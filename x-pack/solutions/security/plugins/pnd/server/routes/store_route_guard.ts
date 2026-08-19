@@ -6,11 +6,11 @@
  */
 
 import type { KibanaResponseFactory, IKibanaResponse } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 /**
- * The worker and skill catalogs, and every write, exist only in the in-memory store. There is no
- * live backing for them yet — settings will eventually be applied to the managed workflow
- * definition — so refuse the request rather than serving or accepting data that would look real.
+ * Some mock-only worker, skill, and unconverted watch settings have no live backing. Refuse those
+ * operations rather than serving or accepting data that would look durable.
  *
  * Reading a watch is deliberately not gated: `get_watch` still serves the live projection and simply
  * omits `settings`.
@@ -19,7 +19,8 @@ export const storeUnavailableResponse = (response: KibanaResponseFactory): IKiba
   response.customError({
     statusCode: 501,
     body: {
-      message:
-        'This endpoint is backed by the in-memory watch store and requires xpack.pnd.ui.useMockData — no live backing exists yet.',
+      message: i18n.translate('xpack.pnd.watchOperationUnavailableErrorMessage', {
+        defaultMessage: 'This watch does not have a durable settings extension yet.',
+      }),
     },
   });

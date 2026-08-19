@@ -6,8 +6,6 @@
  */
 
 export { WATCHES_SEED } from './watches';
-export { WATCH_SETTINGS_SEED } from './watch_settings';
-export type { WatchLedgerEntrySeed, WatchSettingsSeed } from './watch_settings';
 export { WORKERS_SEED } from './workers';
 export type { WatchWorkerSeed } from './workers';
 export { SKILLS_SEED } from './skills';

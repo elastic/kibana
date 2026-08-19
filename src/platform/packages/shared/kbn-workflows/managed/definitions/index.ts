@@ -93,8 +93,9 @@ export {
   PND_WATCH_DEEP_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_FLOOR_WORKFLOW_ID,
+  PND_MANAGED_WATCH_WORKFLOW_IDS,
   PND_WATCH_OFFICER_WORKFLOW_ID,
-  PND_WATCH_WORKFLOW_IDS,
+  PND_RULE_WORKFLOW_IDS,
 } from './pnd';
 
 // Registering the AD workflow definitions in the managed-workflows registry is

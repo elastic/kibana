@@ -35,7 +35,7 @@ describe('project watch', () => {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
             handoff: 'records',
-            ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+            ui: { color: '#8b5cf6', order: 40 },
           },
         },
         steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
@@ -44,7 +44,7 @@ describe('project watch', () => {
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
         handoff: 'records',
-        ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+        ui: { color: '#8b5cf6', order: 40 },
       });
     });
   });
@@ -64,24 +64,24 @@ describe('project watch', () => {
   });
 
   describe('projectSchedule', () => {
-    it('uses actual manual-only triggers instead of an incompatible policy mode', () => {
-      expect(
-        projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }], {
-          mode: 'always',
-          cadence: 'stream',
-          onDemand: false,
-        })
-      ).toMatchObject({ mode: 'demand', cadence: 'manual', set: false, onDemand: true });
+    it('derives on-demand behavior from a manual trigger', () => {
+      expect(projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }])).toMatchObject({
+        mode: 'demand',
+        cadence: 'manual',
+        set: false,
+        onDemand: true,
+        handoff: 'none',
+      });
     });
 
-    it('preserves a configured window for scheduled watches', () => {
-      expect(
-        projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], {
-          mode: 'window',
-          from: 22,
-          to: 6,
-        })
-      ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
+    it('derives a neutral full-day projection from a scheduled trigger', () => {
+      expect(projectSchedule([{ type: 'schedule', summary: 'Scheduled' }])).toMatchObject({
+        mode: 'always',
+        set: true,
+        from: 0,
+        to: 23,
+        onDemand: false,
+      });
     });
   });
 

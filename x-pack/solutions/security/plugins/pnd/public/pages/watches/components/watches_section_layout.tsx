@@ -17,7 +17,6 @@ import type {
 } from '@kbn/app-header';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import { PndWatchesNav, type WatchesSectionId } from './pnd_watches_nav';
-import { WATCHES_HEADER_MENU_ITEMS } from './watches_header_menu';
 import * as i18n from '../translations';
 
 const SUBNAV_COLLAPSED_KEY = 'pnd.watches.subnavCollapsed';
@@ -67,22 +66,26 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
     }
   }, []);
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      switch: headerSwitch,
-      items: isCollapsed
-        ? [
-            {
-              id: 'pndExpandSubnav',
-              label: i18n.SUBNAV_EXPAND,
-              iconType: 'menuRight',
-              run: () => setCollapsed(false),
-              testId: 'pndWatchesSubnavExpand',
-            },
-            ...WATCHES_HEADER_MENU_ITEMS,
-          ]
-        : WATCHES_HEADER_MENU_ITEMS,
-    }),
+  const menu = useMemo<AppHeaderMenu | undefined>(
+    () =>
+      headerSwitch || isCollapsed
+        ? {
+            switch: headerSwitch,
+            ...(isCollapsed
+              ? {
+                  items: [
+                    {
+                      id: 'pndExpandSubnav',
+                      label: i18n.SUBNAV_EXPAND,
+                      iconType: 'menuRight' as const,
+                      run: () => setCollapsed(false),
+                      testId: 'pndWatchesSubnavExpand',
+                    },
+                  ],
+                }
+              : {}),
+          }
+        : undefined,
     [headerSwitch, isCollapsed, setCollapsed]
   );
 

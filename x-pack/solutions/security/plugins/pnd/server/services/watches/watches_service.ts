@@ -9,19 +9,17 @@
  * The single seam routes use to read and write watches.
  *
  * A watch has no storage of its own — it is projected from a managed Workflow by `project_watch.ts`.
- * Settings have no home in that workflow yet, so they live in the in-memory `watch_store` until we
- * decide how they reach the workflow definition. Both backings sit behind this one interface so that
- * migration is a change here, not in seven route handlers.
+ * Settings are read from and written to managed template values through the Common Watch registry
+ * in both live and mock presentation modes.
  *
  * Where each field is written today:
- *   - `enabled`  → the real workflow, via `updateWorkflow`. The Workflows API permits this on a
- *     managed workflow because it is an enablement-only update; anything else on a managed workflow
- *     throws `ManagedWorkflowUpdateForbiddenError`.
- *   - everything else → `watch_store`, which resets when Kibana restarts.
+ *   - `enabled` → install the per-space managed definition when needed, then update it in place.
+ *   - registered live settings → install with versioned managed template values.
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   WATCH_TAG,
   compareWatchesForDisplay,
@@ -30,44 +28,70 @@ import {
   type ApprovalRequirement,
   type Watch,
   type WatchAutonomyLevel,
+  type WatchSettings,
   type WatchSkill,
   type WatchWorker,
 } from '@kbn/pnd-common';
 import {
-  buildCustomWatchYaml,
-  normalizeWorkflowTriggerType,
-  projectWorkflowToWatch,
-} from './project_watch';
-import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
+  installRegisteredWatch,
+  watchRegistry,
+  type WatchRegistration,
+} from '../../managed_workflows/watch_registry';
+import { normalizeWorkflowTriggerType, projectWorkflowToWatch } from './project_watch';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
 import {
   getWatch as getStoredWatch,
-  getWatchSettings as getStoredWatchSettings,
   listSkills as listStoredSkills,
   listWatches as listStoredWatches,
   listWorkers as listStoredWorkers,
   setSkillEnabled as setStoredSkillEnabled,
-  setWatchApprovalGate,
-  setWatchAutonomy,
-  setWatchEnabled as setStoredWatchEnabled,
-  setWatchScopeRouting,
-  setWatchSkillEnabled,
-  setWatchTriggers,
-  setWatchWorkerEnabled,
   setWorkerEnabled as setStoredWorkerEnabled,
-  type WatchScopeRoutingPatch,
-  type WatchTriggersPatch,
 } from '../watch_store/watch_store';
+import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
 
-export interface CreateWatchRequest {
-  name: string;
-  description?: string;
+const projectNotInstalledWatch = (watch: Watch): Watch => ({
+  ...structuredClone(watch),
+  enabled: false,
+  schedule: {
+    set: false,
+    mode: 'demand',
+    from: 0,
+    to: 23,
+    onDemand: true,
+    cadence: 'manual',
+    every: 1,
+    handoff: 'none',
+  },
+  triggers: [],
+  coverage: [],
+  scopeSummary: '',
+  scopes: [],
+  callables: [],
+  metrics: { runs7d: null, acceptedPct: null, timeSaved: null, lastRun: null },
+  recentRuns: [],
+});
+
+const templateValuesEqual = (
+  left: Record<string, unknown> | null,
+  right: Record<string, unknown>
+): boolean => JSON.stringify(left) === JSON.stringify(right);
+
+export interface WatchTriggersPatch {
+  scheduleId?: string;
+  allowManualRun?: boolean;
+}
+
+export interface WatchScopeRoutingPatch {
+  dataSources?: string;
+  assigneeQueue?: string;
+  escalationContact?: string;
 }
 
 export interface WatchUpdatePatch {
   enabled?: boolean;
+  settingsRevision?: number | null;
   autonomyLevel?: WatchAutonomyLevel;
   triggers?: WatchTriggersPatch;
   scopeRouting?: WatchScopeRoutingPatch;
@@ -88,14 +112,17 @@ export type WatchUpdateResult =
   | { outcome: 'updated'; response: GetWatchResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'conflict' }
   | { outcome: 'unavailable' };
 
 export class WatchesService {
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
+    private readonly managedWorkflows:
+      | Promise<PluginScopedManagedWorkflowsApi | undefined>
+      | undefined,
     private readonly logger: Logger,
-    private readonly useMockData: boolean,
-    private readonly installationReady: Promise<void> = Promise.resolve()
+    private readonly useMockData: boolean
   ) {}
 
   private requireManagement(): WatchWorkflowsManagementClient {
@@ -103,6 +130,71 @@ export class WatchesService {
       throw new Error('Workflows management API is not available');
     }
     return this.management;
+  }
+
+  private async requireManagedWorkflows(): Promise<PluginScopedManagedWorkflowsApi> {
+    if (!this.managedWorkflows) {
+      throw new Error('Managed Workflows API is not available');
+    }
+    const managedWorkflows = await this.managedWorkflows;
+    if (!managedWorkflows) {
+      throw new Error('Managed Workflows API is not available');
+    }
+    return managedWorkflows;
+  }
+
+  async synchronizeSpaceEnabled(
+    enabled: boolean,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const managedWorkflows = await this.requireManagedWorkflows();
+    const management = this.requireManagement();
+
+    const failures: string[] = [];
+    for (const registration of watchRegistry.list()) {
+      try {
+        const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
+
+        if (enabled) {
+          if (!status.installed) {
+            await installRegisteredWatch(managedWorkflows, registration, {
+              spaceId,
+              workflowIdSuffix: spaceId,
+              ...(registration.settings
+                ? { values: registration.settings.createDefaultValues() }
+                : {}),
+            });
+          }
+          continue;
+        }
+
+        if (!status.installed) continue;
+        if (status.enabled) {
+          await management.updateWorkflow(status.workflowId, { enabled: false }, spaceId, request);
+        }
+        await management.cancelAllActiveWorkflowExecutions(status.workflowId, spaceId, request);
+        await managedWorkflows.uninstall(registration.id, {
+          spaceId,
+          workflowId: status.workflowId,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        failures.push(`${registration.id}: ${message}`);
+        this.logger.warn(
+          `Failed to synchronize PND watch "${registration.id}" in space "${spaceId}": ${message}`
+        );
+      }
+    }
+
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to synchronize ${failures.length} PND watch(es): ${failures.join('; ')}`
+      );
+    }
   }
 
   /* ---------------------------------------------------------------------- */
@@ -115,7 +207,7 @@ export class WatchesService {
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
     }
 
-    await this.installationReady;
+    const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     // Managed catalog watches opt into `selector:watch` visibility; custom
     // unmanaged watches still match via tag `watch` under managedFilter `all`.
@@ -133,15 +225,40 @@ export class WatchesService {
       { includeExecutionHistory: true, includeManagedExecutionHistory: true }
     );
 
+    const statuses = await Promise.all(
+      watchRegistry.list().map(async (registration) => ({
+        registration,
+        status: await managedWorkflows.getWorkflowStatus(registration.id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        }),
+      }))
+    );
+    const registrationByDocumentId = new Map(
+      statuses.map(({ registration, status }) => [status.workflowId, registration])
+    );
     const watches = result.results
       .filter((item) => {
         const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
-        return tags.includes(WATCH_TAG);
+        const isLegacyGlobalWatch =
+          item.managedBy === PND_MANAGED_WORKFLOW_OWNER_ID &&
+          watchRegistry.get(item.id) !== undefined;
+        return tags.includes(WATCH_TAG) && !isLegacyGlobalWatch;
       })
-      .map(projectWorkflowToWatch)
-      .sort(compareWatchesForDisplay);
+      .map((item) => {
+        const watch = projectWorkflowToWatch(item);
+        const registration = registrationByDocumentId.get(item.id);
+        return registration ? { ...watch, id: registration.id } : watch;
+      });
 
-    return ListWatchesResponse.parse({ watches });
+    const watchIds = new Set(watches.map(({ id }) => id));
+    for (const { registration, status } of statuses) {
+      if (!status.installed && !watchIds.has(registration.id)) {
+        watches.push(projectNotInstalledWatch(registration.watch));
+      }
+    }
+
+    return ListWatchesResponse.parse({ watches: watches.sort(compareWatchesForDisplay) });
   }
 
   async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
@@ -150,13 +267,71 @@ export class WatchesService {
       if (!stored) {
         return undefined;
       }
-      const [watch] = await this.withWorkflowEnablement([stored], spaceId);
-      return GetWatchResponse.parse({ watch, settings: getStoredWatchSettings(watchId) });
+      const registration = watchRegistry.get(watchId);
+      const watch = structuredClone(stored);
+      let settings: WatchSettings | undefined;
+      let settingsRevision: number | null = null;
+
+      if (registration) {
+        try {
+          const managedWorkflows = await this.requireManagedWorkflows();
+          const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
+          watch.enabled = status.installed ? Boolean(status.enabled) : false;
+
+          if (registration.settings) {
+            const state = status.installed
+              ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
+              : null;
+            settingsRevision = state?.documentVersion ?? null;
+            const values = state?.templateValues
+              ? registration.settings.migrate(state.templateValues).values
+              : registration.settings.createDefaultValues();
+            settings = registration.settings.toSettings(values);
+          }
+        } catch (error) {
+          this.logger.debug(
+            `Failed to read durable mock watch state for ${watchId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          watch.enabled = false;
+          settings = undefined;
+        }
+      }
+
+      return GetWatchResponse.parse({
+        watch,
+        settings,
+        settingsRevision,
+      });
     }
 
-    await this.installationReady;
+    const registration = watchRegistry.get(watchId);
+    let workflowDocumentId = watchId;
+    if (registration) {
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+      if (!status.installed) {
+        const settings = registration.settings?.toSettings(
+          registration.settings.createDefaultValues()
+        );
+        return GetWatchResponse.parse({
+          watch: projectNotInstalledWatch(registration.watch),
+          settings,
+          settingsRevision: null,
+        });
+      }
+      workflowDocumentId = status.workflowId;
+    }
+
     const management = this.requireManagement();
-    const detail = await management.getWorkflow(watchId, spaceId);
+    const detail = await management.getWorkflow(workflowDocumentId, spaceId);
     if (!detail) {
       return undefined;
     }
@@ -180,10 +355,31 @@ export class WatchesService {
       history: undefined,
     };
 
+    let settings: WatchSettings | undefined;
+    let settingsRevision: number | null = null;
+    if (registration?.settings) {
+      const state = await (
+        await this.requireManagedWorkflows()
+      ).getInstalledWorkflowState(workflowDocumentId, spaceId);
+      settingsRevision = state?.documentVersion ?? null;
+      try {
+        const values = state?.templateValues
+          ? registration.settings.migrate(state.templateValues).values
+          : registration.settings.createDefaultValues();
+        settings = registration.settings.toSettings(values);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to read settings for watch ${watchId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
     // Enrich with recent executions when possible
     try {
       const executions = await management.getWorkflowExecutions(
-        { workflowId: watchId, page: 1, size: 10 },
+        { workflowId: workflowDocumentId, page: 1, size: 10 },
         spaceId
       );
       const history = executions.results.map((run) => ({
@@ -195,7 +391,12 @@ export class WatchesService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const watch = projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags });
+      const projectedWatch = projectWorkflowToWatch({
+        ...listItem,
+        history,
+        tags: detail.definition?.tags,
+      });
+      const watch = registration ? { ...projectedWatch, id: registration.id } : projectedWatch;
 
       // Attach step summaries for the latest few runs
       const enrichedRuns = await Promise.all(
@@ -225,6 +426,8 @@ export class WatchesService {
           // Enrich the latest 5 with step detail; keep any additional projected runs.
           recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
         },
+        settings,
+        settingsRevision,
       });
     } catch (error) {
       this.logger.debug(
@@ -232,46 +435,44 @@ export class WatchesService {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
+      const projectedWatch = projectWorkflowToWatch(listItem);
+      return GetWatchResponse.parse({
+        watch: registration ? { ...projectedWatch, id: registration.id } : projectedWatch,
+        settings,
+        settingsRevision,
+      });
     }
   }
 
-  /**
-   * `enabled` is authoritative on the workflow even in mock mode, so the toggle reflects real state
-   * and survives a restart while the rest of the seeded watch does not. Falls back to the stored
-   * value when Workflows is unavailable or the workflow has not been installed yet.
-   */
+  /** `enabled` is authoritative on the per-space managed workflow even in mock mode. */
   private async withWorkflowEnablement(watches: Watch[], spaceId: string): Promise<Watch[]> {
-    if (!this.management || watches.length === 0) {
+    if (watches.length === 0) {
       return watches;
     }
 
     try {
-      await this.installationReady;
-      const result = await this.management.getWorkflows(
-        {
-          tags: [WATCH_TAG],
-          size: 100,
-          page: 1,
-          enabled: [true, false],
-          managedFilter: 'all',
-          visibilityContext: [WATCH_VISIBILITY_CONTEXT],
-        },
-        spaceId
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const enablement = await Promise.all(
+        watches.map(async (watch) => {
+          const registration = watchRegistry.get(watch.id);
+          if (!registration) return [watch.id, watch.enabled] as const;
+          const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
+          return [watch.id, status.installed ? Boolean(status.enabled) : false] as const;
+        })
       );
-      const enabledById = new Map(result.results.map((item) => [item.id, item.enabled]));
+      const enabledById = new Map(enablement);
 
-      return watches.map((watch) => {
-        const enabled = enabledById.get(watch.id);
-        return enabled == null ? watch : { ...watch, enabled };
-      });
+      return watches.map((watch) => ({ ...watch, enabled: enabledById.get(watch.id) ?? false }));
     } catch (error) {
       this.logger.debug(
-        `Failed to read workflow enablement, falling back to stored values: ${
+        `Failed to read managed workflow enablement: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return watches;
+      return watches.map((watch) => ({ ...watch, enabled: false }));
     }
   }
 
@@ -286,92 +487,120 @@ export class WatchesService {
     request: KibanaRequest
   ): Promise<WatchUpdateResult> {
     const { enabled, autonomyLevel, triggers, scopeRouting, approvalGate, worker, skill } = patch;
-    const touchesSettings =
-      autonomyLevel != null || triggers || scopeRouting || approvalGate || worker || skill;
+    const touchesSettings = Boolean(
+      autonomyLevel != null || triggers || scopeRouting || approvalGate || worker || skill
+    );
+    const registration = watchRegistry.get(watchId);
 
-    // Settings only exist in the store, so a settings patch is meaningless without it.
-    if (touchesSettings && !this.useMockData) {
-      return { outcome: 'unavailable' };
+    if (registration) {
+      return this.updateManagedWatch(registration, patch, touchesSettings, spaceId, request);
     }
 
-    // Settings are validated and applied before `enabled`, deliberately. `enabled` is the one field
-    // that leaves a real, persisted side effect on the backing workflow, so a rejected patch must not
-    // reach it: a body carrying both would otherwise disable the workflow and then return 400 for the
-    // invalid setting, telling the caller that nothing had changed.
-    if (touchesSettings) {
-      if (!getStoredWatchSettings(watchId)) {
-        return { outcome: 'not-found' };
-      }
-
-      if (autonomyLevel != null && !setWatchAutonomy(watchId, autonomyLevel)) {
-        return { outcome: 'rejected', what: 'autonomy level' };
-      }
-      if (triggers && !setWatchTriggers(watchId, triggers)) {
-        return { outcome: 'rejected', what: 'trigger settings' };
-      }
-      if (scopeRouting && !setWatchScopeRouting(watchId, scopeRouting)) {
-        return { outcome: 'rejected', what: 'scope and routing settings' };
-      }
-      if (approvalGate) {
-        const { gateId, ...gatePatch } = approvalGate;
-        if (!setWatchApprovalGate(watchId, gateId, gatePatch)) {
-          return { outcome: 'rejected', what: `approval gate "${gateId}"` };
-        }
-      }
-      if (worker && !setWatchWorkerEnabled(watchId, worker.workerId, worker.enabled)) {
-        return { outcome: 'rejected', what: `worker "${worker.workerId}"` };
-      }
-      if (skill && !setWatchSkillEnabled(watchId, skill.skillId, skill.enabled)) {
-        return { outcome: 'rejected', what: `skill "${skill.skillId}"` };
-      }
+    if (this.useMockData) {
+      return { outcome: touchesSettings ? 'unavailable' : 'not-found' };
     }
 
+    if (touchesSettings) return { outcome: 'unavailable' };
     if (enabled != null) {
-      const applied = await this.applyEnabled(watchId, enabled, spaceId, request);
-      if (applied === 'not-found') {
-        return { outcome: 'not-found' };
-      }
+      const management = this.requireManagement();
+      const detail = await management.getWorkflow(watchId, spaceId);
+      if (!detail) return { outcome: 'not-found' };
+      await management.updateWorkflow(watchId, { enabled }, spaceId, request);
     }
-
     const response = await this.get(watchId, spaceId);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
-  /**
-   * Enablement-only updates are the one mutation the Workflows API allows on a managed workflow, so
-   * this is a real write. Mirrors into the store as a fallback when Workflows is unavailable.
-   */
-  private async applyEnabled(
-    watchId: string,
-    enabled: boolean,
+  private async updateManagedWatch(
+    registration: WatchRegistration,
+    patch: WatchUpdatePatch,
+    touchesSettings: boolean,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<'applied' | 'not-found'> {
-    if (this.useMockData && !getStoredWatch(watchId)) {
-      return 'not-found';
-    }
+  ): Promise<WatchUpdateResult> {
+    const managedWorkflows = await this.requireManagedWorkflows();
+    const management = this.requireManagement();
+    let status = await managedWorkflows.getWorkflowStatus(registration.id, {
+      spaceId,
+      workflowIdSuffix: spaceId,
+    });
 
-    if (!this.management) {
-      return setStoredWatchEnabled(watchId, enabled) ? 'applied' : 'not-found';
-    }
+    if (touchesSettings) {
+      if (!registration.settings) return { outcome: 'unavailable' };
+      if (patch.settingsRevision === undefined) {
+        return { outcome: 'rejected', what: 'a settings update without its revision' };
+      }
 
-    try {
-      await this.installationReady;
-      await this.management.updateWorkflow(watchId, { enabled }, spaceId, request);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to persist enabled=${enabled} for watch ${watchId} to its workflow: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+      const state = status.installed
+        ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
+        : null;
+      if (status.installed && !state) return { outcome: 'unavailable' };
+      if (patch.settingsRevision !== (state?.documentVersion ?? null)) {
+        return { outcome: 'conflict' };
+      }
+      const currentValues = state?.templateValues
+        ? registration.settings.migrate(state.templateValues).values
+        : registration.settings.createDefaultValues();
+      const applied = registration.settings.applyPatch(currentValues, patch);
+      if ('rejected' in applied) {
+        return { outcome: 'rejected', what: applied.rejected };
+      }
+
+      await installRegisteredWatch(managedWorkflows, registration, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+        values: applied.values,
+      });
+      status = await managedWorkflows.getWorkflowStatus(registration.id, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+      if (!status.installed) return { outcome: 'unavailable' };
+      const persisted = await managedWorkflows.getInstalledWorkflowState(
+        status.workflowId,
+        spaceId
       );
-      if (!this.useMockData) {
-        return 'not-found';
+      if (!persisted || !templateValuesEqual(persisted.templateValues, applied.values)) {
+        return { outcome: 'unavailable' };
       }
     }
 
-    // Keep the store in step so a mock-mode read agrees even if the workflow write failed.
-    setStoredWatchEnabled(watchId, enabled);
-    return 'applied';
+    if (patch.enabled != null) {
+      if (!status.installed) {
+        if (!patch.enabled) {
+          const response = await this.get(registration.id, spaceId);
+          return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
+        }
+
+        if (registration.settings) {
+          await installRegisteredWatch(managedWorkflows, registration, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+            values: registration.settings.createDefaultValues(),
+          });
+        } else {
+          await installRegisteredWatch(managedWorkflows, registration, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
+        }
+        status = await managedWorkflows.getWorkflowStatus(registration.id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
+        if (!status.installed) return { outcome: 'unavailable' };
+      }
+
+      await management.updateWorkflow(
+        status.workflowId,
+        { enabled: patch.enabled },
+        spaceId,
+        request
+      );
+    }
+
+    const response = await this.get(registration.id, spaceId);
+    return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
   /* ---------------------------------------------------------------------- */
@@ -392,44 +621,5 @@ export class WatchesService {
 
   setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
     return setStoredSkillEnabled(skillId, enabled);
-  }
-
-  /* ---------------------------------------------------------------------- */
-  /* Custom watch lifecycle                                                 */
-  /* ---------------------------------------------------------------------- */
-
-  async createCustom(
-    request: KibanaRequest,
-    spaceId: string,
-    body: CreateWatchRequest
-  ): Promise<GetWatchResponse> {
-    const management = this.requireManagement();
-    const name = body.name.trim() || 'Custom watch';
-    const description =
-      body.description?.trim() ||
-      'Custom watch scaffold — tagged watch so it appears in the Watches catalog.';
-    const yaml = buildCustomWatchYaml(name, description);
-    const created = await management.createWorkflow({ yaml }, spaceId, request);
-    const projected = await this.get(created.id, spaceId);
-    if (!projected) {
-      throw new Error(`Created watch "${created.id}" but failed to reload it`);
-    }
-    return projected;
-  }
-
-  async deleteCustom(request: KibanaRequest, watchId: string, spaceId: string): Promise<void> {
-    const management = this.requireManagement();
-    const detail = await management.getWorkflow(watchId, spaceId);
-    if (!detail) {
-      throw createWatchNotFoundError(watchId);
-    }
-    if (detail.managed === true) {
-      throw createWatchDeleteForbiddenError(watchId);
-    }
-    const tags = detail.definition?.tags ?? [];
-    if (!tags.includes(WATCH_TAG)) {
-      throw createWatchNotFoundError(watchId);
-    }
-    await management.deleteWorkflows([watchId], spaceId, request);
   }
 }

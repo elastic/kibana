@@ -37,9 +37,13 @@ export type UpdateWatchRequestParamsInput = z.input<typeof UpdateWatchRequestPar
 export const UpdateWatchRequestBody = lazySchema(() =>
   z.object({
     /**
-     * Written to the backing workflow as an enablement-only update, which is the one mutation permitted on a managed workflow.
+     * Enables or disables the backing workflow. Enabling an uninstalled built-in watch first installs its per-space managed document.
      */
     enabled: z.boolean().optional(),
+    /**
+     * Revision returned by GET. Required when any settings field is present; null asserts that the per-space managed watch has not been installed yet.
+     */
+    settingsRevision: z.number().int().min(0).nullable().optional(),
     autonomyLevel: WatchAutonomyLevel.optional(),
     triggers: z
       .object({
@@ -91,6 +95,10 @@ export const UpdateWatchResponse = lazySchema(() =>
   z.object({
     watch: Watch,
     settings: WatchSettings.optional(),
+    /**
+     * Current logical workflow version after the update
+     */
+    settingsRevision: z.number().int().min(0).nullable(),
   })
 );
 export type UpdateWatchResponse = z.infer<typeof UpdateWatchResponse>;

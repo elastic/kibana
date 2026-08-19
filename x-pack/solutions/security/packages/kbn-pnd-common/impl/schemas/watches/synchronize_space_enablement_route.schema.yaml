@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: Synchronize PND Watch space enablement API endpoint
+  version: '1'
+paths:
+  /internal/pnd/watches/_sync_enablement:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: SynchronizeSpaceEnablement
+      description: Reconcile per-space managed watch documents with the PND Advanced Setting
+      summary: Synchronize PND watch space enablement
+      tags:
+        - PND API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - enabled
+                properties:
+                  enabled:
+                    type: boolean
+        '500':
+          description: One or more watch documents could not be reconciled

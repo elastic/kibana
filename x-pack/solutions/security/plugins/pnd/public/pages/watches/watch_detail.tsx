@@ -26,7 +26,6 @@ import { useUpdateWatch, useWatch } from '../../hooks/use_watches_api';
 import { ApprovalGatesTable } from './components/approval_gates_table';
 import { AutonomySlider } from './components/autonomy_slider';
 import { SettingsSection } from './components/settings_section';
-import { WatchGeneralSection } from './components/watch_general_section';
 import { WatchMetricsStrip } from './components/watch_metrics_strip';
 import { WatchRunsLedger } from './components/watch_runs_ledger';
 import { WatchScopeRoutingSection } from './components/watch_scope_routing_section';
@@ -162,13 +161,6 @@ export const WatchDetailPage: React.FC = () => {
         </SettingsSection>
       ),
     });
-
-    if (settings.general) {
-      sections.push({
-        key: 'general',
-        node: <WatchGeneralSection general={settings.general} />,
-      });
-    }
 
     if (settings.triggers) {
       sections.push({

@@ -119,20 +119,6 @@ export const WatchSkillAttachment = lazySchema(() =>
 );
 export type WatchSkillAttachment = z.infer<typeof WatchSkillAttachment>;
 
-export const WatchGeneralSettings = lazySchema(() =>
-  z.object({
-    /**
-     * Service account each run executes as, e.g. svc-watch-floor
-     */
-    runAsIdentity: z.string(),
-    /**
-     * Renders the MVP-scope callout about autonomy inheritance being undecided
-     */
-    showMvpScopeWarning: z.boolean(),
-  })
-);
-export type WatchGeneralSettings = z.infer<typeof WatchGeneralSettings>;
-
 /**
  * A single-choice setting. Both ids resolve to copy in the UI.
  */
@@ -240,7 +226,6 @@ export const WatchSettings = lazySchema(() =>
      * The selected level. The scale itself is shared across every watch, so it is not repeated per watch — see WATCH_AUTONOMY_LEVELS.
      */
     autonomy: WatchAutonomyLevel,
-    general: WatchGeneralSettings.optional(),
     triggers: WatchTriggersSettings.optional(),
     scopeRouting: WatchScopeRoutingSettings.optional(),
     workers: z.array(WatchWorkerAttachment).optional(),

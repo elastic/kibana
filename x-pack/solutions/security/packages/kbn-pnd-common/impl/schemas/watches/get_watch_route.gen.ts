@@ -34,9 +34,13 @@ export const GetWatchResponse = lazySchema(() =>
   z.object({
     watch: Watch,
     /**
-     * Omitted when the watch has no settings to expose, which is the case for live projected watches until settings are applied to the managed workflow definition.
+     * Omitted when the watch has not registered a settings extension.
      */
     settings: WatchSettings.optional(),
+    /**
+     * Logical workflow version for best-effort stale settings detection. Null when the per-space managed watch has not been installed yet.
+     */
+    settingsRevision: z.number().int().min(0).nullable(),
   })
 );
 export type GetWatchResponse = z.infer<typeof GetWatchResponse>;
