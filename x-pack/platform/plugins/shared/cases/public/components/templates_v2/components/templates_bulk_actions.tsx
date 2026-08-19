@@ -29,11 +29,18 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const reportTemplateDeleted = useTemplateDeletedEBT();
+
   const { mutate: bulkDeleteTemplates, isLoading: isBulkDeleting } = useBulkDeleteTemplates({
-    onSuccess: onActionSuccess,
+    onSuccess: () => {
+      // One event for the confirmed action, whatever the number of selected templates. Reported from
+      // the hook-level callback, which React Query awaits even once this component has unsubscribed,
+      // unlike a per-call callback.
+      reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'bulk' });
+      onActionSuccess?.();
+    },
   });
   const { mutate: bulkExportTemplates, isLoading: isBulkExporting } = useBulkExportTemplates();
-  const reportTemplateDeleted = useTemplateDeletedEBT();
 
   const selectedTemplateIds = useMemo(
     () => selectedTemplates.map((template) => template.templateId),
@@ -51,17 +58,9 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
   }, [closePopover]);
 
   const handleConfirmBulkDelete = useCallback(() => {
-    // One event for the confirmed action, whatever the number of selected templates.
-    bulkDeleteTemplates(
-      { templateIds: selectedTemplateIds },
-      {
-        onSuccess: () => {
-          reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'bulk' });
-        },
-      }
-    );
+    bulkDeleteTemplates({ templateIds: selectedTemplateIds });
     setIsDeleteModalVisible(false);
-  }, [bulkDeleteTemplates, selectedTemplateIds, reportTemplateDeleted]);
+  }, [bulkDeleteTemplates, selectedTemplateIds]);
 
   const handleCancelBulkDelete = useCallback(() => {
     setIsDeleteModalVisible(false);

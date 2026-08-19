@@ -28,8 +28,19 @@ interface UseTemplatesActionsProps {
 export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
   const { showSuccessToast } = useCasesToast();
+
+  const reportTemplateCreated = useTemplateCreatedEBT();
+  const reportTemplateUpdated = useTemplateUpdatedEBT();
+  const reportTemplateDeleted = useTemplateDeletedEBT();
+
   const { mutate: bulkDeleteTemplates, isLoading: isDeleting } = useBulkDeleteTemplates({
-    onSuccess: onDeleteSuccess,
+    onSuccess: () => {
+      // React Query awaits this hook-level callback whatever happens to the caller, but it runs a
+      // per-call callback only while the caller still has listeners. Report here so that navigating
+      // away mid-flight cannot drop the event. This hook instance always deletes one row.
+      reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'single' });
+      onDeleteSuccess?.();
+    },
   });
 
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
@@ -41,10 +52,6 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   const { mutate: updateTemplate, isLoading: isUpdating } = useUpdateTemplate({
     disableDefaultSuccessToast: true,
   });
-
-  const reportTemplateCreated = useTemplateCreatedEBT();
-  const reportTemplateUpdated = useTemplateUpdatedEBT();
-  const reportTemplateDeleted = useTemplateDeletedEBT();
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -100,19 +107,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const confirmDelete = useCallback(() => {
     if (templateToDelete) {
-      // A row delete reuses the bulk mutation with a single id, so the scope is only knowable here.
-      // This per-call callback is additional to the hook-level one, which refreshes the list.
-      bulkDeleteTemplates(
-        { templateIds: [templateToDelete.templateId] },
-        {
-          onSuccess: () => {
-            reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'single' });
-          },
-        }
-      );
+      bulkDeleteTemplates({ templateIds: [templateToDelete.templateId] });
       setTemplateToDelete(null);
     }
-  }, [templateToDelete, bulkDeleteTemplates, reportTemplateDeleted]);
+  }, [templateToDelete, bulkDeleteTemplates]);
 
   const cancelDelete = useCallback(() => {
     setTemplateToDelete(null);

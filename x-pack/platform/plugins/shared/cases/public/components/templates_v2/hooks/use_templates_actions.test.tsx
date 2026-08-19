@@ -302,23 +302,27 @@ describe('useTemplatesActions', () => {
       result.current.confirmDelete();
     });
 
-    expect(bulkDeleteTemplatesMock).toHaveBeenCalledWith(
-      { templateIds: [mockTemplate.templateId] },
-      { onSuccess: expect.any(Function) }
-    );
+    expect(bulkDeleteTemplatesMock).toHaveBeenCalledWith({
+      templateIds: [mockTemplate.templateId],
+    });
     expect(result.current.templateToDelete).toBeNull();
   });
 
-  it('passes onDeleteSuccess to useBulkDeleteTemplates hook', () => {
+  it('forwards onDeleteSuccess through the callback it gives useBulkDeleteTemplates', () => {
     const onDeleteSuccessMock = jest.fn();
     renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
       wrapper,
     });
 
-    // Verify useBulkDeleteTemplates was called with the onSuccess callback
     expect(useBulkDeleteTemplatesMock).toHaveBeenCalledWith({
-      onSuccess: onDeleteSuccessMock,
+      onSuccess: expect.any(Function),
     });
+
+    act(() => {
+      useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
+    });
+
+    expect(onDeleteSuccessMock).toHaveBeenCalledTimes(1);
   });
 
   it('cancelDelete clears templateToDelete without calling mutation', () => {
@@ -476,9 +480,14 @@ describe('useTemplatesActions', () => {
 
       // Confirming the modal only starts the delete; the event waits for the server.
       expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+      // The report must not live in a per-call callback, which React Query skips once the caller has
+      // unsubscribed.
+      expect(bulkDeleteTemplatesMock).toHaveBeenCalledWith({
+        templateIds: [mockTemplate.templateId],
+      });
 
       act(() => {
-        bulkDeleteTemplatesMock.mock.calls[0][1].onSuccess();
+        useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
       });
 
       expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -492,7 +501,7 @@ describe('useTemplatesActions', () => {
       );
     });
 
-    it('reports one deleted event even though the hook-level callback also runs', () => {
+    it('reports one deleted event and still refreshes the list', () => {
       const onDeleteSuccessMock = jest.fn();
       const { result } = renderHook(
         () => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }),
@@ -507,11 +516,9 @@ describe('useTemplatesActions', () => {
         result.current.confirmDelete();
       });
 
-      // A real success runs both callbacks: the hook-level one refreshes the list, the per-call one
-      // reports. Only one of them may report.
+      // The report and the list refresh now share one callback, so neither may cost the other.
       act(() => {
         useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
-        bulkDeleteTemplatesMock.mock.calls[0][1].onSuccess();
       });
 
       expect(onDeleteSuccessMock).toHaveBeenCalledTimes(1);
