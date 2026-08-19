@@ -51,6 +51,8 @@ import {
   SourceDocument,
   DataLoadingState,
   getDisplayedColumns,
+  RowHeightSettings,
+  ROWS_HEIGHT_OPTIONS,
   type UnifiedDataTableProps,
   type SortOrder,
   type DataGridDensity,
@@ -111,6 +113,7 @@ export interface TanStackDataGridProps {
   headerRowHeightState?: number;
   onUpdateHeaderRowHeight?: UnifiedDataTableProps['onUpdateHeaderRowHeight'];
   externalAdditionalControls?: React.ReactNode;
+  gridImplementationSwitch?: React.ReactNode;
 }
 
 type GridDensity = 'compact' | 'normal' | 'expanded';
@@ -623,47 +626,61 @@ const CellPopover = React.memo(
 
 // ── Memoized virtual row ──
 const VirtualRow = React.memo(
-  ({
-    row,
-    virtualRow,
-    isExpanded,
-    isSelected,
-    indicatorColor,
-    rowHeight,
-    styles,
-    focusedColIndex,
-    rowIndex,
-    onFilter,
-    setPopoverState,
-    findTerm,
-    findActiveMatch,
-  }: {
-    row: Row<DataTableRecord>;
-    virtualRow: VirtualItem;
-    isExpanded: boolean;
-    isSelected: boolean;
-    indicatorColor: string | undefined;
-    rowHeight: number;
-    styles: ReturnType<typeof getTanStackDataGridStyles>;
-    focusedColIndex: number | null;
-    rowIndex: number;
-    onFilter?: UnifiedDataTableProps['onFilter'];
-    setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
-    findTerm?: string;
-    findActiveMatch?: FindMatch | null;
-  }) => {
+  React.forwardRef<
+    HTMLDivElement,
+    {
+      row: Row<DataTableRecord>;
+      virtualRow: VirtualItem;
+      isExpanded: boolean;
+      isSelected: boolean;
+      indicatorColor: string | undefined;
+      rowHeight: number;
+      isAutoHeight: boolean;
+      styles: ReturnType<typeof getTanStackDataGridStyles>;
+      focusedColIndex: number | null;
+      rowIndex: number;
+      onFilter?: UnifiedDataTableProps['onFilter'];
+      setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
+      findTerm?: string;
+      findActiveMatch?: FindMatch | null;
+    }
+  >(function VirtualRow(
+    {
+      row,
+      virtualRow,
+      isExpanded,
+      isSelected,
+      indicatorColor,
+      rowHeight,
+      isAutoHeight,
+      styles,
+      focusedColIndex,
+      rowIndex,
+      onFilter,
+      setPopoverState,
+      findTerm,
+      findActiveMatch,
+    },
+    ref
+  ) {
     const cells = row.getVisibleCells();
     return (
       <div
+        ref={ref}
         data-index={virtualRow.index}
-        style={{ height: rowHeight, width: '100%' }}
+        style={{ height: isAutoHeight ? undefined : rowHeight, width: '100%' }}
         role="row"
         aria-rowindex={rowIndex + 2}
         aria-selected={isSelected}
         tabIndex={-1}
       >
         <div
-          css={[styles.row, isExpanded && styles.rowExpanded, isSelected && styles.selectedRow]}
+          css={[
+            styles.row,
+            isAutoHeight && styles.rowAutoHeight,
+            isExpanded && styles.rowExpanded,
+            isSelected && styles.selectedRow,
+          ]}
           style={{
             borderLeft: indicatorColor ? `3px solid ${indicatorColor}` : undefined,
           }}
@@ -674,6 +691,7 @@ const VirtualRow = React.memo(
               cell={cell}
               styles={styles}
               isFocused={focusedColIndex === colIdx}
+              isAutoHeight={isAutoHeight}
               onFilter={onFilter}
               setPopoverState={setPopoverState}
               findTerm={findTerm}
@@ -684,8 +702,9 @@ const VirtualRow = React.memo(
         </div>
       </div>
     );
-  }
+  })
 );
+VirtualRow.displayName = 'VirtualRow';
 
 // ── Virtual cell with cell actions, popover, and focus support ──
 const VirtualCell = React.memo(
@@ -693,6 +712,7 @@ const VirtualCell = React.memo(
     cell,
     styles,
     isFocused,
+    isAutoHeight,
     onFilter,
     setPopoverState,
     findTerm,
@@ -702,6 +722,7 @@ const VirtualCell = React.memo(
     cell: Cell<DataTableRecord, unknown>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
     isFocused: boolean;
+    isAutoHeight?: boolean;
     onFilter?: UnifiedDataTableProps['onFilter'];
     setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
     findTerm?: string;
@@ -751,7 +772,7 @@ const VirtualCell = React.memo(
             }
           }}
         >
-          <div css={styles.summaryCellContent}>
+          <div css={isAutoHeight ? styles.summaryCellContentAuto : styles.summaryCellContent}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </div>
         </div>
@@ -800,7 +821,7 @@ const VirtualCell = React.memo(
           }
         }}
       >
-        <div css={styles.cellContent}>
+        <div css={isAutoHeight ? styles.cellContentAuto : styles.cellContent}>
           {findTerm ? (
             <HighlightedText
               text={formatted}
@@ -891,6 +912,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     headerRowHeightState,
     onUpdateHeaderRowHeight,
     externalAdditionalControls,
+    gridImplementationSwitch,
   }) => {
     const { euiTheme } = useEuiTheme();
     const { fieldFormats } = useDiscoverServices();
@@ -1014,9 +1036,16 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     // ── Body cell lines (sync with app state) ──
     const [localBodyMaxLines, setLocalBodyMaxLines] = useState(rowHeightState ?? 1);
     const bodyMaxLines = rowHeightState ?? localBodyMaxLines;
+    const isAutoRowHeight = bodyMaxLines === ROWS_HEIGHT_OPTIONS.auto;
+    const [customBodyMaxLines, setCustomBodyMaxLines] = useState(
+      rowHeightState != null && rowHeightState > 0 ? rowHeightState : ROWS_HEIGHT_OPTIONS.default
+    );
     const setBodyMaxLines = useCallback(
       (val: number) => {
         setLocalBodyMaxLines(val);
+        if (val > 0) {
+          setCustomBodyMaxLines(val);
+        }
         onUpdateRowHeight?.(val);
       },
       [onUpdateRowHeight]
@@ -1471,16 +1500,15 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const tableRows = table.getRowModel().rows;
     const baseRowHeight = useMemo(() => {
-      // Auto / unlimited: keep a density-based estimate so the virtualizer has a size
-      if (bodyMaxLines <= 0) {
+      if (isAutoRowHeight) {
         return isSummaryMode ? densityCfg.summaryRowHeight : densityCfg.rowHeight;
       }
-      if (bodyMaxLines === 1) {
+      if (bodyMaxLines <= 1) {
         return densityCfg.rowHeight;
       }
       const lineH = densityCfg.fontSize * 1.5;
       return Math.round(densityCfg.cellPaddingV * 2 + lineH * bodyMaxLines);
-    }, [bodyMaxLines, densityCfg, isSummaryMode]);
+    }, [bodyMaxLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
     const getRowHeight = useCallback((): number => {
@@ -1494,6 +1522,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       estimateSize: getRowHeight,
       overscan: OVERSCAN,
       initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
+      getItemKey: (index) => rows[index]?.id ?? index,
     });
 
     useEffect(() => {
@@ -1616,9 +1645,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           '--tsg-cell-padding-v': `${densityCfg.cellPaddingV}px`,
           '--tsg-cell-padding-h': `${densityCfg.cellPaddingH}px`,
           '--tsg-header-max-lines': String(headerMaxLines),
-          '--tsg-body-max-lines': bodyMaxLines <= 0 ? 'none' : String(bodyMaxLines),
+          '--tsg-body-max-lines': isAutoRowHeight ? 'none' : String(Math.max(bodyMaxLines, 1)),
+          '--tsg-row-min-height': `${densityCfg.rowHeight}px`,
         } as React.CSSProperties),
-      [densityCfg, headerMaxLines, bodyMaxLines]
+      [densityCfg, headerMaxLines, bodyMaxLines, isAutoRowHeight]
     );
 
     // ── Copy selected rows ──
@@ -1752,20 +1782,25 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   data-test-subj="headerMaxLinesInput"
                 />
               </EuiFormRow>
-              <EuiFormRow label="Body cell lines" display="columnCompressed" fullWidth>
-                <EuiFieldNumber
-                  compressed
-                  min={1}
-                  max={20}
-                  step={1}
-                  value={bodyMaxLines}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    if (val >= 1 && val <= 20) setBodyMaxLines(val);
-                  }}
-                  data-test-subj="bodyMaxLinesInput"
-                />
-              </EuiFormRow>
+              <RowHeightSettings
+                label="Body cell lines"
+                rowHeight={isAutoRowHeight ? 'auto' : 'custom'}
+                lineCountInput={isAutoRowHeight ? customBodyMaxLines : bodyMaxLines}
+                onChangeRowHeight={(mode) => {
+                  setBodyMaxLines(
+                    mode === 'auto' ? ROWS_HEIGHT_OPTIONS.auto : customBodyMaxLines
+                  );
+                }}
+                onChangeLineCountInput={(lines, isValid) => {
+                  if (isValid && lines >= 1) {
+                    setBodyMaxLines(lines);
+                  } else {
+                    setCustomBodyMaxLines(lines);
+                  }
+                }}
+                data-test-subj="tanstackGridRowHeight"
+              />
+              {gridImplementationSwitch}
             </EuiPopover>
             <EuiToolTip
               content={isFullScreen ? 'Exit full screen' : 'Full screen'}
@@ -1996,12 +2031,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                     return (
                       <VirtualRow
                         key={row.id}
+                        ref={rowVirtualizer.measureElement}
                         row={row}
                         virtualRow={virtualRow}
                         isExpanded={isExpanded}
                         isSelected={isSelected}
                         indicatorColor={indicator?.color}
                         rowHeight={baseRowHeight}
+                        isAutoHeight={isAutoRowHeight}
                         styles={styles}
                         focusedColIndex={
                           focusedCell?.row === virtualRow.index ? focusedCell.col : null

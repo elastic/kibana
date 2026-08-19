@@ -27,10 +27,8 @@ const KIBANA_URL = process.env.KIBANA_URL ?? 'http://localhost:5601';
 const KIBANA_USER = process.env.KIBANA_USER ?? 'elastic';
 const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
-/** Same synthetic dataset for both grids; marker selects implementation. */
+/** Same synthetic dataset for both grids; implementation is selected via the density popover switch. */
 const ROW_BASE = 'ROW a=1,b="hello",c=3.14,d="x",e="y",f=42,g="more",h="data" // 200x';
-const QUERY_TANSTACK = `${ROW_BASE} // TanStackGrid`;
-const QUERY_UNIFIED = `${ROW_BASE} // UnifiedDataTable`;
 
 interface PerfSnapshot {
   timestamp: number;
@@ -148,6 +146,15 @@ const submitEsqlQuery = async (page: Page, query: string) => {
   await page.waitForTimeout(5000);
 };
 
+const switchGridViaUi = async (page: Page) => {
+  const densityBtn = page.locator('[data-test-subj="dataGridDensityButton"]');
+  await expect(densityBtn).toBeVisible({ timeout: 10_000 });
+  await densityBtn.click();
+  await page.getByTestId('discoverGridImplementationSwitch').click();
+  await densityBtn.click();
+  await page.waitForTimeout(1000);
+};
+
 const readDomStats = async (page: Page): Promise<DomStats> =>
   page.evaluate(() => {
     const grid = document.querySelector('[role="grid"]');
@@ -162,7 +169,8 @@ const readDomStats = async (page: Page): Promise<DomStats> =>
 const measureGrid = async (
   page: Page,
   grid: GridRunResult['grid'],
-  query: string
+  query: string,
+  { submitQuery = true }: { submitQuery?: boolean } = {}
 ): Promise<GridRunResult> => {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Performance.enable');
@@ -171,7 +179,9 @@ const measureGrid = async (
   await cdp.send('HeapProfiler.collectGarbage').catch(() => undefined);
 
   const t0 = Date.now();
-  await submitEsqlQuery(page, query);
+  if (submitQuery) {
+    await submitEsqlQuery(page, query);
+  }
 
   if (grid === 'TanStackDataGrid') {
     await expect(page.getByText('TanStack Grid')).toBeVisible({ timeout: 60_000 });
@@ -257,12 +267,12 @@ test.describe('Grid A/B performance comparison', () => {
     test.setTimeout(300_000);
     await setupDiscover(page);
 
-    const tanstack = await measureGrid(page, 'TanStackDataGrid', QUERY_TANSTACK);
+    const tanstack = await measureGrid(page, 'TanStackDataGrid', ROW_BASE);
     console.log('\n=== TanStack ===');
     console.log(JSON.stringify(tanstack, null, 2));
 
-    // Same page / session: swap query marker to force UnifiedDataTable
-    const unified = await measureGrid(page, 'UnifiedDataTable', QUERY_UNIFIED);
+    await switchGridViaUi(page);
+    const unified = await measureGrid(page, 'UnifiedDataTable', ROW_BASE, { submitQuery: false });
     console.log('\n=== UnifiedDataTable ===');
     console.log(JSON.stringify(unified, null, 2));
 

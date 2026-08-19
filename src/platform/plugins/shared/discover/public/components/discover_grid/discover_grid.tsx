@@ -25,6 +25,8 @@ import {
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 import { TanStackDataGrid } from './tanstack_data_grid';
+import { DiscoverGridImplementationSwitch } from './discover_grid_implementation_switch';
+import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -44,7 +46,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView } = props;
+    const { dataView, services } = props;
+    const { usesUnifiedDataTable, toggleImplementation } = useDiscoverGridImplementation(
+      services.storage
+    );
+
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -116,15 +122,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       isCascadedDocumentsAvailable,
     ]);
 
-    const useUnifiedDataTable = useMemo(() => {
-      if (!isOfAggregateQueryType(query)) {
-        return false;
-      }
-      // Opt out of the TanStack default with `// UnifiedDataTable` (or block comment).
-      return /\/\*[\s\S]*?\bUnifiedDataTable\b[\s\S]*?\*\/|\/\/.*\bUnifiedDataTable\b/.test(
-        query.esql
-      );
-    }, [query]);
+    const gridImplementationSwitch = (
+      <DiscoverGridImplementationSwitch
+        usesUnifiedDataTable={usesUnifiedDataTable}
+        onSwitch={toggleImplementation}
+      />
+    );
 
     if (isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length) {
       return (
@@ -143,7 +146,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       );
     }
 
-    if (!useUnifiedDataTable) {
+    if (!usesUnifiedDataTable) {
       return (
         <TanStackDataGrid
           rows={props.rows ?? []}
@@ -175,6 +178,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           headerRowHeightState={props.headerRowHeightState}
           onUpdateHeaderRowHeight={props.onUpdateHeaderRowHeight}
           externalAdditionalControls={externalAdditionalControls}
+          gridImplementationSwitch={gridImplementationSwitch}
         />
       );
     }
@@ -195,6 +199,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        additionalDisplaySettingsContent={gridImplementationSwitch}
       />
     );
   }

@@ -4,7 +4,7 @@
 **Branch:** `pr-255490-tanstack-grid-cleanup`  
 **Environment:** local Kibana 9.6.0 + ES 9.6.0-SNAPSHOT, Chromium headless 1440×900  
 **Dataset:** `ROW a=1,b="hello",c=3.14,d="x",e="y",f=42,g="more",h="data" // 200x` → **1,600 synthetic rows**  
-**Activation:** TanStack default / `// UnifiedDataTable` opt-out  
+**Activation:** TanStack default (local storage) / density popover switch  
 
 Harness: [`compare_grids_perf.playwright.ts`](./compare_grids_perf.playwright.ts)  
 Raw JSON: [`compare_grids_perf.results.json`](./compare_grids_perf.results.json)
@@ -79,7 +79,7 @@ Raw JSON: [`compare_grids_perf.results.json`](./compare_grids_perf.results.json)
 ## Methodology
 
 1. Log into Discover (ES\|QL mode).
-2. Submit the same `ROW … // 200x` body with either `// TanStackGrid` or `// UnifiedDataTable`.
+2. Submit the same `ROW … // 200x` body; switch grid via the density popover if needed.
 3. Capture CDP metrics after the grid is visible.
 4. Scroll the `[role="grid"]` container mid → end → top.
 5. Count `longtask` entries during a tight `requestAnimationFrame` scroll loop.

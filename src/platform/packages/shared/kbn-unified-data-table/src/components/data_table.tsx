@@ -523,6 +523,11 @@ interface InternalUnifiedDataTableProps {
    * When true, filter actions on computed columns will be hidden.
    */
   hideFilteringOnComputedColumns?: boolean;
+
+  /**
+   * Optional content rendered at the bottom of the grid display settings popover.
+   */
+  additionalDisplaySettingsContent?: React.ReactNode;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -613,6 +618,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
+      additionalDisplaySettingsContent,
     },
     ref
   ) => {
@@ -1274,6 +1280,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               lineCountInput={lineCountInput}
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
+              additionalContent={additionalDisplaySettingsContent}
             />
           </>
         ),
@@ -1293,6 +1300,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateDataGridDensity,
       lineCountInput,
       headerLineCountInput,
+      additionalDisplaySettingsContent,
     ]);
 
     const toolbarVisibility = useMemo(

@@ -158,6 +158,12 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     },
   }),
 
+  rowAutoHeight: css({
+    height: 'auto',
+    minHeight: 'var(--tsg-row-min-height, 28px)',
+    alignItems: 'stretch',
+  }),
+
   rowExpanded: css({
     backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
     '&:hover': {
@@ -187,6 +193,15 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     WebkitLineClamp: 'var(--tsg-body-max-lines, 1)',
     wordBreak: 'break-word',
     whiteSpace: 'normal',
+  }),
+
+  cellContentAuto: css({
+    minWidth: 0,
+    width: '100%',
+    flex: 1,
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    whiteSpace: 'pre-wrap',
   }),
 
   controlCell: css({
@@ -241,6 +256,12 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     overflow: 'hidden',
     width: '100%',
     minWidth: 0,
+  }),
+
+  summaryCellContentAuto: css({
+    width: '100%',
+    minWidth: 0,
+    whiteSpace: 'normal',
   }),
 
   timestampCell: css({

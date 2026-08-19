@@ -27,12 +27,11 @@ const KIBANA_URL = process.env.KIBANA_URL ?? 'http://localhost:5601';
 const KIBANA_USER = process.env.KIBANA_USER ?? 'elastic';
 const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
-// ES|QL queries that activate the TanStackGrid variant
-// ROW-based queries are time-independent and always produce results
-const ESQL_QUERY = 'ROW a=1,b="hello",c=3.14 | EVAL d=a+1 // TanStackGrid';
-const ESQL_MULTI_ROW_QUERY = 'FROM kibana_sample_data_logs | LIMIT 500 // TanStackGrid';
+// ES|QL queries for TanStack grid tests (grid is selected via local storage, default TanStack)
+const ESQL_QUERY = 'ROW a=1,b="hello",c=3.14 | EVAL d=a+1';
+const ESQL_MULTI_ROW_QUERY = 'FROM kibana_sample_data_logs | LIMIT 500';
 const ESQL_STATS_QUERY =
-  'FROM kibana_sample_data_logs | STATS count=COUNT(*) BY geo.dest | LIMIT 50 // TanStackGrid';
+  'FROM kibana_sample_data_logs | STATS count=COUNT(*) BY geo.dest | LIMIT 50';
 
 interface PerfSnapshot {
   timestamp: number;
@@ -412,8 +411,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Performance.enable');
 
-    // ROW with 100x multiplier + TanStackGrid trigger
-    const bigQuery = 'ROW a=1,b="test",c=42 // 100x // TanStackGrid';
+    const bigQuery = 'ROW a=1,b="test",c=42 // 100x';
     await submitEsqlQuery(page, bigQuery);
 
     const tanstackBadge = page.getByText('TanStack Grid');
@@ -529,7 +527,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
 
     // Submit query that produces individual columns
-    await submitEsqlQuery(page, 'ROW a=1,b="test",c=42,d="val",e="extra" // 10x // TanStackGrid');
+    await submitEsqlQuery(page, 'ROW a=1,b="test",c=42,d="val",e="extra" // 10x');
 
     const tanstackBadge = page.getByText('TanStack Grid');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
@@ -643,7 +641,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     // Verify "Max header cell lines" and "Body cell lines" inputs are visible
     const headerLinesInput = page.locator('[data-test-subj="headerMaxLinesInput"]');
     await expect(headerLinesInput).toBeVisible({ timeout: 3_000 });
-    const bodyLinesInput = page.locator('[data-test-subj="bodyMaxLinesInput"]');
+    const bodyLinesInput = page.locator('[data-test-subj="tanstackGridRowHeight_lineCountNumber"]');
     await expect(bodyLinesInput).toBeVisible({ timeout: 3_000 });
 
     // Change header max lines to 3 and body cell lines to 4
@@ -716,7 +714,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(
       page,
-      'ROW a=1,b="hello",c=3.14,d="world",e="hello" // 10x // TanStackGrid'
+      'ROW a=1,b="hello",c=3.14,d="world",e="hello" // 10x'
     );
 
     const tanstackBadge = page.getByText('TanStack Grid');
@@ -785,7 +783,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
 
     const query =
-      'ROW a=1,b="hello world this is a long value that should be expandable",c=3.14,d="another value",e="more data" // 10x // TanStackGrid';
+      'ROW a=1,b="hello world this is a long value that should be expandable",c=3.14,d="another value",e="more data" // 10x';
     await submitEsqlQuery(page, query);
 
     const tanstackBadge = page.getByText('TanStack Grid');
@@ -849,20 +847,20 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
 
     // Submit a query that produces no results
-    const noResultsQuery = 'FROM nonexistent_index_xyz_12345 | LIMIT 1 // TanStackGrid';
+    const noResultsQuery = 'FROM nonexistent_index_xyz_12345 | LIMIT 1';
     await submitEsqlQuery(page, noResultsQuery);
 
     // Wait for query to complete
     await page.waitForTimeout(8000);
 
-    // If TanStackGrid rendered with 0 rows, the empty state should show
+    // If TanStack grid rendered with 0 rows, the empty state should show
     const emptyState = page.locator('[data-test-subj="discoverNoResults"]');
     const tanstackBadge = page.getByText('TanStack Grid');
 
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
     const hasBadge = await tanstackBadge.isVisible().catch(() => false);
 
-    // Either the grid shows empty state, or the query error prevented TanStackGrid
+    // Either the grid shows empty state, or the query error prevented the TanStack grid
     console.log(`Empty state visible: ${hasEmptyState}, TanStack badge: ${hasBadge}`);
     expect(hasEmptyState || !hasBadge).toBe(true);
   });

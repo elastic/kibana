@@ -142,4 +142,16 @@ describe('TanStackDataGrid summary column row height', () => {
       '--tsg-body-max-lines': '5',
     });
   });
+
+  it('disables line clamping when row height is auto', () => {
+    renderGrid({
+      columns: ['_source'],
+      expandedDoc: undefined,
+      rowHeightState: -1,
+    });
+
+    expect(screen.getByTestId('tanstackGridWrapper')).toHaveStyle({
+      '--tsg-body-max-lines': 'none',
+    });
+  });
 });
