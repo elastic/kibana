@@ -87,13 +87,10 @@ export const roundToEvents = (
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
-/** The `user_message` payload for a round. Shared by the read converter and the live producer. */
-export const userMessageData = (round: ConversationRound): UserMessageEventData => ({
-  message: round.input.message,
-  ...(round.input.attachment_refs ? { attachment_refs: round.input.attachment_refs } : {}),
-});
+/** The `user_message` payload for a round: the whole round input, carried verbatim. */
+export const userMessageData = (round: ConversationRound): UserMessageEventData => round.input;
 
-/** The `execution_completed` payload for a completed round. */
+/** The run-summary payload for a completed round (also reused for the paused terminal). */
 export const executionCompletedData = (round: ConversationRound): ExecutionCompletedEventData => ({
   response: round.response,
   steps: round.steps,
@@ -101,6 +98,10 @@ export const executionCompletedData = (round: ConversationRound): ExecutionCompl
   time_to_first_token: round.time_to_first_token,
   time_to_last_token: round.time_to_last_token,
   ...(round.trace_id ? { trace_id: round.trace_id } : {}),
+  ...(round.state ? { state: round.state } : {}),
+  ...(round.configuration_overrides
+    ? { configuration_overrides: round.configuration_overrides }
+    : {}),
 });
 
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */

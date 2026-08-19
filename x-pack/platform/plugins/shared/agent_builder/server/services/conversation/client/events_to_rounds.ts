@@ -97,12 +97,7 @@ const roundIdFromExecutionId = (executionId: string): string =>
     ? executionId.slice(0, -EXECUTION_ID_SUFFIX.length)
     : executionId;
 
-const toRoundInput = (userMessage: UserMessageEvent): RoundInput => ({
-  message: userMessage.data.message,
-  ...(userMessage.data.attachment_refs
-    ? { attachment_refs: userMessage.data.attachment_refs }
-    : {}),
-});
+const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
 
 const authorAndOrigin = (
   userMessage: UserMessageEvent
@@ -119,11 +114,19 @@ const authorAndOrigin = (
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
 
+/** The run summary shared by both terminals (`execution_completed` and `prompt_requested`). */
 const runSummaryFields = (
   data: ExecutionCompletedEvent['data']
 ): Pick<
   ConversationRound,
-  'response' | 'steps' | 'model_usage' | 'time_to_first_token' | 'time_to_last_token' | 'trace_id'
+  | 'response'
+  | 'steps'
+  | 'model_usage'
+  | 'time_to_first_token'
+  | 'time_to_last_token'
+  | 'trace_id'
+  | 'state'
+  | 'configuration_overrides'
 > => ({
   response: data.response,
   steps: data.steps,
@@ -131,6 +134,10 @@ const runSummaryFields = (
   time_to_first_token: data.time_to_first_token,
   time_to_last_token: data.time_to_last_token,
   ...(data.trace_id ? { trace_id: data.trace_id } : {}),
+  ...(data.state ? { state: data.state } : {}),
+  ...(data.configuration_overrides
+    ? { configuration_overrides: data.configuration_overrides }
+    : {}),
 });
 
 const completedRoundFields = (
@@ -144,6 +151,8 @@ const completedRoundFields = (
   | 'time_to_first_token'
   | 'time_to_last_token'
   | 'trace_id'
+  | 'state'
+  | 'configuration_overrides'
 > => ({
   status: ConversationRoundStatus.completed,
   ...runSummaryFields(data),
@@ -161,6 +170,8 @@ const awaitingPromptRoundFields = (
   | 'time_to_first_token'
   | 'time_to_last_token'
   | 'trace_id'
+  | 'state'
+  | 'configuration_overrides'
 > => ({
   status: ConversationRoundStatus.awaitingPrompt,
   pending_prompts: data.prompts,

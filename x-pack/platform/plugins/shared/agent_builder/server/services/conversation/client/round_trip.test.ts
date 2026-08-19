@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  Conversation,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
+
+const conversationWith = (rounds: ConversationRound[]): Conversation => ({
+  id: 'conv-1',
+  agent_id: 'agent-1',
+  user: { id: 'user-1', username: 'alice' },
+  title: 'T',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  rounds,
+});
+
+const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
+  id: 'round-1',
+  status: ConversationRoundStatus.completed,
+  input: { message: 'hello' },
+  steps: [],
+  response: { message: 'hi there' },
+  started_at: '2026-01-01T00:00:00.000Z',
+  time_to_first_token: 10,
+  time_to_last_token: 20,
+  model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 5, output_tokens: 7 },
+  ...overrides,
+});
+
+// The invariant that makes the eventual events-native flip safe: converting a round to events and
+// back must be an identity. This suite is the permanent net; it must hold for every real shape.
+const roundTrip = (rounds: ConversationRound[]): ConversationRound[] =>
+  eventsToRounds(roundsToEvents(conversationWith(rounds)));
+
+describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round', () => {
+  it('preserves a maximal completed round (steps, structured output, attachments, trace_id, state, overrides)', () => {
+    const steps: ConversationRoundStep[] = [
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'tc-1',
+        tool_id: 'platform.core.execute_esql',
+        params: { query: 'FROM foo' },
+        progression: [],
+        tool_call_group_id: 'grp-1',
+        results: [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }],
+      } as ConversationRoundStep,
+      {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'thinking about it',
+      } as ConversationRoundStep,
+    ];
+
+    const round = baseRound({
+      input: {
+        message: 'hello',
+        attachment_refs: [
+          { attachment_id: 'a1', version: 1, actor: 'user', operation: 'created' },
+        ] as unknown as ConversationRound['input']['attachment_refs'],
+        attachment_context: 'pre-rendered context',
+      },
+      steps,
+      response: { message: 'hi there', structured_output: { foo: 'bar' } },
+      trace_id: ['trace-a', 'trace-b'],
+      configuration_overrides: {
+        some: 'override',
+      } as unknown as ConversationRound['configuration_overrides'],
+      state: { agent: { nodes: [] } } as unknown as ConversationRound['state'],
+    });
+
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('preserves a single-string trace_id', () => {
+    const round = baseRound({ trace_id: 'trace-single' });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('preserves multiple rounds in order, with per-round ids', () => {
+    const rounds = [
+      baseRound({ id: 'round-1', input: { message: 'first' } }),
+      baseRound({ id: 'round-2', input: { message: 'second' } }),
+      baseRound({ id: 'round-3', input: { message: 'third' } }),
+    ];
+    expect(roundTrip(rounds)).toEqual(rounds);
+  });
+
+  it('preserves an awaiting-prompt round with its prompts, resume state, and run metrics', () => {
+    const round = baseRound({
+      status: ConversationRoundStatus.awaitingPrompt,
+      pending_prompts: [{ id: 'p1' }] as unknown as PromptRequest[],
+      state: { agent: { nodes: [] } } as unknown as ConversationRound['state'],
+    });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  describe('accepted, documented losses', () => {
+    it('drops an in-progress round (the run has no terminal event yet)', () => {
+      expect(roundTrip([baseRound({ status: ConversationRoundStatus.inProgress })])).toEqual([]);
+    });
+
+    it('collapses a Kibana-user author (author set, no origin) to the conversation owner', () => {
+      const round = baseRound({ author: { id: 'kibana-user-2', username: 'bob' } });
+      const [reconstructed] = roundTrip([round]);
+      // The author is not recoverable from a `user`-type actor, so it is dropped.
+      expect(reconstructed.author).toBeUndefined();
+    });
+  });
+});

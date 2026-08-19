@@ -7,6 +7,7 @@
 
 import type { PromptRequest, PromptResponse } from '../agents/prompts';
 import type { SerializedExecutionError } from '../agents/execution_status';
+import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -14,6 +15,7 @@ import type {
   RoundInput,
   RoundModelUsageStats,
 } from './conversation';
+import type { RoundState } from './round_state';
 
 /**
  * The current schema version for an events-native conversation document.
@@ -126,7 +128,7 @@ export type BaseTimelineEvent<TType extends TimelineEventType, TData> = BaseTime
 };
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
-export type UserMessageEventData = Pick<RoundInput, 'message' | 'attachment_refs'>;
+export type UserMessageEventData = RoundInput;
 export type UserMessageEvent = BaseTimelineEvent<
   TimelineEventType.userMessage,
   UserMessageEventData
@@ -180,6 +182,10 @@ export interface ExecutionCompletedEventData {
   time_to_last_token: number;
   /** When tracing is enabled, the trace id(s) for the run. */
   trace_id?: string | string[];
+  /** Round-level persisted resume state, when present. Carried so rounds round-trip losslessly. */
+  state?: RoundState;
+  /** Runtime configuration overrides applied to the run, when present. */
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 export type ExecutionCompletedEvent = BaseTimelineEvent<
   TimelineEventType.executionCompleted,

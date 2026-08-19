@@ -65,6 +65,8 @@ import {
   type Document,
   type VersionedDocument,
 } from './converters';
+import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
@@ -94,6 +96,18 @@ const buildMetadataFromTemplate = (
     },
     {}
   );
+
+/**
+ * Read-path round-trip check: a conversation's rounds are replaced by the result of round-tripping
+ * them through the event model — `eventsToRounds(roundsToEvents(...))`. Always on, so the whole test
+ * suite continuously asserts the rounds<->events conversion is an identity; any fidelity regression
+ * fails CI. Applied at the response boundary only (never in `fromEs`, which also feeds the write
+ * path), so reads are round-tripped but writes still persist the real rounds.
+ */
+const verifyRoundTrip = (conversation: Conversation): Conversation => ({
+  ...conversation,
+  rounds: eventsToRounds(roundsToEvents(conversation)),
+});
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -254,7 +268,9 @@ class ConversationClientImpl implements ConversationClient {
 
     try {
       return withDeserializedMetadata(
-        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
+        verifyRoundTrip(
+          fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
+        )
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
@@ -507,7 +523,7 @@ class ConversationClientImpl implements ConversationClient {
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
     return withDeserializedMetadata({
-      ...fromEs(document),
+      ...verifyRoundTrip(fromEs(document)),
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
