@@ -625,6 +625,17 @@ export const getFaceliftResolutionGroup = (entityId: string): ResolutionGroup | 
         calculated_level: toRiskLevel(identity.riskScore),
         calculated_score: identity.riskScore,
       },
+      // Same field the Resolution Group tab badge reads
+      // (`entity.relationships.resolution.risk.calculated_score_norm`).
+      relationships: {
+        resolution: {
+          risk: {
+            calculated_score_norm: identity.riskScore,
+            calculated_level: toRiskLevel(identity.riskScore),
+            calculated_score: identity.riskScore,
+          },
+        },
+      },
     },
     ...(storeRecord && 'user' in storeRecord
       ? { user: storeRecord.user }

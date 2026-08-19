@@ -62,8 +62,9 @@ export interface ResolutionGroupTableProps {
   onEntityNameClick?: (entity: Record<string, unknown>) => void;
   currentEntityId?: string;
   /**
-   * When true, only raw-record aliases are listed (used by the flyout Resolution
-   * section). The full Resolution tab keeps the resolved/target entity row.
+   * When true, only raw-record aliases are listed (flyout Resolution section,
+   * and the v.3 Resolution Group subflyout). Older facelift versions keep the
+   * resolved/target entity row in the full Resolution tab.
    */
   aliasesOnly?: boolean;
 }

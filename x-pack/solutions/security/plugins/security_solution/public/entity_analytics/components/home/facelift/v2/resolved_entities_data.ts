@@ -29,13 +29,9 @@ import {
   scoreDeltaPercent,
   watchlistsForIdentity,
   watchlistsForRecord,
-  casesCountForIdentity,
   casesCountForRecord,
-  anomaliesCountForIdentity,
   anomaliesCountForRecord,
-  firstSeenForIdentity,
   firstSeenForRecord,
-  lastAlertForIdentity,
   lastAlertForRecord,
 } from './data';
 import { filterHitsByEsQuery } from './grouping_data';
@@ -171,6 +167,9 @@ const highestCriticality = (
 const mostRecent = (timestamps: string[]): string =>
   timestamps.reduce((latest, timestamp) => (timestamp > latest ? timestamp : latest));
 
+const oldest = (timestamps: string[]): string =>
+  timestamps.reduce((earliest, timestamp) => (timestamp < earliest ? timestamp : earliest));
+
 // ---------------------------------------------------------------------------
 // Rows
 // ---------------------------------------------------------------------------
@@ -199,6 +198,9 @@ const rowFromRecord = (record: FaceliftRawRecord): EntityRow => ({
 const groupFromIdentity = (identity: FaceliftIdentity): ResolvedEntityRow => {
   const rawRecords = recordsForIdentity(identity.id).map(rowFromRecord);
   const alerts = rawRecords.reduce((total, record) => total + record.alerts, 0);
+  const lastAlerts = rawRecords
+    .map((record) => record.lastAlert)
+    .filter((stamp): stamp is string => stamp != null);
 
   return {
     id: identity.id,
@@ -215,10 +217,10 @@ const groupFromIdentity = (identity: FaceliftIdentity): ResolvedEntityRow => {
     alertsBySeverity: sumSeverities(rawRecords.map((record) => record.alertsBySeverity)),
     lastSeen: mostRecent(rawRecords.map((record) => record.lastSeen)),
     watchlists: watchlistsForIdentity(identity.id),
-    cases: casesCountForIdentity(identity.id),
-    anomalies: anomaliesCountForIdentity(identity),
-    firstSeen: firstSeenForIdentity(identity.id),
-    lastAlert: lastAlertForIdentity(identity.id, alerts),
+    cases: rawRecords.reduce((total, record) => total + record.cases, 0),
+    anomalies: rawRecords.reduce((total, record) => total + record.anomalies, 0),
+    firstSeen: oldest(rawRecords.map((record) => record.firstSeen)),
+    lastAlert: lastAlerts.length > 0 ? mostRecent(lastAlerts) : undefined,
     rawRecords,
     isUnresolved: false,
   };

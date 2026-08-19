@@ -27,18 +27,20 @@ import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
-import { getEntityId, getEntityName, getResolutionRiskScore } from './helpers';
+import { getEntityId, getEntityName, getEntityRiskScore, getResolutionRiskScore } from './helpers';
 import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_ERROR_TITLE,
   ENTITY_HAS_ALIASES_ERROR,
   GROUP_RISK_SCORE_LABEL,
+  RESOLVED_ENTITY_RISK_SCORE_LABEL,
   RISK_SCORE_NOT_AVAILABLE,
   RESOLUTION_GROUP_CREATED_TOAST,
   RESOLUTION_GROUP_CREATED_TOAST_TEXT,
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
+import { useActiveFaceliftVersion } from '../home/facelift/active_version';
 
 interface ResolutionGroupTabProps {
   entityId: string;
@@ -85,7 +87,15 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
   const hasGroup = group && group.group_size > 1;
-  const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
+  // Prefer resolution-group risk; fall back to the target entity's own risk
+  // (facelift mocks expose both; they match the resolved identity score).
+  const resolutionRiskScore = hasGroup
+    ? getResolutionRiskScore(group.target) ?? getEntityRiskScore(group.target)
+    : undefined;
+  const [faceliftVersion] = useActiveFaceliftVersion();
+  /** v.3 matches the flyout Resolution overview: raw records only, no primary row. */
+  const isFaceliftV3 = faceliftVersion === 'v3';
+  const riskScoreLabel = isFaceliftV3 ? RESOLVED_ENTITY_RISK_SCORE_LABEL : GROUP_RISK_SCORE_LABEL;
 
   const excludeEntityIds = useMemo(() => {
     if (!group) return [entityId];
@@ -218,7 +228,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">{GROUP_RISK_SCORE_LABEL}</EuiText>
+                  <EuiText size="xs">{riskScoreLabel}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {resolutionRiskScore != null ? (
@@ -244,6 +254,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
           currentEntityId={entityId}
+          aliasesOnly={isFaceliftV3}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection

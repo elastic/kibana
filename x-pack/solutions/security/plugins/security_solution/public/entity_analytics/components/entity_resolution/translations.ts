@@ -57,6 +57,11 @@ export const GROUP_RISK_SCORE_LABEL = i18n.translate(
   { defaultMessage: 'Group risk score:' }
 );
 
+export const RESOLVED_ENTITY_RISK_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedEntityRiskScore',
+  { defaultMessage: 'Resolved entity risk score:' }
+);
+
 export const EXPAND_ENTITY_BUTTON = i18n.translate(
   'xpack.securitySolution.entityResolution.expandEntity',
   { defaultMessage: 'Open entity details' }

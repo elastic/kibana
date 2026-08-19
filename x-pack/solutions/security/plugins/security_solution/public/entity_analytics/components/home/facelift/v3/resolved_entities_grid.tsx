@@ -286,13 +286,10 @@ const AlertsCell: React.FC<{
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {onOpenAlerts ? (
-          <EuiBadge
-            color="hollow"
-            onClick={onOpenAlerts}
-            onClickAriaLabel="Open alerts"
-            data-test-subj="eaFaceliftAlertsBadge"
-          >
-            {total}
+          <EuiBadge color="hollow" data-test-subj="eaFaceliftAlertsBadge">
+            <EuiLink onClick={onOpenAlerts} aria-label="Open alerts">
+              {total}
+            </EuiLink>
           </EuiBadge>
         ) : (
           <EuiBadge color="hollow">{total}</EuiBadge>
@@ -595,8 +592,9 @@ const sortRows = <T extends EntityRow>(
 
 /**
  * The nested rows sit inside a full-width cell, so they can't inherit the
- * grid's column widths. Measuring the header keeps them aligned through column
- * resizing, hiding and reordering.
+ * grid's column widths. Prefer measuring the parent resolved-entity row cells
+ * (same box model as the visible grid); fall back to the header when no rows
+ * are rendered yet. Keeps alignment through resize, hide, and reorder.
  */
 const useHeaderCellWidths = (
   containerRef: React.RefObject<HTMLDivElement>,
@@ -609,10 +607,18 @@ const useHeaderCellWidths = (
     if (!container) return;
 
     const measure = () => {
-      const cells = container.querySelectorAll<HTMLElement>(
-        '.euiDataGridHeader .euiDataGridHeaderCell'
+      // Custom body: first child of each role=row is the cells flex; skip the
+      // trailing row-details cell which lives in a sibling wrapper. Measure a
+      // single parent row so nested raw records share its exact column boxes.
+      const firstRowCells = container.querySelector(
+        '.euiDataGridRow > div:first-child'
       );
-      const next = Array.from(cells, (cell) => cell.getBoundingClientRect().width);
+      const rowCells = firstRowCells?.querySelectorAll<HTMLElement>('.euiDataGridRowCell');
+      const headerCells = container.querySelectorAll<HTMLElement>(
+        '.euiDataGridHeader .euiDataGridHeaderCell:not(.euiScreenReaderOnly)'
+      );
+      const cells = rowCells && rowCells.length > 0 ? rowCells : headerCells;
+      const next = Array.from(cells, (cell) => cell.offsetWidth);
       setWidths((current) =>
         current.length === next.length && current.every((width, i) => width === next[i])
           ? current
@@ -624,8 +630,16 @@ const useHeaderCellWidths = (
 
     const observer = new ResizeObserver(measure);
     observer.observe(container);
+    const observed = container.querySelector(
+      '.euiDataGridRow > div:first-child'
+    );
+    observed
+      ?.querySelectorAll<HTMLElement>('.euiDataGridRowCell')
+      .forEach((cell) => observer.observe(cell));
     container
-      .querySelectorAll<HTMLElement>('.euiDataGridHeader .euiDataGridHeaderCell')
+      .querySelectorAll<HTMLElement>(
+        '.euiDataGridHeader .euiDataGridHeaderCell:not(.euiScreenReaderOnly)'
+      )
       .forEach((cell) => observer.observe(cell));
 
     return () => observer.disconnect();
@@ -640,7 +654,6 @@ interface RawRecordsProps {
   columnIds: string[];
   /** Header widths in visible order: select, expander, actions, then the data columns. */
   columnWidths: number[];
-  canUseTimeline: boolean;
   onOpenDetails: (row: EntityRow) => void;
   onOpenAnomalies: (row: EntityRow) => void;
   onOpenAlerts: (row: EntityRow) => void;
@@ -650,7 +663,6 @@ const RawRecords: React.FC<RawRecordsProps> = ({
   records,
   columnIds,
   columnWidths,
-  canUseTimeline,
   onOpenDetails,
   onOpenAnomalies,
   onOpenAlerts,
@@ -665,20 +677,43 @@ const RawRecords: React.FC<RawRecordsProps> = ({
       `,
       row: css`
         display: flex;
+        flex-wrap: nowrap;
         align-items: center;
+        inline-size: fit-content;
+        min-inline-size: 100%;
         min-block-size: 36px;
         border: none;
       `,
+      /**
+       * Match EuiDataGrid `cellPadding: 'm'` (size.m / 2) so nested content
+       * lines up with the parent resolved-entity row.
+       */
       cell: css`
+        box-sizing: border-box;
         flex: 0 0 auto;
         overflow: hidden;
-        padding-inline: ${euiTheme.size.s};
+        padding-inline: calc(${euiTheme.size.m} / 2);
       `,
-      /** The child marker reads better centered under the expander above it. */
-      marker: css`
+      numericCell: css`
+        text-align: right;
+      `,
+      /**
+       * Nested raw-record names sit indented under the parent, with a mirrored
+       * return icon marking the child relationship.
+       */
+      nameCell: css`
         display: flex;
-        justify-content: center;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        padding-inline-start: ${euiTheme.size.s};
+        min-inline-size: 0;
+      `,
+      nameMarker: css`
+        flex-shrink: 0;
         transform: scaleX(-1);
+      `,
+      nameText: css`
+        min-inline-size: 0;
       `,
     }),
     [euiTheme]
@@ -686,37 +721,65 @@ const RawRecords: React.FC<RawRecordsProps> = ({
 
   // select + expander + actions
   const leadingCount = 3;
+  const numericColumnIds = new Set(['records', 'cases', 'anomalies']);
 
   return (
     <div css={styles.panel} data-test-subj="eaFaceliftRawRecords">
       {records.map((record) => (
         <div css={styles.row} key={record.id} data-test-subj="eaFaceliftRawRecordRow">
-          <div css={styles.cell} style={{ width: columnWidths[0] ?? SELECTION_WIDTH }} />
           <div
-            css={[styles.cell, styles.marker]}
-            style={{ width: columnWidths[1] ?? EXPANDER_WIDTH }}
-          >
-            <EuiIcon type="return" size="s" color="subdued" aria-hidden={true} />
-          </div>
-          <div css={styles.cell} style={{ width: columnWidths[2] ?? ENTITY_ROW_ACTIONS_WIDTH }}>
-            <EntityRowActions
-              row={record}
-              canUseTimeline={canUseTimeline}
-            />
-          </div>
-          {columnIds.map((columnId, index) => (
-            <div
-              css={styles.cell}
-              key={columnId}
-              style={{ width: columnWidths[leadingCount + index] }}
-            >
-              {renderValue(columnId, record, {
-                onOpenDetails: columnId === 'name' ? onOpenDetails : undefined,
-                onOpenAnomalies: columnId === 'anomalies' ? onOpenAnomalies : undefined,
-                onOpenAlerts: columnId === 'alerts' ? onOpenAlerts : undefined,
-              })}
-            </div>
-          ))}
+            css={styles.cell}
+            style={{
+              width: columnWidths[0] ?? SELECTION_WIDTH,
+              flexBasis: columnWidths[0] ?? SELECTION_WIDTH,
+            }}
+          />
+          <div
+            css={styles.cell}
+            style={{
+              width: columnWidths[1] ?? EXPANDER_WIDTH,
+              flexBasis: columnWidths[1] ?? EXPANDER_WIDTH,
+            }}
+          />
+          <div
+            css={styles.cell}
+            style={{
+              width: columnWidths[2] ?? ENTITY_ROW_ACTIONS_WIDTH,
+              flexBasis: columnWidths[2] ?? ENTITY_ROW_ACTIONS_WIDTH,
+            }}
+          />
+          {columnIds.map((columnId, index) => {
+            const width = columnWidths[leadingCount + index];
+            return (
+              <div
+                css={[styles.cell, numericColumnIds.has(columnId) && styles.numericCell]}
+                key={columnId}
+                style={width != null ? { width, flexBasis: width } : undefined}
+              >
+                {columnId === 'name' ? (
+                  <div css={styles.nameCell}>
+                    <EuiIcon
+                      css={styles.nameMarker}
+                      type="return"
+                      size="s"
+                      color="subdued"
+                      aria-hidden={true}
+                    />
+                    <div css={styles.nameText}>
+                      {renderValue(columnId, record, {
+                        onOpenDetails,
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  renderValue(columnId, record, {
+                    onOpenAnomalies: columnId === 'anomalies' ? onOpenAnomalies : undefined,
+                    onOpenAlerts: columnId === 'alerts' ? onOpenAlerts : undefined,
+                  })
+                )}
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>
@@ -797,7 +860,7 @@ const CustomGridBody = memo<CustomGridBodyProps>(
       <>
         {headerRow}
         {visibleRows.map((row, rowIndex) => (
-          <div role="row" css={styles.row} key={row.id}>
+          <div role="row" className="euiDataGridRow" css={styles.row} key={row.id}>
             <div css={styles.cells}>
               {visibleColumns.map((column, colIndex) =>
                 column.id === ROW_DETAILS_ID ? null : (
@@ -1243,7 +1306,6 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
               records={row.rawRecords}
               columnIds={visibleColumnIds}
               columnWidths={columnWidths}
-              canUseTimeline={canUseTimeline}
               onOpenDetails={onOpenDetails}
               onOpenAnomalies={onOpenAnomalies}
               onOpenAlerts={onOpenAlerts}
@@ -1258,7 +1320,6 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     expandedIds,
     visibleColumnIds,
     columnWidths,
-    canUseTimeline,
     onOpenDetails,
     onOpenAnomalies,
     onOpenAlerts,

@@ -106,11 +106,19 @@ const legendTableCss = css`
 `;
 
 /**
- * Equal columns with a 16px gutter (`gutterSize="m"`): each side is half of
- * (panel content width − spacing), not a hard 50% that would overflow the gap.
+ * Equal columns with a 16px gutter (`gutterSize="m"`): flex shares remaining
+ * space after the gutter (not a hard % that would overflow the gap).
  */
-const halfWidthItemCss = css`
-  flex: 1 1 0%;
+
+/** Entities-by legend — 60% of the panel (after the 16px gutter). */
+const entitiesByLegendItemCss = css`
+  flex: 60 1 0%;
+  min-inline-size: 0;
+`;
+
+/** Entities-by donut — remainder beside the 60% legend. */
+const entitiesByChartItemCss = css`
+  flex: 40 1 0%;
   min-inline-size: 0;
 `;
 
@@ -727,7 +735,7 @@ const EntitiesByPanel: React.FC<{
         responsive={false}
         css={chartTableBodyCss}
       >
-        <EuiFlexItem css={halfWidthItemCss}>
+        <EuiFlexItem css={entitiesByLegendItemCss}>
           <div css={legendTableCss}>
             {selection === 'risk level' ? (
               <RiskLevelBreakdownTable
@@ -745,7 +753,7 @@ const EntitiesByPanel: React.FC<{
             ) : null}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem css={halfWidthItemCss}>
+        <EuiFlexItem css={entitiesByChartItemCss}>
           {selection === 'risk level' ? <SummaryRiskDonut severityCount={severityCount} /> : null}
           {selection === 'asset criticality' ? (
             <CriticalityDonutChart counts={criticalityCounts} />

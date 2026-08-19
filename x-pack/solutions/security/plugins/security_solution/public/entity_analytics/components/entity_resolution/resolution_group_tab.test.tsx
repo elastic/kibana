@@ -73,16 +73,18 @@ describe('ResolutionGroupTab', () => {
   it('renders group table and add entities section', () => {
     mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
 
-    const { getByTestId, getAllByText, getByText } = render(
+    const { getByTestId, getByText, queryByText } = render(
       <TestProviders>
         <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
       </TestProviders>
     );
 
     expect(getByTestId(RESOLUTION_GROUP_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
-    // 'alice' appears in entity row + summary row
-    expect(getAllByText('alice').length).toBeGreaterThanOrEqual(1);
+    // v.3 default: aliases only — primary target is omitted from the table
+    expect(queryByText('alice', { exact: true })).not.toBeInTheDocument();
+    expect(getByText('alice-azure')).toBeInTheDocument();
     expect(getByText('bob')).toBeInTheDocument();
+    expect(getByText('Resolved entity risk score:')).toBeInTheDocument();
   });
 
   it('adds entity to existing group — calls linkEntities directly', async () => {

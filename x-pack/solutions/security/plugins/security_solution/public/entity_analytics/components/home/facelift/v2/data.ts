@@ -231,12 +231,17 @@ export const DEFAULT_RISK_CONTRIBUTIONS = [
 
 const ago = (hours: number): string => new Date(Date.now() - hours * 36e5).toISOString();
 
+/**
+ * Resolved-entity risk is always strictly below the highest raw-record risk in
+ * the group (close, never equal or higher). A few identities sit further below
+ * on purpose (“hidden risk” elevated raw records).
+ */
 export const IDENTITIES: FaceliftIdentity[] = [
   {
     id: 'id-amber',
     name: 'amber.rodriguez',
     entityType: EntityType.user,
-    riskScore: 96,
+    riskScore: 93, // max raw 96
     riskDelta24h: 24,
     criticality: 'extreme_impact',
     alerts: 14,
@@ -256,7 +261,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-svc-ci',
     name: 'svc-ci-deploy',
     entityType: EntityType.service,
-    riskScore: 92,
+    riskScore: 91, // max raw 92; keep Critical (>90)
     riskDelta24h: 8,
     criticality: 'high_impact',
     alerts: 9,
@@ -275,7 +280,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-web-prod',
     name: 'web-prod-042',
     entityType: EntityType.host,
-    riskScore: 88,
+    riskScore: 86, // max raw 88
     riskDelta24h: 21,
     criticality: 'extreme_impact',
     alerts: 11,
@@ -290,7 +295,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-james',
     name: 'james.okafor',
     entityType: EntityType.user,
-    riskScore: 84,
+    riskScore: 81, // max raw 84
     riskDelta24h: 3,
     criticality: 'high_impact',
     alerts: 6,
@@ -304,7 +309,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-db-core',
     name: 'db-core-003',
     entityType: EntityType.host,
-    riskScore: 81,
+    riskScore: 78, // max raw 81
     riskDelta24h: -4,
     criticality: 'extreme_impact',
     alerts: 4,
@@ -319,7 +324,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-maria',
     name: 'maria.chen',
     entityType: EntityType.user,
-    riskScore: 78,
+    riskScore: 75, // max raw 78
     riskDelta24h: 26,
     criticality: 'medium_impact',
     alerts: 7,
@@ -334,7 +339,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-vpn-gw',
     name: 'vpn-gw-eu-1',
     entityType: EntityType.host,
-    riskScore: 74,
+    riskScore: 71, // max raw 74
     riskDelta24h: 0,
     criticality: 'high_impact',
     alerts: 3,
@@ -349,7 +354,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-svc-backup',
     name: 'svc-backup-agent',
     entityType: EntityType.service,
-    riskScore: 71,
+    riskScore: 70, // max raw 71; keep High (≥70)
     riskDelta24h: 2,
     criticality: 'medium_impact',
     alerts: 2,
@@ -364,7 +369,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-liam',
     name: 'liam.novak',
     entityType: EntityType.user,
-    riskScore: 72,
+    riskScore: 70, // max raw 72; keep High (≥70)
     riskDelta24h: 22,
     criticality: 'high_impact',
     alerts: 5,
@@ -451,7 +456,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-eva',
     name: 'eva.dubois',
     entityType: EntityType.user,
-    riskScore: 33,
+    riskScore: 30, // max raw 33
     riskDelta24h: 0,
     criticality: 'unassigned',
     alerts: 0,
@@ -465,7 +470,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-print-srv',
     name: 'print-srv-01',
     entityType: EntityType.host,
-    riskScore: 26,
+    riskScore: 23, // max raw 26
     riskDelta24h: -3,
     criticality: 'low_impact',
     alerts: 0,
@@ -479,7 +484,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-noah',
     name: 'noah.tanaka',
     entityType: EntityType.user,
-    riskScore: 18,
+    riskScore: 15, // max raw 18
     riskDelta24h: 1,
     criticality: 'unassigned',
     alerts: 0,
@@ -493,7 +498,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-iot-sensor',
     name: 'iot-sensor-77',
     entityType: EntityType.host,
-    riskScore: 8,
+    riskScore: 5, // max raw 8
     riskDelta24h: 0,
     criticality: 'unassigned',
     alerts: 0,
@@ -557,26 +562,61 @@ export const watchlistsForRecord = (record: FaceliftRawRecord): FaceliftWatchlis
 // Cases (prototype — count of case attachments per entity)
 // ---------------------------------------------------------------------------
 
-/** Case attachment counts for resolved identities (0–25). */
-const IDENTITY_CASE_COUNTS: Record<string, number> = {
-  'id-amber': 12,
-  'id-svc-ci': 3,
-  'id-web-prod': 7,
-  'id-james': 25,
-  'id-db-core': 0,
-  'id-maria': 4,
-  'id-vpn-gw': 1,
-  'id-svc-backup': 0,
-  'id-liam': 18,
-  'id-kiosk': 2,
-  'id-sofia': 9,
-  'id-build-runner': 0,
-  'id-tomas': 6,
-  'id-svc-report': 1,
-  'id-eva': 14,
-  'id-print-srv': 0,
-  'id-noah': 21,
-  'id-iot-sensor': 5,
+/**
+ * Per raw-record case counts. Resolved-entity totals are the sum of their
+ * records (same aggregation as alerts).
+ */
+const RECORD_CASE_COUNTS: Record<string, number> = {
+  // amber.rodriguez → 12
+  'rec-ad-8f21': 7,
+  'rec-okta-1a4e': 3,
+  'rec-wd-77c2': 2,
+  // svc-ci-deploy → 3
+  'rec-okta-9b2d': 2,
+  'rec-ep-4410': 1,
+  // web-prod-042 → 7
+  'rec-ep-a2f9': 4,
+  'rec-cs-5512': 3,
+  // james.okafor → 25
+  'rec-ad-33d1': 10,
+  'rec-okta-71b8': 8,
+  'rec-wd-2091': 4,
+  'rec-entra-c4a7': 3,
+  // db-core-003 → 0
+  'rec-ep-b7c3': 0,
+  // maria.chen → 4
+  'rec-ad-90ef': 3,
+  'rec-okta-d3f0': 1,
+  // vpn-gw-eu-1 → 1
+  'rec-ep-66a1': 1,
+  'rec-net-08d4': 0,
+  // svc-backup-agent → 0
+  'rec-ad-5b09': 0,
+  // liam.novak → 18
+  'rec-ad-12aa': 9,
+  'rec-okta-e8b5': 6,
+  'rec-wd-3358': 3,
+  // kiosk-lobby-2 → 2
+  'rec-ep-f00d': 2,
+  // sofia.marino → 9
+  'rec-ad-77e2': 6,
+  'rec-entra-9f13': 3,
+  // build-runner-17 → 0
+  'rec-ep-31cb': 0,
+  'rec-cs-8a60': 0,
+  // tomas.lindqvist → 6
+  'rec-ad-c9d8': 6,
+  // svc-report-gen → 1
+  'rec-ad-40b6': 1,
+  'rec-okta-2270': 0,
+  // eva.dubois → 14
+  'rec-okta-ab19': 14,
+  // print-srv-01 → 0
+  'rec-ep-dd21': 0,
+  // noah.tanaka → 21
+  'rec-wd-6644': 21,
+  // iot-sensor-77 → 5
+  'rec-net-4f8a': 5,
 };
 
 const UNRESOLVED_CASE_COUNTS: Record<string, number> = {
@@ -586,11 +626,8 @@ const UNRESOLVED_CASE_COUNTS: Record<string, number> = {
   'rec-okta-un04': 11,
 };
 
-export const casesCountForIdentity = (identityId: string): number =>
-  IDENTITY_CASE_COUNTS[identityId] ?? 0;
-
 export const casesCountForRecord = (record: FaceliftRawRecord): number => {
-  if (record.resolvedTo) return casesCountForIdentity(record.resolvedTo);
+  if (record.resolvedTo) return RECORD_CASE_COUNTS[record.id] ?? 0;
   return UNRESOLVED_CASE_COUNTS[record.id] ?? 0;
 };
 
@@ -599,26 +636,34 @@ export const casesCountForRecord = (record: FaceliftRawRecord): number => {
 // ---------------------------------------------------------------------------
 
 /**
- * Per-identity totals for entities with `hasNewAnomalies`. Used by the
- * Entities table and the flyout overview so both stay in lockstep.
+ * Per raw-record anomaly counts for identities with `hasNewAnomalies`.
+ * Resolved-entity totals are the sum of their records.
  */
-const IDENTITY_ANOMALY_COUNTS: Record<string, number> = {
-  'id-amber': 15,
-  'id-web-prod': 8,
-  'id-maria': 12,
-  'id-liam': 22,
-  'id-sofia': 5,
-};
-
-export const anomaliesCountForIdentity = (identity: FaceliftIdentity): number => {
-  if (!identity.hasNewAnomalies) return 0;
-  return IDENTITY_ANOMALY_COUNTS[identity.id] ?? 15;
+const RECORD_ANOMALY_COUNTS: Record<string, number> = {
+  // amber.rodriguez → 15
+  'rec-ad-8f21': 8,
+  'rec-okta-1a4e': 5,
+  'rec-wd-77c2': 2,
+  // web-prod-042 → 8
+  'rec-ep-a2f9': 5,
+  'rec-cs-5512': 3,
+  // maria.chen → 12
+  'rec-ad-90ef': 7,
+  'rec-okta-d3f0': 5,
+  // liam.novak → 22
+  'rec-ad-12aa': 12,
+  'rec-okta-e8b5': 7,
+  'rec-wd-3358': 3,
+  // sofia.marino → 5
+  'rec-ad-77e2': 4,
+  'rec-entra-9f13': 1,
 };
 
 export const anomaliesCountForRecord = (record: FaceliftRawRecord): number => {
   if (!record.resolvedTo) return 0;
   const identity = IDENTITY_BY_ID[record.resolvedTo];
-  return identity ? anomaliesCountForIdentity(identity) : 0;
+  if (!identity?.hasNewAnomalies) return 0;
+  return RECORD_ANOMALY_COUNTS[record.id] ?? 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -628,28 +673,60 @@ export const anomaliesCountForRecord = (record: FaceliftRawRecord): number => {
 const daysAgo = (days: number): string => ago(days * 24);
 
 /**
- * First-seen timestamps: most entities months–a year ago; a few are recent
- * (new-this-week / short-lived).
+ * Per raw-record first-seen timestamps (each distinct within a group).
+ * Resolved-entity first seen = oldest among its records.
  */
-const IDENTITY_FIRST_SEEN: Record<string, string> = {
-  'id-amber': daysAgo(240),
-  'id-svc-ci': daysAgo(150),
-  'id-web-prod': daysAgo(95),
-  'id-james': daysAgo(380),
-  'id-db-core': daysAgo(420),
-  'id-maria': daysAgo(60),
-  'id-vpn-gw': ago(30), // recent
-  'id-svc-backup': ago(18), // recent
-  'id-liam': daysAgo(200),
-  'id-kiosk': ago(40), // recent
-  'id-sofia': daysAgo(5), // recent
-  'id-build-runner': daysAgo(110),
-  'id-tomas': daysAgo(310),
-  'id-svc-report': daysAgo(85),
-  'id-eva': daysAgo(175),
-  'id-print-srv': daysAgo(500),
-  'id-noah': daysAgo(45),
-  'id-iot-sensor': daysAgo(130),
+const RECORD_FIRST_SEEN: Record<string, string> = {
+  // amber.rodriguez → oldest daysAgo(240)
+  'rec-ad-8f21': daysAgo(240),
+  'rec-okta-1a4e': daysAgo(180),
+  'rec-wd-77c2': daysAgo(95),
+  // svc-ci-deploy → oldest daysAgo(150)
+  'rec-okta-9b2d': daysAgo(150),
+  'rec-ep-4410': daysAgo(80),
+  // web-prod-042 → oldest daysAgo(95)
+  'rec-ep-a2f9': daysAgo(95),
+  'rec-cs-5512': daysAgo(40),
+  // james.okafor → oldest daysAgo(380)
+  'rec-ad-33d1': daysAgo(380),
+  'rec-okta-71b8': daysAgo(210),
+  'rec-wd-2091': daysAgo(120),
+  'rec-entra-c4a7': daysAgo(55),
+  // db-core-003
+  'rec-ep-b7c3': daysAgo(420),
+  // maria.chen → oldest daysAgo(60)
+  'rec-ad-90ef': daysAgo(60),
+  'rec-okta-d3f0': daysAgo(28),
+  // vpn-gw-eu-1 → oldest ago(40)
+  'rec-ep-66a1': ago(40),
+  'rec-net-08d4': ago(18),
+  // svc-backup-agent
+  'rec-ad-5b09': ago(18),
+  // liam.novak → oldest daysAgo(200)
+  'rec-ad-12aa': daysAgo(200),
+  'rec-okta-e8b5': daysAgo(110),
+  'rec-wd-3358': daysAgo(45),
+  // kiosk-lobby-2
+  'rec-ep-f00d': ago(40),
+  // sofia.marino → oldest daysAgo(5)
+  'rec-ad-77e2': daysAgo(5),
+  'rec-entra-9f13': daysAgo(2),
+  // build-runner-17 → oldest daysAgo(110)
+  'rec-ep-31cb': daysAgo(110),
+  'rec-cs-8a60': daysAgo(35),
+  // tomas.lindqvist
+  'rec-ad-c9d8': daysAgo(310),
+  // svc-report-gen → oldest daysAgo(85)
+  'rec-ad-40b6': daysAgo(85),
+  'rec-okta-2270': daysAgo(30),
+  // eva.dubois
+  'rec-okta-ab19': daysAgo(175),
+  // print-srv-01
+  'rec-ep-dd21': daysAgo(500),
+  // noah.tanaka
+  'rec-wd-6644': daysAgo(45),
+  // iot-sensor-77
+  'rec-net-4f8a': daysAgo(130),
 };
 
 const UNRESOLVED_FIRST_SEEN: Record<string, string> = {
@@ -660,28 +737,44 @@ const UNRESOLVED_FIRST_SEEN: Record<string, string> = {
 };
 
 /**
- * Last-alert timestamps — between first seen and now. Omitted when the entity
- * has no alerts (table shows —).
+ * Per raw-record last-alert timestamps (only for records with alerts > 0;
+ * each distinct within a group). Resolved-entity last alert = latest among
+ * its records that have alerts.
  */
-const IDENTITY_LAST_ALERT: Record<string, string> = {
-  'id-amber': ago(0.2),
-  'id-svc-ci': ago(1.5),
-  'id-web-prod': ago(3),
-  'id-james': ago(12),
-  'id-db-core': ago(48),
-  'id-maria': ago(0.5),
-  'id-vpn-gw': ago(4),
-  'id-svc-backup': ago(6),
-  'id-liam': ago(2),
-  'id-kiosk': ago(10),
-  'id-sofia': ago(1),
-  'id-build-runner': ago(72),
-  'id-tomas': daysAgo(20),
-  'id-svc-report': ago(36),
-  'id-eva': ago(8),
-  'id-print-srv': daysAgo(40),
-  'id-noah': ago(16),
-  'id-iot-sensor': daysAgo(12),
+const RECORD_LAST_ALERT: Record<string, string> = {
+  // amber.rodriguez → latest ago(0.2)
+  'rec-ad-8f21': ago(0.2),
+  'rec-okta-1a4e': ago(2),
+  'rec-wd-77c2': ago(8),
+  // svc-ci-deploy → latest ago(1.5)
+  'rec-okta-9b2d': ago(1.5),
+  'rec-ep-4410': ago(6),
+  // web-prod-042 → latest ago(3)
+  'rec-ep-a2f9': ago(3),
+  'rec-cs-5512': ago(14),
+  // james.okafor → latest ago(12)
+  'rec-ad-33d1': ago(12),
+  'rec-okta-71b8': ago(30),
+  'rec-entra-c4a7': ago(48),
+  // db-core-003
+  'rec-ep-b7c3': ago(48),
+  // maria.chen → latest ago(0.5)
+  'rec-ad-90ef': ago(0.5),
+  'rec-okta-d3f0': ago(9),
+  // vpn-gw-eu-1 → latest ago(4)
+  'rec-ep-66a1': ago(4),
+  'rec-net-08d4': ago(20),
+  // svc-backup-agent
+  'rec-ad-5b09': ago(6),
+  // liam.novak → latest ago(2)
+  'rec-ad-12aa': ago(2),
+  'rec-okta-e8b5': ago(11),
+  // kiosk-lobby-2
+  'rec-ep-f00d': ago(10),
+  // sofia.marino → latest ago(1) (only AD has alerts)
+  'rec-ad-77e2': ago(1),
+  // tomas.lindqvist
+  'rec-ad-c9d8': daysAgo(20),
 };
 
 const UNRESOLVED_LAST_ALERT: Record<string, string> = {
@@ -695,29 +788,17 @@ const UNRESOLVED_LAST_ALERT: Record<string, string> = {
 const clampAfterFirstSeen = (firstSeen: string, lastAlert: string): string =>
   lastAlert >= firstSeen ? lastAlert : firstSeen;
 
-export const firstSeenForIdentity = (identityId: string): string =>
-  IDENTITY_FIRST_SEEN[identityId] ?? daysAgo(90);
-
-export const lastAlertForIdentity = (
-  identityId: string,
-  alerts: number
-): string | undefined => {
-  if (alerts <= 0) return undefined;
-  const firstSeen = firstSeenForIdentity(identityId);
-  const lastAlert = IDENTITY_LAST_ALERT[identityId] ?? ago(24);
-  return clampAfterFirstSeen(firstSeen, lastAlert);
-};
-
 export const firstSeenForRecord = (record: FaceliftRawRecord): string => {
-  if (record.resolvedTo) return firstSeenForIdentity(record.resolvedTo);
+  if (record.resolvedTo) return RECORD_FIRST_SEEN[record.id] ?? daysAgo(90);
   return UNRESOLVED_FIRST_SEEN[record.id] ?? daysAgo(90);
 };
 
 export const lastAlertForRecord = (record: FaceliftRawRecord): string | undefined => {
   if (record.alerts <= 0) return undefined;
-  if (record.resolvedTo) return lastAlertForIdentity(record.resolvedTo, record.alerts);
   const firstSeen = firstSeenForRecord(record);
-  const lastAlert = UNRESOLVED_LAST_ALERT[record.id] ?? ago(24);
+  const lastAlert = record.resolvedTo
+    ? RECORD_LAST_ALERT[record.id] ?? ago(24)
+    : UNRESOLVED_LAST_ALERT[record.id] ?? ago(24);
   return clampAfterFirstSeen(firstSeen, lastAlert);
 };
 
@@ -726,7 +807,8 @@ export const lastAlertForRecord = (record: FaceliftRawRecord): string | undefine
  * first record of a group is the one the resolved entity takes its name from,
  * and its criticality is the highest in the group, so the aggregated row in the
  * Resolved entities table always has a visible origin. Group totals (records,
- * sources, alerts, last seen) are the sum / union / max of the records below.
+ * sources, alerts, cases, anomalies, last seen / last alert) are the sum /
+ * union / max of the records below; first seen is the oldest.
  */
 export const RAW_RECORDS: FaceliftRawRecord[] = [
   // amber.rodriguez (3)
@@ -1274,6 +1356,38 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
 
 export const recordsForIdentity = (identityId: string): FaceliftRawRecord[] =>
   RAW_RECORDS.filter((record) => record.resolvedTo === identityId);
+
+export const casesCountForIdentity = (identityId: string): number =>
+  recordsForIdentity(identityId).reduce(
+    (total, record) => total + casesCountForRecord(record),
+    0
+  );
+
+export const anomaliesCountForIdentity = (identity: FaceliftIdentity): number => {
+  if (!identity.hasNewAnomalies) return 0;
+  return recordsForIdentity(identity.id).reduce(
+    (total, record) => total + anomaliesCountForRecord(record),
+    0
+  );
+};
+
+export const firstSeenForIdentity = (identityId: string): string => {
+  const stamps = recordsForIdentity(identityId).map(firstSeenForRecord);
+  if (stamps.length === 0) return daysAgo(90);
+  return stamps.reduce((earliest, stamp) => (stamp < earliest ? stamp : earliest));
+};
+
+export const lastAlertForIdentity = (
+  identityId: string,
+  alerts: number
+): string | undefined => {
+  if (alerts <= 0) return undefined;
+  const stamps = recordsForIdentity(identityId)
+    .map(lastAlertForRecord)
+    .filter((stamp): stamp is string => stamp != null);
+  if (stamps.length === 0) return undefined;
+  return stamps.reduce((latest, stamp) => (stamp > latest ? stamp : latest));
+};
 
 /** Distinct data sources present in the corpus, used to populate the page filters. */
 export const ENTITY_SOURCE_LABELS: string[] = Array.from(

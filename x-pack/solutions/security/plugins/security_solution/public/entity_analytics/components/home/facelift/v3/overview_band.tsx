@@ -48,10 +48,7 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
         return;
       }
 
-      const isSame =
-        activeFilter?.type === 'card' &&
-        activeFilter.cardId === cardId &&
-        !activeFilter.exclude;
+      const isSame = activeFilter?.type === 'card' && activeFilter.cardId === cardId;
       onFilterChange(isSame ? null : { type: 'card', cardId, label: card.filterLabel });
     },
     [activeFilter, cards, onFilterChange]
