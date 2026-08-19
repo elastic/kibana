@@ -34,9 +34,6 @@ import {
   DeployAndDetectStep,
 } from './step_components';
 
-const AUTHENTICATE_AND_DEPLOY_STEP_INDEX = ONBOARDING_STEPS.findIndex(
-  (s) => s.id === 'authenticate-and-deploy'
-);
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
@@ -86,19 +83,6 @@ export function OnboardingShell() {
     markStepsIncomplete,
   });
 
-  const needsAuthenticateAndDeployStep = useMemo(() => {
-    if (!awsServiceMatrix) return true; // loading — assume deploy settings needed
-    return (
-      selectedServiceIds.length === 0 ||
-      selectedServiceIds.some(
-        (id) =>
-          awsServiceMatrix
-            .find((s) => s.id === id)
-            ?.deploymentMethods.some((dm) => dm.method === 'managed_integration') ?? false
-      )
-    );
-  }, [selectedServiceIds, awsServiceMatrix]);
-
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
 
@@ -114,39 +98,17 @@ export function OnboardingShell() {
     const nextStep = ONBOARDING_STEPS[currentStepIndex + 1];
     return () => {
       markStepComplete(currentStepId);
-      if (currentStepId === 'services' && !needsAuthenticateAndDeployStep) {
-        markStepComplete('authenticate-and-deploy');
-        const stepAfterConnect = ONBOARDING_STEPS[AUTHENTICATE_AND_DEPLOY_STEP_INDEX + 1];
-        if (stepAfterConnect) {
-          history.push({ ...location, hash: `#${stepAfterConnect.id}` });
-        }
-      } else if (nextStep) {
+      if (nextStep) {
         history.push({ ...location, hash: `#${nextStep.id}` });
       }
     };
-  }, [
-    currentStepId,
-    currentStepIndex,
-    markStepComplete,
-    needsAuthenticateAndDeployStep,
-    history,
-    location,
-  ]);
+  }, [currentStepId, currentStepIndex, markStepComplete, history, location]);
 
   const onBack = useMemo(() => {
     if (currentStepIndex <= 0) return undefined;
-    // Scan backward, skipping connect when it is not part of the current flow
-    let prevIndex = currentStepIndex - 1;
-    while (
-      prevIndex > 0 &&
-      ONBOARDING_STEPS[prevIndex].id === 'authenticate-and-deploy' &&
-      !needsAuthenticateAndDeployStep
-    ) {
-      prevIndex--;
-    }
-    const prevStep = ONBOARDING_STEPS[prevIndex];
+    const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, needsAuthenticateAndDeployStep, history, location]);
+  }, [currentStepIndex, history, location]);
 
   const horizontalStepsConfig = useMemo(
     () =>
