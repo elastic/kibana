@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema } from './config';
+import { configSchema, getMaxAlertsPerRun } from './config';
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -74,9 +74,9 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.run.alerts.max', () => {
-    it('defaults to 10000', () => {
+    it('is unset by default so it can be resolved by response format', () => {
       const config = configSchema.validate({});
-      expect(config.rules.run.alerts.max).toBe(10000);
+      expect(config.rules.run.alerts.max).toBeUndefined();
     });
 
     it('accepts a smaller configured value', () => {
@@ -91,6 +91,54 @@ describe('alerting_v2 config schema', () => {
 
     it('rejects values above the 10000 ceiling', () => {
       expect(() => configSchema.validate({ rules: { run: { alerts: { max: 10001 } } } })).toThrow();
+    });
+  });
+
+  describe('getMaxAlertsPerRun', () => {
+    it('defaults to 1000 for the json response format', () => {
+      const config = configSchema.validate({ esql: { responseFormat: 'json' } });
+      expect(getMaxAlertsPerRun(config)).toBe(1000);
+    });
+
+    it('defaults to 10000 for the arrow response format', () => {
+      const config = configSchema.validate({ esql: { responseFormat: 'arrow' } });
+      expect(getMaxAlertsPerRun(config)).toBe(10000);
+    });
+
+    it('honors the set value on the json response format', () => {
+      const config = configSchema.validate({
+        esql: { responseFormat: 'json' },
+        rules: { run: { alerts: { max: 500 } } },
+      });
+      expect(getMaxAlertsPerRun(config)).toBe(500);
+    });
+
+    it('honors the set value on the arrow response format', () => {
+      const config = configSchema.validate({
+        esql: { responseFormat: 'arrow' },
+        rules: { run: { alerts: { max: 500 } } },
+      });
+      expect(getMaxAlertsPerRun(config)).toBe(500);
+    });
+  });
+
+  describe('rules.run.query.maxResponseSize', () => {
+    it('defaults to 50 MB', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.query.maxResponseSize).toBe(50 * 1024 * 1024);
+    });
+
+    it('accepts a configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1024 } } } }).rules.run
+          .query.maxResponseSize
+      ).toBe(1024);
+    });
+
+    it('rejects values below 1024 bytes', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1023 } } } })
+      ).toThrow();
     });
   });
 

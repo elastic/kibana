@@ -18,8 +18,8 @@ import { getQueryPayload } from '../get_query_payload';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { PluginConfig } from '../../../config';
+import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
+import { type PluginConfig, getMaxAlertsPerRun } from '../../../config';
 
 type EsqlRowBatch = Record<string, unknown>[];
 
@@ -37,7 +37,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     const config = pluginConfigAccessor.get<PluginConfig>();
-    this.maxAlertsPerRun = config.rules.run.alerts.max;
+    this.maxAlertsPerRun = getMaxAlertsPerRun(config);
     this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
   }
 
@@ -74,15 +74,29 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           maxResponseSize: step.maxQueryResponseSize,
         });
 
+        let totalRows = 0;
+        let loggedRowsDropped = false;
+
         for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+          totalRows += batch.length;
+
+          const counters: Partial<Record<RuleExecutionCounter, number>> = {
+            [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+          };
+
+          if (!loggedRowsDropped && totalRows === step.maxAlertsPerRun) {
+            loggedRowsDropped = true;
+            counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
+            logger.debug({
+              message: `ES|QL query results truncated at the ${step.maxAlertsPerRun}-row limit; some rows may have been dropped`,
+              labels: { rule_id: input.ruleId, step: step.name },
+            });
+          }
+
           yield {
             type: 'continue',
             state: { ...state, queryPayload, esqlRowBatch: batch },
-            meta: {
-              counters: {
-                [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-              },
-            },
+            meta: { counters },
           };
         }
       } catch (error) {
