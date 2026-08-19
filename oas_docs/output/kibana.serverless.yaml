@@ -2023,6 +2023,159 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-agent-builder-conversations
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createConversationRequestExample:
+                description: Example request for creating a private shared conversation with a custom title and two members
+                value:
+                  access_control:
+                    access_mode: private
+                    entries:
+                      - id: u_abc123_uid
+                        role: member
+                        type: user
+                      - id: u_def456_uid
+                        role: member
+                        type: user
+                  title: My new conversation
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                access_control:
+                  additionalProperties: false
+                  description: Optional access control settings. Defaults to private.
+                  type: object
+                  properties:
+                    access_mode:
+                      description: "Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation's agent can read and continue it)."
+                      enum:
+                        - private
+                        - public
+                      type: string
+                    entries:
+                      description: Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored. Must be empty when `access_mode` is `public`; repeated ids are rejected.
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            description: 'Stable identifier of the user to share the conversation with: a Kibana user profile uid. Users without a profile cannot be granted access.'
+                            maxLength: 1024
+                            minLength: 1
+                            type: string
+                          role:
+                            description: 'Role granted to the principal. `member` is the only role: it grants read and converse access to the conversation.'
+                            enum:
+                              - member
+                            type: string
+                          type:
+                            enum:
+                              - user
+                            type: string
+                        required:
+                          - type
+                          - id
+                          - role
+                      maxItems: 100
+                      type: array
+                  required:
+                    - access_mode
+                agent_id:
+                  description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
+                  maxLength: 256
+                  type: string
+                conversation_id:
+                  description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
+                  maxLength: 256
+                  type: string
+                title:
+                  description: Title for the conversation. Defaults to "New conversation".
+                  maxLength: 500
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createConversationResponseExample:
+                  description: Example response returning the newly created conversation
+                  value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - added_at: '2026-08-14T10:00:00.000Z'
+                          id: u_abc123_uid
+                          role: member
+                          type: user
+                        - added_at: '2026-08-14T10:00:00.000Z'
+                          id: u_def456_uid
+                          role: member
+                          type: user
+                    agent_id: elastic-ai-agent
+                    created_at: '2026-08-14T10:00:00.000Z'
+                    id: bcc176c5-38f6-40be-be0c-898e34fa1480
+                    permissions:
+                      delete: true
+                      rename: true
+                    rounds: []
+                    title: My new conversation
+                    updated_at: '2026-08-14T10:00:00.000Z'
+                    user:
+                      username: elastic
+          description: Indicates a successful response
+      summary: Create conversation
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/conversations" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "title": "My new conversation",
+                "access_control": {
+                  "access_mode": "private",
+                  "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+                }
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/conversations
+            {
+              "title": "My new conversation",
+              "access_control": {
+                "access_mode": "private",
+                "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+              }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}:
     delete:
       description: |-
@@ -3092,6 +3245,10 @@ paths:
                 input:
                   description: The user input message to send to the agent.
                   type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
+                  type: string
                 prompts:
                   additionalProperties:
                     anyOf:
@@ -3564,6 +3721,10 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
                   type: string
                 prompts:
                   additionalProperties:
@@ -15370,11 +15531,11 @@ paths:
           required: false
           schema:
             anyOf:
-              - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+              - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
                 enum:
                   - alert
                 type: string
-              - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+              - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
                 enum:
                   - signal
                 type: string
@@ -82815,11 +82976,11 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
               enum:
                 - alert
               type: string
-            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
               enum:
                 - signal
               type: string
@@ -82836,7 +82997,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
@@ -83312,11 +83473,11 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
               enum:
                 - alert
               type: string
-            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
               enum:
                 - signal
               type: string
@@ -83333,7 +83494,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
@@ -83723,7 +83884,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
@@ -89503,7 +89664,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -95679,29 +95839,6 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
-      type: object
-    Kibana_HTTP_APIs_legacyDurationFormat:
-      additionalProperties: false
-      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
-      properties:
-        from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
-          type: string
-        suffix:
-          description: Suffix appended to the formatted value.
-          type: string
-        to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
-          type: string
-        type:
-          enum:
-            - duration
-          type: string
-      required:
-        - type
-        - from
-        - to
-      title: Duration Format (Legacy)
       type: object
     Kibana_HTTP_APIs_legacyMetricChart:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQL'

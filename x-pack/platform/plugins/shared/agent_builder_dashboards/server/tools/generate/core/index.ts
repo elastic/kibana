@@ -15,6 +15,3 @@ export type { VisPanelResolutionRequest } from './operations/panels';
 
 export { createVisPanelResolver } from './resolvers/vis_panel_resolver';
 export type { VisPanelResolverDeps } from './resolvers/vis_panel_resolver';
-
-export { createCustomContentTemplateResolver } from './resolvers/custom_content_resolver';
-export type { CustomContentTemplateResolverDeps } from './resolvers/custom_content_resolver';
