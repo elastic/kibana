@@ -209,7 +209,7 @@ export const EditCustomContentFlyout = ({
               'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
-          <div css={editorContainerCss}>
+          <div css={editorContainerCss} data-test-subj="customContentTemplateEditorContainer">
             <CodeEditor
               languageId="liquid"
               value={draftTemplate}
@@ -262,7 +262,7 @@ export const EditCustomContentFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty onClick={onClose} data-test-subj="customContentFlyoutCancelButton">
               {i18n.translate('xpack.customContent.editFlyout.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
@@ -277,6 +277,7 @@ export const EditCustomContentFlyout = ({
                   isLoading={isRenderLoading}
                   disabled={!hasChanges || hasPreviewedCurrentDraft}
                   onClick={handleRender}
+                  data-test-subj="customContentFlyoutRunPreviewButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
                     defaultMessage: 'Run Preview',
@@ -284,7 +285,12 @@ export const EditCustomContentFlyout = ({
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
+                <EuiButton
+                  fill
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                  data-test-subj="customContentFlyoutApplyButton"
+                >
                   {i18n.translate('xpack.customContent.editFlyout.applyButton', {
                     defaultMessage: 'Apply and close',
                   })}

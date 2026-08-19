@@ -1,0 +1,8 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": []
+}

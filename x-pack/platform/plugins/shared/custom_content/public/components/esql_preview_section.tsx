@@ -83,6 +83,7 @@ export const EsqlPreviewSection = ({
   return (
     <EuiAccordion
       id="custom-content-esql-accordion"
+      data-test-subj="customContentEsqlSection"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
