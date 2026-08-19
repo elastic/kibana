@@ -11,7 +11,6 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import useMount from 'react-use/lib/useMount';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -26,6 +25,7 @@ import { GridSettingsFlyout } from '../../flyout';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
+  useDiscoverFieldForBreakdown,
   useMetricFieldsFilter,
   useMetricsSort,
   useResetPageOnDimensionsChange,
@@ -88,12 +88,12 @@ export const MetricsExperienceGrid = ({
     recentlyExploredMetrics,
   });
 
-  // Seed dimensions once for links created before dimensions had dedicated profile state.
-  useMount(() => {
-    if (selectedDimensions.length === 0 && breakdownField) {
-      onDimensionsChange([{ name: breakdownField }]);
-    }
-  });
+  useDiscoverFieldForBreakdown(
+    breakdownField,
+    allDimensions,
+    selectedDimensions,
+    onDimensionsChange
+  );
 
   useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 

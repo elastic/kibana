@@ -542,9 +542,9 @@ describe('MetricsExperienceGrid', () => {
 
   describe('seed dimensions from breakdownField on mount', () => {
     // Backward compatibility only, for links created before `dimensions` became its own
-    // dedicated profile state. Unvalidated and one-shot: if breakdownField isn't a real
-    // dimension for this stream, `useDimensionsWipe` prunes it once allDimensions loads,
-    // and it never re-syncs after mount even if breakdownField changes later.
+    // dedicated profile state. The initial value is unvalidated; if it isn't a real dimension
+    // for this stream, `useDimensionsWipe` prunes it once allDimensions loads. Later field list
+    // selections are validated and imported into dimensions by the same hook.
     it('seeds a single dimension when nothing is selected yet', () => {
       const onDimensionsChange = jest.fn();
 
@@ -629,42 +629,6 @@ describe('MetricsExperienceGrid', () => {
       });
 
       render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
-
-      expect(onDimensionsChange).not.toHaveBeenCalled();
-    });
-
-    it('does not re-seed when breakdownField changes after mount', () => {
-      const onDimensionsChange = jest.fn();
-
-      useMetricsExperienceStateMock.mockReturnValue({
-        currentPage: 0,
-        selectedDimensions: [],
-        onDimensionsChange,
-        onPageChange: jest.fn(),
-        isFullscreen: false,
-        searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
-        profileId: 'test-profile-id',
-        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
-        recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
-      });
-
-      const { rerender } = render(
-        <MetricsExperienceGrid {...defaultProps} breakdownField="host.name" />,
-        { wrapper: TestWrapper }
-      );
-
-      expect(onDimensionsChange).toHaveBeenCalledTimes(1);
-      onDimensionsChange.mockClear();
-
-      rerender(<MetricsExperienceGrid {...defaultProps} breakdownField="service.name" />);
 
       expect(onDimensionsChange).not.toHaveBeenCalled();
     });
