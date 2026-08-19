@@ -15,7 +15,7 @@ import { resolverEntity } from './utils/build_resolver_entity';
 import { pickEntityHit } from './utils/pick_entity_hit';
 import { createSharedFilters } from '../utils/shared_filters';
 import {
-  firstConcreteIndex,
+  firstProjectQualifiedConcreteIndex,
   stripRemoteIndexPatterns,
   toLocalIndexName,
 } from '../../../utils/cps_read_routing';
@@ -45,7 +45,7 @@ export function handleEntities(): RequestHandler<
 
     const { client, cpsRead } = await getResolverClusterClient(context, request);
     const requestedIndices = asIndexArray(indices);
-    const preferredIndex = firstConcreteIndex(requestedIndices);
+    const preferredIndex = firstProjectQualifiedConcreteIndex(requestedIndices);
     const searchIndices = stripRemoteIndexPatterns(
       preferredIndex ? [toLocalIndexName(preferredIndex), ...requestedIndices] : requestedIndices,
       cpsRead

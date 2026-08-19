@@ -21,6 +21,7 @@ import {
 } from '../../../common/endpoint/constants';
 import {
   firstConcreteIndex,
+  firstProjectQualifiedConcreteIndex,
   isFannedInHit,
   isEndpointIndex,
   isFleetIndex,
@@ -163,6 +164,29 @@ describe('CPS read routing classifiers', () => {
 
     it('should return undefined when every entry is a wildcard pattern', () => {
       expect(firstConcreteIndex(['logs-*', 'metrics-*'])).toBeUndefined();
+    });
+  });
+
+  describe('firstProjectQualifiedConcreteIndex()', () => {
+    it('should return the first project-qualified concrete index', () => {
+      expect(
+        firstProjectQualifiedConcreteIndex([
+          '.alerts-security.alerts-default',
+          'logs-*',
+          'linked-project:logs-endpoint.events-default',
+        ])
+      ).toBe('linked-project:logs-endpoint.events-default');
+    });
+
+    it('should ignore origin-only concrete names used by the flyout and resolver archives', () => {
+      expect(
+        firstProjectQualifiedConcreteIndex([
+          '.internal.alerts-security.alerts-default-000001',
+          '.alerts-security.alerts-default',
+          'winlogbeat-7.11.0-default',
+          'logs-endpoint.events.*',
+        ])
+      ).toBeUndefined();
     });
   });
 });

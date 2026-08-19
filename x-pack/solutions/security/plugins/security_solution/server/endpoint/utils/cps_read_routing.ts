@@ -84,3 +84,11 @@ export const stripRemoteIndexPatterns = (indices: string[], cpsRead: boolean): s
 /** First index that names a concrete document rather than a wildcard pattern. */
 export const firstConcreteIndex = (indices: string[]): string | undefined =>
   indices.find((index) => !toLocalIndexName(index).includes('*'));
+
+/**
+ * Concrete `_index` used to disambiguate the same `_id` across projects. Origin-only names
+ * (alerts aliases, winlogbeat archives, hidden backing indices) keep the pre-CPS first-hit
+ * lookup; treating them as a preferred index changes Analyzer on ordinary flyout alerts.
+ */
+export const firstProjectQualifiedConcreteIndex = (indices: string[]): string | undefined =>
+  firstConcreteIndex(indices.filter(isRemoteOrProjectPrefixed));

@@ -6,11 +6,15 @@
  */
 
 /**
- * Prepends the clicked document's `_index` so the entity lookup can disambiguate the same `_id`
- * across projects. No-ops when the index is missing or already present.
+ * Prepends a project-qualified document `_index` (`alias:index`) so entity lookup can pick the
+ * clicked document when the same `_id` exists in more than one project.
+ *
+ * Origin-only names — including hidden alert backing indices such as `.internal.alerts-*` — are
+ * left unchanged. Searching those from the flyout is unauthorized for the request user and surfaces
+ * as Analyzer's "this alert from being analyzed" error.
  */
 export const withDocumentIndex = (indices: string[], documentIndex?: string | null): string[] => {
-  if (!documentIndex || indices.includes(documentIndex)) {
+  if (!documentIndex || !documentIndex.includes(':') || indices.includes(documentIndex)) {
     return indices;
   }
 
