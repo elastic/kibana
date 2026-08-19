@@ -20,11 +20,9 @@ export { layoutLevels } from './src/levels';
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 
-export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
-
 export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
 
-export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', '.kbnAppWrapper'];
+export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', `#${APP_MAIN_SCROLL_CONTAINER_ID}`];
 
 export const SIDE_PANEL_CONTENT_GAP = 8;
 

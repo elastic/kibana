@@ -26,6 +26,7 @@ import {
   getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
+  generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
 /**
@@ -218,24 +219,6 @@ describe('schema_to_skill_docs', () => {
     it('matches the snapshot', () => {
       expect(generateRuleSchemaDoc()).toMatchSnapshot();
     });
-
-    it('includes key field names from the schema', () => {
-      const doc = generateRuleSchemaDoc();
-      expect(doc).toContain('`kind`');
-      expect(doc).toContain('`metadata`');
-      expect(doc).toContain('`schedule`');
-      expect(doc).toContain('`query`');
-      expect(doc).toContain('`recovery_strategy`');
-      expect(doc).toContain('`no_data_strategy`');
-      expect(doc).toContain('`state_transition`');
-    });
-
-    it('does not contain stale field names', () => {
-      const doc = generateRuleSchemaDoc();
-      expect(doc).not.toContain('consecutive_breaches');
-      expect(doc).not.toContain('evaluation');
-      expect(doc).not.toContain('recovery_policy');
-    });
   });
 
   describe('generateRuleOperationsDoc', () => {
@@ -301,6 +284,84 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  /**
+   * Every schema carrying a `.meta({ id })` — added so the OAS emits named
+   * components — is hoisted into `definitions` / `$defs` by `z.toJSONSchema`
+   * and replaced by a `$ref` (`#/definitions/...` or `#/$defs/...`). These
+   * docs are read by an LLM, so the pointers have to be expanded back into
+   * real types rather than rendered as `unknown`.
+   */
+  describe('schemas extracted into `definitions` / `$defs`', () => {
+    const allDocs = () => [
+      generateRuleSchemaDoc(),
+      generateRuleOperationsDoc(),
+      generateActionPolicySchemaDoc(),
+      generateActionPolicyOperationsDoc(),
+      generateActionPolicyWorkflowPayloadDoc(),
+    ];
+
+    it('never leaves an unresolved pointer or type in any doc', () => {
+      for (const doc of allDocs()) {
+        expect(doc).not.toContain('$ref');
+        expect(doc).not.toContain('| unknown');
+        expect(doc).not.toContain('unknown[]');
+      }
+    });
+
+    it('renders referenced object schemas with their type and description', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('| `metadata` | object | required | Rule metadata. |');
+      expect(doc).toContain(
+        '| `schedule` | object | required | Execution schedule configuration. |'
+      );
+    });
+
+    it('renders a referenced discriminated union as its variants', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+      expect(generateRuleOperationsDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+    });
+
+    it('expands the variant tables of a referenced union', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('## Query Formats');
+      expect(doc).toContain('#### `format: "composed"`');
+      expect(doc).toContain('#### `format: "standalone"`');
+      expect(doc).toContain(
+        '| `base` | string | required | Base ES\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |'
+      );
+    });
+
+    it('renders arrays whose items are referenced schemas', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
+      );
+    });
+
+    it('merges a reference with the sibling keys draft-7 moves into `allOf`', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `grouping` | object | optional | Grouping configuration. |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+      );
+    });
+
+    it('keeps the referencing field description when the definition also has one', () => {
+      const doc = generateActionPolicySchemaDoc();
+      expect(doc).toContain(
+        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+      );
+      expect(doc).not.toContain('per_episode groups by episode lifecycle');
+    });
+  });
+
   describe('generateActionPolicyOperationsDoc', () => {
     /**
      * Snapshot of the generated skill markdown for `manage_action_policy`
@@ -334,6 +395,39 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRuleKindDoc()).toMatchSnapshot();
     });
+
+    it('uses product labels from RULE_KIND_LABELS', () => {
+      const doc = generateRuleKindDoc();
+      expect(doc).toContain('### Alerts (`kind: alert`)');
+      expect(doc).toContain('### Events (`kind: signal`)');
+      expect(doc).not.toContain('### Signal (`kind: signal`)');
+    });
+  });
+
+  describe('generateNotificationsOverviewDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateNotificationsOverviewDoc()).toMatchSnapshot();
+    });
+
+    it('uses product labels and distinguishes draft vs persisted kind changes', () => {
+      const doc = generateNotificationsOverviewDoc();
+      expect(doc).toContain('Alerts (`kind: alert`)');
+      expect(doc).toContain('Events (`kind: signal`)');
+      expect(doc).toContain('**Explain the difference**');
+      expect(doc).toContain(
+        'If the rule is a **draft (in-memory)**: use `set_kind` to change it to `alert`'
+      );
+      expect(doc).toContain('If the rule is **persisted**: `kind` is immutable after creation');
+      expect(doc).toContain('existing Events (`kind: signal`) rule cannot be converted');
+      expect(doc).toContain('After ensuring the rule is `kind: alert`');
+    });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateNotificationsOverviewDoc();
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).not.toContain('./references/');
+    });
   });
 
   describe('generateEpisodeLifecycleDoc', () => {
@@ -342,21 +436,28 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
-  describe('generateStateTransitionDoc', () => {
-    it('matches the reviewed skill-doc snapshot', () => {
-      expect(generateStateTransitionDoc()).toMatchSnapshot();
-    });
-  });
-
   describe('generateRecoveryStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
+    });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateRecoveryStrategyDoc();
+      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).not.toContain('./references/');
     });
   });
 
   describe('generateNoDataStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateNoDataStrategyDoc()).toMatchSnapshot();
+    });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateNoDataStrategyDoc();
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).not.toContain('./references/');
     });
   });
 
@@ -436,6 +537,7 @@ describe('schema_to_skill_docs', () => {
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
       ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
       ['generateRuleKindDoc from spec', generateRuleKindDoc],
+      ['generateNotificationsOverviewDoc from spec', generateNotificationsOverviewDoc],
       ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
       [
         'generateActionPolicyWorkflowPayloadDoc workflow input definition',

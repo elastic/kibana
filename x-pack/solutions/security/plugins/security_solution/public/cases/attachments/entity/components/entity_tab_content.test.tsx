@@ -60,7 +60,7 @@ const fullEntityReadPrivileges = {
   privileges: {
     elasticsearch: {
       index: {
-        '.entities.v2.latest.security_default': { read: true },
+        '.entities.v2.latest.default': { read: true },
       },
     },
   },
@@ -218,7 +218,7 @@ describe('EntityTabContent', () => {
         privileges: {
           elasticsearch: {
             index: {
-              '.entities.v2.latest.security_default': { read: false },
+              '.entities.v2.latest.default': { read: false },
             },
           },
         },
