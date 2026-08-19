@@ -93,6 +93,9 @@ steps:
                 field: threat.enrichments.indicator.reference
                 size: 100
                 include: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+              aggs:
+                alert_count:
+                  reverse_nested: {}
     on-failure:
       continue: true
 
@@ -135,7 +138,7 @@ steps:
       - name: capture_hit_counts
         type: data.set
         with:
-          layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'doc_count' | first | default: 0 }}"
+          layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
           layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
 
       - name: queue_bulk_update_meta
