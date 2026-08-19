@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
 import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
+import { useTemplateDeletedEBT } from '../../../analytics/templates';
 
 export interface TemplatesBulkActionsProps {
   selectedTemplates: Template[];
@@ -32,6 +33,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
     onSuccess: onActionSuccess,
   });
   const { mutate: bulkExportTemplates, isLoading: isBulkExporting } = useBulkExportTemplates();
+  const reportTemplateDeleted = useTemplateDeletedEBT();
 
   const selectedTemplateIds = useMemo(
     () => selectedTemplates.map((template) => template.templateId),
@@ -49,9 +51,17 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
   }, [closePopover]);
 
   const handleConfirmBulkDelete = useCallback(() => {
-    bulkDeleteTemplates({ templateIds: selectedTemplateIds });
+    // One event for the confirmed action, whatever the number of selected templates.
+    bulkDeleteTemplates(
+      { templateIds: selectedTemplateIds },
+      {
+        onSuccess: () => {
+          reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'bulk' });
+        },
+      }
+    );
     setIsDeleteModalVisible(false);
-  }, [bulkDeleteTemplates, selectedTemplateIds]);
+  }, [bulkDeleteTemplates, selectedTemplateIds, reportTemplateDeleted]);
 
   const handleCancelBulkDelete = useCallback(() => {
     setIsDeleteModalVisible(false);

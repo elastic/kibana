@@ -14,6 +14,11 @@ import { useCreateTemplate } from './use_create_template';
 import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import {
+  useTemplateCreatedEBT,
+  useTemplateDeletedEBT,
+  useTemplateUpdatedEBT,
+} from '../../../analytics/templates';
 import * as i18n from '../translations';
 
 interface UseTemplatesActionsProps {
@@ -36,6 +41,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   const { mutate: updateTemplate, isLoading: isUpdating } = useUpdateTemplate({
     disableDefaultSuccessToast: true,
   });
+
+  const reportTemplateCreated = useTemplateCreatedEBT();
+  const reportTemplateUpdated = useTemplateUpdatedEBT();
+  const reportTemplateDeleted = useTemplateDeletedEBT();
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -67,12 +76,15 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
         },
         {
           onSuccess: () => {
+            // A clone is a create with a copied payload, so it reports the create event with a
+            // distinct creation mode rather than an event of its own.
+            reportTemplateCreated({ entryPoint: 'templates_list', creationMode: 'clone' });
             showSuccessToast(i18n.SUCCESS_CLONING_TEMPLATE(template.name));
           },
         }
       );
     },
-    [cloneTemplate, showSuccessToast]
+    [cloneTemplate, showSuccessToast, reportTemplateCreated]
   );
 
   const handleExport = useCallback(
@@ -88,10 +100,19 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const confirmDelete = useCallback(() => {
     if (templateToDelete) {
-      bulkDeleteTemplates({ templateIds: [templateToDelete.templateId] });
+      // A row delete reuses the bulk mutation with a single id, so the scope is only knowable here.
+      // This per-call callback is additional to the hook-level one, which refreshes the list.
+      bulkDeleteTemplates(
+        { templateIds: [templateToDelete.templateId] },
+        {
+          onSuccess: () => {
+            reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'single' });
+          },
+        }
+      );
       setTemplateToDelete(null);
     }
-  }, [templateToDelete, bulkDeleteTemplates]);
+  }, [templateToDelete, bulkDeleteTemplates, reportTemplateDeleted]);
 
   const cancelDelete = useCallback(() => {
     setTemplateToDelete(null);
@@ -106,12 +127,13 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
         },
         {
           onSuccess: () => {
+            reportTemplateUpdated({ entryPoint: 'templates_list' });
             showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
           },
         }
       );
     },
-    [updateTemplate, showSuccessToast]
+    [updateTemplate, showSuccessToast, reportTemplateUpdated]
   );
 
   return {

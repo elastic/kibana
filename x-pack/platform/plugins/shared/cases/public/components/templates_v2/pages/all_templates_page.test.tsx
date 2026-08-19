@@ -11,6 +11,8 @@ import userEvent from '@testing-library/user-event';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AllTemplatesPage } from './all_templates_page';
 import { renderWithTestingProviders, createTestQueryClient } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -406,5 +408,21 @@ describe('AllTemplatesPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('templates-table-selected-count')).not.toBeInTheDocument();
     });
+  });
+
+  it('reports no template management event on page load alone', async () => {
+    const queryClient = createTestQueryClient();
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient, coreStart },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    // Loading and listing templates is not a management action.
+    expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
   });
 });
