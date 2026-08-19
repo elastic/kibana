@@ -11,6 +11,11 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import {
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
+} from '@kbn/elastic-assistant-common';
+import type { Logger } from '@kbn/core/server';
 
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -21,12 +26,20 @@ import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_aler
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { prefetchPreviousStatusesByIds } from '../common/operations/prefetch_previous_statuses';
+import {
+  prefetchPreviousStatusesByIds,
+  type PreviousStatus,
+} from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+
+const isAttackDiscoveryIndex = (index: string): boolean =>
+  index.startsWith(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX) ||
+  index.startsWith(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX);
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
+  logger: Logger,
   eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
@@ -65,13 +78,37 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-        const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+        const alertIds: string[] = [];
+        const attackIds: string[] = [];
+        const alertPreviousStatuses: PreviousStatus[] = [];
+        const attackPreviousStatuses: PreviousStatus[] = [];
+        let prefetchSucceeded = false;
+
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            previousStatuses.push(...(await prefetchPreviousStatusesByIds(esClient, index, ids)));
+            const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
+              esClient,
+              index,
+              ids
+            );
+            const psMap = new Map(previousStatuses.map((s) => [s.id, s]));
+            for (const id of ids) {
+              const docIndex = idToIndex.get(id);
+              if (docIndex != null) {
+                const ps = psMap.get(id);
+                if (isAttackDiscoveryIndex(docIndex)) {
+                  attackIds.push(id);
+                  if (ps) attackPreviousStatuses.push(ps);
+                } else {
+                  alertIds.push(id);
+                  if (ps) alertPreviousStatuses.push(ps);
+                }
+              }
+            }
+            prefetchSucceeded = true;
           } catch {
-            // Non-blocking — emit with empty previousStatuses
+            logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
           }
         }
 
@@ -83,12 +120,23 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             status,
             reason: closingReason.reason,
           });
-          void eventBus?.emitAlertStatusChanged(request, {
-            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            status,
-            previousStatuses: previousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-            truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
-          });
+          if (prefetchSucceeded) {
+            if (attackIds.length > 0) {
+              void eventBus?.emitAttackStatusChanged(request, {
+                attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                status,
+                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+              });
+            }
+            if (alertIds.length > 0) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                status,
+                previousStatuses: alertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
+          }
           return result;
         });
       }

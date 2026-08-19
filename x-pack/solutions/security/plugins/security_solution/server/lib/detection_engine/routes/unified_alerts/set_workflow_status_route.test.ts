@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
@@ -22,6 +23,7 @@ describe('set unified alerts workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,8 +34,9 @@ describe('set unified alerts workflow status', () => {
       getSuccessfulSignalUpdateResponse()
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
+    mockLogger = loggingSystemMock.createLogger();
 
-    setUnifiedAlertsWorkflowStatusRoute(server.router, ruleDataClient);
+    setUnifiedAlertsWorkflowStatusRoute(server.router, ruleDataClient, mockLogger);
   });
 
   afterEach(() => {
@@ -239,16 +242,23 @@ describe('set unified alerts workflow status', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertStatusChanged: jest.Mock };
+    let mockEventBus: { emitAlertStatusChanged: jest.Mock; emitAttackStatusChanged: jest.Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertStatusChanged: jest.fn() };
+      mockEventBus = {
+        emitAlertStatusChanged: jest.fn(),
+        emitAttackStatusChanged: jest.fn(),
+      };
       setUnifiedAlertsWorkflowStatusRoute(
         server.router,
         ruleDataClient,
+        mockLogger,
         mockEventBus as unknown as SecuritySolutionEventBus
       );
+    });
+
+    test('emits alertStatusChanged for detection alert documents', async () => {
       context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
         docs: [
           {
@@ -265,9 +275,6 @@ describe('set unified alerts workflow status', () => {
           },
         ],
       });
-    });
-
-    test('emits alertStatusChanged with the updated ids and status', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -282,6 +289,91 @@ describe('set unified alerts workflow status', () => {
           status: 'closed',
           truncated: false,
         })
+      );
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackStatusChanged for attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'somefakeid1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+          {
+            found: true,
+            _id: 'somefakeid2',
+            _index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+          },
+        ],
+      });
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['somefakeid1', 'somefakeid2'],
+          status: 'closed',
+        })
+      );
+      expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits both triggers when IDs span detection alerts and attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'somefakeid1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+          {
+            found: true,
+            _id: 'somefakeid2',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+          },
+        ],
+      });
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['somefakeid1'], status: 'closed' })
+      );
+      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['somefakeid2'], status: 'closed' })
+      );
+    });
+
+    test('emits nothing and logs warn when prefetch fails', async () => {
+      context.core.elasticsearch.client.asCurrentUser.mget.mockRejectedValue(new Error('ES error'));
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to pre-fetch previous alert statuses for workflow trigger'
       );
     });
   });
