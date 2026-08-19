@@ -156,7 +156,7 @@ export const searchCasesTool = (
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
-    description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.manage_attachments\` (comments, alerts, events), \`platform.core.cases.get_attachments\` (retrieve all), or \`platform.core.cases.observables\` (IOCs).
+    description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.manage_attachments\` (comments, alerts, events), or \`platform.core.cases.observables\` (IOCs). To retrieve all attachments use \`platform.core.cases.get_attachments\`.
 
 ${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
