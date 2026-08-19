@@ -264,7 +264,7 @@ describe('createActionPolicySmlType', () => {
       const permissions = buildDefinition().getPermissions!('policy-1', buildSmlContext());
       expect(permissions).toEqual({
         kibana: {
-          privileges: { name: `ai_index:${ACTION_POLICY_SML_TYPE}/read` },
+          privileges: { name: [`ai_index:${ACTION_POLICY_SML_TYPE}/read`] },
         },
       });
     });

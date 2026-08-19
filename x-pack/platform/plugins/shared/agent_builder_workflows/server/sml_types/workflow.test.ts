@@ -441,7 +441,7 @@ describe('workflowSmlType', () => {
         logger: createMockLogger(),
       });
       expect(permissions).toEqual({
-        kibana: { privileges: { name: `ai_index:${WORKFLOW_SML_TYPE}/read` } },
+        kibana: { privileges: { name: [`ai_index:${WORKFLOW_SML_TYPE}/read`] } },
       });
     });
   });

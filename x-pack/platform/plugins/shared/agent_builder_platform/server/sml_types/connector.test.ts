@@ -390,7 +390,7 @@ describe('connectorSmlType', () => {
       // `ai_index:action/read` here would make every connector entry invisible to everyone.
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: { name: 'ai_index:connector/read' } },
+        kibana: { privileges: { name: ['ai_index:connector/read'] } },
       });
     });
   });

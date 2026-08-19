@@ -30,9 +30,16 @@ interface DiscoveryLabel {
   kind: string;
 }
 
-/** Returned by SmlTypeDefinition.getPermissions hooks: RAW Kibana action strings. */
+/**
+ * Returned by SmlTypeDefinition.getPermissions hooks: RAW Kibana action strings.
+ *
+ * A list, not a single action: a type may require several, in which case the caller must hold
+ * ALL of them within one space. Deliberately NOT shaped like {@link SmlPermissions} — that one is
+ * an array of per-space groups, and keeping the two structurally distinct is what stops "list of
+ * actions" being mistaken for "list of spaces". The indexer converts between them.
+ */
 export interface SmlPermissionsInput {
-  kibana: { privileges: { name: string | string[] } };
+  kibana: { privileges: { name: string[] } };
 }
 
 /**

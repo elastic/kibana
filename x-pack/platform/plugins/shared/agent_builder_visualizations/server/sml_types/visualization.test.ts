@@ -272,7 +272,7 @@ describe('visualizationSmlType', () => {
       // `ai_index:lens/read` here would make every visualization entry invisible to everyone.
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: { name: 'ai_index:visualization/read' } },
+        kibana: { privileges: { name: ['ai_index:visualization/read'] } },
       });
     });
   });

@@ -323,7 +323,7 @@ describe('dashboardSmlType', () => {
     } as never);
 
     expect(permissions).toEqual({
-      kibana: { privileges: { name: 'ai_index:dashboard/read' } },
+      kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
     });
   });
 

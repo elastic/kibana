@@ -134,7 +134,7 @@ describe('createSmlIndexer', () => {
       };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
-        kibana: { privileges: { name: 'perm1' } },
+        kibana: { privileges: { name: ['perm1'] } },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -230,7 +230,7 @@ describe('createSmlIndexer', () => {
       };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
-        kibana: { privileges: { name: 'saved_object:dashboard/get' } },
+        kibana: { privileges: { name: ['saved_object:dashboard/get'] } },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
@@ -710,11 +710,11 @@ describe('createSmlIndexer', () => {
         const getPermissions = jest.fn().mockImplementation(
           async () =>
             new Promise<{
-              kibana: { privileges: { name: string } };
+              kibana: { privileges: { name: string[] } };
             }>((resolve) =>
               setImmediate(() =>
                 resolve({
-                  kibana: { privileges: { name: 'saved_object:lens/get' } },
+                  kibana: { privileges: { name: ['saved_object:lens/get'] } },
                 })
               )
             )
@@ -754,7 +754,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockReturnValue({
-          kibana: { privileges: { name: 'p1' } },
+          kibana: { privileges: { name: ['p1'] } },
         } as unknown);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -831,7 +831,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'lens', title: 'A', content: 'a' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockResolvedValue({
-          kibana: { privileges: { name: 'p1' } },
+          kibana: { privileges: { name: ['p1'] } },
         });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -867,7 +867,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'dashboard', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockReturnValue({
-          kibana: { privileges: { name: 'saved_object:dashboard/get' } },
+          kibana: { privileges: { name: ['saved_object:dashboard/get'] } },
         });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })

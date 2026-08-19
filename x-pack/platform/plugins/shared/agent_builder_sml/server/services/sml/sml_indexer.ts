@@ -262,10 +262,8 @@ class SmlIndexerImpl implements SmlIndexer {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
-      const names = result.kibana?.privileges?.name ?? [];
-      const nameArray = Array.isArray(names) ? names : [names];
       return {
-        kibana: { privileges: { name: nameArray } },
+        kibana: { privileges: { name: result.kibana?.privileges?.name ?? [] } },
       };
     }
 
@@ -289,8 +287,7 @@ class SmlIndexerImpl implements SmlIndexer {
     resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
   }) {
-    const rawNames = resolvedPermissions.kibana?.privileges?.name ?? [];
-    const actions = [...new Set(Array.isArray(rawNames) ? rawNames : [rawNames])].sort();
+    const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
 
     const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
     if (normalizedSpaces.length === 0) {
