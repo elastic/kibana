@@ -186,6 +186,24 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
+        expect(body.message).to.contain('[request body.otlp_exporter.tls.key_pem]');
+      });
+
+      it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-inline-key-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+              tls: { key_pem: 'my-private-key' },
+            },
+          })
+          .expect(400);
+
         expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
       });
     });
