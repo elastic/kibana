@@ -65,6 +65,7 @@ export interface ProjectPickerFlyoutProps
   onClose: () => void;
   applyButtonLabel?: ReactNode;
   backButtonLabel?: string;
+  canApplyUnchangedProjectRouting?: boolean;
   discardButtonLabel?: ReactNode;
   titleId?: string;
   title?: ReactNode;
@@ -74,6 +75,7 @@ export function ProjectPickerFlyoutContent({
   applyButtonLabel = defaultApplyButtonLabel,
   availableProjects,
   backButtonLabel = defaultBackButtonLabel,
+  canApplyUnchangedProjectRouting = false,
   defaultProjectRoutingGetter,
   discardButtonLabel = defaultDiscardButtonLabel,
   controlsState,
@@ -82,6 +84,7 @@ export function ProjectPickerFlyoutContent({
   fetchProjectsByRouting,
   originProjectId,
   projectRouting,
+  projectRoutingStrategy,
   titleId: titleIdProp,
   title = defaultTitle,
 }: ProjectPickerFlyoutProps) {
@@ -113,13 +116,15 @@ export function ProjectPickerFlyoutContent({
     );
   }, [availableProjects, originProjectId, projectRouting, stagedProjectRouting]);
 
+  const canApplyChanges = hasUnsavedChanges || canApplyUnchangedProjectRouting;
+
   const handleApplyChanges = useCallback(() => {
-    if (stagedProjectRouting === undefined || !hasUnsavedChanges) {
+    if (!canApplyChanges || currentProjectRouting === undefined) {
       return;
     }
 
-    onApplyChanges(stagedProjectRouting);
-  }, [hasUnsavedChanges, onApplyChanges, stagedProjectRouting]);
+    onApplyChanges(currentProjectRouting);
+  }, [canApplyChanges, currentProjectRouting, onApplyChanges]);
 
   const handleDiscardChanges = useCallback(() => {
     setStagedProjectRouting(undefined);
@@ -136,6 +141,7 @@ export function ProjectPickerFlyoutContent({
       originProjectId={originProjectId}
       onProjectRoutingChange={setStagedProjectRouting}
       fetchProjectsByRouting={fetchProjectsByRouting}
+      projectRoutingStrategy={projectRoutingStrategy}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -183,7 +189,7 @@ export function ProjectPickerFlyoutContent({
             <EuiButton
               data-test-subj="projectPickerFlyoutApplyButton"
               fill
-              isDisabled={!hasUnsavedChanges}
+              isDisabled={!canApplyChanges}
               onClick={handleApplyChanges}
             >
               {applyButtonLabel}
