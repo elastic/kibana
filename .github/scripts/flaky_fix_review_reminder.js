@@ -33,7 +33,7 @@ const REMINDER_AFTER_DAYS = 4;
 // first sweep over the backlog.
 const MAX_PINGS_PER_RUN = 50;
 // Used when no codeowner can be resolved for the changed files.
-const FALLBACK_OWNER = '@elastic/kibana-qa';
+const FALLBACK_OWNER = '@elastic/appex-qa';
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
 const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
 

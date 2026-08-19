@@ -92,7 +92,7 @@ test('buildCommentBody mentions the owners and includes the marker', () => {
 });
 
 test('buildCommentBody falls back to the QA team when no owners resolve', () => {
-  assert.match(reminder.buildCommentBody([]), /@elastic\/kibana-qa/);
+  assert.match(reminder.buildCommentBody([]), /@elastic\/appex-qa/);
 });
 
 // --- Full sweep integration against a mocked Octokit -----------------------
