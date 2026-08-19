@@ -153,8 +153,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   ): void {
     this.state.setStepIo(stepExecutionId, { [type]: value });
     if (type === 'output') {
-      const bytes = sizeBytes ?? safeOutputSize(value) ?? 0;
-      this.cache.set(stepExecutionId, 'output', value, bytes);
+      this.cache.set(stepExecutionId, 'output', value, sizeBytes);
     }
   }
 

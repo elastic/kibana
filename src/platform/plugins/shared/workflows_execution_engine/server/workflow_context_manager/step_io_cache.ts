@@ -9,6 +9,7 @@
 
 import { LRUCache } from 'lru-cache';
 import type { JsonValue } from '@kbn/utility-types';
+import { safeOutputSize } from '../step/errors';
 
 export type StepIoType = 'input' | 'output';
 
@@ -32,15 +33,24 @@ export class StepIoCache {
   private readonly lru: LRUCache<string, CacheEntry>;
 
   constructor(maxBytes: number) {
-    this.lru = new LRUCache({ maxSize: maxBytes });
+    this.lru = new LRUCache({
+      maxSize: maxBytes,
+      // Fallback size used when the caller does not supply an explicit byte count.
+      sizeCalculation: (entry: CacheEntry) => safeOutputSize(entry.value) ?? 0,
+    });
   }
 
   public get(id: string, type: StepIoType): JsonValue | null | undefined {
     return this.lru.get(`${type}_${id}`)?.value;
   }
 
-  public set(id: string, type: StepIoType, value: JsonValue | null, bytes: number): void {
-    this.lru.set(`${type}_${id}`, { value }, { size: bytes });
+  /**
+   * Stores a step IO value. When `bytes` is supplied it is used directly
+   * (caller already knows the size, avoids a redundant JSON.stringify).
+   * When omitted, `sizeCalculation` measures the entry automatically.
+   */
+  public set(id: string, type: StepIoType, value: JsonValue | null, bytes?: number): void {
+    this.lru.set(`${type}_${id}`, { value }, bytes !== undefined ? { size: bytes } : undefined);
   }
 
   public has(id: string, type: StepIoType): boolean {
