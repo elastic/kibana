@@ -47,7 +47,7 @@ describe('use is add to existing case modal open hook', () => {
 
     expect(result.current.isOpen).toEqual(false);
     act(() => {
-      result.current.modal.open();
+      result.current.modal.open({ getAttachments: () => [] });
     });
     rerender();
     expect(result.current.isOpen).toEqual(true);

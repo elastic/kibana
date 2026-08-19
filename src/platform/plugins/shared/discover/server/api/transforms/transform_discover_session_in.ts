@@ -129,6 +129,10 @@ export const transformDiscoverSessionIn = (
         visContext: transformVisContextIn(tab.vis_context, getVisContextRequestData(tab)),
         controlGroupJson: transformControlPanelsIn(tab.control_panels),
         usesAdHocDataView: tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
+        ...(isEsqlTab(tab) &&
+          tab.esql_approximation !== undefined && {
+            esqlApproximation: tab.esql_approximation,
+          }),
       },
     };
   });
