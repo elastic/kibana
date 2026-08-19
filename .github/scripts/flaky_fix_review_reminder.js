@@ -18,10 +18,12 @@ const ignore = require('ignore');
 
 const LABEL = 'flaky-test-fixer';
 const REMINDER_MARKER = '<!-- flaky-fix-review-reminder -->';
-// The identity that authors our reminder comments. A real user account is
-// required: team @-mentions in comments posted by GitHub Apps (github-actions)
-// do not trigger notifications.
-const REMINDER_AUTHOR = 'kibanamachine';
+// Identities whose marker comments count as prior reminders. Comments are
+// posted as kibanamachine — a real user account is required because team
+// @-mentions in comments posted by GitHub Apps (github-actions) do not
+// trigger notifications. github-actions[bot] is kept for reminders posted
+// before the switch.
+const REMINDER_AUTHORS = ['kibanamachine', 'github-actions[bot]'];
 // Calendar days (weekends included) before the first ping; also the re-ping cadence.
 const REMINDER_AFTER_DAYS = 4;
 // Max reminder comments posted per run. Bounds the noise (and API writes) of a
@@ -154,7 +156,7 @@ async function getLastReminderTime({ github, owner, repo, prNumber }) {
   for (const comment of comments) {
     if (
       comment.user &&
-      comment.user.login === REMINDER_AUTHOR &&
+      REMINDER_AUTHORS.includes(comment.user.login) &&
       comment.body &&
       comment.body.includes(REMINDER_MARKER)
     ) {
