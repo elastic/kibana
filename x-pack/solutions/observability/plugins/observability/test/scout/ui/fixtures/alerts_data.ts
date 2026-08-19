@@ -111,7 +111,13 @@ export async function generateObservabilityAlerts(esClient: Client): Promise<voi
     return [{ index: { _index: OBSERVABILITY_ALERTS_INDEX, _id: doc['kibana.alert.uuid'] } }, doc];
   });
 
-  await esClient.bulk({ operations, refresh: 'wait_for' });
+  const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
+  if (bulkResponse.errors) {
+    const failures = bulkResponse.items
+      .filter((item) => item.index?.error)
+      .map((item) => `${item.index!._id}: ${item.index!.error!.reason}`);
+    throw new Error(`Failed to ingest observability alert documents: ${failures.join('; ')}`);
+  }
 }
 
 export { ALERT_TABLE_DATE_RANGE };
