@@ -6,10 +6,10 @@
  */
 
 import type {
+  Conversation,
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
-  Conversation,
   ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
 
