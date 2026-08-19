@@ -15,16 +15,18 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerListEvaluatorsRoute } from './list_evaluators';
 
 describe('GET /internal/evals/evaluators', () => {
-  const buildEvaluatorRegistry = (): EvaluatorRegistry => ({
-    list: () => [
+  const buildEvaluatorRegistry = (): EvaluatorRegistry =>
+    createEvaluatorRegistryMock([
       {
         name: 'groundedness',
         version: '1.0.0',
         kind: 'llm',
+        origin: 'built_in',
         description: 'Groundedness evaluator',
         evidenceSchema: z.object({
           input: z.object({ message: z.string().min(1) }),
@@ -37,6 +39,7 @@ describe('GET /internal/evals/evaluators', () => {
         name: 'latency',
         version: '1.0.0',
         kind: 'code',
+        origin: 'built_in',
         description: 'Latency evaluator',
         evaluate: jest.fn(),
       },
@@ -44,6 +47,7 @@ describe('GET /internal/evals/evaluators', () => {
         name: 'input_tokens',
         version: '1.0.0',
         kind: 'code',
+        origin: 'built_in',
         description: 'Input tokens evaluator',
         evaluate: jest.fn(),
       },
@@ -51,6 +55,7 @@ describe('GET /internal/evals/evaluators', () => {
         name: 'output_tokens',
         version: '1.0.0',
         kind: 'code',
+        origin: 'built_in',
         description: 'Output tokens evaluator',
         evaluate: jest.fn(),
       },
@@ -58,6 +63,7 @@ describe('GET /internal/evals/evaluators', () => {
         name: 'tool_calls',
         version: '1.0.0',
         kind: 'code',
+        origin: 'built_in',
         description: 'Tool calls evaluator',
         evaluate: jest.fn(),
       },
@@ -65,6 +71,7 @@ describe('GET /internal/evals/evaluators', () => {
         name: 'correctness',
         version: '1.0.0',
         kind: 'llm',
+        origin: 'built_in',
         description: 'Correctness evaluator',
         referenceDataSchema: z.object({
           expected: z
@@ -75,9 +82,15 @@ describe('GET /internal/evals/evaluators', () => {
         }),
         evaluate: jest.fn(),
       },
-    ],
-    get: jest.fn((_name: string, _version?: string) => undefined),
-  });
+      {
+        name: 'tone',
+        version: '1.2.0',
+        kind: 'llm',
+        origin: 'user_defined',
+        description: 'Tone evaluator',
+        evaluate: jest.fn(),
+      },
+    ]);
 
   const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry } = {}) => {
     const router = httpServiceMock.createRouter();
@@ -118,11 +131,12 @@ describe('GET /internal/evals/evaluators', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload.evaluators).toHaveLength(6);
+    expect(response.payload.evaluators).toHaveLength(7);
     expect(response.payload.evaluators[0]).toEqual({
       name: 'groundedness',
       version: '1.0.0',
       kind: 'llm',
+      origin: 'built_in',
       description: 'Groundedness evaluator',
       evidence_schema: expect.objectContaining({
         properties: expect.objectContaining({
@@ -140,6 +154,7 @@ describe('GET /internal/evals/evaluators', () => {
       name: 'correctness',
       version: '1.0.0',
       kind: 'llm',
+      origin: 'built_in',
       description: 'Correctness evaluator',
       reference_data_schema: expect.objectContaining({
         properties: expect.objectContaining({
@@ -150,6 +165,24 @@ describe('GET /internal/evals/evaluators', () => {
         }),
         required: ['expected'],
       }),
+    });
+  });
+
+  it('marks persisted evaluators as user-defined', async () => {
+    const { handler } = setup();
+
+    const response = await handler(
+      {} as Parameters<typeof handler>[0],
+      {} as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.payload.evaluators.find((e: { name: string }) => e.name === 'tone')).toEqual({
+      name: 'tone',
+      version: '1.2.0',
+      kind: 'llm',
+      origin: 'user_defined',
+      description: 'Tone evaluator',
     });
   });
 });

@@ -20,6 +20,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
@@ -57,18 +58,13 @@ describe('POST /internal/evals/_evaluate', () => {
     name,
     version,
     kind,
+    origin: 'built_in',
     description: `${name} evaluator`,
     evaluate,
   });
 
-  const buildEvaluatorRegistry = (definitions: EvaluatorDefinition[] = []): EvaluatorRegistry => ({
-    list: () => definitions,
-    get: (name: string, version?: string) =>
-      definitions.find(
-        (definition) =>
-          definition.name === name && (version === undefined || definition.version === version)
-      ),
-  });
+  const buildEvaluatorRegistry = (definitions: EvaluatorDefinition[] = []): EvaluatorRegistry =>
+    createEvaluatorRegistryMock(definitions);
 
   const buildContext = (
     searchMock: jest.Mock = jest.fn().mockResolvedValue({

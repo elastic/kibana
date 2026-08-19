@@ -20,6 +20,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { registerValidateRoute } from './validate';
 import { buildSearchMock, hasTermFilter, withHits } from './test_helpers';
@@ -120,6 +121,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     name: 'groundedness',
     version: '1.0.0',
     kind: 'llm',
+    origin: 'built_in',
     description: 'Groundedness evaluator',
     evidenceSchema: z.object({
       input: z.object({
@@ -137,18 +139,15 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     name: 'latency',
     version: '1.0.0',
     kind: 'code',
+    origin: 'built_in',
     description: 'Latency evaluator',
     evaluate: jest.fn(),
   };
 
-  const evaluatorRegistry: EvaluatorRegistry = {
-    list: () => [groundednessEvaluator, codeEvaluator],
-    get: (name: string, version?: string) =>
-      [groundednessEvaluator, codeEvaluator].find(
-        (definition) =>
-          definition.name === name && (version === undefined || definition.version === version)
-      ),
-  };
+  const evaluatorRegistry: EvaluatorRegistry = createEvaluatorRegistryMock([
+    groundednessEvaluator,
+    codeEvaluator,
+  ]);
 
   const setup = () => {
     const router = httpServiceMock.createRouter();
