@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
+import type { TokenResponseOptions } from './request_oauth_token';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 import { getStoredTokenWithRefresh } from './get_stored_oauth_token_with_refresh';
 
@@ -41,6 +42,7 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
    * even if it hasn't "expired" according to the stored timestamp.
    */
   forceRefresh?: boolean;
+  tokenResponseOptions?: TokenResponseOptions;
 }
 
 /**
@@ -57,6 +59,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   authMode,
   profileUid,
   forceRefresh = false,
+  tokenResponseOptions,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
   const { clientSecret } = credentials.secrets;
@@ -92,7 +95,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
         logger,
         { refreshToken, clientId, clientSecret, scope, ...additionalFields },
         configurationUtilities,
-        shouldUseBasicAuth
+        shouldUseBasicAuth,
+        tokenResponseOptions
       ),
   });
 };

@@ -49,11 +49,16 @@ export async function bulkRequestDiagnostics(
   options: GetAgentsOptions & {
     batchSize?: number;
     additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {
       additionalMetrics: options.additionalMetrics,
@@ -70,6 +75,9 @@ export async function bulkRequestDiagnostics(
     page: 1,
     perPage: batchSize,
   });
+  if (options.dryRun) {
+    return { count: res.total };
+  }
   if (res.total <= batchSize) {
     return await requestDiagnosticsBatch(esClient, res.agents, {
       additionalMetrics: options.additionalMetrics,

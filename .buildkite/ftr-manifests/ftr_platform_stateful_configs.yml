@@ -212,6 +212,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
   - x-pack/platform/test/fleet_api_integration/config.fleet.ts
   - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/platform/test/fleet_api_integration/config.preconfiguration_updates.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/platform/test/fleet_api_integration/config.cloud_connector.ts
   - x-pack/platform/test/fleet_functional/config.ts
@@ -333,7 +334,6 @@ enabled:
   - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
-  - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
@@ -427,7 +427,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
   - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/anonymization/config.ts
-  - x-pack/platform/test/api_integration/apis/content_management/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts

@@ -13,7 +13,13 @@ servers:
 paths:
   /api/asset_criticality:
     delete:
-      description: Delete the asset criticality record for a specific entity.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset
+        criticality for a specific entity.
+
+
+        Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -61,7 +67,9 @@ paths:
       tags:
         - Security Entity Analytics API
     get:
-      description: Get the asset criticality record for a specific entity.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Get the asset criticality record for a
+        specific entity.'
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -93,7 +101,12 @@ paths:
       tags:
         - Security Entity Analytics API
     post:
+      deprecated: true
       description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset
+        criticality to an entity.
+
+
         Create or update an asset criticality record for a specific entity.
 
 
@@ -133,7 +146,12 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
+      deprecated: true
       description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset
+        criticality.
+
+
         Bulk upsert up to 1000 asset criticality records.
 
 
@@ -203,7 +221,9 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: List asset criticality records, paging, sorting and filtering as needed.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** List asset criticality records, paging,
+        sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -304,6 +324,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -330,6 +352,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -343,6 +367,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -362,6 +388,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -389,6 +417,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      deprecated: true
+      description: '**Deprecated in 9.4.0.**'
       operationId: PrivMonHealth
       responses:
         '200':
@@ -427,8 +457,13 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: Check if the current user has all required permissions for
-        Privilege Monitoring
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+
+        Check if the current user has all required permissions for Privilege
+        Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -449,6 +484,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: CreatePrivMonUser
       requestBody:
         content:
@@ -468,6 +506,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
@@ -515,6 +556,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
     delete:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: DeletePrivMonUser
       parameters:
         - in: path
@@ -543,6 +587,9 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: UpdatePrivMonUser
       parameters:
         - in: path
@@ -568,6 +615,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/list:
     get:
+      deprecated: true
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       operationId: ListPrivMonUsers
       parameters:
         - description: KQL query to filter the list of monitored users

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/evals-plugin",
-  "owner": ["@elastic/obs-ai-team", "@elastic/security-generative-ai"],
+  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/security-generative-ai"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {

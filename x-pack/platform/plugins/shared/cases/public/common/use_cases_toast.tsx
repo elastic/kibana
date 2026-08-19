@@ -34,7 +34,6 @@ import {
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 import { TruncatedText } from '../components/truncated_text';
-import type { ObservablePost } from '../../common/types/api';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -135,13 +134,11 @@ export const useCasesToast = () => {
       showSuccessAttach: ({
         theCase,
         attachments,
-        observables,
         title,
         content,
       }: {
         theCase: CaseUI;
         attachments?: CaseAttachmentsWithoutOwner;
-        observables?: ObservablePost[];
         title?: string;
         content?: string;
       }) => {
@@ -187,8 +184,13 @@ export const useCasesToast = () => {
       showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
         toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string, text?: string) => {
-        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: React.ReactNode) => {
+        // Rich (non-string) content must be rendered via a mount point.
+        const mountedText =
+          text != null && typeof text !== 'string'
+            ? toMountPoint(text, { i18n, theme, userProfile })
+            : text ?? undefined;
+        toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
       showInfoToast: (title: string, text?: string) => {
         toasts.addInfo({

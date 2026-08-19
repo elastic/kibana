@@ -223,6 +223,12 @@ module.exports = {
           exclude: USES_ELASTIC_APM_AGENT,
           disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
         },
+        {
+          from: 'js-yaml',
+          to: false,
+          disallowedMessage:
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
+        },
       ],
     ],
 

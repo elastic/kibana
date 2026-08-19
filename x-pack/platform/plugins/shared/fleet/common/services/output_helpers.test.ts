@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import { outputType, OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT } from '../constants/output';
@@ -192,13 +192,13 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns true when reserved key is present', () => {
       const configYml = `queue.mem.events: 1000`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
       const configYml = `some.random.key: 1000`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(false);
     });
   });
 
@@ -210,7 +210,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
             events: 1000
     `;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
@@ -220,7 +220,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
             key: 1000
       `;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(false);
     });
   });
 
@@ -228,13 +228,13 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns true when reserved key is present', () => {
       const configYml = `bulk_max_size`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
       const configYml = `just a string`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(false);
     });
   });
 
@@ -242,7 +242,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns false when reserved key is present only in a comment', () => {
       const configYml = `true`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(false);
     });
   });
 
@@ -250,7 +250,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns false when YML is empty', () => {
       const configYml = ``;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml, load)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, parse)).toBe(false);
     });
   });
 });

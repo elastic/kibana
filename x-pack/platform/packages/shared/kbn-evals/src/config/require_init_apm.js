@@ -41,7 +41,7 @@ if (tracingExporters) {
 
 // we send an empty process.argv argument (or our synthetic overrides), as playwright
 // uses the same --config flag as kibana, leading it to not read from kibana.{dev.}yml
-require('../../../../../../../src/cli/kibana/apm')('playwright', argv);
+require('@kbn/cli/kibana/apm')('playwright', argv);
 
 registerInstrumentations({
   instrumentations: [

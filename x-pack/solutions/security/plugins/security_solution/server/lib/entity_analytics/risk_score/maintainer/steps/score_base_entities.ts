@@ -26,6 +26,8 @@ import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
+const BASE_SCORING_REQUEST_TIMEOUT = '5m';
+
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
@@ -46,6 +48,7 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   idBasedRiskScoringEnabled: boolean;
   lookupIndex: string;
   abortSignal?: AbortSignal;
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
@@ -135,6 +138,7 @@ export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
   lookupIndex,
+  refresh,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   // Persist using categorized write groups to keep routing explicit.
@@ -185,6 +189,7 @@ export const scoreBaseEntities = async ({
       entityType: params.entityType,
       scores: riskIndexWrites,
       logger: params.logger,
+      refresh,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,
@@ -240,7 +245,8 @@ const fetchNextEuidPage = async ({
       index: alertsIndex,
       pageSize,
       afterKey,
-    })
+    }),
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -275,10 +281,13 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
 }) => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query({
-    query,
-    filter: { bool: { filter: alertFilters } },
-  });
+  const esqlResponse = await esClient.esql.query(
+    {
+      query,
+      filter: { bool: { filter: alertFilters } },
+    },
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+  );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };

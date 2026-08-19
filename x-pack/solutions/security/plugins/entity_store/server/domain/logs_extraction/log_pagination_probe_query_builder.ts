@@ -14,32 +14,49 @@ import {
   type LogSlicePaginationParams,
 } from './query_builder_commons';
 
-/** Column produced by {@link buildLogPaginationCursorProbeEsql} via `STATS COUNT(*)` after `LIMIT` (docs in this slice, at most `maxLogsPerPage`). */
 export const LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD = 'total_logs';
 
+export const LOG_EXTRACTION_SAMPLE_PROBABILITY = 0.1;
+
+export const roundSampleProbability = (sampleProbability: number): number =>
+  Math.round(sampleProbability * 10000) / 10000;
+
+export const scaledProbeLimit = (
+  maxLogsPerPage: number,
+  sampleProbability: number = LOG_EXTRACTION_SAMPLE_PROBABILITY
+): number => Math.max(1, Math.round(maxLogsPerPage * sampleProbability));
+
 /**
- * Returns at most one row: the inclusive slice end (`MAX(@timestamp)` of the capped page)
- * and the count of docs in this slice (`COUNT(*)`).
- * If `total_logs < maxLogsPerPage`, this slice exhausts the window (last page).
- * If `total_logs >= maxLogsPerPage`, more slices remain.
+ * Returns at most one row: the inclusive slice end (`MAX(@timestamp)` of the capped, sampled
+ * page) and the count of sampled docs in this slice (`COUNT(*)`).
+ * If `total_logs` is below the scaled sample limit, no more pages to process.
+ * If the scaled limit was saturated, more slices remain.
+ *
+ * `sampleProbability >= 1` omits the `SAMPLE` stage entirely rather than emitting a no-op
  */
 export function buildLogPaginationCursorProbeEsql(
-  params: LogPageProbeSourceClauseParams & { maxLogsPerPage: number }
+  params: LogPageProbeSourceClauseParams & { maxLogsPerPage: number; sampleProbability?: number }
 ): string {
-  const { maxLogsPerPage, ...sourceParams } = params;
+  const {
+    maxLogsPerPage,
+    sampleProbability: rawSampleProbability = LOG_EXTRACTION_SAMPLE_PROBABILITY,
+    ...sourceParams
+  } = params;
+  const sampleProbability = roundSampleProbability(rawSampleProbability);
+  const sampleStage = sampleProbability < 1 ? `\n  | SAMPLE ${sampleProbability}` : '';
   return (
     `${NULLIFY_UNMAPPED_FIELDS_SETTING}\n` +
     buildLogPageProbeSourceClause(sourceParams) +
-    `
+    `${sampleStage}
   | SORT ${TIMESTAMP_FIELD} ASC
-  | LIMIT ${maxLogsPerPage}
+  | LIMIT ${scaledProbeLimit(maxLogsPerPage, sampleProbability)}
   | STATS ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}), ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = COUNT(*)`
   );
 }
 
 export interface LogPaginationCursorParsedRow {
   logsPaginationCursor: LogSlicePaginationParams;
-  /** Number of docs in this slice (at most `maxLogsPerPage` due to `LIMIT`). */
+  /** Number of sampled docs in this slice (at most the scaled sample limit due to `LIMIT`). */
   sliceDocCount: number;
 }
 
@@ -76,29 +93,41 @@ export function parseLogPaginationCursorRow(
 }
 
 export type LogPaginationCursor =
-  | { hasLogsToProcess: false }
+  | {
+      hasLogsToProcess: false;
+      /** No docs were sampled at all, so this cannot be the start of another page. */
+      isLastLogsPage: true;
+      /** No sampled rows to extrapolate from — always 0. */
+      sliceLogCount: 0;
+    }
   | {
       hasLogsToProcess: true;
       logsPaginationCursor: LogSlicePaginationParams;
       isLastLogsPage: boolean;
-      /** Raw log count in this slice: `min(total_logs, maxLogsPerPage)`. Used for volume-cap accounting. */
+      /**
+       * Estimated real log count in this slice: `round(total_logs / sampleProbability)`.
+       * No longer an exact count now that the probe samples — used for volume-cap accounting,
+       * where the ~1-3% estimation error is within the existing cap tolerance.
+       */
       sliceLogCount: number;
     };
 
 export function interpretLogPaginationCursorRows(
   row: LogPaginationCursorParsedRow | undefined,
-  maxLogsPerPage: number
+  maxLogsPerPage: number,
+  rawSampleProbability: number = LOG_EXTRACTION_SAMPLE_PROBABILITY
 ): LogPaginationCursor {
   if (row === undefined) {
-    return { hasLogsToProcess: false };
+    return { hasLogsToProcess: false, isLastLogsPage: true, sliceLogCount: 0 };
   }
+  const sampleProbability = roundSampleProbability(rawSampleProbability);
   const { logsPaginationCursor, sliceDocCount } = row;
-  // total_logs is COUNT(*) after LIMIT — at most maxLogsPerPage. If fewer docs were returned
-  // than the limit, the window is exhausted. An exact full page means more slices may follow.
+  const scaledLimit = scaledProbeLimit(maxLogsPerPage, sampleProbability);
   return {
     hasLogsToProcess: true,
     logsPaginationCursor,
-    isLastLogsPage: sliceDocCount < maxLogsPerPage,
-    sliceLogCount: sliceDocCount,
+    isLastLogsPage: sliceDocCount < scaledLimit,
+    // Estimated slice log count, based on sampled count we extrapolate to the real count.
+    sliceLogCount: Math.round(sliceDocCount / sampleProbability),
   };
 }

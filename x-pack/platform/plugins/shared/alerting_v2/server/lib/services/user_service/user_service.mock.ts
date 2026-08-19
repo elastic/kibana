@@ -11,8 +11,10 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { UserService } from './user_service';
 
+const DEFAULT_PROFILE_UID = 'elastic_profile_uid';
+
 const mockProfile: UserProfileWithSecurity = {
-  uid: 'elastic_profile_uid',
+  uid: DEFAULT_PROFILE_UID,
   enabled: true,
   user: {
     username: 'elastic',
@@ -30,17 +32,11 @@ export function createUserService(): {
   const request = httpServerMock.createKibanaRequest();
   const userProfileService = userProfileServiceMock.createStart();
 
-  userProfileService.getCurrent.mockResolvedValue(createUserProfile());
+  userProfileService.getCurrentProfileId.mockResolvedValue(DEFAULT_PROFILE_UID);
+  userProfileService.getCurrent.mockResolvedValue(mockProfile);
 
   return {
     userService: new UserService(request, userProfileService),
     userProfileService,
-  };
-}
-
-export function createUserProfile(uid?: string): UserProfileWithSecurity {
-  return {
-    ...mockProfile,
-    ...(uid ? { uid } : {}),
   };
 }

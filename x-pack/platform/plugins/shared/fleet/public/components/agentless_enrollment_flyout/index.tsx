@@ -21,12 +21,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AGENTS_PREFIX, MAX_FLYOUT_WIDTH } from '../../constants';
+import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
+
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
+import { AgentlessStepConfigureConnector } from './step_configure_connector';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -67,7 +70,11 @@ export const AgentlessEnrollmentFlyout = ({
   useEffect(() => {
     const fetchAgents = async () => {
       const { data: agentsData, error } = await sendGetAgents({
-        kuery: `${AGENTS_PREFIX}.policy_id: "${packagePolicy.policy_ids[0]}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(
+          packagePolicy.policy_ids[0],
+          `${AGENTS_PREFIX}.policy_base_id`,
+          `${AGENTS_PREFIX}.policy_id`
+        ),
       });
 
       if (error) {
@@ -146,6 +153,10 @@ export const AgentlessEnrollmentFlyout = ({
     return packagePolicy.name;
   }, [packageInfoData, packagePolicy]);
 
+  // Connector integrations don't ingest data until the connector is configured,
+  // so the "Confirm incoming data" step is reframed as a connector setup step.
+  const isConnector = packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+
   return (
     <EuiFlyout
       data-test-subj="agentlessEnrollmentFlyout"
@@ -178,17 +189,33 @@ export const AgentlessEnrollmentFlyout = ({
               status: confirmEnrollmentStatus,
             },
             {
-              title: i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle', {
-                defaultMessage: 'Confirm incoming data',
-              }),
+              title: isConnector
+                ? i18n.translate(
+                    'xpack.fleet.agentlessEnrollmentFlyout.stepConfigureConnectorTitle',
+                    {
+                      defaultMessage: 'Configure connector',
+                    }
+                  )
+                : i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle', {
+                    defaultMessage: 'Confirm incoming data',
+                  }),
               children:
                 agentData && confirmEnrollmentStatus === 'complete' ? (
-                  <AgentlessStepConfirmData
-                    agent={agentData}
-                    packagePolicy={packagePolicy}
-                    policyTemplates={packageInfoData?.item.policy_templates}
-                    setConfirmDataStatus={setConfirmDataStatus}
-                  />
+                  isConnector ? (
+                    <AgentlessStepConfigureConnector
+                      packagePolicy={packagePolicy}
+                      policyTemplates={packageInfoData?.item.policy_templates}
+                      setStepStatus={setConfirmDataStatus}
+                      onClose={onClose}
+                    />
+                  ) : (
+                    <AgentlessStepConfirmData
+                      agent={agentData}
+                      packagePolicy={packagePolicy}
+                      policyTemplates={packageInfoData?.item.policy_templates}
+                      setConfirmDataStatus={setConfirmDataStatus}
+                    />
+                  )
                 ) : (
                   <></> // Avoids React error about null children prop
                 ),

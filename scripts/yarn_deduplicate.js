@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/yarn_deduplicate');
+require('@kbn/dev/yarn_deduplicate');

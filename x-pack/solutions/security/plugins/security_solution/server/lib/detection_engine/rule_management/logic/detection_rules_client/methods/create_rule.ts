@@ -26,6 +26,7 @@ interface CreateRuleOptions {
   mlAuthz: MlAuthz;
   rule: RuleCreateProps & { immutable: boolean };
   id?: string;
+  initialRevision?: number;
   allowMissingConnectorSecrets?: boolean;
 }
 
@@ -35,6 +36,7 @@ export const createRule = async ({
   mlAuthz,
   rule,
   id,
+  initialRevision,
   allowMissingConnectorSecrets,
 }: CreateRuleOptions): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, rule.type);
@@ -50,7 +52,10 @@ export const createRule = async ({
 
   const createdRule = await rulesClient.create<RuleParams>({
     data: payload,
-    options: { id },
+    options: {
+      id,
+      initialRevision,
+    },
     allowMissingConnectorSecrets,
   });
 

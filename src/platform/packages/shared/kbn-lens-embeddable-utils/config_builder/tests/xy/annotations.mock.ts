@@ -11,6 +11,7 @@ import type {
   DateHistogramIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MaxIndexPatternColumn,
+  XYByReferenceAnnotationLayerConfig,
   XYPersistedByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
@@ -260,6 +261,139 @@ export const byRefAnnotationXY: LensAttributes = {
       id: 'my-annotation-group-id',
       name: 'ref-16f0980e-4f7a-43d0-b5aa-e8c75c4cd930',
       type: 'event-annotation-group',
+    },
+  ],
+};
+
+export const runtimeByRefAnnotationXY: LensAttributes = {
+  visualizationType: 'lnsXY',
+  title: 'XY with runtime by-ref annotation',
+  state: {
+    adHocDataViews: {},
+    datasourceStates: {
+      formBased: {
+        layers: {
+          'e6f11ede-9943-4073-b9f3-1f69d0e934a8': {
+            columnOrder: [
+              '8362014d-fc6c-4f9e-b63f-c0cd9a3227e6',
+              '8da7e0b1-770d-4f2d-aac8-53a331ac1829',
+            ],
+            columns: {
+              '8362014d-fc6c-4f9e-b63f-c0cd9a3227e6': {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              } as DateHistogramIndexPatternColumn,
+              '8da7e0b1-770d-4f2d-aac8-53a331ac1829': {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Maximum of bytes',
+                operationType: 'max',
+                params: {
+                  emptyAsNull: true,
+                },
+                scale: 'ratio',
+                sourceField: 'bytes',
+              } as MaxIndexPatternColumn,
+            },
+            incompleteColumns: {},
+          },
+        },
+      },
+    },
+    filters: [],
+    internalReferences: [],
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    visualization: {
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      layers: [
+        {
+          accessors: ['8da7e0b1-770d-4f2d-aac8-53a331ac1829'],
+          layerId: 'e6f11ede-9943-4073-b9f3-1f69d0e934a8',
+          layerType: 'data',
+          position: 'top',
+          seriesType: 'line',
+          showGridlines: false,
+          xAccessor: '8362014d-fc6c-4f9e-b63f-c0cd9a3227e6',
+          yConfig: [
+            {
+              axisMode: 'left',
+              color: '#009ce0',
+              forAccessor: '8da7e0b1-770d-4f2d-aac8-53a331ac1829',
+            },
+          ],
+        },
+        {
+          layerId: '16f0980e-4f7a-43d0-b5aa-e8c75c4cd930',
+          layerType: 'annotations',
+          indexPatternId: 'metrics-*',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#ff0000',
+              icon: 'triangle',
+              id: 'cf13a990-6a33-427a-a85a-2f271116776a',
+              key: { type: 'point_in_time' },
+              label: 'Event',
+              type: 'query',
+              timeField: '@timestamp',
+              filter: { type: 'kibana_query', language: 'kuery', query: '' },
+            },
+          ],
+          annotationGroupId: 'my-runtime-annotation-group-id',
+          __lastSaved: {
+            annotations: [
+              {
+                color: '#ff0000',
+                icon: 'triangle',
+                id: 'cf13a990-6a33-427a-a85a-2f271116776a',
+                key: { type: 'point_in_time' },
+                label: 'Event',
+                type: 'query',
+                timeField: '@timestamp',
+                filter: { type: 'kibana_query', language: 'kuery', query: '' },
+              },
+            ],
+            indexPatternId: 'metrics-*',
+            ignoreGlobalFilters: true,
+            title: 'My annotation group',
+            description: '',
+            tags: [],
+          },
+        } as XYByReferenceAnnotationLayerConfig,
+      ],
+      legend: {
+        isVisible: true,
+        position: 'bottom',
+        showSingleSeries: true,
+      },
+      preferredSeriesType: 'line',
+      title: 'Empty XY chart',
+      valueLabels: 'hide',
+      valuesInLegend: true,
+      yTitle: 'Rate',
+    },
+  },
+  references: [
+    {
+      id: 'metrics-*',
+      name: 'indexpattern-datasource-layer-e6f11ede-9943-4073-b9f3-1f69d0e934a8',
+      type: 'index-pattern',
     },
   ],
 };

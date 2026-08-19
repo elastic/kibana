@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/lens-plugin'
+  - '@kbn/lens-common'
   - '@kbn/security-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/actions-plugin'
@@ -113,6 +114,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-ui-settings-browser'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
