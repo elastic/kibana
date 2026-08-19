@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import {
   AgentAccessControlMode,
+  AgentAccessControlRole,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -27,6 +28,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { internalApiPath, publicApiPath } from '../../../../common/constants';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { apiTest } from '../fixtures';
 import {
   CHAT_CONVERSATIONS_INDEX,
@@ -101,6 +103,11 @@ apiTest.describe(
       username: `${ACCESS_CONTROL_TEST_PREFIX}-bob-${testRunId}`,
       password: 'bob-password',
     };
+    const eve = {
+      roleName: `${ACCESS_CONTROL_TEST_PREFIX}-eve-role-${testRunId}`,
+      username: `${ACCESS_CONTROL_TEST_PREFIX}-eve-${testRunId}`,
+      password: 'eve-password',
+    };
     // No Agent Builder privileges. Used to assert route-level privilege gates.
     const noAccess = {
       roleName: `${ACCESS_CONTROL_TEST_PREFIX}-no-access-role-${testRunId}`,
@@ -108,7 +115,7 @@ apiTest.describe(
       password: 'no-access-password',
     };
 
-    const allPrincipals = [alice, bob, noAccess];
+    const allPrincipals = [alice, bob, eve, noAccess];
 
     let adminCookie: Record<string, string>;
     let llmProxy: LlmProxy;
@@ -176,7 +183,7 @@ apiTest.describe(
 
       connectorId = await createConnectorForSpace(kbnClient, llmProxy);
 
-      for (const { roleName } of [alice, bob]) {
+      for (const { roleName } of [alice, bob, eve]) {
         await kbnClient.request({
           method: 'PUT',
           path: `/api/security/role/${encodeURIComponent(roleName)}`,
@@ -298,6 +305,23 @@ apiTest.describe(
         {
           headers: headersFor(user),
           body: { access_control: { access_mode: accessMode } },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(200);
+    };
+
+    const setAgentAccessControlAs = async (
+      apiClient: AuthedApiClient,
+      user: { username: string; password: string },
+      agentId: string,
+      entries: Array<{ type: 'user'; name: string; role: AgentAccessControlRole }>
+    ) => {
+      const response = await apiClient.put(
+        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}/access_control`,
+        {
+          headers: headersFor(user),
+          body: { entries },
           responseType: 'json',
         }
       );
@@ -1073,6 +1097,157 @@ apiTest.describe(
         });
       }
     );
+
+    apiTest(
+      'a conversation member needs access to its private backing agent',
+      async ({ apiClient }) => {
+        const sharedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-member-id-agent-${testRunId.slice(
+          0,
+          8
+        )}`;
+        await createAgentAs(
+          apiClient,
+          alice,
+          mockAgent(sharedAgentId, AgentAccessControlMode.Shared)
+        );
+        const bobConversation = await createConversationAs({
+          apiClient,
+          user: bob,
+          agentId: sharedAgentId,
+          input: 'Bob stable id probe',
+          title: 'Bob Stable Id Probe',
+        });
+        const bobId = await resolveStableUserId(apiClient, bob, bobConversation.conversation_id);
+
+        const privateAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-private-member-agent-${testRunId.slice(
+          0,
+          8
+        )}`;
+        await createAgentAs(
+          apiClient,
+          alice,
+          mockAgent(privateAgentId, AgentAccessControlMode.Private)
+        );
+        const aliceConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId: privateAgentId,
+          input: 'Private agent sharing test',
+          title: 'Private Agent Sharing Test',
+        });
+        const conversationId = aliceConversation.conversation_id;
+
+        await setAccessControlAs(apiClient, alice, conversationId, {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ type: 'user', id: bobId, role: ConversationAccessControlRole.Member }],
+        });
+
+        await apiTest.step(
+          'Bob cannot access the shared conversation before agent access',
+          async () => {
+            expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
+            expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
+
+            const continueResponse = await apiClient.post(`${accessControlApiBase}/converse`, {
+              headers: headersFor(bob),
+              body: {
+                agent_id: privateAgentId,
+                conversation_id: conversationId,
+                input: 'Bob private-agent follow-up',
+                connector_id: connectorId,
+                _execution_mode: 'local',
+              },
+              responseType: 'json',
+            });
+            expect(continueResponse).toHaveStatusCode(404);
+          }
+        );
+
+        await apiTest.step('Bob gains access after the private agent is shared', async () => {
+          await setAgentAccessControlAs(apiClient, alice, privateAgentId, [
+            { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+          ]);
+
+          expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(200);
+          expect(await listConversationIdsAs(apiClient, bob)).toContain(conversationId);
+
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            response: 'Response to: Bob private-agent follow-up',
+            continueConversation: true,
+          });
+          const continueResponse = await apiClient.post(`${accessControlApiBase}/converse`, {
+            headers: headersFor(bob),
+            body: {
+              agent_id: privateAgentId,
+              conversation_id: conversationId,
+              input: 'Bob private-agent follow-up',
+              connector_id: connectorId,
+              _execution_mode: 'local',
+            },
+            responseType: 'json',
+          });
+          expect(continueResponse).toHaveStatusCode(200);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        });
+      }
+    );
+
+    apiTest('user suggestions report access to the selected agent', async ({ apiClient }) => {
+      const publicAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-suggest-public-${testRunId.slice(0, 8)}`;
+      const sharedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-suggest-shared-${testRunId.slice(0, 8)}`;
+      const privateAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-suggest-private-${testRunId.slice(
+        0,
+        8
+      )}`;
+      await createAgentAs(
+        apiClient,
+        alice,
+        mockAgent(publicAgentId, AgentAccessControlMode.Public)
+      );
+      await createAgentAs(
+        apiClient,
+        alice,
+        mockAgent(sharedAgentId, AgentAccessControlMode.Shared)
+      );
+      await createAgentAs(
+        apiClient,
+        alice,
+        mockAgent(privateAgentId, AgentAccessControlMode.Private)
+      );
+      await setAgentAccessControlAs(apiClient, alice, privateAgentId, [
+        { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+      ]);
+
+      const suggest = async (agentId: string, username: string) => {
+        const response = await apiClient.post(
+          `${accessControlInternalBase}/_suggest_user_profiles`,
+          {
+            headers: headersFor(alice),
+            body: { name: username, agent_id: agentId },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(200);
+        const profile = (
+          response.body as Array<{
+            user: { username: string };
+            has_agent_access?: boolean;
+          }>
+        ).find(({ user }) => user.username === username);
+        expect(profile).toBeDefined();
+        if (!profile) {
+          throw new Error(`Expected a suggested profile for ${username}`);
+        }
+        return profile;
+      };
+
+      expect((await suggest(publicAgentId, eve.username)).has_agent_access).toBe(true);
+      expect((await suggest(sharedAgentId, eve.username)).has_agent_access).toBe(true);
+      expect((await suggest(privateAgentId, alice.username)).has_agent_access).toBe(true);
+      expect((await suggest(privateAgentId, bob.username)).has_agent_access).toBe(true);
+      expect((await suggest(privateAgentId, eve.username)).has_agent_access).toBe(false);
+    });
 
     // ── cluster admin management ────────────────────────────────────────────
 
