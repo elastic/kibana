@@ -551,6 +551,27 @@ export class AgentBuilderApp {
     return labelTexts;
   }
 
+  async navigateToAgentOverview(agentId: string) {
+    await this.page.gotoApp(`agent_builder/agents/${agentId}/overview`);
+    await this.page.testSubj.locator('agentOverviewPage').waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
+  }
+
+  async openEditDetailsFlyout() {
+    await this.page.testSubj.click('agentOverviewEditDetailsButton');
+    await this.page.testSubj.locator('editDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async setEditDetailsInstructions(instructions: string) {
+    await this.page.testSubj.fill('editDetailsInstructionsInput', instructions);
+  }
+
+  async getEditDetailsInstructions() {
+    return this.page.testSubj.locator('editDetailsInstructionsInput').inputValue();
+  }
+
   async clickAgentChat(agentId: string) {
     await this.agentAction(agentId, `agentBuilderAgentsListChat-${agentId}`).click();
   }

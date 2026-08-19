@@ -12,6 +12,7 @@ import {
   METRICS_TEST_INDEX_NAME,
   METRICS_TEST_INDEX_NAME_OTHER,
 } from '../fixtures/metrics_experience/constants';
+import { SECURITY_INDICES } from '../fixtures/security_experience/constants';
 
 globalTeardownHook('Teardown Discover tests data', async ({ esClient, apiServices, log }) => {
   log.debug('[teardown:discover] resetting isEsqlDefault feature flag');
@@ -24,4 +25,9 @@ globalTeardownHook('Teardown Discover tests data', async ({ esClient, apiService
   log.debug('[teardown:metrics] deleting custom metrics test indices');
   await esClient.indices.delete({ index: METRICS_TEST_INDEX_NAME, ignore_unavailable: true });
   await esClient.indices.delete({ index: METRICS_TEST_INDEX_NAME_OTHER, ignore_unavailable: true });
+
+  log.debug('[teardown:security] deleting synthetic security test indices');
+  for (const index of Object.values(SECURITY_INDICES)) {
+    await esClient.indices.delete({ index, ignore_unavailable: true });
+  }
 });

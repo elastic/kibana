@@ -38,7 +38,7 @@ This makes EIS connector IDs available as Playwright projects, for example `eis-
 node scripts/evals init config
 ```
 
-See [`@kbn/evals` documentation](../../kbn-evals/README.md) for `TRACING_EXPORTERS`, `TRACING_ES_URL`, and Phoenix executor details.
+See [`@kbn/evals` documentation](../../kbn-evals/README.md) for `TRACING_EXPORTERS` and `TRACING_ES_URL` details.
 
 ## Running Evaluations
 
