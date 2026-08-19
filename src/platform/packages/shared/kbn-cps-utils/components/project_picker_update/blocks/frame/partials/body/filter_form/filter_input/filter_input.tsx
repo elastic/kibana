@@ -39,8 +39,9 @@ interface FilterSelectionInputProps {
   /**
    * Business-rule validator invoked by RHF on submit (and on revalidation).
    * Return `true` when valid, or an error message string when invalid.
+   * May be async when validating against the server.
    */
-  validateExpression: (input: FilterInput) => true | string;
+  validateExpression: (input: FilterInput) => true | string | Promise<true | string>;
   getFilteringDimensionsOptions: () => string[];
   getFilterValuesOptions: (anchor: Omit<Partial<FilterInput>, 'tagValue'>) => string[];
 }
@@ -190,6 +191,14 @@ export function FilterSelectionInput({
   );
 
   const [customFilterValues, setCustomFilterValues] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (errors.tagValue) {
+      setCustomFilterValues((prevCustomFilterValues) =>
+        prevCustomFilterValues.filter((value) => value !== filteringTagValue)
+      );
+    }
+  }, [filteringTagValue, errors.tagValue]);
 
   const filterValues = useMemo(() => {
     return toSelectableOptions(
@@ -348,7 +357,10 @@ export function FilterSelectionInput({
         placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
           defaultMessage: 'Select a tag',
         })}
-        popoverProps={{ anchorPosition: 'downLeft' }}
+        popoverProps={{
+          anchorPosition: 'downLeft',
+          panelMinWidth: calculateWidthFromEntries(filteringDimensionsOptions, ['label']),
+        }}
         compressed
         fullWidth
       />
@@ -358,7 +370,10 @@ export function FilterSelectionInput({
         options={filterOperators}
         disabled={!anchoringFilteringTagName}
         fullWidth={false}
-        popoverProps={{ anchorPosition: 'downRight' }}
+        popoverProps={{
+          anchorPosition: 'downLeft',
+          panelMinWidth: calculateWidthFromEntries(filterOperators, ['label']),
+        }}
         compressed
       />
       <Controller

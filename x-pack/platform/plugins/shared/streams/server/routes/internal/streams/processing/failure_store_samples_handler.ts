@@ -242,7 +242,7 @@ export function collectAncestorProcessing(
 
   // Add processing steps from each ancestor only
   for (const ancestor of sortedAncestors) {
-    if (ancestor.ingest.processing.steps.length > 0) {
+    if ('steps' in ancestor.ingest.processing && ancestor.ingest.processing.steps.length > 0) {
       allSteps.push(...ancestor.ingest.processing.steps);
     }
   }

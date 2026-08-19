@@ -177,10 +177,10 @@ spaceTest.describe(
 
         await spaceTest.step('adds runtime field and verifies data view id changed', async () => {
           prevId = await discover.getCurrentDataViewId();
-          await discover.createRuntimeField(
-            '_bytes-runtimefield',
-            `emit((doc["bytes"].value * 2).toString())`
-          );
+          await discover.createRuntimeField({
+            fieldName: '_bytes-runtimefield',
+            script: `emit((doc["bytes"].value * 2).toString())`,
+          });
           const newId = await discover.getCurrentDataViewId();
           expect(newId).not.toBe(prevId);
         });

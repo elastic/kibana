@@ -25,11 +25,7 @@ import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
-import {
-  mergeCustomFieldsIntoExtendedFields,
-  resolveTemplateFields,
-} from '../../../common/utils/template_fields';
-import { fillMissingCustomFields } from './utils';
+import { resolveTemplateFields } from '../../../common/utils/template_fields';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { isDisplayOnlyField, FieldType } from '../../../common/types/domain/template/fields';
 import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
@@ -60,6 +56,23 @@ export const validateCustomFields = (params: CustomFieldValidationParams) => {
   });
   validateCustomFieldKeysAgainstConfiguration(params);
   validateRequiredCustomFields(params);
+  validateCustomFieldTypesInRequest(params);
+};
+
+/**
+ * Structural-only customFields validation — duplicate keys, unknown keys, and type mismatches.
+ * Deliberately excludes `validateRequiredCustomFields`: a create path that pairs customFields
+ * with extended_fields (see create.ts / bulk_create.ts) must resolve that pairing first, since a
+ * required linked field supplied only via extended_fields is not yet reflected in the raw request
+ * customFields the required-check inspects. Callers using this run `validateRequiredCustomFields`
+ * separately, after pairing, against the effective (post-pair) customFields array.
+ */
+export const validateCustomFieldsStructure = (params: CustomFieldValidationParams) => {
+  validateDuplicatedKeysInRequest({
+    requestFields: params.requestCustomFields,
+    fieldName: 'customFields',
+  });
+  validateCustomFieldKeysAgainstConfiguration(params);
   validateCustomFieldTypesInRequest(params);
 };
 
@@ -217,49 +230,23 @@ export const resolveGlobalFieldKeys = async (
  * same semantics v1 required custom fields get from `validateRequiredCustomFields`: a required
  * field with no value and no default fails the create with a 400.
  *
- * The check runs against the *effective* values the create will persist across BOTH
- * representations — not just the request's `extended_fields`:
- * - the caller's `extended_fields` (with template + global definition defaults already merged
- *   in by the create path),
- * - v1 configuration `defaultValue`s for custom fields absent from the request (they are filled
- *   into the persisted `customFields` by `fillMissingCustomFields`, so a required global field
- *   linked to such a v1 field is satisfied — matching v1's default-satisfies-required rule),
- * - the caller's `customFields`, mirrored with the same customFields-win semantics the
- *   write-time mirror applies after validation (including explicit-null deletes), so a value
- *   supplied through the legacy representation satisfies the linked global field and an
- *   explicit null does not.
+ * Call after pairing (and after global-default injection): `extendedFields` must be the map
+ * that will be persisted. Pairing already copies a linked customFields value — including a v1
+ * configuration `defaultValue` filled by `fillMissingCustomFields` — into that map, so a
+ * legacy customFields-only create that passes v1 validation also passes here. An explicit null
+ * on the linked v1 field clears the v2 key, so it does not satisfy required.
  *
- * Only required-ness is enforced here (`requiredOnly`): mirrored keys of unlinked legacy fields
- * must not be flagged as unknown, and value validation of the request's own map is handled by
- * `validateCaseExtendedFields`.
+ * Only required-ness is enforced here (`requiredOnly`): value validation of the request's own
+ * map is handled by `validateCaseExtendedFields`.
  */
 export const validateRequiredGlobalFields = ({
   globalFields,
   extendedFields,
-  requestCustomFields,
-  customFieldsConfiguration,
 }: {
   globalFields: InlineField[];
   extendedFields: Record<string, string>;
-  requestCustomFields?: CaseRequestCustomFields;
-  customFieldsConfiguration?: CustomFieldsConfiguration;
 }): void => {
-  const requestKeys = new Set((requestCustomFields ?? []).map((cf) => cf.key));
-  // Only the entries the fill ADDS (v1 config defaults), and only real values: the fill also
-  // pads absent optional fields with synthetic nulls which are never mirrored and must not
-  // delete a caller-sent extended_fields value from the effective view.
-  const filledDefaults = fillMissingCustomFields({
-    customFields: requestCustomFields,
-    customFieldsConfiguration,
-  }).filter((cf) => !requestKeys.has(cf.key) && cf.value !== null && cf.value !== undefined);
-
-  const effectiveExtendedFields =
-    mergeCustomFieldsIntoExtendedFields(
-      [...filledDefaults, ...(requestCustomFields ?? [])],
-      extendedFields
-    ) ?? extendedFields;
-
-  const errors = validateExtendedFields(effectiveExtendedFields, globalFields, {
+  const errors = validateExtendedFields(extendedFields, globalFields, {
     requiredOnly: true,
   });
   if (errors.length) {
@@ -449,7 +436,13 @@ export const resolveTemplateFieldsForClose = async ({
 
 /**
  * Validates that all `required_on_close` fields are filled when a case transitions to closed.
- * Operates on the merged extended_fields (existing SO state + request updates).
+ *
+ * `finalExtendedFields` must be the COMPLETE map that will be persisted for the case — not a
+ * PATCH delta. The caller is responsible for producing it (post-merge and post-pairing, when
+ * pairing ran). The validator never consults the original case's stored values: merging them
+ * here would resurrect keys that pairing deliberately deleted (a cleared linked field) and
+ * wrongly allow closing without a required field.
+ *
  * Only checks fields with `required_on_close: true` — regular required fields are a write-time
  * concern and are not re-validated here. Orphaned keys from old templates are silently ignored.
  *
@@ -459,34 +452,30 @@ export const resolveTemplateFieldsForClose = async ({
  * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })
  * here, even though that option was added in the same PR, because:
  *   1. The common function is designed for client-side real-time preview (no SO access; caller
- *      provides a flat extendedFields map). Here we operate on pre-merged SO + request state.
+ *      provides a flat extendedFields map). Here we operate on the caller-provided final state.
  *   2. This implementation passes fieldControlMap to evaluateCondition for correct
  *      CHECKBOX_GROUP / USER_PICKER show_when evaluation — the common function omits it
  *      (pre-existing gap). If the common function gains fieldControlMap support, this can
  *      be revisited.
  */
 export const validateExtendedFieldsOnClose = ({
-  updateReq,
-  originalCase,
+  caseId,
+  requestedStatus,
+  originalStatus,
+  finalExtendedFields,
   templateFields,
   globalFields,
 }: {
-  updateReq: CasePatchRequest;
-  originalCase: CaseSavedObjectTransformed;
+  caseId: string;
+  requestedStatus: CaseStatuses | undefined;
+  originalStatus: CaseStatuses;
+  finalExtendedFields: Record<string, string>;
   templateFields: InlineField[];
   globalFields: InlineField[];
 }): void => {
-  if (
-    updateReq.status !== CaseStatuses.closed ||
-    originalCase.attributes.status === CaseStatuses.closed
-  ) {
+  if (requestedStatus !== CaseStatuses.closed || originalStatus === CaseStatuses.closed) {
     return;
   }
-
-  const mergedExtendedFields: Record<string, string> = {
-    ...(originalCase.attributes.extended_fields ?? {}),
-    ...(updateReq.extended_fields ?? {}),
-  };
 
   // Same global-wins exclusion as write-time validation — template `$ref`s to global fields
   // must not be checked a second time (duplicate "Field X is required" on close).
@@ -500,7 +489,7 @@ export const validateExtendedFieldsOnClose = ({
   const fieldTypeMap: Record<string, string> = {};
   const fieldControlMap: Record<string, string> = {};
   for (const field of allFields) {
-    fieldValues[field.name] = mergedExtendedFields[getFieldSnakeKey(field.name, field.type)];
+    fieldValues[field.name] = finalExtendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
     fieldControlMap[field.name] = field.control;
   }
@@ -531,7 +520,7 @@ export const validateExtendedFieldsOnClose = ({
 
   if (errors.length > 0) {
     throw Boom.badRequest(
-      `Cannot close case ${updateReq.id}, required fields must be filled: ${errors.join('; ')}`
+      `Cannot close case ${caseId}, required fields must be filled: ${errors.join('; ')}`
     );
   }
 };
