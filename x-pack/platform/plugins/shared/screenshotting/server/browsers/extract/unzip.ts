@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { extract } from 'zip-lib';
+import AdmZip from 'adm-zip';
 import { ExtractError } from './extract_error';
 
 export async function unzip(filepath: string, target: string) {
   try {
-    await extract(filepath, target, { safeSymlinksOnly: true });
+    const zip = new AdmZip(filepath);
+    zip.extractAllTo(target, true);
   } catch (err) {
     throw new ExtractError(err);
   }

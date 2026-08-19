@@ -25,7 +25,7 @@ import minimist from 'minimist';
 import moment from 'moment';
 import Papa from 'papaparse';
 import pLimit from 'p-limit';
-import { extract } from 'zip-lib';
+import extract from 'extract-zip';
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
@@ -102,7 +102,7 @@ export async function downloadFile(url: string, destPath: string): Promise<void>
 }
 
 export async function extractZip(zipPath: string, destDir: string): Promise<void> {
-  await extract(zipPath, destDir);
+  await extract(zipPath, { dir: destDir });
 }
 
 // ---------------------------------------------------------------------------

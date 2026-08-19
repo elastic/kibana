@@ -1638,7 +1638,6 @@
     "yargs": "15.4.1",
     "yauzl": "3.4.0",
     "yazl": "3.3.1",
-    "zip-lib": "1.4.0",
     "zod": "4.4.3",
     "zod-to-json-schema": "3.25.0"
   },
@@ -2160,6 +2159,7 @@
     "eslint-traverse": "1.0.0",
     "exit-hook": "2.2.0",
     "expect": "29.7.0",
+    "extract-zip": "^2.0.1",
     "fast-glob": "3.3.3",
     "fetch-mock": "10.1.0",
     "find-cypress-specs": "1.54.6",

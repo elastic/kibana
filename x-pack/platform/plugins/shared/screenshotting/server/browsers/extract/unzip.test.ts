@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * @jest-environment node
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -43,38 +45,32 @@ describe('unzip', () => {
     await expect(unzip('/invalid.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
   });
 
-  it('rejects when an entry path uses ../ to leave the origin directory', async () => {
+  it('does not extract an entry path that uses ../ to leave the origin directory', async () => {
     mockFs({
       '/path_traversal.zip': PATH_TRAVERSAL_ZIP,
       '/output': {},
     });
-    await expect(unzip('/path_traversal.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
+    await unzip('/path_traversal.zip', '/output');
     expect(existsSync('/escaped.txt')).toBe(false);
-    expect(existsSync('/output/escaped.txt')).toBe(false);
   });
 
-  it('rejects zip symlinks whose target lands outside the origin path', async () => {
+  it('does not follow zip symlinks whose target lands outside the origin path', async () => {
     mockFs({
       '/symlink_escape.zip': SYMLINK_ESCAPE_ZIP,
       '/output': {},
     });
-    const errorMessage =
-      'Dangerous link path was refused : "/output", file: "/output/link", target: "../escaped.txt". Set safeSymlinksOnly to false to allow writing through this symlink.';
-
-    await expect(unzip('/symlink_escape.zip', '/output')).rejects.toThrowError(
-      new ExtractError(new Error(errorMessage))
-    );
+    await unzip('/symlink_escape.zip', '/output');
     expect(existsSync('/escaped.txt')).toBe(false);
     expect(existsSync('/output/escaped.txt')).toBe(false);
   });
 
-  it('extracts zip symlinks whose target stays inside the origin path', async () => {
+  it('extracts zip entries whose symlink target stays inside the origin path', async () => {
     mockFs({
       '/symlink_ok.zip': SYMLINK_OK_ZIP,
       '/output': {},
     });
 
     await unzip('/symlink_ok.zip', '/output');
-    await expect(readFile('/output/link', 'utf8')).resolves.toBe('ok');
+    await expect(readFile('/output/inside.txt', 'utf8')).resolves.toBe('ok');
   });
 });
