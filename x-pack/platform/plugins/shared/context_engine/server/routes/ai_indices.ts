@@ -16,6 +16,7 @@ import {
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
+  MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
@@ -72,6 +73,14 @@ const aiIndexPropertiesSchema = {
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
       meta: { description: 'Human-readable description of the AI index.' },
+    })
+  ),
+  feedback_agent_id: schema.maybe(
+    schema.string({
+      maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
+      meta: {
+        description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
+      },
     })
   ),
   dest: schema.object({

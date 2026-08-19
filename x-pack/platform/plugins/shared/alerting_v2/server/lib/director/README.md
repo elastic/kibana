@@ -125,10 +125,10 @@ The director writes one of these episode statuses:
 | any | `'last_known_status'` | (unchanged — preserve current status) |
 | `inactive` | `'recover'` | `inactive` |
 | `pending` | `'recover'` | `inactive` |
-| `active` | `'recover'` | `recovering` |
+| `active` | `'recover'` | `inactive` |
 | `recovering` | `'recover'` | `inactive` |
 
-For `'recover'`, the director applies the same FSM transitions as a `recovered` event would. No prior episode (null) always returns `pending`.
+For `'recover'`, the episode resolves directly to `inactive` on the first no-data run.
 
 ### `CountTimeframeStrategy`
 
@@ -136,6 +136,8 @@ For `'recover'`, the director applies the same FSM transitions as a `recovered` 
 
 - `pending -> active`
 - `recovering -> inactive`
+
+A `no_data` event on a rule with `no_data_strategy: 'recover'` always bypasses this gating and resolves directly to `inactive`, regardless of `recovering_count` / `recovering_timeframe`.
 
 It supports:
 

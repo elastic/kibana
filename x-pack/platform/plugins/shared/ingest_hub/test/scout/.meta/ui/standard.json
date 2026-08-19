@@ -1,52 +1,10 @@
 {
-  "sha1": "b910b6ec66dc6a071de90bebf6846027d01e991c",
+  "sha1": "07abbb8af55de5612e3b486133bd1cab11ae941b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "2e34171f24bcdca-674591f076626ad",
-      "title": "Onboarding deploy settings step static keys path — form enables Next when credentials are filled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 35,
-        "column": 23
-      }
-    },
-    {
-      "id": "2e34171f24bcdca-90e5aa39d02d5a8",
-      "title": "Onboarding deploy settings step identity federation create — New Identity tab active when no connectors exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 47,
-        "column": 5
-      }
-    },
-    {
-      "id": "2e34171f24bcdca-15500196b0e1b26",
-      "title": "Onboarding deploy settings step identity federation reuse — shows connector selector on Existing Identity tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 74,
-        "column": 24
-      }
-    },
     {
       "id": "8b1c88bbca05585-cc5ebedbcad32a7",
       "title": "Onboarding app — FF enabled renders the onboarding shell and navigates between steps",
@@ -59,34 +17,6 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
         "line": 35,
         "column": 23
-      }
-    },
-    {
-      "id": "b0669359ac1acfc-a80b304ef315b8d",
-      "title": "Onboarding deploy settings step IAM permissions viewer shows the aggregated IAM policy for the selected services",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 63,
-        "column": 7
-      }
-    },
-    {
-      "id": "b0669359ac1acfc-7a437c0b8c2cda8",
-      "title": "Onboarding deploy settings step IAM permissions viewer narrows the policy when a single integration is selected",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 86,
-        "column": 9
       }
     },
     {
@@ -510,8 +440,8 @@
       }
     },
     {
-      "id": "987d8f3ed53a350-fdcceb3f9769da6",
-      "title": "Onboarding — downstream step invalidation path 2 — deploy-settings indicator loses checkmark when agentless service is added",
+      "id": "987d8f3ed53a350-bbc9f0dbfeb2443",
+      "title": "Onboarding — downstream step invalidation path 2 — authenticate-and-deploy indicator loses checkmark when agentless service is added",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

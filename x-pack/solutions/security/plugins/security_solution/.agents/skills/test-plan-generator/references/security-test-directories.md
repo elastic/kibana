@@ -56,8 +56,8 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration (FTR) | `x-pack/solutions/security/test/security_solution_api_integration/` | `node scripts/functional_tests` |
 | Functional / E2E (FTR) | `x-pack/solutions/security/test/functional/` | `node scripts/functional_tests` |
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/**/*.cy.ts` | Cypress runner |
-| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
-| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout.js run-tests` |
+| Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout run-tests` |
+| Scout UI | `<plugin>/test/scout*/ui/**/*.spec.ts` | `node scripts/scout run-tests` |
 
 ---
 

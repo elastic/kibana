@@ -14,22 +14,30 @@ import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 
-let capturedOnTemplateChange: ((t: string) => void) | undefined;
+jest.mock('@kbn/presentation-publishing', () => {
+  const actual = jest.requireActual('@kbn/presentation-publishing');
+  return { ...actual, apiIsPresentationContainer: jest.fn(() => false) };
+});
+
+const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
+  typeof apiIsPresentationContainer
+>;
+
+let capturedComponentProps: { onGenerateWithChat?: () => void } | undefined;
 
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
-    prompt: string | undefined;
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
-    onTemplateChange: (t: string) => void;
+    onGenerateWithChat?: () => void;
   }) => {
-    capturedOnTemplateChange = props.onTemplateChange;
+    capturedComponentProps = props;
     return (
       <div
         data-test-subj="mockCustomContentComponent"
-        data-prompt={props.prompt ?? ''}
         data-esql-query={props.esqlQuery ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
@@ -42,6 +50,7 @@ let capturedFlyoutProps:
   | {
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
       onClose: () => void;
+      onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
     }
   | undefined;
 
@@ -64,16 +73,17 @@ const baseState: CustomContentEmbeddableState = {
   template: '<div>static html</div>',
 };
 
-const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
-  const parentApiStub = {};
+const buildEmbeddable = async (
+  initialState: CustomContentEmbeddableState,
+  parentApi: Record<string, unknown> = {}
+) => {
   const uuid = 'test-uuid';
 
   const embeddable = await customContentEmbeddableFactory.buildEmbeddable({
     initializeDrilldownsManager: jest.fn(),
     initialState,
-    parentApi: parentApiStub,
-    finalizeApi: (api) =>
-      ({ ...api, uuid, parentApi: parentApiStub } as unknown as CustomContentApi),
+    parentApi,
+    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
     uuid,
   });
 
@@ -83,6 +93,8 @@ const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
 describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
     mockAgentBuilder = undefined;
+    capturedComponentProps = undefined;
+    mockApiIsPresentationContainer.mockReturnValue(false);
   });
 
   describe('serializeState', () => {
@@ -147,7 +159,7 @@ describe('customContentEmbeddableFactory', () => {
       expect(listener).toHaveBeenCalled();
     });
 
-    it('emits when prompt or template changes via applySerializedState', async () => {
+    it('emits when template changes via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       const listener = jest.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
@@ -161,29 +173,13 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('Component', () => {
-    it('passes prompt, esqlQuery and savedTemplate to CustomContentComponent', async () => {
+    it('passes esqlQuery and savedTemplate to CustomContentComponent', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-prompt', 'Show KPI cards');
       expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
-    });
-  });
-
-  describe('template caching', () => {
-    it('writes back template when onTemplateChange is called from the component', async () => {
-      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
-      await act(async () => render(<embeddable.Component />));
-
-      expect(embeddable.api.serializeState().template).toBeUndefined();
-
-      act(() => {
-        capturedOnTemplateChange!('<div>generated</div>');
-      });
-
-      expect(embeddable.api.serializeState().template).toBe('<div>generated</div>');
     });
   });
 
@@ -233,6 +229,85 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => capturedFlyoutProps!.onClose());
       await waitFor(() => expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull());
+    });
+
+    it('cancelling on a new panel removes it from the parent', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).toHaveBeenCalledWith('test-uuid');
+    });
+
+    it('cancelling an existing panel does not remove it', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).not.toHaveBeenCalled();
+    });
+
+    it('saving a new panel does not remove it on subsequent cancel', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onSave('FROM logs', '<div>saved</div>'));
+
+      await act(async () => embeddable.api.onEdit());
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).not.toHaveBeenCalled();
+    });
+
+    it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('', undefined));
+
+      expect(removePanel).not.toHaveBeenCalled();
+      expect(openChat).toHaveBeenCalled();
+      await waitFor(() =>
+        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
+      );
     });
   });
 
@@ -341,6 +416,71 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => chatEvents$.next(roundCompleteEvent));
 
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
+    });
+  });
+
+  describe('handleGenerateWithChat', () => {
+    it('opens the agent builder with the correct attachment', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      expect(openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachments: expect.arrayContaining([
+            expect.objectContaining({
+              data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
+            }),
+          ]),
+          sessionTag: expect.stringContaining('test-uuid'),
+        })
+      );
+    });
+
+    it('closes the flyout before opening the agent builder', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
+      );
+      expect(openChat).toHaveBeenCalled();
+    });
+
+    it('does nothing when agentBuilder is unavailable', async () => {
+      mockAgentBuilder = undefined;
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await expect(
+        act(async () => capturedComponentProps?.onGenerateWithChat?.())
+      ).resolves.not.toThrow();
     });
   });
 });
