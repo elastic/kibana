@@ -32,9 +32,9 @@ const baseSource: AgentProperties = {
   updated_at: '2024-01-01T00:00:00.000Z',
 };
 
-const ownerUser = { id: 'user-1', username: 'owner' };
-const nonOwnerUser = { id: 'user-2', username: 'other' };
-const ownerByUsernameOnly = { username: 'owner' };
+const ownerUser = { id: 'user-1', username: 'owner', isAdmin: false };
+const nonOwnerUser = { id: 'user-2', username: 'other', isAdmin: false };
+const ownerByUsernameOnly = { username: 'owner', isAdmin: false };
 
 describe('normalizeAccessControl', () => {
   it('falls back to public for legacy documents without access control, unlike new agents', () => {
@@ -534,7 +534,7 @@ describe('redactAccessControlForCaller', () => {
 
   it("keeps only the caller's own entry for a user without manage rights", () => {
     // Bob has User access via the access_control (User < Manager threshold) so he cannot manage.
-    const bobUser = { username: 'bob' };
+    const bobUser = { username: 'bob', isAdmin: false };
     const definition = {
       id: 'a',
       access_control: {
@@ -555,7 +555,7 @@ describe('redactAccessControlForCaller', () => {
 
   it("keeps only the caller's own entry for a user with Editor via the access_control", () => {
     // Alice can edit the agent, but ACL management requires Manager.
-    const aliceUser = { username: 'alice' };
+    const aliceUser = { username: 'alice', isAdmin: false };
     const definition = {
       id: 'a',
       access_control: {
@@ -573,7 +573,7 @@ describe('redactAccessControlForCaller', () => {
   });
 
   it('returns the full entries list for a user with Manager via legacy acl', () => {
-    const aliceUser = { username: 'alice' };
+    const aliceUser = { username: 'alice', isAdmin: false };
     const aliceManagerEntry = {
       type: 'user' as const,
       name: 'alice',
