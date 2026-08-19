@@ -721,7 +721,7 @@ export function ActionsMenu({
                 size="m"
                 iconSize="m"
                 color="text"
-                display="empty"
+                display="base"
                 css={styles.rowActionButton}
                 aria-label={i18n.translate('workflows.actionsMenu.addStep', {
                   defaultMessage: 'Add step',
@@ -1479,7 +1479,7 @@ const componentStyles = {
     alignItems: 'center',
     gap: '4px',
   }),
-  // 32×32 empty icon buttons (no border / fill) — Info + Add
+  // 32×32 icon buttons — Info empty; Add uses display="base" (border) for hierarchy
   rowActionButton: css({
     inlineSize: '32px',
     blockSize: '32px',

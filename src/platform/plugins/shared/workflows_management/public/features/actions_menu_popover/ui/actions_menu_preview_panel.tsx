@@ -612,7 +612,7 @@ function PreviewStepRow({
               size="m"
               iconSize="m"
               color="text"
-              display="empty"
+              display="base"
               css={styles.rowActionButton}
               aria-label={i18n.translate('workflows.actionsMenu.addStep', {
                 defaultMessage: 'Add step',
