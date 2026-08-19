@@ -27,11 +27,7 @@ import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
-import {
-  isOutputSecretStorageEnabled,
-  extractAndWriteOutputSecrets,
-  extractAndUpdateOutputSecrets,
-} from './secrets';
+import { extractAndWriteOutputSecrets, extractAndUpdateOutputSecrets } from './secrets';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -44,9 +40,6 @@ const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction
   typeof findAgentlessPolicies
 >;
 
-const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
-  typeof isOutputSecretStorageEnabled
->;
 const mockedExtractAndWriteOutputSecrets = extractAndWriteOutputSecrets as jest.MockedFunction<
   typeof extractAndWriteOutputSecrets
 >;
