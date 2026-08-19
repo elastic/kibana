@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiProgress,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RumVitalRanks } from '../../../../common/rum_app';
@@ -16,17 +23,20 @@ export function RankChips({
   p75,
   ranks,
   unit = 'ms',
+  tooltip,
 }: {
   name: string;
   p75: number | null;
   ranks: RumVitalRanks | null;
   unit?: 'ms' | 'score';
+  tooltip?: string;
 }) {
   const value = unit === 'score' ? (p75 == null ? '—' : p75.toFixed(3)) : formatReportMs(p75);
   return (
     <div data-test-subj={`uxReportVital-${name}`}>
       <EuiText size="s">
-        <strong>{name}</strong> {value}
+        <strong>{name}</strong>
+        {tooltip ? <EuiIconTip content={tooltip} type="info" /> : null} {value}
       </EuiText>
       {ranks ? (
         <>

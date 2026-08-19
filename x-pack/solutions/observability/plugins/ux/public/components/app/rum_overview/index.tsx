@@ -15,6 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -34,6 +35,8 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumOverview } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName } from '../../../utils/vital_help_label';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
 import { TrendChartTypeGroup, TrendMetric, useTrendChartType } from './trend_metric';
 import { VisitorCountriesPanel } from './visitor_countries';
@@ -270,13 +273,23 @@ export function RumOverviewV2() {
     },
     {
       field: 'p75Lcp',
-      name: i18n.translate('xpack.ux.overview.pages.lcp', { defaultMessage: 'LCP p75' }),
-      width: '100px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.overview.pages.lcp', { defaultMessage: 'LCP p75' })}
+          tooltip={VITAL_P75_HELP.lcp}
+        />
+      ),
+      width: '120px',
       render: (value: number | null) => formatMs(value),
     },
     {
       field: 'p75Inp',
-      name: i18n.translate('xpack.ux.overview.pages.inp', { defaultMessage: 'INP p75' }),
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.overview.pages.inp', { defaultMessage: 'INP p75' })}
+          tooltip={VITAL_P75_HELP.inp}
+        />
+      ),
       width: '100px',
       render: (value: number | null) => formatMs(value),
     },
@@ -344,36 +357,50 @@ export function RumOverviewV2() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel hasBorder paddingSize="m">
-            <EuiLink
-              data-test-subj="uxOverviewKpiLoad"
-              onClick={() => pushRumPath(history, '/pages')}
-            >
-              <EuiStat
-                title={formatMs(data.kpis.p75LoadMs)}
-                titleSize="m"
-                description={i18n.translate('xpack.ux.overview.kpi.load', {
-                  defaultMessage: 'p75 load',
-                })}
-              />
-            </EuiLink>
+            <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
+              <EuiFlexItem>
+                <EuiLink
+                  data-test-subj="uxOverviewKpiLoad"
+                  onClick={() => pushRumPath(history, '/pages')}
+                >
+                  <EuiStat
+                    title={formatMs(data.kpis.p75LoadMs)}
+                    titleSize="m"
+                    description={i18n.translate('xpack.ux.overview.kpi.load', {
+                      defaultMessage: 'p75 load',
+                    })}
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip content={VITAL_P75_HELP.load} type="info" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="xs" />
             <BudgetChips items={budgets} templateId="page_load" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel hasBorder paddingSize="m">
-            <EuiLink
-              data-test-subj="uxOverviewKpiInp"
-              onClick={() => pushRumPath(history, '/pages')}
-            >
-              <EuiStat
-                title={formatMs(data.kpis.p75Inp)}
-                titleSize="m"
-                description={i18n.translate('xpack.ux.overview.kpi.inp', {
-                  defaultMessage: 'p75 INP',
-                })}
-              />
-            </EuiLink>
+            <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
+              <EuiFlexItem>
+                <EuiLink
+                  data-test-subj="uxOverviewKpiInp"
+                  onClick={() => pushRumPath(history, '/pages')}
+                >
+                  <EuiStat
+                    title={formatMs(data.kpis.p75Inp)}
+                    titleSize="m"
+                    description={i18n.translate('xpack.ux.overview.kpi.inp', {
+                      defaultMessage: 'p75 INP',
+                    })}
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip content={VITAL_P75_HELP.inp} type="info" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="xs" />
             <BudgetChips items={budgets} templateId="inp" pagePath={pageUrl} />
           </EuiPanel>

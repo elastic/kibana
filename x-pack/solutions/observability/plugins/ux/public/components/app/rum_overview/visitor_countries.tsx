@@ -26,6 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import type { RumCountryRow } from '../../../../common/rum_app';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName } from '../../../utils/vital_help_label';
 import { VisitorCountryMap } from './visitor_country_map';
 
 const LCP_POOR_MS = 4000;
@@ -112,7 +114,12 @@ export function VisitorCountriesPanel({
     },
     {
       field: 'p75Lcp',
-      name: i18n.translate('xpack.ux.overview.countries.lcp', { defaultMessage: 'LCP p75' }),
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.overview.countries.lcp', { defaultMessage: 'LCP p75' })}
+          tooltip={VITAL_P75_HELP.lcp}
+        />
+      ),
       width: '110px',
       render: (value: number | null) => {
         const tone = lcpTone(value);

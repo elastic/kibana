@@ -28,6 +28,8 @@ import type {
   RumScorecardReport,
 } from '../../../../common/rum_report';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName, VitalHelpLabel } from '../../../utils/vital_help_label';
 import { TrendMetric } from '../rum_overview/trend_metric';
 import { DeltaStat } from './delta_stat';
 import { formatReportCount, formatReportMs, formatReportRate } from './format';
@@ -63,25 +65,40 @@ export function ScorecardReport({ report }: { report: RumScorecardReport }) {
     },
     {
       field: 'p75Lcp',
-      name: i18n.translate('xpack.ux.reports.scorecard.pages.lcpLabel', {
-        defaultMessage: 'LCP p75',
-      }),
-      width: '90px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.reports.scorecard.pages.lcpLabel', {
+            defaultMessage: 'LCP p75',
+          })}
+          tooltip={VITAL_P75_HELP.lcp}
+        />
+      ),
+      width: '110px',
       render: (value: number | null) => formatReportMs(value),
     },
     {
       field: 'p75Inp',
-      name: i18n.translate('xpack.ux.reports.scorecard.pages.inpLabel', {
-        defaultMessage: 'INP p75',
-      }),
-      width: '90px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.reports.scorecard.pages.inpLabel', {
+            defaultMessage: 'INP p75',
+          })}
+          tooltip={VITAL_P75_HELP.inp}
+        />
+      ),
+      width: '110px',
       render: (value: number | null) => formatReportMs(value),
     },
     {
       field: 'p75Cls',
-      name: i18n.translate('xpack.ux.reports.scorecard.pages.clsLabel', {
-        defaultMessage: 'CLS p75',
-      }),
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.reports.scorecard.pages.clsLabel', {
+            defaultMessage: 'CLS p75',
+          })}
+          tooltip={VITAL_P75_HELP.cls}
+        />
+      ),
       width: '90px',
       render: (value: number | null) => (value == null ? '—' : value.toFixed(3)),
     },
@@ -173,9 +190,14 @@ export function ScorecardReport({ report }: { report: RumScorecardReport }) {
         </EuiFlexItem>
         <EuiFlexItem>
           <DeltaStat
-            title={i18n.translate('xpack.ux.reports.scorecard.kpi.loadLabel', {
-              defaultMessage: 'p75 load',
-            })}
+            title={
+              <VitalHelpLabel
+                label={i18n.translate('xpack.ux.reports.scorecard.kpi.loadLabel', {
+                  defaultMessage: 'p75 load',
+                })}
+                tooltip={VITAL_P75_HELP.load}
+              />
+            }
             value={formatReportMs(report.kpis.p75LoadMs.current)}
             delta={report.kpis.p75LoadMs}
             invert
@@ -183,9 +205,14 @@ export function ScorecardReport({ report }: { report: RumScorecardReport }) {
         </EuiFlexItem>
         <EuiFlexItem>
           <DeltaStat
-            title={i18n.translate('xpack.ux.reports.scorecard.kpi.inpLabel', {
-              defaultMessage: 'p75 INP',
-            })}
+            title={
+              <VitalHelpLabel
+                label={i18n.translate('xpack.ux.reports.scorecard.kpi.inpLabel', {
+                  defaultMessage: 'p75 INP',
+                })}
+                tooltip={VITAL_P75_HELP.inp}
+              />
+            }
             value={formatReportMs(report.kpis.p75Inp.current)}
             delta={report.kpis.p75Inp}
             invert
@@ -208,14 +235,25 @@ export function ScorecardReport({ report }: { report: RumScorecardReport }) {
             <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <RankChips name="LCP" p75={report.vitals.lcp.p75} ranks={report.vitals.lcp.ranks} />
+                <RankChips
+                  name="LCP"
+                  tooltip={VITAL_P75_HELP.lcp}
+                  p75={report.vitals.lcp.p75}
+                  ranks={report.vitals.lcp.ranks}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
-                <RankChips name="INP" p75={report.vitals.inp.p75} ranks={report.vitals.inp.ranks} />
+                <RankChips
+                  name="INP"
+                  tooltip={VITAL_P75_HELP.inp}
+                  p75={report.vitals.inp.p75}
+                  ranks={report.vitals.inp.ranks}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <RankChips
                   name="CLS"
+                  tooltip={VITAL_P75_HELP.cls}
                   p75={report.vitals.cls.p75}
                   ranks={report.vitals.cls.ranks}
                   unit="score"

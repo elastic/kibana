@@ -26,6 +26,7 @@ import type {
   SessionUser,
   SessionWebVitals,
 } from '../../../common/session_replay';
+import { VITAL_HELP } from '../../utils/vital_help';
 
 export const formatTime = (value: string | null): string => {
   if (!value) {
@@ -362,13 +363,43 @@ export const SignalBadges = ({
 
 const VITAL_META: Record<
   keyof SessionWebVitals,
-  { label: string; unit: 'ms' | 'score'; good: number; poor: number }
+  { label: string; unit: 'ms' | 'score'; good: number; poor: number; tooltip: string }
 > = {
-  lcp: { label: 'LCP', unit: 'ms', good: 2500, poor: 4000 },
-  fcp: { label: 'FCP', unit: 'ms', good: 1800, poor: 3000 },
-  inp: { label: 'INP', unit: 'ms', good: 200, poor: 500 },
-  ttfb: { label: 'TTFB', unit: 'ms', good: 800, poor: 1800 },
-  cls: { label: 'CLS', unit: 'score', good: 0.1, poor: 0.25 },
+  lcp: {
+    label: i18n.translate('xpack.ux.inventory.lcpColumnLabel', { defaultMessage: 'LCP' }),
+    unit: 'ms',
+    good: 2500,
+    poor: 4000,
+    tooltip: VITAL_HELP.lcp,
+  },
+  fcp: {
+    label: i18n.translate('xpack.ux.inventory.fcpColumnLabel', { defaultMessage: 'FCP' }),
+    unit: 'ms',
+    good: 1800,
+    poor: 3000,
+    tooltip: VITAL_HELP.fcp,
+  },
+  inp: {
+    label: i18n.translate('xpack.ux.inventory.inpColumnLabel', { defaultMessage: 'INP' }),
+    unit: 'ms',
+    good: 200,
+    poor: 500,
+    tooltip: VITAL_HELP.inp,
+  },
+  ttfb: {
+    label: i18n.translate('xpack.ux.inventory.ttfbColumnLabel', { defaultMessage: 'TTFB' }),
+    unit: 'ms',
+    good: 800,
+    poor: 1800,
+    tooltip: VITAL_HELP.ttfb,
+  },
+  cls: {
+    label: i18n.translate('xpack.ux.inventory.clsColumnLabel', { defaultMessage: 'CLS' }),
+    unit: 'score',
+    good: 0.1,
+    poor: 0.25,
+    tooltip: VITAL_HELP.cls,
+  },
 };
 
 const vitalColor = (
@@ -408,9 +439,11 @@ export const WebVitalBadges = ({ vitals }: { vitals: SessionWebVitals }) => {
     <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
       {entries.map(({ name, value }) => (
         <EuiFlexItem grow={false} key={name}>
-          <EuiBadge color={vitalColor(name, value)}>
-            {VITAL_META[name].label} {formatVital(name, value)}
-          </EuiBadge>
+          <EuiToolTip content={VITAL_META[name].tooltip}>
+            <EuiBadge color={vitalColor(name, value)} tabIndex={0}>
+              {VITAL_META[name].label} {formatVital(name, value)}
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

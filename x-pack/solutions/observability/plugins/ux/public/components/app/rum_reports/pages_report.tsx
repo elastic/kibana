@@ -20,6 +20,8 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { RumPagesReport, RumReportPageRow } from '../../../../common/rum_report';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { POOR_LCP_HELP, VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName, VitalHelpLabel } from '../../../utils/vital_help_label';
 import { DeltaStat } from './delta_stat';
 import { formatReportCount, formatReportMs, formatReportRate } from './format';
 import { SessionChips } from './session_chips';
@@ -46,19 +48,34 @@ const pageColumns = (
   },
   {
     field: 'p75Lcp',
-    name: i18n.translate('xpack.ux.reports.pages.lcpLabel', { defaultMessage: 'LCP p75' }),
-    width: '100px',
+    name: (
+      <VitalColumnName
+        label={i18n.translate('xpack.ux.reports.pages.lcpLabel', { defaultMessage: 'LCP p75' })}
+        tooltip={VITAL_P75_HELP.lcp}
+      />
+    ),
+    width: '120px',
     render: (value: number | null) => formatReportMs(value),
   },
   {
     field: 'p75Inp',
-    name: i18n.translate('xpack.ux.reports.pages.inpLabel', { defaultMessage: 'INP p75' }),
-    width: '100px',
+    name: (
+      <VitalColumnName
+        label={i18n.translate('xpack.ux.reports.pages.inpLabel', { defaultMessage: 'INP p75' })}
+        tooltip={VITAL_P75_HELP.inp}
+      />
+    ),
+    width: '120px',
     render: (value: number | null) => formatReportMs(value),
   },
   {
     field: 'p75Cls',
-    name: i18n.translate('xpack.ux.reports.pages.clsLabel', { defaultMessage: 'CLS p75' }),
+    name: (
+      <VitalColumnName
+        label={i18n.translate('xpack.ux.reports.pages.clsLabel', { defaultMessage: 'CLS p75' })}
+        tooltip={VITAL_P75_HELP.cls}
+      />
+    ),
     width: '90px',
     render: (value: number | null) => (value == null ? '—' : value.toFixed(3)),
   },
@@ -96,9 +113,14 @@ export function PagesReport({ report }: { report: RumPagesReport }) {
         </EuiFlexItem>
         <EuiFlexItem>
           <DeltaStat
-            title={i18n.translate('xpack.ux.reports.pages.kpi.poorLcpLabel', {
-              defaultMessage: 'Pages with poor LCP',
-            })}
+            title={
+              <VitalHelpLabel
+                label={i18n.translate('xpack.ux.reports.pages.kpi.poorLcpLabel', {
+                  defaultMessage: 'Pages with poor LCP',
+                })}
+                tooltip={POOR_LCP_HELP}
+              />
+            }
             value={formatReportRate(report.kpis.poorLcpPct.current)}
             delta={report.kpis.poorLcpPct}
             invert

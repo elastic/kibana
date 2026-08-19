@@ -23,6 +23,8 @@ import { useHistory } from 'react-router-dom';
 import type { RumCountryRow } from '../../../../common/rum_app';
 import type { RumReportCountryRow, RumReportDelta } from '../../../../common/rum_report';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName } from '../../../utils/vital_help_label';
 import { VisitorCountryMap } from '../rum_overview/visitor_country_map';
 import { formatReportMs, formatReportRate } from './format';
 
@@ -87,7 +89,14 @@ export function CountriesReportPanel({
     },
     {
       field: 'p75Lcp',
-      name: i18n.translate('xpack.ux.reports.countries.lcpLabel', { defaultMessage: 'LCP p75' }),
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.reports.countries.lcpLabel', {
+            defaultMessage: 'LCP p75',
+          })}
+          tooltip={VITAL_P75_HELP.lcp}
+        />
+      ),
       width: '90px',
       render: (value: number | null) => formatReportMs(value),
     },

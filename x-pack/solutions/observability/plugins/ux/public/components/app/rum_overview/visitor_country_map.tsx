@@ -14,6 +14,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPopoverTitle,
   EuiSpacer,
   useEuiTheme,
@@ -24,6 +25,7 @@ import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import type { RumCountryRow } from '../../../../common/rum_app';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
 import { countryCentroid } from './country_centroids';
 import {
   countryChoroplethLayer,
@@ -220,6 +222,7 @@ function CountryMapTooltip({
           {i18n.translate('xpack.ux.overview.countries.tooltipLcpLabel', {
             defaultMessage: 'LCP p75',
           })}
+          <EuiIconTip content={VITAL_P75_HELP.lcp} type="info" />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{formatMs(row.p75Lcp)}</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>

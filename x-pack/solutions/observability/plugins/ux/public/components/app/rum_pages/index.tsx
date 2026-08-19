@@ -49,6 +49,13 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPageDetail, fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import {
+  AVG_LOAD_HELP,
+  PASSING_CWV_HELP,
+  POOR_LCP_HELP,
+  VITAL_P75_HELP,
+} from '../../../utils/vital_help';
+import { VitalHelpLabel, VitalColumnName } from '../../../utils/vital_help_label';
 import { uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import { Sparkline } from '../../session_replay/session_ui';
 import { BackendCallsPanel } from '../../trace/backend_calls_panel';
@@ -133,7 +140,7 @@ const VitalCell = ({
 };
 
 const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
-  const items: Array<{ title: string; description: string }> = [
+  const items: Array<{ title: string; description: React.ReactNode }> = [
     {
       title: String(kpis.views),
       description: i18n.translate('xpack.ux.pages.kpi.viewsLabel', { defaultMessage: 'Views' }),
@@ -146,15 +153,25 @@ const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
     },
     {
       title: percent(kpis.passingCwvPct),
-      description: i18n.translate('xpack.ux.pages.kpi.passingCwvLabel', {
-        defaultMessage: 'Views passing CWV',
-      }),
+      description: (
+        <VitalHelpLabel
+          label={i18n.translate('xpack.ux.pages.kpi.passingCwvLabel', {
+            defaultMessage: 'Views passing CWV',
+          })}
+          tooltip={PASSING_CWV_HELP}
+        />
+      ),
     },
     {
       title: String(kpis.poorLcpPages),
-      description: i18n.translate('xpack.ux.pages.kpi.poorLcpLabel', {
-        defaultMessage: 'Pages with poor LCP',
-      }),
+      description: (
+        <VitalHelpLabel
+          label={i18n.translate('xpack.ux.pages.kpi.poorLcpLabel', {
+            defaultMessage: 'Pages with poor LCP',
+          })}
+          tooltip={POOR_LCP_HELP}
+        />
+      ),
     },
   ];
 
@@ -162,7 +179,7 @@ const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="uxRumPagesKpis">
       <EuiFlexGroup responsive={false} gutterSize="l" wrap>
         {items.map((item) => (
-          <EuiFlexItem grow={false} key={item.description}>
+          <EuiFlexItem grow={false} key={item.title}>
             <EuiStat
               title={item.title}
               description={item.description}
@@ -681,25 +698,45 @@ export function RumPagesPanel() {
     },
     {
       field: 'avgDurationMs',
-      name: i18n.translate('xpack.ux.pages.table.duration', { defaultMessage: 'Avg load' }),
-      width: '100px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.pages.table.duration', { defaultMessage: 'Avg load' })}
+          tooltip={AVG_LOAD_HELP}
+        />
+      ),
+      width: '110px',
       render: (value: number | null) => formatMs(value),
     },
     {
       field: 'p75Lcp',
-      name: i18n.translate('xpack.ux.pages.table.lcp', { defaultMessage: 'LCP p75' }),
-      width: '130px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.pages.table.lcp', { defaultMessage: 'LCP p75' })}
+          tooltip={VITAL_P75_HELP.lcp}
+        />
+      ),
+      width: '140px',
       render: (value: number | null) => <VitalCell vital="lcp" value={value} format={formatMs} />,
     },
     {
       field: 'p75Inp',
-      name: i18n.translate('xpack.ux.pages.table.inp', { defaultMessage: 'INP p75' }),
-      width: '120px',
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.pages.table.inp', { defaultMessage: 'INP p75' })}
+          tooltip={VITAL_P75_HELP.inp}
+        />
+      ),
+      width: '130px',
       render: (value: number | null) => <VitalCell vital="inp" value={value} format={formatMs} />,
     },
     {
       field: 'p75Cls',
-      name: i18n.translate('xpack.ux.pages.table.cls', { defaultMessage: 'CLS p75' }),
+      name: (
+        <VitalColumnName
+          label={i18n.translate('xpack.ux.pages.table.cls', { defaultMessage: 'CLS p75' })}
+          tooltip={VITAL_P75_HELP.cls}
+        />
+      ),
       width: '120px',
       render: (value: number | null) => (
         <VitalCell
@@ -941,9 +978,14 @@ export function RumPagesPanel() {
                 <EuiFlexItem grow={false}>
                   <EuiStat
                     title={formatMs(selected.avgDurationMs)}
-                    description={i18n.translate('xpack.ux.pages.detail.load', {
-                      defaultMessage: 'Avg load',
-                    })}
+                    description={
+                      <VitalHelpLabel
+                        label={i18n.translate('xpack.ux.pages.detail.load', {
+                          defaultMessage: 'Avg load',
+                        })}
+                        tooltip={AVG_LOAD_HELP}
+                      />
+                    }
                     titleSize="s"
                     textAlign="left"
                   />
@@ -968,19 +1010,34 @@ export function RumPagesPanel() {
                 <EuiFlexGroup gutterSize="l" wrap responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      {i18n.translate('xpack.ux.pages.detail.lcp', { defaultMessage: 'LCP p75' })}
+                      <VitalHelpLabel
+                        label={i18n.translate('xpack.ux.pages.detail.lcp', {
+                          defaultMessage: 'LCP p75',
+                        })}
+                        tooltip={VITAL_P75_HELP.lcp}
+                      />
                     </EuiText>
                     <VitalCell vital="lcp" value={selected.p75Lcp} format={formatMs} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      {i18n.translate('xpack.ux.pages.detail.inp', { defaultMessage: 'INP p75' })}
+                      <VitalHelpLabel
+                        label={i18n.translate('xpack.ux.pages.detail.inp', {
+                          defaultMessage: 'INP p75',
+                        })}
+                        tooltip={VITAL_P75_HELP.inp}
+                      />
                     </EuiText>
                     <VitalCell vital="inp" value={selected.p75Inp} format={formatMs} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      {i18n.translate('xpack.ux.pages.detail.cls', { defaultMessage: 'CLS p75' })}
+                      <VitalHelpLabel
+                        label={i18n.translate('xpack.ux.pages.detail.cls', {
+                          defaultMessage: 'CLS p75',
+                        })}
+                        tooltip={VITAL_P75_HELP.cls}
+                      />
                     </EuiText>
                     <VitalCell
                       vital="cls"

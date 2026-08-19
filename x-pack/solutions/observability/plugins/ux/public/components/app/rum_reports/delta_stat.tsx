@@ -18,7 +18,7 @@ export function DeltaStat({
   invert = false,
   'data-test-subj': dataTestSubj,
 }: {
-  title: string;
+  title: React.ReactNode;
   value: string;
   delta: RumReportDelta;
   invert?: boolean;
