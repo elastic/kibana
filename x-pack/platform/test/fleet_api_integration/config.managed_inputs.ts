@@ -24,8 +24,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...(baseExperimentalArg
       ? JSON.parse(baseExperimentalArg.slice(EXPERIMENTAL_FEATURES_ARG_PREFIX.length))
       : {}),
-    // Managed OTLP output: allows OTLP output type creation and management for any policy.
-    managedOtlpOutput: true,
+    // OTLP output: allows OTLP output type creation and management for any policy.
+    enableOtlpOutput: true,
   };
 
   return {

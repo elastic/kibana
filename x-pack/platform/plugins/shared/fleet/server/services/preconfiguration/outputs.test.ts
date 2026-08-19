@@ -64,9 +64,11 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('Outputs preconfiguration', () => {
   let logstashSecretHash: string;
+  let otlpKeyPemHash: string;
 
   beforeEach(async () => {
     logstashSecretHash = await hashSecret('secretKey');
+    otlpKeyPemHash = await hashSecret('secretKeyPem');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
@@ -282,6 +284,25 @@ describe('Outputs preconfiguration', () => {
           is_preconfigured: true,
           secrets: {
             service_token: 'secretServiceToken',
+          },
+        },
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'otlp-key-pem-id', hash: otlpKeyPemHash },
+              },
+            },
           },
         },
       ];
@@ -1437,6 +1458,36 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).not.toHaveBeenCalled();
       expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should not update output if a preconfigured OTLP output with secrets exists and did not change', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: 'secretKeyPem',
+              },
+            },
+          },
+        },
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
     const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [

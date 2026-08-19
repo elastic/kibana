@@ -1395,6 +1395,7 @@ describe('Output Service', () => {
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
           enableOtlpOutput: true,
         } as any);
+        mockedExtractAndWriteOutputSecrets.mockResolvedValue({ output: { type: 'otlp' } } as any);
       });
 
       afterEach(() => {
@@ -1462,10 +1463,30 @@ describe('Output Service', () => {
         );
       });
 
-      it('should write tls secrets into otlp_exporter_secrets when secret storage is disabled', async () => {
+      it('should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+        mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
+          output: {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test OTLP secrets',
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'owner-auth-secret-id' },
+                    auth: { id: 'auth-secret-id' },
+                  },
+                },
+              },
+            },
+          },
+        } as any);
 
         await outputService.create(
           soClient,
@@ -1473,7 +1494,7 @@ describe('Output Service', () => {
           {
             is_default: false,
             is_default_monitoring: false,
-            name: 'Test OTLP secrets plaintext',
+            name: 'Test OTLP secrets',
             type: 'otlp',
             otlp_exporter: {
               endpoint: 'https://otel.example.com:4317',
@@ -1495,14 +1516,23 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
-            otlp_exporter: expect.not.objectContaining({
-              tls: expect.objectContaining({ key_pem: expect.anything() }),
-            }),
-            otlp_exporter_secrets: JSON.stringify({
-              key_pem: 'my-key-pem',
-              tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
-            }),
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'owner-auth-secret-id' },
+                    auth: { id: 'auth-secret-id' },
+                  },
+                },
+              },
+            },
           }),
+          expect.anything()
+        );
+        expect(soClient.create).not.toBeCalledWith(
+          expect.anything(),
+          expect.objectContaining({ otlp_exporter_secrets: expect.anything() }),
           expect.anything()
         );
       });
@@ -1511,7 +1541,6 @@ describe('Output Service', () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedIsOutputSecretStorageEnabled.mockResolvedValueOnce(true);
         mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
           output: {
             is_default: false,
@@ -3031,6 +3060,10 @@ describe('Output Service', () => {
         } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+        mockedExtractAndUpdateOutputSecrets.mockResolvedValue({
+          secretsToDelete: [],
+          outputUpdate: {},
+        } as any);
       });
 
       afterEach(() => {
@@ -3187,7 +3220,6 @@ describe('Output Service', () => {
             },
           })
         );
-
         await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
           otlp_exporter: {
             endpoint: 'https://otel.example.com:4317',
@@ -3276,8 +3308,26 @@ describe('Output Service', () => {
         );
       });
 
-      it('Should write tls secrets into otlp_exporter_secrets on OTLP update when secret storage is disabled', async () => {
+      it('Should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
         const soClient = getMockedSoClient({});
+        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
+          secretsToDelete: [],
+          outputUpdate: {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'updated-key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'updated-owner-auth-secret-id' },
+                    auth: { id: 'updated-auth-secret-id' },
+                  },
+                },
+              },
+            },
+          },
+        } as any);
 
         await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
           otlp_exporter: {
@@ -3299,20 +3349,28 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
-            otlp_exporter: expect.not.objectContaining({
-              tls: expect.objectContaining({ key_pem: expect.anything() }),
-            }),
-            otlp_exporter_secrets: JSON.stringify({
-              key_pem: 'updated-key-pem',
-              tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
-            }),
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'updated-key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'updated-owner-auth-secret-id' },
+                    auth: { id: 'updated-auth-secret-id' },
+                  },
+                },
+              },
+            },
           })
+        );
+        expect(soClient.update).not.toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
         );
       });
 
       it('Should extract tls secrets as ESO secret refs on OTLP update when secret storage is enabled', async () => {
         const soClient = getMockedSoClient({});
-        mockedIsOutputSecretStorageEnabled.mockResolvedValueOnce(true);
         mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
           secretsToDelete: [],
           outputUpdate: {

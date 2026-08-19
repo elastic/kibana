@@ -107,7 +107,6 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
-import { extractAndEncryptOtlpTlsSecrets } from './outputs/otlp_secrets';
 
 import {
   canEnableSyncIntegrations,
@@ -163,26 +162,8 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   }
 
   if (isOtlpSOOutput(so.attributes)) {
-    const { output_id: outputId, otlp_exporter_secrets, ...attributes } = so.attributes;
-    let parsedSecrets: Record<string, unknown> | undefined;
-    try {
-      parsedSecrets =
-        typeof otlp_exporter_secrets === 'string' ? JSON.parse(otlp_exporter_secrets) : undefined;
-    } catch (e) {
-      logger.warn(`Unable to parse otlp_exporter_secrets for output ${so.id}: ${e.message}`);
-    }
-    return {
-      id: outputId ?? so.id,
-      ...attributes,
-      ...(parsedSecrets
-        ? {
-            otlp_exporter: {
-              ...attributes.otlp_exporter,
-              tls: { ...attributes.otlp_exporter?.tls, ...parsedSecrets },
-            },
-          }
-        : {}),
-    };
+    const { output_id: outputId, ...attributes } = so.attributes;
+    return { id: outputId ?? so.id, ...attributes };
   }
 
   const { output_id: outputId, ...attributes } =
@@ -839,8 +820,13 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
+    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
+    // output-secrets floor, so its credentials are always stored as references.
+    const useSecretStorage =
+      isOtlpOutput(output) || (await isOutputSecretStorageEnabled(esClient, soClient));
+
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (useSecretStorage) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -848,9 +834,6 @@ class OutputService {
       });
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
-      if (isOtlpOutput(output) && isOtlpOutput(data)) {
-        extractAndEncryptOtlpTlsSecrets(data);
-      }
     } else {
       if (
         isBeatsOutput(output) &&
@@ -875,8 +858,6 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets.service_token as string;
         }
-      } else if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
-        extractAndEncryptOtlpTlsSecrets(data, output.secrets?.otlp_exporter?.tls);
       }
     }
 
@@ -1487,8 +1468,13 @@ class OutputService {
     }
     await remoteSyncIntegrationsCheck(esClient, data);
 
+    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
+    // output-secrets floor, so its credentials are always stored as references.
+    const useSecretStorage =
+      isOtlpOutput(typedFullUpdateData) || (await isOutputSecretStorageEnabled(esClient, soClient));
+
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (useSecretStorage) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
@@ -1498,9 +1484,6 @@ class OutputService {
 
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
-      if (isOtlpOutput(updateData)) {
-        extractAndEncryptOtlpTlsSecrets(updateData);
-      }
     } else {
       if (isBeatsOutput(typedFullUpdateData) && isBeatsOutput(updateData)) {
         if (!typedFullUpdateData.ssl?.key && typedFullUpdateData.secrets?.ssl?.key) {
@@ -1521,14 +1504,6 @@ class OutputService {
         if (!typedFullUpdateData.service_token && typedFullUpdateData.secrets?.service_token) {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
         }
-      } else if (
-        updateData.type === outputType.Otlp &&
-        typedFullUpdateData.type === outputType.Otlp
-      ) {
-        extractAndEncryptOtlpTlsSecrets(
-          updateData,
-          typedFullUpdateData.secrets?.otlp_exporter?.tls
-        );
       }
     }
 
@@ -1684,25 +1659,6 @@ class OutputService {
       output.secrets?.service_token
     ) {
       throw new OutputInvalidError('Cannot specify both service_token and secrets.service_token');
-    }
-    if (isOtlpOutput(output)) {
-      const tls = output.otlp_exporter?.tls;
-      const secretsTls = output.secrets?.otlp_exporter?.tls;
-      if (tls?.key_pem && secretsTls?.key_pem) {
-        throw new OutputInvalidError(
-          'Cannot specify both otlp_exporter.tls.key_pem and secrets.otlp_exporter.tls.key_pem'
-        );
-      }
-      if (tls?.tpm?.owner_auth && secretsTls?.tpm?.owner_auth) {
-        throw new OutputInvalidError(
-          'Cannot specify both otlp_exporter.tls.tpm.owner_auth and secrets.otlp_exporter.tls.tpm.owner_auth'
-        );
-      }
-      if (tls?.tpm?.auth && secretsTls?.tpm?.auth) {
-        throw new OutputInvalidError(
-          'Cannot specify both otlp_exporter.tls.tpm.auth and secrets.otlp_exporter.tls.tpm.auth'
-        );
-      }
     }
   }
 

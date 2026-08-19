@@ -15,7 +15,8 @@
  *
  * Coverage:
  *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     secret round-trip (tls.key_pem and tls.tpm.owner_auth/auth via .fleet-secrets).
+ *     inline tls credential rejection (400), secret round-trip (tls.key_pem and
+ *     tls.tpm.owner_auth/auth via .fleet-secrets).
  *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
  *   - Delete: ESO secrets are removed when the output is deleted (key_pem and tpm credentials).
  *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
@@ -116,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
         // Exercises every optional sub-block that is valid for http/protobuf in one payload.
         // grpc-only compression values (snappy, zstd) are excluded — the schema only allows
         // gzip/none for http/protobuf (OtlpHttpExporterSchema).
-        // tls.key_pem is exercised in the dedicated secrets test below.
+        // key_pem is excluded here — it is accepted only via secrets.otlp_exporter.tls (see secrets tests below).
         const name = `otlp-http-full-${uuidv4()}`;
         const otlpExporter = {
           endpoint: 'https://otlp.example.com:4318',
@@ -129,7 +130,6 @@ export default function (providerContext: FtrProviderContext) {
             insecure_skip_verify: true,
             ca_pem: 'test-ca-pem',
             cert_pem: 'test-cert-pem',
-            key_pem: 'test-key-pem',
             include_system_ca_certs_pool: true,
             min_version: 'TLS 1.2',
             max_version: 'TLS 1.3',
@@ -209,6 +209,24 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body.message).to.contain('[request body.otlp_exporter.compression]');
+      });
+
+      it('returns 400 when tls.key_pem is supplied inline instead of via secrets', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-inline-key-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+              tls: { key_pem: 'my-private-key' },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('[request body.otlp_exporter.tls.key_pem]');
       });
 
       it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
