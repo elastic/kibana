@@ -91,10 +91,15 @@ describe('UserPicker', () => {
     jest.clearAllMocks();
 
     useCasesContextMock.mockReturnValue({ owner: ['securitySolution'] });
-    useSuggestUserProfilesMock.mockReturnValue({
-      data: userProfiles,
-      isLoading: false,
-      isFetching: false,
+    // Mirror the real hook, which clears the "user typing" state by invoking onDebounce; a static
+    // return value never resets isUserTyping, pinning the async combobox on "Loading options".
+    useSuggestUserProfilesMock.mockImplementation(({ onDebounce } = {}) => {
+      setTimeout(() => onDebounce?.(), 0);
+      return {
+        data: userProfiles,
+        isLoading: false,
+        isFetching: false,
+      };
     });
     useBulkGetUserProfilesMock.mockReturnValue({
       data: userProfilesMap,
