@@ -55,24 +55,10 @@ export class InterceptsPageObject {
     return (await locator.getAttribute('href')) || '';
   }
 
-  async isProgressionButtonVisible(): Promise<boolean> {
-    try {
-      const locator = this.page.testSubj.locator('productInterceptProgressionButton');
-      await locator.waitFor({ state: 'visible' });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async isCompletionStepVisible(): Promise<boolean> {
-    const locator = this.page.testSubj.locator('interceptStep-completion');
-    return locator.isVisible();
-  }
-
-  async getProgressionButtonText(): Promise<string> {
-    const locator = this.page.testSubj.locator('productInterceptProgressionButton');
-    return (await locator.textContent()) || '';
+  async waitForCompletionStep() {
+    await this.page.testSubj.waitForSelector('interceptStep-completion', {
+      state: 'visible',
+    });
   }
 
   async getInterceptText(triggerId: string): Promise<string> {
