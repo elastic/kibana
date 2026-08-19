@@ -10,8 +10,13 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { UseInvestigationStateResult } from '@kbn/investigation-output';
 import { EventFlyout } from './event_flyout';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  clearRememberedInvestigationTerminalFailuresForTests,
+  getRememberedInvestigationTerminalFailure,
+} from './significant_event_status';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -21,14 +26,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
+const mockUseInvestigationState = jest.fn<UseInvestigationStateResult, []>();
+
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-  useInvestigationState: () => ({
-    status: 'complete',
-    state: undefined,
-    error: undefined,
-    conversationId: undefined,
-  }),
+  useInvestigationState: () => mockUseInvestigationState(),
 }));
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
@@ -132,8 +134,16 @@ const mockEvent: SignificantEvent = {
 describe('EventFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockUseInvestigationState.mockReturnValue({
+      status: 'complete',
+      state: undefined,
+      error: undefined,
+      conversationId: undefined,
+    });
     window.history.pushState({}, '', '/app/observability/nightshift');
   });
+
+  afterEach(clearRememberedInvestigationTerminalFailuresForTests);
 
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EventFlyout>> = {}) =>
     render(
@@ -261,6 +271,44 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftInvestigationShowDetailsButton')).toBeInTheDocument();
     expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
   });
+
+  it.each([
+    ['failed', 'Investigation failed'],
+    ['unavailable', 'Investigation unavailable'],
+  ] as const)(
+    'marks an already-completed %s investigation, withholds the details button, and remembers the failure for the list',
+    (status, label) => {
+      mockUseInvestigationState.mockReturnValue({
+        status,
+        state: undefined,
+        error: 'The investigation did not complete.',
+        conversationId: undefined,
+      });
+
+      renderFlyout({
+        event: {
+          ...mockEvent,
+          investigations: [
+            {
+              workflow_execution_id: 'exec-1',
+              started_at: '2026-07-10T12:00:00Z',
+              completed_at: '2026-07-10T12:05:00Z',
+            },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(label);
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
+        label
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+      ).not.toBeInTheDocument();
+      expect(getRememberedInvestigationTerminalFailure('exec-1')).toBe(status);
+    }
+  );
 
   it('calls onClose when flyout is closed', () => {
     const onClose = jest.fn();

@@ -27,7 +27,11 @@ import { buildRecommendationChatOptions } from './open_investigation_item_in_cha
 import { useKibana } from '../hooks/use_kibana';
 import { InvestigationItemChatButton } from './investigation_item_chat_button';
 import { BlindSpotsTable } from './blind_spots_table';
-import { InvestigationCompleteStatus, InvestigatingStatusDots } from './investigation_status_badge';
+import {
+  InvestigationCompleteStatus,
+  InvestigationFailedStatus,
+  InvestigatingStatusDots,
+} from './investigation_status_badge';
 import { InvestigationFormattedText } from './investigation_formatted_text';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { createFadeOverlayBackground } from '../common/fade_overlay_background';
@@ -96,7 +100,12 @@ function InvestigationStatusRow({
           </EuiTitle>
         ) : isTerminalFailure ? (
           <EuiTitle size="xxs">
-            <h4>{statusLabel}</h4>
+            <h4>
+              <InvestigationFailedStatus
+                label={statusLabel}
+                testSubj="nightshiftInvestigationFailedStatusIcon"
+              />
+            </h4>
           </EuiTitle>
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

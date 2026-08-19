@@ -28,6 +28,7 @@ import {
   type InvestigationFlyoutTabId,
 } from '../investigation/investigation_flyout';
 import { InvestigationSummaryCard } from '../investigation/investigation_summary_card';
+import { isInvestigationInvestigated } from '../common/investigation_progress_status';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 export interface EventInvestigationProps {
@@ -57,6 +58,10 @@ export function EventInvestigation({
     setIsFlyoutOpen(true);
   }, []);
 
+  // Only a completed run has a result worth opening in the flyout.
+  const canOpenInvestigationFlyout =
+    Boolean(investigation?.workflow_execution_id) && isInvestigationInvestigated(status);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -69,7 +74,7 @@ export function EventInvestigation({
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        {investigation?.workflow_execution_id && (
+        {canOpenInvestigationFlyout && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
@@ -130,7 +135,7 @@ export function EventInvestigation({
         />
       )}
 
-      {isFlyoutOpen && investigation?.workflow_execution_id && (
+      {isFlyoutOpen && canOpenInvestigationFlyout && investigation && (
         <InvestigationFlyout
           eventTitle={event.title}
           investigation={investigation}

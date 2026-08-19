@@ -78,20 +78,26 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   });
 
   useEffect(() => {
-    if (latestInvestigation == null || latestInvestigation.completed_at != null) {
+    if (latestInvestigation == null) {
       return;
     }
 
-    if (isInvestigationInvestigated(investigationStatus)) {
-      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
-      return;
-    }
+    const isTerminalFailure = isInvestigationTerminalFailure(investigationStatus);
 
-    if (isInvestigationTerminalFailure(investigationStatus)) {
+    // The event doc records only start/completion, never the outcome, so remember a failure
+    // here — the list badge has no other way to tell it apart from a successful run.
+    if (isTerminalFailure) {
       rememberInvestigationTerminalFailure(
         latestInvestigation.workflow_execution_id,
         investigationStatus
       );
+    }
+
+    if (latestInvestigation.completed_at != null) {
+      return;
+    }
+
+    if (isTerminalFailure || isInvestigationInvestigated(investigationStatus)) {
       markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
     }
   }, [event.event_uuid, investigationStatus, latestInvestigation, queryClient]);

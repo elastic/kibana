@@ -227,6 +227,58 @@ function InvestigationCompleteStatus({
   );
 }
 
+/**
+ * Terminal-failure counterpart to {@link InvestigationCompleteStatus}; its cross is decorative
+ * because the adjacent label already names the failure.
+ */
+function InvestigationFailedStatus({
+  label,
+  testSubj,
+}: {
+  label: string;
+  testSubj?: string;
+}): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      data-test-subj={testSubj}
+      css={css`
+        align-items: center;
+        color: ${euiTheme.colors.textDanger};
+        display: inline-flex;
+        font-weight: ${euiTheme.font.weight.semiBold};
+        gap: ${euiTheme.size.s};
+      `}
+    >
+      <span
+        aria-hidden={true}
+        css={css`
+          align-items: center;
+          background: ${euiTheme.colors.backgroundFilledDanger};
+          border-radius: 50%;
+          display: inline-flex;
+          flex-shrink: 0;
+          height: ${COMPLETE_STATUS_CIRCLE_SIZE_PX}px;
+          justify-content: center;
+          width: ${COMPLETE_STATUS_CIRCLE_SIZE_PX}px;
+        `}
+      >
+        <EuiIcon
+          type="cross"
+          color="ghost"
+          css={css`
+            height: ${COMPLETE_STATUS_CHECK_SIZE_PX}px;
+            width: ${COMPLETE_STATUS_CHECK_SIZE_PX}px;
+          `}
+          aria-hidden={true}
+        />
+      </span>
+      {label}
+    </span>
+  );
+}
+
 function InvestigationGradientLabel({
   children,
   testSubj,
@@ -315,8 +367,11 @@ function InvestigationTerminalFailureStatus({ label }: { label: string }) {
   return (
     <EuiBadge
       color="hollow"
+      iconType="cross"
+      iconSide="left"
+      data-test-subj="nightshiftInvestigationFailedStatus"
       css={css`
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textDanger};
       `}
     >
       {label}
@@ -377,6 +432,7 @@ export {
   GradientOutlinedStatusBadge,
   InvestigationCompleteCheckIcon,
   InvestigationCompleteStatus,
+  InvestigationFailedStatus,
   InvestigationGradientLabel,
   InvestigatingStatusDots,
 };

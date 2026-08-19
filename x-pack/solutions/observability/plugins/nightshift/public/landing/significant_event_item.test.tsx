@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SignificantEventItem } from './significant_event_item';
+import {
+  clearRememberedInvestigationTerminalFailuresForTests,
+  rememberInvestigationTerminalFailure,
+} from '../event/significant_event_status';
 
 const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
@@ -23,11 +28,24 @@ const mockEvent: SignificantEvent = {
   confidence: 0.9,
 };
 
+const investigatedEvent: SignificantEvent = {
+  ...mockEvent,
+  investigations: [
+    {
+      workflow_execution_id: 'exec-1',
+      started_at: '2026-07-10T12:00:00Z',
+      completed_at: '2026-07-10T12:05:00Z',
+    },
+  ],
+};
+
 describe('SignificantEventItem', () => {
   const renderItem = (props: Partial<React.ComponentProps<typeof SignificantEventItem>> = {}) =>
     render(
       <I18nProvider>
-        <SignificantEventItem event={mockEvent} {...props} />
+        <EuiProvider>
+          <SignificantEventItem event={mockEvent} {...props} />
+        </EuiProvider>
       </I18nProvider>
     );
 
@@ -164,5 +182,34 @@ describe('SignificantEventItem', () => {
     const title = screen.getByText(mockEvent.title);
     expect(title.closest('a')).toBeNull();
     expect(title.closest('button')).toBeNull();
+  });
+
+  describe('investigation marker', () => {
+    afterEach(clearRememberedInvestigationTerminalFailuresForTests);
+
+    it('leaves an event without investigations unlabeled', () => {
+      renderItem();
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a completed investigation as investigated', () => {
+      renderItem({ event: investigatedEvent });
+
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['failed', 'Investigation failed'],
+      ['unavailable', 'Investigation unavailable'],
+    ] as const)('marks a %s investigation with the failure label', (status, label) => {
+      rememberInvestigationTerminalFailure('exec-1', status);
+      renderItem({ event: investigatedEvent });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(label);
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
   });
 });
