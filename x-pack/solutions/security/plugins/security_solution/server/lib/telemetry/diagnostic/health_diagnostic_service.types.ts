@@ -86,46 +86,43 @@ export interface HealthDiagnosticQueryConfig {
 }
 
 /**
- * Narrow base shared by all query descriptor versions (no type/query/size/tiers).
+ * An index-targeting diagnostic query. Produced from v1, v2, and v3 DSL/EQL/ESQL
+ * descriptors. Exactly one of `index` or `integrations` is set.
  */
-export interface HealthDiagnosticQueryCommonBase {
+export interface IndexQuery {
+  kind: 'index';
   id: string;
   name: string;
   scheduleCron: string;
   filterlist: Record<string, Action>;
   enabled: boolean;
-  encryptionKeyId?: string;
-}
-
-/**
- * Fields shared across all known query descriptor versions.
- */
-export interface HealthDiagnosticQueryBase extends HealthDiagnosticQueryCommonBase {
   type: QueryType;
   query: string;
   size?: number;
   tiers?: string[];
+  index?: string;
+  integrations?: string[];
+  datastreamTypes?: string[];
+  encryptionKeyId?: string;
 }
 
 /**
- * v1 query descriptor — targets a fixed index pattern.
- * Produced when the descriptor has `version: 1` or no version field.
+ * An ES HTTP API diagnostic query. Produced from v3 API descriptors.
  */
-export interface HealthDiagnosticQueryV1 extends HealthDiagnosticQueryBase {
-  version: 1;
-  index: string;
-}
-
-/**
- * v2 query descriptor: targets integrations matched by regex patterns,
- * or a direct index pattern (mutually exclusive with integrations).
- * Invariant enforced by parser: exactly one of integrations or index is present.
- */
-export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
-  version: 2;
-  integrations?: string[]; // regex patterns resolved via Fleet
-  datastreamTypes?: string[]; // only relevant when integrations is set
-  index?: string; // alternative to integrations: direct index pattern
+export interface ApiQuery {
+  kind: 'api';
+  id: string;
+  name: string;
+  scheduleCron: string;
+  filterlist: Record<string, Action>;
+  enabled: boolean;
+  api: string;
+  pathParams?: Record<string, string>;
+  queryParams?: Record<string, string | number>;
+  responsePath?: string;
+  responsePathKey?: string;
+  integrations?: string[];
+  encryptionKeyId?: string;
 }
 
 /**
@@ -146,25 +143,7 @@ export interface ParseFailureQuery {
   failureReason: 'unknown_version' | 'invalid_descriptor';
 }
 
-/**
- * v3 query descriptor — targets a Kibana/ES HTTP API endpoint directly.
- */
-export interface HealthDiagnosticQueryV3 extends HealthDiagnosticQueryCommonBase {
-  version: 3;
-  type: 'API';
-  api: string;
-  pathParams?: Record<string, string>;
-  queryParams?: Record<string, string | number>;
-  responsePath?: string;
-  responsePathKey?: string;
-  integrations?: string[];
-}
-
-export type HealthDiagnosticQuery =
-  | HealthDiagnosticQueryV1
-  | HealthDiagnosticQueryV2
-  | HealthDiagnosticQueryV3
-  | ParseFailureQuery;
+export type HealthDiagnosticQuery = IndexQuery | ApiQuery | ParseFailureQuery;
 
 /**
  * Result of resolving a v2 query's integration patterns against Fleet.
@@ -175,14 +154,13 @@ export interface IntegrationResolution {
   indices: string[];
 }
 
-/**
- * A query that has been resolved and is ready for ES execution.
- * Version-specific shape is preserved for stats reporting.
- */
 export type ExecutableQuery =
-  | { kind: 'executable'; query: HealthDiagnosticQueryV1 }
-  | { kind: 'executable'; query: HealthDiagnosticQueryV2; resolution: IntegrationResolution }
-  | { kind: 'executable'; query: HealthDiagnosticQueryV2 & { index: string } };
+  | { kind: 'executable'; query: IndexQuery }
+  | { kind: 'executable'; query: IndexQuery; resolution: IntegrationResolution };
+
+export type ApiExecutableQuery =
+  | { kind: 'executable_api'; query: ApiQuery }
+  | { kind: 'executable_api'; query: ApiQuery; resolution: IntegrationResolution };
 
 export type SkipReason =
   | 'datastreams_not_matched'
@@ -196,13 +174,6 @@ export interface SkippedQuery {
   query: HealthDiagnosticQuery;
   reason: SkipReason;
 }
-
-/**
- * A resolved API query ready for HTTP execution.
- */
-export type ApiExecutableQuery =
-  | { kind: 'executable_api'; query: HealthDiagnosticQueryV3 }
-  | { kind: 'executable_api'; query: HealthDiagnosticQueryV3; resolution: IntegrationResolution };
 
 export type ResolvedQuery = ExecutableQuery | ApiExecutableQuery | SkippedQuery;
 
