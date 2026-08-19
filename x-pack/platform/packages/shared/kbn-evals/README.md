@@ -368,13 +368,11 @@ Use `selectEvaluators<MyExample, MyTaskOutput>(...)` for typed evaluator callbac
 
 | Fixture            | Description                                                                |
 | ------------------ | -------------------------------------------------------------------------- |
-| `inferenceClient`  | Bound to the connector declared by the active Playwright project.          |
+| `inferenceClient`  | Bound to the connector declared by the active Playwright project. For EIS connectors, reasoning is enabled by default; pass an explicit `reasoning` to override. |
 | `executorClient`   | Runs experiments (in-Kibana executor by default).                          |
 | `evalsClient`      | Client for evals plugin APIs (scores, datasets, experiment stats).         |
 | `reportModelScore` | Displays results in terminal (overridable for custom reporting).           |
 | `traceEsClient`    | ES client for querying OTel traces (defaults to Scout `esClient` cluster). |
-
-For EIS connectors, `inferenceClient` (and the judge derived from it) defaults `reasoning` to `{ enabled: true }` when a call omits it, so reasoning-mandatory EIS endpoints don't reject `effort: none`. Non-EIS connectors are left as-is, and an explicit `reasoning` always wins.
 
 ### Available evaluators
 
