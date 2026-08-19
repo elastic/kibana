@@ -115,7 +115,11 @@ export const useExpandedDocSync = ({
     isRestorable &&
     !isEsqlTransformational;
   const shouldClear =
-    Boolean(expandedDoc) && !isRefResolved && isRestorable && !isEsqlTransformational;
+    Boolean(expandedDoc) &&
+    !isRefResolved &&
+    isRestorable &&
+    !isEsqlTransformational &&
+    !resolvedDoc;
 
   // Drop an unresolvable reference without closing the flyout the user still has open.
   const shouldClearRef = Boolean(expandedDocRef) && isEsqlTransformational;

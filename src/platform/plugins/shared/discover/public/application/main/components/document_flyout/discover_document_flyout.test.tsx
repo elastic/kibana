@@ -424,6 +424,46 @@ describe('DiscoverDocumentFlyout', () => {
     expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
   });
 
+  it('keeps flyout pagination populated when the URL reference changes to another document already in the results (e.g. browser back navigation)', async () => {
+    const { toolkit } = await setup({ hits: esHitsMock });
+    const tabId = toolkit.getCurrentTab().id;
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
+    });
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        internalStateActions.setRenderDocumentViewMeta({
+          tabId,
+          renderDocumentViewMeta: {
+            displayedRows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+            displayedColumns: ['bytes'],
+          },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
+    });
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { expandedDoc: { id: inResultsHit._id, index: inResultsHit._index } },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(inResultsHit._id);
+    });
+
+    expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
+  });
+
   it('reports that it is still searching while the results are loading', async () => {
     await setup({
       searchResult: searchResponseFor(outOfResultsHit),
