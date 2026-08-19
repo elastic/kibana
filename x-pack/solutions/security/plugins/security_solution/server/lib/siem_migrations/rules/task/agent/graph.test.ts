@@ -105,6 +105,7 @@ const setupAgent = async (responses: NodeResponse[]) => {
     telemetryClient: mockTelemetryClient,
     tools: getRulesMigrationTools('test-migration', {
       rulesClient: createRuleMigrationsDataClientMock(),
+      ruleMigrationsRetriever: mockRetriever,
     }),
   });
   return graph;

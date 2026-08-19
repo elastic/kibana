@@ -33,10 +33,15 @@ const SCHEMA = z.object({
 
 /**
  * Wraps `RuleMigrationsRetriever#prebuiltRules.search` as a LangChain `tool()` so it has a name,
- * description and validated schema. It is currently only ever invoked deterministically (via
- * `.invoke()` from `searchPrebuiltRuleCandidates`, never bound to a model) — the schema/description
- * exist for consistency and so it can be bound to a model again without rewriting it, not because
- * an LLM is calling it today.
+ * description and validated schema. Bound to the model in the v2 `matchPrebuiltRule` subgraph's
+ * `agent` node (`sub_graphs/match_prebuilt_rule/nodes/match_prebuilt_rule.ts`) and executed by a
+ * real `ToolNode` in `sub_graphs/match_prebuilt_rule/graph.ts` — the model itself decides when to
+ * call it and with what query, as part of the graph's own agent/tools loop (security-team#18589).
+ *
+ * Uses `responseFormat: 'content_and_artifact'`: the `ToolMessage` fed back to the model only gets
+ * the compact `{name, description}` projection (`content`), while the full
+ * `RuleSemanticSearchResult[]` (with `rule_id`, `target`, `current`, etc. — everything needed to
+ * build the final `elastic_rule`) rides along as `artifact`, out of the model's view.
  */
 export const getPrebuiltRulesSearchTool = ({
   ruleMigrationsRetriever,
@@ -49,8 +54,16 @@ export const getPrebuiltRulesSearchTool = ({
   }: {
     query: string;
     technique_ids?: string;
-  }): Promise<RuleSemanticSearchResult[]> => {
-    return ruleMigrationsRetriever.prebuiltRules.search(query, techniqueIds ?? '');
+  }): Promise<[string, RuleSemanticSearchResult[]]> => {
+    const results = await ruleMigrationsRetriever.prebuiltRules.search(query, techniqueIds ?? '');
+    const content = JSON.stringify(
+      results.map((rule) => ({
+        name: rule.name,
+        description: rule.description,
+        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
+      }))
+    );
+    return [content, results];
   };
 
   return {
@@ -58,6 +71,9 @@ export const getPrebuiltRulesSearchTool = ({
       name: NAME,
       description: DESCRIPTION,
       schema: SCHEMA,
+      responseFormat: 'content_and_artifact',
     }),
   };
 };
+
+export type SearchPrebuiltRulesTool = ReturnType<typeof getPrebuiltRulesSearchTool>[typeof NAME];

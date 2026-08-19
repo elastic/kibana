@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { getMatchPrebuiltRuleAgentNode } from './match_prebuilt_rule';
-export { getCreatePrebuiltRuleSemanticQueryNode } from './create_prebuilt_rule_semantic_query';
-export { getSearchPrebuiltRuleCandidatesNode } from './search_prebuilt_rule_candidates';
+export { getMatchPrebuiltRuleAgentNode, getFinalizeMatchNode } from './match_prebuilt_rule';

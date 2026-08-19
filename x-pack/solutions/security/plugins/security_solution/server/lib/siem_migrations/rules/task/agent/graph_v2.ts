@@ -23,10 +23,9 @@ import { getSourceRuleToNaturalLanguageNode } from './nodes/source_rule_to_natur
 /**
  * v2 agent (behind the `ruleMigrationGraphv2` experimental feature): pre-built rule matching runs
  * through the dedicated `matchPrebuiltRule` subgraph (security-team#18589) instead of the v1
- * one-shot node. The subgraph owns its own semantic query generation and deterministically retries
- * (regenerating the query and re-searching), with independent budgets for an empty search
- * (`MAX_SEARCH_ATTEMPTS`) and a failed classification (`MAX_MATCH_ATTEMPTS`), so it does not
- * consume the parent's `semantic_query`.
+ * one-shot node. The subgraph is a single model-driven node: the model itself decides when to
+ * search (via a bound `searchPrebuiltRules` tool) and crafts its own pre-built-rule-specific
+ * query, so it does not consume the parent's `semantic_query`.
  */
 export function getRuleMigrationAgentV2({
   model,
@@ -38,14 +37,14 @@ export function getRuleMigrationAgentV2({
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleSubGraph = getMatchPrebuiltRuleGraph({
     model,
-    ruleMigrationsRetriever,
+    searchPrebuiltRulesTool: tools.searchPrebuiltRules,
     telemetryClient,
   });
 
   const matchPrebuiltRuleNode: GraphNode = async (state) => {
     const result = await matchPrebuiltRuleSubGraph.invoke({
       original_rule: state.original_rule,
-      nl_query: state.nl_query,
+      nl_query: state.nl_query, // splunk has no nl_query
     });
 
     return {
