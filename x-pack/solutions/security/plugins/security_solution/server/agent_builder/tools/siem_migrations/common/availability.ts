@@ -41,7 +41,12 @@ export const createSiemMigrationAvailability = (
           reason: 'Automatic Migration is not enabled for this deployment.',
         };
       }
-    } catch {
+    } catch (error) {
+      logger.error(
+        `[SIEM migrations availability] Failed to check product feature: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return {
         status: 'unavailable' as const,
         reason: 'Automatic Migration availability could not be determined.',

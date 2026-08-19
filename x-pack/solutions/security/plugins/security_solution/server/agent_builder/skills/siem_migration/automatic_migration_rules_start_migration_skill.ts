@@ -85,8 +85,9 @@ between them.
 | Task status | items.pending | Translation counts | Action | Request body |
 |---|---|---|---|---|
 | \`ready\` | any | any | **START** (first run) | \`{ settings: { connector_id, skip_prebuilt_rules_matching } }\` |
-| \`finished\` | 0 | \`rules.failed > 0\` | **REPROCESS failed** | \`{ retry: "failed" }\` |
-| \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ retry: "not_fully_translated" }\` |
+| \`finished\` | 0 | \`rules.failed > 0\` | **REPROCESS failed** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "failed" }\` |
+| \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "not_fully_translated" }\` |
+| \`finished\` | 0 | User-selected rules, including rules with mixed statuses | **REPROCESS selected** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids } }\` |
 | \`finished\` | 0 | \`rules.success.installable > 0\` | Route to **install-automatic-migration-rules** (do not start) | — |
 | \`stopped\` or \`interrupted\` | \`items.pending > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
 | \`running\` | any | any | Do nothing — tell the user it's already running | — |
@@ -104,9 +105,11 @@ between them.
 - Pass \`retry: "failed"\` ONLY to retry only failed rules, or
   \`retry: "not_fully_translated"\` to retry partially translated rules. No selection.
 - **REPROCESS a specific subset**: if the user names specific rules to re-run, resolve their
-  **titles** to **rule item ids** via \`get_migration_rules\` and pass \`selection: { ids }\`. A
-  \`selection\` WITHOUT \`retry: "selected"\` is a no-op — always pair \`selection\` with
-  \`retry: "selected"\`.
+  **titles** to **rule item ids** via \`get_migration_rules\`. Use \`retry: "selected"\` with
+  \`selection: { ids }\` when the requested subset contains mixed statuses; the status-wide
+  \`failed\` and \`not_fully_translated\` filters cannot represent that selection. A \`selection\`
+  WITHOUT \`retry: "selected"\` is a no-op — always pair them and include the required
+  \`settings\` object.
 
 #### RESUME
 - **RESUME** continues a stopped/interrupted run that still has pending items. It uses the SAME
