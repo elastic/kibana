@@ -28,11 +28,9 @@ import {
   EuiButtonIcon,
   EuiCheckbox,
   EuiEmptyPrompt,
-  EuiFieldNumber,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
@@ -45,7 +43,12 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
-import { getShouldShowFieldHandler, formatFieldValueText } from '@kbn/discover-utils';
+import {
+  getShouldShowFieldHandler,
+  formatFieldValueText,
+  canPrependTimeFieldColumn,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import {
   SourceDocument,
@@ -53,9 +56,14 @@ import {
   getDisplayedColumns,
   RowHeightSettings,
   ROWS_HEIGHT_OPTIONS,
+  DataGridDensity,
+  DATA_GRID_DENSITY_STYLE_MAP,
+  useDataGridDensity,
+  useRowHeight,
+  RowHeightType,
+  SOURCE_COLUMN,
   type UnifiedDataTableProps,
   type SortOrder,
-  type DataGridDensity,
   type RenderDocumentViewMeta,
 } from '@kbn/unified-data-table';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -108,15 +116,17 @@ export interface TanStackDataGridProps {
 
   dataGridDensityState?: UnifiedDataTableProps['dataGridDensityState'];
   onUpdateDataGridDensity?: UnifiedDataTableProps['onUpdateDataGridDensity'];
-  rowHeightState?: number;
+  rowHeightState?: UnifiedDataTableProps['rowHeightState'];
   onUpdateRowHeight?: UnifiedDataTableProps['onUpdateRowHeight'];
-  headerRowHeightState?: number;
+  configRowHeight?: UnifiedDataTableProps['configRowHeight'];
+  headerRowHeightState?: UnifiedDataTableProps['headerRowHeightState'];
   onUpdateHeaderRowHeight?: UnifiedDataTableProps['onUpdateHeaderRowHeight'];
+  configHeaderRowHeight?: UnifiedDataTableProps['configHeaderRowHeight'];
+  services: UnifiedDataTableProps['services'];
+  consumer?: UnifiedDataTableProps['consumer'];
   externalAdditionalControls?: React.ReactNode;
   gridImplementationSwitch?: React.ReactNode;
 }
-
-type GridDensity = 'compact' | 'normal' | 'expanded';
 
 interface DensityConfig {
   rowHeight: number;
@@ -128,8 +138,8 @@ interface DensityConfig {
   icon: string;
 }
 
-const DENSITY_CONFIG: Record<GridDensity, DensityConfig> = {
-  compact: {
+const DENSITY_CONFIG: Record<DataGridDensity, DensityConfig> = {
+  [DataGridDensity.COMPACT]: {
     rowHeight: 28,
     summaryRowHeight: 70,
     fontSize: 12,
@@ -138,7 +148,7 @@ const DENSITY_CONFIG: Record<GridDensity, DensityConfig> = {
     label: 'Compact',
     icon: 'menuLeft',
   },
-  normal: {
+  [DataGridDensity.NORMAL]: {
     rowHeight: 34,
     summaryRowHeight: 90,
     fontSize: 14,
@@ -147,7 +157,7 @@ const DENSITY_CONFIG: Record<GridDensity, DensityConfig> = {
     label: 'Normal',
     icon: 'menu',
   },
-  expanded: {
+  [DataGridDensity.EXPANDED]: {
     rowHeight: 44,
     summaryRowHeight: 120,
     fontSize: 14,
@@ -159,9 +169,9 @@ const DENSITY_CONFIG: Record<GridDensity, DensityConfig> = {
 };
 
 const DENSITY_BUTTONS = [
-  { id: 'compact' as GridDensity, label: 'Compact', iconType: 'menuLeft' },
-  { id: 'normal' as GridDensity, label: 'Normal', iconType: 'menu' },
-  { id: 'expanded' as GridDensity, label: 'Expanded', iconType: 'menuRight' },
+  { id: DataGridDensity.COMPACT, label: 'Compact', iconType: 'menuLeft' },
+  { id: DataGridDensity.NORMAL, label: 'Normal', iconType: 'menu' },
+  { id: DataGridDensity.EXPANDED, label: 'Expanded', iconType: 'menuRight' },
 ];
 
 const OVERSCAN = 20;
@@ -378,7 +388,7 @@ const FindInTableBar = React.memo(
 
 const EXPAND_COLUMN_ID = '__expand';
 const SELECT_COLUMN_ID = '__select';
-const SOURCE_COLUMN_ID = '_source';
+const SOURCE_COLUMN_ID = SOURCE_COLUMN;
 
 // -- STATS ... BY column reordering --
 interface StatsByInfo {
@@ -909,13 +919,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     onUpdateDataGridDensity,
     rowHeightState,
     onUpdateRowHeight,
+    configRowHeight,
     headerRowHeightState,
     onUpdateHeaderRowHeight,
+    configHeaderRowHeight,
+    services,
+    consumer = 'discover',
     externalAdditionalControls,
     gridImplementationSwitch,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { fieldFormats } = useDiscoverServices();
+    const { fieldFormats, storage } = services;
     const parentRef = useRef<HTMLDivElement | null>(null);
     const styles = useMemo(() => getTanStackDataGridStyles(euiTheme), [euiTheme]);
 
@@ -927,17 +941,41 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [findTerm, setFindTerm] = useState('');
     const [findActiveIndex, setFindActiveIndex] = useState(0);
 
+    const displayedColumns = useMemo(() => getDisplayedColumns(columns, dataView), [columns, dataView]);
+
+    const shouldPrependTimeFieldColumn = useMemo(
+      () =>
+        canPrependTimeFieldColumn(
+          displayedColumns,
+          timeFieldName,
+          columnsMeta,
+          showTimeCol,
+          Boolean(isPlainRecord)
+        ),
+      [columnsMeta, displayedColumns, isPlainRecord, showTimeCol, timeFieldName]
+    );
+
     const isSummaryMode =
-      columns.length === 0 ||
-      (columns.length === 1 && columns[0] === SOURCE_COLUMN_ID) ||
-      (columns.length === 1 && columns[0] === timeFieldName);
+      displayedColumns.length === 1 && displayedColumns[0] === SOURCE_COLUMN_ID;
 
     // STATS ... BY column reordering
     const statsByInfo = useMemo(
-      () => (!isSummaryMode ? parseStatsByColumns(query, columns) : undefined),
-      [query, columns, isSummaryMode]
+      () => (!isSummaryMode ? parseStatsByColumns(query, displayedColumns) : undefined),
+      [query, displayedColumns, isSummaryMode]
     );
-    const effectiveColumns = statsByInfo?.orderedColumns ?? columns;
+
+    const effectiveColumns = useMemo(() => {
+      const columnSource = statsByInfo?.orderedColumns ?? displayedColumns;
+
+      return getVisibleColumns(columnSource, dataView, shouldPrependTimeFieldColumn);
+    }, [dataView, displayedColumns, shouldPrependTimeFieldColumn, statsByInfo?.orderedColumns]);
+
+    const persistVisibleColumns = useCallback(
+      (nextVisibleColumns: string[]) => {
+        onSetColumns?.(nextVisibleColumns, false);
+      },
+      [onSetColumns]
+    );
 
     // Find matches
     const findMatches = useMemo(
@@ -1007,49 +1045,52 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [isFullScreen, setIsFullScreen] = useState(false);
     const toggleFullScreen = useCallback(() => setIsFullScreen((prev) => !prev), []);
 
-    // ── Grid density (sync with app state if provided) ──
-    const [localDensity, setLocalDensity] = useState<GridDensity>(
-      (dataGridDensityState as GridDensity) || 'compact'
-    );
-    const density = (dataGridDensityState as GridDensity) || localDensity;
-    const setDensity = useCallback(
-      (d: GridDensity) => {
-        setLocalDensity(d);
-        onUpdateDataGridDensity?.(d as DataGridDensity);
-      },
-      [onUpdateDataGridDensity]
-    );
+    // ── Grid density (shared with UnifiedDataTable) ──
+    const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
+      storage,
+      consumer,
+      dataGridDensityState,
+      onUpdateDataGridDensity,
+    });
     const [isDensityPopoverOpen, setIsDensityPopoverOpen] = useState(false);
-    const densityCfg = DENSITY_CONFIG[density];
+    const densityCfg = DENSITY_CONFIG[dataGridDensity];
 
-    // ── Max header cell lines (sync with app state) ──
-    const [localHeaderMaxLines, setLocalHeaderMaxLines] = useState(headerRowHeightState ?? 1);
-    const headerMaxLines = headerRowHeightState ?? localHeaderMaxLines;
-    const setHeaderMaxLines = useCallback(
-      (val: number) => {
-        setLocalHeaderMaxLines(val);
-        onUpdateHeaderRowHeight?.(val);
-      },
-      [onUpdateHeaderRowHeight]
-    );
+    const {
+      rowHeight: headerRowHeight,
+      rowHeightLines: headerRowHeightLines,
+      lineCountInput: headerLineCountInput,
+      onChangeRowHeight: onChangeHeaderRowHeight,
+      onChangeRowHeightLines: onChangeHeaderRowHeightLines,
+    } = useRowHeight({
+      type: RowHeightType.header,
+      storage,
+      consumer,
+      key: 'dataGridHeaderRowHeight',
+      defaultRowHeight: 1,
+      configRowHeight: configHeaderRowHeight,
+      rowHeightState: headerRowHeightState,
+      onUpdateRowHeight: onUpdateHeaderRowHeight,
+    });
 
-    // ── Body cell lines (sync with app state) ──
-    const [localBodyMaxLines, setLocalBodyMaxLines] = useState(rowHeightState ?? 1);
-    const bodyMaxLines = rowHeightState ?? localBodyMaxLines;
-    const isAutoRowHeight = bodyMaxLines === ROWS_HEIGHT_OPTIONS.auto;
-    const [customBodyMaxLines, setCustomBodyMaxLines] = useState(
-      rowHeightState != null && rowHeightState > 0 ? rowHeightState : ROWS_HEIGHT_OPTIONS.default
-    );
-    const setBodyMaxLines = useCallback(
-      (val: number) => {
-        setLocalBodyMaxLines(val);
-        if (val > 0) {
-          setCustomBodyMaxLines(val);
-        }
-        onUpdateRowHeight?.(val);
-      },
-      [onUpdateRowHeight]
-    );
+    const {
+      rowHeight,
+      rowHeightLines,
+      lineCountInput,
+      onChangeRowHeight,
+      onChangeRowHeightLines,
+    } = useRowHeight({
+      type: RowHeightType.row,
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
+
+    const isAutoRowHeight = rowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
+    const isAutoHeaderRowHeight = headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
 
     // ── Cell popover ──
     const [popoverState, setPopoverState] = useState<{
@@ -1090,12 +1131,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           if (fromIdx !== -1 && toIdx !== -1) {
             newCols.splice(fromIdx, 1);
             newCols.splice(toIdx, 0, prev.dragging);
-            onSetColumns(newCols);
+            persistVisibleColumns(newCols);
           }
         }
         return { dragging: null, over: null };
       });
-    }, [effectiveColumns, onSetColumns]);
+    }, [effectiveColumns, onSetColumns, persistVisibleColumns]);
 
     // ── Sorting ──
     const sortingState: SortingState = useMemo(
@@ -1169,11 +1210,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const toggleExpandDocRef = useRef(toggleExpandDoc);
     toggleExpandDocRef.current = toggleExpandDoc;
 
-    const displayedColumns = useMemo(
-      () => getDisplayedColumns(columns, dataView),
-      [columns, dataView]
-    );
-
     // When the document view is rendered externally, we need to provide some metadata
     // to the consumer to allow them to properly render the doc viewer component
     const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
@@ -1235,7 +1271,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           onClick: () => {
             const newCols = [...effectiveColumns];
             [newCols[colIndex - 1], newCols[colIndex]] = [newCols[colIndex], newCols[colIndex - 1]];
-            onSetColumns(newCols, false);
+            persistVisibleColumns(newCols);
             closeHeaderMenu();
           },
         });
@@ -1248,7 +1284,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           onClick: () => {
             const newCols = [...effectiveColumns];
             [newCols[colIndex], newCols[colIndex + 1]] = [newCols[colIndex + 1], newCols[colIndex]];
-            onSetColumns(newCols, false);
+            persistVisibleColumns(newCols);
             closeHeaderMenu();
           },
         });
@@ -1284,15 +1320,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         });
       }
 
-      if (onSetColumns && colId !== dataView.timeFieldName) {
+      if (onSetColumns && colId !== timeFieldName) {
         items.push({
           name: 'Remove column',
           icon: 'cross',
           onClick: () => {
-            onSetColumns(
-              effectiveColumns.filter((c) => c !== colId),
-              false
-            );
+            persistVisibleColumns(effectiveColumns.filter((c) => c !== colId));
             closeHeaderMenu();
           },
         });
@@ -1303,9 +1336,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       headerMenuState,
       effectiveColumns,
       onSetColumns,
+      persistVisibleColumns,
       onResize,
       rows,
-      dataView.timeFieldName,
+      timeFieldName,
       closeHeaderMenu,
     ]);
 
@@ -1503,12 +1537,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       if (isAutoRowHeight) {
         return isSummaryMode ? densityCfg.summaryRowHeight : densityCfg.rowHeight;
       }
-      if (bodyMaxLines <= 1) {
+      if (rowHeightLines <= 1) {
         return densityCfg.rowHeight;
       }
       const lineH = densityCfg.fontSize * 1.5;
-      return Math.round(densityCfg.cellPaddingV * 2 + lineH * bodyMaxLines);
-    }, [bodyMaxLines, densityCfg, isAutoRowHeight, isSummaryMode]);
+      return Math.round(densityCfg.cellPaddingV * 2 + lineH * rowHeightLines);
+    }, [rowHeightLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
     const getRowHeight = useCallback((): number => {
@@ -1527,7 +1561,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     useEffect(() => {
       rowVirtualizer.measure();
-    }, [density, bodyMaxLines, rowVirtualizer]);
+    }, [dataGridDensity, rowHeightLines, rowVirtualizer]);
 
     useEffect(() => {
       const scrollEl = parentRef.current;
@@ -1644,11 +1678,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           '--tsg-font-size': `${densityCfg.fontSize}px`,
           '--tsg-cell-padding-v': `${densityCfg.cellPaddingV}px`,
           '--tsg-cell-padding-h': `${densityCfg.cellPaddingH}px`,
-          '--tsg-header-max-lines': String(headerMaxLines),
-          '--tsg-body-max-lines': isAutoRowHeight ? 'none' : String(Math.max(bodyMaxLines, 1)),
+          '--tsg-header-max-lines': isAutoHeaderRowHeight
+            ? 'none'
+            : String(Math.max(headerRowHeightLines, 1)),
+          '--tsg-body-max-lines': isAutoRowHeight ? 'none' : String(Math.max(rowHeightLines, 1)),
           '--tsg-row-min-height': `${densityCfg.rowHeight}px`,
         } as React.CSSProperties),
-      [densityCfg, headerMaxLines, bodyMaxLines, isAutoRowHeight]
+      [densityCfg, headerRowHeightLines, rowHeightLines, isAutoHeaderRowHeight, isAutoRowHeight]
     );
 
     // ── Copy selected rows ──
@@ -1759,47 +1795,38 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               <EuiButtonGroup
                 legend="Grid density"
                 options={DENSITY_BUTTONS}
-                idSelected={density}
+                idSelected={dataGridDensity}
                 onChange={(id) => {
-                  setDensity(id as GridDensity);
+                  onChangeDataGridDensity(
+                    DATA_GRID_DENSITY_STYLE_MAP[id as DataGridDensity]
+                  );
                 }}
                 buttonSize="compressed"
                 isFullWidth
                 data-test-subj="dataGridDensityButtonGroup"
               />
               <EuiSpacer size="s" />
-              <EuiFormRow label="Max header cell lines" display="columnCompressed" fullWidth>
-                <EuiFieldNumber
-                  compressed
-                  min={1}
-                  max={5}
-                  step={1}
-                  value={headerMaxLines}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    if (val >= 1 && val <= 5) setHeaderMaxLines(val);
-                  }}
-                  data-test-subj="headerMaxLinesInput"
+              {onChangeHeaderRowHeight && onChangeHeaderRowHeightLines && (
+                <RowHeightSettings
+                  label="Max header cell lines"
+                  rowHeight={headerRowHeight}
+                  lineCountInput={headerLineCountInput}
+                  onChangeRowHeight={onChangeHeaderRowHeight}
+                  onChangeLineCountInput={onChangeHeaderRowHeightLines}
+                  data-test-subj="unifiedDataTableHeaderRowHeightSettings"
+                  maxRowHeight={5}
                 />
-              </EuiFormRow>
-              <RowHeightSettings
-                label="Body cell lines"
-                rowHeight={isAutoRowHeight ? 'auto' : 'custom'}
-                lineCountInput={isAutoRowHeight ? customBodyMaxLines : bodyMaxLines}
-                onChangeRowHeight={(mode) => {
-                  setBodyMaxLines(
-                    mode === 'auto' ? ROWS_HEIGHT_OPTIONS.auto : customBodyMaxLines
-                  );
-                }}
-                onChangeLineCountInput={(lines, isValid) => {
-                  if (isValid && lines >= 1) {
-                    setBodyMaxLines(lines);
-                  } else {
-                    setCustomBodyMaxLines(lines);
-                  }
-                }}
-                data-test-subj="tanstackGridRowHeight"
-              />
+              )}
+              {onChangeRowHeight && onChangeRowHeightLines && (
+                <RowHeightSettings
+                  label="Body cell lines"
+                  rowHeight={rowHeight}
+                  lineCountInput={lineCountInput}
+                  onChangeRowHeight={onChangeRowHeight}
+                  onChangeLineCountInput={onChangeRowHeightLines}
+                  data-test-subj="unifiedDataTableRowHeightSettings"
+                />
+              )}
               {gridImplementationSwitch}
             </EuiPopover>
             <EuiToolTip
@@ -1979,7 +2006,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                 }
                                 return null;
                               })()}
-                            <span css={styles.headerCellText}>
+                            <span
+                              css={
+                                isAutoHeaderRowHeight
+                                  ? styles.headerCellTextAuto
+                                  : styles.headerCellText
+                              }
+                            >
                               {flexRender(header.column.columnDef.header, header.getContext())}
                             </span>
                             {sortDir && (

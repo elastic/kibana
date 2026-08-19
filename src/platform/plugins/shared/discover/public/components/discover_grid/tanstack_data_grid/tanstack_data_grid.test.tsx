@@ -11,8 +11,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { TanStackDataGrid } from './tanstack_data_grid';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
+
+const services = createDiscoverServicesMock();
 import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 
 const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
@@ -28,6 +31,7 @@ const renderGrid = (
     showTimeCol: false,
     expandedDoc,
     setExpandedDoc: jest.fn(),
+    services,
     ...override,
   };
 
@@ -83,6 +87,7 @@ describe('TanStackDataGrid document view', () => {
           showTimeCol={false}
           expandedDoc={undefined}
           setExpandedDoc={jest.fn()}
+          services={services}
           {...props}
         />
       </DiscoverTestProvider>
@@ -114,6 +119,19 @@ describe('TanStackDataGrid document view', () => {
   });
 });
 
+describe('TanStackDataGrid columns', () => {
+  it('prepends the data view time field when adding columns', () => {
+    renderGrid({
+      columns: ['extension'],
+      dataView: dataViewMockWithTimeField,
+      showTimeCol: true,
+    });
+
+    expect(screen.getByTestId('tanstackGridWrapper')).toHaveTextContent('timestamp');
+    expect(screen.getByTestId('tanstackGridWrapper')).toHaveTextContent('extension');
+  });
+});
+
 describe('TanStackDataGrid summary column row height', () => {
   it('applies body cell lines to the summary column clamp', () => {
     const { rerender } = renderGrid({
@@ -134,6 +152,7 @@ describe('TanStackDataGrid summary column row height', () => {
           dataView={dataViewMock}
           showTimeCol={false}
           rowHeightState={5}
+          services={services}
         />
       </DiscoverTestProvider>
     );

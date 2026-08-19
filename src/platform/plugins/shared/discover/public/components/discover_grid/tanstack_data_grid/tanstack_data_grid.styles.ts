@@ -97,6 +97,14 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     wordBreak: 'break-word',
   }),
 
+  headerCellTextAuto: css({
+    overflow: 'hidden',
+    flex: 1,
+    minWidth: 0,
+    wordBreak: 'break-word',
+    whiteSpace: 'normal',
+  }),
+
   sortIndicator: css({
     flexShrink: 0,
     color: euiTheme.colors.textSubdued,

@@ -639,9 +639,13 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await page.waitForTimeout(300);
 
     // Verify "Max header cell lines" and "Body cell lines" inputs are visible
-    const headerLinesInput = page.locator('[data-test-subj="headerMaxLinesInput"]');
+    const headerLinesInput = page.locator(
+      '[data-test-subj="unifiedDataTableHeaderRowHeightSettings_lineCountNumber"]'
+    );
     await expect(headerLinesInput).toBeVisible({ timeout: 3_000 });
-    const bodyLinesInput = page.locator('[data-test-subj="tanstackGridRowHeight_lineCountNumber"]');
+    const bodyLinesInput = page.locator(
+      '[data-test-subj="unifiedDataTableRowHeightSettings_lineCountNumber"]'
+    );
     await expect(bodyLinesInput).toBeVisible({ timeout: 3_000 });
 
     // Change header max lines to 3 and body cell lines to 4

@@ -175,8 +175,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           onUpdateDataGridDensity={props.onUpdateDataGridDensity}
           rowHeightState={props.rowHeightState}
           onUpdateRowHeight={props.onUpdateRowHeight}
+          configRowHeight={props.configRowHeight}
           headerRowHeightState={props.headerRowHeightState}
           onUpdateHeaderRowHeight={props.onUpdateHeaderRowHeight}
+          configHeaderRowHeight={props.configHeaderRowHeight}
+          services={services}
           externalAdditionalControls={externalAdditionalControls}
           gridImplementationSwitch={gridImplementationSwitch}
         />
