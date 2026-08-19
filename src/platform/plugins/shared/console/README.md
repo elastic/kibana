@@ -71,7 +71,7 @@ The autocomplete logic is located in [`autocomplete`](https://github.com/elastic
 
 ## Autocomplete definitions
 Kibana users benefit greatly from autocomplete suggestions since not all Elasticsearch APIs can be provided with a corresponding UI. Autocomplete suggestions improve usability of Console for any Elasticsearch API endpoint.
-Autocomplete definitions are all created in the form of javascript objects loaded from `json` and `js` files. 
+Autocomplete definitions are all created in the form of JavaScript objects loaded from `json` and `js` files.
 
 ### Creating definitions
 The [`generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
