@@ -53,7 +53,11 @@ export function checkSuperuser(req: KibanaRequest) {
   }
 
   const userRoles = user.roles || [];
-  if (!userRoles.includes('superuser')) {
+  // system_indices_superuser is a built-in ES role with all cluster + index privileges;
+  // it is equivalent to superuser for the purposes of this check.
+  const isSuperuser =
+    userRoles.includes('superuser') || userRoles.includes('system_indices_superuser');
+  if (!isSuperuser) {
     return false;
   }
 
