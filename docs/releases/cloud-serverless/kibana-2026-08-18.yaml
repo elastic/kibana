@@ -137,9 +137,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/18300'
 - file:
     name: 284966.yaml
-    checksum: 37d0e9cc537754c2cf4878ecd21460a2e2d3f42a
+    checksum: 523e3d6a19c6d8b954ee545f6983e5c4d33d37d2
   type: bug-fix
-  title: Fix missing case assignee names in serverless
+  title: Fix missing case assignee names in Serverless
   products:
   - product: cloud-serverless
     target: 2026-08-18
