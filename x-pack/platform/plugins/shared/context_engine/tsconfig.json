@@ -27,12 +27,14 @@
     "@kbn/core-http-server",
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
-    "@kbn/task-manager-plugin",
     "@kbn/es-errors",
-    "@kbn/es-types",
     "@kbn/management-settings-ids",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-context",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/esql",
@@ -58,9 +60,12 @@
     "@kbn/content-list-provider",
     "@kbn/content-list-provider-client",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/security-plugin-types-server",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
-    "@kbn/zod"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/security-plugin",
+    "@kbn/zod",
+    "@kbn/es-types",
+    "@kbn/task-manager-plugin"
   ]
 }
