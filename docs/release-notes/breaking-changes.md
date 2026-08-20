@@ -39,6 +39,27 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % BREAKING CHANGES
 % Paste in breaking-changes.md
 
+## 9.6.0 [kibana-9.6.0-breaking-changes]
+
+$$$kibana-285645$$$
+::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
+**Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
+
+- `GET /api/workflows/executions/{executionId}`
+- `GET /api/workflows/executions/{executionId}/step/{stepExecutionId}`
+- `GET /api/workflows/executions/{executionId}/logs`
+- `GET /api/workflows/executions/{executionId}/children`
+- `GET /api/workflows/workflow/{workflowId}/executions`
+- `GET /api/workflows/workflow/{workflowId}/executions/steps`
+- `GET /api/workflows/workflow/executions`
+
+**Impact**<br> API callers or custom Kibana roles that grant `workflow_execution_read` without `workflow_read` receive HTTP 403 on the routes listed above.
+
+**Action**<br> In any role that customizes Workflows sub-feature privileges, add **Read** (`workflow_read`) under **Analytics → Workflows → Workflows Actions** alongside **Read Workflow Execution** (`workflow_execution_read`). Roles that grant `All` or `Read` on **Analytics → Workflows** already include both privileges and need no change.
+
+View [#285645]({{kib-pull}}285645).
+::::
+
 ## 9.5.2 [kibana-9.5.2-breaking-changes]
 
 $$$kibana-283150$$$
