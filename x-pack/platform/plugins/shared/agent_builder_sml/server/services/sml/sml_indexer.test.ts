@@ -686,6 +686,51 @@ describe('createSmlIndexer', () => {
         });
       });
 
+      it('getPermissions returning zero actions: entry is still written with one `{ space, name: [], count: 0 }` element per space', async () => {
+        // An empty action list must NOT drop the entry. Each space still gets its privilege
+        // element; `count: 0` makes the ES-side `terms_set` (minimum_should_match_field: count)
+        // require zero matches, so the entry stays visible — including in autocomplete — to any
+        // caller with access to that space.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'lens', title: 'Zero Actions', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        // what it falls back to if no-one implements the optional getPermissions hook
+        const getPermissions = jest.fn().mockResolvedValue({
+          kibana: { privileges: { name: [] } },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-zero-actions',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['space-b', 'default'],
+            esClient,
+          })
+        );
+
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: {
+            privileges: [
+              { space: 'default', name: [], count: 0 },
+              { space: 'space-b', name: [], count: 0 },
+            ],
+          },
+        });
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
       it('awaits async getPermissions and stamps the resolved value', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });

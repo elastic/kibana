@@ -1603,6 +1603,41 @@ describe('SmlService', () => {
       expect(result.get('item-1')).toBe(true);
     });
 
+    it('grants access for items whose space element requires zero actions', async () => {
+      // The indexer writes `{ space, name: [], count: 0 }` when a type resolves to no actions.
+      // Such an element must grant access to anyone in that space — `count: 0` makes the ES-side
+      // `terms_set` (minimum_should_match_field: count) require zero matches, and the Kibana-side
+      // mirror here is the vacuous `[].every(...)`. Records with zero actions therefore keep
+      // showing up in search/autocomplete rather than being silently dropped.
+      const securityAuthz = createMockSecurityAuthz([]);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-zero-actions',
+                permissions: makePermissions([{ space: 'default', name: [] }]),
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-zero-actions'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-zero-actions')).toBe(true);
+    });
+
     it('handles 404 error by returning false for all items', async () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();

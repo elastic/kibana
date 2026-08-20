@@ -434,7 +434,7 @@ export interface SmlService {
     /**
      * Optional fields to include beyond the baseline (`id`, `type`, `title`,
      * `description`). Valid opt-in values: `'content'`, `'tags'`,
-     * `'references'`, `'spaces'`, `'permissions'`.
+     * `'references'`, `'permissions'`.
      */
     fields?: string[];
     /** Runtime-imposed per-type id-allowlist constraints. See {@link SmlSearchConstraints}. */
