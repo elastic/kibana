@@ -511,6 +511,7 @@ export class SecurityPlugin
       config,
       license: this.securityLicense!,
       uiam,
+      checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
       ...this.cloudProjectContext,
     });
 

@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { UiamOAuthProjectType } from '@kbn/core-security-server';
+import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import { EsServiceAccounts } from './es_service_accounts';
 import type { ServiceAccountsServiceStart } from './types';
@@ -20,6 +21,7 @@ export interface ServiceAccountsServiceStartParams {
   license: SecurityLicense;
   /** The UIAM service, when UIAM is configured for this deployment. */
   uiam?: UiamServicePublic;
+  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   organizationId?: string;
   projectId?: string;
   projectType?: UiamOAuthProjectType;
@@ -36,6 +38,7 @@ export class ServiceAccountsService {
     config,
     license,
     uiam,
+    checkPrivilegesWithRequest,
     organizationId,
     projectId,
     projectType,
@@ -58,6 +61,7 @@ export class ServiceAccountsService {
       logger: this.logger,
       license,
       uiam,
+      checkPrivilegesWithRequest,
       organizationId,
       projectId,
       projectType,

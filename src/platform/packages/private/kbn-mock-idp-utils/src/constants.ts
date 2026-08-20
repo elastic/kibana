@@ -29,6 +29,8 @@ export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS = 'oauth-clients';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES =
   'oauth-authorization-codes';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS = 'oauth-app-connections';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS =
+  'organization-service-accounts';
 export const MOCK_IDP_UIAM_COSMOS_DB_NAME = 'uiam-db';
 // Cosmos DB emulator uses a fixed key. For production, this should be retrieved from configuration.
 export const MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY =
