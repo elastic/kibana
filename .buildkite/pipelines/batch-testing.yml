@@ -74,6 +74,8 @@ steps:
             - exit_status: '*'
               limit: 1
 
+  - wait
+
   - label: 'Build Kibana Distribution'
     command: |
       FTR=$(buildkite-agent meta-data get 'test-steps-dispatched:ftr' --default 'false')
@@ -89,9 +91,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-8
-    depends_on:
-      - dispatch-ftr-tests
-      - dispatch-scout-tests
     timeout_in_minutes: 20
     retry:
       automatic:
