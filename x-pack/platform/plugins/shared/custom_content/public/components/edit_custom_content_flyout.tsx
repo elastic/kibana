@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -41,8 +40,8 @@ export interface EditCustomContentFlyoutProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  panelTitle?: string;
   isNewPanel?: boolean;
+  ariaLabelledBy?: string;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
   onRunPreview: (html: string) => void;
@@ -58,8 +57,8 @@ export const EditCustomContentFlyout = ({
   projectRouting,
   query,
   filters,
-  panelTitle,
   isNewPanel,
+  ariaLabelledBy,
   onSave,
   onClose,
   onRunPreview,
@@ -119,20 +118,12 @@ export const EditCustomContentFlyout = ({
   });
 
   return (
-    <EuiFlyout
-      type="push"
-      size={600}
-      resizable
-      minWidth={320}
-      paddingSize="m"
-      onClose={onClose}
-      aria-labelledby="edit-custom-panel-flyout-title"
-    >
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id="edit-custom-panel-flyout-title">
+              <h2 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}>
                 {isNewPanel
                   ? i18n.translate('xpack.customContent.editFlyout.createTitle', {
                       defaultMessage: 'Create custom panel',
@@ -294,6 +285,6 @@ export const EditCustomContentFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

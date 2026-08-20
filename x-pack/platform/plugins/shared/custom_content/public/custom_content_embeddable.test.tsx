@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
@@ -61,6 +61,22 @@ jest.mock('./components/edit_custom_content_flyout', () => ({
   },
 }));
 
+type LoadContentFn = (args: {
+  closeFlyout: () => void;
+  ariaLabelledBy: string;
+}) => Promise<React.JSX.Element | null | void>;
+let capturedOpenLazyFlyoutArgs:
+  | { loadContent: LoadContentFn; flyoutProps?: { focusedPanelId?: string } }
+  | undefined;
+
+jest.mock('@kbn/presentation-util', () => ({
+  openLazyFlyout: (args: any) => {
+    capturedOpenLazyFlyoutArgs = args;
+  },
+  tracksOverlays: (api: any) =>
+    !!api && typeof api.clearOverlays === 'function' && typeof api.openOverlay === 'function',
+}));
+
 let mockAgentBuilder: unknown;
 
 jest.mock('./services', () => ({
@@ -94,8 +110,19 @@ describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
     mockAgentBuilder = undefined;
     capturedComponentProps = undefined;
+    capturedFlyoutProps = undefined;
+    capturedOpenLazyFlyoutArgs = undefined;
     mockApiIsPresentationContainer.mockReturnValue(false);
   });
+
+  const renderFlyoutContent = async (closeFlyout = jest.fn()) => {
+    const content = await capturedOpenLazyFlyoutArgs!.loadContent({
+      closeFlyout,
+      ariaLabelledBy: 'test-aria',
+    });
+    if (content) act(() => render(content as React.ReactElement));
+    return { closeFlyout };
+  };
 
   describe('serializeState', () => {
     it('round-trips prompt and template from initial state', async () => {
@@ -184,30 +211,25 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('flyout integration', () => {
-    beforeEach(() => {
-      capturedFlyoutProps = undefined;
-    });
-
-    it('`onEdit` opens the flyout', async () => {
+    it('`onEdit` calls openLazyFlyout with focusedPanelId and renders the flyout', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull();
+      expect(capturedOpenLazyFlyoutArgs).toBeUndefined();
 
       await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      expect(capturedOpenLazyFlyoutArgs?.flyoutProps?.focusedPanelId).toBe('test-uuid');
+
+      await renderFlyoutContent();
+      expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument();
     });
 
-    it('`handleFlyoutSave` updates state and re-renders', async () => {
+    it('`onSave` updates state and calls closeFlyout', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      const { closeFlyout } = await renderFlyoutContent();
 
       await act(async () =>
         capturedFlyoutProps!.onSave('FROM metrics | LIMIT 10', '<div>new</div>')
@@ -216,19 +238,18 @@ describe('customContentEmbeddableFactory', () => {
       const state = embeddable.api.serializeState();
       expect(state.esqlQuery).toBe('FROM metrics | LIMIT 10');
       expect(state.template).toBe('<div>new</div>');
+      expect(closeFlyout).toHaveBeenCalled();
     });
 
-    it('closing the flyout via `onClose`', async () => {
+    it('`onClose` calls closeFlyout', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      const { closeFlyout } = await renderFlyoutContent();
 
       await act(async () => capturedFlyoutProps!.onClose());
-      await waitFor(() => expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull());
+      expect(closeFlyout).toHaveBeenCalled();
     });
 
     it('cancelling on a new panel removes it from the parent', async () => {
@@ -238,12 +259,9 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      await renderFlyoutContent();
 
       await act(async () => capturedFlyoutProps!.onClose());
-
       expect(removePanel).toHaveBeenCalledWith('test-uuid');
     });
 
@@ -254,12 +272,9 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      await renderFlyoutContent();
 
       await act(async () => capturedFlyoutProps!.onClose());
-
       expect(removePanel).not.toHaveBeenCalled();
     });
 
@@ -270,19 +285,18 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
-
+      await renderFlyoutContent();
       await act(async () => capturedFlyoutProps!.onSave('FROM logs', '<div>saved</div>'));
 
+      capturedOpenLazyFlyoutArgs = undefined;
       await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
       await act(async () => capturedFlyoutProps!.onClose());
 
       expect(removePanel).not.toHaveBeenCalled();
     });
 
-    it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
+    it('clicking "Generate with chat" from the flyout calls openChat and closeFlyout', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {
         openChat,
@@ -291,23 +305,16 @@ describe('customContentEmbeddableFactory', () => {
           getChatEvents$: jest.fn(() => new Subject()),
         },
       };
-      const removePanel = jest.fn();
-      mockApiIsPresentationContainer.mockReturnValue(true);
-      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
+      await act(async () => embeddable.api.onEdit());
+      const { closeFlyout } = await renderFlyoutContent();
 
-      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('', undefined));
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
 
-      expect(removePanel).not.toHaveBeenCalled();
       expect(openChat).toHaveBeenCalled();
-      await waitFor(() =>
-        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
-      );
+      expect(closeFlyout).toHaveBeenCalled();
     });
   });
 
@@ -447,8 +454,9 @@ describe('customContentEmbeddableFactory', () => {
       );
     });
 
-    it('closes the flyout before opening the agent builder', async () => {
+    it('clears overlays (closes edit flyout) before opening the agent builder', async () => {
       const openChat = jest.fn();
+      const clearOverlays = jest.fn();
       mockAgentBuilder = {
         openChat,
         events: {
@@ -457,23 +465,19 @@ describe('customContentEmbeddableFactory', () => {
         },
       };
 
-      const { embeddable } = await buildEmbeddable(baseState);
+      const { embeddable } = await buildEmbeddable(baseState, {
+        clearOverlays,
+        openOverlay: jest.fn(),
+      });
       await act(async () => render(<embeddable.Component />));
-
-      await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
 
       await act(async () => capturedComponentProps?.onGenerateWithChat?.());
 
-      await waitFor(() =>
-        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
-      );
+      expect(clearOverlays).toHaveBeenCalled();
       expect(openChat).toHaveBeenCalled();
     });
 
-    it('does nothing when agentBuilder is unavailable', async () => {
+    it('does nothing when agentBuilder is unavailable (no throw)', async () => {
       mockAgentBuilder = undefined;
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
