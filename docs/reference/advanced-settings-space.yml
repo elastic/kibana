@@ -1912,7 +1912,7 @@ groups:
         id: securitysolution-refreshintervaldefaults
         description: |
           The default refresh interval for the {{security-app}} time filter. Must include `pause` and `value`. Specify `value` in milliseconds.
-        datatype: string
+        datatype: json
         default: '{"pause": true, "value": 300000}'
         applies_to:
           stack: ga
@@ -1927,7 +1927,7 @@ groups:
         id: securitysolution-timedefaults
         description: |
           The default time range for the {{security-app}} time filter. Must include `from` and `to`.
-        datatype: string
+        datatype: json
         default: '{"from": "now/d","to": "now/d"}'
         applies_to:
           stack: ga
@@ -1946,7 +1946,7 @@ groups:
           Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
 
           If you leave the `-*elastic-cloud-logs-*` pattern in the list, Elastic Cloud monitoring logs are excluded from {{security-app}} queries.
-        datatype: string
+        datatype: array
         default: "apm-*-transaction*, auditbeat-*, endgame-*, filebeat-*, logs-*, packetbeat-*, traces-apm*, winlogbeat-*, -*elastic-cloud-logs-*"
         applies_to:
           stack: ga
@@ -1965,7 +1965,7 @@ groups:
           A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators. Features that query these indices include the Threat Intelligence view on the Overview dashboard, indicator match rules, and the alert enrichment query.
 
           Do not remove or overwrite the `logs-ti_*` index pattern as it is used by {{agent}} integrations.
-        datatype: string
+        datatype: array
         default: "logs-ti_*"
         applies_to:
           stack: ga
@@ -2181,7 +2181,7 @@ groups:
           ]
           ```
           :::
-        datatype: string
+        datatype: json
         applies_to:
           stack: ga
           ech: ga
@@ -2240,7 +2240,7 @@ groups:
         id: security-solution-alert-tags
         description: |
           The list of tag options available when you apply tags to detection alerts.
-        datatype: string
+        datatype: array
         default: "Duplicate, False Positive, Further investigation required"
         applies_to:
           stack: ga
@@ -2254,7 +2254,7 @@ groups:
         id: security-solution-detections-close-reasons
         description: |
           Additional close reason options shown in the closing reason menu when you close an alert or an attack. The same options appear in the closing reason menu when you close a case with **Sync alert status with case status** turned on. Custom reasons supplement the predefined options (`Duplicate`, `False positive`, `True positive`, `Benign positive`, and `Other`) and must be unique. To learn more, refer to [Change an alert's status](docs-content://solutions/security/detect-and-alert/manage-detection-alerts.md#detection-alert-status) and [Set an alert closing reason when closing a case](docs-content://solutions/security/investigate/security-cases.md#cases-set-closing-reason).
-        datatype: string
+        datatype: array
         default: "[]"
         applies_to:
           stack: ga 9.4+
@@ -2262,7 +2262,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          security: ga
+          serverless: unavailable
 
       - setting: "securitySolution:maxUnassociatedNotes"
         id: security-solution-max-unassociated-notes
@@ -2283,6 +2283,7 @@ groups:
         description: |
           Specifies [data tiers](docs-content://manage-data/lifecycle/data-tiers.md) to exclude from detection rule queries. Allowed values are `data_cold` and `data_frozen`. If you specify more than one, separate them with commas. For example: `data_frozen,data_cold`. Excluding this data might improve rule performance or reduce execution time. This setting does not apply to {{ml}} rules.
         datatype: array
+        default: "[]"
         applies_to:
           stack: ga
           ech: ga
@@ -2397,7 +2398,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          security: ga
+          serverless: unavailable
 
       - setting: "securitySolution:enableRuleChangesHistory"
         id: security-solution-enable-rule-changes-history
