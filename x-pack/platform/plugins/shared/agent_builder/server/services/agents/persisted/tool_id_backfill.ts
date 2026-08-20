@@ -18,68 +18,80 @@ import { updateRequestToEs } from './client/converters';
 
 const PAGE_SIZE = 1000;
 
-export interface ToolIdMigrationEntry {
+export interface ToolIdBackfillEntry {
   oldId: string;
-  newIds: string[];
+  supplementalIds: string[];
 }
 
 /**
- * Registry of tool ID migrations. Add new entries here when tool IDs are
- * renamed or split. Each entry maps an old ID to one or more replacement IDs.
- * The migration runner applies all entries idempotently on every startup.
+ * Registry of tool ID backfills. Add new entries here when tool IDs are
+ * renamed or split. Each entry maps an old ID to one or more supplemental IDs
+ * that should be added alongside it. The backfill runner applies all entries
+ * idempotently on every startup.
  */
-const TOOL_ID_MIGRATIONS: ToolIdMigrationEntry[] = [
+const TOOL_ID_BACKFILLS: ToolIdBackfillEntry[] = [
   {
     oldId: 'platform.core.cases.attachments',
-    newIds: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
+    supplementalIds: [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ],
   },
 ];
 
 /**
- * Replaces an old tool ID with one or more new IDs in a ToolSelection array.
- * Idempotent: if any new IDs already exist, they are not duplicated.
+ * Appends supplemental tool IDs alongside an old ID in a ToolSelection array.
+ * The old ID is kept. Idempotent: if all supplemental IDs already exist, the
+ * original reference is returned unchanged.
  */
-export const replaceToolIdsInToolSelection = (
+export const addToolIdsToToolSelection = (
   tools: ToolSelection[],
   oldId: string,
-  newIds: string[]
+  supplementalIds: string[]
 ): ToolSelection[] => {
-  return tools.map((selection) => {
+  let changed = false;
+  const result = tools.map((selection) => {
     const ids = selection.tool_ids ?? [];
     if (!ids.includes(oldId)) {
       return selection;
     }
-    const withoutOld = ids.filter((id) => id !== oldId);
-    const existingSet = new Set(withoutOld);
-    const toAdd = newIds.filter((id) => !existingSet.has(id));
-    return { ...selection, tool_ids: [...withoutOld, ...toAdd] };
+    const existingSet = new Set(ids);
+    const toAdd = supplementalIds.filter((id) => !existingSet.has(id));
+    if (toAdd.length === 0) {
+      return selection;
+    }
+    changed = true;
+    return { ...selection, tool_ids: [...ids, ...toAdd] };
   });
+  return changed ? result : tools;
 };
 
 /**
- * Replaces an old tool ID with one or more new IDs in a flat string array.
- * Idempotent: if any new IDs already exist, they are not duplicated.
- * Returns the same reference if oldId is not present.
+ * Appends supplemental tool IDs alongside an old ID in a flat string array.
+ * The old ID is kept. Idempotent: returns the same reference if oldId is not
+ * present or all supplemental IDs already exist.
  */
-export const replaceToolIdsInArray = (
+export const addToolIdsToArray = (
   toolIds: string[],
   oldId: string,
-  newIds: string[]
+  supplementalIds: string[]
 ): string[] => {
   if (!toolIds.includes(oldId)) {
     return toolIds;
   }
-  const withoutOld = toolIds.filter((id) => id !== oldId);
-  const existingSet = new Set(withoutOld);
-  const toAdd = newIds.filter((id) => !existingSet.has(id));
-  return [...withoutOld, ...toAdd];
+  const existingSet = new Set(toolIds);
+  const toAdd = supplementalIds.filter((id) => !existingSet.has(id));
+  if (toAdd.length === 0) {
+    return toolIds;
+  }
+  return [...toolIds, ...toAdd];
 };
 
 const getToolsFromAgentSource = (source: AgentProperties): ToolSelection[] => {
   return source.configuration?.tools ?? source.config?.tools ?? [];
 };
 
-interface MigrationClient<TDoc> {
+interface BackfillClient<TDoc> {
   search: (req: StorageClientSearchRequest) => Promise<{
     hits: { hits: Array<{ _id: string; _source?: TDoc; sort?: SortResults }> };
   }>;
@@ -95,13 +107,13 @@ interface MigrationClient<TDoc> {
  * any that need updating. The `processHits` callback receives one page of hits and returns
  * the bulk operations to apply (empty array = nothing to update for that page).
  */
-const paginatedMigration = async <TDoc>({
+const paginatedUpdate = async <TDoc>({
   client,
   label,
   logger,
   processHits,
 }: {
-  client: MigrationClient<TDoc>;
+  client: BackfillClient<TDoc>;
   label: string;
   logger: Logger;
   processHits: (
@@ -137,7 +149,7 @@ const paginatedMigration = async <TDoc>({
         totalUpdated += bulkOperations.length;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        logger.error(`${label} tool ID migration: bulk update failed. ${message}`);
+        logger.error(`${label} tool ID backfill: bulk update failed. ${message}`);
       }
     }
 
@@ -147,25 +159,23 @@ const paginatedMigration = async <TDoc>({
   } while (true);
 
   if (totalUpdated > 0) {
-    logger.info(`${label} tool ID migration: updated ${totalUpdated} document(s).`);
+    logger.info(`${label} tool ID backfill: updated ${totalUpdated} document(s).`);
   }
 };
 
 /**
- * Scans all agents in .chat-agents and replaces old tool IDs with new ones.
+ * Scans all agents in .chat-agents and appends supplemental tool IDs alongside old ones.
  * Operates across all spaces (no space filter). Fire-and-forget safe.
  */
-export const migrateAgentToolIds = async ({
+export const backfillAgentToolIds = async ({
   storage,
   logger,
 }: {
   storage: AgentProfileStorage;
   logger: Logger;
 }): Promise<void> => {
-  const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
-
-  await paginatedMigration<AgentProperties>({
-    client: storage.getClient() as MigrationClient<AgentProperties>,
+  await paginatedUpdate<AgentProperties>({
+    client: storage.getClient() as BackfillClient<AgentProperties>,
     label: 'Agent',
     logger,
     processHits: (hits, now) => {
@@ -175,14 +185,12 @@ export const migrateAgentToolIds = async ({
         if (!source) continue;
 
         const currentTools = getToolsFromAgentSource(source);
-        if (!currentTools.some((sel) => (sel.tool_ids ?? []).some((id) => oldIdSet.has(id)))) {
-          continue;
+        let newTools = currentTools;
+        for (const { oldId, supplementalIds } of TOOL_ID_BACKFILLS) {
+          newTools = addToolIdsToToolSelection(newTools, oldId, supplementalIds);
         }
 
-        let newTools = currentTools;
-        for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
-          newTools = replaceToolIdsInToolSelection(newTools, oldId, newIds);
-        }
+        if (newTools === currentTools) continue; // reference equality — nothing changed
 
         ops.push({
           index: {
@@ -202,20 +210,18 @@ export const migrateAgentToolIds = async ({
 };
 
 /**
- * Scans all skills in .kibana_ai_infra-skills and replaces old tool IDs with new ones.
+ * Scans all skills in .kibana_ai_infra-skills and appends supplemental tool IDs alongside old ones.
  * Operates across all spaces (no space filter). Fire-and-forget safe.
  */
-export const migrateSkillToolIds = async ({
+export const backfillSkillToolIds = async ({
   storage,
   logger,
 }: {
   storage: SkillStorage;
   logger: Logger;
 }): Promise<void> => {
-  const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
-
-  await paginatedMigration<SkillProperties>({
-    client: storage.getClient() as MigrationClient<SkillProperties>,
+  await paginatedUpdate<SkillProperties>({
+    client: storage.getClient() as BackfillClient<SkillProperties>,
     label: 'Skill',
     logger,
     processHits: (hits, now) => {
@@ -225,12 +231,12 @@ export const migrateSkillToolIds = async ({
         if (!source) continue;
 
         const currentToolIds = source.tool_ids ?? [];
-        if (!currentToolIds.some((id) => oldIdSet.has(id))) continue;
-
         let newToolIds = currentToolIds;
-        for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
-          newToolIds = replaceToolIdsInArray(newToolIds, oldId, newIds);
+        for (const { oldId, supplementalIds } of TOOL_ID_BACKFILLS) {
+          newToolIds = addToolIdsToArray(newToolIds, oldId, supplementalIds);
         }
+
+        if (newToolIds === currentToolIds) continue; // reference equality — nothing changed
 
         ops.push({
           index: {
@@ -245,20 +251,20 @@ export const migrateSkillToolIds = async ({
 };
 
 /**
- * Applies all registered tool ID migrations
+ * Applies all registered tool ID backfills
  * to persisted agent configs and skill definitions. Idempotent — safe to run
  * on every startup.
  */
-export const runToolIdMigrations = async (
+export const runToolIdBackfill = async (
   logger: Logger,
   esClient: ElasticsearchClient
 ): Promise<void> => {
-  await migrateAgentToolIds({
+  await backfillAgentToolIds({
     storage: createAgentStorage({ logger, esClient }),
     logger,
   });
 
-  await migrateSkillToolIds({
+  await backfillSkillToolIds({
     storage: createSkillStorage({ logger, esClient }),
     logger,
   });
