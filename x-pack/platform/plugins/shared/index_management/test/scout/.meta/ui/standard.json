@@ -1,9 +1,37 @@
 {
-  "sha1": "034ef3cdef2d0c8e6a83aae435e9b38e99cdfe39",
+  "sha1": "a49d0c9aee19948ed2228952ca67f05faeb38c91",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "873eff5704fdd35-9e8c608c809725c",
+      "title": "Index Management - accessibility indices list has no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/a11y.spec.ts",
+        "line": 42,
+        "column": 77
+      }
+    },
+    {
+      "id": "873eff5704fdd35-8f12ac211aa34f7",
+      "title": "Index Management - accessibility index details tabs have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/a11y.spec.ts",
+        "line": 49,
+        "column": 62
+      }
+    },
     {
       "id": "2c2ea88c6054293-0f3a836fc0427c7",
       "title": "Component templates tab renders the component templates tab",

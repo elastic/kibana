@@ -1,7 +1,50 @@
 {
-  "sha1": "e301847e3f3650433848f6e4d0147497e0cb2186",
+  "sha1": "97c4aaff9d5a62d1e22ba2fea28802cba99bae31",
   "testChannels": [
     "ci-on-commit"
   ],
-  "tests": []
+  "tests": [
+    {
+      "id": "400bbfe0d93a22b-9967bb024eeac1e",
+      "title": "Stack Management - accessibility landing page has no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_a11y.spec.ts",
+        "line": 24,
+        "column": 89
+      }
+    },
+    {
+      "id": "ab5e730aba1cc4c-a040694ac1e8817",
+      "title": "Management plugin routing mounts a registered section and routes within it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
+        "line": 42,
+        "column": 46
+      }
+    },
+    {
+      "id": "ab5e730aba1cc4c-f74dc99860317f8",
+      "title": "Management plugin routing redirects to management home when navigating to a disabled management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
+        "line": 64,
+        "column": 7
+      }
+    }
+  ]
 }

@@ -1,0 +1,37 @@
+{
+  "sha1": "f8bb15f867af1de0f03703845811548c3afb05aa",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "6ea01ced63fa402-83a83f70e9d742b",
+      "title": "Files management shows an empty prompt when no files exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/files_management/test/scout/ui/tests/files_management.spec.ts",
+        "line": 42,
+        "column": 73
+      }
+    },
+    {
+      "id": "6ea01ced63fa402-d51e48a39c29654",
+      "title": "Files management breaks files down by extension and status in the diagnostics flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/files_management/test/scout/ui/tests/files_management.spec.ts",
+        "line": 43,
+        "column": 57
+      }
+    }
+  ]
+}
