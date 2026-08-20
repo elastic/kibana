@@ -7,7 +7,12 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationHypothesis, InvestigationState } from '@kbn/significant-events-schema';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationRecommendation,
+  InvestigationState,
+} from '@kbn/significant-events-schema';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import { formatShortTime } from '../common/format_timestamp';
 
@@ -18,17 +23,16 @@ export {
   isInvestigationTerminalFailure,
 } from '../common/investigation_progress_status';
 
-export interface InvestigationRecommendation {
-  title: string;
-  description?: string;
-  code?: string;
+/**
+ * One row of the Try next list: either a recommendation the agent emitted structurally, or one
+ * derived from a hypothesis when the investigation reported none — the only case carrying a
+ * `confidence`, since the agent's own recommendations have no such notion.
+ */
+export interface RecommendationItem extends InvestigationRecommendation {
   confidence?: number;
 }
 
-export interface BlindSpotItem {
-  title: string;
-  description: string;
-}
+export type BlindSpotItem = InvestigationBlindSpot;
 
 const NEXT_STEP_SECTION_TITLES = ['next steps', 'recommendations', 'try next'];
 
@@ -172,7 +176,7 @@ const normalizeRecommendationText = (text: string): string => {
   return trimRecommendationTitle(normalized);
 };
 
-const splitRecommendationBullet = (bullet: string): InvestigationRecommendation => {
+const splitRecommendationBullet = (bullet: string): RecommendationItem => {
   const trimmed = normalizeRecommendationText(bullet.replace(/^[-*]\s*/, '').trim());
   const dotSeparator = trimmed.indexOf(' · ');
   if (dotSeparator > 0) {
@@ -193,8 +197,8 @@ const splitRecommendationBullet = (bullet: string): InvestigationRecommendation 
   return { title: trimRecommendationTitle(trimmed) };
 };
 
-const parseNextStepsRecommendations = (section: string): InvestigationRecommendation[] => {
-  const recommendations: InvestigationRecommendation[] = [];
+const parseNextStepsRecommendations = (section: string): RecommendationItem[] => {
+  const recommendations: RecommendationItem[] = [];
   let isCollectingCode = false;
   let codeLines: string[] = [];
 
@@ -239,7 +243,13 @@ const parseNextStepsRecommendations = (section: string): InvestigationRecommenda
 
 export const parseInvestigationRecommendations = (
   state?: InvestigationState
-): InvestigationRecommendation[] => {
+): RecommendationItem[] => {
+  if (state?.recommendations && state.recommendations.length > 0) {
+    return state.recommendations;
+  }
+
+  // Legacy fallback: investigations completed before `recommendations` existed encoded next
+  // steps as a "## Next Steps" markdown section inside `conclusion`.
   const fromConclusion = state?.conclusion
     ? extractMarkdownSection(state.conclusion, NEXT_STEP_SECTION_TITLES)
     : undefined;
@@ -262,36 +272,12 @@ export const parseInvestigationRecommendations = (
 
 export const getPrimaryRecommendation = (
   state?: InvestigationState
-): InvestigationRecommendation | undefined => parseInvestigationRecommendations(state)[0];
+): RecommendationItem | undefined => parseInvestigationRecommendations(state)[0];
 
 const escapeMarkdownInline = (text: string): string => text.replace(/([\\`*_[\]])/g, '\\$1');
 
 export const formatBlindSpotMarkdown = ({ title, description }: BlindSpotItem): string =>
   `**${escapeMarkdownInline(title)}** · ${escapeMarkdownInline(description)}`;
-
-export const mapBlindSpots = (gaps: string[] | undefined): BlindSpotItem[] =>
-  (gaps ?? []).map((gap) => {
-    const separatorIndex = gap.indexOf(' · ');
-    if (separatorIndex > 0) {
-      return {
-        title: gap.slice(0, separatorIndex).trim(),
-        description: gap.slice(separatorIndex + 3).trim(),
-      };
-    }
-
-    const sentenceEnd = gap.search(/[.!?](?:\s|$)/);
-    if (sentenceEnd > 0 && sentenceEnd < gap.length - 1) {
-      return {
-        title: gap.slice(0, sentenceEnd + 1).trim(),
-        description: gap.slice(sentenceEnd + 1).trim(),
-      };
-    }
-
-    return {
-      title: gap.trim(),
-      description: gap.trim(),
-    };
-  });
 
 export const getConclusionBody = (conclusion: string | undefined): string | undefined => {
   if (!conclusion?.trim()) {

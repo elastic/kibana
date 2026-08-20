@@ -28590,7 +28590,6 @@
     "xpack.investigationOutput.couldNotLoadResultErrorMessage": "Impossible de charger le résultat de l’enquête.",
     "xpack.investigationOutput.failedStatusTitle": "L'enquête a échoué",
     "xpack.investigationOutput.failedWithoutDetailsErrorMessage": "L'investigation n'est pas terminée.",
-    "xpack.investigationOutput.gapsFoundTitle": "Écarts détectés",
     "xpack.investigationOutput.gatheringEvidenceTitle": "Collecte de preuves",
     "xpack.investigationOutput.hypothesis": "Hypothèse :",
     "xpack.investigationOutput.hypothesisConfidenceBadgeLabel": "{confidence, number, percent}",
