@@ -447,6 +447,7 @@ export class WatchesService {
       'Custom watch scaffold — tagged watch so it appears in the Watches catalog.';
     const yaml = buildCustomWatchYaml(name, description);
     const created = await management.createWorkflow({ yaml }, spaceId, request);
+    await this.store.refresh(request, spaceId);
     const projected = await this.get(created.id, spaceId, request);
     if (!projected) {
       throw new Error(`Created watch "${created.id}" but failed to reload it`);
@@ -468,5 +469,6 @@ export class WatchesService {
       throw createWatchNotFoundError(watchId);
     }
     await management.deleteWorkflows([watchId], spaceId, request);
+    await this.store.refresh(request, spaceId);
   }
 }
