@@ -14,11 +14,11 @@ export const PROJECT_SCOPE_LABEL = i18n.translate('xpack.slo.projectScope.label'
   defaultMessage: 'Project scope',
 });
 
-export const ALL_PROJECTS_LABEL = i18n.translate('xpack.slo.projectScope.allProjectsLabel', {
+const ALL_PROJECTS_LABEL = i18n.translate('xpack.slo.projectScope.allProjectsLabel', {
   defaultMessage: 'All projects',
 });
 
-export const THIS_PROJECT_LABEL = i18n.translate('xpack.slo.projectScope.thisProjectLabel', {
+const THIS_PROJECT_LABEL = i18n.translate('xpack.slo.projectScope.thisProjectLabel', {
   defaultMessage: 'This project',
 });
 
@@ -39,8 +39,6 @@ export const getProjectCountLabel = (selectedCount: number, totalCount: number):
     values: { selectedCount, totalCount },
   });
 
-export const originOnlyExpression = (originProjectId: string): string => `_id:${originProjectId}`;
-
 export const isThisProjectRouting = (
   projectRouting: string,
   originProjectId: string | undefined
@@ -51,7 +49,7 @@ export const isThisProjectRouting = (
   if (!originProjectId) {
     return false;
   }
-  return projectRouting === originOnlyExpression(originProjectId);
+  return projectRouting === `_id:${originProjectId}`;
 };
 
 /**
@@ -75,16 +73,18 @@ export const toStoredProjectRouting = (
 
 /** The label for routings that need no project lookup to describe. */
 export const getStaticProjectScopeLabel = (
-  projectRouting: string | undefined,
+  projectRouting: string,
   originProjectId?: string
 ): string | undefined => {
   if (projectRouting === ALL_PROJECT_ROUTING) {
     return ALL_PROJECTS_LABEL;
   }
 
-  if (projectRouting === undefined || isThisProjectRouting(projectRouting, originProjectId)) {
+  if (isThisProjectRouting(projectRouting, originProjectId)) {
     return THIS_PROJECT_LABEL;
   }
+
+  return undefined;
 };
 
 export const getSelectedProjectCount = ({

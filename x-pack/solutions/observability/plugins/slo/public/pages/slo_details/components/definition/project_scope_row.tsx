@@ -6,24 +6,24 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiLink,
   EuiPopover,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
-import type { ProjectRouting } from '@kbn/es-query';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   LOCAL_PROJECT_ROUTING,
   toPickerProjectRouting,
 } from '../../../../../common/project_routings';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { SLO_DETAILS_EBT_ACTIONS, SLO_DETAILS_EBT_ELEMENTS } from '../../ebt_constants';
+import type { CpsProjectScope } from '../../../../hooks/use_cps_project_scope';
+import { useCpsProjectScope } from '../../../../hooks/use_cps_project_scope';
 import {
   getProjectCountLabel,
   getStaticProjectScopeLabel,
@@ -32,20 +32,21 @@ import {
   PROJECT_SCOPE_UNAVAILABLE_LABEL,
 } from '../../../../utils/slo/project_scope';
 
-interface ProjectScopeLabelProps {
-  cpsManager: ICPSManager;
+interface ResolvedProjectScopeLabelProps {
+  fetchProjects: CpsProjectScope['fetchProjects'];
   projectRouting: string;
+  totalProjectCount: number;
 }
 
 /**
  * Resolves the routing server-side rather than decoding it locally, so tag-filter routings
  * that only the server can expand still report an accurate project count.
  */
-function ResolvedProjectScopeLabel({ cpsManager, projectRouting }: ProjectScopeLabelProps) {
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
-    [cpsManager]
-  );
+function ResolvedProjectScopeLabel({
+  fetchProjects,
+  projectRouting,
+  totalProjectCount,
+}: ResolvedProjectScopeLabelProps) {
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
     projectRouting
@@ -61,27 +62,15 @@ function ResolvedProjectScopeLabel({ cpsManager, projectRouting }: ProjectScopeL
 
   const matchedCount = (originProject ? 1 : 0) + linkedProjects.length;
 
-  return <>{getProjectCountLabel(matchedCount, cpsManager.getTotalProjectCount())}</>;
+  return <>{getProjectCountLabel(matchedCount, totalProjectCount)}</>;
 }
 
-function ProjectScopeLabel({ cpsManager, projectRouting }: ProjectScopeLabelProps) {
-  const staticLabel = getStaticProjectScopeLabel(projectRouting);
-
-  if (staticLabel) {
-    return <>{staticLabel}</>;
-  }
-
-  return <ResolvedProjectScopeLabel cpsManager={cpsManager} projectRouting={projectRouting} />;
-}
-
-export interface ProjectScopeRowProps {
+export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-export function ProjectScopeRow({ slo }: ProjectScopeRowProps) {
-  const { isServerless } = usePluginContext();
-  const { cps } = useKibana().services;
-  const cpsManager = cps?.cpsManager;
+export function ProjectScopeRow({ slo }: Props) {
+  const { isGateOpen, cpsManager, fetchProjects } = useCpsProjectScope();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -90,36 +79,24 @@ export function ProjectScopeRow({ slo }: ProjectScopeRowProps) {
   const projectRouting =
     toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? LOCAL_PROJECT_ROUTING;
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      if (!cpsManager) {
-        return Promise.resolve(null);
-      }
-      return cpsManager.fetchProjects(routing);
-    },
-    [cpsManager]
-  );
-
-  const popoverTitle = useMemo(
-    () => (
-      <EuiText size="s">
-        <p id={popoverTitleId}>{PROJECT_SCOPE_LABEL}</p>
-      </EuiText>
-    ),
-    [popoverTitleId]
-  );
-
-  if (!isServerless || !cps?.isTierEligible || !cpsManager) {
+  if (!isGateOpen || !cpsManager) {
     return null;
   }
 
-  const label = <ProjectScopeLabel cpsManager={cpsManager} projectRouting={projectRouting} />;
+  const totalProjectCount = cpsManager.getTotalProjectCount();
+  const label = getStaticProjectScopeLabel(projectRouting) ?? (
+    <ResolvedProjectScopeLabel
+      fetchProjects={fetchProjects}
+      projectRouting={projectRouting}
+      totalProjectCount={totalProjectCount}
+    />
+  );
 
   return (
     <>
       <EuiDescriptionListTitle>{PROJECT_SCOPE_LABEL}</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
-        {cpsManager.getTotalProjectCount() <= 1 ? (
+        {totalProjectCount <= 1 ? (
           <EuiText size="s" data-test-subj="sloDetailsProjectScope">
             {label}
           </EuiText>
@@ -128,12 +105,18 @@ export function ProjectScopeRow({ slo }: ProjectScopeRowProps) {
             aria-labelledby={popoverTitleId}
             anchorPosition="downLeft"
             button={
-              <EuiLink
+              <EuiButtonEmpty
                 data-test-subj="sloDetailsProjectScopeButton"
+                flush="both"
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+                size="s"
+                {...getEbtProps({
+                  action: SLO_DETAILS_EBT_ACTIONS.VIEW_PROJECT_SCOPE,
+                  element: SLO_DETAILS_EBT_ELEMENTS.PROJECT_SCOPE_ROW,
+                })}
               >
                 {label}
-              </EuiLink>
+              </EuiButtonEmpty>
             }
             closePopover={() => setIsPopoverOpen(false)}
             isOpen={isPopoverOpen}
@@ -142,7 +125,11 @@ export function ProjectScopeRow({ slo }: ProjectScopeRowProps) {
           >
             <ProjectPickerContent
               controlsState="hidden"
-              customHeaderText={popoverTitle}
+              customHeaderText={
+                <EuiText size="s">
+                  <p id={popoverTitleId}>{PROJECT_SCOPE_LABEL}</p>
+                </EuiText>
+              }
               fetchProjectsByRouting={fetchProjects}
               projectRouting={projectRouting}
             />

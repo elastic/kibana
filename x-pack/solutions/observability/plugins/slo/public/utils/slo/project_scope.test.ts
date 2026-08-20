@@ -12,7 +12,6 @@ import {
   getSelectedProjectCount,
   getStaticProjectScopeLabel,
   isThisProjectRouting,
-  originOnlyExpression,
   toStoredProjectRouting,
 } from './project_scope';
 
@@ -25,12 +24,6 @@ const project = (id: string): CPSProject => ({
 
 const ORIGIN_ID = 'origin-1';
 const availableProjects = [project(ORIGIN_ID), project('linked-1'), project('linked-2')];
-
-describe('originOnlyExpression', () => {
-  it('builds an id clause for the origin project', () => {
-    expect(originOnlyExpression(ORIGIN_ID)).toBe('_id:origin-1');
-  });
-});
 
 describe('isThisProjectRouting', () => {
   it('matches the canonical origin alias', () => {
@@ -81,10 +74,6 @@ describe('getStaticProjectScopeLabel', () => {
 
   it('labels the origin alias', () => {
     expect(getStaticProjectScopeLabel(LOCAL_PROJECT_ROUTING)).toBe('This project');
-  });
-
-  it('labels an unset routing as origin-only', () => {
-    expect(getStaticProjectScopeLabel(undefined)).toBe('This project');
   });
 
   it('returns undefined for a routing that needs a project lookup', () => {

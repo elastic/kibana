@@ -15,8 +15,7 @@ import {
   LOCAL_PROJECT_ROUTING,
   normalizeDefinedRouting,
 } from '../../../../../common/project_routings';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useCpsProjectScope } from '../../../../hooks/use_cps_project_scope';
 import {
   getProjectScopeLabel,
   PROJECT_SCOPE_LABEL,
@@ -28,21 +27,9 @@ import type { CreateSLOForm } from '../../types';
 
 export function ProjectRoutingsSelector() {
   const { watch, setValue } = useFormContext<CreateSLOForm>();
-  const { isServerless } = usePluginContext();
-  const { cps } = useKibana().services;
-  const cpsManager = cps?.cpsManager;
+  const { isGateOpen, fetchProjects } = useCpsProjectScope();
   const projectRoutings = watch('settings.projectRoutings');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      if (!cpsManager) {
-        return Promise.resolve(null);
-      }
-      return cpsManager.fetchProjects(routing);
-    },
-    [cpsManager]
-  );
 
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
@@ -52,7 +39,6 @@ export function ProjectRoutingsSelector() {
     () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
     [linkedProjects, originProject]
   );
-  const isGateOpen = Boolean(isServerless && cps?.isTierEligible && cpsManager);
   const originProjectId = originProject?._id;
 
   // Passed to the picker as-is: it resolves `_alias:_origin` against `originProjectId` itself.
