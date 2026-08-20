@@ -187,8 +187,15 @@ export const pollActionResponses = async (
     };
   }
 
-  // Every responding agent errored: osquery ran but returned no readable rows.
-  if (errorAgents !== undefined && errorAgents > 0 && errorAgents === responded) {
+  // Every EXPECTED agent responded and every one of them errored: osquery ran
+  // but returned no readable rows. Agents still pending at budget expiry are
+  // not failures — reporting `error` there would mask a retryable partial.
+  if (
+    errorAgents !== undefined &&
+    errorAgents > 0 &&
+    errorAgents === responded &&
+    (expectedAgentCount === undefined || responded >= expectedAgentCount)
+  ) {
     return {
       responded,
       ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),

@@ -176,4 +176,32 @@ describe('pollActionResponses', () => {
     expect(result.errorAgents).toBe(2);
     expect(result.error).toMatch(/execution error/);
   });
+
+  it('does not report a hard error while other dispatched agents are still pending', async () => {
+    // One agent errored, a second was dispatched but never reported by budget
+    // expiry. That is a retryable partial, not "the query failed".
+    const search = jest.fn().mockImplementation(async () => {
+      const call = search.mock.calls.length;
+
+      return call % 2 === 1
+        ? {
+            hits: { total: { value: 1 }, hits: [] },
+            aggregations: {
+              distinct_agents: { value: 1 },
+              error_agents: { doc_count: 1, distinct: { value: 1 } },
+            },
+          }
+        : { hits: { hits: [] } };
+    });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('partial');
+    expect(result.errorAgents).toBe(1);
+  });
 });
