@@ -88,6 +88,7 @@ const styles = {
   }),
 };
 export interface Props {
+  isMapLoading: boolean;
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
   saveCounter: number;
@@ -600,7 +601,11 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     return (
-      <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
+      <div
+        id="maps-plugin"
+        data-map-loaded={this.state.initialized && !this.props.isMapLoading}
+        css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}
+      >
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root" css={styles.reactMapsRoot}>

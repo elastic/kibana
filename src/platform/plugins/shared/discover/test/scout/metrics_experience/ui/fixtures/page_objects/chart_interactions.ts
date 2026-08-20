@@ -39,7 +39,7 @@ export function createChartInteractions(
 
   return {
     waitForCardRenderComplete: async (index: number): Promise<void> => {
-      const panel = getCardByIndex(index).locator('[data-test-subj="embeddablePanel"]');
+      const panel = getCardByIndex(index).locator('[data-test-subj="embeddablePanelContent"]');
       await expect(panel).toBeVisible();
 
       const minDurationMs = 2_000;
