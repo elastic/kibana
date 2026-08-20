@@ -9,6 +9,8 @@ import { EuiProvider } from '@elastic/eui';
 import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,6 +18,23 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import React from 'react';
 import { ConnectorsTab } from './connectors_tab';
 import type { DataConnector } from '../../hooks/use_data_connectors';
+
+type AddConnectorFlyoutProps = Parameters<
+  TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout']
+>[0];
+
+const CREATED_CONNECTOR: ActionConnector = {
+  id: 'new-connector',
+  name: 'New Connector',
+  actionTypeId: '.notion',
+  isMissingSecrets: false,
+  isPreconfigured: false,
+  isDeprecated: false,
+  isSystemAction: false,
+  isConnectorTypeDeprecated: false,
+  config: {},
+  secrets: {},
+};
 
 const CONNECTORS: DataConnector[] = [
   { id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' },
@@ -49,7 +68,7 @@ const renderConnectorsTab = ({
     },
   };
 
-  const getAddConnectorFlyout = jest.fn(() => (
+  const getAddConnectorFlyout = jest.fn((_props: AddConnectorFlyoutProps) => (
     <div data-test-subj="contextCreateConnectorFlyout">Create connector flyout</div>
   ));
 
@@ -227,20 +246,12 @@ describe('ConnectorsTab', () => {
       connectors: [],
     });
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const createdConnector = {
-      id: 'new-connector',
-      name: 'New Connector',
-      actionTypeId: '.notion',
-      isMissingSecrets: false,
-      config: {},
-      secrets: {},
-    };
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
     const flyoutProps = getAddConnectorFlyout.mock.calls.at(-1)?.[0];
     act(() => {
-      flyoutProps?.onConnectorCreated?.(createdConnector);
+      flyoutProps?.onConnectorCreated?.(CREATED_CONNECTOR);
       flyoutProps?.onClose?.();
     });
 
@@ -265,21 +276,13 @@ describe('ConnectorsTab', () => {
       connectors: [],
     });
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const createdConnector = {
-      id: 'new-connector',
-      name: 'New Connector',
-      actionTypeId: '.notion',
-      isMissingSecrets: false,
-      config: {},
-      secrets: {},
-    };
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
     const flyoutProps = getAddConnectorFlyout.mock.calls.at(-1)?.[0];
     act(() => {
-      flyoutProps?.onConnectorCreated?.(createdConnector);
-      flyoutProps?.onTestConnector?.(createdConnector);
+      flyoutProps?.onConnectorCreated?.(CREATED_CONNECTOR);
+      flyoutProps?.onTestConnector?.(CREATED_CONNECTOR);
     });
 
     expect(onToggle).toHaveBeenCalledWith({
