@@ -23,5 +23,6 @@ export interface WatchSettingsRegistration {
     values: ManagedWorkflowTemplateValues,
     patch: WatchSettingsPatch
   ): { values: ManagedWorkflowTemplateValues } | { rejected: string };
+  /** Return the raw projection; the registry test guards against API schema stripping. */
   toSettings(values: ManagedWorkflowTemplateValues): WatchSettings;
 }

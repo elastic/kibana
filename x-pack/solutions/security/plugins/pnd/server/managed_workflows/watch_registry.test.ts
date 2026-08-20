@@ -9,6 +9,7 @@ import { parse } from 'yaml';
 import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  WatchSettings,
   WATCH_TIER_TAGS,
 } from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -20,6 +21,17 @@ describe('watchRegistry', () => {
     expect(watchRegistry.list()).toHaveLength(5);
     expect(watchRegistry.get(SYSTEM_SECURITY_WATCH_FLOOR_ID)?.settings).toBe(watchFloorSettings);
     expect(watchRegistry.get(SYSTEM_SECURITY_WATCH_OFFICER_ID)?.settings).toBeUndefined();
+  });
+
+  it('does not silently strip undeclared settings projection keys', () => {
+    for (const registration of watchRegistry.list()) {
+      if (!registration.settings) continue;
+
+      const projected = registration.settings.toSettings(
+        registration.settings.createDefaultValues()
+      );
+      expect(WatchSettings.parse(projected)).toEqual(projected);
+    }
   });
 
   it('renders Watch Floor settings into the managed YAML', () => {
