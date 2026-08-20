@@ -19,7 +19,7 @@ project:
 dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-application-common'
-  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/app-menu'
   - '@kbn/deeplinks-devtools'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-ml'

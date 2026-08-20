@@ -109,6 +109,7 @@ export type SystemCellId = keyof SystemCellComponentMap;
 
 interface CaseInfo {
   id: string;
+  owner: string;
 }
 
 type UseCasesAddToExistingCaseModal = (
@@ -150,7 +151,7 @@ export interface CasesService {
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
-    groupAlertsByRule: (items: any[]) => any[];
+    groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };

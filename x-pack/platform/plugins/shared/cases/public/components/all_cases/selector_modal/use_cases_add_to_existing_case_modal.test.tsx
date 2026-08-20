@@ -39,8 +39,8 @@ jest.mock('./all_cases_selector_modal', () => {
 const onSuccess = jest.fn();
 const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
-const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
+const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 const openCreateNewCaseFlyout = jest.fn();
 
 // test component to test the hook integration
@@ -97,11 +97,11 @@ describe('use cases add to existing case modal hook', () => {
   beforeEach(() => {
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
+    openCreateNewCaseFlyout.mockReset();
     useCasesAddToNewCaseFlyoutMock.mockReturnValue({
       close: jest.fn(),
       open: openCreateNewCaseFlyout,
     });
-    openCreateNewCaseFlyout.mockReset();
     onSuccess.mockReset();
   });
 
@@ -120,7 +120,7 @@ describe('use cases add to existing case modal hook', () => {
       },
       { wrapper }
     );
-    result.current.open();
+    result.current.open({ getAttachments: () => [] });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
@@ -185,10 +185,12 @@ describe('use cases add to existing case modal hook', () => {
 
     await waitFor(() => {
       expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
-        attachments: [alertComment],
         headerContent,
+        getAttachments: expect.any(Function),
       });
     });
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
+    expect(flyoutGetAttachments('cases')).toEqual([alertComment]);
     expect(useCasesAddToNewCaseFlyoutMock).toHaveBeenCalledWith(
       expect.objectContaining({ initialValue })
     );
@@ -327,6 +329,47 @@ describe('use cases add to existing case modal hook', () => {
       expect(mockBulkCreateAttachments).not.toHaveBeenCalled();
       expect(mockedToastSuccess).not.toHaveBeenCalled();
     });
+  });
+
+  it('should lazily resolve owner-dependent attachments when creating a new case from the modal', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      // user clicked "create new case" inside the "add to existing case" modal
+      onRowClick(undefined);
+      return null;
+    });
+
+    // an owner-dependent getAttachments, like ML's or Osquery's, that can only build
+    // the correct unified attachment once the (new) case's owner is known
+    const ownerDependentGetAttachments = jest
+      .fn()
+      .mockImplementation(({ theCase }: { theCase?: CaseUI }) => (theCase ? [alertComment] : []));
+
+    const TestComponentWithOwnerDependentAttachments: React.FC<AddToExistingCaseModalProps> = (
+      props
+    ) => {
+      const hook = useCasesAddToExistingCaseModal({ onSuccess, ...props });
+      const onClick = () => {
+        hook.open({ getAttachments: ownerDependentGetAttachments });
+      };
+      return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
+    };
+
+    renderWithTestingProviders(<TestComponentWithOwnerDependentAttachments />);
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
+        getAttachments: expect.any(Function),
+      });
+    });
+
+    const { getAttachments: flyoutGetAttachments } = openCreateNewCaseFlyout.mock.calls[0][0];
+
+    // the flyout only knows the owner once the case is created; the modal must
+    // forward that owner back to the caller's getAttachments instead of the
+    // empty array it would have eagerly resolved with theCase === undefined
+    expect(flyoutGetAttachments('cases')).toEqual([alertComment]);
+    expect(ownerDependentGetAttachments).toHaveBeenCalledWith({ theCase: { owner: 'cases' } });
   });
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {

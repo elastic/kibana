@@ -67,7 +67,7 @@ describe('bulk action hooks', () => {
   const setIsBulkActionsLoading = jest.fn();
 
   const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
-    getAttachments({ theCase: { id: caseId } });
+    getAttachments({ theCase: { id: caseId, owner: 'cases' } });
   });
 
   mockCasesService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
@@ -101,7 +101,7 @@ describe('bulk action hooks', () => {
         }
       );
 
-      mockAddExistingCase.mock.calls[0][0]!.onSuccess({ id: caseId }, false);
+      mockAddExistingCase.mock.calls[0][0]!.onSuccess({ id: caseId, owner: 'cases' }, false);
       expect(refresh).toHaveBeenCalled();
     });
 
@@ -207,7 +207,7 @@ describe('bulk action hooks', () => {
       // @ts-expect-error: cases do not need all arguments
       result.current[0].onClick(alerts);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts);
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts, 'cases');
     });
 
     it('should remove alerts that are already attached to the case', async () => {
@@ -258,22 +258,25 @@ describe('bulk action hooks', () => {
         },
       ]);
 
-      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith([
-        {
-          _id: 'alert1',
-          _index: 'idx1',
-          data: [
-            {
-              field: 'kibana.alert.case_ids',
-              value: ['test-case-2'],
-            },
-          ],
-          ecs: {
+      expect(mockCasesService.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+        [
+          {
             _id: 'alert1',
             _index: 'idx1',
+            data: [
+              {
+                field: 'kibana.alert.case_ids',
+                value: ['test-case-2'],
+              },
+            ],
+            ecs: {
+              _id: 'alert1',
+              _index: 'idx1',
+            },
           },
-        },
-      ]);
+        ],
+        'cases'
+      );
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {

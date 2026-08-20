@@ -49,36 +49,12 @@ module.exports = {
     },
 
     '@kbn/ui-chrome-layout': {
-      alternative: 'Use chrome layout APIs instead.',
+      alternative:
+        'See src/core/packages/chrome/layout/layout_overview.mdx for layout CSS variables, sizing, and the application scroll container.',
       overrides: [
         {
           path: 'src/core/packages/chrome/',
           reason: 'Core chrome mounts layout and owns the public chrome facades.',
-        },
-        {
-          path: 'src/platform/plugins/shared/developer_toolbar/',
-          reason:
-            'Needs useLayoutUpdate to set chrome footerHeight; no public core re-export yet. Prefer re-exporting from @kbn/core-chrome-layout (or a chrome API).',
-        },
-      ],
-    },
-
-    '@kbn/ui-chrome-layout-constants': {
-      alternative: 'Import from @kbn/core-chrome-layout-constants instead.',
-      overrides: [
-        {
-          path: 'src/core/packages/chrome/',
-          reason: 'Core chrome re-exports and consumes layout constants.',
-        },
-      ],
-    },
-
-    '@kbn/ui-chrome-layout-utils': {
-      alternative: 'Import from @kbn/core-chrome-layout-utils instead.',
-      overrides: [
-        {
-          path: 'src/core/packages/chrome/',
-          reason: 'Core chrome re-exports and consumes layout utils.',
         },
       ],
     },
@@ -89,6 +65,16 @@ module.exports = {
         {
           path: 'src/core/packages/chrome/',
           reason: 'Core chrome mounts side navigation and owns navigation APIs.',
+        },
+      ],
+    },
+
+    '@kbn/ui-app-menu': {
+      alternative: 'Import from @kbn/app-menu instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/app-menu/app-menu/',
+          reason: 'App-facing contract that re-exports the portable implementation.',
         },
       ],
     },
