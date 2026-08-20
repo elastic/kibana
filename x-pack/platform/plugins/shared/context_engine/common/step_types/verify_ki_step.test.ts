@@ -17,6 +17,20 @@ describe('VerifyKiInputSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts a KI without esql attributes', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: { type: 'detection', title: 'no esql', attributes: { severity: 'high' } },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a KI without any attributes', () => {
+    const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' } });
+
+    expect(result.success).toBe(true);
+  });
+
   it('rejects attributes with too many entries', () => {
     const attributes = Object.fromEntries(
       Array.from({ length: MAX_KI_ATTRIBUTES + 1 }, (_, i) => [`key${i}`, 'v'])
