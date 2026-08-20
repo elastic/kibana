@@ -8,7 +8,8 @@
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
 
-globalSetupHook(
+// Failing: See https://github.com/elastic/kibana/issues/282767
+globalSetupHook.skip(
   'Ingest Exploratory View test data',
   { tag: tags.stateful.classic },
   async ({ esArchiver, log }) => {
