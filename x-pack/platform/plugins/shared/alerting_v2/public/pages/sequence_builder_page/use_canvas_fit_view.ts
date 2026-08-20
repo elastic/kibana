@@ -14,11 +14,14 @@ export const useCanvasFitView = (nodesLength: number) => {
   const measuredWidth = useStore((s) => s.width);
   const measuredHeight = useStore((s) => s.height);
 
-  const lastFittedCountRef = useRef(-1);
+  const lastFittedRef = useRef<{ count: number; width: number; height: number }>({
+    count: -1,
+    width: 0,
+    height: 0,
+  });
   const fitTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    lastFittedCountRef.current = -1;
     return () => {
       if (fitTimerRef.current !== undefined) clearTimeout(fitTimerRef.current);
     };
@@ -26,17 +29,23 @@ export const useCanvasFitView = (nodesLength: number) => {
 
   useEffect(() => {
     if (nodesLength === 0 || measuredWidth <= 0 || measuredHeight <= 0) return;
-    if (lastFittedCountRef.current === nodesLength) return;
 
-    const isInitialFit = lastFittedCountRef.current === -1;
-    const targetCount = nodesLength;
+    const prev = lastFittedRef.current;
+    if (
+      prev.count === nodesLength &&
+      prev.width === measuredWidth &&
+      prev.height === measuredHeight
+    )
+      return;
+
+    const isInitialFit = prev.count === -1;
 
     if (fitTimerRef.current !== undefined) clearTimeout(fitTimerRef.current);
 
     fitTimerRef.current = setTimeout(() => {
       fitTimerRef.current = undefined;
       fitView({ padding: 0.4, duration: isInitialFit ? 0 : 200, maxZoom: 1.2 });
-      lastFittedCountRef.current = targetCount;
+      lastFittedRef.current = { count: nodesLength, width: measuredWidth, height: measuredHeight };
     }, 50);
   }, [measuredWidth, measuredHeight, nodesLength, fitView]);
 };

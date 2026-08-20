@@ -45,8 +45,10 @@ const getDefaultFormValues = (): FormValues => ({
 
 export type SequenceBuilderStep = 'alert' | 'recovery';
 
+const DEFAULT_FORM_VALUES = getDefaultFormValues();
+
 export const useSequenceBuilderForm = () => {
-  const methods = useForm<FormValues>({ mode: 'onBlur', values: getDefaultFormValues() });
+  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues: DEFAULT_FORM_VALUES });
   return { methods, isLoading: false };
 };
 
@@ -109,7 +111,7 @@ export const useSequenceBuilderState = () => {
 
         navigateToUrl(basePath.prepend(paths.ruleList));
       } catch (err) {
-        notifications.toasts.addError(err, {
+        notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('xpack.alertingV2.sequenceBuilder.saveError', {
             defaultMessage: 'Failed to save sequence rule',
           }),

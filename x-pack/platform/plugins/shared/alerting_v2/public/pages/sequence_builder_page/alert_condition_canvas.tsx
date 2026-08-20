@@ -412,7 +412,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
             stepsLength={seqValues.steps.length}
             closeAllHopPopovers={closeAllHopPopovers}
             onDrop={handleDrop}
-            colorMode={colorMode as ColorMode}
+            colorMode={colorMode.toLowerCase() as ColorMode}
           />
         </ReactFlowProvider>
       </EuiFlexItem>
