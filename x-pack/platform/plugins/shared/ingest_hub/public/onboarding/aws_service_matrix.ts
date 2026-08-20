@@ -201,6 +201,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — management_governance / security_identity_compliance ──
   {
     id: 'cloudtrail',
+    name: 'AWS CloudTrail',
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
@@ -268,6 +269,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'waf',
+    name: 'AWS WAF',
     category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
@@ -328,6 +330,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'vpcflow',
+    name: 'AWS VPC Flow',
     category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',

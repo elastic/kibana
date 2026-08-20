@@ -120,9 +120,7 @@ export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boo
   if (getRequiredBooleanFields(service, defaultTransport).length > 0) return true;
   const flyoutFields = getFlyoutFields(service, defaultTransport);
   const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
-  return flyoutFields.some(
-    (f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f) && f !== 'regions'
-  );
+  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
 }
 
 export function getRegionFieldName(

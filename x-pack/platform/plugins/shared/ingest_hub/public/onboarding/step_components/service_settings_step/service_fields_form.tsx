@@ -118,7 +118,7 @@ export function ServiceFieldsForm({
   const requiredTextFieldSet = new Set(requiredTextFields);
   const flyoutFields = getFlyoutFields(service, draftTransport);
   const otherFlyoutFields = flyoutFields.filter(
-    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f) && f !== 'regions'
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
   const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
 
@@ -174,15 +174,17 @@ export function ServiceFieldsForm({
               <EuiSpacer size="s" />
             </>
           )}
-          {requiredTextFields.map((fieldName) => (
-            <VarField
-              key={fieldName}
-              service={service}
-              fieldName={fieldName}
-              draft={draft}
-              onFieldChange={onFieldChange}
-              forceShowErrors={anyRequiredEmpty}
-            />
+          {requiredTextFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                fieldName={fieldName}
+                draft={draft}
+                onFieldChange={onFieldChange}
+                forceShowErrors={anyRequiredEmpty}
+              />
+            </React.Fragment>
           ))}
         </>
       )}
@@ -190,27 +192,36 @@ export function ServiceFieldsForm({
       {primaryBoolFields.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          {primaryBoolFields.map((fieldName) => (
-            <VarField
-              key={fieldName}
-              service={service}
-              fieldName={fieldName}
-              draft={draft}
-              onFieldChange={onFieldChange}
-            />
+          {primaryBoolFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                fieldName={fieldName}
+                draft={draft}
+                onFieldChange={onFieldChange}
+              />
+            </React.Fragment>
           ))}
         </>
       )}
 
-      {primaryOtherFields.map((fieldName) => (
-        <VarField
-          key={fieldName}
-          service={service}
-          fieldName={fieldName}
-          draft={draft}
-          onFieldChange={onFieldChange}
-        />
-      ))}
+      {primaryOtherFields.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          {primaryOtherFields.map((fieldName, i) => (
+            <React.Fragment key={fieldName}>
+              {i > 0 && <EuiSpacer size="m" />}
+              <VarField
+                service={service}
+                fieldName={fieldName}
+                draft={draft}
+                onFieldChange={onFieldChange}
+              />
+            </React.Fragment>
+          ))}
+        </>
+      )}
 
       {hasAdvancedOptions && (
         <>
@@ -233,23 +244,27 @@ export function ServiceFieldsForm({
           </EuiFlexGroup>
           {isShowingAdvanced && (
             <>
-              {advancedBoolFields.map((fieldName) => (
-                <VarField
-                  key={fieldName}
-                  service={service}
-                  fieldName={fieldName}
-                  draft={draft}
-                  onFieldChange={onFieldChange}
-                />
+              {advancedBoolFields.map((fieldName, i) => (
+                <React.Fragment key={fieldName}>
+                  {i > 0 && <EuiSpacer size="m" />}
+                  <VarField
+                    service={service}
+                    fieldName={fieldName}
+                    draft={draft}
+                    onFieldChange={onFieldChange}
+                  />
+                </React.Fragment>
               ))}
-              {advancedOtherFields.map((fieldName) => (
-                <VarField
-                  key={fieldName}
-                  service={service}
-                  fieldName={fieldName}
-                  draft={draft}
-                  onFieldChange={onFieldChange}
-                />
+              {advancedOtherFields.map((fieldName, i) => (
+                <React.Fragment key={fieldName}>
+                  {(i > 0 || advancedBoolFields.length > 0) && <EuiSpacer size="m" />}
+                  <VarField
+                    service={service}
+                    fieldName={fieldName}
+                    draft={draft}
+                    onFieldChange={onFieldChange}
+                  />
+                </React.Fragment>
               ))}
             </>
           )}
