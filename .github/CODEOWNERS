@@ -375,8 +375,6 @@ src/dev @elastic/kibana-operations
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
-src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
-src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
 src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
@@ -646,7 +644,6 @@ src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-management/storybook/config @elastic/kibana-management
-src/platform/packages/shared/kbn-mcp-dev-server @elastic/search-ml-ux
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
@@ -1896,6 +1893,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/unified_doc_viewer/public/utils @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
 
 /x-pack/solutions/observability/test/functional/services/logs_ui @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-signals-logs-team
@@ -3724,8 +3722,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
 /src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 /src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
-/src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
-/src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156

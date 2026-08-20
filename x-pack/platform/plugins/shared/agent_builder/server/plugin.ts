@@ -209,6 +209,11 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -256,8 +261,16 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -315,6 +328,7 @@ export class AgentBuilderPlugin
           };
         },
       },
+      conversationTemplates,
     };
   }
 
