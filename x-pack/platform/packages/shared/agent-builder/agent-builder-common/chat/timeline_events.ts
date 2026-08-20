@@ -18,7 +18,7 @@ import type {
 import type { RoundState } from './round_state';
 
 /**
- * The current schema version for an events-native conversation document.
+ * Marks a conversation document as events native (see `isEventsNativeVersion`).
  */
 export const CONVERSATION_SCHEMA_VERSION = 1;
 

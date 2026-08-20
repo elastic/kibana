@@ -1497,15 +1497,9 @@ describe('conversation model converters', () => {
       expect(updated.events).toBeUndefined();
     });
 
-    it('re-stamps schema_version at CONVERSATION_SCHEMA_VERSION on every events-native write', () => {
-      // Provenance/self-heal: a conversation carrying an older format version
-      // is bumped to the current on its next write, so `schema_version <
-      // current` is a reliable "still on the old projection" signal.
+    it('keeps events-native docs stamped with the native marker on update', () => {
       const conversation = eventsNativeStored();
-      // Simulate a doc still stamped at the previous format (a future scenario
-      // once we bump CONVERSATION_SCHEMA_VERSION; here we simulate by forcing
-      // an older-looking number that still passes the events-native gate).
-      conversation.schema_version = 1;
+      conversation.schema_version = CONVERSATION_SCHEMA_VERSION;
 
       const updated = updateConversation({
         conversation,

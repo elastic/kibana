@@ -10,10 +10,8 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
-  ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
-  ToolResultType,
 } from '@kbn/agent-builder-common';
 import { roundsToEvents } from './rounds_to_events';
 
