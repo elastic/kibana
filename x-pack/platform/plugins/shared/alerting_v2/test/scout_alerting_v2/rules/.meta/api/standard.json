@@ -1,5 +1,5 @@
 {
-  "sha1": "1bd512a229f42f90c08e3831edecda25251848b7",
+  "sha1": "aaa6262d8289b8b559c378c7e7091fc7809705f6",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -3372,8 +3372,8 @@
       }
     },
     {
-      "id": "df929c73b65283e-0be0aa964382938",
-      "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "id": "df929c73b65283e-27fa83fe5bf9ac2",
+      "title": "Update rule API validation: should reject recovery_strategy \"query\" without a recovery block",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3385,6 +3385,58 @@
       }
     },
     {
+      "id": "df929c73b65283e-3f809bfcb5a75ba",
+      "title": "Update rule API validation: should reject a composed rule setting recovery_strategy \"query\" without a recovery segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 468,
+        "column": 25
+      }
+    },
+    {
+      "id": "df929c73b65283e-5191b364a564f46",
+      "title": "Update rule API validation: should reject clearing recovery_strategy while a composed recovery segment remains",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 488,
+        "column": 19
+      }
+    },
+    {
+      "id": "df929c73b65283e-7c60ed290b85c05",
+      "title": "Update rule API validation: should reject a no_data_strategy without a no_data block (standalone)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 518,
+        "column": 25
+      }
+    },
+    {
+      "id": "df929c73b65283e-0be0aa964382938",
+      "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 529,
+        "column": 4
+      }
+    },
+    {
       "id": "df929c73b65283e-4ed98ed7872b7fc",
       "title": "Update rule API authorization: should return 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -3393,8 +3445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 470,
-        "column": 14
+        "line": 544,
+        "column": 24
       }
     },
     {
@@ -3406,8 +3458,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 489,
-        "column": 52
+        "line": 563,
+        "column": 53
       }
     },
     {

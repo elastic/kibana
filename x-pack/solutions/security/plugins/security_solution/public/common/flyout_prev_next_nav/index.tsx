@@ -28,7 +28,7 @@ export const FlyoutPrevNextNav = React.memo(function FlyoutPrevNextNav({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={PREVIOUS_BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             color="text"
             display="base"
             size="s"
@@ -42,7 +42,7 @@ export const FlyoutPrevNextNav = React.memo(function FlyoutPrevNextNav({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={NEXT_BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             color="text"
             display="base"
             size="s"

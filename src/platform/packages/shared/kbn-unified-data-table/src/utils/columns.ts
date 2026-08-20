@@ -16,6 +16,11 @@ export const SOURCE_COLUMN = '_source';
 // new columns, and thus performing worse than using the same array over multiple renders.
 const SOURCE_ONLY = [SOURCE_COLUMN];
 
+export const getShowSummaryColumn = (columns: string[]): boolean => columns.includes(SOURCE_COLUMN);
+
+export const isSummaryOnlyColumn = (columns: string[]): boolean =>
+  columns.length === 1 && columns[0] === SOURCE_COLUMN;
+
 /**
  * Function to provide fallback when
  * 1) no columns are given

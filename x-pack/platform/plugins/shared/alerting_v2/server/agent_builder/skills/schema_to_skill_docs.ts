@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ACTION_POLICY_MANAGEMENT_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -128,10 +129,84 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
+const REF_PREFIXES = ['#/definitions/', '#/$defs/'] as const;
+
+/** Keys that carry schema composition rather than the field's own shape. */
+const COMPOSITION_KEYS = new Set(['$ref', 'allOf', 'definitions', '$defs', '$schema']);
+
+function resolveRef(ref: string, root: JsonSchemaNode): JsonSchemaNode | undefined {
+  if (ref === '#') return root;
+  const prefix = REF_PREFIXES.find((candidate) => ref.startsWith(candidate));
+  if (!prefix) return undefined;
+  const defs = (root.definitions ?? root.$defs) as JsonSchemaNode | undefined;
+  const target = defs?.[decodeURIComponent(ref.slice(prefix.length))];
+  return target && typeof target === 'object' ? (target as JsonSchemaNode) : undefined;
+}
+
+/** Merges a referenced schema with the referencing site's own keys; the referencing site wins. */
+function mergeSchemaNodes(base: JsonSchemaNode, override: JsonSchemaNode): JsonSchemaNode {
+  const merged: JsonSchemaNode = { ...base, ...override };
+
+  const baseProperties = base.properties as JsonSchemaNode | undefined;
+  const overrideProperties = override.properties as JsonSchemaNode | undefined;
+  if (baseProperties || overrideProperties) {
+    merged.properties = { ...baseProperties, ...overrideProperties };
+  }
+
+  const required = [
+    ...((base.required as string[]) ?? []),
+    ...((override.required as string[]) ?? []),
+  ];
+  if (required.length > 0) merged.required = [...new Set(required)];
+
+  return merged;
+}
+
+/**
+ * Expands `$ref` pointers back into the tree. Every schema carrying a
+ * `.meta({ id })` is hoisted into `definitions` by `z.toJSONSchema`, and
+ * draft-7 — which cannot combine `$ref` with sibling keys — wraps the pointer
+ * in a single-member `allOf`. The renderers below read `type`, `enum` and
+ * `properties` directly, so unresolved pointers would render as `unknown`.
+ * `visiting` tracks the pointers on the current path to stop self-referencing
+ * definitions from recursing forever.
+ */
+function inlineRefs(node: unknown, root: JsonSchemaNode, visiting: ReadonlySet<string>): unknown {
+  if (Array.isArray(node)) return node.map((item) => inlineRefs(item, root, visiting));
+  if (node === null || typeof node !== 'object') return node;
+
+  const obj = node as JsonSchemaNode;
+  const own: JsonSchemaNode = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (COMPOSITION_KEYS.has(key)) continue;
+    own[key] = inlineRefs(value, root, visiting);
+  }
+
+  const bases: JsonSchemaNode[] = [];
+  const { $ref: ref, allOf } = obj;
+  if (typeof ref === 'string' && !visiting.has(ref)) {
+    const target = resolveRef(ref, root);
+    if (target) {
+      const nested = new Set(visiting).add(ref);
+      bases.push(inlineRefs(target, root, nested) as JsonSchemaNode);
+    }
+  }
+  if (Array.isArray(allOf)) {
+    for (const member of allOf) {
+      bases.push(inlineRefs(member, root, visiting) as JsonSchemaNode);
+    }
+  }
+
+  return [...bases, own].reduce(mergeSchemaNodes, {});
+}
+
 function zodToJsonSchema(schema: z.ZodType): unknown {
   try {
-    const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
-    return compactLargeEnums(jsonSchema);
+    const jsonSchema = z.toJSONSchema(schema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as JsonSchemaNode;
+    return compactLargeEnums(inlineRefs(jsonSchema, jsonSchema, new Set()));
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     throw new SchemaTranslationError(
@@ -464,6 +539,17 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
   return lines.join('\n');
 };
 
+/** Product-facing label for a rule kind (`Alerts` / `Events`). Throws if a kind has no UI label. */
+const getRuleKindProductLabel = (kind: string): string => {
+  const label = RULE_KIND_LABELS[kind as keyof typeof RULE_KIND_LABELS];
+  if (!label) {
+    throw new SchemaTranslationError(
+      `Missing product label for rule kind "${kind}". Add it to RULE_KIND_LABELS.`
+    );
+  }
+  return label;
+};
+
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
   const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
@@ -471,7 +557,7 @@ export const generateRuleKindDoc = (): string => {
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
   const kindSections = kinds.flatMap(({ value, description }, i) => {
-    const heading = `### ${value.charAt(0).toUpperCase()}${value.slice(1)} (\`kind: ${value}\`)`;
+    const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
       lines.push(`Episode statuses: ${episodeStatuses}.`);
@@ -480,15 +566,46 @@ export const generateRuleKindDoc = (): string => {
     return i > 0 ? ['', ...lines] : lines;
   });
 
+  const alertLabel = getRuleKindProductLabel('alert');
+  const signalLabel = getRuleKindProductLabel('signal');
+
   return [
-    '## Rule Kind: Alert vs Signal',
+    `# Rule Kind: ${alertLabel} vs ${signalLabel}`,
     '',
-    'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
+    `Rules declare a \`kind\` of \`alert\` (${alertLabel}) or \`signal\` (${signalLabel}). This is the most important behavioral split in the system.`,
     '',
     ...kindSections,
     '',
-    '### Immutability',
+    '## Immutability',
     '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
+  ].join('\n');
+};
+
+/**
+ * Generates the notifications-overview reference: action policies, plus how to
+ * handle notification requests on Events (`kind: signal`) vs Alerts (`kind: alert`) rules.
+ */
+export const generateNotificationsOverviewDoc = (): string => {
+  const alertLabel = getRuleKindProductLabel('alert');
+  const signalLabel = getRuleKindProductLabel('signal');
+
+  return [
+    '# Notifications via Action Policies',
+    '',
+    'Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.',
+    '',
+    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+    '',
+    '## Notifications Require Alert Kind',
+    '',
+    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [episode-lifecycle reference](./episode-lifecycle.md).`,
+    '',
+    'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
+    '',
+    `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track episode lifecycle and can dispatch to action policies.`,
+    `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
+    `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
   ].join('\n');
 };
 
@@ -529,7 +646,7 @@ export const generateEpisodeLifecycleDoc = (): string => {
   });
 
   return [
-    '## Episode Lifecycle',
+    '# Episode Lifecycle',
     '',
     'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
     '',
@@ -539,12 +656,12 @@ export const generateEpisodeLifecycleDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Alert Event Severity section with heading, valid values, and ES|QL patterns. */
+/** Generates standalone markdown for alert event severity: valid values and ES|QL patterns. */
 export const generateSeverityDoc = (): string => {
   const values = formatEnumValuesList(getSeverityValues());
 
   return [
-    '## Alert Event Severity',
+    '# Alert Event Severity',
     '',
     'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
     '',
@@ -564,7 +681,7 @@ export const generateSeverityDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the No-Data Strategy section with heading, prose, and value table. */
+/** Generates standalone markdown for no-data strategy: values, wiring, and kind constraints. */
 export const generateNoDataStrategyDoc = (): string => {
   const table = generateEnumTable({
     header: ['Value', 'Behaviour'],
@@ -573,7 +690,7 @@ export const generateNoDataStrategyDoc = (): string => {
   });
 
   return [
-    '## No-Data Strategy',
+    '# No-Data Strategy',
     '',
     '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
     '',
@@ -582,12 +699,11 @@ export const generateNoDataStrategyDoc = (): string => {
     "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
     "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
     '',
-    'Signal rules cannot set `no_data_strategy`.',
-    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
+    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./rule-kind.md)).',
   ].join('\n');
 };
 
-/** Generates the Recovery Strategy section with heading, prose, and value list. */
+/** Generates standalone markdown for recovery strategy: values, wiring, and kind constraints. */
 export const generateRecoveryStrategyDoc = (): string => {
   const list = generateEnumList({
     schema: recoveryStrategySchema,
@@ -595,17 +711,15 @@ export const generateRecoveryStrategyDoc = (): string => {
   });
 
   return [
-    '## Recovery Strategy',
+    '# Recovery Strategy',
     '',
-    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (`kind: signal`) cannot set `recovery_strategy`.',
+    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./rule-kind.md)).',
     '',
     list,
     '',
     `When using \`recovery_strategy: '${recoveryStrategy.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
     "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
     "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
-    '',
-    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
 };
 

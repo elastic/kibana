@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { EventClient } from '../../../lib/significant_events/events';
 import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
+import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
 
 /**
  * Chat-initiated event input — a minimal subset of EventsWriteInput.
  *
- * `event_id` is absent: eventsWriteHandler generates a synthetic one automatically.
- * `status` is optional: defaults to 'open' when omitted.
+ * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
+ * collapse chat creates onto an existing same-stream event. `status` defaults to 'open'.
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
@@ -32,8 +34,14 @@ export async function createEventToolHandler({
     eventClient,
     input: {
       ...eventInput,
+      event_id: uuidv4(),
       status: eventInput.status ?? 'open',
     },
   });
+  if (!result.written) {
+    throw createBulkWriteOutcomeUnknownError(
+      `Event write skipped (${result.reason}): event_id=${result.event_id}`
+    );
+  }
   return { event_uuid: result.event_uuid, acknowledged: true };
 }

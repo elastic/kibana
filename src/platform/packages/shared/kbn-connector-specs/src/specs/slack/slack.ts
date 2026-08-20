@@ -939,6 +939,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.create
     createConversation: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
@@ -991,6 +992,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
       isTool: false,
+      scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
@@ -1043,7 +1045,7 @@ export const Slack: ConnectorSpec = {
     sendMessage: {
       isTool: true,
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
+        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
