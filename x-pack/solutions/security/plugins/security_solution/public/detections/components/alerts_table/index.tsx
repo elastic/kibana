@@ -276,7 +276,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   );
 
   // Pass undefined (not {}) when browserFields is empty so the shared alerts table can fall back to
-  // its own /internal/rac/alerts/browser_fields fetch, recovering the field browser without Layer B.
+  // its own /internal/rac/alerts/browser_fields fetch, recovering the field browser independently.
   // Keep the deliberate {} for event-rendered view where browser fields are intentionally suppressed.
   const finalBrowserFields = useMemo(() => {
     if (isEventRenderedView) {
