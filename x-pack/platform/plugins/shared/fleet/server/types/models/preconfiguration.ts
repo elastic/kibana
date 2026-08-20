@@ -101,11 +101,19 @@ const PreconfiguredOutputBaseSchema = {
 };
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  schema.oneOf([
-    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+  schema.discriminatedUnion('type', [
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_elasticsearch' },
+    }),
+    schema
+      .object({ ...LogstashSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_logstash' } }),
+    schema
+      .object({ ...KafkaSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_kafka' } }),
+    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_remote_elasticsearch' },
+    }),
   ]),
   { defaultValue: [], validate: validatePreconfiguredOutputs, maxSize: 100 }
 );
@@ -116,6 +124,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
     is_internal: schema.maybe(schema.boolean()),
+    allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
     proxy_id: schema.nullable(schema.string()),
     secrets: schema.maybe(
@@ -245,6 +254,24 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     defaultValue: [],
     maxSize: 1000,
   }
+);
+
+export const PreconfiguredDownloadSourcesSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    host: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    proxy_id: schema.maybe(schema.nullable(schema.string())),
+    ssl: schema.maybe(
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+      })
+    ),
+  }),
+  { defaultValue: [], maxSize: 100 }
 );
 
 export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(

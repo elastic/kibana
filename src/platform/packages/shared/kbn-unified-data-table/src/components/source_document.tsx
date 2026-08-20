@@ -11,7 +11,6 @@ import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import type {
   DataTableRecord,
-  EsHitRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
@@ -31,6 +30,7 @@ import { getInnerColumns } from '../utils/columns';
 import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
+const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
 
 export function SourceDocument({
   useTopLevelObjectColumns,
@@ -58,24 +58,28 @@ export function SourceDocument({
   isCompressed?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
-  const dataView =
-    dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
-        row.raw,
+        row,
         columnId,
         dataSource,
         shouldShowFieldHandler,
-        fieldFormats
+        fieldFormats,
+        Boolean(isPlainRecord)
       ).slice(0, maxEntries)
-    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+    : formatHitReact(
+        row,
+        dataView,
+        shouldShowFieldHandler,
+        maxEntries,
+        fieldFormats,
+        isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
+      );
 
   const renderedPairs: ReactNode[] = [];
 
-  for (const [fieldDisplayName, value, fieldName] of pairs) {
-    // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-    // hide the empty one from the Document view
-    if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) continue;
+  for (const [fieldDisplayName, value] of pairs) {
     renderedPairs.push(
       <Fragment key={fieldDisplayName}>
         <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
@@ -110,20 +114,24 @@ export function SourceDocument({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairsReact(
-  row: EsHitRecord,
+  row: DataTableRecord,
   columnId: string,
   dataSource: DataSource | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  skipNullishValues: boolean
 ): FormattedHit {
-  const dataView =
-    dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
-  const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
+  const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
-  const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
+  const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
+    if (skipNullishValues && (row.flattened[key] ?? null) === null) {
+      return;
+    }
+
     const subField = getFieldFromDataSource(dataSource, key);
     const displayKey = dataView?.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
@@ -132,7 +140,7 @@ function getTopLevelObjectPairsReact(
     const formatted: ReactNode = values.map((value: unknown, idx) => (
       <Fragment key={`${key}-${idx}`}>
         {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({ value, hit: row, fieldFormats, dataView, field: subField })}
+        {formatFieldValueReact({ value, hit: row.raw, fieldFormats, dataView, field: subField })}
       </Fragment>
     ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

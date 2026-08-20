@@ -6,8 +6,10 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { TimeRange } from '@kbn/agent-builder-common';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import { EffortLevels } from '@kbn/agent-builder-common';
+import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
@@ -16,16 +18,30 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
+import { loadDocumentation } from './documentation';
+import { getDefaultEsqlCacheKey } from './cache_key';
+
+export class GenerateEsqlNoDataError extends Error {
+  readonly code = 'NO_DATA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'GenerateEsqlNoDataError';
+  }
+}
 
 export interface GenerateEsqlResponse {
   /**
-   * The ES|QL query which was generated
+   * The ES|QL query which was generated.
+   *
+   * `undefined` when the model failed to produce a query after exhausting retries — in that
+   * case {@link GenerateEsqlResponse.error} is always set. Consumers should check `error`
+   * before using `query`.
    */
-  query: string;
+  query?: string;
   /**
    * The full text answer which was provided by the LLM when generating the query.
    */
-  answer: string;
+  answer?: string;
   /**
    * Results from executing the query.
    * Available if `executeQuery` was true and if a successful query was executed.
@@ -37,12 +53,19 @@ export interface GenerateEsqlResponse {
   error?: string;
 }
 
-export interface GenerateEsqlDeps {
-  model: ScopedModel;
+/**
+ * Model input for {@link generateEsql}.
+ * Either a `modelProvider` (allowing model selection) or an already-resolved `model` (legacy path).
+ */
+export type GenerateEsqlModelDeps =
+  | { modelProvider: ModelProvider; model?: never }
+  | { model: ScopedModel; modelProvider?: never };
+
+export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
-}
+};
 
 export interface GenerateEsqlOptions {
   /**
@@ -87,6 +110,14 @@ export interface GenerateEsqlOptions {
    * for time range filtering in generated queries.
    */
   disableNamedParams?: boolean;
+  /**
+   * If true, external ES|QL datasets are considered when discovering and resolving the target.
+   */
+  includeDatasets?: boolean;
+  /**
+   * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
+   */
+  sessionId?: string;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -101,26 +132,43 @@ export const generateEsql = async ({
   rowLimit,
   timeRange: inputTimeRange,
   disableNamedParams,
-  model,
+  includeDatasets = false,
+  sessionId,
+  model: inputModel,
+  modelProvider,
   esClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  // Resolve a single ScopedModel once. When a modelProvider is given, use the low-effort model
+  const model = modelProvider
+    ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    : inputModel!;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
+  const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const cacheSessionId = sessionId ?? getDefaultEsqlCacheKey();
+  const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
     docBase,
+    documentation,
     esqlCallbacks,
+    includeDatasets,
+    sessionId: cacheSessionId,
+    cacheControl,
   });
 
   return withActiveInferenceSpan(
-    'GenerateEsqlGraph',
+    'generate_esql',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+        [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl,
+        [ElasticGenAIAttributes.CacheControlSessionId]: cacheSessionId,
       },
     },
     async () => {
@@ -140,11 +188,12 @@ export const generateEsql = async ({
             nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
+            includeDatasets,
             model,
             logger,
           });
           if (!selectedResource) {
-            throw new Error(
+            throw new GenerateEsqlNoDataError(
               'Could not discover a suitable index for the query. Please specify an index explicitly.'
             );
           }
@@ -178,6 +227,9 @@ export const generateEsql = async ({
           results: outState.results,
         };
       } catch (e) {
+        if (e instanceof GenerateEsqlNoDataError) {
+          throw e;
+        }
         throw new Error(`Could not generate ESQL query: ${e.message}`);
       }
     }

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -64,9 +65,18 @@ export const createExecuteConnectorSubActionTool = ({
     'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
     'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
     'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
-    'Do not invent names or parameters.',
+    'Do not invent names or parameters. ' +
+    'Connectors API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors — ' +
+    'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
@@ -128,6 +138,47 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
+    const resolveAuthorizationResult = ({
+      authMethod,
+      connectorName,
+    }: {
+      authMethod: unknown;
+      connectorName?: string;
+    }) => {
+      if (!isAuthorizationMethod(authMethod)) {
+        return undefined;
+      }
+      const promptId = `tools.${context.callContext.toolId}.authorization.${connectorId}`;
+      const { status } = context.prompts.checkAuthorizationStatus(promptId);
+      const resolvedConnectorName = connectorName ?? connectorId;
+
+      if (status === AuthorizationStatus.unprompted) {
+        return context.prompts.askForAuthorization({
+          id: promptId,
+          connector_id: connectorId,
+          connector_name: resolvedConnectorName,
+          connector_type: connectorType,
+          auth_method: authMethod,
+        });
+      }
+
+      if (status === AuthorizationStatus.declined) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `The user declined to authorize the '${resolvedConnectorName}' connector, so the '${subAction}' sub-action cannot run. ` +
+                'Do not retry this sub-action and do not instruct the user to authorize the connector themselves. ' +
+                'Briefly let the user know the request was not completed because authorization was declined.',
+              metadata: { connectorId, connectorType, subAction, authorizationStatus: status },
+            }),
+          ],
+        };
+      }
+
+      return undefined;
+    };
+
     let executeResult;
     try {
       executeResult = await actionsClient.execute({
@@ -153,6 +204,18 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      if (executeResult.errorName === 'ConnectorAuthorizationError') {
+        const { errorMeta } = executeResult;
+        const connectorName =
+          typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
+        const authResult = resolveAuthorizationResult({
+          authMethod: errorMeta?.authMethod,
+          connectorName,
+        });
+        if (authResult) {
+          return authResult;
+        }
+      }
       return {
         results: [
           createErrorResult({

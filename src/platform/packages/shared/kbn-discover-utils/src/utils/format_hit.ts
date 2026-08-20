@@ -28,9 +28,13 @@ type PartialHitReactPair = [
   fieldName: string | null
 ];
 
+interface FormatHitReactOptions {
+  skipNullishValues?: boolean;
+}
+
 const formattedHitCache = new WeakMap<
   EsHitRecord,
-  { formattedHit: FormattedHit; maxEntries: number }
+  { formattedHit: FormattedHit; maxEntries: number; skipNullishValues: boolean }
 >();
 
 /**
@@ -41,15 +45,21 @@ export function formatHitReact(
   dataView: DataView | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  options?: FormatHitReactOptions
 ): FormattedHit {
+  const skipNullishValues = Boolean(options?.skipNullishValues);
   const cached = formattedHitCache.get(hit.raw);
 
-  if (cached && cached.maxEntries === maxEntries) {
+  if (
+    cached &&
+    cached.maxEntries === maxEntries &&
+    cached.skipNullishValues === skipNullishValues
+  ) {
     return cached.formattedHit;
   }
 
-  const highlights = hit.raw.highlight ?? {};
+  const highlights = hit.raw.highlight ?? hit.raw.inline_highlights ?? {};
   const flattened = hit.flattened;
   const renderedPairs: PartialHitReactPair[] = [];
   const otherPairs: PartialHitReactPair[] = [];
@@ -58,6 +68,10 @@ export function formatHitReact(
   // depending on whether the original hit had a highlight for it. That way we can ensure
   // highlighted fields are shown first in the document summary.
   for (const key of Object.keys(flattened)) {
+    if (skipNullishValues && (flattened[key] ?? null) === null) {
+      continue;
+    }
+
     const field = dataView?.fields.getByName(key);
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
@@ -119,7 +133,7 @@ export function formatHitReact(
 
   const formattedHit = renderedPairs as FormattedHit;
 
-  formattedHitCache.set(hit.raw, { formattedHit, maxEntries });
+  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues });
 
   return formattedHit;
 }

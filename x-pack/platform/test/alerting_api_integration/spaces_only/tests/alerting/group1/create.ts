@@ -13,6 +13,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
@@ -508,6 +509,89 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.body.message).to.contain('string is not a valid timezone: invalid');
     });
 
+    it('creates a rule action with an is-one-of alerts filter', async () => {
+      const phrasesFilterQuery = {
+        bool: {
+          should: [{ match_phrase: { 'host.name': 'a' } }, { match_phrase: { 'host.name': 'b' } }],
+          minimum_should_match: 1,
+        },
+      };
+      const phrasesFilter = {
+        meta: {
+          type: 'phrases',
+          key: 'host.name',
+          params: ['a', 'b'],
+          negate: false,
+          disabled: false,
+        },
+        query: phrasesFilterQuery,
+      };
+
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.always-firing-alert-as-data',
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              reference: 'test-is-one-of-filter',
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+                alerts_filter: {
+                  query: {
+                    kql: '',
+                    filters: [phrasesFilter],
+                  },
+                },
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+      const responseFilter = response.body.actions[0].alerts_filter.query.filters[0];
+      expect(responseFilter.meta.params).to.eql(['a', 'b']);
+      expect(responseFilter.meta).to.not.have.property('value');
+      expect(responseFilter.query).to.eql(phrasesFilterQuery);
+
+      const esResponse = await es.get<SavedObject<RawRule>>(
+        {
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: `alert:${response.body.id}`,
+        },
+        { meta: true }
+      );
+
+      expect(esResponse.statusCode).to.eql(200);
+
+      const storedFilter = (esResponse.body._source as any)?.alert.actions[0].alertsFilter.query
+        .filters[0];
+
+      expect(storedFilter.meta.params).to.eql(['a', 'b']);
+      expect(storedFilter.meta).to.not.have.property('value');
+      expect(storedFilter.query).to.eql(phrasesFilterQuery);
+      expect(storedFilter.meta.type).to.eql('phrases');
+      expect(storedFilter.meta.key).to.eql('host.name');
+    });
+
     describe('system actions', () => {
       const systemAction = {
         id: 'system-connector-test.system-action',
@@ -794,42 +878,38 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      describe('create rule with dashboards artifacts correctly', function () {
+      const artifacts = {
+        dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+        investigation_guide: { blob: 'Sample investigation guide' },
+      };
+
+      describe('create rule with artifacts correctly', function () {
         this.tags('skipFIPS');
 
-        it('should not return dashboards artifacts in the rule response', async () => {
+        it('should return artifacts in the rule response', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                artifacts: {
-                  dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
+                artifacts,
               })
             );
+
           expect(response.status).to.eql(200);
+
           objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-          expect(response.body.artifacts).to.be(undefined);
+          expect(response.body.artifacts).to.eql(artifacts);
         });
 
-        it('should store references correctly for dashboard artifacts', async () => {
-          const dashboardId = 'dashboard-1';
+        it('should store references correctly for artifacts', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                artifacts: {
-                  dashboards: [
-                    {
-                      id: dashboardId,
-                    },
-                  ],
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
+                artifacts,
               })
             );
           expect(response.status).to.eql(200);
@@ -862,6 +942,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             execution_status: response.body.execution_status,
             ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
             ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+            artifacts,
           });
 
           const esResponse = await es.get<SavedObject<RawRule>>(
@@ -877,61 +958,26 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             {
               refId: 'dashboard_0',
             },
+            {
+              refId: 'dashboard_1',
+            },
           ]);
 
           const references = esResponse.body._source?.references ?? [];
 
-          expect(references.length).to.eql(1);
+          expect(references.length).to.eql(2);
+
           expect(references[0]).to.eql({
-            id: dashboardId,
+            id: artifacts.dashboards[0].id,
             name: 'dashboard_0',
             type: 'dashboard',
           });
-        });
-      });
-      describe('create rule with investigation guide artifacts', () => {
-        it('should not return investigation guide artifacts in the rule response', async () => {
-          const response = await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                artifacts: {
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
-              })
-            )
-            .expect(200);
-          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-          expect(response.body.artifacts).to.be(undefined);
-        });
-
-        it('should store investigation guide in the artifacts field', async () => {
-          const expectedArtifacts = {
-            artifacts: {
-              investigation_guide: { blob: 'Sample investigation guide' },
-            },
-          };
-          const createResponse = await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestRuleData(expectedArtifacts))
-            .expect(200);
-          objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
-
-          const esResponse = await es.get<SavedObject<RawRule>>(
-            {
-              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-              id: `alert:${createResponse.body.id}`,
-            },
-            { meta: true }
-          );
-
-          const rawInvestigationGuide =
-            (esResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {};
-
-          expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
+          expect(references[1]).to.eql({
+            id: artifacts.dashboards[1].id,
+            name: 'dashboard_1',
+            type: 'dashboard',
+          });
         });
 
         it('should deny creating a rule with an investigation guide that exceeds size limits', () =>

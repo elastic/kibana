@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { vaultRead } from './vault';
 import type { Manifest, ManifestSecretField, ResolvedManifest } from './types';
 
@@ -22,7 +22,7 @@ export function loadManifests(manifestsDir: string = MANIFESTS_DIR): Manifest[] 
   const files = fs.readdirSync(manifestsDir).filter((f) => f.endsWith('.yaml'));
   return files.map((file) => {
     const content = fs.readFileSync(path.join(manifestsDir, file), 'utf-8');
-    const manifest = yaml.load(content) as Manifest;
+    const manifest = parse(content) as Manifest;
     validate(manifest, file);
     return manifest;
   });
@@ -44,7 +44,7 @@ async function resolveSecretField(
 ): Promise<string> {
   if (field == null) {
     throw new Error(
-      `Secret "${name}" in manifest "${manifestName}" has no value. Either provide a "value" or a "vault" + "field" pair, or remove the key.`
+      `Secret "${name}" in manifest "${manifestName}" has no value. Either provide a "value", a "vault" + "field" pair, or a "template" + "vars" object, or remove the key.`
     );
   }
 
@@ -56,8 +56,23 @@ async function resolveSecretField(
     return vaultRead(field.vault, field.field);
   }
 
+  if (field.template !== undefined) {
+    if (!field.vars || Object.keys(field.vars).length === 0) {
+      throw new Error(
+        `Secret "${name}" in manifest "${manifestName}" has a "template" but no "vars".`
+      );
+    }
+    let result = field.template;
+    for (const [varName, varSource] of Object.entries(field.vars)) {
+      const resolved =
+        'value' in varSource ? varSource.value : await vaultRead(varSource.vault, varSource.field);
+      result = result.replaceAll(`{${varName}}`, resolved);
+    }
+    return result;
+  }
+
   throw new Error(
-    `Secret "${name}" in manifest "${manifestName}" must have either a "value" or a "vault" + "field" pair.`
+    `Secret "${name}" in manifest "${manifestName}" must have either a "value" or a "vault" + "field" pair, or a "template" + "vars" object.`
   );
 }
 

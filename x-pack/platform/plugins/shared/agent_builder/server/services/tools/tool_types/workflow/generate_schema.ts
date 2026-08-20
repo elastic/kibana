@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/v1';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JSONSchema7 } from 'json-schema';
 
 // Simple JSON Schema to Zod converter for basic types
@@ -55,12 +55,13 @@ function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
 }
 
 export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z.ZodObject<any> => {
-  if (!workflow.definition || !workflow.definition.inputs) {
+  if (!workflow.definition) {
     return z.object({});
   }
 
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(workflow.definition.inputs);
+  const normalizedInputs = extractNormalizedInputsFromYaml(workflow.definition, workflow.yaml) as
+    | JSONSchema7
+    | undefined;
 
   if (!normalizedInputs?.properties) {
     return z.object({});

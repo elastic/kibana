@@ -183,12 +183,13 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
       position="top"
     >
       <EuiPopover
+        aria-label={i18n.VISIBILITY}
         button={button}
         closePopover={closePopover}
         data-test-subj="sharedBadgePopover"
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.VISIBILITY}

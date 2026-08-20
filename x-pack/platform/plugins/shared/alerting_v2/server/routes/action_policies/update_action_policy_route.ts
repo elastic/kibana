@@ -7,6 +7,7 @@
 
 import {
   actionPolicyResponseSchema,
+  errorResponseSchema,
   ID_MAX_LENGTH,
   updateActionPolicyBodySchema,
   type UpdateActionPolicyBody,
@@ -18,9 +19,14 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { updateActionPolicyOasExamples } from './update_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const updateActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -28,7 +34,7 @@ const updateActionPolicyParamsSchema = z.object({
 
 @injectable()
 export class UpdateActionPolicyRoute extends BaseAlertingRoute {
-  static method = 'put' as const;
+  static method = 'patch' as const;
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
@@ -36,24 +42,32 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Update an action policy',
-    description: 'Update an existing action policy by identifier.',
+    summary: 'Partially update an action policy.',
+    description:
+      'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
+    oasOperationObject: updateActionPolicyOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(updateActionPolicyBodySchema),
-      params: buildRouteValidationWithZod(updateActionPolicyParamsSchema),
+      body: updateActionPolicyBodySchema,
+      params: updateActionPolicyParamsSchema,
     },
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated action policy.',
       },
       400: {
-        description: 'Indicates invalid request parameters or body.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
-        description: 'Indicates an action policy with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

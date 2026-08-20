@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHitsComplex } from './es_hits_complex';
@@ -19,6 +20,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UseSelectedDocsState } from '../src/hooks/use_selected_docs';
 
 const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTableContext => {
+  const dataSource = new IndexPatternSource(dataView);
   return {
     expanded: undefined,
     setExpanded: jest.fn(),
@@ -34,7 +36,7 @@ const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTab
         columnId,
         fieldFormats: servicesMock.fieldFormats,
         rows,
-        dataSource: undefined,
+        dataSource,
         options,
       }),
   };

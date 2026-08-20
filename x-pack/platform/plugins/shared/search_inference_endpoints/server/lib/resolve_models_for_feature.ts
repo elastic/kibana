@@ -27,10 +27,11 @@ export interface ResolvedConnectorsForFeature {
  *
  * The priority resolution is:
  *   - If the default only setting is enabled, return just the default connector (or nothing if not set).
- *   - If there's a saved object entry for the feature, return that list
- *   - If there's a global default, return that and the feature-recommended models with isRecommended set to true, followed by the rest of the available models
- *   - If there's no global default, return the feature-recommended models with isRecommended set to true, followed by the rest of the available models
- *   - If there are no recommended models and no global default, return the full list of available models
+ *   - If there's a saved object entry for the feature, return that list.
+ *   - If `ignoreGlobalDefault` is true, skip prepending the global default connector.
+ *   - If there's a global default, return that and the feature-recommended models with isRecommended set to true, followed by the rest of the available models.
+ *   - If there's no global default, return the feature-recommended models with isRecommended set to true, followed by the rest of the available models.
+ *   - If there are no recommended models and no global default, return the full list of available models.
  *
  * Used by both the `GET /internal/search_inference_endpoints/connectors`
  * HTTP endpoint and the `endpoints.getForFeature` server-side contract.
@@ -48,6 +49,7 @@ export const resolveModelsForFeature = async ({
   getConnectorById,
   uiSettingsClient,
   featureId,
+  ignoreGlobalDefault = false,
   logger,
 }: {
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
@@ -55,6 +57,7 @@ export const resolveModelsForFeature = async ({
   getConnectorById: (id: string) => Promise<InferenceConnector>;
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
+  ignoreGlobalDefault?: boolean;
   logger: Logger;
 }): Promise<ResolvedConnectorsForFeature> => {
   const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
@@ -98,7 +101,12 @@ export const resolveModelsForFeature = async ({
   const merged = mergeConnectors(featureResult.endpoints, allConnectors, soEntryFound);
 
   let connectors: ApiInferenceConnector[] = merged;
-  if (!soEntryFound && defaultConnectorId && defaultConnectorId !== NO_DEFAULT_CONNECTOR) {
+  if (
+    !soEntryFound &&
+    !ignoreGlobalDefault &&
+    defaultConnectorId &&
+    defaultConnectorId !== NO_DEFAULT_CONNECTOR
+  ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
       connectors = [

@@ -8,6 +8,8 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+export const OTEL_LOG_INDEX = 'logs-collectortelemetry.otel-*';
+
 export type OTelComponentType = 'receiver' | 'processor' | 'connector' | 'exporter' | 'pipeline';
 
 export const COMPONENT_TYPE_VIS_COLORS: Record<

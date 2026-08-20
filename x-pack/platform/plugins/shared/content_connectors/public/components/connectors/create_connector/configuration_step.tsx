@@ -18,9 +18,9 @@ import {
   EuiText,
   EuiButton,
   EuiProgress,
-  EuiCallOut,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -49,7 +49,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic({ http }));
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic({ http }));
   const { setFormDirty } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const [isFormEditing, setIsFormEditing] = useState<boolean>(false);
   const { status } = useValues(ConnectorConfigurationApiLogic);
@@ -87,9 +87,8 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
         {isWaitingOnAgentlessDeployment && (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             title={
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
@@ -105,18 +104,14 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.contentConnectors.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
-                {
-                  defaultMessage:
-                    'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
-                }
-              )}
-            </EuiText>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.contentConnectors.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
+              {
+                defaultMessage:
+                  'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
+              }
+            )}
+          />
         )}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l" css={{ position: 'relative' }}>

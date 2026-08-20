@@ -19,6 +19,7 @@ export * from './metrics/latest';
 export * from './custom_field/latest';
 export * from './observable/latest';
 export * from './template/latest';
+export * from './field_definition/latest';
 
 // V1
 export * as configureApiV1 from './configure/v1';
@@ -34,6 +35,7 @@ export * as metricsApiV1 from './metrics/v1';
 export * as customFieldsApiV1 from './custom_field/v1';
 export * as observableApiV1 from './observable/v1';
 export * as templateApiV1 from './template/v1';
+export * as fieldDefinitionApiV1 from './field_definition/v1';
 
 // V2
 export * as attachmentApiV2 from './attachment/v2';

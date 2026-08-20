@@ -10,6 +10,7 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQLEditorTelemetryService,
+  AiReviewAction,
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
 } from './telemetry_service';
@@ -18,12 +19,21 @@ import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_VISOR_NL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_SUBMITTED,
+  ESQL_COMMENT_TO_ESQL_REVIEWED,
+  ESQL_FIX_WITH_AI_SUBMITTED,
+  ESQL_FIX_WITH_AI_REVIEWED,
 } from './events_registration';
+import { reportEsqlError } from '../report_error';
+
+jest.mock('../report_error', () => ({
+  reportEsqlError: jest.fn(),
+}));
 
 describe('ESQLEditorTelemetryService', () => {
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
   let telemetryService: ESQLEditorTelemetryService;
-  let consoleLogSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockAnalytics = {
@@ -31,14 +41,10 @@ describe('ESQLEditorTelemetryService', () => {
     } as unknown as jest.Mocked<AnalyticsServiceStart>;
 
     telemetryService = new ESQLEditorTelemetryService(mockAnalytics);
-
-    // Mock console.log to avoid test output pollution
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    consoleLogSpy.mockRestore();
   });
 
   describe('trackLookupJoinHoverActionShown', () => {
@@ -156,10 +162,219 @@ describe('ESQLEditorTelemetryService', () => {
         telemetryService.trackLookupJoinHoverActionShown(invalidEncodedMessage);
 
         expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          'Failed to parse hover message command data',
-          expect.any(Error)
-        );
+        expect(reportEsqlError).toHaveBeenCalledWith(expect.any(Error), {
+          errorType: 'HoverMessageParse',
+        });
+      });
+    });
+  });
+
+  describe('trackVisorNlSubmitted', () => {
+    it('tracks a successful NL submission with all fields, omitting error_code', () => {
+      telemetryService.trackVisorNlSubmitted({
+        nlLength: 42,
+        contextQueryLength: 100,
+        success: true,
+        durationMs: 1500,
+        generatedQueryLength: 80,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_SUBMITTED, {
+        nl_length: 42,
+        context_query_length: 100,
+        success: true,
+        duration_ms: 1500,
+        generated_query_length: 80,
+      });
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('error_code');
+    });
+
+    it('tracks a failed NL submission with error code, omitting generated_query_length', () => {
+      telemetryService.trackVisorNlSubmitted({
+        nlLength: 42,
+        contextQueryLength: 100,
+        success: false,
+        durationMs: 300,
+        errorCode: '500',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_SUBMITTED, {
+        nl_length: 42,
+        context_query_length: 100,
+        success: false,
+        duration_ms: 300,
+        error_code: '500',
+      });
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('generated_query_length');
+    });
+
+    it('omits error_code when not provided', () => {
+      telemetryService.trackVisorNlSubmitted({
+        nlLength: 10,
+        contextQueryLength: 50,
+        success: false,
+        durationMs: 200,
+      });
+
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('error_code');
+    });
+  });
+
+  describe('trackCommentToEsqlSubmitted', () => {
+    it('tracks a successful comment-to-esql generation with all fields', () => {
+      telemetryService.trackCommentToEsqlSubmitted({
+        nlLength: 30,
+        isCompletion: true,
+        contextQueryLength: 60,
+        success: true,
+        durationMs: 2000,
+        generatedLineCount: 3,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_SUBMITTED, {
+        nl_length: 30,
+        is_completion: true,
+        context_query_length: 60,
+        success: true,
+        duration_ms: 2000,
+        generated_line_count: 3,
+      });
+    });
+
+    it('tracks a failed generation with error code, omitting generated_line_count', () => {
+      telemetryService.trackCommentToEsqlSubmitted({
+        nlLength: 30,
+        isCompletion: false,
+        contextQueryLength: 0,
+        success: false,
+        durationMs: 400,
+        errorCode: '503',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_SUBMITTED, {
+        nl_length: 30,
+        is_completion: false,
+        context_query_length: 0,
+        success: false,
+        duration_ms: 400,
+        error_code: '503',
+      });
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('generated_line_count');
+    });
+  });
+
+  describe('trackCommentToEsqlReviewed', () => {
+    it('tracks an accept action', () => {
+      telemetryService.trackCommentToEsqlReviewed({
+        action: AiReviewAction.ACCEPT,
+        linesGenerated: 4,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_REVIEWED, {
+        action: AiReviewAction.ACCEPT,
+        lines_generated: 4,
+      });
+    });
+
+    it('tracks a reject action', () => {
+      telemetryService.trackCommentToEsqlReviewed({
+        action: AiReviewAction.REJECT,
+        linesGenerated: 2,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_REVIEWED, {
+        action: AiReviewAction.REJECT,
+        lines_generated: 2,
+      });
+    });
+  });
+
+  describe('trackFixWithAiSubmitted', () => {
+    it('tracks a successful fix with all fields', () => {
+      telemetryService.trackFixWithAiSubmitted({
+        errorCode: 'SYNTAX_ERROR',
+        queryLength: 120,
+        success: true,
+        durationMs: 1800,
+        changedLineCount: 2,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_SUBMITTED, {
+        error_code: 'SYNTAX_ERROR',
+        query_length: 120,
+        success: true,
+        duration_ms: 1800,
+        changed_line_count: 2,
+      });
+    });
+
+    it('tracks a failed fix, omitting changed_line_count', () => {
+      telemetryService.trackFixWithAiSubmitted({
+        queryLength: 120,
+        success: false,
+        durationMs: 500,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_SUBMITTED, {
+        query_length: 120,
+        success: false,
+        duration_ms: 500,
+      });
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('changed_line_count');
+    });
+
+    it('omits error_code when not provided', () => {
+      telemetryService.trackFixWithAiSubmitted({
+        queryLength: 50,
+        success: true,
+        durationMs: 1000,
+        changedLineCount: 1,
+      });
+
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(payload).not.toHaveProperty('error_code');
+    });
+  });
+
+  describe('trackFixWithAiReviewed', () => {
+    it('tracks an accept action', () => {
+      telemetryService.trackFixWithAiReviewed({ action: AiReviewAction.ACCEPT, linesChanged: 3 });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
+        action: AiReviewAction.ACCEPT,
+        lines_changed: 3,
+      });
+    });
+
+    it('tracks a reject action', () => {
+      telemetryService.trackFixWithAiReviewed({ action: AiReviewAction.REJECT, linesChanged: 1 });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
+        action: AiReviewAction.REJECT,
+        lines_changed: 1,
       });
     });
   });

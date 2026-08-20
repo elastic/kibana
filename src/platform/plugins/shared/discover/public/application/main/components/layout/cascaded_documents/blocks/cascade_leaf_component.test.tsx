@@ -23,6 +23,7 @@ import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-c
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../../context_awareness';
 import {
   CascadedDocumentsProvider,
   type CascadedDocumentsContext,
@@ -32,6 +33,7 @@ import {
   CascadedDocumentsFetcher,
   type CascadedDocumentsStateManager,
 } from '../../../../data_fetching/cascaded_documents_fetcher';
+import type { ColumnsMeta } from '../../../../state_management/redux';
 import type { DiscoverServices } from '../../../../../../build_services';
 
 jest.mock('@kbn/unified-data-table', () => ({
@@ -46,6 +48,11 @@ const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMoc
 const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewWithTimefieldMock);
 const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
+const cascadedColumnsMeta: ColumnsMeta = {
+  category: {
+    type: 'string',
+  },
+};
 
 const createVirtualizerController = () =>
   createChildVirtualizerController({ getRootVirtualizer: () => undefined });
@@ -54,10 +61,13 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn(() => undefined),
+    getColumnsMeta: jest.fn(() => ({})),
     setCascadedDocuments: jest.fn(),
+    setColumnsMeta: jest.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
 
   return new CascadedDocumentsFetcher(services, scopedProfilesManager, stateManager);
@@ -128,10 +138,12 @@ const createContextValue = ({
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createCascadedDocumentsFetcher(services),
+    cascadedColumnsMeta,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
-    viewModeToggle: undefined,
+    esqlApproximation: false,
+    renderViewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(expandedDoc),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(currentOwner),
     getExpandedDocSetter,

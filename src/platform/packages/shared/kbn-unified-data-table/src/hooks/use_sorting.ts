@@ -28,7 +28,8 @@ export const useSorting = ({
   sort,
   isPlainRecord,
   isSortEnabled,
-  defaultColumns,
+  isInMemorySortEnabled,
+  isSummaryOnlyColumn,
   onSort,
 }: {
   rows: DataTableRecord[] | undefined;
@@ -38,8 +39,9 @@ export const useSorting = ({
   sort: SortOrder[];
   isPlainRecord: boolean;
   isSortEnabled: boolean;
-  defaultColumns: boolean;
-  onSort: ((sort: string[][]) => void) | undefined;
+  isInMemorySortEnabled: boolean;
+  isSummaryOnlyColumn: boolean;
+  onSort: ((sort: SortOrder[]) => void) | undefined;
 }) => {
   const sortingColumns = useMemo(() => {
     return sort
@@ -48,7 +50,7 @@ export const useSorting = ({
   }, [sort, visibleColumns]);
 
   const comparators = useMemo(() => {
-    if (!isPlainRecord || !rows || !sortingColumns.length) {
+    if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
     const dataView =
@@ -73,7 +75,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [dataSource, fieldFormats, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, fieldFormats, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {
@@ -104,17 +106,17 @@ export const useSorting = ({
     // in ES|QL mode, sorting is disabled when in Document view
     // ideally we want the @timestamp column to be sortable server side
     // but it needs discussion before moving forward like this
-    if (isPlainRecord && defaultColumns) {
+    if (isPlainRecord && isSummaryOnlyColumn) {
       return undefined;
     }
 
     return {
       columns: sortingColumns,
       onSort: (sortingColumnsData) => {
-        onSort?.(sortingColumnsData.map(({ id, direction }) => [id, direction]));
+        onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
-  }, [isSortEnabled, isPlainRecord, defaultColumns, sortingColumns, onSort]);
+  }, [isSortEnabled, isPlainRecord, isSummaryOnlyColumn, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
 };

@@ -19,6 +19,8 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
+import { EsqlSource, type DataSource } from '@kbn/data-source';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   getDiscoverInternalStateMock,
   type InternalStateMockToolkit,
@@ -191,10 +193,12 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
 
 async function setupToolkit({
   query,
+  hideSidebar,
   fieldListUiState,
   services,
 }: {
   query?: Query | AggregateQuery;
+  hideSidebar?: boolean;
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
   services?: DiscoverServices;
 }): Promise<InternalStateMockToolkit> {
@@ -207,6 +211,7 @@ async function setupToolkit({
       appState: {
         query: query ?? { query: '', language: 'lucene' },
         filters: [],
+        hideSidebar,
       },
     })
   );
@@ -224,6 +229,7 @@ async function renderComponent(
   props: TestWrapperProps,
   appStateParams: {
     query?: Query | AggregateQuery;
+    hideSidebar?: boolean;
     fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
   } = {},
   services?: DiscoverServices
@@ -513,9 +519,7 @@ describe('discover responsive sidebar', function () {
     const { result: collapsedRender } = await renderComponent(
       props,
       {
-        fieldListUiState: {
-          isCollapsed: true,
-        },
+        hideSidebar: true,
       },
       undefined
     );
@@ -527,9 +531,7 @@ describe('discover responsive sidebar', function () {
     const { result: expandedRender } = await renderComponent(
       props,
       {
-        fieldListUiState: {
-          isCollapsed: false,
-        },
+        hideSidebar: false,
       },
       undefined
     );
@@ -549,6 +551,15 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should render correctly in the ES|QL mode', async () => {
+    const esqlQueryColumns: DatatableColumn[] = [
+      { id: '1', name: 'extension', meta: { type: 'string' } },
+      { id: '2', name: 'bytes', meta: { type: 'number' } },
+      { id: '3', name: '@timestamp', meta: { type: 'date' } },
+    ];
+    const dataSource: DataSource = await EsqlSource.create({
+      query: 'FROM `index`',
+      resultColumns: esqlQueryColumns,
+    });
     const propsWithEsqlMode = {
       ...props,
       columns: ['extension', 'bytes'],
@@ -556,11 +567,8 @@ describe('discover responsive sidebar', function () {
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         result: getDataTableRecords(stubLogstashDataView),
-        esqlQueryColumns: [
-          { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ],
+        esqlQueryColumns,
+        dataSource,
       }) as DataDocuments$,
     };
     await renderComponent(
@@ -789,9 +797,7 @@ describe('discover responsive sidebar', function () {
           sidebarToggleState$: collapsedSidebarToggleState$,
         },
         {
-          fieldListUiState: {
-            isCollapsed: true,
-          },
+          hideSidebar: true,
         }
       );
 

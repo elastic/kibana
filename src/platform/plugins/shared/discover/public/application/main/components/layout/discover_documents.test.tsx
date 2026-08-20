@@ -19,6 +19,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import type { ColumnsMeta } from '../../state_management/redux';
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
@@ -26,6 +27,7 @@ import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 jest.mock('../../../../components/discover_grid', () => ({
   ...jest.requireActual('../../../../components/discover_grid'),
@@ -40,6 +42,11 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 const discoverGridMock = jest.mocked(DiscoverGrid);
 const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
+const cascadedColumnsMeta: ColumnsMeta = {
+  bytes: {
+    type: 'number',
+  },
+};
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -93,7 +100,10 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next = jest.fn();
 
   const props = {
-    viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
+    renderViewModeToggle: jest.fn<
+      ReturnType<RenderViewModeToggle>,
+      Parameters<RenderViewModeToggle>
+    >(() => <div data-test-subj="viewModeToggle">test</div>),
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -286,6 +296,16 @@ describe('Discover documents layout', () => {
         })
       );
 
+      toolkit.internalState.dispatch(
+        internalStateActions.setCascadedDocumentsState({
+          tabId,
+          cascadedDocumentsState: {
+            ...toolkit.getCurrentTab().cascadedDocumentsState,
+            columnsMeta: cascadedColumnsMeta,
+          },
+        })
+      );
+
       await mountComponent({
         fetchStatus: FetchStatus.COMPLETE,
         hits: esHitsMock,
@@ -320,7 +340,6 @@ describe('Discover documents layout', () => {
       expect(flyoutProps.hit).toEqual(expandedDoc);
       expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
       expect(flyoutProps.columns).toEqual(['bytes']);
-      expect(flyoutProps.docViewerExtensionActions?.refreshData).toEqual(expect.any(Function));
 
       act(() => {
         flyoutProps.setExpandedDoc(nextExpandedDoc);

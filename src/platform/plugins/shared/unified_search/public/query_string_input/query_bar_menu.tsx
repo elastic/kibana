@@ -269,6 +269,9 @@ function QueryBarMenuComponent({
       aria-label={i18n.translate('unifiedSearch.queryBarMenu.popoverAriaLabel', {
         defaultMessage: 'Query bar menu',
       })}
+      focusTrapProps={
+        renderedComponent === 'addFilter' ? { clickOutsideDisables: false } : undefined
+      }
     >
       {renderComponent()}
     </EuiPopover>

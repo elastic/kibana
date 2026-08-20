@@ -13,7 +13,7 @@ import {
   ExternalReferenceStorageType,
   UserActionActions,
 } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER, LEGACY_FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 export const updateUser = {
   updated_at: '2020-03-13T08:34:53.450Z',
@@ -234,7 +234,7 @@ export const commentPersistableState: Attachment = {
 
 export const commentFileExternalReference: Attachment = {
   ...commentExternalReference,
-  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+  externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
   externalReferenceMetadata: { files: [{ name: '', extension: '', mimeType: '', created: '' }] },
   externalReferenceStorage: {
     type: ExternalReferenceStorageType.savedObject as const,

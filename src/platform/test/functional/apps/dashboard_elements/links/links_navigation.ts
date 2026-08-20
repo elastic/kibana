@@ -29,6 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
   const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
 
+  /**
+   * Purpose: Links panel navigation smoke test
+   *
+   * Migration: migrate to scout - move to links plugin
+   */
   describe('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -53,6 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: FROM_TIME,
         to: TO_TIME,
       });
+      // Setup mutates saved objects out-of-band via the API, so re-mount the
+      // dashboards listing to reflect the imported dashboards before the first test.
+      await dashboard.navigateToApp();
     });
 
     after(async () => {

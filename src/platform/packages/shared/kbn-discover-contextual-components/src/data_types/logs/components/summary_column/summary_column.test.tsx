@@ -25,12 +25,14 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   dataViewMock,
+  buildDataViewMock,
   createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
   createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -61,7 +63,7 @@ const getSummaryProps = (
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
-        convert: jest.fn().mockImplementation((t: string) => String(t)),
+        convertToText: jest.fn().mockImplementation((t: string) => String(t)),
       })),
   },
   setCellProps: () => {},
@@ -70,7 +72,7 @@ const getSummaryProps = (
   rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
-  columnsMeta: undefined,
+  dataSource: new IndexPatternSource(dataViewMock),
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
   isTracesSummary: false,
@@ -282,8 +284,8 @@ describe('SummaryCellPopover', () => {
   });
 });
 
-describe('SummaryColumn with columnsMeta', () => {
-  it('should use data view field type when columnsMeta is undefined', () => {
+describe('SummaryColumn with dataSource', () => {
+  it('should use data view field type when the dataSource is index-pattern backed', () => {
     const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
@@ -301,7 +303,7 @@ describe('SummaryColumn with columnsMeta', () => {
       <SummaryColumn
         {...getSummaryProps(record, {
           dataView: testDataView,
-          columnsMeta: undefined,
+          dataSource: new IndexPatternSource(testDataView),
         })}
       />
     );
@@ -310,9 +312,36 @@ describe('SummaryColumn with columnsMeta', () => {
     formatFieldValueReactSpy.mockRestore();
   });
 
-  it('should use columnsMeta type instead of data view field type when provided', () => {
+  it("should use the dataSource's field type instead of a mismatched data view field type", () => {
+    // The `dataSource` is the sole source of field-type truth for rendering (see
+    // `SourceDocument` in `@kbn/unified-data-table`, which derives its `dataView` from
+    // `dataSource` rather than from a separately threaded `dataView`/`columnsMeta` prop).
+    // Wrap a data view where `bytes` is mapped as a keyword to simulate a data source
+    // whose field type differs from a stale/separately-passed `dataView` prop.
     const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
-    const testDataView = createDataViewWithBytesField();
+    const staleDataView = createDataViewWithBytesField();
+    const keywordBytesDataView = buildDataViewMock({
+      name: 'test-data-view-keyword-bytes',
+      fields: fieldList([
+        { name: '_index', type: 'string', scripted: false, searchable: true, aggregatable: false },
+        {
+          name: '_source',
+          type: '_source',
+          scripted: false,
+          searchable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'bytes',
+          type: 'string',
+          esTypes: ['keyword'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+        { name: '@timestamp', type: 'date', scripted: false, searchable: true, aggregatable: true },
+      ]),
+    });
 
     const record = buildDataTableRecord(
       {
@@ -321,14 +350,14 @@ describe('SummaryColumn with columnsMeta', () => {
           bytes: ['100'],
         },
       },
-      testDataView
+      keywordBytesDataView
     );
 
     render(
       <SummaryColumn
         {...getSummaryProps(record, {
-          dataView: testDataView,
-          columnsMeta: columnsMetaOverridingBytesType,
+          dataView: staleDataView,
+          dataSource: new IndexPatternSource(keywordBytesDataView),
         })}
       />
     );

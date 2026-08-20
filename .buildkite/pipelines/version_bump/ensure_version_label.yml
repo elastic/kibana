@@ -2,3 +2,8 @@ steps:
   - name: 'Ensure version label exists'
     key: ensure-version-label
     command: .buildkite/scripts/steps/version_bump/ensure_version_label.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4

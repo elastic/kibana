@@ -75,7 +75,7 @@ interface TruncatedBadgeListProps {
    */
   overflowTooltipTitle?: string;
   /**
-   * Optional text size to apply to the value text. Defaults to `s`.
+   * Optional text size to apply to the value text. Defaults to `xs`.
    */
   textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
@@ -99,7 +99,7 @@ export const TruncatedBadgeList = memo(
     maxVisible = 1,
     formatValue,
     overflowTooltipTitle,
-    textSize = 's',
+    textSize = 'xs',
     'data-test-subj': dataTestSubj,
   }: TruncatedBadgeListProps) => {
     const formattedValues = useMemo(

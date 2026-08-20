@@ -16,8 +16,8 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { ActionPolicySnoozeModal } from '../../../components/action_policy/action_policy_snooze_modal';
 import { BulkDeleteConfirmationModal } from './bulk_delete_confirmation_modal';
-import { BulkSnoozeModal } from './bulk_snooze_modal';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 
 type BulkAction = 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key';
@@ -125,7 +125,7 @@ export const ActionPoliciesBulkActions = ({
             button={
               <EuiButtonEmpty
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                 isLoading={isLoading}
@@ -166,8 +166,12 @@ export const ActionPoliciesBulkActions = ({
       )}
 
       {activeModal === 'snooze' && (
-        <BulkSnoozeModal
-          count={count}
+        <ActionPolicySnoozeModal
+          title={i18n.translate('xpack.alertingV2.actionPolicy.bulkSnoozeModal.title', {
+            defaultMessage:
+              'Snooze {count} {count, plural, one {action policy} other {action policies}}',
+            values: { count },
+          })}
           onApplySnooze={(snoozedUntil) => {
             onBulkAction('snooze', snoozedUntil);
             setActiveModal(null);

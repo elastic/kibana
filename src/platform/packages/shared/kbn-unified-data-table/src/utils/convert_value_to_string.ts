@@ -10,9 +10,12 @@
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
 import { getFieldFromDataSource } from './get_field_from_data_source';
+import type { SourceDisplayMode } from '../types';
+import { SOURCE_COLUMN } from './columns';
+import { sourceDocumentToJsonString } from './build_document_tree';
 
 interface ConvertedResult {
   formattedString: string;
@@ -28,6 +31,9 @@ export const convertValueToString = ({
   dataSource,
   fieldFormats,
   options,
+  sourceDisplayMode,
+  shouldShowFieldHandler,
+  selectedColumns,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
@@ -36,24 +42,45 @@ export const convertValueToString = ({
   fieldFormats: FieldFormatsStart;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
+    compatibleWithMarkdown?: boolean; // values as one-liner
   };
+  sourceDisplayMode?: SourceDisplayMode;
+  shouldShowFieldHandler?: ShouldShowFieldInTableHandler;
+  selectedColumns?: string[];
 }): ConvertedResult => {
-  if (!rows[rowIndex]) {
+  const row = rows[rowIndex];
+  if (!row) {
     return {
       formattedString: '',
       withFormula: false,
     };
   }
-  const rowFlattened = rows[rowIndex].flattened;
-  const value = rowFlattened?.[columnId];
-  const field = getFieldFromDataSource(dataSource, columnId);
   const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
+
+  if (
+    sourceDisplayMode === 'json' &&
+    columnId === SOURCE_COLUMN &&
+    shouldShowFieldHandler &&
+    dataView
+  ) {
+    const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
+    return {
+      formattedString: sourceDocumentToJsonString(
+        { row, dataView, shouldShowFieldHandler, selectedColumns },
+        { multiline }
+      ),
+      withFormula: false,
+    };
+  }
+
+  const value = row.flattened?.[columnId];
+  const field = getFieldFromDataSource(dataSource, columnId);
 
   return commonConvertValueToString({
     dataView,
     dataViewField: field,
     flattenedValue: value,
-    dataTableRecord: rows[rowIndex],
+    dataTableRecord: row,
     fieldFormats,
     options,
   });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { overrideTimeRange } from './override_time_range';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -641,5 +642,292 @@ describe('overrideTimeRange', () => {
       logger: mockLogger,
     });
     expect(updated).toBeUndefined();
+  });
+
+  describe('date math time range filters', () => {
+    const forceNow = '2025-06-18T06:00:00.000Z';
+
+    it('should resolve "now-24h" to "now" range anchored to forceNow', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now-24h',
+              lte: 'now',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-17T06:00:00.000Z',
+                lte: '2025-06-18T06:00:00.000Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('should resolve "now/d" rounded range anchored to forceNow (start/end of today)', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      // Both sides are resolved to ISO strings via dateMath with forceNow anchor.
+      // The exact midnight depends on local timezone, so we verify they are valid ISO strings
+      // and that lte >= gte (lte has roundUp=true so it's end-of-day).
+      expect(updated).toHaveLength(1);
+      const range = (updated![0] as any).query.range['@timestamp'];
+      expect(range.format).toBe('strict_date_optional_time');
+      expect(new Date(range.gte).getTime()).toBeGreaterThan(0);
+      expect(new Date(range.lte).getTime()).toBeGreaterThan(0);
+      expect(new Date(range.lte).getTime()).toBeGreaterThanOrEqual(new Date(range.gte).getTime());
+      // lte should be close to end-of-day (within 1 second), gte close to start-of-day
+      expect(new Date(range.lte).getTime() - new Date(range.gte).getTime()).toBeGreaterThan(
+        23 * 60 * 60 * 1000
+      );
+    });
+
+    it('should resolve "now-7d/d" to "now/d" range anchored to forceNow (last ~7 full days)', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now-7d/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      expect(updated).toHaveLength(1);
+      const range = (updated![0] as any).query.range['@timestamp'];
+      expect(new Date(range.gte).getTime()).toBeGreaterThan(0);
+      expect(new Date(range.lte).getTime()).toBeGreaterThan(0);
+      // Span should be approximately 7 days (with rounding, between 6 and 8 days)
+      const spanDays =
+        (new Date(range.lte).getTime() - new Date(range.gte).getTime()) / (24 * 60 * 60 * 1000);
+      expect(spanDays).toBeGreaterThan(6);
+      expect(spanDays).toBeLessThan(8);
+    });
+
+    it('should handle date math range in a filter array', () => {
+      const filters = [
+        {
+          meta: { field: '@timestamp', index: 'test-index', params: {} },
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: 'now-1h',
+                lte: 'now',
+              },
+            },
+          },
+        },
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: { alias: null, disabled: false, negate: false },
+          query: { match_phrase: { status: '200' } },
+        },
+      ];
+
+      const updated = overrideTimeRange({
+        currentFilters: filters,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      expect(updated![0]).toEqual(
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-18T05:00:00.000Z',
+                lte: '2025-06-18T06:00:00.000Z',
+              },
+            },
+          },
+        })
+      );
+      // Other filters are preserved unchanged
+      expect(updated![1]).toEqual(filters[1]);
+    });
+  });
+
+  describe('timezone-aware date math rounding', () => {
+    // 2025-06-18T06:00:00.000Z === 2025-06-18T02:00:00-04:00 in America/New_York (EDT).
+    const forceNow = '2025-06-18T06:00:00.000Z';
+
+    it('rounds "now/d" to the New York day boundary when timezone is provided', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+        timezone: 'America/New_York',
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                // Start of 2025-06-18 in New York (EDT, UTC-4)
+                gte: '2025-06-18T04:00:00.000Z',
+                // End of 2025-06-18 in New York (EDT, UTC-4)
+                lte: '2025-06-19T03:59:59.999Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('rounds "now/d" to the UTC day boundary when no timezone is provided', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now/d',
+              lte: 'now/d',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-18T00:00:00.000Z',
+                lte: '2025-06-18T23:59:59.999Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('does not affect non-rounded date math regardless of timezone', () => {
+      const filter = {
+        meta: {
+          field: '@timestamp',
+          index: 'test-index',
+          params: {},
+        },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: 'now-24h',
+              lte: 'now',
+            },
+          },
+        },
+      };
+
+      const updated = overrideTimeRange({
+        currentFilters: filter,
+        forceNow,
+        logger: mockLogger,
+        timezone: 'America/New_York',
+      });
+
+      expect(updated).toEqual([
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-17T06:00:00.000Z',
+                lte: '2025-06-18T06:00:00.000Z',
+              },
+            },
+          },
+        }),
+      ]);
+    });
   });
 });

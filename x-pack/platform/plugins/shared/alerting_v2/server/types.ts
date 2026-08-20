@@ -21,17 +21,23 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { RulesClient } from './lib/rules_client';
+import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
+
+export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
 export type AlertingServerSetup = void;
 
@@ -41,6 +47,21 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: string
   ): Promise<RulesClientApi>;
+
+  getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
+  getActionPolicyClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<ActionPolicyClientApi>;
+
+  /**
+   * Returns an AlertEventsClient scoped to the request's credentials.
+   * NOTE: AlertEventsClient writes via the internal ES user, so callers are
+   * responsible for enforcing write-privilege checks before calling mutating
+   * methods. HTTP routes must check via their own authz; workflow steps must
+   * check via PrivilegeChecker before invoking the client.
+   */
+  getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {
@@ -53,7 +74,7 @@ export interface AlertingServerSetupDependencies {
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
 }
 
 export interface AlertingServerStartDependencies {
@@ -63,5 +84,6 @@ export interface AlertingServerStartDependencies {
   data: DataPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  eventLog: IEventLogClientService;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }

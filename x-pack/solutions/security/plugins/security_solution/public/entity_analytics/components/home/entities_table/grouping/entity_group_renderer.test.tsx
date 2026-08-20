@@ -11,7 +11,7 @@ import type { RawBucket } from '@kbn/grouping';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 import { TestProviders } from '../../../../../common/mock';
 
 const mockOpenRightPanel = jest.fn();
@@ -19,7 +19,18 @@ const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({
     openRightPanel: mockOpenRightPanel,
+    openFlyout: jest.fn(),
     closeFlyout: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
   }),
 }));
 
@@ -155,7 +166,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
 
     it('hides expand button when metadata is not available', () => {
@@ -167,7 +178,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
       expect(screen.getByText('fallback-entity-id')).toBeInTheDocument();
     });
 
@@ -180,7 +191,7 @@ describe('createGroupPanelRenderer', () => {
         <>{rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>
       );
       expect(screen.getByText('target-id')).toBeInTheDocument();
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
 
       // Phase 2: metadata arrived — new renderer shows target name + flyout button
       const metadata: TargetMetadataMap = new Map([
@@ -198,7 +209,7 @@ describe('createGroupPanelRenderer', () => {
       rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
       expect(screen.getByText('alice-target')).toBeInTheDocument();
       expect(screen.queryByText('target-id')).not.toBeInTheDocument();
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
   });
 
@@ -345,6 +356,23 @@ describe('createGroupStatsRenderer', () => {
       expect(screen.getByText('42.50')).toBeInTheDocument();
     });
 
+    it('solo entity falls back to individual risk score when group score is zero', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'solo-id',
+          { name: 'solo', type: EntityType.user, riskScore: 0, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'solo-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('42.50')).toBeInTheDocument();
+      expect(screen.queryByText('0.00')).not.toBeInTheDocument();
+    });
+
     it('solo entity with no group or individual score shows N/A', () => {
       const metadata: TargetMetadataMap = new Map([
         [
@@ -375,6 +403,23 @@ describe('createGroupStatsRenderer', () => {
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(screen.queryByText('42.50')).not.toBeInTheDocument();
+    });
+
+    it('multi-entity group retains a zero group score instead of using an individual score', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'target', type: EntityType.user, riskScore: 0, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('0.00')).toBeInTheDocument();
       expect(screen.queryByText('42.50')).not.toBeInTheDocument();
     });
 

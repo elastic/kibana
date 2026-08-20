@@ -225,6 +225,7 @@ export interface ICommandContext {
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -267,6 +268,11 @@ export enum Location {
    * In a LIMIT grouping clause
    */
   LIMIT_BY = 'limit_by',
+
+  /**
+   * In a CHANGE_POINT grouping clause
+   */
+  CHANGE_POINT_BY = 'change_point_by',
 
   /**
    * In a per-agg filter
@@ -328,10 +334,29 @@ export enum Location {
    * In the PROMQL command (PromQL query expression)
    */
   PROMQL = 'promql',
+
+  /**
+   * In the HIGHLIGHT command ON field list
+   */
+  HIGHLIGHT = 'highlight',
+
+  /**
+   * In the HIGHLIGHT command query expression (before ON)
+   */
+  HIGHLIGHT_QUERY = 'highlight_query',
 }
 
 export enum UnmappedFieldsStrategy {
   DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
+  LOAD_ALL = 'LOAD_ALL',
+}
+const UNMAPPED_FIELD_STRATEGIES = new Set<string>(Object.values(UnmappedFieldsStrategy));
+
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return UNMAPPED_FIELD_STRATEGIES.has(value);
 }

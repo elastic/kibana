@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
+/* eslint-disable complexity,@typescript-eslint/no-non-null-assertion */
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
+import {
+  isCancelAction,
+  isKillProcessAction,
+} from '../../../common/endpoint/service/response_actions/type_guards';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
@@ -29,10 +34,16 @@ import type {
   EndpointActionResponseDataOutput,
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
+  LogsEndpointAction,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithEntityId,
+  ResponseActionMemoryDumpParameters,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../common/endpoint/constants';
@@ -77,7 +88,7 @@ export const sendFleetActionResponse = async (
         },
         ES_INDEX_OPTIONS
       )
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
   }
 
   // @ts-expect-error
@@ -161,13 +172,29 @@ export const sendEndpointActionResponse = async (
       }
     }
 
+    // `kill-process --kill-descendants`: add list of descendants killed
+    if (
+      isKillProcessAction(action) &&
+      (action.parameters as ResponseActionParametersWithEntityId | ResponseActionParametersWithPid)
+        ?.kill_descendants
+    ) {
+      const tree = endpointActionGenerator.createProcessDescendants(
+        action.parameters?.pid ?? endpointActionGenerator.randomN(50)
+      );
+
+      (
+        endpointResponse.EndpointActions.data.output!
+          .content as unknown as KillProcessActionOutputContent
+      ).descendants = tree;
+    }
+
     await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         body: endpointResponse,
         refresh: 'wait_for',
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
 
     // ------------------------------------------
     // Post Action Response tasks
@@ -252,7 +279,7 @@ export const sendEndpointActionResponse = async (
           refresh: 'wait_for',
           body: fileMetaDoc,
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
@@ -281,8 +308,56 @@ export const sendEndpointActionResponse = async (
             },
           }
         )
-        .catch(catchAxiosErrorFormatAndThrow)
+        .catch(catchHttpErrorFormatAndThrow)
         .then(() => sleep(2000));
+    }
+
+    // For `cancel` of an `agentType` of `endpoint` - also send a response for the action that was canceled
+    if (isCancelAction(action) && state !== 'failure') {
+      const canceledActionId = action.parameters!.id;
+      const canceledActionCommandName = await esClient
+        .search<LogsEndpointAction>({
+          index: ENDPOINT_ACTIONS_INDEX,
+          query: {
+            match: {
+              'EndpointActions.action_id': canceledActionId,
+            },
+          },
+        })
+        .then(
+          (response) => response.hits?.hits[0]?._source?.EndpointActions.data.command || 'runscript'
+        )
+        .catch(catchHttpErrorFormatAndThrow);
+
+      const canceledActionResponse =
+        endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
+          agent: { id: actionAgentId },
+          error: { message: 'action was canceled' },
+          EndpointActions: {
+            action_id: canceledActionId,
+            started_at: action.startedAt,
+            data: {
+              command: canceledActionCommandName,
+              comment: '',
+              output: {
+                type: 'json',
+                content: {
+                  code: `ra_${canceledActionCommandName}_error_canceled`,
+                  canceled_by: 'action',
+                  canceled_id: action.id,
+                },
+              },
+            },
+          },
+        });
+
+      await esClient
+        .index({
+          index: ENDPOINT_ACTION_RESPONSES_INDEX,
+          body: canceledActionResponse,
+          refresh: 'wait_for',
+        })
+        .catch(catchHttpErrorFormatAndThrow);
     }
   }
 
@@ -356,15 +431,20 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         }),
       } as unknown as ResponseOutput<ResponseActionExecuteOutputContent>;
 
-    case 'cancel':
+    case 'cancel': {
+      const successCodes = Object.keys(endpointActionResponseCodes).filter((key) =>
+        key.startsWith('ra_cancel_success')
+      );
+
       return {
         output: {
           type: 'json',
           content: {
-            code: 'ra_cancel_success_done',
+            code: endpointActionGenerator.randomChoice(successCodes) ?? 'ra_cancel_success_done',
           },
         },
       } as unknown as ResponseOutput;
+    }
 
     case 'memory-dump':
       return {
@@ -372,9 +452,22 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           type: 'json',
           content: {
             code: 'ra_memory-dump_success_done',
-            file_size: 2322000,
+            file_size: 2_322_000,
             path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
-            disk_free_space: 123045678009,
+            disk_free_space: 123_045_678_009,
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'raw'
+              ? {
+                  total_memory_size: 4_000_000_000,
+                  total_bytes_captured: 3_999_900_000,
+                  success_ratio: 3_999_998_000 / 4_000_000_000,
+                }
+              : {}),
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'kernel'
+              ? {
+                  dump_executed_from_driver: endpointActionGenerator.randomChoice([true, false]),
+                  user_space_included: endpointActionGenerator.randomChoice([true, false]),
+                }
+              : {}),
           },
         },
       } as unknown as ResponseOutput;
@@ -404,7 +497,7 @@ export async function getLatestActionDoc(
         },
         size: 1,
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
   ).hits.hits.at(0);
 }
 
@@ -436,5 +529,5 @@ export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: 
       doc,
       refresh: 'wait_for',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 }

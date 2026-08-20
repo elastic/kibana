@@ -19,12 +19,13 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
-  type DefaultProfileStateField,
-  type DefaultProfileStateFields,
-  type DefaultProfileState,
-  type ProfileStateSnapshot,
+  type ColumnsMeta,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
   type UpdateESQLQueryActionPayload,
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabInitializationStatus,
   TabsBarVisibility,
 } from './types';
@@ -45,7 +46,8 @@ export const internalStateActions = {
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
-    'syncProfileStateSnapshot'
+    'setProfileState',
+    'syncProfileAppStateSnapshot'
   ),
   ...actions,
   syncLocallyPersistedTabState,
@@ -90,6 +92,9 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
+  selectCurrentProfileStateDefinition,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileLocatorState,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
@@ -112,6 +117,7 @@ export {
 
 export {
   fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

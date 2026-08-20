@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -16,6 +17,7 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -46,16 +48,25 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export interface CreateRuleOptions {
   id?: string;
+  initialRevision?: number;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
+  changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
+  /**
+   * The id of the rule template this rule was created from, when known (e.g. gallery
+   * create-from-template, or Fleet installing a rule from a package template). Used only
+   * for telemetry - it is not persisted on the rule saved object.
+   */
+  templateId?: string;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -63,7 +74,13 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+  const {
+    data: initialData,
+    options,
+    changeTracking,
+    allowMissingConnectorSecrets,
+    templateId,
+  } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -138,6 +155,9 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
   const username = await context.getUserName();
 
   let createdAPIKey = null;
@@ -227,7 +247,7 @@ export async function createRule<Params extends RuleParams = never>(
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
-      revision: 0,
+      revision: options?.initialRevision ?? 0,
       running: false,
     },
     params: {
@@ -253,12 +273,16 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: [createdRuleSavedObject],
+    encryptedFieldsMap: new Map([
+      [id, { apiKey: ruleAttributes.apiKey, uiamApiKey: ruleAttributes.uiamApiKey ?? null }],
+    ]),
     rulesClientContext: context,
     changesContext: {
-      action: RuleChangeTrackingAction.ruleCreate,
-      timestamp: createTime,
+      action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
+      metadata: changeTracking?.metadata,
+      refresh: changeTracking?.refresh,
     },
   });
 
@@ -282,7 +306,17 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
+
+  reportRuleCreatedEvent(context, {
+    id,
+    templateId,
+    createTime,
+    alertTypeId: data.alertTypeId,
+    enabled: data.enabled,
+    consumer: data.consumer,
+    producer: ruleType.producer,
+  });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

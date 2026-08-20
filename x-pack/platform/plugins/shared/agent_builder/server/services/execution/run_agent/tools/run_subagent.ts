@@ -16,11 +16,11 @@ import {
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
-export const SubAgentToolName = internalTools.subAgentTool;
+export const SubAgentToolName = internalTools.runSubagent;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),
@@ -89,7 +89,7 @@ export const createSubagentTool = ({
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
-}): BuiltinToolDefinition<typeof schema> => {
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
     description: toolDescription,

@@ -7,6 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -41,6 +43,11 @@ export interface KIQueryGenerationScenario {
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
+  /** Eval-only novelty arm: seeds existing_queries, scored against hidden criteria. */
+  rerun?: {
+    existing_queries: ExistingQuerySummary[];
+    criteria: SamplingCriterion[];
+  };
 }
 
 export interface KIFeatureExtractionScenario {
@@ -88,6 +95,32 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface DiscoveryScenario {
+  input: {
+    scenario_id: string;
+    stream_name: string;
+    detections: Array<Partial<Detection>>;
+  };
+  /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
+  continuationChains?: Record<string, string[]>;
+  output: {
+    criteria: SamplingCriterion[];
+    expected_min_evidence_count?: number;
+    /** Human-readable summary of expected output for quick orientation. */
+    expected_ground_truth?: string;
+    /** Expected confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
+    /**
+     * The significant events the agent is expected to generate — signals + causal_features +
+     * blast_radius + status. The grouping check derives its expected groups from these events'
+     * `signals[].metadata.rule_uuid`s.
+     */
+    expected_significant_events: Array<Partial<SignificantEvent>>;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 export interface DatasetConfig {
   id: string;
   description: string;
@@ -96,4 +129,5 @@ export interface DatasetConfig {
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
+  discovery: DiscoveryScenario[];
 }

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MobilePropertyType } from '../../../common/mobile_types';
-import { MobileProperty } from '../../../common/mobile_types';
+import { type MobilePropertyType, MobileProperty } from '@kbn/apm-types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDeviceOSApp } from './get_device_os_app';
 import { getNCT } from './get_nct';

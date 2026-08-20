@@ -9,7 +9,6 @@
 
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from './data_view';
-import type { DataTableColumnsMeta } from '../types';
 import * as formatValueModule from '../utils/format_value';
 
 /**
@@ -85,40 +84,6 @@ export const createDataViewWithoutCustomField = () =>
       },
     ]),
   });
-
-/**
- * columnsMeta that overrides bytes from number to string/keyword.
- * Used for testing when ES|QL query returns a field with a different
- * type than defined in the data view.
- */
-export const columnsMetaOverridingBytesType: DataTableColumnsMeta = {
-  bytes: {
-    type: 'string',
-    esType: 'keyword',
-  },
-};
-
-/**
- * columnsMeta for a custom ES|QL field not in the data view.
- */
-export const columnsMetaWithCustomField: DataTableColumnsMeta = {
-  custom_esql_field: {
-    type: 'number',
-    esType: 'long',
-  },
-};
-
-/**
- * Creates a spy on formatFieldValue that returns 'formatted'.
- * Remember to call mockRestore() in afterEach.
- *
- * @deprecated Use `createFormatFieldValueReactSpy` instead for testing components
- * that use `formatFieldValueReact`. This spy is only needed for legacy code paths
- * that haven't been migrated yet (e.g., UnifiedDocViewer, SummaryColumn).
- */
-export const createFormatFieldValueSpy = () => {
-  return jest.spyOn(formatValueModule, 'formatFieldValue').mockReturnValue('formatted');
-};
 
 /**
  * Creates a spy on formatFieldValueReact that returns 'formatted'.

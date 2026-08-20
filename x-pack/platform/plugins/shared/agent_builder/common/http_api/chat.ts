@@ -7,6 +7,7 @@
 
 import type {
   ConversationAction,
+  ConversationAccessControl,
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
@@ -24,6 +25,10 @@ export interface ChatRequestBodyPayload {
   connector_id?: string | null;
   inference_id?: string | null;
   conversation_id?: string;
+  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
+  /** Applied when the round creates the conversation; ignored when continuing an existing one. */
+  read_only?: boolean;
+  execution_id?: string;
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input?: string;
@@ -31,6 +36,7 @@ export interface ChatRequestBodyPayload {
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
+  project_routing?: string;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
 }
@@ -40,6 +46,7 @@ export type ChatResponse = Omit<
   'id' | 'input' | 'pending_prompts' | 'response' | 'state'
 > & {
   conversation_id: string;
+  access_control: ConversationAccessControl;
   round_id: string;
   response: Partial<AssistantResponse> & {
     prompts?: PromptRequest[];

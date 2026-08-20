@@ -165,6 +165,7 @@ describe('migration v2', () => {
 
       await root.preboot();
       const setup = await root.setup();
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'foo',
         hidden: false,
@@ -181,6 +182,7 @@ describe('migration v2', () => {
           },
         },
       });
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'bar',
         hidden: false,

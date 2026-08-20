@@ -7,19 +7,22 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
+import type { EntityType as EntityTypeOpenAPI } from '@kbn/entity-store/common';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../utils/elasticsearch_terms_limits';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
+  errorMessage,
   makeObservation,
   extractIsPrivileged,
+  matchesPrivilegedWatchlist,
   entityTypeLabel,
 } from './utils';
-import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import { OBSERVATION_MODULE_WEIGHTS } from './weights';
 
 const MODULE_ID = 'temporal_state_analysis';
 const MODULE_NAME = 'Temporal State Analysis';
 const MODULE_PRIORITY = 9;
-const MODULE_WEIGHT = 0.25;
+const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.temporal_state_analysis;
 
 const SUPPORTED_ENTITY_TYPES: EntityTypeOpenAPI[] = ['user', 'host'];
 
@@ -52,7 +55,7 @@ export const createTemporalStateModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      if (escalations.has(`${entity.type}:${entity.name}`)) {
+      if (escalations.has(entity.id)) {
         observations.push(buildPrivilegeEscalationObservation(entity));
       }
     }
@@ -82,57 +85,60 @@ const fetchPrivilegeEscalations = async (
   for (const entityType of SUPPORTED_ENTITY_TYPES) {
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
-      const names = ofType.map((e) => e.name);
+      const euids = ofType.map((e) => e.id);
       const historyPattern = getHistorySnapshotIndexPattern(spaceId);
 
       try {
-        const response = await esClient.search({
-          index: historyPattern,
-          size: 0,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          query: {
-            bool: { filter: [{ terms: { [`${entityType}.name`]: names } }] },
-          },
-          aggs: {
-            by_entity: {
-              terms: { field: `${entityType}.name`, size: names.length },
-              aggs: {
-                oldest_snapshot: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': { order: 'asc' } }],
-                    _source: ['entity.attributes.watchlists'],
+        for (let offset = 0; offset < euids.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {
+          const euidChunk = euids.slice(offset, offset + DEFAULT_MAX_TERMS_QUERY_COUNT);
+
+          const response = await esClient.search({
+            index: historyPattern,
+            size: 0,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            query: {
+              bool: { filter: [{ terms: { 'entity.id': euidChunk } }] },
+            },
+            aggs: {
+              by_entity: {
+                terms: { field: 'entity.id', size: euidChunk.length },
+                aggs: {
+                  oldest_snapshot: {
+                    top_hits: {
+                      size: 1,
+                      sort: [{ '@timestamp': { order: 'asc' } }],
+                      _source: ['entity.attributes.watchlists'],
+                    },
                   },
                 },
               },
             },
-          },
-        });
+          });
 
-        const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-          []) as Array<{
-          key: string;
-          oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
-        }>;
+          const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+            []) as Array<{
+            key: string;
+            oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
+          }>;
 
-        for (const bucket of buckets) {
-          const hit = bucket.oldest_snapshot.hits.hits[0];
-          if (hit) {
-            const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { watchlists?: string[] } | undefined;
-            const watchlists = Array.isArray(attrs?.watchlists) ? attrs.watchlists : [];
-            const wasPrivileged = watchlists.some(
-              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
-            );
-
-            if (!wasPrivileged) {
-              escalated.add(`${entityType}:${bucket.key}`);
+          for (const bucket of buckets) {
+            const hit = bucket.oldest_snapshot.hits.hits[0];
+            if (hit) {
+              const entityField = hit._source?.entity as Record<string, unknown> | undefined;
+              const attrs = entityField?.attributes as { watchlists?: unknown } | undefined;
+              if (!matchesPrivilegedWatchlist(attrs?.watchlists)) {
+                escalated.add(bucket.key);
+              }
             }
           }
         }
       } catch (error) {
-        logger.warn(`[${MODULE_ID}] Failed to query privilege history for ${entityType}: ${error}`);
+        logger.warn(
+          `[${MODULE_ID}] Failed to query privilege history for ${entityType}: ${errorMessage(
+            error
+          )}`
+        );
       }
     }
   }

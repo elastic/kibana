@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/serverless-vectordb",
   "owner": [
-    "@elastic/search-kibana"
+    "@elastic/search-ml-ux"
   ],
   "group": "vectordb",
   "visibility": "private",
@@ -17,9 +17,18 @@
       "vectordb"
     ],
     "requiredPlugins": [
-      "serverless"
+      "dataViews",
+      "navigation",
+      "serverless",
+      "share",
+      "agentBuilder"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "optionalPlugins": [
+      "console",
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

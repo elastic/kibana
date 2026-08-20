@@ -7,17 +7,17 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import {
-  buildEpisodeEventDataQuery,
-  type EpisodeEventDataRow,
-} from '../queries/episode_event_data_query';
-import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
+import { buildEpisodeEventDataQuery } from '../queries/episode_event_data_query';
+import { QUERY_STALE_TIME } from '../constants';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeEventDataQueryOptions {
   episodeId: string | undefined;
-  data: DataPublicPluginStart;
+  services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
 export interface EpisodeEventData {
@@ -41,22 +41,24 @@ export interface EpisodeEventData {
  */
 export const useFetchEpisodeEventDataQuery = ({
   episodeId,
-  data,
+  services,
 }: UseFetchEpisodeEventDataQueryOptions) => {
+  const { data } = services;
+  const spaceId = useSpaceId(services.spaces);
+
   return useQuery({
-    queryKey: queryKeys.episodeEventData(episodeId ?? ''),
-    queryFn: ({ signal }) =>
-      runEsqlAsyncSearch({
+    queryKey: queryKeys.episodeEventData(spaceId, episodeId ?? ''),
+    queryFn: async ({ signal }): Promise<EpisodeEventData | null> => {
+      const query = buildEpisodeEventDataQuery(spaceId, episodeId!);
+      const raw = await runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeEventDataQuery(episodeId!).print('basic'),
+          query: query.print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      }),
-    select: (raw): EpisodeEventData | null => {
-      const rows = esqlResponseToObjectRows<EpisodeEventDataRow>(raw);
-      const row = rows[0];
+      });
+      const row = rowsFromEsql(query, raw)[0];
       if (!row || !row.last_data || !row.last_data_timestamp) return null;
 
       let parsed: Record<string, unknown>;
@@ -75,5 +77,6 @@ export const useFetchEpisodeEventDataQuery = ({
       };
     },
     enabled: Boolean(episodeId),
+    staleTime: QUERY_STALE_TIME,
   });
 };

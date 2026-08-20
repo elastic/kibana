@@ -224,6 +224,7 @@ export function initializeFetch({
               searchSessionId,
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
+              esqlApproximation: fetchContext.isApproximate,
             });
             return {
               dataSource: result.dataSource,
@@ -296,7 +297,11 @@ export function initializeFetch({
       }
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  return {
+    cleanup: () => fetchSubscription.unsubscribe(),
+    cancelRequests: () => {
+      abortController?.abort();
+      abortController = undefined;
+    },
   };
 }

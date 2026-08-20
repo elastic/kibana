@@ -31,9 +31,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     indexNames,
     hostDetailsPagePath,
     hostDetailsFilter,
-    hostDetailsIdentityFilterQuery,
     identityFields,
     entityId,
+    entityRecord,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
@@ -48,6 +48,8 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       indexNames,
       identityFields,
       entityId,
+      entityRecord,
+      hostName: detailName,
     };
 
     const tabPath = (tab: HostsTableType) => `${hostDetailsPagePath}/:tabName(${tab})`;

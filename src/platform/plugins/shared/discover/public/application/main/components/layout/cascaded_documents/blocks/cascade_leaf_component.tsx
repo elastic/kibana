@@ -164,7 +164,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataGridDensityState,
     showTimeCol,
     dataView,
-    showKeyboardShortcuts,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
@@ -272,7 +271,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
       ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
-
     return (
       <UnifiedDataTable
         isPlainRecord

@@ -135,6 +135,43 @@ describe('executeAsReasoningAgent', () => {
     expect(toolMsg?.response).toEqual({ result: 'ok', stepsLeft: 1 });
   });
 
+  test('accumulates token counts across every step', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `reasoning${END_INTERNAL_REASONING_MARKER}`,
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+          ],
+          tokens: { prompt: 100, completion: 20, total: 120, cached: 5 },
+        })
+        .mockResolvedValueOnce({
+          content: 'final',
+          toolCalls: [
+            { type: 'function', function: { name: 'complete', arguments: {} }, toolCallId: 'c' },
+          ],
+          tokens: { prompt: 250, completion: 400, total: 650, cached: 10 },
+        }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: {
+        fetch_data: jest.fn().mockResolvedValue({ response: { result: 'ok' } }),
+        complete: jest.fn(),
+      },
+      input: { foo: '' },
+      finalToolChoice: { type: 'function', function: 'complete' },
+    });
+
+    expect(inferenceClient.prompt).toHaveBeenCalledTimes(2);
+    expect(result.tokens).toEqual({ prompt: 350, completion: 420, total: 770, cached: 15 });
+  });
+
   test('completes next turn when content includes external part after END_INTERNAL marker', async () => {
     const prompt = makePrompt();
     const inferenceClient = {

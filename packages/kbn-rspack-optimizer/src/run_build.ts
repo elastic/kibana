@@ -18,6 +18,19 @@ import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
 
+export const IGNORED_WATCH_PATTERNS: RegExp[] = [
+  /[\\/]node_modules[\\/]/,
+  /[\\/]target[\\/]/,
+  /\.tsbuildinfo$/,
+  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
+  /\.stories\.[jt]sx?$/,
+  /\.mock\.[jt]sx?$/,
+  /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
+  /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+];
+
 export interface BuildOptions {
   repoRoot: string;
   outputRoot?: string;
@@ -26,6 +39,10 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -74,6 +91,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -97,7 +116,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     let hmrPort: number | undefined;
     if (hmr) {
-      hmrServer = new HmrServer(options.basePath);
+      hmrServer = new HmrServer(options.basePath, log);
       hmrPort = await hmrServer.start();
     }
 
@@ -111,6 +130,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      pluginPaths,
+      pluginScanDirs,
       themeTags,
       log,
       profile,
@@ -243,7 +264,7 @@ async function runWatchBuild(
     };
 
     log?.info('Setting up RSPack watcher...');
-    log?.debug('Watcher will ignore: /node_modules/');
+    log?.debug(`Watcher will ignore: ${IGNORED_WATCH_PATTERNS.map((re) => re.source).join(', ')}`);
     log?.debug('Aggregate timeout: 50ms');
 
     if (hmrServer) {
@@ -257,7 +278,9 @@ async function runWatchBuild(
     const watching = compiler.watch(
       {
         aggregateTimeout: 50,
-        ignored: /node_modules/,
+        // rspack's WatchOptions.ignored only types as string[] | string | RegExp
+        // | (path) => boolean (not RegExp[]), so use the predicate form.
+        ignored: (filePath: string) => IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath)),
       },
       (err, stats) => {
         if (isShuttingDown) {
@@ -466,17 +489,9 @@ function processStats(
       assets: false,
       modules: false,
     });
-    const lines = warningOutput
-      .split('\n')
-      .filter(
-        (line) => !line.includes('rspack.persistentCache') && !line.includes('BuildDependencies')
-      )
-      .slice(0, 20);
-    if (lines.length > 0) {
-      log.warning('Build warnings (first 20):');
-      for (const line of lines) {
-        log.warning(line);
-      }
+
+    if (warningOutput.trim()) {
+      log.warning(warningOutput);
     }
   }
 

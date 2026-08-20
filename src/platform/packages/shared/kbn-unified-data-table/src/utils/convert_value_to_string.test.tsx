@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import {
-  dataTableContextComplexMock,
   dataTableContextComplexRowsMock,
-  dataTableContextMock,
   dataTableContextRowsMock,
 } from '../../__mocks__/table_context';
+import { dataViewComplexMock } from '../../__mocks__/data_view_complex';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { servicesMock } from '../../__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {
-  jest.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
+  jest.spyOn(dataViewComplexMock.fields, 'create');
 
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'keyword_key',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -38,11 +38,10 @@ describe('convertValueToString', () => {
   it('should convert a text value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -54,11 +53,10 @@ describe('convertValueToString', () => {
   it('should convert a multiline text value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -71,50 +69,54 @@ describe('convertValueToString', () => {
   it('should convert a number value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('10.99');
-    expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(0);
+    expect(dataViewComplexMock.fields.create).toHaveBeenCalledTimes(0);
   });
 
-  it('should convert a number value as keyword override to text', () => {
+  it('should convert a number value as keyword override to text', async () => {
+    const dataSource = await EsqlSource.create({
+      query: 'FROM test | KEEP number_price',
+      resultColumns: [
+        {
+          id: 'number_price',
+          name: 'number_price',
+          meta: { type: 'string', esType: 'keyword' },
+        },
+      ],
+    });
+
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource,
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
-      columnsMeta: {
-        number_price: {
-          type: 'string',
-          esType: 'keyword',
-        },
-      },
       options: {
         compatibleWithCSV: true,
       },
     });
 
+    // The ES|QL result column type (string/keyword) wins over the number formatting the
+    // underlying data view would otherwise apply.
     expect(result.formattedString).toBe('10.99');
-    expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(1);
   });
 
   it('should convert a date value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -126,11 +128,10 @@ describe('convertValueToString', () => {
   it('should convert a date nanos value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -142,11 +143,10 @@ describe('convertValueToString', () => {
   it('should convert a date nanos value to text (not for CSV)', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -158,11 +158,10 @@ describe('convertValueToString', () => {
   it('should convert a boolean value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'bool_enabled',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -174,11 +173,10 @@ describe('convertValueToString', () => {
   it('should convert a binary value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -190,11 +188,10 @@ describe('convertValueToString', () => {
   it('should convert a binary value to text (not for CSV)', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -206,11 +203,10 @@ describe('convertValueToString', () => {
   it('should convert an object value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'object_user.first',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -222,11 +218,10 @@ describe('convertValueToString', () => {
   it('should convert a nested value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'nested_user',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -240,11 +235,10 @@ describe('convertValueToString', () => {
   it('should convert a flattened value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'flattened_labels',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -256,11 +250,10 @@ describe('convertValueToString', () => {
   it('should convert a range value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'range_time_frame',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -274,11 +267,10 @@ describe('convertValueToString', () => {
   it('should convert a rank features value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'rank_features',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -290,11 +282,10 @@ describe('convertValueToString', () => {
   it('should convert a histogram value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'histogram',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -306,11 +297,10 @@ describe('convertValueToString', () => {
   it('should convert a IP value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -322,11 +312,10 @@ describe('convertValueToString', () => {
   it('should convert a IP value to text (not for CSV)', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -338,11 +327,10 @@ describe('convertValueToString', () => {
   it('should convert a version value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -354,11 +342,10 @@ describe('convertValueToString', () => {
   it('should convert a version value to text (not for CSV)', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -370,11 +357,10 @@ describe('convertValueToString', () => {
   it('should convert a vector value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'vector',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -386,11 +372,10 @@ describe('convertValueToString', () => {
   it('should convert a geo point value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -402,11 +387,10 @@ describe('convertValueToString', () => {
   it('should convert a geo point object value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -418,11 +402,10 @@ describe('convertValueToString', () => {
   it('should convert an array value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -434,11 +417,10 @@ describe('convertValueToString', () => {
   it('should convert a shape value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geometry',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -452,11 +434,10 @@ describe('convertValueToString', () => {
   it('should convert a runtime value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'runtime_number',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -468,11 +449,10 @@ describe('convertValueToString', () => {
   it('should convert a scripted value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -484,11 +464,10 @@ describe('convertValueToString', () => {
   it('should convert a scripted value to text (not for CSV)', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -500,11 +479,10 @@ describe('convertValueToString', () => {
   it('should return an empty string and not fail', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -516,11 +494,10 @@ describe('convertValueToString', () => {
   it('should return an empty string when rowIndex is out of range', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: -1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -532,11 +509,10 @@ describe('convertValueToString', () => {
   it('should return _source value', () => {
     const result = convertValueToString({
       rows: dataTableContextRowsMock,
-      dataView: dataTableContextMock.dataView,
+      dataSource: new IndexPatternSource(dataViewMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -556,11 +532,10 @@ describe('convertValueToString', () => {
   it('should return a formatted _source value', () => {
     const result = convertValueToString({
       rows: dataTableContextRowsMock,
-      dataView: dataTableContextMock.dataView,
+      dataSource: new IndexPatternSource(dataViewMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -571,14 +546,39 @@ describe('convertValueToString', () => {
     );
   });
 
+  it('should copy the _source column as the rendered nested document in JSON mode', () => {
+    const params = {
+      rows: dataTableContextComplexRowsMock,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: '_source',
+      rowIndex: 0,
+      options: { compatibleWithCSV: true },
+    };
+
+    const flattened = convertValueToString(params).formattedString;
+    const nested = convertValueToString({
+      ...params,
+      sourceDisplayMode: 'json',
+      shouldShowFieldHandler: () => true,
+    }).formattedString;
+
+    // Summary/default copies the flattened source (dotted keys); JSON mode copies the nested
+    // document as the tree viewer renders it (dotted keys become nested objects).
+    expect(flattened).toContain('"object_user.first"');
+
+    const parsedNested = JSON.parse(nested);
+    expect(parsedNested).toHaveProperty('object_user.first'); // the dotted path resolves
+    expect(parsedNested).not.toHaveProperty(['object_user.first']); // no literal dotted key
+  });
+
   it('should escape formula', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -589,11 +589,10 @@ describe('convertValueToString', () => {
 
     const result2 = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -606,11 +605,10 @@ describe('convertValueToString', () => {
   it('should not escape formulas when not for CSV', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
-      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },

@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  dataViewMock,
-  createDataViewWithBytesField,
-  createDataViewWithoutCustomField,
-  columnsMetaOverridingBytesType,
-  columnsMetaWithCustomField,
-  createFormatFieldValueReactSpy,
-  expectFieldCallToMatch,
-} from '../__mocks__';
+import { dataViewMock } from '../__mocks__';
 import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
@@ -37,11 +29,11 @@ describe('formatHitReact', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      reactConvert: (value: unknown) => `formatted:${value}`,
+      convertToReact: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected using reactConvert', () => {
+  it('formats a document as expected using convertToReact', () => {
     const formatted = formatHitReact(
       row,
       dataViewMock,
@@ -68,6 +60,31 @@ describe('formatHitReact', () => {
       dataViewMock
     );
 
+    const formatted = formatHitReact(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
+      220,
+      fieldFormatsMock,
+      undefined
+    );
+    expect(formatted.map(([fieldName]) => fieldName)).toEqual([
+      'message',
+      'extension',
+      'object.value',
+      '_index',
+      '_score',
+    ]);
+  });
+
+  it('orders inline highlights first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        inline_highlights: { message: { preTag: '<em>', postTag: '</em>' } },
+      },
+      dataViewMock
+    );
     const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
@@ -165,65 +182,70 @@ describe('formatHitReact', () => {
     ]);
   });
 
-  describe('with columnsMeta', () => {
-    let formatFieldValueReactSpy: jest.SpyInstance;
+  it('skips nullish values before limiting fields when configured', () => {
+    const rowWithNullishFields = buildDataTableRecord(
+      {
+        _id: 'doc-001',
+        _source: {
+          field_1: null,
+          field_2: undefined,
+          source: 'void_realm',
+          status: 'missing_in_action',
+        },
+      },
+      dataViewMock
+    );
 
-    beforeEach(() => {
-      formatFieldValueReactSpy = createFormatFieldValueReactSpy();
-    });
+    formatHitReact(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock);
 
-    afterEach(() => {
-      formatFieldValueReactSpy.mockRestore();
-    });
+    const formatted = formatHitReact(
+      rowWithNullishFields,
+      dataViewMock,
+      () => true,
+      2,
+      fieldFormatsMock,
+      { skipNullishValues: true }
+    );
 
-    it('should pass data view field to formatFieldValueReact when columnsMeta is undefined', () => {
-      const testDataView = createDataViewWithBytesField();
-      const testHit = buildDataTableRecord(
-        { _id: '1', _index: 'logs', fields: { bytes: [100] } },
-        testDataView
-      );
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['source', 'source'],
+      ['status', 'status'],
+    ]);
+  });
 
-      formatHitReact(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
+  it('keeps non-nullish falsy values when skipping nullish values', () => {
+    const rowWithFalsyFields = buildDataTableRecord(
+      {
+        _id: 'doc-002',
+        _source: {
+          field_1: null,
+          a_empty_string: '',
+          b_zero: 0,
+          c_false_value: false,
+          d_source: 'void_realm',
+        },
+      },
+      dataViewMock
+    );
 
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
-    });
+    const formatted = formatHitReact(
+      rowWithFalsyFields,
+      dataViewMock,
+      () => true,
+      3,
+      fieldFormatsMock,
+      { skipNullishValues: true }
+    );
 
-    it('should pass field with columnsMeta type to formatFieldValueReact when types differ', () => {
-      const testDataView = createDataViewWithBytesField();
-      const testHit = buildDataTableRecord(
-        { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
-        testDataView
-      );
-
-      formatHitReact(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaOverridingBytesType
-      );
-
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
-    });
-
-    it('should pass field created from columnsMeta to formatFieldValueReact for fields not in data view', () => {
-      const testDataView = createDataViewWithoutCustomField();
-      const testHit = buildDataTableRecord(
-        { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
-        testDataView
-      );
-
-      formatHitReact(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaWithCustomField
-      );
-
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
-    });
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['a_empty_string', 'a_empty_string'],
+      ['b_zero', 'b_zero'],
+      ['c_false_value', 'c_false_value'],
+      ['and 1 more field', null],
+    ]);
   });
 });

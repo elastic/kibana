@@ -103,6 +103,10 @@ Object {
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
+  "selfHttp": Object {
+    "ssl": Object {},
+    "target": "auto",
+  },
   "serverTiming": false,
   "serverTimingElasticsearch": false,
   "shutdownTimeout": "PT30S",
@@ -149,6 +153,7 @@ Object {
     "versionResolution": "oldest",
   },
   "xsrf": Object {
+    "allowedSchemes": Array [],
     "allowlist": Array [],
     "disableProtection": false,
   },

@@ -311,6 +311,20 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
     });
 
+    it.each(['IN', 'NOT IN'])('returns boolean for %s subquery expressions', (operator) => {
+      const { root, errors } = Parser.parse(`FROM index | WHERE field ${operator} (FROM other)`);
+
+      if (errors.length > 0) {
+        throw new Error(
+          `Failed to parse expression "field ${operator} (FROM other)": ${errors
+            .map((e) => e.message)
+            .join(', ')}`
+        );
+      }
+
+      expect(getExpressionType(root.commands[1].args[0])).toBe('boolean');
+    });
+
     it('accounts for the "any" parameter type', () => {
       setTestFunctions([
         {

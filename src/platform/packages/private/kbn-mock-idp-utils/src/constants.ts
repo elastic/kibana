@@ -10,10 +10,11 @@
 export const MOCK_IDP_LOGIN_PATH = '/mock_idp/login';
 export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 
-// Fixed base path used when running stateful Kibana with the SAML Mock IdP. Having a stable value
-// (instead of the random base path the dev proxy generates by default) keeps SP/ACS endpoints in
-// the Elasticsearch SAML realm aligned with Kibana's URL across restarts.
-export const MOCK_IDP_KIBANA_BASE_PATH = '/kbn';
+// Fixed placeholder used as the SP entity ID / ACS / logout base URL in the ES SAML realm and
+// embedded in the IdP metadata + SAML response. The mock IdP plugin rewrites IdP-bound redirects
+// from this base to the actual Kibana URL at runtime (see `onPreResponse` in the plugin), so this
+// value does not need to match where Kibana is actually served from.
+export const MOCK_IDP_SP_BASE_URL = `http://localhost:5601`;
 
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
@@ -45,6 +46,18 @@ export const MOCK_IDP_UIAM_COSMOS_DB_URL =
 export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 export const MOCK_IDP_UIAM_PROJECT_ID2 = 'fedcba65432109876543210987654321';
+
+// Canonical project type names used in UIAM role assignments and ES Serverless configuration.
+// Test users get one project grant per type (like an org admin with mixed projects) so they can
+// reach cross-project (CPS) linked projects of any type, not just the type of the Kibana
+// instance they logged in to.
+export const MOCK_IDP_UIAM_PROJECT_TYPES = [
+  'elasticsearch',
+  'observability',
+  'security',
+  'workplaceai',
+  'vectordb',
+] as const;
 
 // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
 // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)

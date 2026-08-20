@@ -55,8 +55,24 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
   default: () => [undefined, jest.fn()],
 }));
 
-jest.mock('../../../context/send_message/send_message_context', () => ({
-  useSendMessageContext: () => ({ removeAllErrors: jest.fn() }),
+jest.mock('../../../context/streaming/streaming_context', () => ({
+  useStreamingContext: () => ({
+    removeAllErrors: jest.fn(),
+    removeError: jest.fn(),
+    activeStreams: new Set(),
+    byConversationId: {},
+  }),
+}));
+
+jest.mock('../../../hooks/use_conversation_list_mutations', () => ({
+  useConversationListMutations: () => ({
+    deleteConversation: jest.fn(),
+    renameConversation: jest.fn(),
+    markAsRead: jest.fn(),
+    markAsUnread: jest.fn(),
+    markAsPinned: jest.fn(),
+    markAsUnpinned: jest.fn(),
+  }),
 }));
 
 import { UnifiedSidebar } from './unified_sidebar';

@@ -11,6 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
+import type { DocMap } from '../../../types';
+import { SOURCE_COLUMN } from '../../../utils/columns';
 
 export const MAX_COMPARISON_FIELDS = 250;
 
@@ -20,7 +22,7 @@ export interface UseComparisonFieldsProps {
   selectedDocIds: string[];
   showAllFields: boolean;
   showMatchingValues: boolean;
-  getDocById: (id: string) => DataTableRecord | undefined;
+  docMap: DocMap;
 }
 
 export const useComparisonFields = ({
@@ -29,21 +31,22 @@ export const useComparisonFields = ({
   selectedDocIds,
   showAllFields,
   showMatchingValues,
-  getDocById,
+  docMap,
 }: UseComparisonFieldsProps) => {
   const { baseDoc, comparisonDocs } = useMemo(() => {
     const [baseDocId, ...comparisonDocIds] = selectedDocIds;
 
     return {
-      baseDoc: getDocById(baseDocId),
+      baseDoc: docMap.get(baseDocId)?.doc,
       comparisonDocs: comparisonDocIds
-        .map((docId) => getDocById(docId))
+        .map((docId) => docMap.get(docId)?.doc)
         .filter((doc): doc is DataTableRecord => Boolean(doc)),
     };
-  }, [getDocById, selectedDocIds]);
+  }, [docMap, selectedDocIds]);
 
   return useMemo(() => {
-    let comparisonFields = selectedFieldNames;
+    // Summary is not a comparable field; compare selected fields only
+    let comparisonFields = selectedFieldNames.filter((fieldName) => fieldName !== SOURCE_COLUMN);
 
     if (showAllFields && dataView) {
       const sortedFields = dataView.fields

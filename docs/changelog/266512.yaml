@@ -1,0 +1,12 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266512
+issues:
+- https://github.com/elastic/kibana/issues/217598
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Kibana platform
+- Discover and ES|QL
+title: Fix a bug that caused long runs of whitespace in KQL to be parsed slowly

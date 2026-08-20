@@ -70,7 +70,6 @@ export function SelectionListButton({
           }
         >
           <EuiListGroup
-            flush={true}
             maxWidth={false}
             listItems={selectionOptions?.map((selectionOption) => ({
               label: <EuiText size="s">{selectionOption}</EuiText>,

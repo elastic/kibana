@@ -37,10 +37,15 @@ if (!BUMP_TYPE) {
       // Step 3: Wait, then trigger DRA snapshot (async).
       pipeline.push('  - wait # before dra snapshot');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
 
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait # before update label color');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
+
+      // Step 5: Reconcile labels
+      pipeline.push('  - wait # before reconcile labels');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
 
     if (BUMP_TYPE === 'minor') {
@@ -52,10 +57,13 @@ if (!BUMP_TYPE) {
         )
       );
 
-      // Step 2: Wait for ES build to complete, then bump package.json and other files on the main branch.
+      // Step 2: Wait for ES build to complete, then update versions.json on main.
+      // NOTE: package.json bump on main happens after branch creation (step 4) so the
+      // new release branch is cut while main is still at the release version.
       pipeline.push('  - wait # after es build and promote on main');
+
       pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
+        getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
       );
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
 
@@ -63,31 +71,29 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait # before create new branch');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
 
-      // Step 4: Wait, then trigger DRA snapshot and staging on the new release branch,
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
-      pipeline.push('  - wait # before dra snapshot/staging on release branch');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-      if (process.env.BRANCH !== 'main') {
-        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
-      }
-
-      // Step 5: Wait, and then do a bunch of file changes in the new branch.
+      // Step 4: Wait, and then do a bunch of file changes in the new branch.
       pipeline.push('  - wait # before update release branch');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
 
-      // Step 6: Update pipeline resource definitions on main.
+      // Step 5: Wait, then trigger DRA snapshot and staging on the new release branch.
+      pipeline.push('  - wait # before dra snapshot/staging on release branch');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+
+      // Step 6: Wait, then bump main's package.json to the next dev version. This runs
+      // after release-branch setup is complete so update_release_branch is not coupled to
+      // the PR-merge wait inside bump_package_json_versions_to_main (up to 60 minutes).
+      pipeline.push('  - wait # before package.json bump on main');
       pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
+        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
       );
 
-      // Step 7: Wait, then trigger DRA snapshot on main,
+      // Step 7: Wait, then trigger DRA snapshot on main. Runs after the package.json bump
+      // so the snapshot build picks up the correct next-dev version (e.g. 9.6.0).
       pipeline.push('  - wait # before dra snapshot on main');
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
       );
-
-      // Step 8: Wait, then ensure the version label exists for the new version and reconcile labels
-      pipeline.push('  - wait # before ensure version label');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/ensure_version_label.yml'));
     }
 

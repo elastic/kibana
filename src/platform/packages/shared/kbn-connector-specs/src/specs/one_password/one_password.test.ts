@@ -256,43 +256,33 @@ describe('OnePasswordConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = OnePasswordConnector.test;
+
     it('should return success when API is accessible', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: { results: [] } });
 
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await OnePasswordConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
         params: { maxPageSize: 1 },
       });
       expect(mockContext.log.debug).toHaveBeenCalledWith('1Password test handler');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to 1Password Users API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API returns non-200', async () => {
-      (mockClient.get as jest.Mock).mockResolvedValue({ status: 401, data: {} });
-
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await OnePasswordConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Failed to connect to 1Password Users API');
-    });
-
-    it('should propagate connection errors', async () => {
+    it('should throw on error', async () => {
       (mockClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(OnePasswordConnector.test.handler(mockContext)).rejects.toThrow('Network error');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
+    });
+
+    it('should surface structured API error body on non-2xx response', async () => {
+      const err = Object.assign(new Error('Forbidden'), {
+        response: { status: 403, data: { code: 7, message: 'no_owner_remain', details: [] } },
+      });
+      (mockClient.get as jest.Mock).mockRejectedValue(err);
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('1Password API error (403):');
     });
   });
 });

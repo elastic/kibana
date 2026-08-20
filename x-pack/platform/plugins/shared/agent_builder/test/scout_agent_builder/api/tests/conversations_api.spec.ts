@@ -6,6 +6,7 @@
  */
 
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -29,7 +30,6 @@ apiTest.describe(
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;
-    const createdConversationIds: string[] = [];
 
     apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
@@ -37,13 +37,7 @@ apiTest.describe(
       connectorId = id;
     });
 
-    apiTest.afterAll(async ({ asAdmin, kbnClient, esClient }) => {
-      for (const conversationId of createdConversationIds) {
-        await asAdmin.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-          { responseType: 'json' }
-        );
-      }
+    apiTest.afterAll(async ({ kbnClient, esClient }) => {
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
       await esClient.deleteByQuery({
@@ -56,32 +50,41 @@ apiTest.describe(
       });
     });
 
-    async function createConversation(
+    async function createConversationWithResponse(
       asAdmin: AuthedApiClient,
       input: string,
-      title: string
-    ): Promise<string> {
+      title: string,
+      accessControl?: { access_mode: ConversationAccessControlMode },
+      readOnly?: boolean
+    ): Promise<ChatResponse> {
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         title,
         response: `Response to: ${input}`,
       });
       const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-        body: { input, connector_id: connectorId, _execution_mode: 'local' },
+        body: {
+          input,
+          connector_id: connectorId,
+          _execution_mode: 'local',
+          ...(accessControl ? { access_control: accessControl } : {}),
+          ...(readOnly === undefined ? {} : { read_only: readOnly }),
+        },
         responseType: 'json',
       });
       expect(res).toHaveStatusCode(200);
       const body = res.body as ChatResponse;
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-      createdConversationIds.push(body.conversation_id);
-      return body.conversation_id;
+      return body;
     }
 
-    function removeTrackedConversationId(conversationId: string): void {
-      const index = createdConversationIds.indexOf(conversationId);
-      if (index > -1) {
-        createdConversationIds.splice(index, 1);
-      }
+    async function createConversation(
+      asAdmin: AuthedApiClient,
+      input: string,
+      title: string
+    ): Promise<string> {
+      const body = await createConversationWithResponse(asAdmin, input, title);
+      return body.conversation_id;
     }
 
     apiTest('GET /conversations lists conversations with expected shape', async ({ asAdmin }) => {
@@ -213,6 +216,165 @@ apiTest.describe(
       expect(Array.isArray(firstRound.steps)).toBe(true);
     });
 
+    apiTest('converse create exposes and stores conversation access mode', async ({ asAdmin }) => {
+      const defaultBody = await createConversationWithResponse(
+        asAdmin,
+        'Default access mode test',
+        'Default Access Mode Test'
+      );
+      expect(defaultBody.access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
+
+      const defaultConversationRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(defaultBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(defaultConversationRes).toHaveStatusCode(200);
+      expect((defaultConversationRes.body as Conversation).access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
+
+      const publicBody = await createConversationWithResponse(
+        asAdmin,
+        'Public access mode test',
+        'Public Access Mode Test',
+        {
+          access_mode: ConversationAccessControlMode.Public,
+        }
+      );
+      expect(publicBody.access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+
+      const publicConversationRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(publicBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(publicConversationRes).toHaveStatusCode(200);
+      expect((publicConversationRes.body as Conversation).access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    apiTest('converse ignores access mode when continuing a conversation', async ({ asAdmin }) => {
+      const publicBody = await createConversationWithResponse(
+        asAdmin,
+        'Immutable access mode create test',
+        'Immutable Access Mode Create Test',
+        {
+          access_mode: ConversationAccessControlMode.Public,
+        }
+      );
+
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        response: 'Response to: Immutable access mode continue test',
+        continueConversation: true,
+      });
+      const continueRes = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+        body: {
+          input: 'Immutable access mode continue test',
+          conversation_id: publicBody.conversation_id,
+          connector_id: connectorId,
+          _execution_mode: 'local',
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+          },
+        },
+        responseType: 'json',
+      });
+      expect(continueRes).toHaveStatusCode(200);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      expect((continueRes.body as ChatResponse).access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+
+      const conversationRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(publicBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(conversationRes).toHaveStatusCode(200);
+      expect((conversationRes.body as Conversation).access_control).toStrictEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    apiTest('converse create stores the read_only flag', async ({ asAdmin }) => {
+      const defaultBody = await createConversationWithResponse(
+        asAdmin,
+        'Default read only test',
+        'Default Read Only Test'
+      );
+      const defaultRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(defaultBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(defaultRes).toHaveStatusCode(200);
+      expect((defaultRes.body as Conversation).read_only).toBe(false);
+
+      const readOnlyBody = await createConversationWithResponse(
+        asAdmin,
+        'Read only create test',
+        'Read Only Create Test',
+        undefined,
+        true
+      );
+      const readOnlyRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(readOnlyBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(readOnlyRes).toHaveStatusCode(200);
+      expect((readOnlyRes.body as Conversation).read_only).toBe(true);
+    });
+
+    apiTest(
+      'converse ignores read_only when continuing a conversation, and a read-only conversation can still be continued',
+      async ({ asAdmin }) => {
+        const readOnlyBody = await createConversationWithResponse(
+          asAdmin,
+          'Immutable read only create test',
+          'Immutable Read Only Create Test',
+          undefined,
+          true
+        );
+
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          response: 'Response to: Immutable read only continue test',
+          continueConversation: true,
+        });
+        // read_only carries no authorization meaning: appending a round must still succeed
+        const continueRes = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+          body: {
+            input: 'Immutable read only continue test',
+            conversation_id: readOnlyBody.conversation_id,
+            connector_id: connectorId,
+            _execution_mode: 'local',
+            read_only: false,
+          },
+          responseType: 'json',
+        });
+        expect(continueRes).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const conversationRes = await asAdmin.get(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(readOnlyBody.conversation_id)}`,
+          { responseType: 'json' }
+        );
+        expect(conversationRes).toHaveStatusCode(200);
+        const conversation = conversationRes.body as Conversation;
+        expect(conversation.read_only).toBe(true);
+        expect(conversation.rounds).toHaveLength(2);
+      }
+    );
+
     apiTest('GET /conversations/:id returns 404 for missing id', async ({ asAdmin }) => {
       const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/non-existent-conversation-id-12345`,
@@ -239,7 +401,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationToDelete);
     });
 
     apiTest('DELETE /conversations/:id returns 404 when missing', async ({ asAdmin }) => {
@@ -267,7 +428,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(second).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationToDelete);
     });
 
     apiTest('conversation lifecycle: create, list, get, delete', async ({ asAdmin }) => {
@@ -305,7 +465,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(get404).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationId);
     });
   }
 );

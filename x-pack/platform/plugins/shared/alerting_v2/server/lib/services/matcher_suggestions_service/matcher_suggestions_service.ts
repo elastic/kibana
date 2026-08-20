@@ -6,15 +6,14 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
 import { flattenObject } from '@kbn/object-utils';
+import { inject, injectable } from 'inversify';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import { EsServiceScopedToken } from '../es_service/tokens';
 import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  alertEpisodeStatus,
-} from '../../../resources/datastreams/alert_events';
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
 const MAX_DATA_FIELDS = 100;
@@ -26,7 +25,6 @@ const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
 enum MatcherField {
   EpisodeStatus = 'episode_status',
   RuleName = 'rule.name',
-  RuleDescription = 'rule.description',
   RuleTags = 'rule.tags',
   RuleId = 'rule.id',
   EpisodeId = 'episode_id',
@@ -42,10 +40,6 @@ const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
   [MatcherField.RuleName]: {
     searchField: 'metadata.name',
     accessor: (a) => a.metadata.name,
-  },
-  [MatcherField.RuleDescription]: {
-    searchField: 'metadata.description',
-    accessor: (a) => a.metadata.description,
   },
 };
 
@@ -107,12 +101,13 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(): Promise<string[]> {
+  async getDataFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
         size: DATA_FIELD_SAMPLE_SIZE,
         timeout: '10s',
+        terminate_after: DATA_FIELD_SAMPLE_SIZE,
         _source: ['data'],
         query: {
           bool: {
@@ -121,6 +116,7 @@ export class MatcherSuggestionsService {
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
               { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
         },
@@ -163,7 +159,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: MAX_SUGGESTIONS,
       ...(query ? { search: `${getEscapedQuery(query)}*`, searchFields: [searchField] } : {}),
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -178,7 +174,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: 100,
       fields: ['metadata.tags'],
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -204,7 +200,7 @@ export class MatcherSuggestionsService {
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 

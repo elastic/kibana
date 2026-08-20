@@ -110,7 +110,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   return {
     // check that chrome ui is in project/solution mode
     async expectExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await retry.try(async () => {
+        const exists =
+          (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||
+          (await testSubjects.exists('kibanaProjectHeader', { timeout: 0 }));
+        if (!exists) {
+          throw new Error('Neither chromeNextGlobalHeader nor kibanaProjectHeader is present');
+        }
+      });
     },
     async clickLogo() {
       await testSubjects.click('nav-header-logo');
@@ -498,7 +505,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
-      async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+      async expectBreadcrumbTexts(
+        expectedBreadcrumbTexts: string[],
+        options?: { removeProjectName?: boolean }
+      ) {
         log.debug(
           'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
           JSON.stringify(expectedBreadcrumbTexts)
@@ -506,9 +516,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await retry.try(async () => {
           const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
-          breadcrumbs.shift(); // remove home
-          expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
           const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
+          if (options?.removeProjectName) {
+            texts.shift(); // remove project name breadcrumb in serverless
+          }
+          expect(expectedBreadcrumbTexts.length).to.eql(texts.length);
           expect(expectedBreadcrumbTexts).to.eql(texts);
         });
       },

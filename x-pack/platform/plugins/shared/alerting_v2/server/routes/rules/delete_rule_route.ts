@@ -8,8 +8,8 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,6 +17,8 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { RULE_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { deleteRuleOasExamples } from './delete_rule_oas_example';
 
 @injectable()
 export class DeleteRuleRoute extends BaseAlertingRoute {
@@ -29,17 +31,19 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Delete a rule',
+    oasOperationObject: deleteRuleOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      params: ruleIdParamsSchema,
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The rule was deleted successfully.',
       },
       404: {
-        description: 'Indicates a rule with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
     },
   };

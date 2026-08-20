@@ -11,7 +11,7 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -48,7 +48,8 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
   return buildDataTableRecord(hit, dataViewWithTimefieldMock);
 });
 
-const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const fieldColumnId = 'fieldColumnId';
 
@@ -60,7 +61,7 @@ const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> =
     selectedDocIds: ['0', '1', '2'],
     diffMode: undefined,
     fieldFormats: fieldFormatsMock,
-    getDocById,
+    docMap: createDocMap(),
     ...props,
   };
   const hook = renderHook((currentProps) => useComparisonCellValue(currentProps), {
@@ -124,6 +125,7 @@ const renderComparisonCell = ({
     getAllSegments: () => getCell().querySelectorAll(`.${SEGMENT_CLASS}`),
     getAddedSegments: () => getCell().querySelectorAll(`.${ADDED_SEGMENT_CLASS}`),
     getRemovedSegments: () => getCell().querySelectorAll(`.${REMOVED_SEGMENT_CLASS}`),
+    getFieldIcon: () => within(getCell()).getByTestId('unifiedDataTableComparisonFieldIcon'),
   };
 };
 

@@ -74,7 +74,10 @@ export async function definitionToESQLQuery(
         Builder.expression.source.index(parentViewName),
         Builder.option({
           name: 'METADATA',
-          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] })],
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] }),
+          ],
         }),
       ],
     }),
@@ -104,14 +107,17 @@ export async function definitionToESQLQuery(
     pipeTab: '',
   });
 
-  if (includeProcessing && definition.ingest.processing.steps.length > 0) {
-    const result = await transpileEsql(definition.ingest.processing);
+  const streamlangProcessing =
+    'steps' in definition.ingest.processing ? definition.ingest.processing : undefined;
+
+  if (includeProcessing && streamlangProcessing && streamlangProcessing.steps.length > 0) {
+    const result = await transpileEsql(streamlangProcessing);
     if (result.commands.length > 0) {
       query += `\n| ${result.commands.join('\n| ')}`;
     }
   }
 
-  if (ownFieldCastCmd && includeProcessing && definition.ingest.processing.steps.length > 0) {
+  if (ownFieldCastCmd && includeProcessing && streamlangProcessing?.steps.length) {
     query += `\n| ${BasicPrettyPrinter.command(ownFieldCastCmd)}`;
   }
 

@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
+import { OverviewTab } from '../../flyout_v2/document/main/tabs/overview_tab';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';

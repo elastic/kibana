@@ -9,7 +9,7 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { PluginsTestServer } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/plugins_server/plugins_server';
+import { PluginsTestServer } from '../../../scout_agent_builder_shared/lib/plugins_server/plugins_server';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
@@ -19,7 +19,7 @@ import {
 
 const ASSETS_DIR = path.join(
   REPO_ROOT,
-  'x-pack/platform/test/agent_builder_api_integration/apis/plugins/assets'
+  'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_shared/assets/plugins'
 );
 
 const PLUGIN_NAME = 'test-plugin';

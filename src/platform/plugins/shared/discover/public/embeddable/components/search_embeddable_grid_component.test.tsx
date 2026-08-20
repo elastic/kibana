@@ -16,9 +16,11 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -35,7 +37,7 @@ jest.mock('./saved_search_grid', () => ({
 
 const createStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
-  columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  dataSource: new BehaviorSubject<DataSource | undefined>(undefined),
   grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
   rowHeight: new BehaviorSubject<number | undefined>(undefined),
   headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
@@ -93,26 +95,20 @@ describe('SearchEmbeddableGridComponent', () => {
     jest.clearAllMocks();
   });
 
-  const renderComponent = ({
-    isEsql,
-    onRefreshData,
-  }: {
-    isEsql: boolean;
-    onRefreshData?: () => void;
-  }) => {
+  const renderComponent = ({ isEsql }: { isEsql: boolean }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
+    const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
 
-    return render(
+    render(
       <DiscoverTestProvider services={services}>
         <SearchEmbeddableGridComponent
           api={api}
           dataView={dataViewMock}
           stateManager={stateManager}
-          onRefreshData={onRefreshData}
           enableDocumentViewer={true}
           inlineEditing={{
             isActive: false,
@@ -120,9 +116,14 @@ describe('SearchEmbeddableGridComponent', () => {
             onApply: jest.fn(),
             onCancel: jest.fn(),
           }}
+          docViewerRef={docViewerRef}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
         />
       </DiscoverTestProvider>
     );
+
+    return { stateManager };
   };
 
   describe('onUpdateSampleSize', () => {
@@ -150,17 +151,25 @@ describe('SearchEmbeddableGridComponent', () => {
     });
   });
 
-  describe('refresh action wiring', () => {
-    it('passes onRefreshData to DiscoverGridEmbeddable', async () => {
-      const onRefreshData = jest.fn();
-      renderComponent({ isEsql: false, onRefreshData });
+  describe('onResize', () => {
+    it('should update the embeddable grid state', async () => {
+      const { stateManager } = renderComponent({ isEsql: false });
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
-      expect(lastCallProps?.onRefreshData).toBe(onRefreshData);
+      const onResize = lastCallProps?.onResize as (params: {
+        columnId: string;
+        width: number | undefined;
+      }) => void;
+
+      onResize({ columnId: '_source', width: 250 });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: { width: 250 } } });
+
+      onResize({ columnId: '_source', width: undefined });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
   });
 });

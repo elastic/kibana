@@ -19,6 +19,7 @@ export const appPaths = {
     skills: ({ agentId }: { agentId: string }) => `/agents/${agentId}/skills`,
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     tools: ({ agentId }: { agentId: string }) => `/agents/${agentId}/tools`,
+    connectors: ({ agentId }: { agentId: string }) => `/agents/${agentId}/connectors`,
     overview: ({ agentId }: { agentId: string }) => `/agents/${agentId}/overview`,
   },
 
@@ -38,6 +39,8 @@ export const appPaths = {
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
     mcpClients: '/manage/tools/mcp_clients',
+    mcpClientCreate: '/manage/tools/mcp_clients/new',
+    mcpClientEdit: ({ clientId }: { clientId: string }) => `/manage/tools/mcp_clients/${clientId}`,
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect
