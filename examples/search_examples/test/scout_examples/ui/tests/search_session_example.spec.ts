@@ -16,12 +16,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  LENS_BASIC_KBN_ARCHIVE,
-  LOGSTASH_FUNCTIONAL_ARCHIVE,
-  LOGSTASH_TIME_RANGE,
-  test,
-} from '../fixtures';
+import { LOGSTASH_TIME_RANGE, test } from '../fixtures';
 
 const SESSION_API_PATH = '/internal/session';
 const SESSION_API_VERSION = '1';
@@ -57,10 +52,8 @@ async function deleteAllSearchSessions(kbnClient: KbnClient): Promise<void> {
 }
 
 test.describe('Search session example', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient, isSnapshotBuild }) => {
+  test.beforeAll(async ({ kbnClient, isSnapshotBuild }) => {
     test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
-    await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
-    await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
     await deleteAllSearchSessions(kbnClient);
   });
 
@@ -69,7 +62,6 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
       return;
     }
     await deleteAllSearchSessions(kbnClient);
-    await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {

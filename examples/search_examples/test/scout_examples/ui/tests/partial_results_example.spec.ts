@@ -8,22 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  LENS_BASIC_KBN_ARCHIVE,
-  LOGSTASH_FUNCTIONAL_ARCHIVE,
-  test,
-} from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe('Partial results example', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
-    await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.searchExamples.gotoSearch();

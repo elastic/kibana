@@ -11,23 +11,9 @@
  * Smoke coverage of the search_examples demo.
  */
 
-import {
-  LENS_BASIC_KBN_ARCHIVE,
-  LOGSTASH_FUNCTIONAL_ARCHIVE,
-  assertOtherBucketResponse,
-  test,
-} from '../fixtures';
+import { assertOtherBucketResponse, test } from '../fixtures';
 
 test.describe('Search example', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
-    await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
-  });
-
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.searchExamples.gotoSearch();

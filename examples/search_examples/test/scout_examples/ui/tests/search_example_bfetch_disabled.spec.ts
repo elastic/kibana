@@ -11,23 +11,15 @@
  * Stateful-only: serverless already forces bfetch off via uiSettings.overrides.
  */
 
-import {
-  LENS_BASIC_KBN_ARCHIVE,
-  LOGSTASH_FUNCTIONAL_ARCHIVE,
-  assertOtherBucketResponse,
-  test,
-} from '../fixtures';
+import { assertOtherBucketResponse, test } from '../fixtures';
 
 test.describe('Search example with bfetch disabled', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
-    await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update({ 'bfetch:disable': true });
   });
 
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.unset('bfetch:disable');
-    await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
