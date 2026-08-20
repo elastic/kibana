@@ -270,6 +270,11 @@ export class CasePlugin
       };
     };
 
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
+    };
+
     const serverlessProjectType = this.isServerless
       ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
       : undefined;
@@ -280,6 +285,7 @@ export class CasePlugin
       core,
       logger: this.logger,
       getCasesClient: getCasesClient('connector'),
+      getActionsClient,
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,

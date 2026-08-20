@@ -41,6 +41,7 @@ import type {
   TodoStateManager,
   IFilesystemService,
   IBashService,
+  ConversationTemplatesService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
 import type { ExecutionConversationOrigin } from '../execution/types';
@@ -178,6 +179,10 @@ export interface AgentHandlerContext {
    * Skills service to interact with skills.
    */
   skills: SkillsService;
+  /**
+   * Conversation template service, to interact with conversation templates.
+   */
+  conversationTemplates: ConversationTemplatesService;
   /**
    * Plugins service to resolve plugin-contributed skill IDs during execution.
    */

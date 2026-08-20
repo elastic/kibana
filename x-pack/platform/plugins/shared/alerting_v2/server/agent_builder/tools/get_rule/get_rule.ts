@@ -48,7 +48,7 @@ export const getRuleTool = ({
 }: GetRuleToolParams): BuiltinAttachmentBoundedTool<typeof getRuleSchema> => ({
   id: getRuleToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch rule "${ruleId}" associated with episode "${episodeId}" (attachment "${attachmentId}"), including name, schedule, query, enabled state, and metadata. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+  description: `Fetch the platform alert rule "${ruleId}" associated with episode "${episodeId}" (attachment "${attachmentId}"), including name, schedule, query, source indices, enabled state, and metadata. This is not a Security/SIEM detection rule. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
   schema: getRuleSchema,
   handler: async (_args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({

@@ -18,6 +18,7 @@ import type {
 } from '../../../../containers/types';
 import type { CurrentUserProfile } from '../../../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
+import type { CasesPermissions } from '../../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../../../user_actions/helpers';
 import { builderMap } from '../../../user_actions/builder';
 import type { RenderWorkflowUserActionAction } from '../../../cases_context';
@@ -32,6 +33,7 @@ interface UseBuildUserActionsArgs {
   currentUserProfile: CurrentUserProfile;
   appId: string;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  permissions: CasesPermissions;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
@@ -51,6 +53,7 @@ export const useBuildUserActions = ({
   currentUserProfile,
   appId,
   unifiedAttachmentTypeRegistry,
+  permissions,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -81,6 +84,7 @@ export const useBuildUserActions = ({
         casesConfiguration,
         caseConnectors,
         unifiedAttachmentTypeRegistry,
+        permissions,
         userAction,
         userProfiles,
         currentUserProfile,
@@ -103,6 +107,7 @@ export const useBuildUserActions = ({
     casesConfiguration,
     caseConnectors,
     unifiedAttachmentTypeRegistry,
+    permissions,
     userProfiles,
     currentUserProfile,
     attachments,
