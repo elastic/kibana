@@ -19,4 +19,5 @@ export type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
+  ExchangeServiceAccountTokenResponse,
 } from './src/service_accounts';

@@ -1131,6 +1131,73 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#exchangeServiceAccountToken', () => {
+    it('authenticates with client authentication only, without a user credential', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ token: 'essu_token' }) });
+
+      await expect(uiamService.exchangeServiceAccountToken('service-account-id')).resolves.toEqual({
+        token: 'essu_token',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id/credentials/_exchange',
+        {
+          method: 'POST',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ token: 'essu_token' }) });
+
+      await uiamService.exchangeServiceAccountToken('id/../with special?chars');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        `https://uiam.service/uiam/api/v1/service-accounts/${encodeURIComponent(
+          'id/../with special?chars'
+        )}/credentials/_exchange`,
+        expect.anything()
+      );
+    });
+
+    it('reproduces the UIAM status code and payload when the exchange fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'FORBIDDEN',
+            type: 'authorization',
+            message: 'Principal is not authorized to assume this service account',
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeServiceAccountToken('service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(
+        uiamService.exchangeServiceAccountToken('service-account-id')
+      ).rejects.toThrowError('socket hang up');
+    });
+  });
+
   describe('#createOAuthClient', () => {
     it('properly calls UIAM service to create an OAuth client', async () => {
       const mockResponse: OAuthClientResponse = {

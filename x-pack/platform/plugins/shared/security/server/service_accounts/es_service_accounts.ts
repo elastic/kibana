@@ -7,7 +7,10 @@
 
 import Boom from '@hapi/boom';
 
-import type { ServiceAccount } from '@kbn/core-security-server';
+import type {
+  ExchangeServiceAccountTokenResponse,
+  ServiceAccount,
+} from '@kbn/core-security-server';
 
 import type { ServiceAccountsBackend } from './types';
 
@@ -21,5 +24,12 @@ import type { ServiceAccountsBackend } from './types';
 export class EsServiceAccounts implements ServiceAccountsBackend {
   async create(): Promise<ServiceAccount> {
     throw Boom.notImplemented('Creating Elasticsearch service accounts is not yet implemented');
+  }
+
+  // See https://github.com/elastic/kibana/issues/284466.
+  async exchangeToken(): Promise<ExchangeServiceAccountTokenResponse> {
+    throw Boom.notImplemented(
+      'Exchanging tokens for Elasticsearch service accounts is not yet implemented'
+    );
   }
 }

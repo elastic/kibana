@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountParams,
+  ExchangeServiceAccountTokenResponse,
+  ServiceAccount,
+} from '@kbn/core-security-server';
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -16,6 +20,12 @@ import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-secur
  */
 export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+
+  /**
+   * Exchanges a service account ID for an ephemeral access token under Kibana's own system
+   * credential. Performs no user authorization: callers must authorize their own users first.
+   */
+  exchangeToken(serviceAccountId: string): Promise<ExchangeServiceAccountTokenResponse>;
 }
 
 /**

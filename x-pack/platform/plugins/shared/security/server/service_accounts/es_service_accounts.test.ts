@@ -16,4 +16,13 @@ describe('EsServiceAccounts', () => {
       });
     });
   });
+
+  describe('#exchangeToken', () => {
+    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
+      await expect(new EsServiceAccounts().exchangeToken()).rejects.toMatchObject({
+        message: 'Exchanging tokens for Elasticsearch service accounts is not yet implemented',
+        output: { statusCode: 501 },
+      });
+    });
+  });
 });

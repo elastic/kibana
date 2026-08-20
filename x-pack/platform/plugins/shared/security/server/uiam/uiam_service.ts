@@ -280,6 +280,17 @@ export interface UiamServicePublic {
   ): Promise<ServiceAccount>;
 
   /**
+   * Exchanges a service account ID for an ephemeral access token via the UIAM service.
+   *
+   * The request is authenticated with Kibana's own client authentication (shared secret and,
+   * when configured, the mTLS client certificate) and deliberately carries no user credential:
+   * UIAM authorizes the exchange against the service account's `assumable_by` policy.
+   *
+   * @param serviceAccountId The ID of the service account to exchange a token for.
+   */
+  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+
+  /**
    * Creates an OAuth client via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param body The request body for creating the OAuth client.
@@ -739,6 +750,44 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeServiceAccountToken}.
+   */
+  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+    try {
+      this.#logger.debug('Attempting to exchange service account for an ephemeral token.');
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}/credentials/_exchange`,
+          {
+            method: 'POST',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              // Kibana's own client authentication is the credential for this request: no user
+              // `Authorization` header is sent, and UIAM authorizes the exchange against the
+              // service account's `assumable_by` policy.
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug('Successfully exchanged service account for an ephemeral token.');
+      return response;
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to exchange service account for a token: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

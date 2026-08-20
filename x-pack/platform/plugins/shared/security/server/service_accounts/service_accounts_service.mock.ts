@@ -17,5 +17,6 @@ export const serviceAccountsServiceMock = {
       role_assignments: {},
       assumable_by: [],
     }),
+    exchangeToken: jest.fn().mockResolvedValue({ token: 'essu_mock-service-account-token' }),
   }),
 };

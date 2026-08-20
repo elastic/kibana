@@ -200,4 +200,53 @@ describe('UiamServiceAccounts', () => {
       ).rejects.toThrowError('upstream exploded');
     });
   });
+
+  describe('#exchangeToken', () => {
+    it('exchanges the service account id for an ephemeral token', async () => {
+      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: 'essu_ephemeral_token' });
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).resolves.toEqual({
+        token: 'essu_ephemeral_token',
+      });
+
+      expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
+      expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+    });
+
+    // The upstream endpoint does not exist yet, so the response shape is a guess. Validating it
+    // means a mismatch fails loudly rather than leaking undefined fields to consumers.
+    it('rejects when the upstream response does not match the expected shape', async () => {
+      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ credential: 'nope' } as never);
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
+        'Error occured during service account token exchange'
+      );
+    });
+
+    it('rejects when the upstream response contains an empty token', async () => {
+      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: '' });
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
+        'Error occured during service account token exchange'
+      );
+    });
+
+    it('logs and rethrows upstream failures', async () => {
+      mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('upstream exploded'));
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
+        'upstream exploded'
+      );
+    });
+  });
 });

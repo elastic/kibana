@@ -20,6 +20,7 @@ export type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
+  ExchangeServiceAccountTokenResponse,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,

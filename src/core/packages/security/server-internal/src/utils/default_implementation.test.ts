@@ -69,6 +69,12 @@ describe('getDefaultSecurityImplementation', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
+
+    it('exchangeToken rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.exchangeToken('service-account-id')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
   });
 
   describe('fakeRequestEnricher', () => {

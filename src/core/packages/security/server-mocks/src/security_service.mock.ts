@@ -48,6 +48,7 @@ const createStartMock = (): SecurityStartMock => {
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      exchangeToken: jest.fn(),
     }),
   });
 
@@ -87,6 +88,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      exchangeToken: jest.fn(),
     }),
   });
 

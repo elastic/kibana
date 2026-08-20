@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   CreateServiceAccountParams,
+  ExchangeServiceAccountTokenResponse,
   ServiceAccount,
   UiamOAuthProjectType,
 } from '@kbn/core-security-server';
@@ -22,6 +23,7 @@ import type { SecurityLicense } from '../../common';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 import { getUiamAccessTokenFromRequest, type UiamServicePublic } from '../uiam';
@@ -49,6 +51,19 @@ const serviceAccountSchema = z.object({
       })
     )
     .max(1),
+});
+
+/**
+ * Response shape of the UIAM token exchange, derived from the API specification for the
+ * same reason as {@link serviceAccountSchema}: the upstream endpoint is not implemented
+ * yet, so validation makes the first real call fail loudly on any drift.
+ *
+ * TODO(https://github.com/elastic/kibana/issues/284465): revisit once UIAM ships
+ * the endpoint and the response shape is confirmed.
+ */
+const exchangeTokenResponseSchema = z.object({
+  // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
+  token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
 });
 
 export interface UiamServiceAccountsOptions {
@@ -134,6 +149,33 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       return parsed.data;
     } catch (e) {
       this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async exchangeToken(serviceAccountId: string): Promise<ExchangeServiceAccountTokenResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      );
+    }
+
+    this.logger.debug('Attempting to exchange a service account for an ephemeral token');
+
+    try {
+      const result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
+
+      const parsed = exchangeTokenResponseSchema.safeParse(result);
+      if (!parsed.success) {
+        this.logger.error(
+          `Token exchange payload from UIAM failed validation: ${parsed.error.message}`
+        );
+        throw new Error(`Error occured during service account token exchange.`);
+      }
+
+      return parsed.data;
+    } catch (e) {
+      this.logger.error(`Failed to exchange service account token: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
   }
