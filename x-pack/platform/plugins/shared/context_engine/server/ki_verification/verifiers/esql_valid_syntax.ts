@@ -8,6 +8,10 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLMessage } from '@kbn/esql-language';
 import type { EditorError } from '@elastic/esql/types';
+import {
+  MAX_KI_ATTRIBUTE_ARRAY_VALUES,
+  MAX_KI_ATTRIBUTE_VALUE_LENGTH,
+} from '../../../common/step_types/ki';
 import type { KiVerifier, KnowledgeIndicator } from '../types';
 
 export const ESQL_VALID_SYNTAX_VERIFIER_ID = 'esql-valid-syntax';
@@ -15,8 +19,9 @@ export const ESQL_VALID_SYNTAX_VERIFIER_ID = 'esql-valid-syntax';
 /** KI attribute carrying the ES|QL to verify: a query string or array of query strings. */
 export const ESQL_ATTRIBUTE_KEY = 'esql';
 
-export const MAX_ESQL_QUERIES = 100;
-export const MAX_ESQL_QUERY_LENGTH = 10_000;
+// Aligned with the KI attribute schema bounds so queries accepted there are never rejected here.
+export const MAX_ESQL_QUERIES = MAX_KI_ATTRIBUTE_ARRAY_VALUES;
+export const MAX_ESQL_QUERY_LENGTH = MAX_KI_ATTRIBUTE_VALUE_LENGTH;
 
 const REASON_QUERY_PREVIEW_LENGTH = 200;
 
