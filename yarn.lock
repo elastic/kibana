@@ -4912,6 +4912,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/context-engine-agent-builder-plugin@link:x-pack/platform/plugins/shared/context_engine_agent_builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/context-engine-plugin@link:x-pack/platform/plugins/shared/context_engine":
   version "0.0.0"
   uid ""
@@ -9557,14 +9561,6 @@
   uid ""
 
 "@kbn/ui-callout@link:src/platform/kbn-ui/callout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-chrome-layout-constants@link:src/platform/kbn-ui/chrome-layout-constants":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-chrome-layout-utils@link:src/platform/kbn-ui/chrome-layout-utils":
   version "0.0.0"
   uid ""
 

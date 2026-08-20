@@ -128,6 +128,20 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(moreTestId())).toHaveFocus();
     });
 
+    it('activates the pager first button with Enter', async () => {
+      const doc = Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => [`field_${i}`, `value_${i}`])
+      );
+      render(<JsonTreeViewer json={doc} />);
+
+      expect(screen.queryByTestId(rowTestId('field_11'))).not.toBeInTheDocument();
+
+      screen.getByTestId(pagerTestId()).focus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(screen.getByTestId(rowTestId('field_11'))).toBeVisible();
+    });
+
     it('moves between the two pager buttons with the Right and Left arrows', async () => {
       // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
       const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
@@ -275,6 +289,33 @@ describe('JsonTreeViewer', () => {
       );
 
       expect(screen.getByTestId('fmt')).toHaveTextContent('Berlin');
+    });
+  });
+
+  describe('extraHeaderContent', () => {
+    it('renders custom header content next to the controls', () => {
+      render(
+        <JsonTreeViewer
+          json={{ user: { name: 'Alice' } }}
+          extraHeaderContent={<span data-test-subj="custom-header">custom</span>}
+        />
+      );
+
+      expect(screen.getByTestId('jsonTreeViewerExpandAll')).toBeVisible();
+      expect(screen.getByTestId('custom-header')).toBeVisible();
+    });
+
+    it('renders header content even when there are no expandable collections', () => {
+      // A flat document has no Expand/Collapse-all control; the header row exists only for the slot.
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          extraHeaderContent={<span data-test-subj="custom-header">custom</span>}
+        />
+      );
+
+      expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
+      expect(screen.getByTestId('custom-header')).toBeVisible();
     });
   });
 });
