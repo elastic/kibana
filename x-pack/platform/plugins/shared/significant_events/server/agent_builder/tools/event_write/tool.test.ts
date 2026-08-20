@@ -103,7 +103,7 @@ describe('events_write tool', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues.at(-1)?.message).toBe(
-        'Each detection rule UUID may appear in only one event item per write'
+        'Each detection rule UUID may appear in only one event item per write. Correct ownership before the single write; never retry with an empty placeholder.'
       );
     }
   });

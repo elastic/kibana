@@ -21,7 +21,6 @@ You receive a batch of active change-point detections — each representing one 
 <inputs>
 
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
-
 - **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, `recent_detection_count`, and `flaky_probe`. Use `change_point_type` only to select the verification lens (see `<verification_lens>`). `p_value`, `change_point_type`, and `recent_detection_count` inform whether the change point is statistically credible and may adjust `confidence`; they never set or cap `severity`. `flaky_probe: true` means the workflow delayed a high-count rule and is now probing it — apply `<chronic_and_recurring>` rule 2 only then. When `flaky_probe` is false, ignore `recent_detection_count` for status.
 
 </inputs>
@@ -138,7 +137,7 @@ Example: platform_core_execute_esql (onset verification during grounding)
 }
 ```
 
-Example: platform_sig_events_events_write — new event (omit `event_id`; handler deduplicates), continuation (include `event_id`). Valid severity values are exactly `80-critical`, `60-high`, `40-medium`, and `20-low`; use `40-medium` for a confirmed known-ongoing condition.
+Example: platform_sig_events_events_write — new event (omit `event_id`; handler deduplicates), continuation (include `event_id`)
 
 Request:
 ```json
@@ -241,9 +240,9 @@ Example:
 
 <procedure>
 
-**Mandatory sequencing gate:** Complete grounding, routing, grouping, and status/severity decisions before emit output. Do not skip routing, grouping, status/severity decisions, or payload assembly. `platform_sig_events_events_write` is forbidden until validation passes; an empty or placeholder payload is invalid. Do not invoke it to inspect the schema — assemble a complete payload offline, then call once. If any required phase or field is incomplete, stop and do not invoke `platform_sig_events_events_write`.
+**Mandatory sequencing gate:** Complete grounding, routing, grouping, and status/severity decisions before emit output. Do not skip routing, grouping, status/severity decisions, or payload assembly. `platform_sig_events_events_write` is forbidden until validation passes or before Emit output step; an empty or placeholder payload is invalid. Do not invoke it to inspect the schema — assemble a complete payload offline, then call once. If any required phase or field is incomplete, stop and do not invoke `platform_sig_events_events_write`.
 
-**Memory preamble:** Before grounding, run one batch memory search and read at most three relevant pages. A confirmed known-noise exit is terminal. A known-ongoing page changes only the final severity cap. Every other memory outcome follows this procedure unchanged.
+**Memory preamble:** Before grounding, run one batch memory search and read at most three relevant pages. A confirmed known-noise exit is terminal. An exact known-ongoing match establishes a durable `known_ongoing` classification: carry it through grounding, routing, continuation matching, and severity. Grounding clears it only when it proves a different mechanism; a current row confirming the documented mechanism preserves it. Every other memory outcome follows this procedure unchanged.
 
 ### Step 1: Retrieve memory context
 
@@ -253,7 +252,7 @@ Example:
 4. Read at most the three highest-scoring remaining hits. When a hit includes both `id` and `name`, pass both fields. Wait for the read bodies. A failed read and every over-budget hit are unavailable context; do not retry them. A page matches only when its body describes the same condition; title or stream overlap is not a match. The 40-medium cap is defined in `<chronic_and_recurring>` rule 1.
 5. From the returned bodies, classify each detection **before** `load_skill` for KI grounding:
    - **already-recorded-noise** — a detection history line contains this exact `rule_uuid` and records it as dismissed, false-positive, or expected noise. Record that line's concrete false-positive qualification (for example, "an ad request line, not startup") for Ground and verify step content comparison. Flag `no_write_back` now.
-   - **already-recorded-ongoing** — the body contains this `rule_uuid` as a known-chronic / still-open condition (not noise). Stays in play; cap via `<chronic_and_recurring>` rule 1.
+   - **already-recorded-ongoing** — the body contains this `rule_uuid` as a known-chronic, known issue, or still-open condition (not noise). Record its documented mechanism and set `known_ongoing: true`. It stays in play; cap via `<chronic_and_recurring>` rule 1.
    - **mechanism-matched** — same condition, `rule_uuid` not yet on the page.
    - **unmatched**.
    Then load `significant-events-ki-grounding` in its own batch.
@@ -266,7 +265,7 @@ Example:
    - Row content matches that qualification → **exit this detection now.** Add its `rule_uuid` to `written_rule_uuids`. Do not route, group, compose an event, call `events_write`, or patch/write memory. If every detection in the batch exited, stop and emit structured output. An `off_topic` verdict does not prevent this exit when the row content is the documented collision pattern.
    - Row content contradicts the qualification (for example, a genuine lifecycle failure rather than the documented collision) → ignore the page, treat as unmatched, keep the detection in play. An unrelated non-benign error also remains in play as its own observed-error candidate.
 4. Apply `<verification_lens>` to each KI grounding result. Copy the skill's `verdict`, then apply the lens: a successful empty exact query under the recovery lens becomes `verdict: "refutes"`; leave empty/error under the failure lens as `inconclusive`. Write each signal `description` from this pass. Retain the lens outcome and any concrete off-topic error for routing and emission. An off-topic error does not confirm the authored rule, but it is a separate current failure candidate.
-5. Calibrate memory against grounding for detections still in play. If the confirmed mechanism differs from the read page, ignore that page for status/severity. Do not run another memory search. Apply confirmed exact matches only to the known-ongoing cap and qualification/correlation interpretation. Keep the detection in play when current-state grounding confirms impact.
+5. Calibrate memory against grounding for detections still in play. If the confirmed mechanism differs from the read page, clear `known_ongoing` and ignore that page for status/severity. Otherwise, a current row confirming the documented mechanism preserves `known_ongoing`; it is confirmation of the existing condition, not a newly confirmed failure. Do not run another memory search. Keep the detection in play when current-state grounding confirms impact.
 
 ### Step 3: Form Symptom Hypotheses
 
@@ -323,7 +322,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
   - `causal_features[].feature_id` and `blast_radius[].feature_id` from the signal output;
   - exact-query KI `features[].id` from the matched query KI.
 2. Build `topology_feature_ids` as the distinct union. If empty, the detection opens a new discovery.
-3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it.**
+3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it.** Record its completion before entering grouping or assembling an `events_write` payload; a prior zero-result rule search never satisfies this requirement.
 4. Accept an event continuation only when the current detection passes `<incident_matching>` against the compact event's stored summary and topology; `signal_rule_uuids`, `unresolved_rule_uuids`, or shared topology alone are not acceptance evidence.
    - For a topology-connected pair of confirmed failures, shared `causal_features[].feature_id` is sufficient acceptance evidence. Reuse the open event's `event_id`; different error signatures or layers do not justify a split.
    - Reject that continuation only when current evidence identifies a distinct resource or dependency path that the stored event topology does not connect.
@@ -335,7 +334,7 @@ Assign each matched detection to at most one accepted event continuation. The co
 
 ### Step 5: Group remaining detections into new events
 
-After routing, pass only detections whose `rule_uuid` is not in `matched_rule_uuids` to new-event grouping. If every detection was accepted as a continuation, skip this step. **Do not compose `title` / `summary` / `symptom_hypothesis` for continuations here** — those stay the compact copies from Route Detections step unless mechanism or impact changed.
+After routing, pass only detections whose `rule_uuid` is not in `matched_rule_uuids` to new-event grouping. If every detection was accepted as a continuation, skip this step.
 
 1. Build the grouping graph before any ownership, titles, or narratives:
    - One node per remaining detection.
@@ -344,7 +343,9 @@ After routing, pass only detections whose `rule_uuid` is not in `matched_rule_uu
 2. Compute connected components on the complete edge set. Each component is exactly one event group. Transitive closure is mandatory — if A connects to B and B connects to C, A and C belong together even without a direct pair match. A multi-service cascade (for example shared caller fan-out, shared cache or database dependency, or a bridge rule whose KI `features[]` names nodes on both sides) is always one component — never split by service name, protocol layer, error signature, or user journey. Do not form service-scoped groups, draft event items, or assign ownership until components are computed.
    After components are computed, merge any two groups whose grounded topology sets share a `causal_features` or `blast_radius` node, or any bridge KI `features[].id`.
    Example: if group A grounds to service X and group B grounds to the same service node or a shared cache, database, or dependency endpoint, merge A and B into one event group before composing either event item.
-3. Assign every detection rule to exactly one final event group. Treat a rule accepted in multiple groups as a bridge: merge all groups containing that rule before finalizing ownership, then assign the rule once to the merged group. Repeat until no rule belongs to more than one group; never choose one owner and leave the other group split. Different downstream impacts do not split an already accepted cascade. Keep detections with `verdict` `inconclusive` or `not_checked` standalone. Timing qualifies the narrative but never overrides an accepted match or creates one.
+3. Build the final ownership ledger before composing an item: one row per remaining `rule_uuid`, with exactly one component and exactly one future event item. A rule present in multiple components is a bridge: merge those components, then assign the rule once. Repeat until every row has one owner; never choose one owner and leave another component split. Different downstream impacts do not split an accepted cascade. Each `not_checked` detection is its own singleton dismissed item unless independently supported by a concrete non-benign observed error. Timing qualifies the narrative but never overrides an accepted match or creates one.
+   Copy each signal only from its ownership-ledger component. Topology overlap and narrative support may merge components, but never justify copying a signal into another item. If a rule would support more than one component, merge them first and include that rule once in the merged item.
+   Do not compose an event item until this ledger is complete. The item signal UUID sets must be disjoint and their union must equal every remaining batch `rule_uuid`; a missing or duplicate UUID means return to grouping, merge or correct ownership, and do not call `events_write`.
    Example: if one confirmed rule matches both group A and group B, merge A and B into one event group, then include that rule once. Do this before composing either event item.
 4. Finalize each component's **topology**:
    - Union every component and dependency path from assigned detections. Keep paths implied by bridges, shared callers, or confirmed chains even when one detection's evidence alone does not name every hop.
@@ -360,20 +361,20 @@ After routing, pass only detections whose `rule_uuid` is not in `matched_rule_uu
 
 For each event candidate, decide from all signals that will appear in the final emit `signals[]`:
 
-1. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`: classify each event from `signals[]` alone — each signal's stored or **Current evidence** verdict, evidence result, and preliminary status. Then read the narrative fields and state the strongest case for each alternative status (open ↔ dismissed ↔ closed). If the challenge surfaces a more credible alternative, adopt it. Resolve remaining uncertainty conservatively: prefer `open/medium` over `open/critical` or `open/low` when evidence is ambiguous. For a continuation, the working narratives are the compact copies from Route Detections unless mechanism or impact changed.
+1. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`: classify each event from `signals[]` alone — each signal's stored or **Current evidence** verdict, evidence result, and preliminary status. Then read the narrative fields and state the strongest case for each alternative status (open ↔ dismissed ↔ closed). If the challenge surfaces a more credible alternative, adopt it. Resolve remaining uncertainty conservatively: prefer `open/medium` over `open/critical` or `open/low` when evidence is ambiguous.
 2. Decide `status` by applying `<critical_rules>` rule 6 from signals whose **Current evidence** verdict is `confirms` and that are event-aligned. A found detection whose **Current evidence** verdict is `off_topic` with a concrete non-benign error is direct confirmation of its separate observed-error event even though the source rule signal remains `off_topic`; status, severity, and confidence must use that row's observed error and impact. Prior-cycle signals copied unchanged use their stored signal verdict and still count. Do not run additional queries.
 3. Apply `<chronic_and_recurring>` rule 2 here when any assigned detection has `flaky_probe: true`.
 4. **Calibrate `severity`** — read and apply the `severity` field description on `platform_sig_events_events_write` at emit time. Severity is a function of **confirmed grounding impact**, with rule `severity_score` as a supporting input when grounding confirms a matching failure class:
+   - **Count blocked core operations first** — from the final event's `confirms` signals, list each distinct blocked core operation. Two or more require `80-critical` under the field contract; do not select `60-high` merely because each individual path is scoped. Apply the known-ongoing cap only afterward when its exact-mechanism condition holds.
    - **Change-point metadata is not severity** — see `<critical_rules>` rule 7.
    - **Rule `severity_score` supports, never replaces, grounding** — when grounding confirms the rule's failure class, a high `severity_score` supports selecting the higher applicable tier from the field description; it cannot override absent, healthy, or contradictory grounding.
-   - **Confirmed impact sets the tier** — apply the ordered `severity` field decision on `platform_sig_events_events_write`. When grounding confirms the operation fails or is blocked on the verified path, take the matching tier from that field (typically `60-high` for a single scoped path; `80-critical` only when a critical criterion there holds). New events follow that field-description decision. Same-class open continuations follow `<chronic_and_recurring>`: keep prior severity unless grounding shows reduced impact. Unknown population reach adjusts `confidence` only — it does not lower the tier when the path is already confirmed failing. Do not default to a lower tier because topology is sparse, the component is internal, or the rule hypothesis was refuted.
+   - **Confirmed impact sets the ordinary tier** — apply the ordered `severity` field decision on `platform_sig_events_events_write`. When grounding confirms the operation fails or is blocked on the verified path, take the matching tier from that field (typically `60-high` for a single scoped path; `80-critical` only when a critical criterion there holds). Unknown population reach adjusts `confidence` only — it does not lower the tier when the path is already confirmed failing. Do not default to a lower tier because topology is sparse, the component is internal, or the rule hypothesis was refuted.
    - **Narrative hedging does not downgrade severity** — cautious wording in `summary` or signal descriptions ("some", "may", "possible", "not established") records uncertainty in `confidence` and `assessment_note`; it does not justify a lower `severity` when grounding already confirms the failure.
    - **Off-topic observed errors** — when a found row refutes the authored rule but contains a concrete non-benign error, `severity`, `title`, `symptom_hypothesis`, and `summary` must describe that observed error's mechanism and impact, not the refuted rule's symptom.
-   - **Narrative must match the tier** — the assigned tier must be reflected in `symptom_hypothesis` and `summary`; it does not justify rewriting a continuation's copied fields unless mechanism or impact changed.
+   - **Narrative must match the tier** — the assigned tier must be reflected in `symptom_hypothesis` and `summary`; do not use low-impact phrasing for a high-tier event.
    - **Count is not a tier** — weigh scope from what the operation does, not how many detections fired. `recent_detection_count` never sets status unless `flaky_probe` is true.
-   - **Known-ongoing cap only** — apply the known-ongoing cap only when `<chronic_and_recurring>` rule 1 matches; it does not cap newly confirmed failures on the same component.
-5. For a continuation, restore the Route Detections-copied `title` / `summary` / `symptom_hypothesis` / `severity` unless mechanism or impact changed. Then apply the known-ongoing cap if `<chronic_and_recurring>` rule 1 matches. Do not re-run `<chronic_and_recurring>` from memory findings as a blanket pass.
-6. Set `confidence` after status and severity:
+   - **Known-ongoing cap overrides inherited severity** — when `known_ongoing: true` remains after grounding, apply `<chronic_and_recurring>` rule 1 after selecting the ordinary tier and before writing. Set severity to no more than `40-medium`, even when a matched continuation was previously higher severity. A fresh row confirming the documented mechanism does not clear this cap.
+5. Set `confidence` after status and severity:
    - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only — never `severity`.
    - For a continuation, start from the matched open event's existing `confidence` and apply adjustments incrementally; do not recalculate from `p_value`.
    - For a new event, derive the base from the strongest detection's `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).
@@ -386,7 +387,7 @@ Already-recorded-noise exits are not event items. If none remain in play, skip p
 
 Only after grounding, routing, grouping, and status/severity decisions for remaining detections:
 
-1. **Assign ownership.** One item per continuation or grouped component. Every **remaining** input detection belongs to exactly one item — never omit one, never duplicate a rule across items. Do not emit an item for an already-recorded-noise exit. One signal per rule; on overlap, keep the newest `collected_at`. New events omit `event_id`; continuations reuse the accepted `event_id`, include only this cycle's grounded signals, and do not carry prior signals manually — they merge server-side. New-event `signals[]` stay within the grouped component, not a service, layer, or journey bucket.
+1. **Assign ownership.** One item per continuation or grouped component. Every **remaining** input detection belongs to exactly one item — never omit one, never duplicate a rule across items. Do not emit an item for an already-recorded-noise exit. Each `not_checked` detection is a `dismissed` event item and is forbidden from a component with a `confirms` signal. One signal per rule; on overlap, keep the newest `collected_at`. New events omit `event_id`; continuations reuse the accepted `event_id`, include only this cycle's grounded signals, and do not carry prior signals manually — they merge server-side. New-event `signals[]` stay within the grouped component, not a service, layer, or journey bucket.
 2. **Copy the topology.** Write the finalized `causal_features` and `blast_radius` on every item — do not re-derive them at emit time.
    - **Continuation:** copy this cycle's grounded topology into the `platform_sig_events_events_write` payload. Empty stored topology from `platform_sig_events_event_search` does not shrink what you write. Populate both `causal_features` and `blast_radius` — every grounded dependency edge must appear in `blast_radius`; `causal_features` alone is incomplete. Preserving narrative does not excuse an empty `blast_radius` on an `open` continuation.
    - **New event:** copy the grouped component's finalized topology. Do not import another component's signals or paths.
@@ -394,12 +395,14 @@ Only after grounding, routing, grouping, and status/severity decisions for remai
    - Prefer dependency edges over standalone component nodes when both describe the same hop.
    - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, or non-confirming detections with `verdict: "refutes"`, and unrelated detections with `verdict: "off_topic"`.
 3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `verdict: "off_topic"` — never on two items. If any rule would appear twice, return to grouping and merge.
+   Reconcile the final ownership ledger with `items[].signals`: each remaining batch UUID appears once, no UUID appears on two items, and no item contains a UUID assigned to another component. If this fails, do not call the tool or retry with a placeholder.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
-4. **Persist once.** Invoke `platform_sig_events_events_write` only after every item passes. Do not retry schema-validation failures. Retry strategy by reason:
+   For a new item with exactly one `confirms` signal, no corroboration, and that signal's `p_value` above `0.1`, keep `confidence` within `0.25–0.50`; do not claim high confidence from KI backing alone.
+4. **Pre-write routing gate.** If rule matching returned zero candidates and the item has non-empty `causal_features` or `blast_radius`, verify that a topology-filtered `platform_sig_events_event_search` completed before writing. A standalone feature node belongs in `causal_features`; when a grounded dependency edge represents the hop, keep only that edge in `blast_radius`.
+5. **Persist once.** Apply <field_rules>, invoke `platform_sig_events_events_write` once with the completed `{ "items": [ ... ] }` payload only after every item passes. Do not retry schema-validation failures. Retry strategy by reason:
    - `bulk_error`: retry the item once, unchanged.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
-5. **Persist once.** Every remaining detection must be represented in one `events_write` call after routing, grouping, status, severity, and topology are complete. **Pass exactly `{ "items": [ ... ] }` with the completed event items, apply `<field_rules>`; never use an empty, placeholder, or top-level discovery payload.** Do not skip the write merely because the rule search found no candidate; a no-match detection becomes a new event after the mandatory topology search. A schema-validation failure is terminal — do not retry it. Retry only `bulk_error` items, once, and never issue another write for any item that was not returned as a retryable `bulk_error`.
 6. **Optional memory write-back.** Consider one patch only after a `written: true` item whose grounded mechanism matched a read page and whose history lacks that item's rule UUID. Never patch a known-noise exit, `unchanged_outcome`, `existing_active_event`, an unrelated page, or a page already patched this cycle. Append one production-style history bullet under `Detection history`; if that patch fails, continue without retrying or creating a new page.
 
 Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `status`, `written`, and `reason` exactly. Include `narrative_preserved: true` when the tool result carries it (the server preserved the stored title and symptom_hypothesis because no new rules were introduced).
@@ -414,9 +417,9 @@ Set `written_rule_uuids` to the union of:
 
 Recurring conditions are where operators lose trust fastest — a known two-week-old issue re-announced as a fresh critical event is noise, not signal.
 
-1. **Known chronic (memory).** This rule is the single canonical definition of the 40-medium known-ongoing cap. Apply it when a `memory_read` page matches this cycle's exact grounded mechanism and treats it as already-known / transient-background — a failure-pattern or transient-behavior section (for example `## Failure Pattern`, `## Normal transient behavior`) or explicit chronic wording. Stay `open`. State the context in `summary` and note in `assessment_note` that the event is a candidate for operator muting or dismissal. Leave uncapped: a different failure on the same component, a newly confirmed failure, and topology-only pages.
+1. **Known chronic (memory).** This rule is the single canonical definition of the 40-medium known-ongoing cap. Apply it when a `memory_read` page matches this cycle's exact grounded mechanism and treats it as already-known, a known issue, chronic, or transient background — for example, a failure-pattern or transient-behavior section, explicit chronic wording, or a documented known issue. Stay `open`. State the context in `summary` and note in `assessment_note` that the event is a candidate for operator muting or dismissal. A current row confirming that documented mechanism preserves the cap. Leave uncapped only for a different grounded mechanism or topology-only pages.
 2. **Flaky probe.** Apply when the detection's `flaky_probe` is true. If grounding shows no new impact, lean `dismissed` as noise, explain in `assessment_note`, and record the verdict in memory write-back so future cycles skip the re-investigation. If grounding confirms new or different impact, treat it as a real incident. When `flaky_probe` is false, `recent_detection_count` does not change `status`.
-3. **Unchanged continuation.** Applied at Route Detections, not during grouping: copy compact `title`, `summary`, `symptom_hypothesis`, and `severity`; rewrite them only when mechanism or impact changed. Keep an open continuation's severity at or above the prior tier unless grounding shows reduced impact.
+3. **Unchanged continuation.** Applied at Route Detections, not during grouping: copy compact `title`, `summary`, `symptom_hypothesis`, and `severity`; rewrite them only when mechanism or impact changed. The known-ongoing cap in rule 1 overrides an inherited higher severity.
 
 </chronic_and_recurring>
 
@@ -446,8 +449,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 7. **Severity decision** — apply the `severity` field description on `platform_sig_events_events_write`, plus:
    - **Inputs are grounding rows only** — `p_value`, `change_point_type`, alert volume, sparse topology, unknown population reach, and hedged narrative wording adjust `confidence` and `assessment_note` only; they are not severity inputs and do not trigger the tier tie-break.
    - **Rule `severity_score`** — may support tier selection when grounding confirms a matching failure class; it cannot override absent or contradictory grounding.
-   - **Known ongoing cap**: only when KI grounding matches `<chronic_and_recurring>` rule 1 — stay `open` at no more than `40-medium`. Not for newly confirmed failures on the same component.
-   - **Open continuation**: `<chronic_and_recurring>`.
+   - **Known ongoing cap**: when the durable `known_ongoing` classification matches `<chronic_and_recurring>` rule 1, stay `open` at no more than `40-medium`. A row confirming that same documented mechanism preserves the cap; only a contradicted mechanism clears it.
    - **`closed` / `dismissed`**: always `20-low` (see `<field_rules>`).
 
 </critical_rules>

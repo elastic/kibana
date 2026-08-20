@@ -25,7 +25,9 @@ const {
 
 const toolCall = (
   toolId: string,
-  params?: Record<string, unknown>,
+  params: Record<string, unknown> | undefined = toolId === TOOL_ID_EVENTS_WRITE
+    ? { items: [{ status: 'open' }] }
+    : undefined,
   results?: unknown[]
 ): ConverseStep => ({
   type: 'tool_call',
@@ -35,13 +37,20 @@ const toolCall = (
   results,
 });
 
+const invalidEventsWrite = (params: Record<string, unknown> | undefined): ConverseStep => ({
+  type: 'tool_call',
+  tool_id: TOOL_ID_EVENTS_WRITE,
+  tool_call_id: TOOL_ID_EVENTS_WRITE,
+  params,
+});
+
 const retryCall = (toolId: string): ConverseStep => ({
   ...toolCall(toolId),
   params: { items: [{ event_id: 'failed-event' }] },
 });
 
 const retryableWriteCall = (): ConverseStep => ({
-  ...toolCall(TOOL_ID_EVENTS_WRITE),
+  ...toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ event_id: 'failed-event' }] }),
   results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
 });
 
@@ -50,7 +59,7 @@ const allExpectedTools: ConverseStep[] = [
   toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
   toolCall(TOOL_ID_EXECUTE_ESQL),
   toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
-  toolCall(TOOL_ID_EVENTS_WRITE),
+  toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'open' }] }),
 ];
 
 describe('scoreToolUsage', () => {
@@ -81,6 +90,52 @@ describe('scoreToolUsage', () => {
     const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBe(0);
     expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it.each([undefined, {}, { items: [] }] as const)(
+    'rejects events_write with payload %p',
+    (params) => {
+      const steps = allExpectedTools.map((step) =>
+        step.tool_id === TOOL_ID_EVENTS_WRITE ? invalidEventsWrite(params) : step
+      );
+
+      expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+        score: 0,
+        label: 'invalid-events-write-payload',
+      });
+    }
+  );
+
+  it('rejects duplicate rule ownership before the schema-error retry', () => {
+    const duplicateRule = {
+      type: 'detection',
+      metadata: { rule_uuid: 'rule-uuid-1' },
+    };
+    const failedWrite = toolCall(
+      TOOL_ID_EVENTS_WRITE,
+      {
+        items: [{ signals: [duplicateRule] }, { signals: [duplicateRule] }],
+      },
+      [
+        {
+          data: {
+            message:
+              'Error: Received tool input did not match expected schema\nEach detection rule UUID may appear in only one event item per write',
+          },
+        },
+      ]
+    );
+    const emptyRetry = invalidEventsWrite({});
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      failedWrite,
+      emptyRetry,
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'duplicate-rule-across-items',
+    });
   });
 
   it('gives partial credit when one of the four expected investigation tools is missing', () => {
@@ -675,7 +730,7 @@ describe('scoreToolUsage', () => {
       toolCall('platform_sig_events_ki_search', { kind: ['query'] }),
       toolCall('platform_core_execute_esql'),
       toolCall('platform_sig_events_event_search', { rule_uuids: ['rule-uuid-1'] }),
-      toolCall('platform_sig_events_events_write'),
+      toolCall('platform_sig_events_events_write', { items: [{ status: 'open' }] }),
     ];
 
     expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe('correct');

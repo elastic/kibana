@@ -49,6 +49,37 @@ const isTool = isToolId;
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
   [...calledTools].some((toolId) => isTool(toolId, canonical));
 
+const findDuplicateEventWriteRule = (
+  eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
+): { ruleUuid: string; firstItemIndex: number; secondItemIndex: number } | undefined => {
+  const ruleOwners = new Map<string, number>();
+
+  for (const { params } of eventWrites) {
+    if (!Array.isArray(params.items)) {
+      continue;
+    }
+    for (const [itemIndex, item] of params.items.entries()) {
+      if (!isRecord(item) || !Array.isArray(item.signals)) {
+        continue;
+      }
+      for (const signal of item.signals) {
+        if (!isRecord(signal) || !isRecord(signal.metadata)) {
+          continue;
+        }
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (typeof ruleUuid !== 'string') {
+          continue;
+        }
+        const firstItemIndex = ruleOwners.get(ruleUuid);
+        if (firstItemIndex !== undefined) {
+          return { ruleUuid, firstItemIndex, secondItemIndex: itemIndex };
+        }
+        ruleOwners.set(ruleUuid, itemIndex);
+      }
+    }
+  }
+};
+
 /** Require events_write and reject workflow-owned discovery stamping. */
 const scoreOutputTool = (
   calledTools: Set<string>,
@@ -59,6 +90,52 @@ const scoreOutputTool = (
       score: 0,
       label: `missing-${TOOL_ID_EVENTS_WRITE}`,
       explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
+    };
+  }
+
+  const eventWrites = extractOrderedToolCalls(steps).filter(({ toolId }) =>
+    isTool(toolId, TOOL_ID_EVENTS_WRITE)
+  );
+  const duplicateRule = findDuplicateEventWriteRule(eventWrites);
+  if (duplicateRule) {
+    return {
+      score: 0,
+      label: 'duplicate-rule-across-items',
+      explanation: `${TOOL_ID_EVENTS_WRITE} assigns rule UUID ${duplicateRule.ruleUuid} to items ${duplicateRule.firstItemIndex} and ${duplicateRule.secondItemIndex}; merge those components before writing`,
+    };
+  }
+  const schemaFailureIndex = eventWrites.findIndex(({ results }) =>
+    results.some(
+      (result) =>
+        isRecord(result) &&
+        isRecord(result.data) &&
+        typeof result.data.message === 'string' &&
+        result.data.message.includes('Received tool input did not match expected schema')
+    )
+  );
+  if (schemaFailureIndex !== -1) {
+    const retriedAfterSchemaFailure = eventWrites.length > schemaFailureIndex + 1;
+    return {
+      score: 0,
+      label: retriedAfterSchemaFailure
+        ? 'events-write-schema-validation-retry'
+        : 'events-write-schema-validation-failure',
+      explanation: retriedAfterSchemaFailure
+        ? `${TOOL_ID_EVENTS_WRITE} retried after a schema-validation failure instead of correcting ownership before its single write`
+        : `${TOOL_ID_EVENTS_WRITE} rejected the completed payload during schema validation`,
+    };
+  }
+
+  const invalidWrite = eventWrites.some(
+    ({ params, toolId }) =>
+      isTool(toolId, TOOL_ID_EVENTS_WRITE) &&
+      (!Array.isArray(params.items) || params.items.length === 0)
+  );
+  if (invalidWrite) {
+    return {
+      score: 0,
+      label: 'invalid-events-write-payload',
+      explanation: `${TOOL_ID_EVENTS_WRITE} requires a non-empty items array`,
     };
   }
 
