@@ -63,7 +63,8 @@ export async function installIndexTemplatesAndPipelines({
     packageInstallContext,
     esReferences,
     experimentalDataStreamFeatures,
-    onlyForDataStreams
+    onlyForDataStreams,
+    savedObjectsClient
   );
 
   // Update the references for the templates and ingest pipelines together. Need to be done together to avoid race

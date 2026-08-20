@@ -23,6 +23,8 @@ import { updateCurrentWriteIndices } from '../../../elasticsearch/template/templ
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 
+import type { InstallContext } from '../_state_machine_package_install';
+
 import { stepUpdateCurrentWriteIndices } from './step_update_current_write_indices';
 
 jest.mock('../../../elasticsearch/template/template');
@@ -132,6 +134,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       [],
+      [],
       { ignoreMappingUpdateErrors: undefined, skipDataStreamRollover: undefined }
     );
   });
@@ -159,7 +162,33 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       indexTemplates,
+      [],
       { ignoreMappingUpdateErrors: true, skipDataStreamRollover: true }
+    );
+  });
+
+  it('passes an empty allowlist when the context has none', async () => {
+    const context: InstallContext = {
+      savedObjectsClient: soClient,
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg,
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      esReferences: [],
+      ownedDataStreams: undefined,
+    };
+
+    await stepUpdateCurrentWriteIndices(context);
+
+    expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      [],
+      expect.anything()
     );
   });
 });

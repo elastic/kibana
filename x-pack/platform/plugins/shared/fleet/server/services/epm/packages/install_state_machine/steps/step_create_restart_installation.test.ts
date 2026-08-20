@@ -29,6 +29,7 @@ import { INSTALL_STATES } from '../../../../../../common/types';
 
 import { auditLoggingService } from '../../../../audit_logging';
 import { restartInstallation, createInstallation } from '../../install';
+import { getInstallationObject } from '../../get';
 import type { Installation } from '../../../../../../common';
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
@@ -37,9 +38,11 @@ import { stepCreateRestartInstallation } from './step_create_restart_installatio
 
 jest.mock('../../../../audit_logging');
 jest.mock('../../install');
+jest.mock('../../get');
 
 const mockedRestartInstallation = jest.mocked(restartInstallation);
-const mockedCreateInstallation = createInstallation as jest.Mocked<typeof createInstallation>;
+const mockedCreateInstallation = jest.mocked(createInstallation);
+const mockedGetInstallationObject = jest.mocked(getInstallationObject);
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
@@ -71,6 +74,10 @@ describe('stepCreateRestartInstallation', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       appContextService.start(createAppContextStartContractMock());
+      mockedGetInstallationObject.mockReset();
+      mockedGetInstallationObject.mockResolvedValue(undefined);
+      mockedRestartInstallation.mockReset();
+      mockedCreateInstallation.mockReset();
     });
     afterEach(() => {
       mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
@@ -114,6 +121,13 @@ describe('stepCreateRestartInstallation', () => {
 
     describe('When timeout is not reached', () => {
       it('Should throw if installedPkg is available and force is not provided', async () => {
+        mockedGetInstallationObject.mockResolvedValue({
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            install_started_at: new Date(Date.now() - 1000).toISOString(),
+          },
+        });
         const promise = stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
@@ -158,6 +172,13 @@ describe('stepCreateRestartInstallation', () => {
       });
 
       it('Should call restartInstallation if installedPkg is available and force = true', async () => {
+        mockedGetInstallationObject.mockResolvedValue({
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            install_started_at: new Date(Date.now() - 1000).toISOString(),
+          },
+        });
         await stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
@@ -202,6 +223,13 @@ describe('stepCreateRestartInstallation', () => {
 
     describe('When timeout is reached', () => {
       it('Should call restartInstallation', async () => {
+        mockedGetInstallationObject.mockResolvedValue({
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            install_started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+          },
+        });
         await stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
@@ -240,6 +268,92 @@ describe('stepCreateRestartInstallation', () => {
         });
 
         expect(mockedRestartInstallation).toBeCalled();
+      });
+
+      it('Should throw if another attempt holds a live reservation even after timeout', async () => {
+        mockedGetInstallationObject.mockResolvedValue({
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            dataset_claim_attempt_id: 'other-attempt',
+            install_started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+          },
+        });
+
+        const promise = stepCreateRestartInstallation({
+          savedObjectsClient: soClient,
+          // @ts-ignore
+          savedObjectsImporter: jest.fn(),
+          esClient,
+          logger,
+          packageInstallContext: {
+            archiveIterator: createArchiveIteratorFromMap(new Map()),
+            paths: [],
+            packageInfo: {
+              title: 'title',
+              name: 'xyz',
+              version: '4.5.6',
+              description: 'test',
+              type: 'integration',
+              categories: ['cloud', 'custom'],
+              format_version: 'string',
+              release: 'experimental',
+              conditions: { kibana: { version: 'x.y.z' } },
+              owner: { github: 'elastic/fleet' },
+            },
+          },
+          datasetClaimAttemptId: 'attempt-1',
+          installType: 'install',
+          installSource: 'registry',
+          spaceId: DEFAULT_SPACE_ID,
+        });
+
+        await expect(promise).rejects.toThrowError(
+          'Concurrent installation or upgrade of xyz-4.5.6 detected, aborting.'
+        );
+        expect(mockedRestartInstallation).not.toHaveBeenCalled();
+      });
+
+      it('Should restart a live reservation when force = true', async () => {
+        mockedGetInstallationObject.mockResolvedValue({
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            dataset_claim_attempt_id: 'other-attempt',
+            install_started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+          },
+        });
+
+        await stepCreateRestartInstallation({
+          savedObjectsClient: soClient,
+          // @ts-ignore
+          savedObjectsImporter: jest.fn(),
+          esClient,
+          logger,
+          packageInstallContext: {
+            archiveIterator: createArchiveIteratorFromMap(new Map()),
+            paths: [],
+            packageInfo: {
+              title: 'title',
+              name: 'xyz',
+              version: '4.5.6',
+              description: 'test',
+              type: 'integration',
+              categories: ['cloud', 'custom'],
+              format_version: 'string',
+              release: 'experimental',
+              conditions: { kibana: { version: 'x.y.z' } },
+              owner: { github: 'elastic/fleet' },
+            },
+          },
+          datasetClaimAttemptId: 'attempt-1',
+          force: true,
+          installType: 'install',
+          installSource: 'registry',
+          spaceId: DEFAULT_SPACE_ID,
+        });
+
+        expect(mockedRestartInstallation).toHaveBeenCalledTimes(1);
       });
     });
   });

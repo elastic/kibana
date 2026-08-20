@@ -7,7 +7,7 @@
 
 import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -61,6 +61,7 @@ import {
 } from './template';
 import { buildDefaultSettings, getILMMigrationStatus } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
+import { assertComponentTemplatesMutable } from '../../packages/dataset_ownership';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
@@ -68,7 +69,8 @@ export const prepareToInstallTemplates = async (
   packageInstallContext: PackageInstallContext,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
-  onlyForDataStreams?: RegistryDataStream[]
+  onlyForDataStreams?: RegistryDataStream[],
+  savedObjectsClient?: SavedObjectsClientContract
 ): Promise<{
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
@@ -112,6 +114,25 @@ export const prepareToInstallTemplates = async (
     assetsToAdd,
     assetsToRemove,
     install: async (esClient, logger) => {
+      if (savedObjectsClient) {
+        const dsComponentNames = templates.flatMap((template) =>
+          Object.keys(template.componentTemplates).filter((name) => !isUserSettingsTemplate(name))
+        );
+        const prebuiltNames = (packageInstallContext.paths ?? [])
+          .filter((path) => isComponentTemplate(path))
+          .map((path) => {
+            const { file } = getPathParts(path);
+            return file.substr(0, file.lastIndexOf('.'));
+          });
+        await assertComponentTemplatesMutable({
+          esClient,
+          soClient: savedObjectsClient,
+          packageName: packageInfo.name,
+          names: [...prebuiltNames, ...dsComponentNames],
+          installedEs: esReferences,
+        });
+      }
+
       // install any pre-built index template assets,
       // atm, this is only the base package's global index templates
       // Install component templates first, as they are used by the index templates
@@ -246,10 +267,14 @@ const installPreBuiltComponentTemplates = async (
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
         const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
-
+        const meta = content._meta ?? {};
         const esClientParams = {
           name: templateName,
           ...content,
+          _meta: {
+            ...meta,
+            package: { ...(meta.package ?? {}), name: packageInstallContext.packageInfo.name },
+          },
         };
 
         return retryTransientEsErrors(

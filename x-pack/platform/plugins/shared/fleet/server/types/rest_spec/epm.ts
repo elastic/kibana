@@ -1324,3 +1324,43 @@ export const RollbackPackageRequestSchema = {
     }),
   }),
 };
+
+export const DatasetClaimRequestSchema = {
+  body: schema.object({
+    baseName: schema.string({ maxLength: 256 }),
+    packageName: schema.string({ maxLength: 256 }),
+    packageVersion: schema.maybe(schema.string({ maxLength: 64 })),
+    installSource: schema.maybe(
+      schema.oneOf([
+        schema.literal('registry'),
+        schema.literal('upload'),
+        schema.literal('bundled'),
+        schema.literal('custom'),
+      ])
+    ),
+    datasetIsPrefix: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const DatasetClaimResponseSchema = schema.object(
+  {
+    baseName: schema.string(),
+    packageName: schema.string(),
+    created: schema.boolean(),
+  },
+  { meta: { id: 'dataset_claim_response' } }
+);
+
+export const DatasetClaimDeleteRequestSchema = {
+  params: schema.object({
+    baseName: schema.string({ maxLength: 256 }),
+  }),
+};
+
+export const DatasetClaimDeleteResponseSchema = schema.object(
+  {
+    baseName: schema.string(),
+    deleted: schema.boolean(),
+  },
+  { meta: { id: 'dataset_claim_delete_response' } }
+);

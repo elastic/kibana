@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { merge } from 'lodash';
 
 import type { ExperimentalIndexingFeature } from '../../../common/types';
+import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
 import { PackageNotFoundError } from '../../errors';
 import type {
   NewPackagePolicy,
@@ -19,19 +20,26 @@ import type {
   IndexTemplateEntry,
 } from '../../types';
 import { appContextService } from '../app_context';
+import { createArchiveIteratorFromMap } from '../epm/archive/archive_iterator';
 import { prepareDataStreamTemplates } from '../epm/elasticsearch/template/install';
 import {
   isTotalFieldsLimitError,
   updateCurrentWriteIndices,
 } from '../epm/elasticsearch/template/template';
+import {
+  DatasetOwnershipConflictError,
+  assertComponentTemplatesMutable,
+  claimBaseNameOf,
+  getProspectiveTemplatesFromExisting,
+  resolveDatasetOwnership,
+} from '../epm/packages/dataset_ownership';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
+import { isOtelDataStream } from '../epm/packages/namespace_template_utils';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
-
 import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../experimental_datastream_features_helper';
-import { createArchiveIteratorFromMap } from '../epm/archive/archive_iterator';
 
 export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
@@ -54,6 +62,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // for the package policy here to compare later.
   let installation;
   const templateMappings: { [key: string]: any } = {};
+  let packageInfo:
+    | NonNullable<Awaited<ReturnType<typeof getInstalledPackageWithAssets>>>['packageInfo']
+    | undefined;
 
   if (packagePolicy.package) {
     const installedPackageWithAssets = await getInstalledPackageWithAssets({
@@ -65,7 +76,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       throw new PackageNotFoundError(`package not found with assets ${packagePolicy.package.name}`);
     }
     installation = installedPackageWithAssets.installation;
-    const { packageInfo, paths, assetsMap } = installedPackageWithAssets;
+    packageInfo = installedPackageWithAssets.packageInfo;
+    const { paths, assetsMap } = installedPackageWithAssets;
 
     const packageInstallContext = {
       archiveIterator: createArchiveIteratorFromMap(assetsMap),
@@ -87,7 +99,18 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
   }
 
-  const updatedIndexTemplates: IndexTemplateEntry[] = [];
+  const plannedWrites: Array<{
+    dataStreamName: string;
+    componentPut?: {
+      name: string;
+      body: Record<string, unknown>;
+    };
+    indexPut?: {
+      name: string;
+      body: Record<string, unknown>;
+    };
+    updatedIndexTemplate: IndexTemplateEntry;
+  }> = [];
 
   for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features) {
     const existingOptIn = installation?.experimental_data_stream_features?.find(
@@ -148,6 +171,19 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       name: featureMapEntry.data_stream,
     });
 
+    let plannedComponentPut:
+      | {
+          name: string;
+          body: Record<string, unknown>;
+        }
+      | undefined;
+    let plannedIndexPut:
+      | {
+          name: string;
+          body: Record<string, unknown>;
+        }
+      | undefined;
+
     if (isSyntheticSourceOptInChanged) {
       sourceModeSettings = featureMapEntry.features.synthetic_source
         ? {
@@ -184,13 +220,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         featureMapEntry.features.doc_value_only_numeric ||
         featureMapEntry.features.doc_value_only_other;
 
-      await esClient.cluster.putComponentTemplate({
+      plannedComponentPut = {
         name: componentTemplateName,
-        ...body,
-        _meta: {
-          has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
+        body: {
+          ...body,
+          _meta: {
+            ...((componentTemplate._meta ?? {}) as Record<string, unknown>),
+            has_experimental_data_stream_indexing_features:
+              hasExperimentalDataStreamIndexingFeatures,
+          },
         },
-      });
+      };
     }
 
     const rawIndexTemplate = indexTemplateRes.index_templates[0].index_template;
@@ -221,34 +261,105 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       updatedIndexTemplate = indexTemplateBody as IndexTemplate;
 
-      await esClient.indices.putIndexTemplate({
+      plannedIndexPut = {
         name: featureMapEntry.data_stream,
-        ...indexTemplateBody,
-        _meta: {
-          has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
+        body: {
+          ...indexTemplateBody,
+          _meta: {
+            ...((indexTemplate._meta ?? {}) as Record<string, unknown>),
+            has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
+          },
+          // GET brings string | string[] | undefined but this PUT expects string[]
+          ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
+            ? [indexTemplateBody.ignore_missing_component_templates].flat()
+            : undefined,
         },
-        // GET brings string | string[] | undefined but this PUT expects string[]
-        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
-          ? [indexTemplateBody.ignore_missing_component_templates].flat()
-          : undefined,
-      });
+      };
     }
 
-    updatedIndexTemplates.push({
-      templateName: featureMapEntry.data_stream,
-      indexTemplate: updatedIndexTemplate,
+    plannedWrites.push({
+      dataStreamName: featureMapEntry.data_stream,
+      componentPut: plannedComponentPut,
+      indexPut: plannedIndexPut,
+      updatedIndexTemplate: {
+        templateName: featureMapEntry.data_stream,
+        indexTemplate: updatedIndexTemplate,
+      },
     });
   }
 
   // Trigger rollover for updated datastreams
-  if (updatedIndexTemplates.length > 0) {
+  if (plannedWrites.length > 0) {
+    const packageName = packagePolicy.package?.name;
+    // No package means no package-owned templates to patch, so there is nothing to authorize.
+    if (!packageName || !packageInfo) return;
+
+    const ownedTemplateNames = new Set(
+      (packageInfo.data_streams ?? []).map((dataStream) =>
+        getRegistryDataStreamAssetBaseName(dataStream, isOtelDataStream(dataStream, packageInfo))
+      )
+    );
+    for (const write of plannedWrites) {
+      const baseName = claimBaseNameOf(write.dataStreamName);
+      if (!ownedTemplateNames.has(write.dataStreamName) && !ownedTemplateNames.has(baseName)) {
+        throw new DatasetOwnershipConflictError(
+          `Experimental data stream features for ${packageName} would modify "${write.dataStreamName}", ` +
+            `which is not a data stream of this package.`
+        );
+      }
+    }
+
+    const updatedIndexTemplates = plannedWrites.map((write) => write.updatedIndexTemplate);
+    const ownership = await resolveDatasetOwnership({
+      esClient,
+      soClient,
+      packageName,
+      prospective: getProspectiveTemplatesFromExisting(updatedIndexTemplates),
+    });
+
+    if (ownership.conflicts.length > 0) {
+      throw new DatasetOwnershipConflictError(
+        `Experimental data stream features for ${packageName} would modify resources it does not ` +
+          `own: ` +
+          ownership.conflicts.map(({ name, reason }) => `"${name}" (${reason})`).join(', ') +
+          `. Adopt the dataset explicitly before enabling experimental features.`
+      );
+    }
+
+    await assertComponentTemplatesMutable({
+      esClient,
+      soClient,
+      packageName,
+      names: plannedWrites.flatMap((write) =>
+        write.componentPut ? [write.componentPut.name] : []
+      ),
+      installedEs: installation?.installed_es,
+    });
+
+    for (const write of plannedWrites) {
+      if (write.componentPut) {
+        await esClient.cluster.putComponentTemplate({
+          name: write.componentPut.name,
+          ...write.componentPut.body,
+        } as Parameters<ElasticsearchClient['cluster']['putComponentTemplate']>[0]);
+      }
+      if (write.indexPut) {
+        await esClient.indices.putIndexTemplate({
+          name: write.indexPut.name,
+          ...write.indexPut.body,
+        } as Parameters<ElasticsearchClient['indices']['putIndexTemplate']>[0]);
+      }
+    }
+
     try {
       await updateCurrentWriteIndices(
         esClient,
         appContextService.getLogger(),
-        updatedIndexTemplates
+        updatedIndexTemplates,
+        ownership.allowlist
       );
     } catch (err) {
+      // total_fields handling unchanged
       if (isTotalFieldsLimitError(err)) {
         appContextService
           .getLogger()

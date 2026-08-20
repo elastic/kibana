@@ -1135,7 +1135,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       },
       esClient
     );
-    expect(mockCleanupComponentTemplate).toBeCalledWith(installedEs, esClient);
+    expect(mockCleanupComponentTemplate).toBeCalledWith(installedEs, esClient, 'test-package');
   });
 
   it('should not clean up assets if force is passed', async () => {

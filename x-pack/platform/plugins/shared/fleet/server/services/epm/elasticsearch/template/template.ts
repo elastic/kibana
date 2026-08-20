@@ -377,15 +377,25 @@ export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   templates: IndexTemplateEntry[],
-  options?: {
-    ignoreMappingUpdateErrors?: boolean;
-    skipDataStreamRollover?: boolean;
-  }
+  /**
+   * Data streams this caller may modify. Required, so no caller can regain the unsafe behaviour of
+   * mutating every data stream matching the template pattern. Ownership is decided before any asset
+   * is installed; this function only enforces that decision.
+   */
+  allowedDataStreams: string[],
+  options?: { ignoreMappingUpdateErrors?: boolean; skipDataStreamRollover?: boolean }
 ): Promise<void> => {
   if (!templates.length) return;
 
+  const allowed = new Set(allowedDataStreams);
   const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
   const allUpdatablesIndices = allIndices.filter((indice) => {
+    if (!allowed.has(indice.dataStreamName)) {
+      logger.warn(
+        `Datastream ${indice.dataStreamName} is not owned by this package and will not be updated.`
+      );
+      return false;
+    }
     if (indice.replicated) {
       logger.warn(
         `Datastream ${indice.dataStreamName} cannot be updated because this is a replicated datastream.`

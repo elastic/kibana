@@ -26,9 +26,11 @@ import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_sc
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { outputService } from './output';
+import { backfillDatasetClaims, sweepOrphanedDatasetClaims } from './setup/backfill_dataset_claims';
 
 jest.mock('./app_context');
 jest.mock('./preconfiguration');
+jest.mock('./setup/backfill_dataset_claims');
 jest.mock('./preconfiguration/outputs');
 jest.mock('./preconfiguration/fleet_proxies');
 jest.mock('./preconfiguration/space_settings');
@@ -110,6 +112,12 @@ describe('setupFleet', () => {
     (outputService.ensureDefaultOutput as jest.Mock).mockResolvedValue({
       defaultOutput: { id: 'test-default-output', name: 'test' },
     });
+    (sweepOrphanedDatasetClaims as jest.Mock).mockResolvedValue({ deleted: [] });
+    (backfillDatasetClaims as jest.Mock).mockResolvedValue({
+      created: 0,
+      skipped: [],
+      conflicts: [],
+    });
   });
 
   afterEach(async () => {
@@ -155,6 +163,24 @@ describe('setupFleet', () => {
     await setupFleet(soClient, esClient);
 
     expect(outputService.ensureDefaultOutput).toHaveBeenCalledWith(soClient, esClient);
+  });
+
+  it('backfills dataset claims before installing preconfigured packages', async () => {
+    const soClient = getMockedSoClient();
+    const order: string[] = [];
+
+    (backfillDatasetClaims as jest.Mock).mockImplementation(async () => {
+      order.push('backfill');
+      return { created: 0, skipped: [], conflicts: [] };
+    });
+    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockImplementation(async () => {
+      order.push('preconfigured');
+      return { nonFatalErrors: [] };
+    });
+
+    await setupFleet(soClient, esClient);
+
+    expect(order).toEqual(['backfill', 'preconfigured']);
   });
 
   it('should strip heavy ES connection metadata from ResponseError stored in nonFatalErrors', async () => {

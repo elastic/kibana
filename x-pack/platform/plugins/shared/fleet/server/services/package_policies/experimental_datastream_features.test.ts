@@ -12,6 +12,10 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { appContextService } from '../app_context';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
+import {
+  DatasetOwnershipConflictError,
+  resolveDatasetOwnership,
+} from '../epm/packages/dataset_ownership';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
@@ -19,6 +23,15 @@ import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastr
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
+const mockedResolve = resolveDatasetOwnership as jest.MockedFunction<
+  typeof resolveDatasetOwnership
+>;
+const cleanResolution = {
+  allowlist: [] as string[],
+  adoptedStreams: [],
+  conflicts: [],
+  warnings: [],
+};
 
 jest.mock('../epm/packages', () => {
   return {
@@ -26,7 +39,7 @@ jest.mock('../epm/packages', () => {
     getPackageInfo: jest.fn().mockResolvedValue({
       data_streams: [
         {
-          dataset: 'test',
+          dataset: 'test.test',
           type: 'metrics',
         },
       ],
@@ -40,12 +53,15 @@ function mockGetInstalledPackageWithAssets(installation: any) {
       name: 'test',
       data_streams: [
         {
-          dataset: 'test',
+          dataset: 'test.test',
           type: 'metrics',
         },
       ],
     },
-    installation,
+    installation: {
+      installed_es: [{ id: 'metrics-test.test@package', type: 'component_template' }],
+      ...installation,
+    },
   } as any);
 }
 
@@ -55,7 +71,7 @@ jest.mock('../epm/packages/get', () => ({
       name: 'test',
       data_streams: [
         {
-          dataset: 'test',
+          dataset: 'test.test',
           type: 'metrics',
         },
       ],
@@ -100,6 +116,13 @@ jest.mock('../epm/elasticsearch/template/install', () => {
         indexTemplate: {},
       },
     ]),
+  };
+});
+jest.mock('../epm/packages/dataset_ownership', () => {
+  const actual = jest.requireActual('../epm/packages/dataset_ownership');
+  return {
+    ...actual,
+    resolveDatasetOwnership: jest.fn(),
   };
 });
 
@@ -193,20 +216,30 @@ describe('experimental_datastream_features', () => {
   beforeEach(() => {
     soClient.get.mockClear();
     mockedUpdateCurrentWriteIndices.mockReset();
+    mockedResolve.mockReset();
+    mockedResolve.mockResolvedValue({
+      ...cleanResolution,
+      allowlist: ['logs-mine.data-default'],
+    });
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
+    esClient.indices.putIndexTemplate.mockClear();
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as never);
+    soClient.find.mockResolvedValue({ saved_objects: [] } as never);
     mockedAppContextService.getLogger.mockReturnValue({
       warn: jest.fn(),
       info: jest.fn(),
       debug: jest.fn(),
       error: jest.fn(),
     } as any);
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
-    esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
+    esClient.cluster.getComponentTemplate.mockResolvedValue({
       component_templates: [
         {
           name: 'metrics-test.test@package',
           component_template: {
+            _meta: { package: { name: 'test' } },
             template: {
               settings: {},
               mappings: {
@@ -291,7 +324,9 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
-          _meta: { has_experimental_data_stream_indexing_features: true },
+          _meta: expect.objectContaining({
+            has_experimental_data_stream_indexing_features: true,
+          }),
         })
       );
     });
@@ -319,7 +354,9 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
-          _meta: { has_experimental_data_stream_indexing_features: true },
+          _meta: expect.objectContaining({
+            has_experimental_data_stream_indexing_features: true,
+          }),
         })
       );
     });
@@ -347,7 +384,9 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
-          _meta: { has_experimental_data_stream_indexing_features: true },
+          _meta: expect.objectContaining({
+            has_experimental_data_stream_indexing_features: true,
+          }),
         })
       );
     });
@@ -374,7 +413,9 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
-          _meta: { has_experimental_data_stream_indexing_features: true },
+          _meta: expect.objectContaining({
+            has_experimental_data_stream_indexing_features: true,
+          }),
         })
       );
     });
@@ -397,7 +438,56 @@ describe('experimental_datastream_features', () => {
               index: { mode: 'time_series' },
             }),
           }),
-          _meta: { has_experimental_data_stream_indexing_features: true },
+          _meta: expect.objectContaining({
+            has_experimental_data_stream_indexing_features: true,
+          }),
+        })
+      );
+    });
+
+    it('merges experimental _meta onto the existing package metadata', async () => {
+      esClient.cluster.getComponentTemplate.mockReset();
+      esClient.indices.getIndexTemplate.mockReset();
+      esClient.cluster.getComponentTemplate.mockResolvedValue({
+        component_templates: [
+          {
+            name: 'metrics-test.test@package',
+            component_template: {
+              _meta: { package: { name: 'test' } },
+              template: { settings: {}, mappings: { properties: {} } },
+            },
+          },
+        ],
+      } as never);
+      esClient.indices.getIndexTemplate.mockResolvedValue({
+        index_templates: [
+          {
+            name: 'metrics-test.test',
+            index_template: {
+              _meta: { package: { name: 'test' } },
+              template: { settings: {}, mappings: {} },
+              composed_of: [],
+              index_patterns: '',
+            },
+          },
+        ],
+      } as never);
+
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: true,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: false,
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: expect.objectContaining({
+            package: { name: 'test' },
+            has_experimental_data_stream_indexing_features: true,
+          }),
         })
       );
     });
@@ -497,7 +587,9 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
-            _meta: { has_experimental_data_stream_indexing_features: true },
+            _meta: expect.objectContaining({
+              has_experimental_data_stream_indexing_features: true,
+            }),
           })
         );
       });
@@ -525,7 +617,9 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
-            _meta: { has_experimental_data_stream_indexing_features: true },
+            _meta: expect.objectContaining({
+              has_experimental_data_stream_indexing_features: true,
+            }),
           })
         );
       });
@@ -553,7 +647,9 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
-            _meta: { has_experimental_data_stream_indexing_features: false },
+            _meta: expect.objectContaining({
+              has_experimental_data_stream_indexing_features: false,
+            }),
           })
         );
       });
@@ -592,7 +688,9 @@ describe('experimental_datastream_features', () => {
                 index: { mode: 'time_series' },
               }),
             }),
-            _meta: { has_experimental_data_stream_indexing_features: true },
+            _meta: expect.objectContaining({
+              has_experimental_data_stream_indexing_features: true,
+            }),
           })
         );
       });
@@ -694,6 +792,156 @@ describe('experimental_datastream_features', () => {
         expect(
           mockedUpdateCurrentWriteIndices.mock.calls[0][2].map(({ templateName }) => templateName)
         ).toEqual(['metrics-test.test']);
+      });
+
+      it('passes the resolved allowlist when rolling over experimental feature changes', async () => {
+        mockedResolve.mockResolvedValue({
+          ...cleanResolution,
+          allowlist: ['logs-mine.data-default'],
+        });
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: { settings: {}, mappings: {} },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          ['logs-mine.data-default']
+        );
+      });
+
+      it('does not roll over a data stream the package does not own', async () => {
+        mockedResolve.mockResolvedValue({
+          ...cleanResolution,
+          conflicts: [
+            { kind: 'data_stream', name: 'logs-mine.data-teamb', reason: 'would_govern' },
+          ],
+        });
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: { settings: {}, mappings: {} },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await expect(
+          handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy })
+        ).rejects.toBeInstanceOf(DatasetOwnershipConflictError);
+        expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+        expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      });
+
+      it('does not write templates for a data stream that is not in the package', async () => {
+        mockedResolve.mockResolvedValue(cleanResolution);
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+        packagePolicy.package!.experimental_data_stream_features![0].data_stream =
+          'logs-foreign.records';
+
+        esClient.cluster.getComponentTemplate.mockResolvedValue({
+          component_templates: [
+            {
+              name: 'logs-foreign.records@package',
+              component_template: { template: { settings: {}, mappings: {} } },
+            },
+          ],
+        } as never);
+        esClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [
+            {
+              name: 'logs-foreign.records',
+              index_template: {
+                template: { settings: {}, mappings: {} },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        } as never);
+
+        await expect(
+          handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy })
+        ).rejects.toBeInstanceOf(DatasetOwnershipConflictError);
+        expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+        expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+        expect(mockedResolve).not.toHaveBeenCalled();
+      });
+
+      it('does not overwrite a component template the package does not own', async () => {
+        mockedResolve.mockResolvedValue(cleanResolution);
+        mockGetInstalledPackageWithAssets({
+          installed_es: [],
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: false,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: true,
+              },
+            },
+          ],
+        });
+        esClient.cluster.getComponentTemplate.mockResolvedValue({
+          component_templates: [
+            {
+              name: 'metrics-test.test@package',
+              component_template: {
+                _meta: { package: { name: 'other' } },
+                template: { settings: {}, mappings: {} },
+              },
+            },
+          ],
+        } as never);
+
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: true,
+        });
+
+        await expect(
+          handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy })
+        ).rejects.toBeInstanceOf(DatasetOwnershipConflictError);
+        expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
       });
     });
   });

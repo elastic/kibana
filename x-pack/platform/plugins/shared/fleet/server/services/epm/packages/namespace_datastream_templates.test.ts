@@ -14,6 +14,7 @@ import { ElasticsearchAssetType } from '../../../../common/types';
 import { appContextService } from '../../app_context';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 
+import { DatasetOwnershipConflictError, resolveDatasetOwnership } from './dataset_ownership';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { updateEsAssetReferences } from './es_assets_reference';
 
@@ -28,13 +29,18 @@ import {
 jest.mock('./get');
 jest.mock('../elasticsearch/template/template', () => {
   const actual = jest.requireActual('../elasticsearch/template/template');
-  return {
-    ...actual,
-    updateCurrentWriteIndices: jest.fn(),
-  };
+  actual.updateCurrentWriteIndices = jest.fn();
+  return actual;
 });
 jest.mock('./es_assets_reference');
 jest.mock('../../app_context');
+jest.mock('./dataset_ownership', () => {
+  const actual = jest.requireActual('./dataset_ownership');
+  return {
+    ...actual,
+    resolveDatasetOwnership: jest.fn(),
+  };
+});
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -57,6 +63,15 @@ const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.Mocked
 const mockedUpdateEsAssetReferences = updateEsAssetReferences as jest.MockedFunction<
   typeof updateEsAssetReferences
 >;
+const mockedResolve = resolveDatasetOwnership as jest.MockedFunction<
+  typeof resolveDatasetOwnership
+>;
+const cleanResolution = {
+  allowlist: [] as string[],
+  adoptedStreams: [],
+  conflicts: [],
+  warnings: [],
+};
 
 // ---------------------------------------------------------------------------
 // insertNamespaceCustomTemplate — pure function tests
@@ -241,6 +256,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
     } as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
+    mockedResolve.mockResolvedValue({ ...cleanResolution });
   });
 
   const packageInfo = { policy_templates: [] } as any;
@@ -346,6 +362,7 @@ describe('syncNamespaceTemplates', () => {
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
     mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    mockedResolve.mockResolvedValue({ ...cleanResolution });
   });
 
   it('is a no-op when both added and removed are empty', async () => {
@@ -633,6 +650,115 @@ describe('syncNamespaceTemplates', () => {
       expect.any(Object)
     );
     expect(summary.created).toEqual(['production']);
+  });
+
+  it('does not create a namespace template when resolution reports a conflict', async () => {
+    mockedGetInstalledPackageWithAssets.mockResolvedValue({
+      packageInfo: {
+        name: 'mine',
+        data_streams: [{ dataset: 'mine.data', type: 'logs' }],
+        policy_templates: [],
+      },
+      installation: { installed_es: [] },
+    } as any);
+    const esClient = makeEsClientWithTemplate();
+    mockedResolve.mockResolvedValue({
+      ...cleanResolution,
+      conflicts: [
+        { kind: 'index_template', name: 'teamb-clone', reason: 'outranks_specific_template' },
+      ],
+    });
+
+    await expect(
+      syncNamespaceTemplates({
+        soClient,
+        esClient,
+        packageName: 'mine',
+        addedNamespaces: ['prod'],
+        removedNamespaces: [],
+      })
+    ).rejects.toBeInstanceOf(DatasetOwnershipConflictError);
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('tells the operator to adopt the dataset when the package holds no claim', async () => {
+    mockedGetInstalledPackageWithAssets.mockResolvedValue({
+      packageInfo: {
+        name: 'mine',
+        data_streams: [{ dataset: 'mine.data', type: 'logs' }],
+        policy_templates: [],
+      },
+      installation: { installed_es: [] },
+    } as any);
+    const esClient = makeEsClientWithTemplate();
+    mockedResolve.mockResolvedValue({
+      ...cleanResolution,
+      conflicts: [{ kind: 'data_stream', name: 'logs-mine.data-prod', reason: 'would_govern' }],
+    });
+
+    await expect(
+      syncNamespaceTemplates({
+        soClient,
+        esClient,
+        packageName: 'mine',
+        addedNamespaces: ['prod'],
+        removedNamespaces: [],
+      })
+    ).rejects.toThrow(/[Aa]dopt/);
+  });
+
+  it('resolves against the namespace descriptors, not the base ones', async () => {
+    mockedGetInstalledPackageWithAssets.mockResolvedValue({
+      packageInfo: {
+        name: 'mine',
+        data_streams: [{ dataset: 'mine.data', type: 'logs' }],
+        policy_templates: [],
+      },
+      installation: { installed_es: [] },
+    } as any);
+    const esClient = makeEsClientWithTemplate();
+    mockedResolve.mockResolvedValue({ ...cleanResolution, allowlist: ['logs-mine.data-prod'] });
+
+    await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'mine',
+      addedNamespaces: ['prod'],
+      removedNamespaces: [],
+    });
+
+    expect(mockedResolve).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prospective: expect.arrayContaining([
+          expect.objectContaining({
+            templateName: 'logs-mine.data@namespace.prod',
+            indexPattern: 'logs-mine.data-prod',
+            priority: 250,
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('passes the resolved allowlist to updateCurrentWriteIndices', async () => {
+    mockInstalledPackage();
+    const esClient = makeEsClientWithTemplate();
+    mockedResolve.mockResolvedValue({ ...cleanResolution, allowlist: ['logs-mine.data-prod'] });
+
+    await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      ['logs-mine.data-prod']
+    );
   });
 });
 

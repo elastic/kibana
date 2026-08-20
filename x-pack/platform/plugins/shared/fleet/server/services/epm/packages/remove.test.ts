@@ -11,12 +11,18 @@ import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../
 import { packagePolicyService, appContextService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
+import { updateIndexSettings } from '../elasticsearch/index/update_settings';
+
 import {
   deleteESAsset,
+  deletePrerequisiteAssets,
   removeInstallation,
+  restoreAdoptedStreams,
   cleanupAssets,
   cleanupDependenciesStep,
 } from './remove';
+import { deleteClaims, findClaimsForPackage } from './dataset_ownership';
+import type { DatasetClaimAttributes } from './dataset_ownership';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 import { getInstallation } from './get';
 
@@ -27,8 +33,16 @@ jest.mock('../..', () => {
         info: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
+        debug: jest.fn(),
       }),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+      getSavedObjects: jest.fn().mockReturnValue({
+        getUnsafeInternalClient: jest.fn().mockReturnValue({
+          find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          delete: jest.fn(),
+          bulkDelete: jest.fn(),
+        }),
+      }),
       getExperimentalFeatures: jest.fn().mockReturnValue({
         enableResolveDependencies: false,
       }),
@@ -71,6 +85,14 @@ jest.mock('../archive', () => ({
 jest.mock('../archive/storage', () => ({
   removeArchiveEntries: jest.fn(),
 }));
+jest.mock('../elasticsearch/index/update_settings', () => ({
+  updateIndexSettings: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('./dataset_ownership', () => ({
+  findClaimsForPackage: jest.fn().mockResolvedValue([]),
+  deleteClaims: jest.fn().mockResolvedValue(undefined),
+  withDatasetOwnershipLock: jest.fn(async (fn: () => Promise<unknown>) => fn()),
+}));
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
@@ -79,6 +101,13 @@ const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as jest.Mocked
 >;
 const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
 const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
+const mockedUpdateIndexSettings = updateIndexSettings as jest.MockedFunction<
+  typeof updateIndexSettings
+>;
+const mockedFindClaimsForPackage = findClaimsForPackage as jest.MockedFunction<
+  typeof findClaimsForPackage
+>;
+const mockedDeleteClaims = deleteClaims as jest.MockedFunction<typeof deleteClaims>;
 
 describe('cleanupDependenciesStep', () => {
   let soClientMock: any;
@@ -504,5 +533,453 @@ describe('cleanupAssets', () => {
         'udp.test': 'logs-udp.test-*',
       },
     });
+  });
+});
+
+const assetsWithBoth = {
+  indexAssets: [] as Array<{ id: string; type: ElasticsearchAssetType }>,
+  transformAssets: [] as Array<{ id: string; type: ElasticsearchAssetType }>,
+  // Pipeline first so a concurrent delete of the mixed list cannot accidentally match the required
+  // template-then-pipeline order.
+  indexTemplatesAndPipelines: [
+    { id: 'logs-payroll.records-1.0.0', type: ElasticsearchAssetType.ingestPipeline },
+    { id: 'logs-payroll.records', type: ElasticsearchAssetType.indexTemplate },
+  ],
+};
+
+const assetsWithIndexAsset = {
+  indexAssets: [{ id: 'metrics-endpoint.metadata', type: ElasticsearchAssetType.index }],
+  transformAssets: [] as Array<{ id: string; type: ElasticsearchAssetType }>,
+  indexTemplatesAndPipelines: [] as Array<{ id: string; type: ElasticsearchAssetType }>,
+};
+
+describe('deletePrerequisiteAssets ordering', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createInternalClient();
+  });
+
+  it('deletes index templates before ingest pipelines', async () => {
+    const order: string[] = [];
+    esClient.indices.deleteIndexTemplate.mockImplementation(async () => {
+      order.push('template');
+      return {} as never;
+    });
+    esClient.ingest.deletePipeline.mockImplementation(async () => {
+      order.push('pipeline');
+      return {} as never;
+    });
+
+    await deletePrerequisiteAssets(assetsWithBoth, esClient);
+
+    expect(order).toEqual(['template', 'pipeline']);
+  });
+
+  it('runs the hook between templates and pipelines', async () => {
+    const order: string[] = [];
+    esClient.indices.deleteIndexTemplate.mockImplementation(async () => {
+      order.push('template');
+      return {} as never;
+    });
+    esClient.ingest.deletePipeline.mockImplementation(async () => {
+      order.push('pipeline');
+      return {} as never;
+    });
+
+    await deletePrerequisiteAssets(assetsWithBoth, esClient, {
+      onTemplatesDeleted: async () => {
+        order.push('restore');
+      },
+    });
+
+    expect(order).toEqual(['template', 'restore', 'pipeline']);
+  });
+
+  it('does not delete pipelines when the hook fails', async () => {
+    await expect(
+      deletePrerequisiteAssets(assetsWithBoth, esClient, {
+        onTemplatesDeleted: async () => {
+          throw new Error('boom');
+        },
+      })
+    ).rejects.toThrow(/boom/);
+
+    expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
+  });
+
+  it('still tolerates missing assets when no hook is supplied, for retry cleanup', async () => {
+    esClient.indices.deleteIndexTemplate.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await expect(deletePrerequisiteAssets(assetsWithBoth, esClient)).resolves.toBeUndefined();
+  });
+
+  it('propagates non-404 template deletion errors when the uninstall hook is supplied', async () => {
+    esClient.indices.deleteIndexTemplate.mockRejectedValue({ meta: { statusCode: 500 } });
+
+    await expect(
+      deletePrerequisiteAssets(assetsWithBoth, esClient, {
+        onTemplatesDeleted: async () => undefined,
+      })
+    ).rejects.toThrow(/Error deleting index template/);
+
+    expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
+  });
+
+  it('still swallows non-404 template deletion errors when no hook is supplied', async () => {
+    esClient.indices.deleteIndexTemplate.mockRejectedValue({ meta: { statusCode: 500 } });
+
+    await expect(deletePrerequisiteAssets(assetsWithBoth, esClient)).resolves.toBeUndefined();
+  });
+
+  it('still clears default_pipeline on tracked index assets', async () => {
+    await deletePrerequisiteAssets(assetsWithIndexAsset, esClient);
+
+    expect(mockedUpdateIndexSettings).toHaveBeenCalledWith(esClient, 'metrics-endpoint.metadata', {
+      default_pipeline: '',
+    });
+  });
+});
+
+describe('restoreAdoptedStreams', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  const soClient = {} as never;
+
+  const claim = (
+    overrides: Partial<DatasetClaimAttributes> = {}
+  ): { id: string; attributes: DatasetClaimAttributes } => ({
+    id: 'logs-payroll.records',
+    attributes: {
+      package_name: 'evil',
+      status: 'active',
+      origin: 'adoption',
+      attempt_id: 'attempt-1',
+      index_patterns: ['logs-payroll.records-*'],
+      adopted_streams: [
+        { name: 'logs-payroll.records-teamb', previous_default_pipeline: 'logs@default-pipeline' },
+      ],
+      ...overrides,
+    },
+  });
+
+  const stream = (name = 'logs-payroll.records-teamb') => ({
+    name,
+    indices: [{ index_name: '.ds-x' }],
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createInternalClient();
+  });
+
+  it('restores the recorded baseline for an adopted stream', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([claim()]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+    });
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'logs-payroll.records-teamb',
+      settings: { default_pipeline: 'logs@default-pipeline' },
+    });
+  });
+
+  it('clears the pipeline when the recorded baseline had none', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([
+      claim({ adopted_streams: [{ name: 'logs-payroll.records-teamb' }] }),
+    ]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+    });
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'logs-payroll.records-teamb',
+      settings: { default_pipeline: '' },
+    });
+    expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the next governing template for a stream with no record', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([claim({ adopted_streams: [] })]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      template: { settings: { index: { default_pipeline: 'logs@default-pipeline' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+    });
+
+    expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
+      name: 'logs-payroll.records-teamb',
+    });
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'logs-payroll.records-teamb',
+      settings: { default_pipeline: 'logs@default-pipeline' },
+    });
+  });
+
+  it('leaves a stream pointing at someone else pipeline untouched', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([claim()]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'someone-else' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+    });
+
+    expect(esClient.indices.putSettings).not.toHaveBeenCalled();
+  });
+
+  it('enumerates a dataset_is_prefix pattern from the claim', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([
+      claim({ index_patterns: ['logs-foo.*-*'], adopted_streams: [] }),
+    ]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(),
+    });
+
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-foo.*-*' })
+    );
+  });
+
+  it('propagates a failed settings write instead of swallowing it', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([claim()]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+    esClient.indices.putSettings.mockRejectedValue(new Error('boom'));
+
+    await expect(
+      restoreAdoptedStreams({
+        esClient,
+        soClient,
+        packageName: 'evil',
+        packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+      })
+    ).rejects.toThrow(/boom/);
+  });
+
+  it('treats a 404 from getDataStream as nothing to restore', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([claim()]);
+    esClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await expect(
+      restoreAdoptedStreams({
+        esClient,
+        soClient,
+        packageName: 'evil',
+        packagePipelineIds: new Set(),
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('restores streams from fallback index patterns when the package has no claims', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      template: { settings: { index: { default_pipeline: 'logs@default-pipeline' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+      fallbackIndexPatterns: ['logs-payroll.records-*'],
+    });
+
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-payroll.records-*' })
+    );
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'logs-payroll.records-teamb',
+      settings: { default_pipeline: 'logs@default-pipeline' },
+    });
+  });
+});
+
+describe('removeInstallation claim release', () => {
+  let soClientMock: any;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+
+  const removeArgs = () => ({
+    savedObjectsClient: soClientMock,
+    pkgName: 'test-package',
+    pkgVersion: '1.0.0',
+    esClient,
+    force: true,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createInternalClient();
+    soClientMock = {
+      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: jest.fn(),
+      delete: jest.fn(),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+    } as any;
+    mockGetInstallation.mockResolvedValue({
+      name: 'test-package',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [
+        { id: 'logs-payroll.records', type: ElasticsearchAssetType.indexTemplate },
+        { id: 'logs-payroll.records-1.0.0', type: ElasticsearchAssetType.ingestPipeline },
+      ],
+      package_assets: [],
+    } as never);
+    mockedFindClaimsForPackage.mockResolvedValue([
+      {
+        id: 'logs-payroll.records',
+        attributes: {
+          package_name: 'test-package',
+          status: 'active',
+          origin: 'install',
+          attempt_id: 'attempt-1',
+          index_patterns: ['logs-payroll.records-*'],
+        },
+      },
+    ]);
+  });
+
+  it('releases the package claims after assets are deleted', async () => {
+    const order: string[] = [];
+    esClient.indices.deleteIndexTemplate.mockImplementation(async () => {
+      order.push('deleteAssets');
+      return {} as never;
+    });
+    mockedDeleteClaims.mockImplementation(async () => {
+      order.push('deleteClaims');
+    });
+    esClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await removeInstallation(removeArgs());
+
+    expect(order).toEqual(['deleteAssets', 'deleteClaims']);
+  });
+
+  it('does not release claims when asset deletion failed', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([
+      {
+        id: 'logs-payroll.records',
+        attributes: {
+          package_name: 'test-package',
+          status: 'active',
+          origin: 'adoption',
+          attempt_id: 'attempt-1',
+          index_patterns: ['logs-payroll.records-*'],
+          adopted_streams: [
+            {
+              name: 'logs-payroll.records-teamb',
+              previous_default_pipeline: 'logs@default-pipeline',
+            },
+          ],
+        },
+      },
+    ]);
+    esClient.indices.getDataStream.mockResolvedValue({
+      data_streams: [{ name: 'logs-payroll.records-teamb', indices: [{ index_name: '.ds-x' }] }],
+    } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+    esClient.indices.putSettings.mockRejectedValue(new Error('boom'));
+
+    await expect(removeInstallation(removeArgs())).rejects.toThrow();
+    expect(mockedDeleteClaims).not.toHaveBeenCalled();
+  });
+
+  it('does not release claims during input package cleanup', async () => {
+    await cleanupAssets(
+      'logs-x',
+      {
+        name: 'test-package',
+        version: '1.0.0',
+        installed_kibana: [],
+        installed_es: [],
+      } as never,
+      {
+        name: 'test-package',
+        version: '1.0.0',
+        installed_kibana: [],
+        installed_es: [],
+        es_index_patterns: {},
+      } as never,
+      esClient,
+      soClientMock as never
+    );
+
+    expect(mockedDeleteClaims).not.toHaveBeenCalled();
+  });
+
+  it('keeps active adoption claims when first-install cleanup asks to preserve them', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([
+      {
+        id: 'logs-adopted',
+        attributes: {
+          package_name: 'test-package',
+          status: 'active',
+          origin: 'adoption',
+          attempt_id: 'adoption-1',
+          index_patterns: ['logs-adopted-*'],
+        },
+      },
+      {
+        id: 'logs-pending',
+        attributes: {
+          package_name: 'test-package',
+          status: 'pending',
+          origin: 'install',
+          attempt_id: 'attempt-1',
+          index_patterns: ['logs-pending-*'],
+        },
+      },
+    ]);
+    esClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await removeInstallation({ ...removeArgs(), preserveActiveAdoptionClaims: true });
+
+    expect(mockedDeleteClaims).toHaveBeenCalledWith(soClientMock, ['logs-pending']);
   });
 });

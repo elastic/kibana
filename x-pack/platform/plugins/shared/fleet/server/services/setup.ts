@@ -67,6 +67,7 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import { backfillDatasetClaims, sweepOrphanedDatasetClaims } from './setup/backfill_dataset_claims';
 import {
   ensurePreconfiguredDownloadSources,
   getPreconfiguredDownloadSourcesFromConfig,
@@ -228,6 +229,23 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
+  // Claims must exist before any package install or upgrade, otherwise an already-installed
+  // package is treated as a foreign takeover of its own templates.
+  let datasetClaimsError;
+  try {
+    logger.debug('Releasing orphaned dataset ownership claims');
+    const { deleted } = await sweepOrphanedDatasetClaims(soClient, logger);
+    logger.debug(`Dataset claims sweep: ${deleted.length} released`);
+
+    logger.debug('Backfilling dataset ownership claims');
+    const { created, skipped, conflicts } = await backfillDatasetClaims(soClient, esClient, logger);
+    logger.debug(
+      `Dataset claims backfill: ${created} created, ${skipped.length} skipped, ${conflicts.length} conflicts`
+    );
+  } catch (error) {
+    datasetClaimsError = { error };
+  }
+
   logger.debug('Setting up initial Fleet packages');
 
   stepSpan = apm.startSpan('Install preconfigured packages and policies', 'preconfiguration');
@@ -340,6 +358,7 @@ async function createSetupSideEffects(
       : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
     ...(backfillPolicyBaseIdError ? [backfillPolicyBaseIdError] : []),
+    ...(datasetClaimsError ? [datasetClaimsError] : []),
   ];
 
   logger.info('Scheduling async setup tasks');

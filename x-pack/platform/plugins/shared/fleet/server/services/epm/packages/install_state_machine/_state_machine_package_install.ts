@@ -14,6 +14,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
+import { FleetError } from '../../../../../common/errors';
 import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
@@ -30,6 +31,7 @@ import type {
 } from '../../../../types';
 
 import { appContextService } from '../../..';
+import { enforceInstallDatasetOwnership } from '../dataset_ownership';
 
 import {
   stepCreateRestartInstallation,
@@ -82,6 +84,11 @@ export interface InstallContext extends StateContext<StateNames> {
   retryFromLastState?: boolean;
   initialState?: INSTALL_STATES;
   useStreaming?: boolean;
+  datasetClaimAttemptId?: string;
+  /** Data streams this install may modify, decided before any asset was created. */
+  ownedDataStreams?: string[];
+  /** Claim ids this attempt created, released on failure. */
+  acquiredDatasetClaims?: string[];
 
   indexTemplates?: IndexTemplateEntry[];
   packageAssetRefs?: PackageAssetReference[];
@@ -250,6 +257,29 @@ export async function _stateMachineInstallPackage(
     ? streamingStatesDefinition
     : regularStatesDefinition;
 
+  // Streaming installs create no Elasticsearch index templates, so there is nothing to own.
+  if (!context.useStreaming && !context.datasetClaimAttemptId) {
+    throw new FleetError('An install attempt id is required to resolve dataset ownership');
+  }
+
+  let reservedPackageInstall = false;
+  const ownership =
+    context.useStreaming || !context.datasetClaimAttemptId
+      ? undefined
+      : await enforceInstallDatasetOwnership({
+          esClient: context.esClient,
+          soClient: context.savedObjectsClient,
+          logger,
+          packageInfo: context.packageInstallContext.packageInfo,
+          installSource: context.installSource,
+          attemptId: context.datasetClaimAttemptId,
+          installedEs: installedPkg?.attributes.installed_es,
+          afterAcquire: async () => {
+            await stepCreateRestartInstallation(context);
+            reservedPackageInstall = true;
+          },
+        });
+
   // if retryFromLastState, restart install from last install state
   // if force is passed, the install should be executed from the beginning
   if (retryFromLastState && !force && installedPkg?.attributes?.latest_executed_state?.name) {
@@ -262,11 +292,13 @@ export async function _stateMachineInstallPackage(
     );
     // we need to clean up latest_executed_state or it won't be refreshed
     await cleanupLatestExecutedState(context);
+  } else if (reservedPackageInstall) {
+    initialState = findNextState(INSTALL_STATES.CREATE_RESTART_INSTALLATION, statesDefinition);
   }
 
   const installStates: StateMachineDefinition<StateNames> = {
     // inject initial state inside context
-    context: { ...context, initialState },
+    context: { ...context, ...ownership, initialState },
     states: statesDefinition,
   };
 

@@ -24,10 +24,16 @@ import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
 import { throwIfAborted } from '../../../tasks/utils';
 import type { PackageInfo } from '../../../../common/types';
 
+import {
+  DatasetOwnershipConflictError,
+  assertComponentTemplatesMutable,
+  getNamespaceProspectiveTemplates,
+  resolveDatasetOwnership,
+} from './dataset_ownership';
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstallation } from './get';
-import { isOtelDataStream, fetchIndexTemplate } from './namespace_template_utils';
 import type { SyncIlmPolicySummary } from './namespace_ilm_settings';
+import { isOtelDataStream, fetchIndexTemplate } from './namespace_template_utils';
 
 /**
  * PUTs `nsIndexTemplate` back to ES with `composed_of` replaced by `patchedComposedOf`.
@@ -95,6 +101,55 @@ export function insertIlmComponentTemplate(
 
 function removeIlmComponentTemplate(composedOf: string[], nsTemplateName: string): string[] {
   return composedOf.filter((t) => t !== nsTemplateName);
+}
+
+async function resolveIlmNamespaceOwnership({
+  esClient,
+  soClient,
+  packageName,
+  packageInfo,
+  dataStreams,
+  namespaces,
+  action,
+}: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
+  dataStreams: RegistryDataStream[];
+  namespaces: string[];
+  action: 'set' | 'clear';
+}): Promise<string[]> {
+  const ownership = await resolveDatasetOwnership({
+    esClient,
+    soClient,
+    packageName,
+    prospective: getNamespaceProspectiveTemplates(dataStreams, packageInfo, namespaces),
+  });
+  if (ownership.conflicts.length > 0) {
+    const before =
+      action === 'clear' ? 'before clearing the policy' : 'before enabling namespace customization';
+    throw new DatasetOwnershipConflictError(
+      `ILM namespace sync for ${packageName} would take over resources it does not own: ` +
+        ownership.conflicts.map(({ name, reason }) => `"${name}" (${reason})`).join(', ') +
+        `. Adopt the dataset explicitly ${before}.`
+    );
+  }
+  return ownership.allowlist;
+}
+
+function ilmComponentTemplateNames(
+  dataStreams: RegistryDataStream[],
+  packageInfo: Pick<PackageInfo, 'policy_templates'>,
+  namespaces: string[]
+): string[] {
+  return dataStreams.flatMap((dataStream) => {
+    const templateName = getRegistryDataStreamAssetBaseName(
+      dataStream,
+      isOtelDataStream(dataStream, packageInfo)
+    );
+    return namespaces.map((namespace) => generateNamespaceTemplateName(templateName, namespace));
+  });
 }
 
 /**
@@ -199,6 +254,7 @@ async function trackAndRolloverIlmComponentTemplates({
   packageName,
   createdComponentTemplates,
   updatedIndexTemplates,
+  allowlist,
   signal,
 }: {
   soClient: SavedObjectsClientContract;
@@ -206,6 +262,7 @@ async function trackAndRolloverIlmComponentTemplates({
   packageName: string;
   createdComponentTemplates: string[];
   updatedIndexTemplates: IndexTemplateEntry[];
+  allowlist: string[];
   signal?: AbortSignal;
 }): Promise<string[]> {
   if (createdComponentTemplates.length === 0) {
@@ -234,7 +291,7 @@ async function trackAndRolloverIlmComponentTemplates({
   // Rollover existing data streams so new backing indices pick up the ILM policy
   if (updatedIndexTemplates.length > 0) {
     try {
-      await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+      await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates, allowlist);
     } catch (err: unknown) {
       if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
         throw err;
@@ -272,6 +329,22 @@ export async function syncSetIlmPolicy({
   summary: SyncIlmPolicySummary;
   signal?: AbortSignal;
 }): Promise<void> {
+  const allowlist = await resolveIlmNamespaceOwnership({
+    esClient,
+    soClient,
+    packageName,
+    packageInfo,
+    dataStreams,
+    namespaces: [namespace],
+    action: 'set',
+  });
+  await assertComponentTemplatesMutable({
+    esClient,
+    soClient,
+    packageName,
+    names: ilmComponentTemplateNames(dataStreams, packageInfo, [namespace]),
+  });
+
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
   const createdComponentTemplates: string[] = [];
 
@@ -305,6 +378,7 @@ export async function syncSetIlmPolicy({
     packageName,
     createdComponentTemplates,
     updatedIndexTemplates,
+    allowlist,
     signal,
   });
 }
@@ -340,6 +414,26 @@ export async function syncSetIlmPolicyForNamespaces({
   if (namespaceIlmPolicies.length === 0) {
     return;
   }
+
+  const allowlist = await resolveIlmNamespaceOwnership({
+    esClient,
+    soClient,
+    packageName,
+    packageInfo,
+    dataStreams,
+    namespaces: namespaceIlmPolicies.map(({ namespace }) => namespace),
+    action: 'set',
+  });
+  await assertComponentTemplatesMutable({
+    esClient,
+    soClient,
+    packageName,
+    names: ilmComponentTemplateNames(
+      dataStreams,
+      packageInfo,
+      namespaceIlmPolicies.map(({ namespace }) => namespace)
+    ),
+  });
 
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
   const createdComponentTemplates: string[] = [];
@@ -377,6 +471,7 @@ export async function syncSetIlmPolicyForNamespaces({
     packageName,
     createdComponentTemplates,
     updatedIndexTemplates,
+    allowlist,
     signal,
   });
 }
@@ -406,6 +501,15 @@ export async function syncClearIlmPolicy({
   signal?: AbortSignal;
 }): Promise<void> {
   const logger = appContextService.getLogger();
+  const allowlist = await resolveIlmNamespaceOwnership({
+    esClient,
+    soClient,
+    packageName,
+    packageInfo,
+    dataStreams,
+    namespaces: [namespace],
+    action: 'clear',
+  });
   const deletedTemplateNames: string[] = [];
   const patchedIndexTemplates: IndexTemplateEntry[] = [];
 
@@ -414,6 +518,13 @@ export async function syncClearIlmPolicy({
   const currentInstallation = await getInstallation({
     savedObjectsClient: soClient,
     pkgName: packageName,
+  });
+  await assertComponentTemplatesMutable({
+    esClient,
+    soClient,
+    packageName,
+    names: ilmComponentTemplateNames(dataStreams, packageInfo, [namespace]),
+    installedEs: currentInstallation?.installed_es,
   });
   // When a namespace is being opted out, SyncNamespaceTemplatesTask deletes the whole namespace
   // index template. If we were to patch composed_of here concurrently, we could recreate the
@@ -471,7 +582,7 @@ export async function syncClearIlmPolicy({
   }
 
   // Delete the ILM component templates
-  await deleteComponentTemplates(esClient, deletedTemplateNames);
+  await deleteComponentTemplates(esClient, deletedTemplateNames, { packageName });
 
   // Remove the component templates from installed_es tracking BEFORE rollover so a rollover
   // failure doesn't leave deleted templates still tracked in installed_es (r3518806806).
@@ -490,7 +601,7 @@ export async function syncClearIlmPolicy({
   // Rollover so the ILM policy no longer applies to new backing indices
   if (patchedIndexTemplates.length > 0) {
     try {
-      await updateCurrentWriteIndices(esClient, logger, patchedIndexTemplates);
+      await updateCurrentWriteIndices(esClient, logger, patchedIndexTemplates, allowlist);
     } catch (err: unknown) {
       if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
         throw err;

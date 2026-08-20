@@ -28,6 +28,15 @@ jest.mock('../elasticsearch/template/template', () => ({
   generateNamespaceTemplateName: jest.fn(
     (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
   ),
+  generateNamespaceTemplateIndexPattern: jest.fn(
+    (dataStream: { type: string; dataset: string }, namespace: string) =>
+      `${dataStream.type}-${dataStream.dataset}-${namespace}`
+  ),
+  getNamespaceTemplatePriority: jest.fn(() => 250),
+  generateTemplateIndexPattern: jest.fn(
+    (dataStream: { type: string; dataset: string }) => `${dataStream.type}-${dataStream.dataset}-*`
+  ),
+  getTemplatePriority: jest.fn(() => 200),
   updateCurrentWriteIndices: jest.fn(),
 }));
 jest.mock('../elasticsearch/template/remove');
@@ -36,6 +45,19 @@ jest.mock('../../app_context');
 jest.mock('../elasticsearch/retry', () => ({
   retryTransientEsErrors: jest.fn((fn: () => unknown) => fn()),
 }));
+jest.mock('./dataset_ownership', () => {
+  const actual = jest.requireActual('./dataset_ownership');
+  return {
+    ...actual,
+    resolveDatasetOwnership: jest.fn().mockResolvedValue({
+      allowlist: [],
+      adoptedStreams: [],
+      conflicts: [],
+      warnings: [],
+    }),
+    assertComponentTemplatesMutable: jest.fn().mockResolvedValue(undefined),
+  };
+});
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -412,9 +434,11 @@ describe('syncIlmPolicy — clear', () => {
       ilmPolicy: undefined,
     });
 
-    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(esClient, [
-      'logs-nginx.access@namespace.production',
-    ]);
+    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(
+      esClient,
+      ['logs-nginx.access@namespace.production'],
+      { packageName: 'nginx' }
+    );
   });
 
   it('removes the ILM entry from the namespace index template composed_of when namespace is still opted in', async () => {
@@ -454,9 +478,11 @@ describe('syncIlmPolicy — clear', () => {
 
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     // Component template is still deleted
-    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(esClient, [
-      'logs-nginx.access@namespace.production',
-    ]);
+    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(
+      esClient,
+      ['logs-nginx.access@namespace.production'],
+      { packageName: 'nginx' }
+    );
   });
 
   it('removes the component templates from installed_es', async () => {

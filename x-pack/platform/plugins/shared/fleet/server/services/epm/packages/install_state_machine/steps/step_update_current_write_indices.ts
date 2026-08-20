@@ -17,9 +17,12 @@ export async function stepUpdateCurrentWriteIndices(context: InstallContext) {
 
   // update current backing indices of each data stream
   await withPackageSpan('Update write indices', () =>
-    updateCurrentWriteIndices(esClient, logger, indexTemplates || [], {
-      ignoreMappingUpdateErrors,
-      skipDataStreamRollover,
-    })
+    updateCurrentWriteIndices(
+      esClient,
+      logger,
+      indexTemplates || [],
+      context.ownedDataStreams ?? [],
+      { ignoreMappingUpdateErrors, skipDataStreamRollover }
+    )
   );
 }

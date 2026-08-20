@@ -15,8 +15,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
+import { DatasetOwnershipConflictError } from '../dataset_ownership';
 
 import type { Installation } from '../../../../../common';
+
+import { INSTALL_STATES } from '../../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
@@ -33,6 +36,7 @@ jest.mock('../install_index_template_pipeline');
 jest.mock('../../archive/storage');
 jest.mock('../../elasticsearch/ilm/install');
 jest.mock('../../elasticsearch/datastream_ilm/install');
+jest.mock('../dataset_ownership');
 
 import { updateCurrentWriteIndices } from '../../elasticsearch/template/template';
 
@@ -46,7 +50,8 @@ import {
   regularStatesDefinition,
   streamingStatesDefinition,
 } from './_state_machine_package_install';
-import { cleanupLatestExecutedState } from './steps';
+import { cleanupLatestExecutedState, stepCreateRestartInstallation } from './steps';
+import { enforceInstallDatasetOwnership } from '../dataset_ownership';
 
 jest.mock('./state_machine');
 jest.mock('../install');
@@ -63,6 +68,9 @@ const mockCleanupLatestExecutedState = cleanupLatestExecutedState as jest.Mocked
   typeof cleanupLatestExecutedState
 >;
 const mockHandleState = handleState as jest.MockedFunction<typeof handleState>;
+const mockedEnforce = enforceInstallDatasetOwnership as jest.MockedFunction<
+  typeof enforceInstallDatasetOwnership
+>;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -71,6 +79,32 @@ function sleep(millis: number) {
 describe('_stateMachineInstallPackage', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
+
+  const baseContext = () => ({
+    savedObjectsClient: soClient,
+    savedObjectsImporter: jest.fn(),
+    esClient,
+    logger: loggerMock.create(),
+    packageInstallContext: {
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
+      paths: [],
+      packageInfo: {
+        title: 'title',
+        name: 'xyz',
+        version: '4.5.6',
+        description: 'test',
+        type: 'integration',
+        categories: ['cloud', 'custom'],
+        format_version: 'string',
+        release: 'experimental',
+        conditions: { kibana: { version: 'x.y.z' } },
+        owner: { github: 'elastic/fleet' },
+      },
+    },
+    installType: 'install',
+    installSource: 'registry',
+    spaceId: DEFAULT_SPACE_ID,
+  });
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
@@ -86,6 +120,8 @@ describe('_stateMachineInstallPackage', () => {
     jest.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
+    mockedEnforce.mockReset();
+    mockedEnforce.mockResolvedValue({ ownedDataStreams: [], acquiredDatasetClaims: [] });
   });
 
   afterEach(() => {
@@ -133,6 +169,7 @@ describe('_stateMachineInstallPackage', () => {
       installType: 'install',
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
+      datasetClaimAttemptId: 'attempt-1',
     });
     // if we have a .catch this will fail nicely (test pass)
     // otherwise the test will fail with either of the mocked errors
@@ -195,6 +232,7 @@ describe('_stateMachineInstallPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
+        datasetClaimAttemptId: 'attempt-1',
         retryFromLastState: true,
       });
       expect(mockCleanupLatestExecutedState).not.toBeCalled();
@@ -231,6 +269,7 @@ describe('_stateMachineInstallPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
+        datasetClaimAttemptId: 'attempt-1',
         retryFromLastState: true,
         force: true,
         installedPkg: {
@@ -280,6 +319,7 @@ describe('_stateMachineInstallPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
+        datasetClaimAttemptId: 'attempt-1',
         retryFromLastState: true,
         installedPkg: {
           ...mockInstalledPackageSo,
@@ -347,8 +387,148 @@ describe('_stateMachineInstallPackage', () => {
       installType: 'install',
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
+      datasetClaimAttemptId: 'attempt-1',
     });
     await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
+  });
+
+  it('enforces ownership before any state runs, even when resuming late', async () => {
+    mockedEnforce.mockResolvedValue({
+      ownedDataStreams: ['logs-mine.data-default'],
+      acquiredDatasetClaims: ['logs-mine.data'],
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+      retryFromLastState: true,
+      force: false,
+      installedPkg: {
+        attributes: { latest_executed_state: { name: INSTALL_STATES.REMOVE_LEGACY_TEMPLATES } },
+      },
+    } as never);
+
+    expect(mockedEnforce).toHaveBeenCalled();
+  });
+
+  it('keeps the real resume target so retry cleanup still triggers', async () => {
+    mockedEnforce.mockResolvedValue({ ownedDataStreams: [], acquiredDatasetClaims: [] });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+      retryFromLastState: true,
+      force: false,
+      installedPkg: {
+        attributes: { latest_executed_state: { name: INSTALL_STATES.INSTALL_ML_MODEL } },
+      },
+    } as never);
+
+    expect(mockHandleState).toHaveBeenCalledWith(
+      INSTALL_STATES.INSTALL_INDEX_TEMPLATE_PIPELINES,
+      expect.anything(),
+      expect.objectContaining({ initialState: INSTALL_STATES.INSTALL_INDEX_TEMPLATE_PIPELINES })
+    );
+  });
+
+  it('passes the allowlist into the state context', async () => {
+    mockedEnforce.mockResolvedValue({
+      ownedDataStreams: ['logs-mine.data-default'],
+      acquiredDatasetClaims: ['logs-mine.data'],
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+    } as never);
+
+    expect(mockHandleState).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        ownedDataStreams: ['logs-mine.data-default'],
+        acquiredDatasetClaims: ['logs-mine.data'],
+      })
+    );
+  });
+
+  it('does not enforce ownership for a streaming install, which installs no ES templates', async () => {
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+
+    await _stateMachineInstallPackage({ ...baseContext(), useStreaming: true } as never);
+
+    expect(mockedEnforce).not.toHaveBeenCalled();
+  });
+
+  it('rejects before any state runs when ownership resolution fails', async () => {
+    mockedEnforce.mockRejectedValue(new DatasetOwnershipConflictError('nope'));
+
+    await expect(
+      _stateMachineInstallPackage({
+        ...baseContext(),
+        datasetClaimAttemptId: 'attempt-1',
+      } as never)
+    ).rejects.toBeInstanceOf(DatasetOwnershipConflictError);
+    expect(mockHandleState).not.toHaveBeenCalled();
+  });
+
+  it('refuses a non-streaming install with no attempt id', async () => {
+    await expect(_stateMachineInstallPackage(baseContext() as never)).rejects.toThrow(
+      /attempt id/i
+    );
+  });
+
+  it('creates the package SO under the ownership lock before later states run', async () => {
+    mockedEnforce.mockImplementation(async (opts) => {
+      await opts.afterAcquire?.();
+      return { ownedDataStreams: [], acquiredDatasetClaims: [] };
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+    const mockCreateRestart = stepCreateRestartInstallation as jest.MockedFunction<
+      typeof stepCreateRestartInstallation
+    >;
+    mockCreateRestart.mockResolvedValue(undefined as never);
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+    } as never);
+
+    expect(mockCreateRestart).toHaveBeenCalled();
+    expect(mockHandleState).toHaveBeenCalledWith(
+      INSTALL_STATES.RESOLVE_DEPENDENCIES,
+      expect.anything(),
+      expect.objectContaining({ initialState: INSTALL_STATES.RESOLVE_DEPENDENCIES })
+    );
+  });
+
+  it('reserves the package SO under the ownership lock even when one already exists', async () => {
+    mockedEnforce.mockImplementation(async (opts) => {
+      await opts.afterAcquire?.();
+      return { ownedDataStreams: [], acquiredDatasetClaims: [] };
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+    const mockCreateRestart = stepCreateRestartInstallation as jest.MockedFunction<
+      typeof stepCreateRestartInstallation
+    >;
+    mockCreateRestart.mockClear();
+    mockCreateRestart.mockResolvedValue(undefined as never);
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+      installedPkg: { attributes: { name: 'xyz' } },
+    } as never);
+
+    expect(mockCreateRestart).toHaveBeenCalled();
+    expect(mockHandleState).toHaveBeenCalledWith(
+      INSTALL_STATES.RESOLVE_DEPENDENCIES,
+      expect.anything(),
+      expect.objectContaining({ initialState: INSTALL_STATES.RESOLVE_DEPENDENCIES })
+    );
   });
 });
 

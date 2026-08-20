@@ -1,0 +1,17 @@
+format_version: 3.0.0
+name: dataset_claim_twin
+title: Dataset ownership twin test package
+description: Second fixture package that claims the same dataset as dataset_claim_pkg.
+version: 1.0.0
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+policy_templates:
+  - name: logs
+    title: Logs
+    description: Collect log data
+    inputs:
+      - type: logfile
+        title: Log file
+        description: Collect log files

@@ -26,6 +26,7 @@ import {
   createInstallation,
   handleInstallPackageFailure,
   installPackage,
+  installPackageWithStateMachine,
   isPackageVersionOrLaterInstalled,
   saveKibanaAssetsRefs,
 } from './install';
@@ -34,6 +35,12 @@ import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import { getInstallationObject } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import { removeOldAssets } from './cleanup';
+import {
+  finalizeDatasetClaims,
+  getPackageClaimNames,
+  releaseAttemptClaims,
+} from './dataset_ownership';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -109,6 +116,19 @@ jest.mock('../archive', () => {
   };
 });
 jest.mock('../../audit_logging');
+jest.mock('./dataset_ownership', () => ({
+  releaseAttemptClaims: jest.fn().mockResolvedValue(undefined),
+  finalizeDatasetClaims: jest.fn().mockResolvedValue(undefined),
+  getPackageClaimNames: jest.fn(() => []),
+  getClaimNamesFromInstalledEs: jest.fn(() => []),
+  mergeClaimNames: jest.fn((primary: unknown) => primary),
+  enforceInstallDatasetOwnership: jest.fn().mockResolvedValue({
+    ownedDataStreams: [],
+    acquiredDatasetClaims: [],
+  }),
+  withDatasetOwnershipLock: jest.fn(async (fn: () => Promise<unknown>) => fn()),
+  transferPendingClaims: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('../../utils/agentless', () => {
   return {
@@ -149,6 +169,11 @@ describe('createInstallation', () => {
         name: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
+      expect(soClient.create).toHaveBeenCalledWith(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'test-package', overwrite: false })
+      );
     });
   });
 
@@ -809,6 +834,8 @@ describe('handleInstallPackageFailure', () => {
     mockGetBundledPackageByPkgKey.mockReset();
 
     jest.mocked(installStateMachine._stateMachineInstallPackage).mockResolvedValue({} as any);
+    jest.mocked(releaseAttemptClaims).mockReset();
+    jest.mocked(releaseAttemptClaims).mockResolvedValue(undefined);
     mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
     jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
@@ -886,6 +913,7 @@ describe('handleInstallPackageFailure', () => {
       pkgName,
       pkgVersion: '2.0.0',
       spaceId: 'default',
+      datasetClaimAttemptId: 'attempt-1',
     });
 
     expect(mockedLogger.error).toBeCalledTimes(1);
@@ -900,6 +928,7 @@ describe('handleInstallPackageFailure', () => {
         }),
       })
     );
+    expect(releaseAttemptClaims).not.toHaveBeenCalled();
     jest.mocked(getInstallationObject).mockReset();
   });
 
@@ -933,6 +962,7 @@ describe('handleInstallPackageFailure', () => {
         pkgName,
         pkgVersion: '2.0.0',
         spaceId: 'default',
+        datasetClaimAttemptId: 'attempt-1',
       });
 
       expect(mockedLogger.error).toBeCalledWith(
@@ -952,6 +982,7 @@ describe('handleInstallPackageFailure', () => {
           }),
         })
       );
+      expect(releaseAttemptClaims).not.toHaveBeenCalled();
     });
   });
 
@@ -1401,5 +1432,139 @@ describe('saveKibanaAssetsRefs', () => {
 
     expect(soClient.update).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('my-space'));
+  });
+});
+
+describe('dataset claims on failure', () => {
+  const soClient = savedObjectsClientMock.create();
+  const esClient = {} as ElasticsearchClient;
+  const mockedReleaseAttemptClaims = jest.mocked(releaseAttemptClaims);
+
+  const failureArgs = (overrides = {}) => ({
+    savedObjectsClient: soClient,
+    error: new Error('boom'),
+    pkgName: 'mine',
+    pkgVersion: '1.0.0',
+    installedPkg: undefined,
+    esClient,
+    spaceId: 'default',
+    datasetClaimAttemptId: 'attempt-1',
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    mockedReleaseAttemptClaims.mockReset();
+    mockedReleaseAttemptClaims.mockResolvedValue(undefined);
+  });
+
+  it('does not release claims when first-install cleanup fails', async () => {
+    await handleInstallPackageFailure(failureArgs());
+
+    expect(mockedReleaseAttemptClaims).not.toHaveBeenCalled();
+  });
+
+  it('keeps the claims when the failed installation is kept for retry', async () => {
+    await handleInstallPackageFailure(failureArgs({ keepFailedInstallation: true }));
+
+    expect(mockedReleaseAttemptClaims).not.toHaveBeenCalled();
+  });
+
+  it('releases claims this attempt acquired when a concurrent install is already in progress', async () => {
+    await handleInstallPackageFailure(
+      failureArgs({ error: new ConcurrentInstallOperationError('busy') })
+    );
+
+    expect(mockedReleaseAttemptClaims).toHaveBeenCalledWith(soClient, 'mine', 'attempt-1');
+  });
+
+  it('does nothing when there is no attempt id', async () => {
+    await handleInstallPackageFailure(failureArgs({ datasetClaimAttemptId: undefined }));
+
+    expect(mockedReleaseAttemptClaims).not.toHaveBeenCalled();
+  });
+
+  it('does not mask the original failure when releasing concurrent-install claims fails', async () => {
+    mockedReleaseAttemptClaims.mockRejectedValue(new Error('sweep failed'));
+
+    await expect(
+      handleInstallPackageFailure(
+        failureArgs({ error: new ConcurrentInstallOperationError('busy') })
+      )
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('dataset claims on success', () => {
+  const soClient = savedObjectsClientMock.create();
+  const esClient = {} as ElasticsearchClient;
+  const mockedRemoveOldAssets = jest.mocked(removeOldAssets);
+  const mockedFinalizeDatasetClaims = jest.mocked(finalizeDatasetClaims);
+  const mockedReleaseAttemptClaims = jest.mocked(releaseAttemptClaims);
+
+  const successOptions = {
+    pkgName: 'mine',
+    pkgVersion: '1.0.0',
+    installSource: 'registry' as const,
+    installType: 'install' as const,
+    savedObjectsClient: soClient,
+    esClient,
+    spaceId: 'default',
+    packageInstallContext: {
+      packageInfo: { name: 'mine', version: '1.0.0', data_streams: [], policy_templates: [] },
+      paths: [],
+      archiveIterator: { traverseEntries: async () => undefined },
+    },
+    paths: [],
+  };
+
+  beforeEach(() => {
+    mockedRemoveOldAssets.mockReset();
+    mockedFinalizeDatasetClaims.mockReset();
+    mockedReleaseAttemptClaims.mockReset();
+    mockedRemoveOldAssets.mockResolvedValue(undefined as never);
+    mockedFinalizeDatasetClaims.mockResolvedValue(undefined);
+    mockedReleaseAttemptClaims.mockResolvedValue(undefined);
+    jest.mocked(getPackageClaimNames).mockReturnValue([]);
+    jest.mocked(installStateMachine._stateMachineInstallPackage).mockResolvedValue([] as never);
+  });
+
+  it('finalizes claims only after old assets have been removed', async () => {
+    const order: string[] = [];
+    mockedRemoveOldAssets.mockImplementation(async () => {
+      order.push('removeOldAssets');
+    });
+    mockedFinalizeDatasetClaims.mockImplementation(async () => {
+      order.push('finalize');
+    });
+
+    await installPackageWithStateMachine(successOptions as never);
+
+    expect(order).toEqual(['removeOldAssets', 'finalize']);
+    expect(mockedFinalizeDatasetClaims).toHaveBeenCalledWith(
+      expect.objectContaining({ requireReservation: true })
+    );
+  });
+
+  it('does not finalize when removing old assets fails', async () => {
+    mockedRemoveOldAssets.mockRejectedValue(new Error('boom'));
+
+    await installPackageWithStateMachine(successOptions as never);
+
+    expect(mockedFinalizeDatasetClaims).not.toHaveBeenCalled();
+    expect(mockedReleaseAttemptClaims).not.toHaveBeenCalled();
+  });
+
+  it('reports success even when finalization fails, leaving claims pending', async () => {
+    mockedFinalizeDatasetClaims.mockRejectedValue(new Error('so conflict'));
+
+    const result = await installPackageWithStateMachine(successOptions as never);
+
+    expect(result.status).toBe('installed');
+  });
+
+  it('does not finalize for a streaming install', async () => {
+    await installPackageWithStateMachine({ ...successOptions, useStreaming: true } as never);
+
+    expect(mockedFinalizeDatasetClaims).not.toHaveBeenCalled();
   });
 });

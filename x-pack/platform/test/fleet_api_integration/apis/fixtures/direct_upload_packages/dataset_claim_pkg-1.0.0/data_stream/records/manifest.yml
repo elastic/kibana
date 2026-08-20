@@ -1,0 +1,6 @@
+title: Foreign dataset
+type: logs
+dataset: foreign.records
+elasticsearch:
+  index_template.mappings:
+    dynamic: false

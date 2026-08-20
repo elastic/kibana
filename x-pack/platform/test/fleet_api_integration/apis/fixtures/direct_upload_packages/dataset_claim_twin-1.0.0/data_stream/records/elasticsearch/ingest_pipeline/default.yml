@@ -1,0 +1,6 @@
+---
+description: Marker pipeline for dataset ownership twin tests
+processors:
+  - set:
+      field: labels.dataset_ownership_marker
+      value: dataset_claim_twin

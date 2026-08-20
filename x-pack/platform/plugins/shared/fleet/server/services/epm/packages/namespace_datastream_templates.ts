@@ -26,6 +26,11 @@ import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
 import { throwIfAborted } from '../../../tasks/utils';
 import type { PackageInfo } from '../../../../common/types';
 
+import {
+  DatasetOwnershipConflictError,
+  getNamespaceProspectiveTemplates,
+  resolveDatasetOwnership,
+} from './dataset_ownership';
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { handleIlmSettingsRestoreAfterPackageInstall } from './namespace_ilm_settings';
@@ -179,6 +184,28 @@ async function createNamespaceTemplatesForPackage({
   const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
 
+  const ownership = await resolveDatasetOwnership({
+    esClient,
+    soClient,
+    packageName,
+    prospective: getNamespaceProspectiveTemplates(dataStreams, packageInfo, namespaces),
+  });
+
+  for (const warning of ownership.warnings) {
+    logger.warn(
+      `[${logContext}] namespace template for "${warning.name}" overlaps a template Fleet does not ` +
+        `own (priority ${warning.governingPriority}).`
+    );
+  }
+
+  if (ownership.conflicts.length > 0) {
+    throw new DatasetOwnershipConflictError(
+      `Namespace templates for ${packageName} would take over resources it does not own: ` +
+        ownership.conflicts.map(({ name, reason }) => `"${name}" (${reason})`).join(', ') +
+        `. Adopt the dataset explicitly before enabling namespace customization.`
+    );
+  }
+
   await pMap(
     dataStreams,
     async (dataStream) => {
@@ -231,7 +258,7 @@ async function createNamespaceTemplatesForPackage({
   // (no data has been ingested yet). In that case `getDataStream` 404s on the
   // namespace-scoped pattern; nothing to update, so just continue.
   try {
-    await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+    await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates, ownership.allowlist);
   } catch (err: unknown) {
     if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
       throw err;
@@ -328,7 +355,7 @@ async function deleteNamespaceTemplatesForPackage({
   );
   const componentTemplatesToDelete = deleted.filter((name) => trackedComponentTemplates.has(name));
   if (componentTemplatesToDelete.length > 0) {
-    await deleteComponentTemplates(esClient, componentTemplatesToDelete);
+    await deleteComponentTemplates(esClient, componentTemplatesToDelete, { packageName });
   }
 
   const assetsToRemove = [

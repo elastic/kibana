@@ -89,6 +89,10 @@ import {
   InstallRuleAssetsRequestSchema,
   NamespacePreflightCheckRequestSchema,
   NamespacePreflightCheckResponseSchema,
+  DatasetClaimRequestSchema,
+  DatasetClaimResponseSchema,
+  DatasetClaimDeleteRequestSchema,
+  DatasetClaimDeleteResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -135,6 +139,7 @@ import {
   postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
+import { datasetClaimsDeleteHandler, datasetClaimsHandler } from './dataset_claims_handler';
 import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -155,6 +160,12 @@ export const INSTALL_PACKAGES_SECURITY: RouteSecurity = {
 // Upload accepts an ingest pipeline from the uploaded archive verbatim. Registry packages are
 // signed and custom integrations get a Fleet-generated pipeline, so only this route needs superuser.
 export const INSTALL_PACKAGES_BY_UPLOAD_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [ReservedPrivilegesSet.superuser],
+  },
+};
+
+export const DATASET_CLAIMS_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [ReservedPrivilegesSet.superuser],
   },
@@ -1939,5 +1950,71 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getIlmPoliciesHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.DATASET_CLAIMS_PATTERN,
+      security: DATASET_CLAIMS_SECURITY,
+      summary: `Adopt a dataset for a package`,
+      description: `Assign ownership of a generated dataset name to a package, permitting an install that would otherwise be rejected as a takeover. Only available to superusers.`,
+      options: { tags: ['oas-tag:Elastic Package Manager (EPM)'] },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DatasetClaimRequestSchema,
+          response: {
+            200: {
+              body: () => DatasetClaimResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+            409: {
+              body: genericErrorResponse,
+              description:
+                'The dataset is already claimed by another package, or its index patterns overlap an existing claim.',
+            },
+          },
+        },
+      },
+      datasetClaimsHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DATASET_CLAIMS_DELETE_PATTERN,
+      security: DATASET_CLAIMS_SECURITY,
+      summary: `Release an abandoned dataset claim`,
+      description: `Delete an abandoned pre-install adoption claim so the dataset can be adopted by another package. Claims for installed packages cannot be released this way; uninstall the package instead. Only available to superusers.`,
+      options: { tags: ['oas-tag:Elastic Package Manager (EPM)'] },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DatasetClaimDeleteRequestSchema,
+          response: {
+            200: {
+              body: () => DatasetClaimDeleteResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            404: {
+              body: genericErrorResponse,
+              description: 'The dataset is not claimed.',
+            },
+            409: {
+              body: genericErrorResponse,
+              description:
+                'The claim is not an abandoned pre-install adoption claim. Uninstall the package to release it.',
+            },
+          },
+        },
+      },
+      datasetClaimsDeleteHandler
     );
 };
