@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { useKibana } from '../../../../lib/kibana';
 import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import type {
   EndpointCapabilities,
@@ -58,6 +59,11 @@ export const useWithResponderActionDataFromAlert = ({
 
   const isEndpointHost = agentType === 'endpoint';
 
+  // Only meaningful when CPS is on: `cpsManager` is present solely on CPS-enabled deployments. Off
+  // CPS (including CCS deployments), an ancestor index can legitimately carry a remote-cluster prefix
+  // that `isNonLocalIndexName` would flag, so the check must be gated to avoid a false positive.
+  const isCpsEnabled = Boolean(useKibana().services.cps?.cpsManager);
+
   // In a Cross-Project Search deployment an alert can be generated off a document that lives in a
   // linked project even though the alert itself is stored locally. Response actions run origin-only
   // and reject such a host, so every command opened from the console would fail. Elasticsearch
@@ -65,11 +71,12 @@ export const useWithResponderActionDataFromAlert = ({
   // that the host belongs to a linked project.
   const isHostFromLinkedProject = useMemo<boolean>(
     () =>
+      isCpsEnabled &&
       getEventDetailsFieldValues(
         { category: 'kibana', field: 'kibana.alert.ancestors.index' },
         eventData
       ).some(isNonLocalIndexName),
-    [eventData]
+    [isCpsEnabled, eventData]
   );
 
   const endpointHostData = useResponderDataForEndpointHost(
