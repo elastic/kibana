@@ -135,10 +135,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByText(/Showing.*1.*service/)).toBeVisible();
   });
 
-  // TODO: no metrics-only service has showInUI:true with the current static entries.
-  // ec2_metrics (and all other metrics services) require agentless or ECF deployment
-  // methods before they become visible. Re-enable once a metrics service is promoted.
-  test.skip('signal filter narrows table rows by signal type', async ({ browserAuth, page }) => {
+  test('signal filter narrows table rows by signal type', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
     });
