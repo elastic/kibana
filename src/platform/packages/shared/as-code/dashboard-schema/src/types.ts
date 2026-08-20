@@ -8,22 +8,32 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { panelGridSchema } from './schemas/panel_grid';
-import type { optionsSchema } from './schemas/options';
-import type { accessControlSchema } from './schemas/access_control';
-import type { sectionGridSchema } from './schemas/section';
-import type { basePanelSchema } from './schemas/base_panel';
+import type { getControlsGroupSchema } from '@kbn/controls-schemas';
+import type { getDashboardDataSchema, getPanelSchema } from './schemas/dashboard_data';
+import type { optionsSchema, panelGridSchema, getSectionSchema } from './schemas';
 
-// Output types (after parsing — all defaults resolved)
-export type PanelGrid = z.output<typeof panelGridSchema>;
+/** Input type for the Dashboard API request body (before parsing). Panels are loosely typed since they depend on registered embeddable schemas. */
+export type DashboardApiDataInput = z.input<ReturnType<typeof getDashboardDataSchema>>;
+
+/** Display options for a dashboard. */
 export type DashboardOptions = z.output<typeof optionsSchema>;
-export type AccessControl = z.output<typeof accessControlSchema>;
-export type SectionGrid = z.output<typeof sectionGridSchema>;
-export type BasePanel = z.output<typeof basePanelSchema>;
-
-// Input types (before parsing — fields with defaults are optional)
-export type PanelGridInput = z.input<typeof panelGridSchema>;
+/** Display options for a dashboard (input shape — fields with defaults are optional). */
 export type DashboardOptionsInput = z.input<typeof optionsSchema>;
-export type AccessControlInput = z.input<typeof accessControlSchema>;
-export type SectionGridInput = z.input<typeof sectionGridSchema>;
-export type BasePanelInput = z.input<typeof basePanelSchema>;
+/** Grid position and size data for a panel. */
+export type GridData = z.output<typeof panelGridSchema>;
+/** Grid position and size data for a panel (input shape — fields with defaults are optional). */
+export type GridDataInput = z.input<typeof panelGridSchema>;
+/** A panel in a dashboard containing an embeddable visualization. */
+export type DashboardPanel = z.output<ReturnType<typeof getPanelSchema>>;
+/** A section in a dashboard that groups panels. */
+export type DashboardSection = z.output<ReturnType<typeof getSectionSchema>>;
+/** The complete state of a dashboard including panels, filters, and settings. */
+export type DashboardState = z.output<ReturnType<typeof getDashboardDataSchema>>;
+/** The complete state of a dashboard (input shape — fields with defaults are optional). */
+export type DashboardStateInput = z.input<ReturnType<typeof getDashboardDataSchema>>;
+
+export type DashboardPinnedPanelsState = z.output<ReturnType<typeof getControlsGroupSchema>>;
+/** The input shape of pinned panels state (fields with defaults are optional). */
+export type DashboardPinnedPanelsStateInput = z.input<ReturnType<typeof getControlsGroupSchema>>;
+export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
+export type DashboardPinnedPanelInput = NonNullable<DashboardPinnedPanelsStateInput>[number];

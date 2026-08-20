@@ -7,26 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  panelGridSchema,
-  optionsSchema,
-  accessControlSchema,
-  sectionGridSchema,
-  getSectionSchema,
-  basePanelSchema,
-} from './src/schemas';
+export { getDashboardDataSchema, getPanelSchema } from './src/schemas';
 
 export type {
-  PanelGrid,
+  DashboardApiDataInput,
+  DashboardState,
+  DashboardStateInput,
+  DashboardPanel,
+  DashboardSection,
   DashboardOptions,
-  AccessControl,
-  SectionGrid,
-  BasePanel,
-  PanelGridInput,
   DashboardOptionsInput,
-  AccessControlInput,
-  SectionGridInput,
-  BasePanelInput,
+  GridData,
+  GridDataInput,
 } from './src/types';
 
 export {

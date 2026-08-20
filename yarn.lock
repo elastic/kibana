@@ -4496,6 +4496,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-discover-schema@link:src/platform/packages/shared/as-code/discover-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-export-flyout-component@link:src/platform/packages/shared/as-code/export-flyout-component":
   version "0.0.0"
   uid ""

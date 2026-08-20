@@ -12,3 +12,4 @@ export { optionsSchema } from './options';
 export { accessControlSchema } from './access_control';
 export { sectionGridSchema, getSectionSchema } from './section';
 export { basePanelSchema } from './base_panel';
+export { getPanelSchema, getDashboardDataSchema } from './dashboard_data';
