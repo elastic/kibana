@@ -4,9 +4,20 @@ Use this format when invoking the Scout Best Practices Reviewer skill directly (
 
 Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
 
+When a finding comes from a **Critical check**, format its title as a level-4 heading instead of a bullet, and prefix the checklist heading with `⚠️`:
+
+```md
+#### ⚠️ <Concern (use exact checklist heading)> — <short summary>
+```
+
 ## 1. Findings
 
 ### Blocker
+
+#### ⚠️ <Concern (use exact checklist heading)> — <short summary>  <!-- Critical check only; otherwise use the bullet form below -->
+  - **Explanation**: <1-3 concise, actionable sentences>
+  - **Evidence**: `<file:line>` (add multiple as needed)
+  - **Suggested change**: <Specific code edit; include a small snippet if helpful>
 
 - **<Concern (use exact checklist heading)> — <short summary>**
   - **Explanation**: <1-3 concise, actionable sentences>
