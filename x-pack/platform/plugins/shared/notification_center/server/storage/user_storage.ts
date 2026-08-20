@@ -20,7 +20,8 @@ export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
 /** Per-id read overrides keyed by `notification_id`; each entry records the read
  * direction and when it was set, deviating from the `readAllBefore` marker.
- * advancing the readAllBefore marker keeps this within a reasonable size.
+ * Bounded by `MAX_OVERRIDES` (schema ceiling, enforced on write); `markAllRead`
+ * clears the record entirely.
  */
 export const OVERRIDES_KEY = 'notificationCenter:overrides';
 

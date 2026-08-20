@@ -13,15 +13,17 @@ import {
   type ReadOverrides,
 } from '../storage/user_storage';
 
-/** Keep the newest MAX_OVERRIDES entries, dropping the oldest by `markedAt` (ISO strings
- * sort chronologically) so the write stays within the schema ceiling. */
+/** Keep the newest MAX_OVERRIDES entries, dropping the oldest by `markedAt`, so the write
+ * stays within the schema ceiling. */
 const boundOverrides = (overrides: ReadOverrides): ReadOverrides => {
   const entries = Object.entries(overrides);
   if (entries.length <= MAX_OVERRIDES) {
     return overrides;
   }
   return Object.fromEntries(
-    entries.sort(([, a], [, b]) => a.markedAt.localeCompare(b.markedAt)).slice(-MAX_OVERRIDES)
+    entries
+      .sort(([, a], [, b]) => Date.parse(a.markedAt) - Date.parse(b.markedAt))
+      .slice(-MAX_OVERRIDES)
   );
 };
 
