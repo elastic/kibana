@@ -21,6 +21,7 @@ import { internalStateActions } from '../redux';
 import type { DiscoverAppState } from '../redux';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 
 // Track resources from the last test for cleanup in afterEach
 let lastTestToolkit: InternalStateMockToolkit | undefined;
@@ -848,5 +849,140 @@ describe('buildEsqlFetchSubscribe', () => {
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
+  test('should show Summary when profile has it showing by default', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({
+      appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1', SOURCE_COLUMN] },
+    });
+  });
+
+  test('should not re-insert Summary after the user removed it', async () => {
+    const { replaceUrlState, dataState, tabId, toolkit } = await setupTest({
+      appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      query: { esql: 'from the-data-view-title' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', 'field2'] },
+      })
+    );
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: makeEsqlCols(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
+    });
+  });
+
+  test('should keep Summary when ES|QL default columns change', async () => {
+    const { replaceUrlState, dataState, tabId, toolkit } = await setupTest({
+      appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+    replaceUrlState.mockClear();
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+      })
+    );
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field1' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1', SOURCE_COLUMN] },
+    });
+  });
+
+  test('should not carry Summary across a profile column reset', async () => {
+    const { replaceUrlState, dataState, tabId, toolkit } = await setupTest({
+      appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+    replaceUrlState.mockClear();
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', SOURCE_COLUMN, 'field2'] },
+      })
+    );
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
+        fieldsToReset: 'all',
+      })
+    );
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field1' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1'] },
+    });
   });
 });
