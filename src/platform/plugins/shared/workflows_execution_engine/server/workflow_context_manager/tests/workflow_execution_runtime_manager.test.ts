@@ -299,7 +299,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         context.disable();
       });
 
-      it('persists the active OTEL span trace id on the execution', async () => {
+      it('persists the active OTEL span trace id and span id on the execution', async () => {
         const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
 
         await context.with(trace.setSpan(context.active(), span), async () => {
@@ -308,6 +308,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
           traceId: '0af7651916cd43dd8448eb211c80319c',
+          entryTransactionId: '0000000000000042',
         });
       });
 

@@ -19,6 +19,7 @@ import {
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
+  getActiveOtelSpanId,
   getActiveOtelTraceId,
   getAlertingRuleId,
   getTraceId,
@@ -422,6 +423,7 @@ export class WorkflowExecutionRuntimeManager {
         });
         this.workflowExecutionState.updateWorkflowExecution({
           traceId: otelTraceId,
+          entryTransactionId: getActiveOtelSpanId(),
         });
       } else {
         this.workflowLogger?.logWarn(

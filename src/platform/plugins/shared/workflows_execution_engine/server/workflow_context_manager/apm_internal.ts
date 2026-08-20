@@ -70,6 +70,16 @@ export function getActiveOtelTraceId(): string | undefined {
 }
 
 /**
+ * Reads the span ID from the active OTEL span context, or `undefined` when no
+ * span is active. Used as the `entryTransactionId` fallback under EDOT-only
+ * instrumentation, where there is no APM transaction to read it from.
+ */
+export function getActiveOtelSpanId(): string | undefined {
+  const spanContext = trace.getActiveSpan()?.spanContext();
+  return spanContext?.spanId || undefined;
+}
+
+/**
  * The agent exposes `currentTransaction` as a read property, but no public
  * setter. We rely on the private `setCurrentTransaction` to swap the active
  * transaction when an alerting-triggered workflow opens its own dedicated

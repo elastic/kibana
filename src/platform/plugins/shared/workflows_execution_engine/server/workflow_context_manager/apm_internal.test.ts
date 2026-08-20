@@ -11,7 +11,7 @@ import { context, INVALID_TRACEID, trace, TraceFlags } from '@opentelemetry/api'
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type agent from 'elastic-apm-node';
-import { getActiveOtelTraceId, getTraceId } from './apm_internal';
+import { getActiveOtelSpanId, getActiveOtelTraceId, getTraceId } from './apm_internal';
 
 // Minimal non-recording span carrying a real trace id, built from `@opentelemetry/api`
 // primitives so the test does not depend on an SDK tracer provider.
@@ -97,6 +97,20 @@ describe('getTraceId', () => {
       await context.with(trace.setSpan(context.active(), span), async () => {
         expect(getTraceId(apmlessTransaction) ?? getActiveOtelTraceId()).toBeUndefined();
       });
+    });
+  });
+
+  describe('getActiveOtelSpanId', () => {
+    it('returns the active span id so entryTransactionId is persisted under EDOT-only', async () => {
+      const span = spanWithTraceId(OTEL_TRACE_ID);
+
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        expect(getActiveOtelSpanId()).toBe('0000000000000042');
+      });
+    });
+
+    it('returns undefined when no span is active', () => {
+      expect(getActiveOtelSpanId()).toBeUndefined();
     });
   });
 });
