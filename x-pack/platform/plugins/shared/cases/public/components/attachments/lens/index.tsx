@@ -95,7 +95,7 @@ const LensAttachmentsTab = createSavedObjectAttachmentsTab({
   soType: LENS_SO_TYPE,
 });
 
-const getVisualizationAttachmentViewObject = ({
+const getVisualizationCreationActivity = ({
   savedObjectId,
   data,
   attachmentId,
@@ -118,7 +118,6 @@ const getVisualizationAttachmentViewObject = ({
   const showOpenLensAction = lensProps != null && isOpenLensActionCompatible(lensProps.attributes);
   return {
     event,
-    timelineAvatar: 'lensApp',
     ...(showOpenLensAction
       ? { getActions: () => getVisualizationAttachmentActions(openLensId, lensProps) }
       : {}),
@@ -130,11 +129,11 @@ const getVisualizationAttachmentViewObject = ({
 export const getVisualizationAttachmentType = () =>
   defineAttachment({
     id: LENS_ATTACHMENT_TYPE,
-    icon: 'document',
-    displayName: i18n.VISUALIZATIONS,
-    getAttachmentViewObject: getVisualizationAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
-    getAttachmentTabViewObject: () => ({ children: LensAttachmentsTab }),
+    getIcon: () => 'lensApp',
+    getLabel: () => i18n.VISUALIZATIONS,
+    getCreationActivity: getVisualizationCreationActivity,
+    getRemovalActivity: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+    getAttachmentList: () => ({ children: LensAttachmentsTab }),
     schema: LensAttachmentPayloadSchema,
     // Workflow authors reference a lens visualization by SO id; the by-value
     // `data.state` arm and the optional `data` snapshot are embeddable bags they
