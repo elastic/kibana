@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
+  - '@kbn/data-source'
   - '@kbn/unified-histogram'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
