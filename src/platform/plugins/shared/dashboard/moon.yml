@@ -96,7 +96,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/css-utils'
   - '@kbn/es-query-server'
-  - '@kbn/data-service-server'
   - '@kbn/controls-schemas'
   - '@kbn/controls-constants'
   - '@kbn/controls-renderer'
