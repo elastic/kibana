@@ -11,7 +11,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -40,11 +40,31 @@ export interface AnalyzeChatOptions {
   attachments: AttachmentInput[];
 }
 
+export interface SuggestAutomationParams {
+  aiIndex: GetAiIndexResponse;
+  onSaved: () => void;
+}
+
+/** Powers the Suggest automation button. Registered via {@link AgentBuilderIntegration}. */
+export interface SuggestAutomationProvider {
+  canSuggest: (params: { aiIndex: GetAiIndexResponse | undefined; isManaged: boolean }) => boolean;
+  suggestAutomation: (params: SuggestAutomationParams) => void;
+  /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
+  subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
+}
+
+/** Suggest-automation hooks registered by context_engine_agent_builder. */
+export interface AgentBuilderIntegration {
+  suggestAutomation: SuggestAutomationProvider;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginStart {}
+export interface ContextEnginePluginStart {
+  /** Registers suggest-automation hooks used by the Context Engine UI. */
+  registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineSetupDependencies {}
