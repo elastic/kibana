@@ -205,7 +205,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'cloudtrail',
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
@@ -214,7 +213,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'cloudtrail',
     showInUI: false,
     ecfDedicatedTemplate: 'otel',
@@ -273,7 +271,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'waf',
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
@@ -282,7 +279,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'waf',
     showInUI: false,
     ecfDedicatedTemplate: 'otel',
@@ -294,9 +290,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'networking_content_delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    packageName: 'aws',
-    signalType: 'logs',
     showInUI: false,
+    packageName: 'aws',
   },
   {
     id: 'elb_logs',
@@ -334,7 +329,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'vpcflow',
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
@@ -343,7 +337,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    signalType: 'logs',
     ecfLogType: 'vpcflow',
     showInUI: false,
     ecfDedicatedTemplate: 'otel',
@@ -489,22 +482,6 @@ export function buildAwsServiceMatrix(
   return staticEntries.map((entry) => {
     const { deploymentMethods: staticMethods, ...rest } = entry;
 
-    // ECF-only services need no manifest data: ecfLogType/ecfDedicatedTemplate are static,
-    // there are no user-facing flyout fields, and agentless detection does not apply.
-    if (staticMethods?.length && staticMethods.every((m) => m.method === 'ecf')) {
-      const packageInfo = packages[entry.packageName];
-      return {
-        ...rest,
-        name: (entry.name ?? entry.id) as string,
-        deploymentMethods: staticMethods as DeploymentMethodEntry[],
-        signalType: entry.signalType as SignalType,
-        inputs: entry.inputs ?? [],
-        showInUI: entry.showInUI ?? true,
-        defaultEnabled: true,
-        badge: entry.badge ?? releaseToBadge((packageInfo as any)?.release),
-      } as AwsServiceMatrixEntry;
-    }
-
     let name = entry.name;
     let signalType = entry.signalType;
     let inputs = entry.inputs;
@@ -640,6 +617,18 @@ export function buildAwsServiceMatrix(
     // Once agentless is enabled in the manifest or ECF is added statically, the service
     // gets deployment methods and becomes visible without a manual showInUI update.
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
+
+    // For ECF-only services, ECF manages all configuration internally.
+    // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
+    // Suppress the rest of the manifest vars so the flyout stays minimal.
+    const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+    if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
+      const ecfVarNames = Object.keys(varDefs).filter((v) => ECF_TRIGGER_VARS.has(v));
+      if (ecfVarNames.length > 0) {
+        requiredConfig = ecfVarNames;
+        optionalConfig = undefined;
+      }
+    }
 
     const merged = {
       ...rest,

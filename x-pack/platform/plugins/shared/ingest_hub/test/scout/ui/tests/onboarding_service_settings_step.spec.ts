@@ -109,7 +109,10 @@ async function mockAWSPackage(page: ScoutPage): Promise<void> {
 }
 
 async function fillFlyoutField(page: ScoutPage, fieldName: string, value: string): Promise<void> {
-  await page.testSubj.locator(`serviceSettingsFlyout-field-${fieldName}`).locator('input').fill(value);
+  await page.testSubj
+    .locator(`serviceSettingsFlyout-field-${fieldName}`)
+    .locator('input')
+    .fill(value);
 }
 
 async function navigateToServiceSettings(
@@ -181,6 +184,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     });
   });
 
+  test.beforeEach(async ({ page }) => {
+    await mockAWSPackage(page);
+  });
+
   test.afterAll(async ({ apiServices, config }) => {
     if (config.isCloud) {
       return;
@@ -190,10 +197,6 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
         'ingestHub.onboardingEnabled': 'false',
       },
     });
-  });
-
-  test.beforeEach(async ({ page }) => {
-    await mockAWSPackage(page);
   });
 
   test('renders table with Service Name, Collects, Category, Region columns', async ({
