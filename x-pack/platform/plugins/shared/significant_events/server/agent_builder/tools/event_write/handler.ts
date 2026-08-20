@@ -388,7 +388,12 @@ const buildPendingWrite = (
     document: {
       ...rest,
       ...(frozenNarrative
-        ? { title: frozenNarrative.title, symptom_hypothesis: frozenNarrative.symptom_hypothesis }
+        ? {
+            title: frozenNarrative.title,
+            ...(frozenNarrative.symptom_hypothesis !== undefined && {
+              symptom_hypothesis: frozenNarrative.symptom_hypothesis,
+            }),
+          }
         : {}),
       '@timestamp': timestamp,
       event_uuid: candidate.eventUuid,

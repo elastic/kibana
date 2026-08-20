@@ -287,4 +287,27 @@ describe('preserveStableNarrative', () => {
       preserveStableNarrative(['rule-new'], latest, extractRuleUuidsFromEvents([latest]))
     ).toBeUndefined();
   });
+
+  it('omits symptom_hypothesis from freeze when stored event has none', () => {
+    const latest = {
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'event-uuid',
+      event_id: 'event-id',
+      status: 'open' as const,
+      severity: '60-high' as const,
+      stream_names: ['logs.app'],
+      signals: [makeDetection('rule-1')],
+      title: 'Stored title',
+      summary: 'Stored summary',
+      confidence: 0.8,
+    } as SignificantEvent;
+
+    const result = preserveStableNarrative(
+      ['rule-1'],
+      latest,
+      extractRuleUuidsFromEvents([latest])
+    );
+    expect(result).toEqual({ title: 'Stored title', narrativePreserved: true });
+    expect(result).not.toHaveProperty('symptom_hypothesis');
+  });
 });

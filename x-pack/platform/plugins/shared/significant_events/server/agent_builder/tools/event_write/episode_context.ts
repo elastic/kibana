@@ -160,14 +160,16 @@ export const preserveStableNarrative = (
   latestEvent: SignificantEvent | undefined,
   knownRuleUuids: Iterable<string>
 ):
-  | (Pick<SignificantEvent, 'title' | 'symptom_hypothesis'> & { narrativePreserved: true })
+  | (Pick<SignificantEvent, 'title'> & Partial<Pick<SignificantEvent, 'symptom_hypothesis'>> & { narrativePreserved: true })
   | undefined => {
   if (latestEvent === undefined) return undefined;
   if (addsNewDetectionRules(submittedRuleUuids, knownRuleUuids)) return undefined;
 
   return {
     title: latestEvent.title,
-    symptom_hypothesis: latestEvent.symptom_hypothesis,
+    ...(latestEvent.symptom_hypothesis !== undefined
+      ? { symptom_hypothesis: latestEvent.symptom_hypothesis }
+      : {}),
     narrativePreserved: true,
   };
 };
