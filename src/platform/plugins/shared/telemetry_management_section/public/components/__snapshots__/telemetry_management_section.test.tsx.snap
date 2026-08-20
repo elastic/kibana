@@ -95,7 +95,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                           </EuiLink>,
                           "securityData": <EuiLink
                             data-test-id="endpoint_security_example"
-                            href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+                            href="https://some-host/telemetry-settings#security-telemetry"
                             target="_blank"
                           >
                             <Memo(MemoizedFormattedMessage)
