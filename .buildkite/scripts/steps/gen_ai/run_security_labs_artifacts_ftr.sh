@@ -30,4 +30,4 @@ export FTR_EIS_CCM="${FTR_EIS_CCM:-1}"
 .buildkite/scripts/steps/test/ftr_configs.sh
 
 echo "--- Upload Security Labs KB artifacts to GCS"
-bash .buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
+.buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
