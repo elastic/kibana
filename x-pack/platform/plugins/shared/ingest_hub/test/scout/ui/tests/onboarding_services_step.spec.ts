@@ -128,14 +128,20 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Logs').click();
     await expect(page.testSubj.locator('servicesStep-category-databases')).toBeHidden();
 
-    // switch to Metrics — Databases reappears; navigate to it
+    // navigate to Security in All mode, then switch to Metrics:
+    // guardduty is logs-only so its row disappears without needing to click a hidden category
+    await page.testSubj.locator('servicesStep-category-security_identity_compliance').click();
+    await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeVisible();
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
-    await expect(page.testSubj.locator('servicesStep-category-databases')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeHidden();
+
+    // switch back to All — Databases reappears; navigate to it and verify dynamodb row
+    await page.testSubj.locator('servicesStep-signalFilter').getByText('All').click();
     await page.testSubj.locator('servicesStep-category-databases').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
 
-    // navigate to Security — guardduty is logs-only so it is not rendered with Metrics filter
-    await page.testSubj.locator('servicesStep-category-security_identity_compliance').click();
-    await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeHidden();
+    // Metrics filter on Databases view — dynamodb stays visible (it is a metrics service)
+    await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
+    await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
   });
 });
