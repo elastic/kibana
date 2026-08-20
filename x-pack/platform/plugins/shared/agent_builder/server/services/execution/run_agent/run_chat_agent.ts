@@ -64,7 +64,6 @@ import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
-import { getTemplate } from '../../conversation/templates/registry';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -258,7 +257,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       : undefined;
 
   const conversationTemplate = conversation?.template_id
-    ? getTemplate(conversation.template_id)
+    ? await context.conversationTemplates.get(conversation.template_id)
     : undefined;
 
   await registerInternalTools({
@@ -350,6 +349,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    conversationTemplates: context.conversationTemplates,
   });
 
   const agentGraph = createAgentGraph({
