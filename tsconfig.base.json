@@ -2213,6 +2213,8 @@
       "@kbn/saved-objects-tagging-plugin/*": ["./x-pack/platform/plugins/shared/saved_objects_tagging/*"],
       "@kbn/saved-search-component": ["./src/platform/packages/shared/kbn-saved-search-component"],
       "@kbn/saved-search-component/*": ["./src/platform/packages/shared/kbn-saved-search-component/*"],
+      "@kbn/saved-search-constants": ["./src/platform/packages/private/kbn-saved-search-constants"],
+      "@kbn/saved-search-constants/*": ["./src/platform/packages/private/kbn-saved-search-constants/*"],
       "@kbn/saved-search-plugin": ["./src/platform/plugins/shared/saved_search"],
       "@kbn/saved-search-plugin/*": ["./src/platform/plugins/shared/saved_search/*"],
       "@kbn/scout": ["./src/platform/packages/shared/kbn-scout"],

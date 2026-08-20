@@ -31,7 +31,7 @@ export {
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
   MAX_DISCOVER_SESSION_TABS,
-} from './constants';
+} from '@kbn/saved-search-constants';
 
 export {
   fromDiscoverSessionAttributesToSavedSearch,

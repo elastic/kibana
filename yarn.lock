@@ -8504,6 +8504,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-search-constants@link:src/platform/packages/private/kbn-saved-search-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-search-plugin@link:src/platform/plugins/shared/saved_search":
   version "0.0.0"
   uid ""

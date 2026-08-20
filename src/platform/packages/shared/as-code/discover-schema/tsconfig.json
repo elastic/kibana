@@ -11,8 +11,6 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/discover-utils",
-    "@kbn/saved-search-plugin",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-data-views-schema",
     "@kbn/as-code-filters-schema",
@@ -20,5 +18,6 @@
     "@kbn/controls-constants",
     "@kbn/data-service-server",
     "@kbn/es-query-server",
+    "@kbn/saved-search-constants"
   ]
 }

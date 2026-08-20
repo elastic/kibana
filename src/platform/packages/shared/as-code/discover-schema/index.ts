@@ -24,36 +24,7 @@ export {
   discoverSessionApiDataSchema,
 } from './src/schemas';
 
-export type {
-  DataTable,
-  DataTableLimits,
-  ViewMode,
-  PanelOverrides,
-  ClassicTab,
-  EsqlTab,
-  Tab,
-  ControlPanel,
-  ControlPanels,
-  VisContext,
-  DiscoverSessionData,
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-  DataTableInput,
-  DataTableLimitsInput,
-  ViewModeInput,
-  PanelOverridesInput,
-  ClassicTabInput,
-  EsqlTabInput,
-  TabInput,
-  ControlPanelInput,
-  ControlPanelsInput,
-  VisContextInput,
-  DiscoverSessionDataInput,
-  DiscoverSessionApiClassicTabInput,
-  DiscoverSessionApiEsqlTabInput,
-  DiscoverSessionApiTabInput,
-} from './src/types';
+export type { DiscoverSessionData, DiscoverSessionApiInput } from './src/types';
 
 export {
   MAX_SESSION_TITLE_LENGTH,
@@ -64,4 +35,8 @@ export {
   MAX_DISCOVER_SESSION_CONTROL_PANELS,
   MAX_DISCOVER_SESSION_TAGS,
   MAX_SEARCH_QUERY_LENGTH,
-} from './src/constants';
+  MAX_DISCOVER_SESSION_TABS,
+  VIEW_MODE,
+  DataGridDensity,
+  UnifiedHistogramSuggestionType,
+} from '@kbn/saved-search-constants';

@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { VIEW_MODE } from '@kbn/saved-search-constants';
 
 export const viewModeSchema = z
   .union([

@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/saved-search-constants';
 import { columnSettingsEntrySchema, sortSchema } from './data_table';
 
 export const panelOverridesSchema = z

@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { UnifiedHistogramSuggestionType } from '@kbn/saved-search-constants';
 import { MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH } from '../constants';
 
 export const visContextSchema = z

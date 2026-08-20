@@ -15,7 +15,7 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { MAX_DISCOVER_SESSION_TABS } from '../constants';
 import { classicTabSchema, esqlTabSchema } from './tab';
 import { visContextSchema } from './vis_context';
 import { discoverSessionControlPanelsSchema } from './control_panel';

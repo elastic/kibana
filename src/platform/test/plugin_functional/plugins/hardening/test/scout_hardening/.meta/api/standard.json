@@ -9,7 +9,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-security-hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
+        "file": "src/platform/test/plugin_functional/plugins/hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
         "line": 24,
         "column": 12
       }
@@ -22,7 +22,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-security-hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
+        "file": "src/platform/test/plugin_functional/plugins/hardening/test/scout_hardening/api/tests/code_generation.spec.ts",
         "line": 39,
         "column": 12
       }

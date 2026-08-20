@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  LATEST_VERSION,
-  type SavedSearchContentType,
-  SavedSearchType,
-} from '@kbn/saved-search-constants';
-
-export type { SavedSearchCrudTypes } from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-saved-search-constants'],
+};
