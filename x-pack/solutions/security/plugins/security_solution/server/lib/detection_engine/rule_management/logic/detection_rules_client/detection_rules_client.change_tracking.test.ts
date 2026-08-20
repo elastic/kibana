@@ -33,17 +33,17 @@ import { createProductFeaturesServiceMock } from '../../../../product_features_s
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
-import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
-import { fetchPrebuiltImportContext } from '../import/fetch_prebuilt_import_context';
-import { findInstalledRulesByRuleIds } from '../import/find_installed_rules_by_rule_ids';
+import { checkRuleExceptionReferences } from './methods/import_rules/check_rule_exception_references';
+import { fetchPrebuiltImportContext } from './methods/import_rules/fetch_prebuilt_import_context';
+import { findInstalledRulesByRuleIds } from './methods/import_rules/find_installed_rules_by_rule_ids';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 jest.mock('./methods/get_rule_by_rule_id');
-jest.mock('../import/check_rule_exception_references');
-jest.mock('../import/fetch_prebuilt_import_context');
-jest.mock('../import/find_installed_rules_by_rule_ids');
+jest.mock('./methods/import_rules/check_rule_exception_references');
+jest.mock('./methods/import_rules/fetch_prebuilt_import_context');
+jest.mock('./methods/import_rules/find_installed_rules_by_rule_ids');
 
 describe('DetectionRulesClient change tracking', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -145,28 +145,15 @@ describe('DetectionRulesClient change tracking', () => {
       );
     });
 
-    describe('importRule', () => {
-      it('uses ruleImport action when creating a new rule', async () => {
-        await detectionRulesClient.importRule({
-          ruleToImport: getValidatedRuleToImportMock(),
-          overwriteRules: true,
-        });
-
-        expect(rulesClient.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            changeTracking: expect.objectContaining({
-              action: SecurityRuleChangeTrackingAction.ruleImport,
-            }),
-          })
-        );
-      });
-
+    describe('importRules', () => {
       it('uses ruleImport action when overwriting an existing rule', async () => {
         const existingRule = getRulesSchemaMock();
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+          [existingRule.rule_id]: existingRule,
+        });
 
-        await detectionRulesClient.importRule({
-          ruleToImport: { ...getValidatedRuleToImportMock(), rule_id: existingRule.rule_id },
+        await detectionRulesClient.importRules({
+          rules: [{ ...getValidatedRuleToImportMock(), rule_id: existingRule.rule_id }],
           overwriteRules: true,
         });
 

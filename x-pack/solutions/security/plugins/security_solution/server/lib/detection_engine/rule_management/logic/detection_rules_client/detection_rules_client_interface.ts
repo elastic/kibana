@@ -14,7 +14,6 @@ import type {
   RuleObjectId,
   RuleResponse,
   RuleToImport,
-  RuleSource,
 } from '../../../../../../common/api/detection_engine';
 import type {
   RuleChangesHistoryResponse,
@@ -23,7 +22,13 @@ import type {
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
-import type { ImportRulesResult } from './methods/import_rules';
+import type {
+  ImportRuleSuccess,
+  ImportRulesResult,
+  RuleImportErrorObject,
+} from './methods/import_rules/types';
+
+export type { ImportRuleSuccess, ImportRulesResult, RuleImportErrorObject };
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
@@ -38,7 +43,6 @@ export interface IDetectionRulesClient {
   bulkDeleteRules: (args: BulkDeleteRulesArgs) => Promise<BulkDeleteRulesReturn>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<ImportRulesResult>;
   getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
   restoreRuleFromHistory: (
@@ -88,14 +92,6 @@ export interface UpgradePrebuiltRuleArgs {
 export interface RevertPrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
   existingRule: RuleResponse;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
-export interface ImportRuleArgs {
-  ruleToImport: RuleToImport;
-  overrideFields?: { rule_source: RuleSource; immutable: boolean };
-  overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 

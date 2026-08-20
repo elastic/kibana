@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
-import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import { getImportRulesSchemaMock } from '../../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { fetchPrebuiltImportContext } from './fetch_prebuilt_import_context';
 
 describe('fetchPrebuiltImportContext', () => {

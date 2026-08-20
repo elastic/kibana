@@ -7,9 +7,9 @@
 
 import { escapeQuotes } from '@kbn/es-query';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
-import { findRules } from '../search/find_rules';
+import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import { internalRuleToAPIResponse } from '../../converters/internal_rule_to_api_response';
+import { findRules } from '../../../search/find_rules';
 
 /**
  * Look up installed rules by `rule_id`, returned as a map keyed by `rule_id`.

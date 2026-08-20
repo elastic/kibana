@@ -10,7 +10,7 @@ import { getImportRulesSchemaMock } from '../../../../../../common/api/detection
 import { importRules } from './import_rules';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { detectionRulesClientMock } from '../detection_rules_client/__mocks__/detection_rules_client';
-import { createRuleImportErrorObject } from './errors';
+import { createRuleImportErrorObject } from '../detection_rules_client/methods/import_rules/errors';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
 describe('importRules', () => {

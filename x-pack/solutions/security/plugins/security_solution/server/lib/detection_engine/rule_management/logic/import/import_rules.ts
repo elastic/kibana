@@ -9,9 +9,11 @@ import { chunk } from 'lodash/fp';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
-import type { ImportRuleSuccess } from '../detection_rules_client/methods/import_rules';
-import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
-import { isRuleConflictError, isRuleImportError, type RuleImportErrorObject } from './errors';
+import type {
+  IDetectionRulesClient,
+  ImportRuleSuccess,
+  RuleImportErrorObject,
+} from '../detection_rules_client/detection_rules_client_interface';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
 /**
@@ -53,17 +55,20 @@ export const importRules = async ({
 };
 
 const toImportRuleResponse = (
-  rule: ImportRuleSuccess | RuleImportErrorObject
+  response: ImportRuleSuccess | RuleImportErrorObject
 ): ImportRuleResponse => {
-  if (isRuleImportError(rule)) {
+  if ('error' in response) {
+    const { ruleId, message, type } = response.error;
+
     return createBulkErrorObject({
-      message: rule.error.message,
-      statusCode: isRuleConflictError(rule) ? 409 : 400,
-      ruleId: rule.error.ruleId,
+      message,
+      statusCode: type === 'conflict' ? 409 : 400,
+      ruleId,
     });
   }
+
   return {
-    rule_id: rule.rule_id,
+    rule_id: response.rule_id,
     status_code: 200,
   };
 };

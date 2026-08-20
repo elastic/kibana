@@ -23,6 +23,6 @@ export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 100;
 
 /**
  * `pMap` concurrency for the per-rule overwrite branch during import
- * (existing `rule_id`s fall through to `importRule` one-by-one).
+ * (existing `rule_id`s are updated one-by-one via `rulesClient.update`).
  */
 export const RULE_IMPORT_BULK_UPDATE_CONCURRENCY = 50;

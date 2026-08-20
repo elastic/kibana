@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import type { IPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { RuleToImport } from '../../../../../../../../common/api/detection_engine';
+import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
+import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 
 /**
  * Prebuilt-rule lookups the import path needs before it can classify rules

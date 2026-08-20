@@ -6,9 +6,9 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
+import { getRuleMock } from '../../../../../routes/__mocks__/request_responses';
+import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
+import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../../../api/constants';
 import { findInstalledRulesByRuleIds } from './find_installed_rules_by_rule_ids';
 
 /**
