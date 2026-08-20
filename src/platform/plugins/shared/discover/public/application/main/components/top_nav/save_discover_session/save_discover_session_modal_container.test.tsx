@@ -355,7 +355,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
           },
         }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -368,7 +367,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
           },
         }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -381,7 +379,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
           },
         }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -397,7 +394,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
           },
         }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -450,7 +446,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
         services,
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
@@ -458,7 +453,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       let { modalProps } = await setup({

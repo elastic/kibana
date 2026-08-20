@@ -164,14 +164,12 @@ export const fromTabStateToSavedObjectTab = ({
   services,
   currentDataView,
   tabType,
-  profileStateRegistry,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
   currentDataView: DataView | undefined;
   tabType: DiscoverTabType | undefined;
-  profileStateRegistry: ProfileStateRegistry;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
@@ -222,7 +220,7 @@ export const fromTabStateToSavedObjectTab = ({
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,
-    tabTypeState: profileStateRegistry.toSavedState(tabType, tab.profileState),
+    tabTypeState: services.profileStateRegistry.toSavedState(tabType, tab.profileState),
   };
 };
 

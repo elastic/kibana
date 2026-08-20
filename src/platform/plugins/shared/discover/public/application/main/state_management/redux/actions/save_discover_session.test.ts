@@ -444,7 +444,6 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });
@@ -492,7 +491,6 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });
@@ -537,7 +535,6 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });

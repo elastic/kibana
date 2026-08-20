@@ -109,7 +109,6 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
@@ -199,7 +198,6 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
@@ -303,7 +301,6 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
@@ -457,7 +454,6 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -501,7 +497,6 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -570,7 +565,6 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: dataViewMockWithTimeField,
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       // The serializedSearchSource should be created from the provided dataView,
@@ -605,7 +599,6 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       // Should use initialInternalState since dataView is not provided
@@ -819,6 +812,7 @@ describe('tab mapping utils', () => {
 
   describe('tab type persistence', () => {
     const profileStateRegistry = createProfileStateRegistry();
+    const tabTypeServices = { ...services, profileStateRegistry };
 
     it('fromSavedObjectTabToTabState populates initialInternalState.tabType and merges the saved profile state', () => {
       const persistedTab = fromTabStateToSavedObjectTab({
@@ -826,10 +820,9 @@ describe('tab mapping utils', () => {
           id: 'metrics-tab',
           profileState: { metricsState: { dimensions: ['host.name'] } },
         }),
-        services,
+        services: tabTypeServices,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileStateRegistry,
       });
 
       expect(persistedTab.tabTypeState).toEqual({
@@ -857,10 +850,9 @@ describe('tab mapping utils', () => {
           id: 'unopened-metrics-tab',
           profileState: { metricsState: { dimensions: ['service.name'] } },
         }),
-        services,
+        services: tabTypeServices,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileStateRegistry,
       });
 
       const loadedTabState = fromSavedObjectTabToTabState({
@@ -872,10 +864,9 @@ describe('tab mapping utils', () => {
       // exactly as a tab that was never selected would be saved again.
       const resavedTab = fromTabStateToSavedObjectTab({
         tab: loadedTabState,
-        services,
+        services: tabTypeServices,
         currentDataView: undefined,
         tabType: loadedTabState.initialInternalState?.tabType,
-        profileStateRegistry,
       });
 
       expect(resavedTab.tabTypeState).toEqual(persistedTab.tabTypeState);
@@ -889,11 +880,10 @@ describe('tab mapping utils', () => {
 
       const savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tabState,
-        services,
+        services: tabTypeServices,
         currentDataView: undefined,
         // The query no longer matches the metrics profile, so nothing resolved this save.
         tabType: undefined,
-        profileStateRegistry,
       });
 
       expect(savedObjectTab.tabTypeState).toBeUndefined();
@@ -904,10 +894,9 @@ describe('tab mapping utils', () => {
 
       const savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tabState,
-        services,
+        services: tabTypeServices,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileStateRegistry,
       });
 
       // Defaults are expanded even though the tab never had explicit metrics state.

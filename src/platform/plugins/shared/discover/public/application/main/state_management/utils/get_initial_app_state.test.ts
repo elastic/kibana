@@ -80,7 +80,6 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileStateRegistry: services.profileStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -129,7 +128,6 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileStateRegistry: services.profileStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -271,7 +269,6 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileStateRegistry: services.profileStateRegistry,
     });
 
   test('should set view mode correctly', () => {

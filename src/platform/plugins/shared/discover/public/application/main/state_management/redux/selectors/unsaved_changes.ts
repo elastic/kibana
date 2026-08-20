@@ -106,7 +106,6 @@ export const selectHasUnsavedChanges = (
       services,
       currentDataView: undefined,
       tabType,
-      profileStateRegistry: services.profileStateRegistry,
     });
 
     const normalizedTab = fromTabStateToSavedObjectTab({
@@ -114,7 +113,6 @@ export const selectHasUnsavedChanges = (
       currentDataView,
       services,
       tabType,
-      profileStateRegistry: services.profileStateRegistry,
     });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {

@@ -64,7 +64,6 @@ describe('Test discover app state', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileStateRegistry: services.profileStateRegistry,
     });
 
     return createDiscoverSessionMock({
