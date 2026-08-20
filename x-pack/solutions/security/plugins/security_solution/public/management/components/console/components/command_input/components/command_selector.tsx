@@ -62,8 +62,6 @@ export const CommandSelector = memo<CommandSelectorProps>(
         for (const commandDefinition of [...commandDefinitions].sort((a, b) =>
           a.name.localeCompare(b.name)
         )) {
-          a.name.localeCompare(b.name)
-        )) {
           options.push(
             ...buildCommandUsageList(commandDefinition, { includeOptionalArgs: false }).map(
               (usage) => {
