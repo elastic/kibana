@@ -31,7 +31,7 @@ jobs:
       group: flaky-fix-review-reminder
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/CODEOWNERS
@@ -43,7 +43,8 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
         with:
-          # github-script defaults to GITHUB_TOKEN; pull-requests: write suffices.
+          # must be kibanamachine (github-actions wouldn't send the notification to the team)
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
             const flakyFixReviewReminder = require('./.github/scripts/flaky_fix_review_reminder');
             await flakyFixReviewReminder({ github, context, core });
