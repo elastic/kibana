@@ -10,7 +10,6 @@ import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_VERSION_CURRENT,
 } from '../../constants';
 import type { Investigation } from '../schemas/components/investigation.gen';
 
