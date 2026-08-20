@@ -1,0 +1,13 @@
+version: 1
+enabled: true
+review_drafts: false
+required_labels:
+  - reviewer:libra
+paths:
+  exclude:
+    - ".github/workflows/*.lock.yml"
+    - "**/__snapshots__/**"
+    - "**/.meta/**"
+    - "**/moon.yml"
+    - "**/version_dependencies.txt"
+    - "oas_docs/output/**"
