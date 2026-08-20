@@ -12,6 +12,10 @@
  * an unsaved session keeps them short-lived, saving the session extends them, extending the
  * session extends them again, and deleting the session deletes them.
  *
+ * Also covers the "late-joiner" contract: a search submitted after a session's existing tracked
+ * searches have already completed in Elasticsearch (e.g. an "other bucket" follow-up fired by
+ * Lens during a session restore) must still be recorded in the session's idMapping.
+ *
  * These assertions are all about backend state — the keep-alive Kibana asks Elasticsearch for —
  * so they belong here rather than in a UI spec.
  */
@@ -162,6 +166,61 @@ apiTest.describe(
               .then(() => undefined)
               .catch((e) => e);
             return error?.meta?.body?.error?.type === 'resource_not_found_exception';
+          },
+          true,
+          { timeout: 30_000 }
+        );
+      }
+    );
+
+    apiTest(
+      "records a search submitted after the session's existing searches have already completed",
+      async ({ apiClient, esClient }) => {
+        const sessionId = randomSessionId();
+
+        await saveSession(apiClient, sessionId);
+        const firstId = await submitSearch(apiClient, sessionId, { isStored: true });
+
+        // Wait for the first ES async search to finish — modelling the state where all of a
+        // session's tracked searches are done, but a follow-up (e.g. an "other bucket" filter
+        // request emitted by Lens after it processes the first result) is about to be issued.
+        await waitFor(
+          async () => !(await esClient.asyncSearch.status({ id: firstId })).is_running,
+          true,
+          { timeout: 30_000 }
+        );
+
+        // Also wait for Kibana to have recorded the first search in idMapping, so we can
+        // distinguish "first tracked" from "second tracked" in the assertion below.
+        await waitFor(
+          async () => {
+            const session = await apiClient.get(`${SESSION_API_PATH}/${sessionId}`, {
+              headers: { ...COMMON_HEADERS, ...cookieHeader },
+            });
+            if (session.statusCode !== 200) return false;
+            const ids = Object.values<{ id: string }>(session.body.attributes.idMapping).map(
+              ({ id }) => id
+            );
+            return ids.includes(firstId);
+          },
+          true,
+          { timeout: 30_000 }
+        );
+
+        // Submit the follow-up after the first search is done. The session engine must accept
+        // and track it even though its existing search has already completed.
+        const secondId = await submitSearch(apiClient, sessionId, { isStored: true });
+
+        await waitFor(
+          async () => {
+            const session = await apiClient.get(`${SESSION_API_PATH}/${sessionId}`, {
+              headers: { ...COMMON_HEADERS, ...cookieHeader },
+            });
+            if (session.statusCode !== 200) return false;
+            const ids = Object.values<{ id: string }>(session.body.attributes.idMapping).map(
+              ({ id }) => id
+            );
+            return ids.includes(secondId);
           },
           true,
           { timeout: 30_000 }
