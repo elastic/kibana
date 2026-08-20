@@ -177,7 +177,9 @@ export const composedRecoverySegmentSchema = z
   .string()
   .min(1)
   .max(MAX_ESQL_QUERY_LENGTH)
-  .refine((s) => s.trim().length > 0, { message: 'Segment must contain at least one character.' });
+  .refine((s) => s.trim().length > 0, {
+    message: 'Segment must contain at least one non-whitespace character.',
+  });
 
 /** Composed wrappers (segment-based, appended to `base`). */
 
