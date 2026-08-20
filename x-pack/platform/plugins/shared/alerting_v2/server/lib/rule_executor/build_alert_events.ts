@@ -151,6 +151,7 @@ export function createAlertEventsBatchBuilder({
   const wroteAt = new Date().toISOString();
   const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
+  const hasGroupingFields = groupingFields.length > 0;
   const groupHashes = new Set<string>();
   const droppedGroupHashes = new Set<string>();
   let index = 0;
@@ -172,8 +173,14 @@ export function createAlertEventsBatchBuilder({
 
       const isNewGroup = !groupHashes.has(groupHash);
       const isActiveGroup = activeGroupHashes.has(groupHash);
-      // Active groups with an existing episode should not be dropped.
-      if (isNewGroup && !isActiveGroup && groupHashes.size >= maxGroupsPerExecution) {
+      if (
+        // Only check maxGroupsPerExecution for grouped rules
+        hasGroupingFields &&
+        isNewGroup &&
+        // Active groups with an existing episode should not be dropped.
+        !isActiveGroup &&
+        groupHashes.size >= maxGroupsPerExecution
+      ) {
         droppedGroupHashes.add(groupHash);
         continue;
       }

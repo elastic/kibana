@@ -383,6 +383,11 @@ export const ALERTING_LOG_CODES = {
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
   /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
   RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
+  /**
+   * The active-group fetch returned exactly `maxGroupsPerExecution` rows,
+   * so the active set may be truncated.
+   */
+  RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**

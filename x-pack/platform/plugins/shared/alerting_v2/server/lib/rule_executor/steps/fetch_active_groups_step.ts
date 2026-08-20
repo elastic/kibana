@@ -6,46 +6,68 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { guardedMapStep } from '../stream_utils';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
-import { isClassifyAbsentGroupsEnabled } from '../is_classify_absent_groups_enabled';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { PluginConfig } from '../../../config';
 
 /**
  * Fetches the rule's currently-active group hashes once, before the breach query
  * fans out into batches, and threads them onto `state.activeGroups`.
  *
- * The set is reused downstream by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. It
- * only matters when the run may classify absence, so the query is skipped otherwise.
+ * The set is reused downstream by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`.
  */
 @injectable()
 export class FetchActiveGroupsStep implements RuleExecutionStep {
   public readonly name = 'fetch_active_groups';
 
+  private readonly maxGroupsPerExecution: number;
+
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract
-  ) {}
+    @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+  ) {
+    this.maxGroupsPerExecution =
+      pluginConfigAccessor.get<PluginConfig>().rules.run.maxGroupsPerExecution;
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
     return guardedMapStep(streamState, ['rule'], async (state) => {
-      if (!isClassifyAbsentGroupsEnabled(state.rule)) {
+      if (state.rule.kind !== 'alert') {
         return { type: 'continue', state };
       }
 
       const activeGroups = await fetchActiveAlertGroupHashes(
         step.internalQueryService,
         state.input.ruleId,
-        state.input.executionContext
+        state.input.executionContext,
+        step.maxGroupsPerExecution
       );
+
+      if (activeGroups.length >= step.maxGroupsPerExecution) {
+        step.logger.warn({
+          message: `[${step.name}] Active-group fetch hit maxGroupsPerExecution=${step.maxGroupsPerExecution} for rule ${state.input.ruleId}; active set may be truncated`,
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED,
+          labels: {
+            rule_id: state.input.ruleId,
+            space_id: state.input.spaceId,
+            step: step.name,
+          },
+        });
+      }
 
       step.logger.debug({
         message: `[${step.name}] Fetched ${activeGroups.length} active group(s) for rule ${state.input.ruleId}`,

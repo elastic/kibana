@@ -176,7 +176,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert' });
+      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const esqlRowBatch = [
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
@@ -287,7 +287,7 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const input = createRuleExecutionInput();
-      const rule = createRuleResponse({ kind: 'alert' });
+      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
       const batch1 = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
       const batch2 = [{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }];
 

@@ -200,7 +200,7 @@ describe('createAlertEventsBatchBuilder', () => {
         ruleId: 'rule-123',
         ruleVersion: 1,
         spaceId: 'default',
-        ruleAttributes: { grouping: { fields: [] } },
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
         scheduledTimestamp: '2024-12-31T23:59:00.000Z',
         type: 'alert',
         maxGroupsPerExecution,
@@ -286,6 +286,31 @@ describe('createAlertEventsBatchBuilder', () => {
       // First batch fills the cap (2 groups); the second batch is all new -> dropped.
       expect(batch1).toHaveLength(2);
       expect(batch2).toHaveLength(0);
+    });
+
+    it('does not apply the cap when the rule has no grouping fields', () => {
+      // Without `grouping.fields` every row is its own fallback "group", so the
+      // cap would collide with `alerts.max` (which already bounds rows upstream)
+      // and silently truncate ungrouped results. The cap must be skipped here.
+      const builder = createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: [] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 2,
+      });
+
+      const docs = builder.buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+        { 'host.name': 'host-d' },
+      ]);
+
+      expect(docs).toHaveLength(4);
+      expect(builder.droppedGroupCount).toBe(0);
     });
 
     it('does not drop anything when the group count stays within the limit', () => {

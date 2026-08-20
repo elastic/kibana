@@ -20,7 +20,6 @@ import {
 import { detectDataPresence } from '../detect_data_presence';
 import { executeRecoveryQuery } from '../execute_recovery_query';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
-import { isClassifyAbsentGroupsEnabled } from '../is_classify_absent_groups_enabled';
 import { forwardThenFinalize } from '../stream_utils';
 import {
   QueryServiceInternalToken,
@@ -63,6 +62,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   public readonly name = 'classify_absent_groups';
 
   private readonly maxQueryResponseSize: number;
+  private readonly maxGroupsPerExecution: number;
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
@@ -71,8 +71,9 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    this.maxQueryResponseSize =
-      pluginConfigAccessor.get<PluginConfig>().rules.run.query.maxResponseSize;
+    const { run } = pluginConfigAccessor.get<PluginConfig>().rules;
+    this.maxQueryResponseSize = run.query.maxResponseSize;
+    this.maxGroupsPerExecution = run.maxGroupsPerExecution;
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -114,21 +115,26 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   ): Promise<AlertEvent[]> {
     const { rule, input } = state;
 
-    if (!rule || !isClassifyAbsentGroupsEnabled(rule)) {
+    if (rule?.kind !== 'alert') {
       return [];
     }
 
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
     const noDataEnabled = getNoDataEsqlQuery(rule.query, rule.no_data_strategy) != null;
 
+    if (!recoveryEnabled && !noDataEnabled) {
+      return [];
+    }
+
     // Reuse the active groups already fetched by `FetchActiveGroupsStep`.
-    // Falls back to a fetch in case they were not threaded onto state.
+    // Falls back to a fetch in case they were not threaded onto state
     const activeGroups = state.activeGroups
       ? [...state.activeGroups]
       : await fetchActiveAlertGroupHashes(
           this.internalQueryService,
           rule.id,
-          input.executionContext
+          input.executionContext,
+          this.maxGroupsPerExecution
         );
 
     if (activeGroups.length === 0) {

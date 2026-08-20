@@ -152,8 +152,7 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 
 `CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
 
-The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front — but only when absence classification (recovery / no-data) is enabled — and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
-
+The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
 ## Pipeline state
 
 `RulePipelineState` in `types.ts` is the data contract between steps.
@@ -165,7 +164,7 @@ The cap only ever drops groups that have **no existing episode** — groups that
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
-| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once when absence classification is enabled so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
+| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
 
 ## Execution steps
 
@@ -176,7 +175,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once (only when absence classification is enabled) and thread them onto `state.activeGroups`. |
+| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
 | 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
