@@ -47,6 +47,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
+import { roundsToEvents } from './rounds_to_events';
 
 export type Document = Omit<
   Required<
@@ -222,29 +223,36 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
+  // The timeline is a derived projection of the rounds, which stay the source of truth. It is
+  // exposed on the conversation object but never persisted (this PR writes rounds only).
+  const withEvents = (conversation: Conversation): Conversation => ({
+    ...conversation,
+    events: roundsToEvents(conversation),
+  });
+
   if (existingAttachments && existingAttachments.length > 0) {
-    return {
+    return withEvents({
       ...base,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
       ...(document._source!.state && { state: document._source!.state }),
-    };
+    });
   }
 
   if (hasLegacyRoundAttachments) {
-    return {
+    return withEvents({
       ...base,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
       ...(document._source!.state && { state: document._source!.state }),
-    };
+    });
   }
 
-  return {
+  return withEvents({
     ...base,
     rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
-  };
+  });
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
@@ -292,6 +300,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    // The timeline is derived from rounds on read (see fromEs), never persisted here.
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.

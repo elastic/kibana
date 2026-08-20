@@ -60,6 +60,8 @@
     "@kbn/content-list-provider",
     "@kbn/content-list-provider-client",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
     "@kbn/shared-ux-ai-components",
     "@kbn/security-plugin",
     "@kbn/zod",
