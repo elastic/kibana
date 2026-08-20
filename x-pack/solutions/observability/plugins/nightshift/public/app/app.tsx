@@ -103,14 +103,10 @@ export function NightshiftApp(): React.ReactElement {
     [events, selectedEventIdFromUrl]
   );
 
-  // Deep links can name an event the severity-filtered list never fetches; the list stays
-  // authoritative when it has a match, so an open flyout still tracks background refetches.
   const shouldFetchById = Boolean(selectedEventIdFromUrl) && !eventFromList && !isLoading;
   const eventByIdQuery = useFetchEventById(selectedEventIdFromUrl, { enabled: shouldFetchById });
   const selectedEvent = eventFromList ?? eventByIdQuery.data;
 
-  // Held in state rather than derived: the id is stripped from the URL the moment it fails to
-  // resolve, so the callout needs its own copy to keep naming the event the user followed.
   const [notFoundEventId, setNotFoundEventId] = useState<string>();
 
   useEffect(() => {
@@ -121,7 +117,6 @@ export function NightshiftApp(): React.ReactElement {
       setNotFoundEventId(undefined);
       return;
     }
-    // Only a settled lookup proves absence; acting earlier would flash the callout mid-fetch.
     if (!eventByIdQuery.isFetched) {
       return;
     }

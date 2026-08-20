@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/**
- * Query param that restores the open event flyout on load or from a shared link.
- *
- * Holds `event_id`, the stable lineage key — not `event_uuid`, which identifies a single
- * append-only document version and would rot as soon as the event is updated.
- */
+/** Query param that restores the open event flyout on load or from a shared link. */
 export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
 
 export const IMPACTED_SERVICES_QUERY_PARAM = 'impactedServices';

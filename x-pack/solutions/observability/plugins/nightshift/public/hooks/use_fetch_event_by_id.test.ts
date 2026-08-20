@@ -61,8 +61,6 @@ describe('useFetchEventById', () => {
     mockSignificantEventsFetch.mockResolvedValue({ hits: [], page: 1, perPage: 1, total: 0 });
   });
 
-  // A deep link has to resolve regardless of the landing list's severity filter and lookback
-  // window, so any filter creeping back into this request is a regression.
   it('requests the event by id and sends no list filters', async () => {
     renderHook(() => useFetchEventById('evt-1'));
 
@@ -97,9 +95,7 @@ describe('useFetchEventById', () => {
     await expect(capturedQueryFn!({ signal: undefined })).resolves.toEqual(event);
   });
 
-  // react-query treats an undefined result as a failed query, so a missing event has to resolve to
-  // null for the caller to see a settled "not found" rather than a retrying error.
-  it('resolves to null when the event does not exist', async () => {
+  it('resolves to null (never undefined, which react-query rejects) when the event does not exist', async () => {
     renderHook(() => useFetchEventById('evt-unknown'));
 
     await expect(capturedQueryFn!({ signal: undefined })).resolves.toBeNull();

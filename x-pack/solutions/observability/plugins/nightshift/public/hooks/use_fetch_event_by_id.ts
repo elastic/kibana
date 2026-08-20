@@ -9,14 +9,7 @@ import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
-/**
- * Fetches a single significant event by its stable `event_id`, so a deep link can restore the
- * flyout for an event that is not on the landing list.
- *
- * The request deliberately carries no `severity`, `status`, `from` or `to`: a shared link has to
- * resolve independently of the filters and lookback window the landing list applies, otherwise a
- * link to a medium/low-severity or older event silently resolves to nothing.
- */
+/** Fetches one significant event by its stable `event_id`, unfiltered by the landing list's severity and time range. */
 export const useFetchEventById = (
   eventId: string | undefined,
   { enabled = true }: { enabled?: boolean } = {}
@@ -37,8 +30,6 @@ export const useFetchEventById = (
         }
       );
 
-      // `null`, not `undefined`: react-query rejects an undefined query result, which would turn a
-      // legitimately missing event into a retrying error instead of a settled "not found".
       return response.hits.at(0) ?? null;
     },
   });
