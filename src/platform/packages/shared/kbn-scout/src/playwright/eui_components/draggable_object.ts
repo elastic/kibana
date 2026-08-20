@@ -20,12 +20,17 @@ import { BaseObject, type ObjectScope } from '@elastic/eui-test-helpers';
  * `testSubj` must be set on the item's own drag handle (the element EUI's
  * `provided.dragHandleProps` are spread onto), not on the `EuiDraggable` item
  * wrapper — that's what every current consumer already renders a handle
- * `data-test-subj` for. No `componentSelector` is enforced: the handle is
- * consumer-markup (often a button or icon), not a fixed EUI element.
+ * `data-test-subj` for. The handle markup itself is consumer-defined (often a
+ * button or icon), so the component-type guard checks for the
+ * `data-rfd-drag-handle-draggable-id` attribute `@hello-pangea/dnd` spreads
+ * onto an *enabled* handle instead of a fixed EUI class. A disabled
+ * draggable's handle lacks that attribute — pointing this object at one
+ * throws the same "wrong component" error as pointing it at a non-handle
+ * element, since a disabled item can't be reordered either way.
  */
 export class EuiDraggableObject extends BaseObject {
   constructor(scope: ObjectScope, testSubj: string) {
-    super(scope, testSubj);
+    super(scope, testSubj, '[data-rfd-drag-handle-draggable-id]');
   }
 
   /**
