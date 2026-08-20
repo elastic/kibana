@@ -14,6 +14,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
   let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.cleanUp();
     await syntheticsServices.deleteCustomRules();
     await syntheticsServices.deleteSettingsAndConnectors();

@@ -13,6 +13,7 @@ test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.cleanUp();
   });
 

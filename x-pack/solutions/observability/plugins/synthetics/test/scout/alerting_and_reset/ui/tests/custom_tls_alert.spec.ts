@@ -14,6 +14,7 @@ test.describe('Creates a custom TLS alert rule', { tag: tags.stateful.classic },
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.cleanUp();
     await syntheticsServices.deleteCustomRules();
     configId = await syntheticsServices.addMonitor(
