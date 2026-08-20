@@ -24,8 +24,8 @@ import {
   SDLC_TEAMS_ROUTE,
 } from '../common/constants';
 
-export interface SdlcIntelPluginSetup {}
-export interface SdlcIntelPluginStart {}
+export type SdlcIntelPluginSetup = Record<string, never>;
+export type SdlcIntelPluginStart = Record<string, never>;
 
 export interface SdlcIntelPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;

@@ -234,7 +234,10 @@ export const groupRoadmapsByOrgTeamSubteam = (
       continue;
     }
 
-    const subteamEpicsMap = groupEpicsBySubteam(orgEpics, teamRecord);
+    const subteamEpicsMap = groupEpicsBySubteam(
+      orgEpics.map((epic) => ({ ...epic, ...toEpicSubteamMatchInput(epic) })),
+      teamRecord
+    );
     const subteamDefinitions = resolveSubteamDefinitionsForOrg(orgTeamKey, teamRecord.subteams);
     const subteams: ExecutiveSubteamGroup[] = [];
     const assignedEpicIds = new Set<string>();

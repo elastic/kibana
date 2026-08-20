@@ -71,7 +71,7 @@ export const PipelineToolbar = ({
             fullWidth
             value={scope.orgTeamKey}
             onChange={(event) => onOrgTeamChange(event.target.value)}
-            options={orgTeamOptions}
+            options={[...orgTeamOptions]}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -90,7 +90,7 @@ export const PipelineToolbar = ({
             onChange={(event) => onSubteamChange(event.target.value)}
             options={
               subteamOptions.length > 0
-                ? subteamOptions
+                ? [...subteamOptions]
                 : [
                     {
                       value: '',
@@ -115,7 +115,7 @@ export const PipelineToolbar = ({
             fullWidth
             value={scope.productRoadmapId}
             onChange={(event) => onProductRoadmapChange(event.target.value)}
-            options={productRoadmapOptions}
+            options={[...productRoadmapOptions]}
           />
         </EuiFormRow>
       </EuiFlexItem>

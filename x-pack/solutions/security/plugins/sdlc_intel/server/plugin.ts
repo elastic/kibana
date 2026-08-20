@@ -33,8 +33,8 @@ import { registerSdlcReadRoutes } from './routes/register_routes';
 import { registerSdlcWorkflowSteps } from './steps/register_workflow_steps';
 import { setSdlcIntelServices } from './services/sdlc_intel_services';
 
-export interface SdlcIntelPluginSetup {}
-export interface SdlcIntelPluginStart {}
+export type SdlcIntelPluginSetup = Record<string, never>;
+export type SdlcIntelPluginStart = Record<string, never>;
 
 export interface SdlcIntelPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -121,6 +121,3 @@ export class SdlcIntelPlugin
     }
   }
 }
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SdlcIntelPlugin(initializerContext);

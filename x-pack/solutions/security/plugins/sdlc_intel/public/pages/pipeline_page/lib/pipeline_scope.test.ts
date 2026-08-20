@@ -29,10 +29,12 @@ const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhas
     ownEngineeringTeam: 'One Workflow',
     contributingOrgTeams: ['siem'],
     contributingEngineeringTeams: [],
+
     crossTeam: false,
     teamCount: 1,
   },
   phases: {},
+  links: {},
   ticketsByRepo: [],
   ...overrides,
 });
@@ -60,6 +62,7 @@ const roadmaps: SdlcRoadmapGroup[] = [
         roadmap: { id: 'unmapped', title: '(fips): Legal requirements', product: 'Unknown' },
         teams: {
           contributingOrgTeams: [],
+          contributingEngineeringTeams: [],
           crossTeam: false,
           teamCount: 0,
         },

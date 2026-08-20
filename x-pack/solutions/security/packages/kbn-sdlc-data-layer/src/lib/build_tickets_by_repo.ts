@@ -134,11 +134,10 @@ export const collectEpicGithubAssignees = ({
   const add = (logins: readonly string[] | undefined): void => {
     for (const login of logins ?? []) {
       const trimmed = login.trim();
-      if (!trimmed || seen.has(trimmed)) {
-        continue;
+      if (trimmed && !seen.has(trimmed)) {
+        seen.add(trimmed);
+        ordered.push(trimmed);
       }
-      seen.add(trimmed);
-      ordered.push(trimmed);
     }
   };
 

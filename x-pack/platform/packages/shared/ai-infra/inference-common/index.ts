@@ -43,6 +43,7 @@ export {
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
   type ChatCompleteRetryConfiguration,
+  type ChatCompleteCacheControl,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
   type UnboundChatCompleteOptions,

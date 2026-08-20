@@ -11,14 +11,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type {
+  ActionsClient,
+  PluginSetupContract as ActionsPluginSetupContract,
+} from '@kbn/actions-plugin/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import type { RawAction } from '@kbn/actions-plugin/server/types';
 import { getSdlcIntelServices } from './sdlc_intel_services';
+
+export type ResolvedConnectorClient = Awaited<
+  ReturnType<ActionsPluginSetupContract['getAxiosInstanceWithAuth']>
+>;
 
 const resolveConnector = async (
   actionsClient: ActionsClient,
@@ -88,7 +94,7 @@ export const resolveConnectorAxiosClient = async ({
   connectorIdOrName: string;
   expectedTypeId: string;
   additionalHeaders?: Record<string, string>;
-}): Promise<AxiosInstance> => {
+}): Promise<ResolvedConnectorClient> => {
   const { actionsSetup, actionsStart, coreStart, logger } = getSdlcIntelServices();
   const actionsClient = await actionsStart.getActionsClientWithRequest(request);
   const connectorRef = await resolveConnector(actionsClient, connectorIdOrName, expectedTypeId);
@@ -106,6 +112,7 @@ export const resolveConnectorAxiosClient = async ({
     encryptedSavedObjectsClient,
     unsecuredSavedObjectsClient,
     logger,
+    configurationUtilities: actionsSetup.getActionsConfigurationUtilities(),
   });
 
   return actionsSetup.getAxiosInstanceWithAuth({

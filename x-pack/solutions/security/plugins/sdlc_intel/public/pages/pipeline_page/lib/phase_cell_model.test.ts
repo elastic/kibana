@@ -21,6 +21,7 @@ const sampleEpic = (): SdlcEpicPhaseSummary => ({
   teams: {
     ownOrgTeam: 'siem',
     contributingOrgTeams: ['siem'],
+    contributingEngineeringTeams: [],
     crossTeam: false,
     teamCount: 1,
   },

@@ -11,9 +11,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
 import type { KibanaRequest } from '@kbn/core/server';
-import { resolveConnectorAxiosClient } from './resolve_connector_client';
+import {
+  resolveConnectorAxiosClient,
+  type ResolvedConnectorClient,
+} from './resolve_connector_client';
 
 export const GOOGLE_DRIVE_CONNECTOR_TYPE_ID = '.google_drive';
 
@@ -23,7 +25,7 @@ export const resolveGoogleDriveClient = async ({
 }: {
   request: KibanaRequest;
   googleDriveConnectorId: string;
-}): Promise<AxiosInstance> =>
+}): Promise<ResolvedConnectorClient> =>
   resolveConnectorAxiosClient({
     request,
     connectorIdOrName: googleDriveConnectorId,
@@ -35,7 +37,7 @@ export const fetchSpreadsheetCsv = async ({
   spreadsheetId,
   sheetGid,
 }: {
-  client: AxiosInstance;
+  client: ResolvedConnectorClient;
   spreadsheetId: string;
   sheetGid: string;
 }): Promise<string> => {

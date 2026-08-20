@@ -11,9 +11,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
 import type { KibanaRequest } from '@kbn/core/server';
-import { resolveConnectorAxiosClient } from './resolve_connector_client';
+import {
+  resolveConnectorAxiosClient,
+  type ResolvedConnectorClient,
+} from './resolve_connector_client';
 
 export const SLACK_CONNECTOR_TYPE_ID = '.slack2';
 const SLACK_API_BASE = 'https://slack.com/api';
@@ -62,7 +64,7 @@ export const resolveSlackClient = async ({
 }: {
   request: KibanaRequest;
   slackConnectorId: string;
-}): Promise<AxiosInstance> =>
+}): Promise<ResolvedConnectorClient> =>
   resolveConnectorAxiosClient({
     request,
     connectorIdOrName: slackConnectorId,
@@ -83,7 +85,7 @@ export const searchSlackReleaseMessages = async ({
   lookbackHours,
   query = 'release OR deploy OR promotion OR "branch cut" OR "feature freeze"',
 }: {
-  client: AxiosInstance;
+  client: ResolvedConnectorClient;
   channelName: string;
   lookbackHours: number;
   query?: string;

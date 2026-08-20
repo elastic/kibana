@@ -10,6 +10,7 @@ export type {
   ChatCompleteAPI,
   ChatCompleteAPIResponse,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,

@@ -70,6 +70,13 @@ export const createExecuteConnectorSubActionTool = ({
     'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {

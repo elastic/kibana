@@ -214,23 +214,22 @@ export const fetchGitHubGraphQl = async <T>({
         signal: AbortSignal.timeout(requestTimeoutMs),
       });
 
-      if (!response.ok) {
-        if (isRetryableGitHubHttpStatus(response.status) && attempt < maxAttempts) {
-          await sleep(retryDelayMs);
-          retryDelayMs *= 2;
-          continue;
+      if (response.ok) {
+        const payload = (await response.json()) as GraphQlResponse<T>;
+        if (payload.errors?.length) {
+          throw new Error(payload.errors.map((error) => error.message).join('; '));
         }
-        throw new Error(`GitHub GraphQL request failed with status ${response.status}`);
+        if (!payload.data) {
+          throw new Error('GitHub GraphQL response did not include data');
+        }
+        return payload.data;
       }
 
-      const payload = (await response.json()) as GraphQlResponse<T>;
-      if (payload.errors?.length) {
-        throw new Error(payload.errors.map((error) => error.message).join('; '));
+      if (!isRetryableGitHubHttpStatus(response.status) || attempt >= maxAttempts) {
+        throw new Error(`GitHub GraphQL request failed with status ${response.status}`);
       }
-      if (!payload.data) {
-        throw new Error('GitHub GraphQL response did not include data');
-      }
-      return payload.data;
+      await sleep(retryDelayMs);
+      retryDelayMs *= 2;
     } catch (error) {
       const isLastAttempt = attempt >= maxAttempts;
       if (isLastAttempt || !(error instanceof Error)) {
@@ -264,13 +263,12 @@ export const fieldValuesToMap = (
   for (const node of nodes) {
     const field = node.field as { name?: string } | undefined;
     const name = field?.name;
-    if (!name) {
-      continue;
-    }
-    if (typeof node.name === 'string') {
-      map[name] = node.name;
-    } else if (typeof node.text === 'string') {
-      map[name] = node.text;
+    if (name) {
+      if (typeof node.name === 'string') {
+        map[name] = node.name;
+      } else if (typeof node.text === 'string') {
+        map[name] = node.text;
+      }
     }
   }
   return map;

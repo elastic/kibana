@@ -88,16 +88,12 @@ const parseCsvLine = (line: string): string[] => {
       } else {
         inQuotes = !inQuotes;
       }
-      continue;
-    }
-
-    if (char === ',' && !inQuotes) {
+    } else if (char === ',' && !inQuotes) {
       values.push(current);
       current = '';
-      continue;
+    } else {
+      current += char;
     }
-
-    current += char;
   }
 
   values.push(current);
@@ -175,45 +171,41 @@ export const parseStackReleaseSpreadsheet = ({
   for (const line of lines.slice(headerIndex + 1)) {
     const columns = parseCsvLine(line);
     const version = columns[versionIndex]?.trim();
-    if (!version || isSkippableVersion(version)) {
-      continue;
-    }
+    if (version && !isSkippableVersion(version)) {
+      const releaseManager =
+        releaseManagerIndex >= 0 ? columns[releaseManagerIndex]?.trim() || undefined : undefined;
+      const product = inferStackProduct(version);
+      const sourceBase = {
+        type: 'spreadsheet' as const,
+        spreadsheetId,
+        sheetGid,
+        sheetName,
+      };
 
-    const releaseManager =
-      releaseManagerIndex >= 0 ? columns[releaseManagerIndex]?.trim() || undefined : undefined;
-    const product = inferStackProduct(version);
-    const sourceBase = {
-      type: 'spreadsheet' as const,
-      spreadsheetId,
-      sheetGid,
-      sheetName,
-    };
+      const milestoneDates: Array<{
+        milestone: ReleaseCalendarEvent['milestone'];
+        rawDate?: string;
+      }> = [
+        { milestone: 'feature_freeze', rawDate: columns[featureFreezeIndex] },
+        { milestone: 'build_candidate', rawDate: columns[buildCandidateIndex] },
+        { milestone: 'public_release', rawDate: columns[publicReleaseIndex] },
+      ];
 
-    const milestoneDates: Array<{
-      milestone: ReleaseCalendarEvent['milestone'];
-      rawDate?: string;
-    }> = [
-      { milestone: 'feature_freeze', rawDate: columns[featureFreezeIndex] },
-      { milestone: 'build_candidate', rawDate: columns[buildCandidateIndex] },
-      { milestone: 'public_release', rawDate: columns[publicReleaseIndex] },
-    ];
-
-    for (const { milestone, rawDate } of milestoneDates) {
-      const targetDate = parseReleaseScheduleDate(rawDate);
-      if (!targetDate) {
-        continue;
+      for (const { milestone, rawDate } of milestoneDates) {
+        const targetDate = parseReleaseScheduleDate(rawDate);
+        if (targetDate) {
+          events.push({
+            releaseLine: 'stack',
+            product,
+            version,
+            milestone,
+            targetDate,
+            status: 'scheduled',
+            releaseManager,
+            source: sourceBase,
+          });
+        }
       }
-
-      events.push({
-        releaseLine: 'stack',
-        product,
-        version,
-        milestone,
-        targetDate,
-        status: 'scheduled',
-        releaseManager,
-        source: sourceBase,
-      });
     }
   }
 
