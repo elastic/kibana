@@ -13,6 +13,7 @@ import {
 } from '@kbn/core-security-server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
+import type { SecurityAuthenticateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -23,10 +24,6 @@ interface StableUserIdAuthUser {
   profile_uid?: string;
   authentication_type?: string;
   authentication_realm?: { type?: string; name?: string };
-}
-
-interface AuthenticatedApiKeyUser extends StableUserIdAuthUser {
-  api_key?: { id?: string };
 }
 
 /**
@@ -102,46 +99,6 @@ const getApiKeyOwnerProfileUid = async ({
 };
 
 /**
- * Resolves the API key creator profile uid from the request authorization header.
- */
-const resolveApiKeyOwnerProfileUid = async ({
-  request,
-  esClient,
-}: {
-  request: KibanaRequest;
-  esClient: ElasticsearchClient;
-}): Promise<string | undefined> => {
-  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-  return id ? getApiKeyOwnerProfileUid({ id, esClient }) : undefined;
-};
-
-/**
- * Resolves a stable user id from the authenticated ES principal when request auth is incomplete.
- */
-const resolveStableUserIdFromAuthenticate = async ({
-  username,
-  esClient,
-}: {
-  username: string;
-  esClient: ElasticsearchClient;
-}): Promise<string | undefined> => {
-  const authResponse = (await esClient.security.authenticate()) as AuthenticatedApiKeyUser;
-
-  return toStableUserId({
-    authUser: {
-      username,
-      profile_uid: authResponse.profile_uid,
-      authentication_type: authResponse.authentication_type,
-      authentication_realm: authResponse.authentication_realm,
-    },
-    resolveApiKeyProfileUid: () => {
-      const id = authResponse.api_key?.id;
-      return id ? getApiKeyOwnerProfileUid({ id, esClient }) : Promise.resolve(undefined);
-    },
-  });
-};
-
-/**
  * Resolves the current user from a request.
  *
  * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
@@ -170,13 +127,28 @@ export const getUserFromRequest = async ({
   if (authUser?.username) {
     let stableUserId = await toStableUserId({
       authUser,
-      resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
+      resolveApiKeyProfileUid: async () => {
+        // Real HTTP API-key requests expose the key id in the Authorization header.
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        return id ? getApiKeyOwnerProfileUid({ id, esClient }) : undefined;
+      },
     });
 
     if (stableUserId === undefined) {
-      stableUserId = await resolveStableUserIdFromAuthenticate({
-        username: authUser.username,
-        esClient,
+      // Task Manager fake requests can authenticate with an API key without exposing that header.
+      const authResponse: SecurityAuthenticateResponse = await esClient.security.authenticate();
+
+      stableUserId = await toStableUserId({
+        authUser: {
+          username: authUser.username,
+          authentication_type: authResponse.authentication_type,
+          authentication_realm: authResponse.authentication_realm,
+        },
+        resolveApiKeyProfileUid: async () => {
+          // In that path, Elasticsearch can report the active API key id from _authenticate.
+          const id = authResponse.api_key?.id;
+          return id ? getApiKeyOwnerProfileUid({ id, esClient }) : undefined;
+        },
       });
     }
 
