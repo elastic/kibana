@@ -70,6 +70,45 @@ describe('lookupTriggerDefinitionsForAgent', () => {
     }
   });
 
+  it('uses registered manual event definitions for schema guidance', () => {
+    const result = lookupTriggerDefinitionsForAgent({
+      registeredTriggers: [],
+      manualEventDefinitions: [
+        {
+          id: 'cases.updated',
+          title: 'Case updated',
+          description: 'A case was updated.',
+          eventSchema: z.object({
+            case: z.object({
+              id: z.string(),
+            }),
+          }),
+        },
+      ],
+      triggerType: 'manual',
+    });
+
+    expect(isTriggerDefinitionsLookupError(result)).toBe(false);
+    if (isTriggerDefinitionsLookupError(result)) {
+      return;
+    }
+
+    const manualTrigger = result.triggerTypes[0];
+    expect(JSON.stringify(manualTrigger.jsonSchema)).toContain('cases.updated');
+    expect(manualTrigger.manualEventTypes).toEqual([
+      expect.objectContaining({
+        id: 'cases.updated',
+        label: 'Case updated',
+      }),
+    ]);
+    expect(JSON.stringify(manualTrigger.manualEventTypes?.[0].eventContextSchema)).toContain(
+      'case'
+    );
+    expect(JSON.stringify(manualTrigger.manualEventTypes?.[0].eventContextSchema)).toContain(
+      'spaceId'
+    );
+  });
+
   it('returns custom trigger with trigger-specific eventContextSchema when filtered', () => {
     const result = lookupTriggerDefinitionsForAgent({
       registeredTriggers: [mockCasesTrigger],

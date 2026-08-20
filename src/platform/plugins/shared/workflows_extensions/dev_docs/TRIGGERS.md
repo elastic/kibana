@@ -13,6 +13,43 @@ This section provides a complete guide for contributors who want to add event-dr
 3. Emit events via request context or direct `emitEvent`
 4. Add to approved list and get workflows-eng approval
 
+## Typed events for manual runs
+
+An event-driven trigger subscribes a workflow to emitted events. If a product UI instead runs a
+workflow explicitly and supplies `inputs.event`, register a manual workflow event definition rather
+than adding an automatic trigger solely for editor typing:
+
+```ts
+const caseRunEventDefinition: ManualWorkflowEventDefinition = {
+  id: 'cases.case',
+  eventSchema: z.object({ caseId: z.string(), owner: z.string() }),
+  title: 'Case',
+  description: 'Runs manually from a case.',
+};
+
+workflowsExtensions.registerManualWorkflowEventDefinition(caseRunEventDefinition);
+```
+
+Register the same definition during both server and public setup. The workflow then declares the
+contract explicitly:
+
+```yaml
+triggers:
+  - type: manual
+    eventType: cases.case
+steps:
+  - name: log_case
+    type: console
+    with:
+      message: "Case {{ event.caseId }}"
+```
+
+The definition drives YAML completion and validation, filters context-specific workflow selectors,
+and validates the event payload before execution. It does not emit or subscribe to events.
+`executionContext` remains a separate correlation reference and is not available to templates.
+See [Typed manual workflow event contracts](TYPED_MANUAL_WORKFLOW_EVENTS.md) for the architecture,
+authoring flow, runtime validation sequence, and compatibility behavior.
+
 ### Trigger ID and naming conventions
 
 Trigger IDs use the following convention:

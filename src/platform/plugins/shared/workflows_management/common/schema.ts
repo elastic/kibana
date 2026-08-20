@@ -266,6 +266,7 @@ export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZo
 
 export interface WorkflowZodSchemaOptions {
   lightweight?: boolean;
+  manualWorkflowEventIds?: string[];
 }
 
 // NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
@@ -465,11 +466,16 @@ export const getWorkflowZodSchema = (
   options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
   if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggerIds);
+    return generateLightweightYamlSchema(registeredTriggerIds, options.manualWorkflowEventIds);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
+  return generateYamlSchemaFromConnectors(
+    allConnectors,
+    registeredTriggerIds,
+    false,
+    options.manualWorkflowEventIds
+  );
 };
 
 export const getWorkflowZodSchemaLoose = (

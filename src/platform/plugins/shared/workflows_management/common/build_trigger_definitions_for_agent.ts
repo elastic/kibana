@@ -10,13 +10,15 @@
 import type { BaseTriggerDefinition } from '@kbn/workflows';
 import {
   builtInTriggerDefinitions,
-  EventTimestampSchema,
+  getManualTriggerSchema,
   WorkflowEventsSchema,
 } from '@kbn/workflows';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import type { ManualWorkflowEventDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
+import { extendEventContextSchema } from './build_event_context_schema';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -28,6 +30,14 @@ export interface TriggerDefinitionForAgent {
   eventContextSchema: unknown;
   eventContextNote: string;
   examples?: string[];
+  manualEventTypes?: ManualEventDefinitionForAgent[];
+}
+
+export interface ManualEventDefinitionForAgent {
+  id: string;
+  label: string;
+  description: string;
+  eventContextSchema: unknown;
 }
 
 export const EVENT_CONTEXT_NOTE =
@@ -68,10 +78,6 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
-function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
-  return schema instanceof z.ZodObject;
-}
-
 function getCustomTriggerYamlSchema(triggerId: string): z.ZodType {
   return z.object({
     type: z.literal(triggerId),
@@ -106,13 +112,9 @@ function getEventContextSchema(
   }
 
   const custom = customDefsById.get(triggerId);
-  if (custom && isZodObject(custom.eventSchema)) {
+  if (custom) {
     return zodToJsonSchemaSafe(
-      z.object({
-        ...BaseEventSchema.shape,
-        ...EventTimestampSchema.shape,
-        ...custom.eventSchema.shape,
-      })
+      extendEventContextSchema(BaseEventSchema, custom.eventSchema, { includeTimestamp: true })
     );
   }
 
@@ -127,17 +129,39 @@ function createRegisteredTriggersMap(
 
 function formatBuiltInTrigger(
   def: BaseTriggerDefinition,
-  registeredTriggersById: Map<string, ServerTriggerDefinition>
+  registeredTriggersById: Map<string, ServerTriggerDefinition>,
+  manualEventDefinitions: ManualWorkflowEventDefinition[]
 ): TriggerDefinitionForAgent {
-  return {
+  const formatted: TriggerDefinitionForAgent = {
     id: def.id,
     label: def.label,
     description: def.description,
-    jsonSchema: zodToJsonSchemaSafe(def.schema),
+    jsonSchema: zodToJsonSchemaSafe(
+      def.id === 'manual'
+        ? getManualTriggerSchema(manualEventDefinitions.map(({ id }) => id))
+        : def.schema
+    ),
     eventContextSchema: getEventContextSchema(def.id, registeredTriggersById),
     eventContextNote: EVENT_CONTEXT_NOTE,
     examples: def.documentation.examples,
   };
+
+  if (def.id === 'manual' && manualEventDefinitions.length > 0) {
+    formatted.manualEventTypes = manualEventDefinitions.map(
+      ({ id, title, description, eventSchema }) => ({
+        id,
+        label: title,
+        description,
+        eventContextSchema: zodToJsonSchemaSafe(
+          extendEventContextSchema(BaseEventSchema, eventSchema)
+        ),
+      })
+    );
+    formatted.eventContextNote +=
+      ' Set eventType on the manual trigger to one of manualEventTypes to declare and validate the corresponding event payload.';
+  }
+
+  return formatted;
 }
 
 function formatRegisteredTrigger(
@@ -170,12 +194,15 @@ function formatRegisteredTrigger(
  * - Everything else comes from `api.getRegisteredTriggers()` (workflows_extensions registry).
  */
 export function getAllTriggerDefinitionsForAgent(
-  registeredTriggers: ServerTriggerDefinition[]
+  registeredTriggers: ServerTriggerDefinition[],
+  manualEventDefinitions: ManualWorkflowEventDefinition[] = []
 ): TriggerDefinitionForAgent[] {
   const registeredById = createRegisteredTriggersMap(registeredTriggers);
   const builtInIds = new Set(builtInTriggerDefinitions.map((def) => def.id));
 
-  const builtIn = builtInTriggerDefinitions.map((def) => formatBuiltInTrigger(def, registeredById));
+  const builtIn = builtInTriggerDefinitions.map((def) =>
+    formatBuiltInTrigger(def, registeredById, manualEventDefinitions)
+  );
   const pluginRegistered = registeredTriggers
     .filter((def) => !builtInIds.has(def.id))
     .map((def) => formatRegisteredTrigger(def, registeredById));
@@ -206,12 +233,17 @@ export const isTriggerDefinitionsLookupError = (
  */
 export function lookupTriggerDefinitionsForAgent({
   registeredTriggers,
+  manualEventDefinitions = [],
   triggerType,
 }: {
   registeredTriggers: ServerTriggerDefinition[];
+  manualEventDefinitions?: ManualWorkflowEventDefinition[];
   triggerType?: string;
 }): TriggerDefinitionsLookupResult {
-  const allTriggerDefinitions = getAllTriggerDefinitionsForAgent(registeredTriggers);
+  const allTriggerDefinitions = getAllTriggerDefinitionsForAgent(
+    registeredTriggers,
+    manualEventDefinitions
+  );
 
   if (!triggerType) {
     return { count: allTriggerDefinitions.length, triggerTypes: allTriggerDefinitions };

@@ -21,6 +21,7 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import { ServerManualWorkflowEventRegistry } from './manual_workflow_event_registry';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -34,6 +35,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
+import { registerInternalManualWorkflowEventDefinitions } from '../common';
 
 export class WorkflowsExtensionsServerPlugin
   implements
@@ -47,6 +49,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private readonly manualWorkflowEventRegistry: ServerManualWorkflowEventRegistry;
   private readonly managedWorkflowPluginIds = new Set<string>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
   private managedWorkflowsSystemApiProvider: ManagedWorkflowsSystemApiProvider | undefined;
@@ -55,6 +58,7 @@ export class WorkflowsExtensionsServerPlugin
     this.logger = initializerContext.logger.get();
     this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
+    this.manualWorkflowEventRegistry = new ServerManualWorkflowEventRegistry();
   }
 
   public setup(
@@ -79,6 +83,7 @@ export class WorkflowsExtensionsServerPlugin
 
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
+    registerInternalManualWorkflowEventDefinitions(this.manualWorkflowEventRegistry);
 
     return {
       registerStepDefinition: (definition) => {
@@ -86,6 +91,9 @@ export class WorkflowsExtensionsServerPlugin
       },
       registerTriggerDefinition: (definition) => {
         this.triggerRegistry.register(definition);
+      },
+      registerManualWorkflowEventDefinition: (definition) => {
+        this.manualWorkflowEventRegistry.register(definition);
       },
       registerWorkflowsClientProvider: (provider) => {
         if (this.workflowsClientProvider) {
@@ -113,6 +121,7 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
+    this.manualWorkflowEventRegistry.freeze();
 
     return {
       getStepDefinition: (stepTypeId: string) => {
@@ -129,6 +138,15 @@ export class WorkflowsExtensionsServerPlugin
       },
       getTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.get(triggerId);
+      },
+      getAllManualWorkflowEventDefinitions: () => {
+        return this.manualWorkflowEventRegistry.list();
+      },
+      getManualWorkflowEventDefinition: (id: string) => {
+        return this.manualWorkflowEventRegistry.get(id);
+      },
+      hasManualWorkflowEventDefinition: (id: string) => {
+        return this.manualWorkflowEventRegistry.has(id);
       },
       isReady: async () => {
         await this.stepRegistry.whenReady();

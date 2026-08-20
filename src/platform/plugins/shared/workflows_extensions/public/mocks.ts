@@ -16,6 +16,7 @@ const createSetupMock: () => jest.Mocked<WorkflowsExtensionsPublicPluginSetup> =
   return {
     registerStepDefinition: jest.fn(),
     registerTriggerDefinition: jest.fn(),
+    registerManualWorkflowEventDefinition: jest.fn(),
   };
 };
 
@@ -27,6 +28,9 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsPublicPluginStart> =
     getAllTriggerDefinitions: jest.fn(() => []),
     getTriggerDefinition: jest.fn(),
     hasTriggerDefinition: jest.fn(),
+    getAllManualWorkflowEventDefinitions: jest.fn(() => []),
+    getManualWorkflowEventDefinition: jest.fn(),
+    hasManualWorkflowEventDefinition: jest.fn(),
     isReady: jest.fn(() => Promise.resolve()),
   };
 };

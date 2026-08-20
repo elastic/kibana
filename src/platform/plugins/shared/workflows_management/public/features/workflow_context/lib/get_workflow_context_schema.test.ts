@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
+import { manualWorkflowEventSchemas } from '../../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
@@ -476,6 +477,60 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
     } finally {
       getTriggerDefinitionSpy.mockRestore();
+    }
+  });
+
+  it('exposes registered manual event fields, including nested paths', () => {
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'manual', eventType: 'cases.updated' }],
+    } as WorkflowYaml;
+    const getDefinitionSpy = jest
+      .spyOn(manualWorkflowEventSchemas, 'getDefinition')
+      .mockReturnValue({
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'A case was updated.',
+        eventSchema: z.object({
+          case: z.object({
+            id: z.string(),
+            status: z.string(),
+          }),
+        }),
+      });
+
+    try {
+      const contextSchema = getWorkflowContextSchema(workflow);
+
+      expect(getSchemaAtPath(contextSchema, 'event.spaceId').schema).toBeDefined();
+      expect(getSchemaAtPath(contextSchema, 'event.case.id').schema).toBeDefined();
+      expect(getSchemaAtPath(contextSchema, 'event.case.status').schema).toBeDefined();
+      expect(getShape(getSchemaAtPath(contextSchema, 'event').schema!)).not.toHaveProperty(
+        'timestamp'
+      );
+    } finally {
+      getDefinitionSpy.mockRestore();
+    }
+  });
+
+  it('does not expose fields for an unknown manual event type', () => {
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'manual', eventType: 'cases.unknown' }],
+    } as WorkflowYaml;
+    const getDefinitionSpy = jest
+      .spyOn(manualWorkflowEventSchemas, 'getDefinition')
+      .mockReturnValue(undefined);
+
+    try {
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const eventShape = getShape(getSchemaAtPath(contextSchema, 'event').schema!);
+
+      expect(eventShape).toEqual(expect.objectContaining({ spaceId: expect.anything() }));
+      expect(eventShape).not.toHaveProperty('case');
+      expect(eventShape).not.toHaveProperty('timestamp');
+    } finally {
+      getDefinitionSpy.mockRestore();
     }
   });
 });

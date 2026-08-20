@@ -22,6 +22,7 @@ import {
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
+import { ManualWorkflowEventValidationError } from '../../manual_workflow_event_validation_error';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 
 /**
@@ -52,6 +53,14 @@ export function handleRouteError(
     return response.badRequest({
       body: {
         message: `Invalid workflow yaml: ${error.message}`,
+      },
+    });
+  }
+
+  if (error instanceof ManualWorkflowEventValidationError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
       },
     });
   }

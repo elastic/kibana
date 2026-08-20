@@ -635,6 +635,7 @@ describe('Route privilege/ES-operation consistency', () => {
       },
       workflowsExtensions: {
         getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+        getAllManualWorkflowEventDefinitions: jest.fn().mockReturnValue([]),
       },
     };
 

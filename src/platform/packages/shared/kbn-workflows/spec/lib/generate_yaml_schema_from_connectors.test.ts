@@ -9,7 +9,8 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorContractUnion } from '../..';
-import { generateYamlSchemaFromConnectors } from '../..';
+import { generateLightweightYamlSchema, generateYamlSchemaFromConnectors } from '../..';
+import { MULTIPLE_MANUAL_EVENT_TYPES_ERROR } from '../schema/triggers';
 
 const BASE_WORKFLOW = {
   name: 'test',
@@ -40,6 +41,57 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [],
         })
       ).toThrow();
+    });
+
+    it('rejects multiple typed manual triggers', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Console',
+          description: 'Console',
+          type: 'console',
+          paramsSchema: z.object({ message: z.string() }),
+          outputSchema: z.object({ message: z.string() }),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+      const result = schema.safeParse({
+        name: 'test',
+        triggers: [
+          { type: 'manual', eventType: 'cases.case' },
+          { type: 'manual', eventType: 'workflows.alert' },
+        ],
+        steps: [{ name: 'log', type: 'console', with: { message: 'hello' } }],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toContainEqual(
+        expect.objectContaining({
+          message: MULTIPLE_MANUAL_EVENT_TYPES_ERROR,
+          path: ['triggers', 1, 'eventType'],
+        })
+      );
+    });
+  });
+
+  describe('lightweight strict mode', () => {
+    it('rejects multiple typed manual triggers', () => {
+      const schema = generateLightweightYamlSchema();
+      const result = schema.safeParse({
+        name: 'test',
+        triggers: [
+          { type: 'manual', eventType: 'cases.case' },
+          { type: 'manual', eventType: 'workflows.alert' },
+        ],
+        steps: [{}],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toContainEqual(
+        expect.objectContaining({
+          message: MULTIPLE_MANUAL_EVENT_TYPES_ERROR,
+          path: ['triggers', 1, 'eventType'],
+        })
+      );
     });
   });
 

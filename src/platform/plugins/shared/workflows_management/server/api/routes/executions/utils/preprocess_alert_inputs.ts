@@ -196,6 +196,9 @@ export async function preprocessAlertInputs(
 
   return {
     ...inputs,
-    event: alertEvent,
+    event: {
+      ...alertEvent,
+      params: {},
+    },
   };
 }

@@ -14,6 +14,7 @@ import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState }
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { resolveFocusForLine } from './utils/trigger_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import { manualWorkflowEventSchemas } from '../../../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type { WorkflowsResponse } from '../../model/types';
 
@@ -40,7 +41,9 @@ const initialState: WorkflowDetailState = {
   activeTab: undefined,
   connectors: undefined,
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds(), {
+    manualWorkflowEventIds: manualWorkflowEventSchemas.getRegisteredIds(),
+  }),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,

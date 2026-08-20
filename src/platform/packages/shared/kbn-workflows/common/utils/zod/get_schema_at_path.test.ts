@@ -135,6 +135,25 @@ describe('getSchemaAtPath', () => {
     expect(result.scopedToPath).toBe('a');
     expectZodSchemaEqual(result.schema as z.ZodType, z.unknown());
   });
+
+  it('object catchall', () => {
+    const schema = z.object({ known: z.string() }).catchall(z.unknown());
+    const result = getSchemaAtPath(schema, 'dynamic.nested');
+    expect(result.schema).toBeDefined();
+    expect(result.scopedToPath).toBe('dynamic');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.unknown());
+  });
+
+  it('rejects unknown fields on strict objects while resolving passthrough fields', () => {
+    expect(getSchemaAtPath(z.object({ known: z.string() }).strict(), 'dynamic').schema).toBeNull();
+
+    const passthroughResult = getSchemaAtPath(
+      z.object({ known: z.string() }).passthrough(),
+      'dynamic.nested'
+    );
+    expect(passthroughResult.scopedToPath).toBe('dynamic');
+    expectZodSchemaEqual(passthroughResult.schema as z.ZodType, z.unknown());
+  });
 });
 
 describe('getSchemaAtPath: real life examples', () => {

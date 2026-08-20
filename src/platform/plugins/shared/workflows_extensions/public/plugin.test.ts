@@ -8,6 +8,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { WORKFLOWS_ALERT_EVENT_TYPE, WORKFLOWS_DOCUMENT_EVENT_TYPE } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsExtensionsPublicPlugin } from './plugin';
 
 jest.mock('./steps', () => ({
@@ -54,6 +56,23 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
       expect(() => setup.registerTriggerDefinition(definition)).toThrow(/already registered/);
     });
+
+    it('returns registerManualWorkflowEventDefinition that delegates to its registry', () => {
+      const plugin = createPlugin();
+      const setup = plugin.setup(coreMock.createSetup(), {});
+      const definition = {
+        id: 'cases.updated',
+        eventSchema: z.object({ caseId: z.string() }),
+        title: 'Case updated',
+        description: 'A case was updated.',
+      };
+
+      setup.registerManualWorkflowEventDefinition(definition);
+
+      expect(() => setup.registerManualWorkflowEventDefinition(definition)).toThrow(
+        /already registered/
+      );
+    });
   });
 
   describe('start', () => {
@@ -90,6 +109,36 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
       expect(start.getAllTriggerDefinitions()).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: 'my.trigger' })])
       );
+    });
+
+    it('returns manual workflow event registry accessors', () => {
+      const plugin = createPlugin();
+      const setup = plugin.setup(coreMock.createSetup(), {});
+      const definition = {
+        id: 'cases.updated',
+        eventSchema: z.object({ caseId: z.string() }),
+        title: 'Case updated',
+        description: 'A case was updated.',
+      };
+      setup.registerManualWorkflowEventDefinition(definition);
+
+      const start = plugin.start(coreMock.createStart(), {});
+
+      expect(start.hasManualWorkflowEventDefinition(definition.id)).toBe(true);
+      expect(start.getManualWorkflowEventDefinition(definition.id)).toBe(definition);
+      expect(start.getAllManualWorkflowEventDefinitions()).toEqual(
+        expect.arrayContaining([definition])
+      );
+    });
+
+    it('always exposes the generic alert and document event definitions', () => {
+      const plugin = createPlugin();
+      plugin.setup(coreMock.createSetup(), {});
+
+      const start = plugin.start(coreMock.createStart(), {});
+
+      expect(start.hasManualWorkflowEventDefinition(WORKFLOWS_ALERT_EVENT_TYPE)).toBe(true);
+      expect(start.hasManualWorkflowEventDefinition(WORKFLOWS_DOCUMENT_EVENT_TYPE)).toBe(true);
     });
 
     it('isReady resolves when both registries have settled', async () => {

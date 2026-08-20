@@ -8,6 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocumentEvent } from '@kbn/workflows';
 import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 
 export function buildAlertTriggerInputFromRecords(
@@ -41,16 +42,7 @@ export function buildAlertTriggerInputFromRecords(
 }
 
 export interface DocumentTriggerEventPayload {
-  event: {
-    documents: Array<{
-      id: string | undefined;
-      index: string | undefined;
-      timestamp: unknown;
-      data: Record<string, unknown>;
-    }>;
-    query: string;
-    dataView: string | undefined;
-  };
+  event: DocumentEvent;
 }
 
 export function buildDocumentTriggerInputFromRecords(
@@ -61,17 +53,35 @@ export function buildDocumentTriggerInputFromRecords(
     return null;
   }
 
+  const documents = selectedRecords.flatMap((record) => {
+    const id = record.raw._id;
+    const index = record.raw._index;
+    if (!id || !index) {
+      return [];
+    }
+
+    const data = (record.raw._source ?? {}) as Record<string, unknown>;
+    const timestamp = data['@timestamp'];
+    return [
+      {
+        ...data,
+        _id: id,
+        _index: index,
+        id,
+        index,
+        ...(typeof timestamp === 'string' && { timestamp }),
+        data,
+      },
+    ];
+  });
+
+  if (documents.length === 0) {
+    return null;
+  }
+
   return {
     event: {
-      documents: selectedRecords.map((record) => {
-        const source = (record.raw._source ?? {}) as Record<string, unknown>;
-        return {
-          id: record.raw._id,
-          index: record.raw._index,
-          timestamp: source['@timestamp'],
-          data: source,
-        };
-      }),
+      documents,
       query: options.submittedQuery,
       dataView: options.dataViewTitle,
     },

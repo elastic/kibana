@@ -40,6 +40,7 @@ import { WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_REUSE_MAX_WAIT_MS } from './w
 import type { WorkflowChangeHistoryCompareMode } from './workflow_change_history_preview_settings_popover';
 import { getWorkflowZodSchema } from '../../../common/schema';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
+import { manualWorkflowEventSchemas } from '../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../trigger_schemas';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
 import { useWorkflowYamlValidationContextRef } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
@@ -113,7 +114,13 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   const validationContextRef = useWorkflowYamlValidationContextRef();
   const workflowZodSchema = useMemo(
     () =>
-      getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}, triggerSchemas.getRegisteredIds()),
+      getWorkflowZodSchema(
+        connectorsData?.connectorTypes ?? {},
+        triggerSchemas.getRegisteredIds(),
+        {
+          manualWorkflowEventIds: manualWorkflowEventSchemas.getRegisteredIds(),
+        }
+      ),
     [connectorsData?.connectorTypes]
   );
   const workflowZodSchemaRef = useRef(workflowZodSchema);

@@ -35,11 +35,17 @@ export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
     schema: ManualTriggerSchema,
     documentation: {
       details:
-        'Optionally declare runtime inputs under the trigger using JSON Schema ' +
-        '(`inputs.properties` + `inputs.required`). Reference them in steps with `{{ inputs.<name> }}`.',
+        'Optionally set `eventType` to a registered manual event contract so `{{ event.* }}` is ' +
+        'typed and validated for product-provided data. User-supplied runtime inputs remain separate: ' +
+        'declare them with JSON Schema (`inputs.properties` + `inputs.required`) and reference them ' +
+        'with `{{ inputs.<name> }}`.',
       examples: [
         `triggers:
   - type: manual`,
+        `# Run from a generic document action with typed event.documents
+triggers:
+  - type: manual
+    eventType: workflows.document`,
         `triggers:
   - type: manual
     inputs:

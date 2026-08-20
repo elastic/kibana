@@ -8,6 +8,13 @@
  */
 
 export type { CommonStepDefinition } from './step_registry/types';
+export type { ManualWorkflowEventDefinition } from './manual_workflow_event_registry';
+export {
+  alertManualWorkflowEventDefinition,
+  documentManualWorkflowEventDefinition,
+  internalManualWorkflowEventDefinitions,
+  registerInternalManualWorkflowEventDefinitions,
+} from './generic_manual_workflow_event_definitions';
 export type {
   CommonTriggerDefinition,
   TriggerDocumentation,

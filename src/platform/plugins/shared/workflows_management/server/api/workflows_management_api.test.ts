@@ -9,7 +9,15 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  AlertEventSchema,
+  DocumentEventSchema,
+  MULTIPLE_MANUAL_EVENT_TYPES_ERROR,
+  type WorkflowDetailDto,
+  WORKFLOWS_ALERT_EVENT_TYPE,
+  WORKFLOWS_DOCUMENT_EVENT_TYPE,
+  WorkflowsManagementApiActions,
+} from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
@@ -28,6 +36,7 @@ describe('WorkflowsManagementApi', () => {
   let mockWorkflowsService: jest.Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+  let getManualWorkflowEventDefinition: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,6 +48,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
+    getManualWorkflowEventDefinition = jest.fn();
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -56,6 +66,10 @@ describe('WorkflowsManagementApi', () => {
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
+      getWorkflowsExtensions: jest.fn().mockResolvedValue({
+        getManualWorkflowEventDefinition,
+        getAllManualWorkflowEventDefinitions: jest.fn().mockReturnValue([]),
+      }),
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
@@ -672,6 +686,57 @@ steps:
       return promise;
     };
 
+    it('does not manually validate automatic alert executions for mixed-trigger workflows', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        yaml: 'name: Test Workflow',
+        definition: {
+          ...workflowDefinition,
+          triggers: [
+            { type: 'alert' as const },
+            { type: 'manual' as const, eventType: WORKFLOWS_ALERT_EVENT_TYPE },
+          ],
+        },
+      };
+
+      await api.runWorkflow(
+        workflow,
+        'default',
+        { event: { automatic: true } },
+        mockRequest,
+        'alert'
+      );
+
+      expect(getManualWorkflowEventDefinition).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('defensively rejects multiple typed manual triggers before automatic execution', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        yaml: 'name: Test Workflow',
+        definition: {
+          ...workflowDefinition,
+          triggers: [
+            { type: 'manual' as const, eventType: 'cases.case' },
+            { type: 'manual' as const, eventType: WORKFLOWS_ALERT_EVENT_TYPE },
+            { type: 'alert' as const },
+          ],
+        },
+      };
+
+      await expect(
+        api.runWorkflow(workflow, 'default', { event: {} }, mockRequest, 'alert')
+      ).rejects.toThrow(MULTIPLE_MANUAL_EVENT_TYPES_ERROR);
+
+      expect(getManualWorkflowEventDefinition).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
     it('executes a saved workflow by id and returns the execution document', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue({
         id: 'workflow-123',
@@ -721,6 +786,220 @@ steps:
         'default',
         { includeOutput: true }
       );
+      expect(getManualWorkflowEventDefinition).not.toHaveBeenCalled();
+    });
+
+    it('validates a registered manual event payload before executing', async () => {
+      const typedWorkflowDefinition = {
+        ...workflowDefinition,
+        triggers: [{ type: 'manual' as const, eventType: 'cases.updated' }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: typedWorkflowDefinition,
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue({
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'A case was updated.',
+        eventSchema: z.object({ case: z.object({ id: z.string() }) }),
+      });
+
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { event: { case: { id: 'case-1' } } },
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+        })
+      );
+
+      expect(getManualWorkflowEventDefinition).toHaveBeenCalledWith('cases.updated');
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts the canonical alert event produced by route preprocessing', async () => {
+      const typedWorkflowDefinition = {
+        ...workflowDefinition,
+        triggers: [{ type: 'manual' as const, eventType: WORKFLOWS_ALERT_EVENT_TYPE }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: typedWorkflowDefinition,
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue({
+        id: WORKFLOWS_ALERT_EVENT_TYPE,
+        title: 'Alert',
+        description: 'Runs manually against alerts.',
+        eventSchema: AlertEventSchema,
+      });
+      const event = {
+        alerts: [{ _id: 'alert-1', _index: '.alerts-security.alerts-default' }],
+        rule: {
+          id: 'rule-1',
+          name: 'Rule',
+          tags: [],
+          consumer: 'siem',
+          producer: 'siem',
+          ruleTypeId: 'siem.queryRule',
+        },
+        params: {},
+        spaceId: 'default',
+      };
+
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { event },
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+        })
+      );
+
+      expect(getManualWorkflowEventDefinition).toHaveBeenCalledWith(WORKFLOWS_ALERT_EVENT_TYPE);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('validates canonical document events on the direct execute path', async () => {
+      const typedWorkflowDefinition = {
+        ...workflowDefinition,
+        triggers: [{ type: 'manual' as const, eventType: WORKFLOWS_DOCUMENT_EVENT_TYPE }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: typedWorkflowDefinition,
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue({
+        id: WORKFLOWS_DOCUMENT_EVENT_TYPE,
+        title: 'Document',
+        description: 'Runs manually against documents.',
+        eventSchema: DocumentEventSchema,
+      });
+
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {
+            event: {
+              documents: [
+                {
+                  id: 'document-1',
+                  index: 'logs-*',
+                  data: { message: 'hello' },
+                },
+              ],
+            },
+          },
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+        })
+      );
+
+      expect(getManualWorkflowEventDefinition).toHaveBeenCalledWith(WORKFLOWS_DOCUMENT_EVENT_TYPE);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an invalid manual event payload without starting an execution', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: {
+          ...workflowDefinition,
+          triggers: [{ type: 'manual', eventType: 'cases.updated' }],
+        },
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue({
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'A case was updated.',
+        eventSchema: z.object({ case: z.object({ id: z.string() }) }),
+      });
+
+      await expect(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { event: { case: {} } },
+          spaceId: 'default',
+          request: mockRequest,
+        })
+      ).rejects.toThrow(/Invalid payload.*inputs\.event\.case\.id/);
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unknown manual event type without starting an execution', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: {
+          ...workflowDefinition,
+          triggers: [{ type: 'manual', eventType: 'cases.unknown' }],
+        },
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue(undefined);
+
+      await expect(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { event: { case: { id: 'case-1' } } },
+          spaceId: 'default',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('Manual workflow event type "cases.unknown" is not registered.');
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a missing manual event payload without starting an execution', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: {
+          ...workflowDefinition,
+          triggers: [{ type: 'manual', eventType: 'cases.updated' }],
+        },
+      } as any);
+      getManualWorkflowEventDefinition.mockReturnValue({
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'A case was updated.',
+        eventSchema: z.object({ caseId: z.string() }),
+      });
+
+      await expect(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('Invalid payload for manual workflow event type "cases.updated"');
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {
@@ -1315,6 +1594,7 @@ steps:
       expect(passedContext.event).toEqual(eventPayload);
       expect(passedRequest).toBe(mockRequest);
       expect(result).toBe('sched-exec-id');
+      expect(getManualWorkflowEventDefinition).not.toHaveBeenCalled();
     });
 
     it('passes schedule metadata through to the execution engine context', async () => {

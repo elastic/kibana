@@ -103,6 +103,7 @@ const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
     },
     workflowsExtensions: {
       getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      getAllManualWorkflowEventDefinitions: jest.fn().mockReturnValue([]),
     },
   } as unknown as WorkflowsServerPluginStartDeps);
 

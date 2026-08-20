@@ -11,6 +11,7 @@ import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
+import { manualWorkflowEventSchemas } from '../../../../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import type { WorkflowsServices } from '../../../../../types';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
@@ -47,7 +48,8 @@ export const loadConnectorsThunk = createAsyncThunk<
 
         const schema = getWorkflowZodSchema(
           currentConnectorTypes,
-          triggerSchemas.getRegisteredIds()
+          triggerSchemas.getRegisteredIds(),
+          { manualWorkflowEventIds: manualWorkflowEventSchemas.getRegisteredIds() }
         );
         dispatch(_setGeneratedSchemaInternal(schema));
       }

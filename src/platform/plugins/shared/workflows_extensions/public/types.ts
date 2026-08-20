@@ -10,6 +10,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './step_registry/types';
 import type { PublicTriggerDefinition } from './trigger_registry/types';
+import type { ManualWorkflowEventDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 export type PublicStepDefinitionOrLoader<
@@ -23,6 +24,10 @@ export type PublicStepDefinitionOrLoader<
 export type PublicTriggerDefinitionOrLoader<EventSchema extends z.ZodType = z.ZodType> =
   | PublicTriggerDefinition<EventSchema>
   | (() => Promise<PublicTriggerDefinition<EventSchema>>);
+
+export type ManualWorkflowEventDefinitionOrLoader<EventSchema extends z.ZodType = z.ZodType> =
+  | ManualWorkflowEventDefinition<EventSchema>
+  | (() => Promise<ManualWorkflowEventDefinition<EventSchema>>);
 
 /**
  * Public-side plugin setup contract.
@@ -55,6 +60,13 @@ export interface WorkflowsExtensionsPublicPluginSetup {
   registerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>(
     definition: PublicTriggerDefinitionOrLoader<EventSchema>
   ): void;
+
+  /**
+   * Register a typed event that can be selected by a manual workflow trigger.
+   */
+  registerManualWorkflowEventDefinition<EventSchema extends z.ZodType = z.ZodType>(
+    definition: ManualWorkflowEventDefinitionOrLoader<EventSchema>
+  ): void;
 }
 
 /**
@@ -66,12 +78,20 @@ export interface TriggerRegistryStartContract {
   hasTriggerDefinition(triggerId: string): boolean;
 }
 
+export interface ManualWorkflowEventRegistryStartContract {
+  getAllManualWorkflowEventDefinitions(): ManualWorkflowEventDefinition[];
+  getManualWorkflowEventDefinition(id: string): ManualWorkflowEventDefinition | undefined;
+  hasManualWorkflowEventDefinition(id: string): boolean;
+}
+
 /**
  * Public-side plugin start contract.
  * Exposes methods for retrieving registered step and trigger definitions.
  */
 export type WorkflowsExtensionsPublicPluginStart =
-  WorkflowsExtensionsStartContract<PublicStepDefinition> & TriggerRegistryStartContract;
+  WorkflowsExtensionsStartContract<PublicStepDefinition> &
+    TriggerRegistryStartContract &
+    ManualWorkflowEventRegistryStartContract;
 
 /**
  * Dependencies for the public plugin setup phase.

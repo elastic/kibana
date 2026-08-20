@@ -18,6 +18,7 @@ export type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginStart,
 } from './types';
+export type { ManualWorkflowEventDefinition } from '../common';
 
 export type { PublicStepDefinition } from './step_registry/types';
 export type { StepDocumentation } from '@kbn/workflows';
@@ -29,6 +30,7 @@ export { createPublicStepDefinition } from './step_registry/types';
 export { PublicStepRegistry } from './step_registry';
 export { registerInternalStepDefinitions } from './steps';
 export { PublicTriggerRegistry } from './trigger_registry';
+export { PublicManualWorkflowEventRegistry } from './manual_workflow_event_registry';
 export { registerInternalTriggerDefinitions } from './triggers';
 
 export type {
