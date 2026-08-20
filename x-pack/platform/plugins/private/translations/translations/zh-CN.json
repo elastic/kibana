@@ -23496,7 +23496,6 @@
     "xpack.fleet.overviewPageSubtitle": "Elastic 代理的集中管理。",
     "xpack.fleet.overviewPageTitle": "Fleet",
     "xpack.fleet.packageCard.activeLabel": "活动",
-    "xpack.fleet.packageCard.collectionButton.copy": "查看集合",
     "xpack.fleet.packageCard.contentPackageLabel": "仅内容",
     "xpack.fleet.packageCard.deprecatedLabel": "已弃用",
     "xpack.fleet.packageCard.faileAttemptDescription": "失败于 {attemptDate}。",
