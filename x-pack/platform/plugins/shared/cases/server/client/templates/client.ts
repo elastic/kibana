@@ -188,6 +188,7 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       await templatesService.validateWriteInput(input, {
         excludeTemplateId: template.attributes.templateId,
         currentOwner: template.attributes.owner,
+        existingDefinition: template.attributes.definition,
       });
     },
 
