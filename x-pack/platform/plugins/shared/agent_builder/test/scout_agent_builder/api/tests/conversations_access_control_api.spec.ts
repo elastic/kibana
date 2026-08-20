@@ -576,11 +576,10 @@ apiTest.describe(
           'read status is tracked per user, not shared across readers',
           async () => {
             const getReadAs = async (user: { username: string; password: string }) => {
-              const response = await apiClient.get(
-                `${accessControlApiBase}/conversations/${encodeURIComponent(
-                  publicConversation.conversation_id
-                )}`,
-                { headers: headersFor(user), responseType: 'json' }
+              const response = await getConversationAs(
+                apiClient,
+                user,
+                publicConversation.conversation_id
               );
               expect(response).toHaveStatusCode(200);
               return (response.body as Conversation).read;
