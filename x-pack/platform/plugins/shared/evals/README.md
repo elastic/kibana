@@ -180,7 +180,7 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
-- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones (see [Evaluators](#evaluators))
+- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID
@@ -201,48 +201,6 @@ Writes are patch-like: a field omitted from a create, update, or upsert keeps it
 The listing also returns `facets` — the distinct tags and maturity levels with dataset counts. They follow the search term but ignore the active tag and maturity filters, so filter options stay stable as they are toggled.
 
 Concurrent writes are guarded with optimistic concurrency, so a suite adding examples cannot roll back tags saved from the UI while it was running. If many writers contend for the same dataset and the retries run out, a write that only refreshes `examples_count` is skipped and logged (the count catches up on the next change), while a metadata change that could not be applied fails the request rather than disappearing.
-
-## Evaluators
-
-An evaluator scores one trace. Kibana ships six built-ins — `correctness` and `groundedness` (LLM-as-a-judge) plus `latency`, `input_tokens`, `output_tokens`, and `tool_calls` (computed from the trace) — and you can define your own LLM judges through the API. Both kinds resolve through the same registry, so `_evaluate`, `_validate`, and `GET /internal/evals/evaluators` treat them alike; only the `origin` field (`built_in` or `user_defined`) distinguishes them.
-
-User-defined definitions are stored in the hidden `.evaluation-evaluators` index and are visible only in the space they were created in.
-
-### Defining a judge
-
-```json
-POST /internal/evals/evaluators
-{
-  "name": "tone",
-  "description": "Judges whether the response keeps a professional tone.",
-  "judge": {
-    "system_prompt": "You are a strict evaluator of professional communication.",
-    "prompt": "Question: {{{user_query}}}\n\nAnswer: {{{agent_response}}}\n\nRate how professional the answer's tone is.",
-    "evidence": ["input", "response"],
-    "output": {
-      "scores": [{ "name": "tone", "type": "number", "description": "1 is fully professional." }]
-    }
-  }
-}
-```
-
-- **`system_prompt`** is required and persisted with the definition so an evaluator version never depends on a server-side default.
-- **`evidence`** names the parts of the normalized trace the judge is shown, and therefore requires. They reach the prompt as `{{{user_query}}}`, `{{{agent_response}}}`, and `{{{tool_calls}}}`. A trace missing one is reported as `evidence_unmet` rather than judged.
-- **`reference_data_keys`** names values the example must carry, each exposed to the prompt under its own name. Keys use letters, digits, `_`, or `-` and must start with a letter or `_`. An example missing one is refused before a model is called.
-- **`output.scores`** declares what the judge reports. A `number` score is a value between 0 and 1; a `categorical` score picks from `labels`, each of which carries the numeric value that label is worth, so categorical judgements still aggregate.
-- The prompt is a Mustache template and may only reference declared evidence and reference data keys. Use triple braces (`{{{variable}}}`) or unescaped interpolation (`{{& variable}}`); ordinary `{{variable}}` interpolation is rejected because Mustache would HTML-escape the trace content. Anything undeclared is also rejected at create time instead of rendering blank mid-experiment.
-
-### Versioning
-
-Versions are immutable. A create writes `1.0.0`, and each update writes a **new** version at the next minor (`1.0.0` → `1.1.0`) rather than replacing the one it read. Fields omitted from an update carry forward. Every score records the version that produced it, so a run stays reproducible after the definition moves on, and `_evaluate` can pin a version with `{ "name": "tone", "version": "1.0.0" }`.
-
-Deleting without a version removes every version of the name; one left behind would still resolve through `name@version` and outlive the delete.
-
-### Name rules
-
-Names are lowercase, 2–128 characters, may contain `-` and `_` inside, and must start and end with a letter or digit — so a name can never be read as an action path like `_validate`.
-
-A user-defined evaluator cannot take a built-in's name. Creation refuses it outright, and resolution consults built-ins first, so a stored definition cannot shadow a built-in added after it was saved either.
 
 ## Instrumentation profiles
 
