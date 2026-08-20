@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 
-const rangeValueSchema = z.union([z.string(), z.number()]);
+const rangeValueSchema = z.union([z.string(), z.number(), z.null()]);
 
 const rangeKeySchema = z
   .object({
