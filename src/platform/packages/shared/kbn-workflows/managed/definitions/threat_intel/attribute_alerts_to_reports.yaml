@@ -3,6 +3,9 @@ version: "1"
 # alerts in the last 7d tie back to that report, then write the totals onto the doc.
 # IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
 # with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
+# Unlike enrich/ingest, this pass does not include space_id: "*" catalog rows:
+# environment_hits are per-space alert totals, and writing them onto a shared
+# global doc would let each space's hourly run clobber the others.
 name: Attribute alerts to reports
 description: Count environment alerts linked to each threat report and store totals on the report
 tags:
@@ -34,10 +37,8 @@ steps:
             - range:
                 lineage.extracted_at:
                   gte: "now-30d"
-            - terms:
-                space_id:
-                  - "{{ variables.spaceId }}"
-                  - "*"
+            - term:
+                space_id: "{{ variables.spaceId }}"
           should:
             # nested `exists`; `exists` on the parent path matches nothing.
             - nested:
