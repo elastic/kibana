@@ -216,7 +216,9 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     () => timeFieldOptions.some((option) => option.value === timeField),
     [timeFieldOptions, timeField]
   );
-  const timeFieldInvalid = hasSourceQuery && !currentTimeFieldIsOption;
+  const timeFieldDisabled = !onTimeFieldChange || !hasSourceQuery || timeFieldOptions.length === 0;
+  const timeFieldInvalid =
+    hasSourceQuery && timeFieldOptions.length > 0 && !currentTimeFieldIsOption;
 
   const {
     columns,
@@ -382,26 +384,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} css={timeFieldSelectCss}>
-            <EuiSelect
-              options={timeFieldOptions}
-              value={currentTimeFieldIsOption ? timeField : ''}
-              hasNoInitialSelection={!currentTimeFieldIsOption}
-              isInvalid={timeFieldInvalid}
-              aria-label={i18n.translate(
-                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
-                { defaultMessage: 'Time field for rule execution' }
-              )}
-              onChange={(e) => onTimeFieldChange?.(e.target.value)}
-              disabled={!onTimeFieldChange}
-              compressed
-              prepend={i18n.translate(
-                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
-                { defaultMessage: 'Time field' }
-              )}
-              data-test-subj="querySandboxTimeField"
-            />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertingDateRangePicker
               from={dateRange.dateStart}
@@ -412,7 +394,31 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxDatePicker"
             />
           </EuiFlexItem>
-          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+          <EuiFlexItem grow={false} css={timeFieldSelectCss}>
+            <EuiSelect
+              options={timeFieldOptions}
+              value={hasSourceQuery && currentTimeFieldIsOption ? timeField : ''}
+              hasNoInitialSelection={!hasSourceQuery || !currentTimeFieldIsOption}
+              isInvalid={timeFieldInvalid}
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
+                { defaultMessage: 'Time field for rule execution' }
+              )}
+              onChange={(e) => onTimeFieldChange?.(e.target.value)}
+              disabled={timeFieldDisabled}
+              compressed
+              prepend={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
+                { defaultMessage: 'Time field' }
+              )}
+              data-test-subj="querySandboxTimeField"
+            />
+          </EuiFlexItem>
+          {headerActions && (
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+              {headerActions}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={editorBodyCss} style={{ height: editorHeight }}>

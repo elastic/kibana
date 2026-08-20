@@ -439,12 +439,26 @@ describe('shell shared fields', () => {
     ).toBeDisabled();
   });
 
+  it('shows the read-only outcome info tooltip in edit mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
+
+    expect(screen.getByTestId('composeDiscoverKindSelect-readOnlyTooltip')).toBeInTheDocument();
+  });
+
   it('enables KindSelect in create mode on Outcome when sandbox is closed', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
     expect(
       screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
     ).not.toBeDisabled();
+  });
+
+  it('does not show the read-only outcome info tooltip in create mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
+
+    expect(
+      screen.queryByTestId('composeDiscoverKindSelect-readOnlyTooltip')
+    ).not.toBeInTheDocument();
   });
 
   it('disables KindSelect when sandbox is open on Outcome', () => {

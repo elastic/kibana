@@ -48,6 +48,14 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(true);
   });
 
+  it('sets childOpen false, queryCommitted true, and preserves clone mode (not aliased to edit)', () => {
+    const state = createInitialState({ mode: 'clone', initialKind: 'signal' });
+
+    expect(state.mode).toBe('clone');
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(true);
+  });
+
   it('sets recoveryType to default in edit mode with alert kind', () => {
     const state = createInitialState({ mode: 'edit', initialKind: 'alert' });
 
@@ -269,24 +277,14 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
-  it('returns undefined on alertCondition step in create mode (single unified editor)', () => {
-    const state = createState({ step: 0, mode: 'create' });
+  it('returns undefined on alertCondition step (unified editor by default)', () => {
+    const state = createState({ step: 0 });
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
-  it('returns undefined on alertCondition step in edit mode (unified editor by default)', () => {
-    const state = createState({ step: 0, mode: 'edit' });
-    expect(getSandboxTabs(true, state)).toBeUndefined();
-  });
-
-  it('returns [base, alert] on alertCondition step in edit mode when manualSplitEnabled', () => {
-    const state = createState({ step: 0, mode: 'edit', manualSplitEnabled: true });
+  it('returns [base, alert] on alertCondition step when manualSplitEnabled', () => {
+    const state = createState({ step: 0, manualSplitEnabled: true });
     expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
-  });
-
-  it('returns undefined on alertCondition step in clone mode (unified editor by default)', () => {
-    const state = createState({ step: 0, mode: 'clone' });
-    expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
   it('returns [recovery] on outcome step with custom recovery', () => {
@@ -296,16 +294,6 @@ describe('getSandboxTabs', () => {
 
   it('returns undefined on outcome step with default recovery', () => {
     const state = createState({ step: 1, recoveryType: 'default' });
-    expect(getSandboxTabs(true, state)).toBeUndefined();
-  });
-
-  it('returns [base, alert] on alertCondition step in create mode when manualSplitEnabled', () => {
-    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
-    expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
-  });
-
-  it('returns undefined on alertCondition step in create mode when manualSplitEnabled is false', () => {
-    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: false });
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 });

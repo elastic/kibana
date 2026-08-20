@@ -301,7 +301,7 @@ export function ComposeDiscoverFlyout({
   );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'edit' : mode,
+    mode,
     initialKind,
     initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryPopulated,
@@ -510,10 +510,14 @@ export function ComposeDiscoverFlyout({
 
   const handleResolvedTimeFieldChange = useCallback(
     (field: string) => {
+      if (uiState.childOpen) {
+        setSandboxTimeField(field);
+        return;
+      }
       methods.setValue('timeField', field, { shouldDirty: false });
       setSandboxTimeField(field);
     },
-    [methods]
+    [methods, uiState.childOpen]
   );
 
   const { timeFieldOptions, isTimeFieldResolved } = useResolveTimeField({
@@ -1035,7 +1039,6 @@ export function ComposeDiscoverFlyout({
       return getSandboxTabs(isAlert, {
         step: uiState.step,
         recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -1050,7 +1053,6 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     uiState.recoveryType,
     uiState.step,
-    uiState.mode,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,

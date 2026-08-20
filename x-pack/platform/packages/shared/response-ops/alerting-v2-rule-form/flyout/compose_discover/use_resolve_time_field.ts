@@ -99,6 +99,9 @@ export const useResolveTimeField = ({
   const isLoadingResolution = isLoadingFields || (needsApiTimeField && isLoadingApiTimeField);
 
   const timeFieldOptions = useMemo(() => {
+    if (!fromSourceQuery || isLoadingResolution) {
+      return [];
+    }
     if (dateFields.length > 0) {
       return dateFields.map((name) => ({ value: name, text: name }));
     }
@@ -108,7 +111,7 @@ export const useResolveTimeField = ({
     // No date field on the index: don't fabricate `@timestamp`. Callers show a
     // placeholder/invalid state so the user must select (or fix the query).
     return [];
-  }, [dateFields, apiTimeField]);
+  }, [fromSourceQuery, isLoadingResolution, dateFields, apiTimeField]);
 
   // Field discovery failed and neither the API fallback nor field-caps returned
   // any date fields. We can't distinguish a transient introspection error from a
