@@ -175,7 +175,7 @@ describe('rule template create-rule schema coupling', () => {
                   "description": "Breach detection configuration. Omit to treat every base row as a breach.",
                   "properties": Object {
                     "segment": Object {
-                      "description": "Appendable ES|QL segment for breach detection (required).",
+                      "description": "Appendable ES|QL segment for breach detection. Required when the breach block is present.",
                       "maxLength": 10000,
                       "minLength": 1,
                       "type": "string",

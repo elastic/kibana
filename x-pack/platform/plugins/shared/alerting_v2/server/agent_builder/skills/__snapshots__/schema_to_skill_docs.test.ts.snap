@@ -304,7 +304,7 @@ Composed query: a shared base with appendable breach and recovery segments.
 |---|---|---|---|
 | \`format\` | \\"composed\\" | required |  |
 | \`base\` | string | required | Base ES\\\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
-| \`breach\` | object | required | Breach detection configuration (required). |
+| \`breach\` | object | optional | Breach detection configuration. Omit to treat every base row as a breach. |
 | \`recovery\` | object | optional | Recovery query segment. Required when recovery_strategy is \\"query\\". |
 
 #### \`format: \\"standalone\\"\`

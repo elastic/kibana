@@ -1451,6 +1451,20 @@ describe('getBreachEsqlQuery', () => {
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
   });
 
+  // Storage persists a conditionless composed rule as an empty segment, so
+  // both shapes reach this helper and must not append a trailing pipe.
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', '   '],
+  ])('returns base verbatim for a %s stored breach segment', (_label, segment) => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
   it('handles a trailing comment in base without corrupting the composed query', () => {
     const query = {
       format: 'composed' as const,
