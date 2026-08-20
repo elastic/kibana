@@ -88,6 +88,34 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT 500'));
   });
 
+
+  it('extract_iocs filters ordinary host chatter out of network destinations', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> } | undefined;
+
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [
+        { name: 'destination.ip' },
+        { name: 'destination.domain' },
+        { name: '@timestamp' },
+      ],
+      values: [
+        ['10.0.0.5', null, '2026-01-01T00:00:00Z'],
+        ['8.8.8.8', null, '2026-01-01T00:01:00Z'],
+        [null, 'updates.example.com', '2026-01-01T00:02:00Z'],
+      ],
+    });
+    await extractIocs!.handler(
+      { hosts: ['WKSTN-RECV01'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    );
+
+    const call = esqlQuery.mock.calls[0][0].query as string;
+    expect(call).toContain('file.Ext.original.extension');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(

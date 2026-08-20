@@ -32,6 +32,8 @@ const resolveAgentIdsSchema = z.object({
     ),
 });
 
+import { EXECUTABLE_AGENT_STATUSES } from './agent_statuses';
+
 interface ResolvedAgent {
   hostname: string;
   agent_id: string | null;
@@ -193,8 +195,9 @@ export const resolveAgentIdsTool = (
 
         const matches = (agents as FleetAgentLike[]).filter(
           (agent) =>
-            agent.local_metadata?.host?.hostname === hostname ||
-            agent.local_metadata?.host?.name === hostname
+            (agent.local_metadata?.host?.hostname === hostname ||
+              agent.local_metadata?.host?.name === hostname) &&
+            EXECUTABLE_AGENT_STATUSES.has(agent.status ?? '')
         );
 
         const best = [...matches].sort((a, b) => {

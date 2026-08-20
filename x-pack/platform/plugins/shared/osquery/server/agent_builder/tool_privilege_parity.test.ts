@@ -11,6 +11,7 @@ import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import type { SchemaService } from '../lib/schema_service';
 import { buildToolContext, toolRequest } from './test_helpers';
 import { checkIntegrationTool } from './check_integration_tool';
+import { registerAgentBuilderTools } from './register_tools';
 import { listSavedQueriesTool } from './list_saved_queries_tool';
 import { getTableSchemaTool } from './get_table_schema_tool';
 import { runLiveQueryTool } from './run_live_query_tool';
@@ -157,17 +158,28 @@ describe('Osquery Agent Builder tool privilege parity', () => {
   });
 
   it('covers every registered Osquery Agent Builder tool', () => {
-    // Keep in sync with registerAgentBuilderTools().
-    const registered = [
-      'check_integration',
-      'list_saved_queries',
-      'get_table_schema',
-      'run_live_query',
-      'get_live_query_results',
-      'list_packs',
-      'resolve_agent_ids',
-    ];
+    // Derive the registered set from the real registration entrypoint, not a
+    // copy — a newly registered tool must fail this test until it has a row.
+    const logger = loggerMock.create();
+    const registered: string[] = [];
+    const agentBuilder = {
+      tools: {
+        register: (tool: { id: string }) => registered.push(tool.id),
+      },
+    };
+    registerAgentBuilderTools(
+      agentBuilder as never,
+      buildToolContext().context,
+      schemaService() as never,
+      logger
+    );
 
-    expect(TOOL_PRIVILEGE_CONTRACT.map((entry) => entry.name).sort()).toEqual(registered.sort());
+    const contractIds = TOOL_PRIVILEGE_CONTRACT.map((entry) => {
+      const tool = entry.factory(buildToolContext().context) as unknown as { id: string };
+
+      return tool.id;
+    });
+
+    expect(contractIds.sort()).toEqual(registered.sort());
   });
 });

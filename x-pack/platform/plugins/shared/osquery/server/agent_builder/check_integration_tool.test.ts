@@ -22,7 +22,8 @@ describe('checkIntegrationTool agent_id handling', () => {
     } as never);
 
     const kuery = (listAgents.mock.calls[0][0] as { kuery: string }).kuery;
-    expect(kuery).toContain('agent.id:"agent-\\"1\\" or agent.id:\\"*\\\\"');
+    expect(kuery).toContain('agent.id:"agent-\\"1\\"');
+    expect(kuery).toContain('agent.id:\\"\\*\\\\"');
   });
 
   it('does not report capability when the kuery matched a different agent', async () => {
@@ -48,7 +49,7 @@ describe('checkIntegrationTool agent_id handling', () => {
   it('reports capability when the list returns the exact requested agent', async () => {
     const { context } = buildToolContext({
       grantedPrivileges: ['osquery-read'],
-      agents: [{ id: 'ad2681a0-1a5b-4b42-9a5f-000000000001' }],
+      agents: [{ id: 'ad2681a0-1a5b-4b42-9a5f-000000000001', status: 'online' }],
       agentsTotal: 1,
     });
     const tool = checkIntegrationTool(context, loggerMock.create());

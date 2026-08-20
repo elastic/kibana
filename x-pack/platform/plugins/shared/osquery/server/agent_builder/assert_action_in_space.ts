@@ -16,6 +16,7 @@ export interface ActionOwnership {
 }
 
 interface OsqueryActionSource {
+  action_id?: string;
   agents?: string[];
   queries?: Array<{ action_id?: string; agents?: string[] }>;
 }
@@ -60,14 +61,25 @@ export const assertActionBelongsToSpace = async (
     },
   });
 
-  const hit = result.hits.hits[0]?._source;
+  const hit = result.hits.hits[0];
 
   if (!hit) {
     return { found: false };
   }
 
-  const matchingQuery = hit.queries?.find((query) => query.action_id === queryActionId);
-  const expectedAgentCount = (matchingQuery?.agents ?? hit.agents)?.length;
+  const source = hit._source ?? {};
+
+  // A parent action id is a container, not a query: response/result documents
+  // carry only the per-query child id, so polling with the parent id can never
+  // match. Accept the id only when it identifies an actual query — a child
+  // entry in the parent doc's `queries[]`, or a doc that IS the query (its own
+  // action_id with no `queries` container).
+  const matchingQuery = source.queries?.find((query) => query.action_id === queryActionId);
+  if (!matchingQuery && (source.queries?.length || source.action_id !== queryActionId)) {
+    return { found: false };
+  }
+
+  const expectedAgentCount = (matchingQuery?.agents ?? source.agents)?.length;
 
   return {
     found: true,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-nodejs-modules */
-
 import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -46,6 +44,7 @@ describe('Endpoint Osquery eval isolation', () => {
 
     const endpoint = suites.suites.find((suite) => suite.id === 'endpoint');
     const endpointOsquery = suites.suites.find((suite) => suite.id === 'endpoint-osquery');
+    const endpointOsqueryTrap = suites.suites.find((suite) => suite.id === 'endpoint-osquery-trap');
 
     expect(endpoint).toMatchObject({
       configPath:
@@ -57,23 +56,42 @@ describe('Endpoint Osquery eval isolation', () => {
         'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery.config.ts',
       serverConfigSet: 'evals_endpoint_osquery',
     });
+    // The trap installs osquery_manager at runtime, so it gets its own suite
+    // and stack — a shared stack leaks the install into other specs.
+    expect(endpointOsqueryTrap).toMatchObject({
+      configPath:
+        'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery-trap.config.ts',
+      serverConfigSet: 'evals_endpoint',
+    });
   });
 
-  it('keeps live-state Osquery specs out of the base endpoint Playwright testDir', () => {
+  it('keeps the trap and live-state Osquery specs out of the base endpoint Playwright testDir', () => {
     const baseConfig = read(
       'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.config.ts'
     );
     const osqueryConfig = read(
       'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery.config.ts'
     );
+    const trapConfig = read(
+      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery-trap.config.ts'
+    );
 
     expect(baseConfig).toContain('testDir: `${__dirname}/evals`');
     expect(osqueryConfig).toContain('testDir: `${__dirname}/evals_osquery`');
+    expect(trapConfig).toContain("testDir: Path.resolve(__dirname, './evals_trap')");
     expect(
       Fs.existsSync(
         Path.join(
           REPO_ROOT,
           'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_osquery/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_live_state.spec.ts'
+        )
+      )
+    ).toBe(true);
+    expect(
+      Fs.existsSync(
+        Path.join(
+          REPO_ROOT,
+          'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_trap/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_trap.spec.ts'
         )
       )
     ).toBe(true);

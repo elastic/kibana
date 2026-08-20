@@ -127,6 +127,9 @@ export const getLiveQueryResultsTool = (
               ...(pollResult.expected !== undefined && { expected_agents: pollResult.expected }),
               row_count: pollResult.rows.length,
               rows: pollResult.rows,
+              ...(pollResult.truncated && { truncated: true }),
+              ...(pollResult.errorAgents !== undefined &&
+                pollResult.errorAgents > 0 && { errored_agents: pollResult.errorAgents }),
               wait_seconds: waitSeconds ?? DEFAULT_WAIT_SECONDS,
               ...(pollResult.status === 'pending' && {
                 guidance:

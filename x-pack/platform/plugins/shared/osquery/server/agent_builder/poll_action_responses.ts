@@ -50,6 +50,10 @@ export interface PollActionResponsesResult {
   status: LiveQueryPollStatus;
   /** Last search error, when `status` is `error`. */
   error?: string;
+  /** Distinct agents whose response carried an error, when known. */
+  errorAgents?: number;
+  /** True when matching result rows exceeded what was returned. */
+  truncated?: boolean;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -87,6 +91,8 @@ export const pollActionResponses = async (
   let rows: Array<Record<string, unknown>> = [];
   let searchSucceeded = false;
   let lastError: string | undefined;
+  let errorAgents: number | undefined;
+  let totalRows: number | undefined;
 
   const allAgentsResponded = () =>
     expectedAgentCount !== undefined && expectedAgentCount > 0 && responded >= expectedAgentCount;
@@ -100,10 +106,20 @@ export const pollActionResponses = async (
         ignore_unavailable: true,
         track_total_hits: true,
         // The transform keys docs by (@timestamp, action_id, agent_id), so a
-        // retried flush double-counts one agent. Count distinct agents.
+        // retried flush double-counts one agent. Count distinct agents, and
+        // how many of those responses carry an error (the same classification
+        // query.action_results.dsl.ts applies: error.keyword empty = success).
         aggs: {
           distinct_agents: {
             cardinality: { field: 'agent_id' },
+          },
+          error_agents: {
+            filter: { exists: { field: 'error' } },
+            aggs: {
+              distinct: {
+                cardinality: { field: 'agent_id' },
+              },
+            },
           },
         },
         query: {
@@ -116,11 +132,15 @@ export const pollActionResponses = async (
       responded =
         (responsesResult.aggregations?.distinct_agents as { value: number } | undefined)?.value ??
         0;
+      errorAgents = (
+        responsesResult.aggregations?.error_agents as { distinct?: { value?: number } } | undefined
+      )?.distinct?.value;
 
       const resultsResult = await esClient.search({
         index: RESULTS_INDEX_PATTERN,
         size: maxRows,
         ignore_unavailable: true,
+        track_total_hits: true,
         query: {
           bool: {
             filter: [{ term: { action_id: actionId } }, spaceFilter],
@@ -132,6 +152,11 @@ export const pollActionResponses = async (
       if (hits.length > 0) {
         rows = hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>));
       }
+
+      totalRows =
+        typeof resultsResult.hits.total === 'number'
+          ? resultsResult.hits.total
+          : resultsResult.hits.total?.value;
 
       searchSucceeded = true;
 
@@ -162,6 +187,18 @@ export const pollActionResponses = async (
     };
   }
 
+  // Every responding agent errored: osquery ran but returned no readable rows.
+  if (errorAgents !== undefined && errorAgents > 0 && errorAgents === responded) {
+    return {
+      responded,
+      ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),
+      rows,
+      status: 'error' as const,
+      error: `All ${errorAgents} responding agent(s) reported an execution error.`,
+      errorAgents,
+    };
+  }
+
   const status: LiveQueryPollStatus = allAgentsResponded()
     ? 'completed'
     : responded > 0 || rows.length > 0
@@ -173,5 +210,7 @@ export const pollActionResponses = async (
     ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),
     rows: rows.slice(0, maxRows),
     status,
+    ...(totalRows !== undefined && totalRows > rows.length && { truncated: true }),
+    ...(errorAgents !== undefined && errorAgents > 0 && { errorAgents }),
   };
 };

@@ -56,12 +56,25 @@ const extractTableRefs = (sql: string): string[] => {
 
   for (const clause of sql.matchAll(clauseRe)) {
     for (const item of clause[1].split(',')) {
-      // First identifier of each item; drops any alias (`processes p`,
-      // `processes AS p`) and SQLite's backtick/double/bracket quoting.
-      // Dotted refs are captured whole; `physicalTableName` resolves them.
-      const match = item.trim().match(/^[`"[]?([a-zA-Z_][a-zA-Z0-9_.]*)[`"\]]?/);
+      // First reference of each item; drops any alias (`processes p`,
+      // `processes AS p`). A reference is a chain of dot-separated segments
+      // where each segment may be quoted independently (`main`.`curl`,
+      // [main].[curl], "main".curl) — one optional quote wrapper per segment,
+      // not per reference. `physicalTableName` resolves the last segment.
+      const quotedSegment =
+        '((?:[`"\\[])[a-zA-Z_][a-zA-Z0-9_]*(?:[`"\\]])?|[a-zA-Z_][a-zA-Z0-9_]*)';
+      const match = item
+        .trim()
+        .match(new RegExp(`^(${quotedSegment}(?:\\s*\\.\\s*${quotedSegment})*)`));
       if (match) {
-        refs.push(match[1].toLowerCase());
+        refs.push(
+          match[1]
+            .split('.')
+            .map((segment) => segment.trim().replace(/^[\s`"[]+|[\s`"\]]+$/g, ''))
+            .filter(Boolean)
+            .join('.')
+            .toLowerCase()
+        );
       }
     }
   }
@@ -135,11 +148,13 @@ export const validateReadOnlyQuery = (
     return 'Query contains a forbidden keyword. Only read-only SELECT queries against schema-catalog tables are allowed.';
   }
 
-  // CTE aliases (WITH name AS (...)) are not physical tables — allow them
+  // CTE aliases (WITH [RECURSIVE] name[(cols)] AS (...)) are not physical tables — allow them
   const cteAliases = new Set(
-    [...scannable.matchAll(/\b(?:WITH|,)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+AS\s*\(/gi)].map((m) =>
-      m[1].toLowerCase()
-    )
+    [
+      ...scannable.matchAll(
+        /\b(?:WITH|,)\s+(?:RECURSIVE\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\([^()]*\))?\s+AS\s*\(/gi
+      ),
+    ].map((m) => m[1].toLowerCase())
   );
 
   const tableRefs = extractTableRefs(scannable);

@@ -16,6 +16,7 @@ import {
   buildOsqueryPolicyKuery,
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
+import { EXECUTABLE_AGENT_STATUSES } from './agent_statuses';
 
 export const osqueryTool = (toolName: string): string =>
   `${internalNamespaces.osquery}.${toolName}`;
@@ -88,8 +89,10 @@ export const isOsqueryLiveCapable = async (
   }
 
   try {
+    // Same executable-status contract as resolve_agent_ids.
+    const executableKuery = [...EXECUTABLE_AGENT_STATUSES].map((s) => `status:${s}`).join(' or ');
     const agents = await agentService.asInternalScopedUser(spaceId).listAgents({
-      kuery: buildOsqueryPolicyKuery(agentPolicyIds),
+      kuery: `(${executableKuery}) and (${buildOsqueryPolicyKuery(agentPolicyIds)})`,
       perPage: 1,
       showInactive: false,
     });

@@ -323,4 +323,45 @@ describe('validateReadOnlyQuery', () => {
       expect(validateReadOnlyQuery('SELECT * FROM wifi_survey', ALLOWED)).toMatch(/not read-only/i);
     });
   });
+
+  describe('quoted multi-part references (review round 3)', () => {
+    it('rejects a denylisted table reached via "main"."curl"', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM "main"."curl"', ALLOWED)).toMatch(
+        /not read-only/
+      );
+    });
+
+    it('rejects a denylisted table reached via [main].[curl]', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM [main].[curl]', ALLOWED)).toMatch(
+        /not read-only/
+      );
+    });
+
+    it('rejects a denylisted table reached via `main`.`curl`', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM `main`.`curl`', ALLOWED)).toMatch(
+        /not read-only/
+      );
+    });
+
+    it('does not treat a quoted schema prefix as a CTE alias', () => {
+      expect(
+        validateReadOnlyQuery('WITH main AS (SELECT 1 AS x) SELECT * FROM "main"."curl"', ALLOWED)
+      ).toMatch(/not read-only/);
+    });
+
+    it('accepts a quoted allowlisted table', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM "processes"', ALLOWED)).toBeNull();
+    });
+  });
+
+  describe('WITH RECURSIVE CTEs (review round 3)', () => {
+    it('collects the CTE name after WITH RECURSIVE', () => {
+      expect(
+        validateReadOnlyQuery(
+          'WITH RECURSIVE walk(x) AS (SELECT 1) SELECT * FROM walk JOIN processes ON 1=1',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+  });
 });

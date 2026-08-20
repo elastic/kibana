@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 /**

@@ -12,6 +12,12 @@ const responsesSearchResult = (distinctAgents: number) => ({
   aggregations: { distinct_agents: { value: distinctAgents } },
 });
 
+/** Same shape but raw doc count deliberately disagrees with distinct agents. */
+const duplicateResponsesSearchResult = (distinctAgents: number) => ({
+  hits: { total: { value: distinctAgents + 2 }, hits: [] },
+  aggregations: { distinct_agents: { value: distinctAgents } },
+});
+
 describe('pollActionResponses', () => {
   it('polls action responses for completion metadata and result index for SQL rows', async () => {
     const search = jest
@@ -34,7 +40,13 @@ describe('pollActionResponses', () => {
       expect.objectContaining({
         index: 'logs-osquery_manager.action.responses*',
         size: 0,
-        aggs: { distinct_agents: { cardinality: { field: 'agent_id' } } },
+        aggs: {
+          distinct_agents: { cardinality: { field: 'agent_id' } },
+          error_agents: {
+            filter: { exists: { field: 'error' } },
+            aggs: { distinct: { cardinality: { field: 'agent_id' } } },
+          },
+        },
         query: expect.objectContaining({
           bool: expect.objectContaining({
             filter: expect.arrayContaining([{ term: { action_id: 'query-action-1' } }]),
@@ -121,7 +133,7 @@ describe('pollActionResponses', () => {
         aggregations: { distinct_agents: { value: 2 } },
       })
       .mockResolvedValueOnce({ hits: { hits: [] } })
-      .mockResolvedValueOnce(responsesSearchResult(3))
+      .mockResolvedValueOnce(duplicateResponsesSearchResult(3))
       .mockResolvedValueOnce({ hits: { hits: [] } });
 
     const result = await pollActionResponses({ search } as any, 'query-action-1', {
@@ -131,7 +143,37 @@ describe('pollActionResponses', () => {
       expectedAgentCount: 3,
     });
 
+    // 5 raw docs / 3 distinct agents: a hits.total implementation reports 5
+    // and this expectation fails — only the cardinality agg reports 3.
     expect(result.responded).toBe(3);
     expect(result.status).toBe('completed');
+  });
+
+  it('reports error status when every responding agent reported an execution error', async () => {
+    // Each poll iteration issues two searches (responses, then results).
+    const search = jest.fn().mockImplementation(async () => {
+      const call = search.mock.calls.length;
+
+      return call % 2 === 1
+        ? {
+            hits: { total: { value: 2 }, hits: [] },
+            aggregations: {
+              distinct_agents: { value: 2 },
+              error_agents: { doc_count: 2, distinct: { value: 2 } },
+            },
+          }
+        : { hits: { hits: [] } };
+    });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorAgents).toBe(2);
+    expect(result.error).toMatch(/execution error/);
   });
 });

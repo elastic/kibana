@@ -252,7 +252,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, @timestamp`,
+          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, file.Ext.original.extension, @timestamp`,
           `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
@@ -266,12 +266,46 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         };
         const firstSeenByCategory: Record<string, string> = {};
         let iocsError: string | undefined;
+        let truncated = false;
+
+        // IoC presence filters — without them every ordinary process, IP and
+        // file on the host is reported as an indicator.
+        const isRfc1918OrLocal = (ip: string): boolean =>
+          /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.|0\.|169\.254\.|::1|fe80:)/i.test(
+            ip
+          ) || /^(224\.|239\.)/i.test(ip);
+        const isSuspiciousExtension = (ext: string): boolean =>
+          /^(exe|dll|scr|com|pif|bat|cmd|ps1|vbs|js|jse|hta|jar|lnk)$/i.test(ext);
+        const COMMON_EXECUTABLES = new Set([
+          'svchost.exe',
+          'csrss.exe',
+          'wininit.exe',
+          'winlogon.exe',
+          'services.exe',
+          'lsass.exe',
+          'smss.exe',
+          'explorer.exe',
+          'spoolsv.exe',
+          'conhost.exe',
+          'runtimebroker.exe',
+          'sihost.exe',
+          'taskhostw.exe',
+          'dwm.exe',
+          'ctfmon.exe',
+        ]);
+        const isNotableExecutable = (exe: string): boolean => {
+          const name = exe.split('\\').pop()?.toLowerCase() ?? '';
+          return (
+            name !== '' && !COMMON_EXECUTABLES.has(name) && !/^(system32|syswow64)\//i.test(name)
+          );
+        };
 
         try {
           const { columns, values } = await context.esClient.asCurrentUser.esql.query({
             query: esqlQuery,
             drop_null_columns: true,
           });
+          truncated = values.length >= 500;
           const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
 
           const hashIdx = colIndex('process.hash.sha256');
@@ -282,6 +316,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           const domainIdx = colIndex('destination.domain');
           const regIdx = colIndex('registry.path');
           const extIdx = colIndex('file.extension');
+          const origExtIdx = colIndex('file.Ext.original.extension');
           const tsIdx = colIndex('@timestamp');
 
           // Only persistence-location paths are IoCs; other registry.path
@@ -321,12 +356,19 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
             const domain = domainIdx >= 0 ? v[domainIdx] : null;
             const regPath = regIdx >= 0 ? v[regIdx] : null;
             const ext = extIdx >= 0 ? v[extIdx] : null;
+            const origExt = origExtIdx >= 0 ? v[origExtIdx] : null;
 
             if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
               iocs.file_hashes.push(hash);
               trackCategory('file_hashes', v);
             }
-            if (exe && typeof exe === 'string' && parentName && typeof parentName === 'string') {
+            if (
+              exe &&
+              typeof exe === 'string' &&
+              parentName &&
+              typeof parentName === 'string' &&
+              isNotableExecutable(exe)
+            ) {
               const chain = `${parentName} → ${exe}`;
               if (!iocs.process_chain.includes(chain)) {
                 iocs.process_chain.push(chain);
@@ -337,18 +379,28 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               parentCmd &&
               typeof parentCmd === 'string' &&
               parentName &&
+              isNotableExecutable(exe ?? '') &&
               !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
             ) {
               iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
               trackCategory('process_chain', v);
             }
-            const netDest = domain ?? ip;
+            // External destinations only — RFC1918/loopback/multicast are
+            // ordinary host chatter, not indicators.
             if (
-              netDest &&
-              typeof netDest === 'string' &&
-              !iocs.network_destinations.includes(netDest)
+              typeof ip === 'string' &&
+              !isRfc1918OrLocal(ip) &&
+              !iocs.network_destinations.includes(ip)
             ) {
-              iocs.network_destinations.push(netDest);
+              iocs.network_destinations.push(ip);
+              trackCategory('network_destinations', v);
+            }
+            if (
+              domain &&
+              typeof domain === 'string' &&
+              !iocs.network_destinations.includes(domain)
+            ) {
+              iocs.network_destinations.push(domain);
               trackCategory('network_destinations', v);
             }
             if (
@@ -360,9 +412,24 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               iocs.registry_persistence_keys.push(regPath);
               trackCategory('registry_persistence_keys', v);
             }
-            if (ext && typeof ext === 'string' && !iocs.file_extensions.includes(ext)) {
-              iocs.file_extensions.push(ext);
-              trackCategory('file_extensions', v);
+            // A renamed double extension (report.pdf → report.pdf.exe) is the
+            // IoC — surface the original→current pair when present, else a
+            // suspicious current extension.
+            if (ext && typeof ext === 'string') {
+              if (
+                origExt &&
+                typeof origExt === 'string' &&
+                origExt.toLowerCase() !== ext.toLowerCase()
+              ) {
+                const renamed = `${origExt} → ${ext}`;
+                if (!iocs.file_extensions.includes(renamed)) {
+                  iocs.file_extensions.push(renamed);
+                  trackCategory('file_extensions', v);
+                }
+              } else if (isSuspiciousExtension(ext) && !iocs.file_extensions.includes(ext)) {
+                iocs.file_extensions.push(ext);
+                trackCategory('file_extensions', v);
+              }
             }
           }
         } catch (e) {
@@ -379,6 +446,10 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 time_window_hours: timeWindowHours,
                 iocs,
                 first_seen_by_category: firstSeenByCategory,
+                ...(truncated && {
+                  truncated: true,
+                  note: 'Telemetry for the window exceeded 500 events; values are from the earliest 500. First-seen is accurate, the value set may be partial.',
+                }),
                 ...(iocsError !== undefined && { error: iocsError }),
                 guidance:
                   'Present as a markdown table (one row per indicator type), then offer a cross-environment hunt with these values.',

@@ -189,7 +189,7 @@ export const runLiveQueryTool = (
                 action_id: queryActionId,
                 parent_action_id: parentActionId,
                 agent_count: agentCount,
-                status: 'dispatched' as const,
+                status: 'results_unreadable' as const,
                 query,
                 timeout_seconds: timeout ?? 60,
                 responded_agents: responded,
@@ -226,6 +226,9 @@ export const runLiveQueryTool = (
               responded_agents: responded,
               row_count: rows.length,
               rows: rows.slice(0, MAX_RESULT_ROWS),
+              ...(pollResult.truncated && { truncated: true }),
+              ...(pollResult.errorAgents !== undefined &&
+                pollResult.errorAgents > 0 && { errored_agents: pollResult.errorAgents }),
               ...(status !== 'completed' && {
                 guidance:
                   'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',

@@ -20,6 +20,7 @@ import {
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
 import { escapeKueryValue } from './resolve_agent_ids_tool';
+import { EXECUTABLE_AGENT_STATUSES } from './agent_statuses';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const CHECK_INTEGRATION_TOOL_ID = osqueryTool('check_integration');
@@ -53,6 +54,13 @@ interface IntegrationStatus {
   error?: string;
   guidance?: string;
 }
+
+/**
+ * KQL wildcards are not escapes: `escapeKueryValue` quotes the literal but a
+ * `*` inside it still expands. Escape wildcard metacharacters for exact-match
+ * lookups.
+ */
+const escapeKueryWildcards = (value: string): string => value.replace(/([*?])/g, '\\$1');
 
 const toolResult = (data: IntegrationStatus) => ({
   results: [
@@ -187,15 +195,19 @@ export const checkIntegrationTool = (
       // that carries the integration.
       if (agentId) {
         // escapeKueryValue does not escape KQL wildcards, so the kuery can
-        // match more than the requested agent — verify exact identity.
-        const escapedAgentId = escapeKueryValue(agentId);
+        // match more than the requested agent — verify exact identity below.
+        const escapedAgentId = escapeKueryWildcards(escapeKueryValue(agentId));
         const { agents } = await scopedAgentClient.listAgents({
           kuery: `agent.id:"${escapedAgentId}" and (${policyKuery})`,
           perPage: 1,
+          sortField: 'enrolled_at',
+          sortOrder: 'desc',
           showInactive: true,
         });
 
-        const capable = (agents ?? []).some((agent) => agent.id === agentId);
+        const capable = (agents ?? []).some(
+          (agent) => agent.id === agentId && EXECUTABLE_AGENT_STATUSES.has(agent.status ?? '')
+        );
 
         return toolResult({
           installed: true,
@@ -211,8 +223,11 @@ export const checkIntegrationTool = (
         });
       }
 
+      // Same executable-status contract as resolve_agent_ids: showInactive only
+      // excludes `inactive`, so filter to statuses that can run a query.
+      const executableKuery = [...EXECUTABLE_AGENT_STATUSES].map((s) => `status:${s}`).join(' or ');
       const agents = await scopedAgentClient.listAgents({
-        kuery: policyKuery,
+        kuery: `(${executableKuery}) and (${policyKuery})`,
         perPage: 1,
         showInactive: false,
       });
