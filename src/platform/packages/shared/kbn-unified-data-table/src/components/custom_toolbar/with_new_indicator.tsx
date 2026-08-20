@@ -9,12 +9,8 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-export const DISPLAY_SELECTOR_NEW_INDICATOR_TEST_SUBJ =
-  'unifiedDataTableDisplaySelectorNewIndicator';
-
-export interface WithNewIndicatorProps {
+interface WithNewIndicatorProps {
   children: React.ReactNode;
 }
 
@@ -28,16 +24,13 @@ export const WithNewIndicator = ({ children }: WithNewIndicatorProps) => {
       <EuiIcon
         type="dot"
         color="primary"
-        data-test-subj={DISPLAY_SELECTOR_NEW_INDICATOR_TEST_SUBJ}
-        title={i18n.translate('unifiedDataTable.displaySelector.newIndicatorLabel', {
-          defaultMessage: 'New settings available',
-        })}
         css={{
           position: 'absolute',
           insetBlockStart: '-1px',
           insetInlineEnd: '-1px',
           pointerEvents: 'none',
         }}
+        aria-hidden={true}
       />
     </span>
   );
