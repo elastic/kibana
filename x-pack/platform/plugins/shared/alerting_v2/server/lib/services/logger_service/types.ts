@@ -26,8 +26,8 @@ export type AlertingLabels = Partial<{
   workflow_id: string;
   execution_id: string;
   task_id: string;
-  /** Agent Builder skill id (e.g. rule-management). Low-cardinality. */
   skill_id: string;
+  attachment_type: string;
   event_type: string;
   step: string;
   subsystem: string;
@@ -40,7 +40,7 @@ export type AlertingLabels = Partial<{
 
 /**
  * Subsystems that own a child logger. A name maps to the ECS `log.logger`
- * value `plugins.alertingV2.<name>`, which is the primary axis an operator
+ * value `plugins.alertingVTwo.<name>`, which is the primary axis an operator
  * filters on.
  */
 export type AlertingSubsystemName =

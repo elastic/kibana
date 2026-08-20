@@ -13,6 +13,7 @@ import { EuiSwitch, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AppMenuSwitch } from '../types';
 import { getTooltip } from '../utils';
+import { asPlainText } from '../as_plain_text';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 interface AppMenuSwitchComponentProps {
@@ -51,7 +52,7 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
   const switchElement = (
     <EuiSwitch
       id={id}
-      label={label}
+      label={asPlainText(label)}
       labelProps={{
         ...labelProps,
         css: labelCss,
