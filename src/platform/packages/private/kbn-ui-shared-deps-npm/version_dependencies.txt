@@ -52,7 +52,6 @@
 @popperjs/core@2.11.8
 @reduxjs/toolkit@1.9.7
 @reduxjs/toolkit@2.12.0
-@remix-run/router@1.23.3
 @standard-schema/spec@1.1.0
 @standard-schema/utils@0.3.0
 @tanstack/match-sorter-utils@8.7.0
@@ -160,7 +159,7 @@ console-browserify@1.1.0
 constants-browserify@1.0.0
 convert-source-map@1.8.0
 copy-anything@3.0.2
-core-js@3.45.1
+core-js@3.50.0
 core-util-is@1.0.2
 cosmiconfig@7.1.0
 create-ecdh@4.0.4
@@ -257,7 +256,6 @@ hast-util-whitespace@1.0.4
 hastscript@5.0.0
 hastscript@6.0.0
 history@4.9.0
-history@5.3.0
 hmac-drbg@1.0.1
 hoist-non-react-statics@3.3.2
 html-void-elements@1.0.5
@@ -376,7 +374,7 @@ property-information@5.5.0
 public-encrypt@4.0.3
 punycode@1.4.1
 punycode@2.3.1
-qs@6.15.2
+qs@6.15.3
 querystring-es3@0.2.1
 querystringify@2.1.1
 raf-schd@4.0.3
@@ -396,10 +394,8 @@ react-redux@7.2.8
 react-redux@9.2.0
 react-remove-scroll-bar@2.3.4
 react-remove-scroll@2.5.7
-react-router-dom-v5-compat@6.30.4
 react-router-dom@5.3.4
 react-router@5.3.4
-react-router@6.30.4
 react-style-singleton@2.2.1
 react-virtualized-auto-sizer@1.0.24
 react-window@1.8.11
@@ -441,10 +437,10 @@ set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
 shallowequal@1.1.0
-side-channel-list@1.0.0
+side-channel-list@1.0.1
 side-channel-map@1.0.1
 side-channel-weakmap@1.0.2
-side-channel@1.1.0
+side-channel@1.1.1
 source-map-support@0.5.21
 source-map@0.5.7
 source-map@0.6.1
