@@ -54,7 +54,7 @@ export function CreateSloBtn() {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="createFromTemplate"
-        icon="document"
+        icon="pagesSelect"
         onClick={handleClickCreateFromTemplate}
         data-test-subj="slosPageCreateFromTemplateButton"
       >
@@ -94,7 +94,7 @@ export function CreateSloBtn() {
             data-test-subj="slosPageCreateSloDropdown"
             disabled={isDisabled}
             fill
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >

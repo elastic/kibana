@@ -14,9 +14,13 @@ import {
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
-import type { ListExecutionHistoryArgs } from '../../lib/action_policy_execution_history_client';
+import type {
+  ListExecutionHistoryArgs,
+  ListExecutionHistoryResult,
+} from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { listActionPolicyExecutionsOasExamples } from './list_action_policy_executions_oas_example';
@@ -44,6 +48,24 @@ export const toListExecutionHistoryArgs = ({
     outcome,
     episodeIds,
     startDate,
+  };
+};
+
+export const toListExecutionHistoryResponse = ({
+  items,
+  page,
+  perPage,
+  totalEvents,
+  searchMatches,
+  ...rest
+}: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items,
+    page,
+    per_page: perPage,
+    total_events: totalEvents,
+    search_matches: searchMatches,
   };
 };
 
@@ -100,6 +122,6 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
       ...toListExecutionHistoryArgs(this.request.query ?? {}),
     });
 
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });
   }
 }

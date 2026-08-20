@@ -60,6 +60,8 @@ dependsOn:
   - '@kbn/crypto'
   - '@kbn/std'
   - '@kbn/repo-info'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod

@@ -31,6 +31,7 @@ import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../components/badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
@@ -55,6 +56,7 @@ import {
   enrichStream,
   filterCollapsedStreamRows,
   filterStreamsByQuery,
+  getOnboardStreamTooltip,
 } from './utils';
 
 const EMPTY_CHILDREN: NonNullable<TableRow['children']> = [];
@@ -93,6 +95,7 @@ export function StreamsTreeTable({
   } = useKibana();
   const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
+  const isCpsMultiProject = useIsCpsMultiProject();
 
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -411,7 +414,7 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    content={getOnboardStreamTooltip({ activityBlockTooltip, isCpsMultiProject })}
                     display="block"
                     disableScreenReaderOutput
                   >

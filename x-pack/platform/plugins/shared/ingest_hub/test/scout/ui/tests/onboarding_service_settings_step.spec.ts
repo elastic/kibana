@@ -24,9 +24,10 @@ async function navigateToServiceSettings(
     selectedServiceIds: string[];
     globalRegion?: string;
     serviceVars?: Record<string, unknown>;
+    instances?: unknown[];
   }
 ): Promise<void> {
-  const { selectedServiceIds, globalRegion = 'us-east-1', serviceVars = {} } = opts;
+  const { selectedServiceIds, globalRegion = 'us-east-1', serviceVars = {}, instances } = opts;
   await browserAuth.loginAsAdmin();
   await page.gotoApp('onboarding/aws#service-settings');
   await page.evaluate(
@@ -34,25 +35,27 @@ async function navigateToServiceSettings(
       ids,
       region,
       vars,
+      insts,
       servicesKey,
       settingsKey,
     }: {
       ids: string[];
       region: string;
       vars: Record<string, unknown>;
+      insts: unknown[] | undefined;
       servicesKey: string;
       settingsKey: string;
     }) => {
       sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
-      sessionStorage.setItem(
-        settingsKey,
-        JSON.stringify({ globalRegion: region, serviceVars: vars })
-      );
+      const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
+      if (insts !== undefined) settingsPayload.instances = insts;
+      sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
     },
     {
       ids: selectedServiceIds,
       region: globalRegion,
       vars: serviceVars,
+      insts: instances,
       servicesKey: SERVICES_STEP_SESSION_KEY,
       settingsKey: SERVICE_SETTINGS_SESSION_KEY,
     }
@@ -233,12 +236,15 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('expand icon opens flyout for the correct service', async ({ browserAuth, page }) => {
+    // cloudtrail has configurable flyout fields (transport toggle + bucket_arn),
+    // so it shows an edit button. ec2_metrics has no configurable fields after
+    // removing the region selector and shows plain text instead.
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.getByRole('heading', { name: 'AWS EC2' })).toBeVisible();
+    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await expect(page.getByRole('heading', { name: 'AWS CloudTrail' })).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeHidden();
@@ -246,10 +252,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   test('service name link also opens flyout', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics').click();
+    await page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
   });
 
@@ -281,6 +287,17 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toBeHidden();
   });
 
+  test('flyout no longer shows AWS Region override field', async ({ browserAuth, page }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
+
+    await expect(page.getByLabel('AWS Region (override)')).toBeHidden();
+  });
+
   test('filling required field in flyout and saving unblocks Continue', async ({
     browserAuth,
     page,
@@ -309,16 +326,260 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
-  test('flyout region override pre-populated with global region', async ({ browserAuth, page }) => {
+  // ── Duplicate service ───────────────────────────────────────────────────
+
+  test('⋮ actions menu is visible on every row and contains Duplicate service', async ({
+    browserAuth,
+    page,
+  }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail', 'ec2_metrics'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
+    for (const id of ['cloudtrail', 'ec2_metrics']) {
+      await page.testSubj.locator(`serviceSettingsStep-actionsButton-${id}`).click();
+      await expect(
+        page.testSubj.locator(`serviceSettingsStep-duplicateAction-${id}`)
+      ).toBeVisible();
+      // Close popover before opening the next
+      await page.keyboard.press('Escape');
+    }
+  });
+
+  test('duplicate modal opens with correct service name in body copy', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+
+    const modal = page.testSubj.locator('duplicateServiceModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText(/Add another instance of/)).toBeVisible();
+    await expect(modal.getByText('AWS CloudTrail')).toBeVisible();
+  });
+
+  test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({ browserAuth, page }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+
+    await expect(page.testSubj.locator('duplicateServiceModal-nameField')).toHaveValue(
+      'AWS CloudTrail [Duplicate]'
+    );
+  });
+
+  test('Cancel discards without adding a row or changing session storage', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await expect(page.testSubj.locator('duplicateServiceModal')).toBeVisible();
+
+    await page.testSubj.locator('duplicateServiceModal-cancelButton').click();
+    await expect(page.testSubj.locator('duplicateServiceModal')).toBeHidden();
+
+    // Still only 1 row
+    await expect(page.getByText(/Showing.*1.*service/)).toBeVisible();
+  });
+
+  test('Add inserts a new row with the chosen name', async ({ browserAuth, page }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: {
+        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+      },
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+
+    // Fill the duplicate bucket_arn and click Add
+    await page.testSubj
+      .locator('serviceSettingsFlyout-field-bucket_arn')
+      .fill('arn:aws:s3:::second-bucket');
+    await page.testSubj.locator('duplicateServiceModal-addButton').click();
+
+    await expect(page.testSubj.locator('duplicateServiceModal')).toBeHidden();
+
+    // Table now shows 2 rows
+    await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
+    // The new row uses the generated name
+    await expect(page.getByText('AWS CloudTrail [Duplicate]')).toBeVisible();
+  });
+
+  test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: {
+        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+      },
+    });
+
+    // Duplicate with a different bucket_arn
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj
+      .locator('serviceSettingsFlyout-field-bucket_arn')
+      .fill('arn:aws:s3:::second-bucket');
+    await page.testSubj.locator('duplicateServiceModal-addButton').click();
+
+    // Open the original's flyout and verify its bucket_arn is unchanged
+    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toHaveValue(
+      'arn:aws:s3:::original-bucket'
+    );
+    await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
+  });
+
+  test('duplicate row participates in attention callout and Continue readiness', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Seed with a complete original and an already-persisted incomplete duplicate
+    const dupInstanceId = 'cloudtrail__dup-1';
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: {
+        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+        [dupInstanceId]: { trigger: 'aws-s3', vars: {} }, // bucket_arn missing
+      },
+      instances: [
+        {
+          instanceId: 'cloudtrail',
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail',
+          isDuplicate: false,
+        },
+        {
+          instanceId: dupInstanceId,
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail [Duplicate]',
+          isDuplicate: true,
+        },
+      ],
+    });
+
+    // Duplicate row has the attention badge
+    await expect(
+      page.testSubj.locator(`serviceSettingsStep-attentionIcon-${dupInstanceId}`)
+    ).toBeVisible();
+    // Callout visible, Continue blocked
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
+
+    // Fill the duplicate's required field via its flyout
+    await page.testSubj.locator(`serviceSettingsStep-editButton-${dupInstanceId}`).click();
+    await page.testSubj
+      .locator('serviceSettingsFlyout-field-bucket_arn')
+      .fill('arn:aws:s3:::second-bucket');
+    await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
+
+    // All clear — Continue enabled
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
+  });
+
+  test('Remove action is visible only on duplicate rows and removes the row', async ({
+    browserAuth,
+    page,
+  }) => {
+    const dupInstanceId = 'cloudtrail__dup-1';
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: {
+        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+        [dupInstanceId]: {
+          trigger: 'aws-s3',
+          vars: { bucket_arn: 'arn:aws:s3:::second-bucket' },
+        },
+      },
+      instances: [
+        {
+          instanceId: 'cloudtrail',
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail',
+          isDuplicate: false,
+        },
+        {
+          instanceId: dupInstanceId,
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail [Duplicate]',
+          isDuplicate: true,
+        },
+      ],
+    });
+
+    // Original row has no Remove action
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await expect(page.testSubj.locator('serviceSettingsStep-removeAction-cloudtrail')).toBeHidden();
+    await page.keyboard.press('Escape');
+
+    // Duplicate row has a Remove action — clicking it removes the row
+    await page.testSubj.locator(`serviceSettingsStep-actionsButton-${dupInstanceId}`).click();
+    await page.testSubj.locator(`serviceSettingsStep-removeAction-${dupInstanceId}`).click();
+
+    await expect(page.getByText(/Showing.*1.*service/)).toBeVisible();
+    await expect(page.getByText('AWS CloudTrail [Duplicate]')).toBeHidden();
+  });
+
+  test('duplicate modal — Add is disabled until required fields are filled', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+
+    // bucket_arn is empty (pre-filled from source which had empty vars)
+    // Trigger name validation so the Add button state is evaluated
+    await page.testSubj.locator('duplicateServiceModal-nameField').blur();
+
+    await expect(page.testSubj.locator('duplicateServiceModal-addButton')).toBeDisabled();
+
+    await page.testSubj
+      .locator('serviceSettingsFlyout-field-bucket_arn')
+      .fill('arn:aws:s3:::my-bucket');
+
+    await expect(page.testSubj.locator('duplicateServiceModal-addButton')).toBeEnabled();
+  });
+
+  test('duplicate modal — name collision shows error and blocks Add', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: {
+        cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+      },
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+
+    // Change the name to match the original
+    await page.testSubj.locator('duplicateServiceModal-nameField').fill('AWS CloudTrail');
 
     await expect(
-      page.testSubj.locator('serviceSettingsFlyout').getByLabel('AWS Region (override)')
-    ).toHaveValue('us-east-1');
+      page.getByText('This name is already in use. Choose a different name.')
+    ).toBeVisible();
+    await expect(page.testSubj.locator('duplicateServiceModal-addButton')).toBeDisabled();
   });
 });

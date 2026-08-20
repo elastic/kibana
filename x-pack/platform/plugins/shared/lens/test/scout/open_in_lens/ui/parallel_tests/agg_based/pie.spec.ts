@@ -67,12 +67,18 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
 
     await convertToLensByTitle({ dashboard }, 'Pie - Agg with params');
     await lens.waitForVisualization('partitionVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
-    const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+    const sliceByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sliceByDimensionPanel',
+      0
+    );
+    const sizeByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sizeByDimensionPanel',
+      0
+    );
     expect(sliceByText).toBe('machine.os.raw: Descending');
     expect(sizeByText).toBe('Sum of machine.ram');
   });
@@ -84,17 +90,25 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await convertToLensByTitle({ dashboard }, 'Pie - Basic count');
     await lens.waitForVisualization('partitionVisChart');
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
-    const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+    const sliceByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sliceByDimensionPanel',
+      0
+    );
+    const sizeByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sizeByDimensionPanel',
+      0
+    );
     expect(sliceByText).toBe('machine.os.raw: Descending');
     expect(sizeByText).toBe('Count');
 
     await expect
       .poll(
         async () =>
-          getPieChartLabels(await lens.getCurrentChartDebugState('partitionVisChart')).sort(),
+          getPieChartLabels(
+            await lens.workspace.getCurrentChartDebugState('partitionVisChart')
+          ).sort(),
         { timeout: 20_000 }
       )
       .toStrictEqual([...expectedLabels].sort());
@@ -107,7 +121,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await lens.waitForVisualization('partitionVisChart');
 
     expect(await lens.getChartSwitchType()).toBe('Pie');
-    expect(await lens.getDonutHoleSize()).toBe('Small');
+    expect(await lens.style.getDonutHoleSize()).toBe('Small');
   });
 
   spaceTest('should convert Pie types correctly', async ({ pageObjects }) => {

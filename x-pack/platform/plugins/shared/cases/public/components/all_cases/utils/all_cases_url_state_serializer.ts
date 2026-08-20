@@ -32,6 +32,8 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     {}
   );
 
+  const extendedFieldFilters = state.filterOptions.extendedFieldFilters ?? [];
+
   const combinedState = {
     ...state.queryParams,
     page: state.queryParams.page,
@@ -41,6 +43,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
       assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
     ),
     customFields: customFieldsAsQueryParams,
+    ...(extendedFieldFilters.length > 0 && { extendedFieldFilters }),
     search: encodeURIComponent(state.filterOptions.search ?? ''),
   };
 

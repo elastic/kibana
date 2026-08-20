@@ -79,7 +79,7 @@ export class FeatureSettingsPage {
 
     // Add Model Popover
     this.addModelSearch = this.page.testSubj.locator('add-model-search');
-    this.addModelOptions = this.page.testSubj.locator('add-model-selectable').getByRole('option');
+    this.addModelOptions = this.page.components.selectable('add-model-selectable').options;
 
     // Copy To Modal
     this.copyToModalApply = this.page.testSubj.locator('copy-to-modal-apply');
@@ -145,7 +145,9 @@ export class FeatureSettingsPage {
   }
 
   public addModelOption(name: string): Locator {
-    return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
+    return this.page.components
+      .selectable('add-model-selectable')
+      .options.filter({ hasText: name });
   }
 
   public copyToModalCheckbox(featureId: string): Locator {

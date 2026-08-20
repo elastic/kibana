@@ -91,7 +91,7 @@
     {
       "id": "securityGroup:rules",
       "title": "Rules",
-      "icon": "securitySignal",
+      "icon": "radar",
       "renderAs": "panelOpener",
       "path": "securityGroup:rules",
       "isExternalLink": false,
@@ -857,7 +857,7 @@
       "id": "launchpad",
       "title": "Launchpad",
       "renderAs": "panelOpener",
-      "icon": "launch",
+      "icon": "rocket",
       "path": "launchpad",
       "isExternalLink": false,
       "sideNavStatus": "visible",
@@ -919,7 +919,7 @@
     },
     {
       "title": "Developer tools",
-      "icon": "editorCodeBlock",
+      "icon": "code",
       "id": "dev_tools",
       "href": "/jom/app/dev_tools",
       "path": "dev_tools",

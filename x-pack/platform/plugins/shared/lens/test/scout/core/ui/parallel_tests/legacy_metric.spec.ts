@@ -42,46 +42,46 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
     'renders, filters and dynamically colors a legacy metric',
     async ({ pageObjects: { lens, filterBar } }) => {
       await spaceTest.step('renders a numeric metric', async () => {
-        const { title, value } = await lens.getLegacyMetricData();
-        expect(title).toBe('Maximum of bytes');
+        const { title, value } = await lens.metric.getLegacyMetricData();
+        expect(title).toBe(testData.MAX_BYTES_LABEL);
         // Backend-computed aggregation: assert it renders as a formatted number rather than
         // pinning the exact figure.
         expect(value).toMatch(/^[\d,]+$/);
       });
 
       await spaceTest.step('creates a filter when the metric is clicked', async () => {
-        await lens.clickLegacyMetric();
+        await lens.metric.clickLegacyMetric();
         await expect.poll(() => filterBar.getFilterCount()).toBe(1);
         await filterBar.removeAllFilters();
       });
 
       await spaceTest.step('colors the metric text based on its value', async () => {
-        await lens.openDimensionEditor('lns-dimensionTrigger');
-        await lens.setLegacyMetricColoringMode('labels');
+        await lens.dimensions.openDimensionEditor('lns-dimensionTrigger');
+        await lens.metric.setLegacyMetricColoringMode('labels');
 
         // Coloring updates are debounced, so assert the computed color (auto-retries)
         // rather than a point-in-time read of the `style` attribute.
-        await expect(lens.legacyMetricValue).toHaveCSS('color', LABELS_COLOR);
-        expect((await lens.getLegacyMetricStyle())['background-color']).toBeUndefined();
+        await expect(lens.metric.legacyMetricValue).toHaveCSS('color', LABELS_COLOR);
+        expect((await lens.metric.getLegacyMetricStyle())['background-color']).toBeUndefined();
       });
 
       await spaceTest.step('recolors the metric when tweaking the palette range', async () => {
         await lens.openPalettePanelFlyout();
-        await lens.setPaletteRangeValue(1, '21000');
+        await lens.style.setPaletteRangeValue(1, '21000');
 
-        await expect(lens.legacyMetricValue).toHaveCSS('color', RANGE_TWEAKED_COLOR);
+        await expect(lens.metric.legacyMetricValue).toHaveCSS('color', RANGE_TWEAKED_COLOR);
       });
 
       await spaceTest.step('recolors the metric when reversing the palette', async () => {
-        await lens.reversePaletteColors();
+        await lens.style.reversePaletteColors();
 
-        await expect(lens.legacyMetricValue).toHaveCSS('color', REVERSED_COLOR);
+        await expect(lens.metric.legacyMetricValue).toHaveCSS('color', REVERSED_COLOR);
       });
 
       await spaceTest.step('resets the color stops when picking a predefined palette', async () => {
-        await lens.changePaletteTo('temperature');
+        await lens.style.changePaletteTo('temperature');
 
-        await expect(lens.legacyMetricValue).toHaveCSS('color', TEMPERATURE_COLOR);
+        await expect(lens.metric.legacyMetricValue).toHaveCSS('color', TEMPERATURE_COLOR);
       });
     }
   );

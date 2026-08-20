@@ -29,7 +29,7 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
               label: i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
                 defaultMessage: 'Add endpoint',
               }),
-              iconType: 'plusInCircle' as const,
+              iconType: 'plusCircle' as const,
               run: onFlyoutOpen,
               testId: 'add-inference-endpoint-header-button',
             },

@@ -27,7 +27,7 @@ import type {
 } from '../../../plugin_contract';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import {
   buildSingleEntityAttachmentId,
   ensureEntityAttachment,
@@ -481,10 +481,23 @@ export const getEntityTool = (
 When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) and its \`other\` result includes a pre-formatted \`renderTag\` string. To show the rich entity card inline, copy that \`renderTag\` string verbatim onto its own line in your reply BEFORE your prose summary. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the user's prompt. When the query resolves multiple candidates (fallback match) no attachment is stored, no \`renderTag\` is returned, and you must not emit a render tag in that case.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics'],
+    annotations: {
+      title: 'Get Entity',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
-        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
+        getEntityAnalyticsToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        }),
     },
     handler: async (params, { spaceId, esClient, savedObjectsClient, attachments }) => {
       logger.debug(
