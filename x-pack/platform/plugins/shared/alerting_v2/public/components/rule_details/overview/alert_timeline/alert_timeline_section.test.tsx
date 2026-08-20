@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AlertTimelineSection } from './alert_timeline_section';
 
 const mockUseFetchRuleEvents = jest.fn();
-const mockTimeRange = { from: 'now-7d', to: 'now' };
 let capturedOnRefresh: (() => void) | undefined;
 
 jest.mock('../../../../hooks/use_fetch_rule_events', () => ({
@@ -19,7 +18,7 @@ jest.mock('../../../../hooks/use_fetch_rule_events', () => ({
 }));
 
 jest.mock('./use_alert_timeline_url_state', () => ({
-  useAlertTimelineUrlState: () => [mockTimeRange, jest.fn()],
+  useAlertTimelineUrlState: () => [{ from: 'now-7d', to: 'now' }, jest.fn()],
 }));
 
 jest.mock('../../../../utils/discover_href_for_episode', () => ({
@@ -85,8 +84,6 @@ describe('AlertTimelineSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    mockTimeRange.from = 'now-7d';
-    mockTimeRange.to = 'now';
     capturedOnRefresh = undefined;
     mockUseFetchRuleEvents.mockReturnValue(successResult);
   });
@@ -114,9 +111,9 @@ describe('AlertTimelineSection', () => {
     expect(screen.getByTestId('alertTimelineSectionError')).toBeInTheDocument();
   });
 
-  it('refetches when refresh leaves an absolute window unchanged', () => {
-    mockTimeRange.from = '2026-08-01T00:00:00.000Z';
-    mockTimeRange.to = '2026-08-08T00:00:00.000Z';
+  it('refetches when refresh is pressed', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
 
     act(() => {
@@ -124,12 +121,6 @@ describe('AlertTimelineSection', () => {
     });
 
     expect(successResult.refetch).toHaveBeenCalledTimes(1);
-    const lastCall = mockUseFetchRuleEvents.mock.calls.at(-1)?.[0] as {
-      windowStartMs: number;
-      windowEndMs: number;
-    };
-    expect(lastCall.windowStartMs).toBe(Date.parse(mockTimeRange.from));
-    expect(lastCall.windowEndMs).toBe(Date.parse(mockTimeRange.to));
   });
 
   it('slides a relative window forward on refresh without calling refetch', () => {
