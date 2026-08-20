@@ -53,10 +53,6 @@ export function useSharingAttributes(
   );
 
   useEffect(() => {
-    if (!isSharedItem) {
-      return;
-    }
-
     const shareTitle = title ?? defaultTitle;
     const shareDescription = description ?? defaultDescription;
 

@@ -190,7 +190,9 @@ export const PresentationPanel = <
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
           data-test-subj="embeddablePanelContent"
-          {...(isSharedItem && sharingAttirbutes)}
+          {...(isSharedItem
+            ? sharingAttirbutes
+            : { ['data-render-complete']: sharingAttirbutes['data-render-complete'] })}
           ref={panelRef}
         >
           <EuiErrorBoundary>
