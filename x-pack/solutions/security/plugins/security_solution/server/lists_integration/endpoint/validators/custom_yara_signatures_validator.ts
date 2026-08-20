@@ -37,6 +37,8 @@ export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
  */
 export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
 
+const VALID_META_ARCH_VALUES = ['x86', 'arm64'];
+
 const validateYaraRuleContentByteLength = (value: string): string | void => {
   const byteLength = Buffer.byteLength(value, 'utf8');
 
@@ -266,6 +268,28 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       result.errorCount++;
     }
 
+    const textLines = ruleText.split('\n');
+    const getRuleIdentifierLineNumber = (identifier: string) => {
+      const lineIndex = textLines.findIndex((textLine) => textLine.match(`rule ${identifier}\\b`));
+
+      // If not found, -1+1 results 0 which is the 'unknown' line in our error messages.
+      // For other indexes, +1 results in the correct 1-based line number.
+      const lineNumber = lineIndex + 1;
+
+      return lineNumber;
+    };
+
+    const findFirstOccurrenceLineNumberAfterLineNumber = (
+      searchString: string,
+      startLineNumber: number
+    ) => {
+      const lineIndex = textLines.findIndex(
+        (textLine, index) => index + 1 >= startLineNumber && textLine.match(`\\b${searchString}\\b`)
+      );
+
+      return lineIndex + 1;
+    };
+
     // Validate that we don't have any rule identifiers that are too long
     if (result.rules.length > 0) {
       const tooLongIdentifiers = result.rules
@@ -273,20 +297,49 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
         .filter((identifier) => identifier.length > MAXIMUM_RULE_IDENTIFIER_LENGTH);
 
       if (tooLongIdentifiers.length > 0) {
-        const textLines = ruleText.split('\n');
-
         for (const identifier of tooLongIdentifiers) {
-          const lineIndex = textLines.findIndex((textLine) =>
-            textLine.match(`rule ${identifier}\\b`)
-          );
-
-          // If not found, -1+1 results 0 which is the 'unknown' line in our error messages.
-          // For other indexes, +1 results in the correct 1-based line number.
-          const lineNumber = lineIndex + 1;
+          const lineNumber = getRuleIdentifierLineNumber(identifier);
 
           result.errorCount++;
           result.errors.push({
             message: `Too long rule identifier "${identifier}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`,
+            line: lineNumber,
+            severity: 'error',
+          });
+        }
+      }
+    }
+
+    // Validate that we don't have any duplicated meta fields of interest
+    for (const rule of result.rules) {
+      for (const duplicatedMeta of rule.duplicateMeta) {
+        const lineNumberOfRule = getRuleIdentifierLineNumber(rule.identifier);
+        const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
+          duplicatedMeta,
+          lineNumberOfRule
+        );
+
+        result.errorCount++;
+        result.errors.push({
+          message: `Multiple "meta.${duplicatedMeta}" fields set on rule "${rule.identifier}", only one is allowed`,
+          line: lineNumber,
+          severity: 'error',
+        });
+      }
+    }
+
+    // Validate meta.arch field
+    for (const rule of result.rules) {
+      if (rule.meta.arch !== undefined) {
+        const values = rule.meta.arch.split(',').map((value) => value.trim());
+
+        if (values.length > 2 || values.some((value) => !VALID_META_ARCH_VALUES.includes(value))) {
+          const lineNumberOfRule = getRuleIdentifierLineNumber(rule.identifier);
+          const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber('arch', lineNumberOfRule);
+
+          result.errorCount++;
+          result.errors.push({
+            message: `Invalid "meta.arch" value "${rule.meta.arch}" on rule "${rule.identifier}", only "x86", "arm64" or "x86,arm64" are allowed`,
             line: lineNumber,
             severity: 'error',
           });

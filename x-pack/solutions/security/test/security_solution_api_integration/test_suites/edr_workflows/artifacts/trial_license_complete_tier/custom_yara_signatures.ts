@@ -417,6 +417,100 @@ export default function ({ getService }: FtrProviderContext) {
               });
             });
 
+            describe('Meta fields', () => {
+              describe('meta.arch', () => {
+                it('accepts rules with meta.arch set to "x86" and/or "arm64"', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86" condition: true }
+                      rule rule2 { meta: arch = "arm64" condition: true }
+
+                      rule rule3 { meta: arch = "x86,arm64" condition: true }
+                      rule rule4 { meta: arch = "x86,   arm64" condition: true }
+
+                      rule rule5 { meta: arch = "arm64,x86" condition: true }
+                      rule rule6 { meta: arch = "arm64,   x86" condition: true }
+                      `)
+                    )
+                    .expect(200);
+                });
+
+                it('rejects rules with meta.arch set to an invalid value', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "invalid" condition: true }
+                      rule rule2 { meta: arch = "arm64/x86" condition: true }
+                      rule rule3 { meta: arch = "x86, arm" condition: true }
+                      rule rule4 { meta: arch = "arm64, x99" condition: true }
+                      rule rule5 { meta: arch = "" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 5 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "invalid" on rule "rule1", only "x86", "arm64" or "x86,arm64" are allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "arm64\/x86" on rule "rule2", only "x86", "arm64" or "x86,arm64" are allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.arch" value "x86, arm" on rule "rule3", only "x86", "arm64" or "x86,arm64" are allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 5\] Invalid "meta.arch" value "arm64, x99" on rule "rule4", only "x86", "arm64" or "x86,arm64" are allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 6\] Invalid "meta.arch" value "" on rule "rule5", only "x86", "arm64" or "x86,arm64" are allowed/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.arch fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            arch = "x86"
+                            arch = "arm64"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.arch" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+              });
+            });
+
             describe('Module support', () => {
               describe('Supported modules', () => {
                 const supportedModules: Record<string, string> = {
