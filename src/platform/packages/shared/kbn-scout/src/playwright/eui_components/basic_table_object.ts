@@ -19,11 +19,8 @@ import type { Locator } from '@playwright/test';
  * Prototype for `@elastic/eui-test-helpers` (see the package CONTRIBUTING guide);
  * lives in kbn-scout until it is ported and published.
  *
- * Deliberately minimal: only `rows` and `cells(field)` are exposed. Row actions
- * (consumer-supplied popovers/buttons), sorting, and pagination are not covered —
- * no current consumer needs them, and the first two are largely app-specific
- * wiring rather than EUI-internal DOM knowledge. Add methods here only once a
- * real migration needs them.
+ * Deliberately minimal — only `rows` and `cells(field)`. Row actions, sorting,
+ * and pagination are excluded until a real migration needs them.
  */
 export class EuiBasicTableObject extends BaseObject {
   constructor(scope: ObjectScope, testSubj: string) {
