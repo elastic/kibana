@@ -1,5 +1,5 @@
 {
-  "sha1": "b910b6ec66dc6a071de90bebf6846027d01e991c",
+  "sha1": "07abbb8af55de5612e3b486133bd1cab11ae941b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -440,7 +440,7 @@
       }
     },
     {
-      "id": "987d8f3ed53a350-fdcceb3f9769da6",
+      "id": "987d8f3ed53a350-bbc9f0dbfeb2443",
       "title": "Onboarding — downstream step invalidation path 2 — authenticate-and-deploy indicator loses checkmark when agentless service is added",
       "expectedStatus": "passed",
       "tags": [
