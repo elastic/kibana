@@ -132,12 +132,15 @@ describe(
             cy.get(LOADING_INDICATOR).should('not.exist');
             cy.wait(`@${ESQL_QUERY_REQ}`, { timeout: ESQL_QUERY_REQ_TIMEOUT });
             verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+            // Assert the time range before the columns: the columns only render once the query
+            // returns documents, so a range that was not restored fails here rather than as a
+            // misleading "column header never appeared".
             expectDateRangeToBe(DISCOVER_CONTAINER, {
               start: INITIAL_START_DATE,
               end: INITIAL_END_DATE,
             });
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
           });
       });
 
@@ -164,12 +167,12 @@ describe(
             // reload the page with the exact url
             cy.reload();
             verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
             expectDateRangeToBe(DISCOVER_CONTAINER, {
               start: INITIAL_START_DATE,
               end: INITIAL_END_DATE,
             });
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
           });
       });
 

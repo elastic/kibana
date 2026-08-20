@@ -193,6 +193,39 @@ describe('useDiscoverInTimelineActions', () => {
         expect(globalState).toMatchObject({ timeRange: { from: 'now-15m', to: 'now' } });
       });
     });
+    it('should reset the time range the ES|QL search runs against', async () => {
+      // The date picker renders Discover's own copy of the range, but the ES|QL search reads it
+      // from the timefilter service, so both have to be reset for the two to agree.
+      const { result } = renderTestHook();
+      await result.current.resetDiscoverAppState();
+
+      expect(
+        startServicesMock.customDataService.query.timefilter.timefilter.setTime
+      ).toHaveBeenCalledWith({ from: 'now-15m', to: 'now', mode: 'relative' });
+    });
+    it('should restore the time range the ES|QL search runs against from the saved search', async () => {
+      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(savedSearchMock);
+      const { result } = renderTestHook();
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(
+        startServicesMock.customDataService.query.timefilter.timefilter.setTime
+      ).toHaveBeenCalledWith(savedSearchMock.timeRange);
+    });
+    it('should fall back to the default time range when the saved search has none', async () => {
+      const { timeRange, ...savedSearchWithoutTimeRange } = savedSearchMock;
+      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(
+        savedSearchWithoutTimeRange
+      );
+      const { result } = renderTestHook();
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(
+        startServicesMock.customDataService.query.timefilter.timefilter.setTime
+      ).toHaveBeenCalledWith({ from: 'now-15m', to: 'now', mode: 'relative' });
+    });
   });
   describe('updateSavedSearch', () => {
     it('should add defaults to the savedSearch before updating saved search', async () => {
@@ -251,6 +284,62 @@ describe('useDiscoverInTimelineActions', () => {
           id: TimelineId.active,
           savedSearch: { ...savedSearchMock, id: newSavedSearchId },
         })
+      );
+    });
+
+    it('should not hand the new Discover session to a timeline created while the save was in flight', async () => {
+      // `TimelineId.active` is a slot: hitting "New" mid-save puts a different timeline in it, and
+      // these dispatches would move the previous timeline's ES|QL session onto the empty one.
+      const store = createMockStore({
+        ...mockState,
+        timeline: {
+          ...mockState.timeline,
+          timelineById: {
+            ...mockState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockState.timeline.timelineById[TimelineId.active],
+              savedObjectId: 'the-timeline-being-saved',
+            },
+          },
+        },
+      });
+      const wrapper: FC<PropsWithChildren<{}>> = ({ children }) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      );
+
+      const newSavedSearchId = 'newly-created-saved-search-id';
+      (startServicesMock.savedSearch.save as jest.Mock).mockImplementationOnce(async () => {
+        // the user creates a new timeline before the save resolves
+        store.dispatch(timelineActions.createTimeline({ id: TimelineId.active, show: true }));
+        return newSavedSearchId;
+      });
+
+      const { result } = renderTestHook(wrapper);
+
+      await waitFor(() =>
+        expect(result.current).toEqual(
+          expect.objectContaining({ updateSavedSearch: expect.any(Function) })
+        )
+      );
+
+      await act(async () => {
+        await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      });
+
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        timelineActions.updateSavedSearchId({
+          id: TimelineId.active,
+          savedSearchId: newSavedSearchId,
+        })
+      );
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        timelineActions.initializeSavedSearch({
+          id: TimelineId.active,
+          savedSearch: { ...savedSearchMock, id: newSavedSearchId },
+        })
+      );
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false })
       );
     });
 

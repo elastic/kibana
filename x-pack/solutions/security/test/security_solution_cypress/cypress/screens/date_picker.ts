@@ -46,5 +46,12 @@ export const GET_DATE_RANGE_PICKER_CONTROL_BUTTON = (container: string) =>
 
 export const DATE_RANGE_PICKER_INPUT = '[data-test-subj="dateRangePickerInput"]';
 
+/**
+ * Marker `unifiedSearch` renders when the query bar's time filtering is off, e.g. because the
+ * ad hoc data view behind an ES|QL query has no time field. Rendered by both the legacy and the
+ * new picker, hidden in the latter.
+ */
+export const QUERY_BAR_DATE_PICKER_DISABLED = '[data-test-subj="kbnQueryBar-datePicker-disabled"]';
+
 export const GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON = (container: string = '') =>
   `${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`;

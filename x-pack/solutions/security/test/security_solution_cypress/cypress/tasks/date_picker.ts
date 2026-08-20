@@ -23,6 +23,7 @@ import {
   GET_DATE_RANGE_PICKER_CONTROL_BUTTON,
   DATE_RANGE_PICKER_INPUT,
   GLOBAL_FILTERS_CONTAINER,
+  QUERY_BAR_DATE_PICKER_DISABLED,
 } from '../screens/date_picker';
 
 const NEW_PICKER_CONTROL = '[data-test-subj="dateRangePickerControlButton"]';
@@ -201,21 +202,14 @@ export const expectDateRangeToBe = (
 };
 
 /**
- * Asserts that the date picker inside `container` is not operable, e.g. the
+ * Asserts that time filtering is off for the query bar inside `container`, e.g. the
  * default state of an ES|QL tab whose ad hoc data view has no time field yet.
  */
 export const expectDatePickerToBeDisabled = (container: string) => {
-  // Wait for whichever picker this build renders before branching on it, so the
-  // branch is not decided while the query bar is still mounting.
-  cy.get(
-    `${GET_DATE_RANGE_PICKER_CONTROL_BUTTON(container)}, ${GET_LOCAL_SHOW_DATES_BUTTON(container)}`
-  ).should('exist');
-
-  usingNewPicker(
-    container,
-    () => cy.get(GET_DATE_RANGE_PICKER_CONTROL_BUTTON(container)).first().should('be.disabled'),
-    () => cy.get(GET_LOCAL_SHOW_DATES_BUTTON(container)).first().should('be.disabled')
-  );
+  // `unifiedSearch` renders this marker for exactly this purpose, in both the legacy and the
+  // new picker, so the assertion does not depend on which one the build ships or on how that
+  // picker expresses being disabled. The new picker renders it hidden, hence `exist`.
+  cy.get(`${container} ${QUERY_BAR_DATE_PICKER_DISABLED}`).should('exist');
 };
 
 export const updateTimelineDates = () => {
