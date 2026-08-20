@@ -39,7 +39,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       ${isFramedAppearance &&
       css`
         background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-        border-radius: ${useEuiTheme.euiTheme.border.radius.container};
+        border-radius: ${useEuiTheme.euiTheme.border.radius.frame};
 
         // use outline so it doesn't affect size/layout and cause a scrollbar
         outline: ${getHighContrastBorder(useEuiTheme)};
