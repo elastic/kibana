@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import { hasNonGlobalStaticItems, type AppMenuStaticItem } from '@kbn/ui-app-menu';
+import type { AppMenuStaticItem } from '@kbn/ui-app-menu';
 import type { AppHeaderBack, AppHeaderConfig } from './types';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
@@ -95,7 +95,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     staticItems,
     fallbackMenu,
   }) => {
-    const hasStaticItems = hasNonGlobalStaticItems(staticItems);
+    const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
     // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
     // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit

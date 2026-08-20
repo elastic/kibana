@@ -9,11 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense } from 'react';
-import {
-  hasNonGlobalStaticItems,
-  type AppMenuConfig,
-  type AppMenuStaticItem,
-} from '@kbn/ui-app-menu';
+import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/ui-app-menu';
 
 const AppMenuComponent = lazy(async () => {
   const { AppMenuComponent: Component } = await import('@kbn/ui-app-menu');
@@ -27,7 +23,7 @@ export interface AppMenuProps {
 }
 
 export const AppMenu = React.memo<AppMenuProps>(({ menu, staticItems, fallbackMenu }) => {
-  const hasStaticItems = hasNonGlobalStaticItems(staticItems);
+  const hasStaticItems = !!staticItems?.some((item) => !item.global);
 
   if (!menu && fallbackMenu) {
     return <>{fallbackMenu}</>;
