@@ -8,12 +8,16 @@
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 
 /**
- * Knowledge-indicator subtype that qualifies a feature reference as an impacted service.
+ * Knowledge-indicator type and subtype that together qualify a feature reference as an impacted
+ * service. A knowledge indicator can also be `infrastructure`, `technology`, `dependency` or
+ * `schema` (`INFERRED_FEATURE_TYPES`), and any of those can still carry `subtype: 'service'`, so
+ * both halves have to match.
  *
- * `Feature.subtype` is an unconstrained `z.string()` written by the model that derives knowledge
- * indicators, so this is a value match rather than a typed one. Comparison is case-insensitive so
- * a row is not dropped over capitalisation alone.
+ * `Feature.type` and `Feature.subtype` are unconstrained `z.string()`s written by the model that
+ * derives knowledge indicators, so these are value matches rather than typed ones. Comparison is
+ * case-insensitive so a feature is not dropped over capitalisation alone.
  */
+export const IMPACTED_SERVICE_TYPE = 'entity';
 export const IMPACTED_SERVICE_SUBTYPE = 'service';
 
 export interface ImpactedService {
@@ -28,7 +32,8 @@ export interface ImpactedService {
  *
  * `blast_radius[]` also carries `infrastructure` rows (components) and `dependency` rows (edges
  * between two services behind one `feature_id`); neither is a service an operator can act on, so
- * only `entity` rows qualify. `causal_features[]` has no row type — every entry names one feature.
+ * only `entity` rows qualify. `causal_features[]` has no row type — every entry names one feature,
+ * so its references are filtered on the resolved knowledge indicator alone.
  */
 const getCandidateReferences = (
   event: SignificantEvent
@@ -71,8 +76,13 @@ const indexFeaturesByReference = (features: Feature[]): Map<string, Feature> => 
 
 /**
  * Impacted services are the feature references of an event — `blast_radius[]` entity rows and
- * `causal_features[]` alike — that resolve to a `service` knowledge indicator. Both arrays
- * routinely name the same service, and neither alone is complete.
+ * `causal_features[]` alike — that resolve to an `entity` knowledge indicator of subtype `service`.
+ * Both arrays routinely name the same service, and neither alone is complete.
+ *
+ * The knowledge indicator is the authority on what a reference *is*, and it is the only check that
+ * covers both arrays: `blast_radius[]` rows carry their own agent-written type, but
+ * `causal_features[]` rows carry none, so without this gate a causal reference to a `dependency` or
+ * `technology` indicator would render as a service.
  *
  * The label is the knowledge indicator's own, not the free-text `name` on the row, and one service
  * appears once: entries collapse on the case-insensitive label. A knowledge indicator's `uuid` is
@@ -96,7 +106,10 @@ export const getImpactedServices = (
 
   for (const { feature_id: featureId } of getCandidateReferences(event)) {
     const feature = featuresByReference.get(featureId);
-    if (feature?.subtype?.toLowerCase() !== IMPACTED_SERVICE_SUBTYPE) {
+    if (
+      feature?.type.toLowerCase() !== IMPACTED_SERVICE_TYPE ||
+      feature.subtype?.toLowerCase() !== IMPACTED_SERVICE_SUBTYPE
+    ) {
       continue;
     }
 

@@ -153,14 +153,31 @@ describe('getImpactedServices', () => {
     ).toBe(byUuid);
   });
 
-  // `Feature.subtype` is an unconstrained string written by a model, so casing is not guaranteed.
-  it('accepts a service subtype regardless of casing', () => {
-    const feature = mockFeature({ subtype: 'Service' });
+  // `Feature.type` and `Feature.subtype` are unconstrained strings written by a model, so casing is
+  // not guaranteed.
+  it('accepts an entity type and service subtype regardless of casing', () => {
+    const feature = mockFeature({ type: 'Entity', subtype: 'Service' });
 
     expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
       1
     );
   });
+
+  // A knowledge indicator's own type is the only gate that covers `causal_features[]`, which carry
+  // no row type of their own.
+  it.each(['dependency', 'infrastructure', 'technology', 'schema'])(
+    'drops a %s knowledge indicator even when its subtype is service',
+    (type) => {
+      const feature = mockFeature({ type, subtype: 'service' });
+
+      expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual(
+        []
+      );
+      expect(getImpactedServices(mockEvent({ causal_features: [causalEntry] }), [feature])).toEqual(
+        []
+      );
+    }
+  );
 
   // An infrastructure row names a component, not a service an operator acts on — even when its
   // knowledge indicator claims the `service` subtype.
