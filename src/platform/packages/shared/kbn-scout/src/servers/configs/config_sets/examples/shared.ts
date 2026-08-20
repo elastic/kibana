@@ -17,8 +17,5 @@ import { findTestPluginPaths } from '@kbn/test-kibana-server';
  */
 export const examplesServerArgs = [
   '--data.search.sessions.enabled=true',
-  ...findTestPluginPaths([
-    resolve(REPO_ROOT, 'examples'),
-    resolve(REPO_ROOT, 'x-pack/examples'),
-  ]),
+  ...findTestPluginPaths([resolve(REPO_ROOT, 'examples'), resolve(REPO_ROOT, 'x-pack/examples')]),
 ];

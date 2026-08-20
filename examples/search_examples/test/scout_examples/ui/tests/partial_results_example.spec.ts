@@ -8,11 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  LENS_BASIC_KBN_ARCHIVE,
-  LOGSTASH_FUNCTIONAL_ARCHIVE,
-  test,
-} from '../fixtures';
+import { LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE, test } from '../fixtures';
 
 test.describe('Partial results example', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {

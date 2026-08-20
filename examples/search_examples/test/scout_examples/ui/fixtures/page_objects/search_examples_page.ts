@@ -123,9 +123,7 @@ export class SearchExamplesPage {
     await searchInput.fill(label);
 
     const listbox = this.page.getByRole('listbox');
-    const exactLabel = new RegExp(
-      `^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`
-    );
+    const exactLabel = new RegExp(`^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
     const option = listbox.getByRole('option').filter({ hasText: exactLabel });
     await option.waitFor({ state: 'visible', timeout });
     await option.click();
