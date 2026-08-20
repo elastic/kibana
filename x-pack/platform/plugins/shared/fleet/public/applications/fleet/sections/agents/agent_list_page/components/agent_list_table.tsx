@@ -432,11 +432,12 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           if (!agent.active) {
             return 'This agent is not active';
           }
-          if (
-            agent.policy_id &&
-            agentPoliciesIndexedById[agent.policy_id].is_managed &&
-            agent.type !== 'OPAMP'
-          ) {
+          // `agentPoliciesIndexedById` is keyed by base policy id; strip the version suffix so
+          // agents on a version-specific variant (`my-policy#9.2`) resolve correctly.
+          const agentPolicy = agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined;
+          if (agentPolicy?.is_managed && agent.type !== 'OPAMP') {
             return 'This action is not available for agents enrolled in an externally managed agent policy';
           }
           return '';

@@ -11,8 +11,9 @@ import type { PropsWithChildren, RefObject } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { strings } from '../../../../../strings';
 import { ProjectPickerFilterForm } from './filter_form';
 import { ProjectPickerFilterDisplay, type EditingFilter } from './filter_display/filter_display';
 import { bodyStyles } from './body.styles';
@@ -38,8 +39,20 @@ export function ProjectPickerFrameBodyHeader() {
 
   const state = useProjectPickerState();
 
+  const isReadOnly = useMemo(() => {
+    return state.controlsState === 'disabled';
+  }, [state.controlsState]);
+
   const showNoMatchingProjectsWarningCallout = useMemo(() => {
-    return getIncludedVisibleProjectIds(state).length === 0 && state.filterExpressions.size > 0;
+    // `filterExpressions`/`filteredProjectIds` only ever change together (see `proposedFilters`
+    // in reducers.ts), so this can never observe a stale/mismatched pairing. The pending check is
+    // a defensive belt-and-suspenders guard, since a pending proposal (including a failed one,
+    // which leaves the proposal in place) always implies its own dedicated error callout instead.
+    return (
+      getIncludedVisibleProjectIds(state).length === 0 &&
+      state.filterExpressions.size > 0 &&
+      !state.isFilterProposalPending
+    );
   }, [state]);
 
   const handleEditFilterRequest = useCallback((filter: Pick<EditingFilter, 'id'> | null) => {
@@ -57,7 +70,21 @@ export function ProjectPickerFrameBodyHeader() {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={styles.bodyContainer}
+      data-test-subj="projectPickerFrameBodyHeader"
+    >
+      {isReadOnly && (
+        <EuiFlexItem>
+          <KbnInfoCallout
+            announceOnMount={false}
+            size="s"
+            title={strings.getProjectPickerReadonlyCallout()}
+          />
+        </EuiFlexItem>
+      )}
       {showNoMatchingProjectsWarningCallout && (
         <EuiFlexItem>
           <KbnWarningCallout
@@ -66,17 +93,37 @@ export function ProjectPickerFrameBodyHeader() {
               defaultMessage: 'No projects are currently being searched',
             })}
             data-test-subj="projectPickerFilterDisplayNoMatchCallout"
-          >
-            <p>
-              {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
-                defaultMessage:
-                  'Adjust your project filters and toggles to ensure at least one project is included in your search.',
-              })}
-            </p>
-          </KbnWarningCallout>
+            text={
+              <p>
+                {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
+                  defaultMessage:
+                    'Adjust your project filters and toggles to ensure at least one project is included in your search.',
+                })}
+              </p>
+            }
+          />
         </EuiFlexItem>
       )}
-      {Boolean(state.filterExpressions.size) ? (
+      {state.filterSearchError && (
+        <EuiFlexItem>
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.translate('cpsUtils.projectPicker.filterBox.searchError.calloutTitle', {
+              defaultMessage: 'Unable to update project search',
+            })}
+            data-test-subj="projectPickerFilterSearchErrorCallout"
+            text={
+              <p>
+                {i18n.translate('cpsUtils.projectPicker.filterBox.searchError.calloutDescription', {
+                  defaultMessage:
+                    'Something went wrong while searching for matching projects. Try again.',
+                })}
+              </p>
+            }
+          />
+        </EuiFlexItem>
+      )}
+      {Boolean(state.displayedFilterExpressions.size) ? (
         <EuiFlexItem>
           <ProjectPickerFilterDisplay
             onEditFilter={handleEditFilterRequest}
@@ -91,7 +138,7 @@ export function ProjectPickerFrameBodyHeader() {
             css={styles.filterCreateButton}
             data-test-subj="projectPickerFilterDisplayAddFilterBtn"
             flush="both"
-            disabled={state.isReadOnly}
+            disabled={isReadOnly || state.isFilterProposalPending}
             onClick={handleFilterCreateClick}
           >
             <EuiText size="xs">
@@ -121,6 +168,7 @@ export function ProjectPickerFrameBody({
 }: PropsWithChildren<ProjectPickerFrameBodyProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = bodyStyles({ euiTheme });
+  const state = useProjectPickerState();
 
   return (
     <EuiFlexGroup
@@ -129,9 +177,11 @@ export function ProjectPickerFrameBody({
       css={css([styles.bodyContainer, { maxHeight }])}
       ref={scrollContainerRef}
     >
-      <EuiFlexItem css={styles.filterBoxWrapper}>
-        <ProjectPickerFrameBodyHeader />
-      </EuiFlexItem>
+      {state.controlsState !== 'hidden' && (
+        <EuiFlexItem css={styles.filterBoxWrapper}>
+          <ProjectPickerFrameBodyHeader />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );

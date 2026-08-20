@@ -606,26 +606,23 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
-                  />
-                </EuiInputPopover>
-              </>
+              <EuiInputPopover
+                id={'providerInputPopoverId'}
+                fullWidth
+                input={selectInput}
+                isOpen={isProviderPopoverOpen}
+                closePopover={closeProviderPopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  currentSolution={currentSolution}
+                  providers={updatedProviders ?? []}
+                  onClosePopover={closeProviderPopover}
+                  onProviderChange={onProviderChange}
+                  onSolutionFilterChange={toggleAndApplyFilter}
+                  solutionFilter={solutionFilter}
+                />
+              </EuiInputPopover>
             </EuiFormRow>
           );
           return formRow;

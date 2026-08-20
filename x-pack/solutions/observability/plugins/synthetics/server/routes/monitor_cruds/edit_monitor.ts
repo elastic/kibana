@@ -154,11 +154,14 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      const editedMonitorSpaces = (editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? [];
-      if (editedMonitorSpaces.length > 0) {
+      const editedMonitorSpaces = new Set([
+        ...(decryptedMonitorPrevMonitor.namespaces ?? []),
+        ...((editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? []),
+      ]);
+      if (editedMonitorSpaces.size > 0) {
         const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
           routeContext,
-          editedMonitorSpaces,
+          [...editedMonitorSpaces],
           decryptedMonitorPrevMonitor.type
         );
         if (spaceAuthError) {

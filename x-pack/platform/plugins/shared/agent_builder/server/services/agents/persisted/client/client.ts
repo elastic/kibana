@@ -608,6 +608,7 @@ class AgentClientImpl implements AgentClient {
       currentProps: source,
       access_control: nextAccessControl,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({

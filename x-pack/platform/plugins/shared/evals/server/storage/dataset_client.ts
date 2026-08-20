@@ -7,29 +7,31 @@
 
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
-import { v5 as uuidv5 } from 'uuid';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   InternalIStorageClient,
   StorageClientBulkOperation,
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
-import { OccWriter, isOccConflictError } from '@kbn/occ';
-import type { OccDocument } from '@kbn/occ';
+import { OccWriter, isElasticsearchWriteConflict, isOccConflictError } from '@kbn/occ';
+import type { OccDocument, OccMetadata } from '@kbn/occ';
 import type { Logger } from '@kbn/logging';
 import {
-  DATASET_UUID_NAMESPACE,
   DatasetMaturityEnum,
   MAX_DATASET_TAG_FACETS,
   MAX_EXAMPLES_PER_DATASET,
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_DATASET,
+  getDatasetId,
   type DatasetMaturity,
 } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
 import { ExampleNotFoundError } from './example_not_found_error';
+import { LastSpaceError } from './last_space_error';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
@@ -59,6 +61,8 @@ export interface CreateDatasetInput {
   tags?: string[];
   maturity?: DatasetMaturity;
   examples?: DatasetExampleInput[];
+  /** Spaces to assign the dataset to. Defaults to the client's own space. */
+  spaceIds?: string[];
 }
 
 export interface UpsertDatasetInput {
@@ -67,6 +71,11 @@ export interface UpsertDatasetInput {
   tags?: string[];
   maturity?: DatasetMaturity;
   examples: DatasetExampleInput[];
+  /**
+   * Spaces to assign on create. An upsert never reassigns an existing dataset,
+   * so a CI run can't move one that other spaces are reading.
+   */
+  spaceIds?: string[];
 }
 
 /**
@@ -77,13 +86,32 @@ export interface UpdateDatasetInput {
   description?: string;
   tags?: string[];
   maturity?: DatasetMaturity | null;
+  /** Reassigns the dataset's spaces. Must be non-empty when provided. */
+  spaceIds?: string[];
 }
+
+/**
+ * Whether a delete removed the dataset or only detached it from one space.
+ * `intent_mismatch` is the other one happening to a caller that said it only
+ * meant this one.
+ */
+export type DatasetDeleteResult = 'deleted' | 'unshared' | 'not_found' | 'intent_mismatch';
+
+/**
+ * Which outcome the caller is asking for, when being handed the other one
+ * instead would be a surprise: the UI offers "remove from this space" and
+ * "delete permanently" as different actions, behind different confirmations,
+ * decided from an assignment that may have moved on since it was read.
+ */
+export type DatasetDeleteIntent = 'unshare' | 'delete';
 
 export interface DatasetDocument extends DatasetStorageProperties {
   id: string;
   // Normalized on read: legacy documents missing the stored field are
   // backfilled to 0, so callers can always rely on a number here.
   examples_count: number;
+  // Normalized on read: an absent assignment resolves to the default space.
+  space_ids: string[];
 }
 
 export interface DatasetWithExamples extends DatasetDocument {
@@ -100,6 +128,27 @@ const DATASET_SORTABLE_FIELDS: readonly DatasetSortField[] = [
   'examples_count',
   'maturity',
 ];
+
+/**
+ * Settles name lookups on the dataset that has held the name longest, so
+ * anything predating the per-space name check still resolves the same way
+ * every time.
+ */
+const OLDEST_FIRST = [{ created_at: { order: 'asc' as const } }];
+
+/**
+ * How many times a delete re-reads the dataset when its spaces change under it.
+ * Each retry needs another write to have landed in between, so exhausting them
+ * means contention no number of attempts would settle.
+ */
+const DELETE_MAX_ATTEMPTS = 3;
+
+/**
+ * How many derived ids a create tries before giving up. Each one it passes over
+ * is held by a dataset of the same name that has moved out of this space, so
+ * even a couple is more history than a name is likely to have.
+ */
+const MAX_DATASET_ID_GENERATIONS = 5;
 
 export interface DatasetListOptions {
   page?: number;
@@ -157,19 +206,26 @@ export class DatasetClient {
   private readonly examplesStorage: InternalIStorageClient<DatasetExampleStorageDocument>;
   private readonly datasetWriter: OccWriter<DatasetStorageProperties>;
   private readonly logger?: Logger;
+  /** The space reads are narrowed to and writes are stamped with. */
+  private readonly spaceId: string;
+  private readonly spaceFilter: QueryDslQueryContainer;
 
   constructor({
     datasetsStorageAdapter,
     examplesStorageAdapter,
     logger,
+    spaceId,
   }: {
     datasetsStorageAdapter: DatasetsStorageAdapter;
     examplesStorageAdapter: DatasetExamplesStorageAdapter;
     logger?: Logger;
+    spaceId: string;
   }) {
     this.datasetsStorage = datasetsStorageAdapter.getClient();
     this.examplesStorage = examplesStorageAdapter.getClient();
     this.logger = logger;
+    this.spaceId = spaceId;
+    this.spaceFilter = buildDatasetSpaceFilter(spaceId);
 
     // Every dataset write is a read-modify-write of the whole document, because the
     // storage adapter can only replace documents outright. Without a conditional write
@@ -205,10 +261,6 @@ export class DatasetClient {
     });
   }
 
-  static getDatasetId(name: string): string {
-    return uuidv5(name, DATASET_UUID_NAMESPACE);
-  }
-
   static getExampleId({
     datasetId,
     example,
@@ -222,36 +274,47 @@ export class DatasetClient {
     });
   }
 
+  /**
+   * Narrows a query to the client's space. Every read of a dataset goes through
+   * this, apart from the name-conflict check, which has to see the datasets
+   * this space cannot.
+   */
+  private scoped(query: QueryDslQueryContainer): QueryDslQueryContainer {
+    return { bool: { must: [query], filter: [this.spaceFilter] } };
+  }
+
   async create({
     name,
     description,
     tags,
     maturity,
     examples = [],
+    spaceIds,
   }: CreateDatasetInput): Promise<DatasetWithExamples> {
-    const datasetId = DatasetClient.getDatasetId(name);
+    const activeSpaceId = this.spaceId;
+    const targetSpaceIds = normalizeSpaceIds(spaceIds, activeSpaceId);
     const now = new Date().toISOString();
 
-    try {
-      await this.datasetsStorage.index({
-        id: datasetId,
-        op_type: 'create',
-        document: buildDatasetDocument(
-          {
-            name,
-            description,
-            created_at: now,
-            updated_at: now,
-          },
-          { tags, maturity, examples_count: 0 }
-        ),
-      });
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 409) {
-        throw new DatasetAlreadyExistsError(name);
-      }
-      throw error;
+    if (await this.hasNameConflict(name, targetSpaceIds)) {
+      throw new DatasetAlreadyExistsError(name);
     }
+
+    const document = buildDatasetDocument(
+      {
+        name,
+        description,
+        created_at: now,
+        updated_at: now,
+        space_ids: targetSpaceIds,
+      },
+      { tags, maturity, examples_count: 0 }
+    );
+
+    const datasetId = await this.indexNewDataset({ name, targetSpaceIds, document });
+
+    // A dataset is deleted document-first, so one whose delete died in between
+    // could have left examples behind under an id this name derives again.
+    await this.deleteExamplesByDatasetId(datasetId);
 
     if (examples.length > 0) {
       await this.addExamples(datasetId, examples, { touchDataset: false });
@@ -267,8 +330,58 @@ export class DatasetClient {
     return created;
   }
 
+  /**
+   * Writes a new dataset under the id its space and name derive, moving on to
+   * the next derivation when one is held by a dataset that has since moved to
+   * spaces this one cannot see.
+   *
+   * Every id a name can take is derived from it, so two creates of one name
+   * compete for the same one and Elasticsearch decides between them. That is
+   * what makes the name unique here: the search above can only report what was
+   * indexed a refresh ago, and on its own would let both creates through.
+   */
+  private async indexNewDataset({
+    name,
+    targetSpaceIds,
+    document,
+  }: {
+    name: string;
+    targetSpaceIds: string[];
+    document: DatasetStorageProperties;
+  }): Promise<string> {
+    for (let generation = 0; generation < MAX_DATASET_ID_GENERATIONS; generation++) {
+      const datasetId = getDatasetId(this.spaceId, name, generation);
+
+      try {
+        await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
+        return datasetId;
+      } catch (error) {
+        if (!isResponseError(error) || error.statusCode !== 409) {
+          throw error;
+        }
+      }
+
+      const holder = await this.getAnyMetadata(datasetId);
+
+      // Nothing to read at an id that just refused a write means the document
+      // holding it is too new to search, and only this name derives that id. A
+      // holder still going by the name where this one is headed is a duplicate
+      // too; anything else has left the name free.
+      if (
+        !holder ||
+        (holder.name === name && holder.space_ids.some((id) => targetSpaceIds.includes(id)))
+      ) {
+        throw new DatasetAlreadyExistsError(name);
+      }
+    }
+
+    throw new Error(
+      `Every id derived for dataset "${name}" is taken after ${MAX_DATASET_ID_GENERATIONS} attempts`
+    );
+  }
+
   async get(datasetId: string): Promise<DatasetWithExamples | undefined> {
-    const dataset = await this.getDatasetById(datasetId);
+    const dataset = await this.getMetadata(datasetId);
     if (!dataset) {
       return undefined;
     }
@@ -281,16 +394,76 @@ export class DatasetClient {
     };
   }
 
+  /**
+   * Whether a dataset already holds `name` in any space the new one would show
+   * up in. An id only encodes the space creating it, so the write itself catches
+   * a name taken here but not one shared in from elsewhere, and names are how
+   * the CLI and `_resolve` find a dataset. Unscoped on purpose: every target
+   * space has to be covered, not just the one this client reads from.
+   */
+  private async hasNameConflict(
+    name: string,
+    spaceIds: string[],
+    { excludeDatasetId }: { excludeDatasetId?: string } = {}
+  ): Promise<boolean> {
+    const matchesName: QueryDslQueryContainer = {
+      bool: {
+        must: [{ term: { name } }],
+        filter: [
+          { bool: { should: spaceIds.map(buildDatasetSpaceFilter), minimum_should_match: 1 } },
+        ],
+      },
+    };
+
+    const query: QueryDslQueryContainer = excludeDatasetId
+      ? { bool: { must: [matchesName], must_not: [{ term: { _id: excludeDatasetId } }] } }
+      : matchesName;
+
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['name'],
+      query,
+    });
+
+    return response.hits.hits.length > 0;
+  }
+
+  /**
+   * Refuses a reassignment that would leave two datasets of one name in a
+   * space. Only the spaces it is joining are checked: a name that is already
+   * ambiguous somewhere shouldn't block an unrelated edit.
+   */
+  private async assertNameFreeInNewSpaces(
+    datasetId: string,
+    nextSpaceIds: string[]
+  ): Promise<void> {
+    const current = await this.getMetadata(datasetId);
+    if (!current) {
+      return;
+    }
+
+    const currentSpaceIds = normalizeSpaceIds(current.space_ids);
+    const joining = nextSpaceIds.filter((spaceId) => !currentSpaceIds.includes(spaceId));
+    if (joining.length === 0) {
+      return;
+    }
+
+    if (await this.hasNameConflict(current.name, joining, { excludeDatasetId: datasetId })) {
+      throw new DatasetAlreadyExistsError(current.name);
+    }
+  }
+
   async datasetExists(datasetId: string): Promise<boolean> {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
       _source: ['name'],
-      query: {
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     return response.hits.hits.length > 0;
@@ -300,11 +473,12 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
-      query: {
+      sort: OLDEST_FIRST,
+      query: this.scoped({
         term: {
           name,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -313,6 +487,32 @@ export class DatasetClient {
     }
 
     return this.get(hit._id);
+  }
+
+  /** Resolves a name to a dataset without loading its examples. */
+  async resolveByName(name: string): Promise<DatasetDocument | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      sort: OLDEST_FIRST,
+      query: this.scoped({
+        term: {
+          name,
+        },
+      }),
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || !hit._id) {
+      return undefined;
+    }
+
+    return {
+      id: hit._id,
+      ...hit._source,
+      examples_count: hit._source.examples_count ?? 0,
+      space_ids: normalizeSpaceIds(hit._source.space_ids),
+    };
   }
 
   async list(options: DatasetListOptions = {}): Promise<DatasetListResult> {
@@ -370,16 +570,19 @@ export class DatasetClient {
       from,
       size: perPage,
       sort: [{ [sortField]: { order: sortOrder } }],
-      query: filters.length > 0 ? { bool: { must: [searchQuery], filter: filters } } : searchQuery,
+      query: this.scoped(
+        filters.length > 0 ? { bool: { must: [searchQuery], filter: filters } } : searchQuery
+      ),
       // `global` escapes the request query so the facet counts aren't narrowed by
       // the tag/maturity filters, then `scoped` re-applies just the search term.
       // Otherwise selecting a tag would hide every tag it doesn't co-occur with.
+      // The space filter is escaped too, so `scoped` puts that back as well.
       aggs: {
         facets: {
           global: {},
           aggs: {
             scoped: {
-              filter: searchQuery,
+              filter: this.scoped(searchQuery),
               aggs: {
                 tags: { terms: { field: 'tags', size: MAX_DATASET_TAG_FACETS } },
                 maturity: { terms: { field: 'maturity', size: MATURITY_FACET_SIZE } },
@@ -399,6 +602,7 @@ export class DatasetClient {
         id: hit._id,
         ...hit._source,
         examples_count: hit._source.examples_count ?? 0,
+        space_ids: normalizeSpaceIds(hit._source.space_ids),
       }));
 
     return {
@@ -413,11 +617,21 @@ export class DatasetClient {
 
   async update(
     datasetId: string,
-    updates: UpdateDatasetInput
+    { spaceIds, ...updates }: UpdateDatasetInput
   ): Promise<DatasetWithExamples | undefined> {
     const updatedAt = new Date().toISOString();
+    const nextSpaceIds = spaceIds ? normalizeSpaceIds(spaceIds, this.spaceId) : undefined;
+
+    if (nextSpaceIds) {
+      await this.assertNameFreeInNewSpaces(datasetId, nextSpaceIds);
+    }
+
     const written = await this.writeDatasetIfPresent(datasetId, (current) =>
-      buildDatasetDocument(current, { ...updates, updated_at: updatedAt })
+      buildDatasetDocument(current, {
+        ...updates,
+        ...(nextSpaceIds ? { space_ids: nextSpaceIds } : {}),
+        updated_at: updatedAt,
+      })
     );
 
     if (!written) {
@@ -427,16 +641,122 @@ export class DatasetClient {
     return this.get(datasetId);
   }
 
-  async delete(datasetId: string): Promise<boolean> {
-    const exists = await this.datasetExists(datasetId);
-    if (!exists) {
-      return false;
+  /**
+   * Removes the dataset from the caller's space: detaching it while other
+   * spaces still share it, destroying it when the last one lets go.
+   *
+   * Which of the two happens is decided from the assignment, and both are
+   * conditional on it not having moved since. A share landing mid-delete is
+   * answered by detaching instead of destroying what the other space just took
+   * on, and a concurrent detach by destroying rather than writing back the
+   * spaces this call read. A caller that only meant one of the two says so, and
+   * gets `intent_mismatch` rather than the other.
+   */
+  async delete(
+    datasetId: string,
+    { intent }: { intent?: DatasetDeleteIntent } = {}
+  ): Promise<DatasetDeleteResult> {
+    for (let attempt = 1; attempt <= DELETE_MAX_ATTEMPTS; attempt++) {
+      const current = await this.getDatasetForWrite(datasetId);
+      if (!current) {
+        return 'not_found';
+      }
+
+      if (this.otherSpaceIds(current.source.space_ids).length > 0) {
+        if (intent === 'delete') {
+          return 'intent_mismatch';
+        }
+
+        const detached = await this.detachFromSpace(datasetId);
+        if (detached !== 'last_space') {
+          return detached;
+        }
+
+        // The other spaces let go while we were detaching, so there is nothing
+        // left to leave it to.
+        continue;
+      }
+
+      if (intent === 'unshare') {
+        return 'intent_mismatch';
+      }
+
+      const destroyed = await this.destroyIfUnchanged(datasetId, current.occ);
+      if (destroyed !== 'conflict') {
+        return destroyed;
+      }
+    }
+
+    throw new Error(
+      `Could not delete dataset "${datasetId}": its spaces kept changing across ${DELETE_MAX_ATTEMPTS} attempts`
+    );
+  }
+
+  /** The dataset's spaces other than the one being deleted from. */
+  private otherSpaceIds(spaceIds: string[] | undefined): string[] {
+    return normalizeSpaceIds(spaceIds).filter((spaceId) => spaceId !== this.spaceId);
+  }
+
+  /**
+   * Drops the caller's space from the assignment, recomputing it from whatever
+   * the conditional write finds so a retry can't restore a space that has since
+   * let go.
+   */
+  private async detachFromSpace(
+    datasetId: string
+  ): Promise<Extract<DatasetDeleteResult, 'unshared' | 'not_found'> | 'last_space'> {
+    try {
+      const written = await this.writeDatasetIfPresent(datasetId, (dataset) => {
+        const remaining = this.otherSpaceIds(dataset.space_ids);
+        if (remaining.length === 0) {
+          throw new LastSpaceError(datasetId);
+        }
+
+        return buildDatasetDocument(dataset, {
+          space_ids: remaining,
+          updated_at: new Date().toISOString(),
+        });
+      });
+
+      return written ? 'unshared' : 'not_found';
+    } catch (error) {
+      if (error instanceof LastSpaceError) {
+        return 'last_space';
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes the dataset, provided it is still the one that was read. Its
+   * examples go afterwards: a delete that loses the race has to leave the
+   * surviving dataset whole.
+   */
+  private async destroyIfUnchanged(
+    datasetId: string,
+    occ: OccMetadata
+  ): Promise<Extract<DatasetDeleteResult, 'deleted' | 'not_found'> | 'conflict'> {
+    try {
+      const response = await this.datasetsStorage.delete({
+        id: datasetId,
+        if_seq_no: occ.seqNo,
+        if_primary_term: occ.primaryTerm,
+      });
+
+      if (response.result !== 'deleted') {
+        return 'not_found';
+      }
+    } catch (error) {
+      if (isElasticsearchWriteConflict(error)) {
+        return 'conflict';
+      }
+
+      throw error;
     }
 
     await this.deleteExamplesByDatasetId(datasetId);
-
-    const deleteDatasetResponse = await this.datasetsStorage.delete({ id: datasetId });
-    return deleteDatasetResponse.result === 'deleted';
+    return 'deleted';
   }
 
   async addExamples(
@@ -497,6 +817,12 @@ export class DatasetClient {
     updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
     expectedDatasetId: string
   ): Promise<ExampleDocument> {
+    // Examples carry no space of their own, so an example is only reachable
+    // through a dataset this space can see.
+    if (!(await this.datasetExists(expectedDatasetId))) {
+      throw new ExampleNotFoundError(exampleId);
+    }
+
     const ownerDatasetId = await this.getExampleDatasetId(exampleId);
     if (!ownerDatasetId || ownerDatasetId !== expectedDatasetId) {
       throw new ExampleNotFoundError(exampleId);
@@ -549,6 +875,10 @@ export class DatasetClient {
   }
 
   async deleteExample(exampleId: string, expectedDatasetId: string): Promise<void> {
+    if (!(await this.datasetExists(expectedDatasetId))) {
+      throw new ExampleNotFoundError(exampleId);
+    }
+
     const datasetId = await this.getExampleDatasetId(exampleId);
     if (!datasetId || datasetId !== expectedDatasetId) {
       throw new ExampleNotFoundError(exampleId);
@@ -616,11 +946,12 @@ export class DatasetClient {
     tags,
     maturity,
     examples,
+    spaceIds,
   }: UpsertDatasetInput): Promise<UpsertDatasetResult> {
     const existing = await this.getByName(name);
 
     if (!existing) {
-      const created = await this.create({ name, description, tags, maturity, examples });
+      const created = await this.create({ name, description, tags, maturity, examples, spaceIds });
       return {
         dataset_id: created.id,
         added: created.examples.length,
@@ -704,7 +1035,7 @@ export class DatasetClient {
 
   /**
    * Reads a dataset along with the `_seq_no`/`_primary_term` a conditional write has
-   * to send back. Separate from `getDatasetById` so `seq_no_primary_term` can't be
+   * to send back. Separate from `getMetadata` so `seq_no_primary_term` can't be
    * forgotten: without it both are undefined and the write silently becomes
    * unconditional.
    */
@@ -715,11 +1046,11 @@ export class DatasetClient {
       track_total_hits: false,
       size: 1,
       seq_no_primary_term: true,
-      query: {
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -734,15 +1065,39 @@ export class DatasetClient {
     };
   }
 
-  private async getDatasetById(datasetId: string): Promise<DatasetDocument | undefined> {
+  /**
+   * The name and spaces of whatever holds an id, from any space. Only for
+   * deciding whether an id is free to write to: what a dataset outside this
+   * space contains is not this client's to read.
+   */
+  private async getAnyMetadata(
+    datasetId: string
+  ): Promise<{ name: string; space_ids: string[] } | undefined> {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
-      query: {
+      _source: ['name', 'space_ids'],
+      query: { term: { _id: datasetId } },
+    });
+
+    const source = response.hits.hits[0]?._source;
+    if (!source) {
+      return undefined;
+    }
+
+    return { name: source.name, space_ids: normalizeSpaceIds(source.space_ids) };
+  }
+
+  /** A dataset without its examples, for callers that only need its metadata. */
+  async getMetadata(datasetId: string): Promise<DatasetDocument | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -754,6 +1109,7 @@ export class DatasetClient {
       id: hit._id,
       ...hit._source,
       examples_count: hit._source.examples_count ?? 0,
+      space_ids: normalizeSpaceIds(hit._source.space_ids),
     };
   }
 
@@ -850,48 +1206,6 @@ export class DatasetClient {
   }
 
   /**
-   * Counts examples for many datasets in a single request via a `terms`
-   * aggregation. Used by the backfill to avoid one count search per dataset.
-   * Datasets with no examples are absent from the result (callers default to 0).
-   */
-  private async countExamplesByDatasetIds(datasetIds: string[]): Promise<Map<string, number>> {
-    if (datasetIds.length === 0) {
-      return new Map();
-    }
-
-    const response = await this.examplesStorage.search({
-      track_total_hits: false,
-      size: 0,
-      query: {
-        terms: {
-          dataset_id: datasetIds,
-        },
-      },
-      aggs: {
-        by_dataset_id: {
-          terms: {
-            field: 'dataset_id',
-            size: datasetIds.length,
-          },
-        },
-      },
-    });
-
-    const buckets =
-      (
-        response.aggregations?.by_dataset_id as
-          | { buckets?: Array<{ key: string; doc_count: number }> }
-          | undefined
-      )?.buckets ?? [];
-
-    const counts = new Map<string, number>();
-    for (const bucket of buckets) {
-      counts.set(bucket.key, bucket.doc_count);
-    }
-    return counts;
-  }
-
-  /**
    * Recomputes the denormalized `examples_count` for a dataset and writes it
    * back, optionally applying a metadata patch in the same write. By default
    * this also advances `updated_at` (a "touch"); pass `bumpUpdatedAt: false` to
@@ -959,63 +1273,6 @@ export class DatasetClient {
       throw error;
     }
   }
-
-  /**
-   * Backfills the denormalized `examples_count` on datasets that predate the
-   * field. Idempotent: only datasets missing the field are processed, so reruns
-   * (and fresh/empty deployments) are no-ops. Intended to run once on plugin
-   * start.
-   *
-   * Unlike the other write paths this one isn't version-checked, since bulk needs
-   * per-item conflict handling. The exposure is a single start-up pass over
-   * documents old enough to be missing the field, so an edit would have to land in
-   * that window to be lost.
-   */
-  async backfillDatasetCounts(): Promise<{ updated: number }> {
-    const batchSize = 100;
-    let updated = 0;
-
-    for (;;) {
-      // Reads the whole document rather than a field projection: the rewrite
-      // below replaces the document, so anything left out would be dropped.
-      const response = await this.datasetsStorage.search({
-        track_total_hits: false,
-        size: batchSize,
-        query: {
-          bool: {
-            must_not: [{ exists: { field: 'examples_count' } }],
-          },
-        },
-      });
-
-      const hits = response.hits.hits.filter(
-        (hit): hit is typeof hit & { _source: DatasetStorageDocument; _id: string } =>
-          Boolean(hit._source) && typeof hit._id === 'string'
-      );
-
-      if (hits.length === 0) {
-        break;
-      }
-
-      const counts = await this.countExamplesByDatasetIds(hits.map((hit) => hit._id));
-
-      const operations: Array<StorageClientBulkOperation<DatasetStorageDocument>> = hits.map(
-        (hit) => ({
-          index: {
-            _id: hit._id,
-            document: buildDatasetDocument(hit._source, {
-              examples_count: counts.get(hit._id) ?? 0,
-            }),
-          },
-        })
-      );
-
-      await this.datasetsStorage.bulk({ operations, refresh: 'wait_for', throwOnFail: true });
-      updated += operations.length;
-    }
-
-    return { updated };
-  }
 }
 
 /**
@@ -1032,7 +1289,43 @@ interface DatasetPatch {
   maturity?: DatasetMaturity | null;
   examples_count?: number;
   updated_at?: string;
+  space_ids?: string[];
 }
+
+/**
+ * Resolves the spaces a dataset belongs to. An absent assignment means the
+ * default space, as it does for scores. An empty one would hide the dataset
+ * everywhere, so it falls back rather than being stored.
+ */
+const normalizeSpaceIds = (
+  spaceIds: string[] | undefined,
+  fallback: string = DEFAULT_SPACE_ID
+): string[] => {
+  const normalized = dedupe((spaceIds ?? []).filter((spaceId) => spaceId.length > 0));
+
+  if (normalized.length === 0) {
+    return [fallback];
+  }
+
+  return normalized;
+};
+
+/**
+ * Matches datasets visible in a space: those assigned to it and — in the
+ * default space only — those predating the field.
+ *
+ * Restates `buildSpaceFilter` from `@kbn/evals-common`, which does the same for
+ * scores untyped; `dataset_client.test.ts` asserts the two agree.
+ */
+const buildDatasetSpaceFilter = (spaceId: string): QueryDslQueryContainer => {
+  const should: QueryDslQueryContainer[] = [{ terms: { space_ids: [spaceId] } }];
+
+  if (spaceId === DEFAULT_SPACE_ID) {
+    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
+  }
+
+  return { bool: { should, minimum_should_match: 1 } };
+};
 
 /**
  * Rebases a patch onto the current document, since the storage adapter can only
@@ -1046,6 +1339,9 @@ const buildDatasetDocument = (
 ): DatasetStorageProperties => {
   const tags = patch.tags === undefined ? existing.tags : normalizeTags(patch.tags);
   const maturity = patch.maturity === undefined ? existing.maturity : patch.maturity;
+  // Writes replace the whole document, so dropping this would reset the dataset
+  // to the default space on the next example insert.
+  const spaceIds = patch.space_ids === undefined ? existing.space_ids : patch.space_ids;
 
   return {
     name: existing.name,
@@ -1055,6 +1351,7 @@ const buildDatasetDocument = (
     updated_at: patch.updated_at ?? existing.updated_at,
     ...(tags && tags.length > 0 ? { tags } : {}),
     ...(maturity ? { maturity } : {}),
+    ...(spaceIds && spaceIds.length > 0 ? { space_ids: spaceIds } : {}),
   };
 };
 

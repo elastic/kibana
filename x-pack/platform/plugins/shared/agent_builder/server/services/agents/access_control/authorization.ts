@@ -60,6 +60,9 @@ export const isAgentOwner = ({
 /**
  * Returns the baseline role granted by the agent's access mode before explicit user grants are
  * considered.
+ *
+ * Built-in agents carry no access control, so the Public fallback for an absent mode is what keeps
+ * them usable — it must not be aligned with the Private default applied to newly created agents.
  */
 const accessControlModeRole = (
   accessMode?: AgentAccessControlMode

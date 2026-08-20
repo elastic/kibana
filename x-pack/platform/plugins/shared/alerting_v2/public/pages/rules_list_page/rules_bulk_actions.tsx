@@ -28,6 +28,7 @@ export interface RulesBulkActionsProps {
   onClearSelection: () => void;
   onBulkEnable: () => void;
   onBulkDisable: () => void;
+  onBulkUpdateApiKey: () => void;
   onBulkDelete: () => void;
 }
 
@@ -46,6 +47,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
 }) => {
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
@@ -66,6 +68,11 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   const handleBulkDelete = () => {
     setIsBulkActionsOpen(false);
     onBulkDelete();
+  };
+
+  const handleBulkUpdateApiKey = () => {
+    setIsBulkActionsOpen(false);
+    onBulkUpdateApiKey();
   };
 
   return (
@@ -115,6 +122,16 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
               >
                 {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
                   defaultMessage: 'Disable',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="updateApiKey"
+                icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+                onClick={handleBulkUpdateApiKey}
+                data-test-subj="bulkUpdateRuleApiKey"
+              >
+                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.updateApiKey', {
+                  defaultMessage: 'Update API key',
                 })}
               </EuiContextMenuItem>,
               <EuiContextMenuItem

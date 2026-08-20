@@ -23,8 +23,8 @@ import {
 } from './authorization';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
-const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice' };
-const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
+const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice', isAdmin: false };
+const bob: CurrentUser = { id: 'bob-id', username: 'bob', isAdmin: false };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
@@ -111,6 +111,14 @@ describe('agent access-control authorization', () => {
           isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Editor);
+    });
+
+    it('treats a missing access control as public so built-in agents stay usable', () => {
+      const args = { accessControl: undefined, owner, currentUser: bob, isAdmin: false };
+
+      expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.Editor);
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(true);
     });
   });
 
