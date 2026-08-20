@@ -87,13 +87,26 @@ export const mergeSignalsLatestPerRule = (
       })),
       { timestamp: submittedTimestamp, values: submitted },
     ],
-    (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
+    (signal) =>
+      signal.type === 'detection' ? (signal.metadata?.rule_uuid ?? undefined) : undefined
   ).map((signal) =>
     signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
       ? signal
       : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
   );
 
+/**
+ * Unions stream names and topology across an episode's prior documents and the submitted payload.
+ *
+ * Known limitation — continuation writes over documents predating the topology classification
+ * fields (`blast_radius[].subtype`, `causal_features[].type`/`.subtype`): prior rows are copied
+ * verbatim out of Elasticsearch, so rows written before those fields became required arrive without
+ * them and `storedEventSchema.parse` in `EventClient.bulkCreate` rejects the whole batch, not just
+ * the offending document. Accepted deliberately: correctness is judged on events written after the
+ * fields shipped, and nothing in production predates them. Re-running discovery or re-seeding
+ * replaces the affected episodes. If pre-existing episodes ever need to keep continuing, drop
+ * prior-document rows that lack the fields here rather than relaxing the schema.
+ */
 export const mergeEpisodeContext = (
   priorDocs: EpisodeContextSource[],
   submitted: Omit<EpisodeContextSource, '@timestamp'> & {
