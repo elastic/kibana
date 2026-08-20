@@ -17,6 +17,7 @@ import {
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  HOST_ON_LINKED_PROJECT_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
@@ -171,6 +172,61 @@ describe('use responder action data hooks', () => {
       });
 
       it('should show action enabled if host metadata was retrieved and host is enrolled', async () => {
+        const { result } = renderHook();
+        await waitFor(() => expect(result.current.isDisabled).toBe(false));
+
+        expect(result.current).toEqual(getExpectedResponderActionData());
+      });
+
+      it('should show action disabled when the alert host is from a linked project (CPS), even if metadata was retrieved', () => {
+        alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+          'kibana.alert.ancestors.index': {
+            category: 'kibana',
+            field: 'kibana.alert.ancestors.index',
+            values: ['linked_local_project:.ds-logs-endpoint.events-default'],
+            originalValue: ['linked_local_project:.ds-logs-endpoint.events-default'],
+            isObjectArray: false,
+          },
+        });
+
+        expect(renderHook().result.current).toEqual(
+          getExpectedResponderActionData({
+            isDisabled: true,
+            tooltip: HOST_ON_LINKED_PROJECT_TOOLTIP,
+          })
+        );
+      });
+
+      it('should NOT open the response console for a host from a linked project', () => {
+        alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+          'kibana.alert.ancestors.index': {
+            category: 'kibana',
+            field: 'kibana.alert.ancestors.index',
+            values: ['linked_local_project:.ds-logs-endpoint.events-default'],
+            originalValue: ['linked_local_project:.ds-logs-endpoint.events-default'],
+            isObjectArray: false,
+          },
+        });
+
+        const { result } = renderHook();
+        act(() => {
+          result.current.handleResponseActionsClick();
+        });
+
+        expect(onClickMock).not.toHaveBeenCalled();
+      });
+
+      it('should keep the action enabled when the ancestor index is local', async () => {
+        alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
+          'kibana.alert.ancestors.index': {
+            category: 'kibana',
+            field: 'kibana.alert.ancestors.index',
+            values: ['.ds-logs-endpoint.events-default'],
+            originalValue: ['.ds-logs-endpoint.events-default'],
+            isObjectArray: false,
+          },
+        });
+
         const { result } = renderHook();
         await waitFor(() => expect(result.current.isDisabled).toBe(false));
 
