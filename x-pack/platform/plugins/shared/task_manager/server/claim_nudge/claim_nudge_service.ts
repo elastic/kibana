@@ -216,7 +216,9 @@ export class TaskManagerClaimNudgeService {
           this.claimNudgeSubject.next();
         }
       } catch (err) {
-        if (!this.started || this.isAbortError(err)) {
+        if (!this.started) {
+          // Expected: `stop()` set `started` to false before aborting the in-flight request.
+          this.logger.debug(`Task Manager claim nudge watch loop for index ${this.index} stopped.`);
           return;
         }
 
@@ -239,17 +241,6 @@ export class TaskManagerClaimNudgeService {
         this.index
       }, falling back to regular polling: ${this.getErrorMessage(err)}`
     );
-  }
-
-  private isAbortError(err: unknown): boolean {
-    if (err instanceof Error) {
-      return (
-        err.name === 'AbortError' ||
-        err.name === 'RequestAbortedError' ||
-        err.message.includes('aborted')
-      );
-    }
-    return false;
   }
 
   private getErrorMessage(err: unknown): string {

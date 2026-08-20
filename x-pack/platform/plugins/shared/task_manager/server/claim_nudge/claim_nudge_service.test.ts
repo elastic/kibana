@@ -86,7 +86,7 @@ describe('TaskManagerClaimNudgeService', () => {
 
       const [{ document: firstDocument }] = (esClient.index as jest.Mock).mock.calls[0];
       const [{ document: secondDocument }] = (esClient.index as jest.Mock).mock.calls[1];
-      expect(firstDocument).not.toEqual(secondDocument);
+      expect(firstDocument.nonce).not.toEqual(secondDocument.nonce);
     });
 
     it('creates the signal index with mappings and single-shard settings', async () => {
@@ -336,6 +336,63 @@ describe('TaskManagerClaimNudgeService', () => {
 
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
     }, 10_000);
+
+    it('retries rather than permanently stopping when an unrelated error message mentions "aborted"', async () => {
+      const esClient = createEsClientMock();
+      const { service, logger } = createService({ esClient });
+
+      let calls = 0;
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
+        calls += 1;
+        if (calls === 1) {
+          // Not caused by stop(): some other transport failure whose message happens to mention
+          // "aborted". This must not be mistaken for an intentional stop() and silently end the
+          // loop while `started` stays true.
+          throw new Error('socket hang up: request aborted');
+        }
+        service.stop();
+        return { global_checkpoints: [1], timed_out: false };
+      });
+
+      service.start();
+      await flushPromises();
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('request aborted'));
+
+      // The service waits ~1s before retrying; wait past that in real time.
+      await new Promise((resolve) => setTimeout(resolve, 1_200));
+
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
+    }, 10_000);
+
+    it('can be started again after stop() aborts the in-flight request', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(
+        async (_params, options: { signal: AbortSignal }) => {
+          return new Promise((_resolve, reject) => {
+            options.signal.addEventListener('abort', () => {
+              const err = new Error('aborted');
+              err.name = 'AbortError';
+              reject(err);
+            });
+          });
+        }
+      );
+
+      service.start();
+      await flushPromises();
+      service.stop();
+      await flushPromises();
+
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+
+      service.start();
+      await flushPromises();
+
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
+    });
 
     it('stops cleanly and aborts the in-flight request', async () => {
       const esClient = createEsClientMock();
