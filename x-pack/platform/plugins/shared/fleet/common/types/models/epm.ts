@@ -128,7 +128,6 @@ export interface SimpleSOAssetType {
     service?: string;
     title?: string;
     description?: string;
-    engine?: 'v1' | 'v2';
   };
 }
 

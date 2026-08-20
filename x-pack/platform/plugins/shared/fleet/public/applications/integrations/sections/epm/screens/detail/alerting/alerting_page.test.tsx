@@ -180,6 +180,7 @@ describe('AlertingPage', () => {
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Alerting v2');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic Alerting');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: '[System] Metrics template' })).not.toBeInTheDocument();
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
     expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('v2');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
@@ -195,7 +196,10 @@ describe('AlertingPage', () => {
 
     fireEvent.click(screen.getByTestId('fleetAlertingEngineTab-v1'));
 
-    expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '[System] Logs template' })).toHaveAttribute(
+      'href',
+      '/mock/app/management/insightsAndAlerting/triggersActions/create/template/template-1'
+    );
     expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
     expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Classic');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
@@ -213,7 +217,7 @@ describe('AlertingPage', () => {
           'template-1': {
             id: 'template-1',
             type: 'alerting_rule_template',
-            attributes: { title: '[System] Logs template', engine: 'v1' },
+            attributes: { title: '[System] Logs template' },
           },
         },
       },
@@ -264,7 +268,7 @@ describe('AlertingPage', () => {
           'template-1': {
             id: 'template-1',
             type: 'alerting_rule_template',
-            attributes: { title: '[System] Logs template', engine: 'v1' },
+            attributes: { title: '[System] Logs template' },
           },
         },
       },

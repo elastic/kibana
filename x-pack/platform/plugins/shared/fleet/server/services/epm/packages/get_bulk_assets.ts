@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type { AssetSOObject, KibanaSavedObjectType, SimpleSOAssetType } from '../../../../common';
+import type { AssetSOObject, GetBulkAssetsResponse, KibanaSavedObjectType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
@@ -69,7 +69,7 @@ export async function getBulkAssets(
     await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
-  const res: SimpleSOAssetType[] = resolvedObjects
+  const res: GetBulkAssetsResponse['items'] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>

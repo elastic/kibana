@@ -266,7 +266,14 @@ export interface GetBulkAssetsRequest {
 }
 
 export interface GetBulkAssetsResponse {
-  items: Array<SimpleSOAssetType & { appLink?: string }>;
+  items: Array<
+    Omit<SimpleSOAssetType, 'attributes'> & {
+      appLink?: string;
+      attributes: SimpleSOAssetType['attributes'] & {
+        engine?: 'v1' | 'v2';
+      };
+    }
+  >;
 }
 
 export interface GetInputsTemplatesRequest {

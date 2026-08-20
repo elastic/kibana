@@ -27,16 +27,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 
 import { AssetTitleMap } from '../../../constants';
-import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
+import type { DisplayedAssetTypes } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
+import type { AlertingAsset, AlertingEngine } from '../alerting/types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
 type AlertingEngineTab = 'v2' | 'v1';
 
-const isV2AlertingAsset = (asset: GetBulkAssetsResponse['items'][number]): boolean =>
-  asset.attributes?.engine === 'v2';
+const isV2AlertingAsset = (asset: AlertingAsset): boolean => asset.attributes?.engine === 'v2';
 
 const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
@@ -59,7 +59,7 @@ const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
 );
 
 const getAlertingEngineBadge = (
-  engine: GetBulkAssetsResponse['items'][number]['attributes']['engine']
+  engine: AlertingEngine | undefined
 ): { label: string; ariaLabel: string } => {
   if (engine === 'v2') {
     return { label: ALERTING_ENGINE_V2_BADGE, ariaLabel: ALERTING_ENGINE_V2_ARIA_LABEL };
@@ -70,7 +70,7 @@ const getAlertingEngineBadge = (
 
 export const AssetsAccordion: FunctionComponent<{
   type: DisplayedAssetType;
-  savedObjects: GetBulkAssetsResponse['items'];
+  savedObjects: AlertingAsset[];
 }> = ({ savedObjects, type }) => {
   const startServices = useStartServices();
   const { http } = startServices;
@@ -150,14 +150,15 @@ export const AssetsAccordion: FunctionComponent<{
           data-test-subj={`fleetAssetsAccordion.content.${type}`}
         >
           {visibleSavedObjects.map(({ id, attributes, appLink }, idx) => {
-            const { title: soTitle, description } = attributes || {};
+            const { title: soTitle, description, engine } = attributes || {};
             if (type === 'view') {
               return;
             }
 
             const title = soTitle ?? id;
-            const engine = attributes?.engine;
             const engineBadge = showEngineUi ? getAlertingEngineBadge(engine) : undefined;
+            // v2 create-from-template is not wired yet; keep titles as plain text for now.
+            const titleHref = engine === 'v2' ? undefined : appLink;
             return (
               <Fragment key={id}>
                 <EuiSplitPanel.Inner
@@ -174,8 +175,8 @@ export const AssetsAccordion: FunctionComponent<{
                     <EuiFlexItem grow={false}>
                       <EuiText size="m">
                         <p>
-                          {appLink ? (
-                            <EuiLink href={http.basePath.prepend(appLink)}>{title}</EuiLink>
+                          {titleHref ? (
+                            <EuiLink href={http.basePath.prepend(titleHref)}>{title}</EuiLink>
                           ) : (
                             title
                           )}
