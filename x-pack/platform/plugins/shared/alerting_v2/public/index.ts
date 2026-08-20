@@ -37,6 +37,7 @@ import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { RuleTemplatesApi } from './services/rule_templates_api';
 import { UserCapabilities } from './services/user_capabilities';
+import { FocusedEpisodeService } from './services/focused_episode_service';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
@@ -66,6 +67,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(RuleTemplatesApi).toSelf().inSingletonScope();
   bind(RuleChangeHistoryApi).toSelf().inSingletonScope();
   bind(UserCapabilities).toSelf().inSingletonScope();
+  bind(FocusedEpisodeService).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
@@ -254,6 +256,22 @@ const pluginModule = new ContainerModule(({ bind }) => {
             agentBuilder.attachments.addAttachmentType(
               actionPolicyAttachmentType,
               createActionPolicyAttachmentDefinition({
+                container: diContainer,
+              })
+            );
+          }
+        );
+        import(
+          /* webpackChunkName: "alerting_v2_episode_attachment" */
+          './agent_builder/attachments/episode_attachment_definition'
+        ).then(
+          ({
+            createEpisodeAttachmentDefinition,
+            EPISODE_ATTACHMENT_TYPE: episodeAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              episodeAttachmentType,
+              createEpisodeAttachmentDefinition({
                 container: diContainer,
               })
             );
