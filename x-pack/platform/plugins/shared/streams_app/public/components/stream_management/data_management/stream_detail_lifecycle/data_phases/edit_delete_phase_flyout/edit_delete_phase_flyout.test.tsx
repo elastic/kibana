@@ -13,7 +13,7 @@ import { EditDeletePhaseFlyout } from './edit_delete_phase_flyout';
 const DATA_TEST_SUBJ = 'streamsEditDeletePhaseFlyout';
 
 jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: false } })),
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
 }));
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof EditDeletePhaseFlyout>> = {}) => {

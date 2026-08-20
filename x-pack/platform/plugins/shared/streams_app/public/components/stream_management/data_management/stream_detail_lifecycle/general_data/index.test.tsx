@@ -31,7 +31,7 @@ interface MockLifecycleSummaryProps {
 let mockLifecycleSummaryProps: MockLifecycleSummaryProps | undefined;
 
 jest.mock('../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: false } })),
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
 }));
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({

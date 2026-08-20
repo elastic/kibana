@@ -52,7 +52,7 @@ export const LifecycleFlyout = ({
 
   return (
     <EuiFlyout
-      size={canvas ? 'fill' : 400}
+      size={canvas.enabled ? 'fill' : 400}
       type="push"
       ownFocus={ownFocus}
       paddingSize={paddingSize}

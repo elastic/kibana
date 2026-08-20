@@ -254,7 +254,7 @@ export const EditDeletePhaseFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size={canvas ? 'fill' : 400}
+      size={canvas.enabled ? 'fill' : 400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}

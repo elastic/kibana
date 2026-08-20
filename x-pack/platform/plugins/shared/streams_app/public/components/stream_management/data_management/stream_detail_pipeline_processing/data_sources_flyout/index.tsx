@@ -43,7 +43,7 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
   return (
     <EuiFlyoutResizable
       onClose={onClose}
-      size={canvas ? 'fill' : 'm'}
+      size={canvas.enabled ? 'fill' : 'm'}
       aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>

@@ -103,7 +103,11 @@ export function AddAttachmentFlyout({
   }, [attachmentSuggestionsFetch.value]);
 
   return (
-    <EuiFlyout onClose={onClose} aria-label={flyoutTitleLabel} size={canvas ? 'fill' : undefined}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-label={flyoutTitleLabel}
+      size={canvas.enabled ? 'fill' : undefined}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>{flyoutTitleLabel}</h2>
