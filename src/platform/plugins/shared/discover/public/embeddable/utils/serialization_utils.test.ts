@@ -32,15 +32,6 @@ describe('Serialization utils', () => {
 
   const dataViewId = dataViewMock.id ?? 'test-id';
 
-  const discoverServicesLegacy = {
-    ...discoverServiceMock,
-    discoverFeatureFlags: {
-      getCascadeLayoutEnabled: jest.fn(() => false),
-      getIsEsqlDefault: jest.fn(() => false),
-      getDataTableJsonViewEnabled: jest.fn(() => false),
-    },
-  } satisfies DiscoverServices;
-
   const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
     kibanaSavedObjectMeta: {
       searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
