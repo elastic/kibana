@@ -28749,7 +28749,6 @@
     "xpack.investigationOutput.evaluatingHypothesesTitle": "{count}件の{count, plural, one {hypothesis} other {hypotheses}}を評価",
     "xpack.investigationOutput.failedStatusTitle": "調査に失敗しました",
     "xpack.investigationOutput.failedWithoutDetailsErrorMessage": "調査は完了しませんでした。",
-    "xpack.investigationOutput.gapsFoundTitle": "ギャップが検出されました",
     "xpack.investigationOutput.gatheringEvidenceTitle": "エビデンスの収集",
     "xpack.investigationOutput.hypothesis": "仮説：",
     "xpack.investigationOutput.hypothesisConfidenceBadgeLabel": "{confidence, number, percent}",
