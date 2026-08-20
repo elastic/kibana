@@ -48,8 +48,6 @@ steps:
                 - '**/*.test.ts'
                 - '**/*.test.tsx'
               cleanup_sparse_state: true
-              post_checkout:
-                unshallow: true
         retry:
           automatic:
             - exit_status: '*'
