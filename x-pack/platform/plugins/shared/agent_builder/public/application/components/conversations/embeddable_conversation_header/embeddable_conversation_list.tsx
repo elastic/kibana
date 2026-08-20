@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiTextTruncate,
   useEuiTheme,
@@ -17,6 +18,8 @@ import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
@@ -35,6 +38,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
+  const { conversationTemplatesService } = useAgentBuilderServices();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
   const sortedConversations = useMemo(
@@ -92,7 +96,25 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
               }}
               data-test-subj={`agentBuilderEmbeddableConversation-${conversation.id}`}
             >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={getConversationTemplateIcon(
+                      conversationTemplatesService,
+                      conversation.template_id
+                    )}
+                    size="s"
+                    aria-hidden={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  css={css`
+                    min-width: 0;
+                  `}
+                >
+                  <EuiTextTruncate text={conversation.title || conversation.id} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </button>
           </EuiFlexItem>
         );

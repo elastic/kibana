@@ -6,8 +6,28 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ConversationTemplatesService } from '../../services/conversation_templates';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversation } from './use_conversation';
+
+export const DEFAULT_CONVERSATION_ICON: IconType = 'comment';
+
+/**
+ * Icon for a conversation, resolved from its template's UI definition. Falls back to the
+ * default comment icon for untemplated conversations and templates without an icon.
+ */
+export const getConversationTemplateIcon = (
+  conversationTemplatesService: ConversationTemplatesService,
+  templateId: string | undefined
+): IconType => {
+  if (!templateId) {
+    return DEFAULT_CONVERSATION_ICON;
+  }
+  return (
+    conversationTemplatesService.getTemplateUIDefinition(templateId)?.icon ??
+    DEFAULT_CONVERSATION_ICON
+  );
+};
 
 export interface ConversationTemplateDisplay {
   name: string;
@@ -15,9 +35,7 @@ export interface ConversationTemplateDisplay {
 }
 
 /**
- * Display info for the active conversation's template, resolved from the conversation
- * template UI registry. Falls back to the raw template id when no UI definition is
- * registered. Returns undefined for untemplated conversations.
+ * Display info for the active conversation's template, resolved from the conversation template UI registry.
  */
 export const useConversationTemplateDisplay = (): ConversationTemplateDisplay | undefined => {
   const { conversationTemplatesService } = useAgentBuilderServices();
