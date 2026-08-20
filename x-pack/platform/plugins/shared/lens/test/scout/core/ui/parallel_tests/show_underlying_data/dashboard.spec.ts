@@ -13,10 +13,6 @@ import {
   testData,
 } from '../../fixtures';
 
-/**
- * Migrated from FTR `group4/show_underlying_data_dashboard.ts` (active `it` only).
- * The skipped ES|QL panel case is omitted — do not reintroduce as test.skip.
- */
 spaceTest.describe(
   'Lens show underlying data from dashboard',
   { tag: '@local-stateful-classic' },
@@ -79,21 +75,18 @@ spaceTest.describe(
           });
           await expect(page.testSubj.locator('~filter-key-host.raw')).toBeVisible();
           await dashboard.saveChangesToExistingDashboard();
+          await dashboard.waitForRenderComplete();
+          await expect(page.testSubj.locator('dashboardUnsavedChangesBadge')).toBeHidden();
         });
 
         await spaceTest.step('open Discover from the panel and assert merged context', async () => {
           await dashboard.openPanelContextMenu(panelTitle);
           await expect(page.testSubj.locator(openInDiscoverAction)).toBeVisible();
-          await page.keyboard.press('Escape');
-          await page.testSubj
-            .locator('embeddablePanelContextMenuOpen')
-            .waitFor({ state: 'hidden' });
-          await dashboard.clickCancelOutOfEditMode();
 
           const discoverPage = await openDiscoverFromPopup({
             context,
             kbnUrl,
-            click: () => dashboard.clickPanelAction(openInDiscoverAction, panelTitle),
+            click: () => page.testSubj.click(openInDiscoverAction),
           });
           try {
             await expect(discoverPage.testSubj.locator('^filter-badge')).toHaveCount(3);
