@@ -32,6 +32,9 @@ export const MANAGEMENT_APP_ID = 'management';
 /** Stable Content List `id` / query-key scope for the rules list page. */
 export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
 
+/** Stable Content List `id` / query-key scope for the rule library page. */
+export const RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v2-rule-templates';
+
 export {
   ALERTING_V2_RULE_API_PATH,
   ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH,
