@@ -118,11 +118,15 @@ const buildMetadataFromTemplate = (
  * via `CI=true`. Always OFF in production: a deployed Kibana never sets
  * `CI`, so real reads return the stored rounds untouched.
  */
+const shouldVerifyRoundTrip = process.env.CI === 'true';
 
-const verifyRoundTrip = (conversation: Conversation): Conversation => ({
-  ...conversation,
-  rounds: eventsToRounds(roundsToEvents(conversation)),
-});
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  shouldVerifyRoundTrip
+    ? {
+        ...conversation,
+        rounds: eventsToRounds(roundsToEvents(conversation)),
+      }
+    : conversation;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
