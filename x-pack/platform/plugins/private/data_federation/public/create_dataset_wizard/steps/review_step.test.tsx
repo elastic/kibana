@@ -16,6 +16,7 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  DATASET_WIZARD_FLOW_VARIANT_3B,
 } from '../dataset_wizard_flow_variant';
 import { getReviewSettingsRows } from '../review_step_utils';
 import { ReviewStep } from './review_step';
@@ -125,7 +126,9 @@ describe('ReviewStep flow 2', () => {
       settings: csvSettings,
     };
 
-    expect(getReviewSettingsRows(csvSettings, csvValues.resource).length).toBeGreaterThanOrEqual(10);
+    expect(getReviewSettingsRows(csvSettings, csvValues.resource).length).toBeGreaterThanOrEqual(
+      10
+    );
 
     render(
       <EuiProvider>
@@ -198,5 +201,51 @@ describe('ReviewStep flow 2', () => {
 
     expect(screen.getByTestId('datasetWizardReviewRequestCodeScroll')).toBeInTheDocument();
     expect(screen.getByTestId('datasetWizardReviewRequestCode')).toHaveTextContent('PUT');
+  });
+});
+
+describe('ReviewStep flow 3b', () => {
+  it('does not show a custom settings JSON block on the summary tab', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep
+          values={{
+            ...defaultValues,
+            settings: {
+              ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+              hive_partitioning: 'true',
+            },
+            settings_custom_json: '{ "hive_partitioning": true }',
+          }}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.queryByTestId('datasetWizardReviewCustomSettingsJson')).toBeNull();
+    expect(screen.queryByText('Custom settings (JSON)')).toBeNull();
+    expect(screen.getByTestId('datasetWizardReviewSettingsTwoColumn')).toHaveTextContent(
+      'Hive partitioning'
+    );
+  });
+
+  it('shows JSON partition detection overrides on the summary tab when form settings lag', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep
+          values={{
+            ...defaultValues,
+            settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+            settings_custom_json: '{ "partition_detection": "hive" }',
+          }}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Hive');
+    expect(screen.getByTestId('datasetWizardReviewSettings')).not.toHaveTextContent('Auto');
   });
 });

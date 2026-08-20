@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+import { applySettingsForFormat } from './dataset_settings_defaults';
 import {
+  applyCustomJsonToFormSettings,
   EMPTY_SETTINGS_CUSTOM_JSON,
   mergeCustomJsonIntoDatasetSettings,
   parseSettingsCustomJson,
@@ -70,6 +73,24 @@ describe('settings_custom_json_utils', () => {
         quote: '|',
       });
       expect(merged?.escape).toBe('\\');
+    });
+  });
+
+  describe('applyCustomJsonToFormSettings', () => {
+    it('overlays json partition detection onto form settings', () => {
+      const settings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
+
+      expect(
+        applyCustomJsonToFormSettings(settings, '{ "partition_detection": "hive" }')
+      ).toMatchObject({
+        partition_detection: 'hive',
+      });
+    });
+
+    it('leaves form settings unchanged when json is invalid', () => {
+      const settings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
+
+      expect(applyCustomJsonToFormSettings(settings, '{ invalid')).toBe(settings);
     });
   });
 });

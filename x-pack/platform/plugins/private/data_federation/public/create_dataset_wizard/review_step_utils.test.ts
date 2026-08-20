@@ -9,13 +9,12 @@ import type { DataSource } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { DATASET_WIZARD_FLOW_VARIANT_2, DATASET_WIZARD_FLOW_VARIANT_3B } from './dataset_wizard_flow_variant';
+import { DATASET_WIZARD_FLOW_VARIANT_2 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestBody,
   buildDatasetRequestText,
-  getReviewCustomSettingsJsonDisplay,
   getReviewLogisticsRows,
   getReviewSchemaMappingRows,
   getReviewSettingsRows,
@@ -68,19 +67,6 @@ describe('review_step_utils', () => {
       format: 'csv',
       quote: '|',
     });
-  });
-
-  it('returns custom json for flow 3b review when overrides are active', () => {
-    const values = {
-      ...emptyDatasetWizardFormValues(),
-      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
-      settings_custom_json: '{ "quote": "|" }',
-    };
-
-    expect(getReviewCustomSettingsJsonDisplay(values, DATASET_WIZARD_FLOW_VARIANT_3B)).toBe(
-      '{\n  "quote": "|"\n}'
-    );
-    expect(getReviewCustomSettingsJsonDisplay(values, DATASET_WIZARD_FLOW_VARIANT_2)).toBeUndefined();
   });
 
   it('builds the request body without the dataset name', () => {
@@ -268,6 +254,24 @@ describe('review_step_utils', () => {
     const formatRow = rows.find((row) => row.displayValue === 'Parquet');
 
     expect(formatRow?.badge).toBeUndefined();
+  });
+
+  it('overlays custom json onto form values when building summary rows', () => {
+    const settings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
+
+    const rows = getReviewSettingsRows(
+      settings,
+      's3://obs-logs-prod/**/*.parquet',
+      '{ "partition_detection": "hive" }'
+    );
+    const partitionDetectionRow = rows.find((row) => row.label === 'Partition detection');
+
+    expect(partitionDetectionRow).toEqual(
+      expect.objectContaining({
+        displayValue: 'Hive',
+        badge: 'modified',
+      })
+    );
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {

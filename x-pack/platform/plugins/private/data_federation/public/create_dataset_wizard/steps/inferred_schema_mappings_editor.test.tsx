@@ -89,12 +89,14 @@ const TestHarness = ({
 };
 
 describe('InferredSchemaMappingsEditor', () => {
-  it('renders the mapped fields editor with an Infer schema action and no Infer missing fields action when empty', () => {
+  it('renders the mapped fields editor with an Infer schema split button', () => {
     const { getByTestId, queryByTestId } = render(<TestHarness />);
 
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
     expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardInferSchemaSplitButton')).toBeInTheDocument();
     expect(getByTestId('datasetWizardInferSchema')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardInferSchemaMenuButton')).toBeInTheDocument();
     expect(queryByTestId('datasetWizardInferMissingFields')).toBeNull();
   });
 
@@ -115,6 +117,12 @@ describe('InferredSchemaMappingsEditor', () => {
   it('only adds missing inferred fields when Infer missing fields is clicked, preserving manual edits', async () => {
     const { getByTestId } = render(<TestHarness automaticFieldTypes={{ message: 'keyword' }} />);
 
+    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardInferMissingFields')).toBeInTheDocument();
+    });
+
     fireEvent.click(getByTestId('datasetWizardInferMissingFields'));
 
     await waitFor(() => {
@@ -124,15 +132,26 @@ describe('InferredSchemaMappingsEditor', () => {
     });
   });
 
-  it('shows the Infer missing fields action once a field is added manually', async () => {
+  it('disables Infer missing fields until a field is present', async () => {
     const { getByTestId, queryByTestId } = render(<TestHarness />);
 
-    expect(queryByTestId('datasetWizardInferMissingFields')).toBeNull();
-
-    fireEvent.click(getByTestId('datasetWizardAddField'));
+    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
 
     await waitFor(() => {
-      expect(getByTestId('datasetWizardInferMissingFields')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardInferMissingFields')).toBeDisabled();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+
+    await waitFor(() => {
+      expect(queryByTestId('datasetWizardInferMissingFields')).toBeNull();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardAddField'));
+    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardInferMissingFields')).toBeEnabled();
     });
   });
 });

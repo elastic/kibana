@@ -14,14 +14,16 @@ interface Props {
   searchValue: string;
   onSearchChange(value: string): void;
   disabled?: boolean;
+  compressed?: boolean;
 }
 
 export const DocumentFieldsSearch = React.memo(
-  ({ searchValue, onSearchChange, disabled = false }: Props) => {
+  ({ searchValue, onSearchChange, disabled = false, compressed = false }: Props) => {
     return (
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
           disabled={disabled}
+          compressed={compressed}
           fullWidth
           placeholder={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',

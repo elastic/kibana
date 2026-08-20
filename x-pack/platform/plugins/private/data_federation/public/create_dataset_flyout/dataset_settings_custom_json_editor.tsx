@@ -27,7 +27,8 @@ import {
   validateSettingsCustomJson,
 } from './settings_custom_json_utils';
 
-const CUSTOM_JSON_EDITOR_HEIGHT = 285;
+const CUSTOM_JSON_EDITOR_MAX_LINES = 14;
+const CUSTOM_JSON_EDITOR_MIN_LINES = 3;
 
 const preventFakeLinkNavigation = (event: MouseEvent) => {
   event.preventDefault();
@@ -126,7 +127,10 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
         languageId="json"
         value={field.value || EMPTY_SETTINGS_CUSTOM_JSON}
         data-test-subj={`${testSubjPrefix}SettingsCustomJsonEditor`}
-        height={CUSTOM_JSON_EDITOR_HEIGHT}
+        fitToContent={{
+          minLines: CUSTOM_JSON_EDITOR_MIN_LINES,
+          maxLines: CUSTOM_JSON_EDITOR_MAX_LINES,
+        }}
         options={{
           lineNumbers: 'on',
           tabSize: 2,

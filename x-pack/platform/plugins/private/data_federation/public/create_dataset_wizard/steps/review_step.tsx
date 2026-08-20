@@ -34,7 +34,6 @@ import {
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestText,
-  getReviewCustomSettingsJsonDisplay,
   getReviewLogisticsRows,
   getReviewSchemaMappingRows,
   getReviewSettingsRows,
@@ -118,10 +117,16 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
       data-test-subj="datasetWizardReviewSettingsTwoColumn"
     >
       <EuiFlexItem grow={1}>
-        <SummaryDescriptionList rows={settingsRowsLeft} testSubj="datasetWizardReviewSettingsLeft" />
+        <SummaryDescriptionList
+          rows={settingsRowsLeft}
+          testSubj="datasetWizardReviewSettingsLeft"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <SummaryDescriptionList rows={settingsRowsRight} testSubj="datasetWizardReviewSettingsRight" />
+        <SummaryDescriptionList
+          rows={settingsRowsRight}
+          testSubj="datasetWizardReviewSettingsRight"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -186,12 +191,8 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     [dataSources, values]
   );
   const settingsRows = useMemo(
-    () => getReviewSettingsRows(values.settings, values.resource),
-    [values.resource, values.settings]
-  );
-  const customSettingsJson = useMemo(
-    () => getReviewCustomSettingsJsonDisplay(values, flowVariant),
-    [flowVariant, values]
+    () => getReviewSettingsRows(values.settings, values.resource, values.settings_custom_json),
+    [values.resource, values.settings, values.settings_custom_json]
   );
   const schemaMappingRows = useMemo(
     () => getReviewSchemaMappingRows(values, flowVariant),
@@ -222,23 +223,6 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
             </EuiTitle>
             <EuiSpacer size="s" />
             <SettingsSummarySection rows={settingsRows} />
-            {customSettingsJson ? (
-              <>
-                <EuiSpacer size="m" />
-                <EuiTitle size="xxs">
-                  <h5>{datasetWizardStrings.reviewCustomSettingsJsonSectionTitle()}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiCodeBlock
-                  language="json"
-                  paddingSize="s"
-                  isCopyable
-                  data-test-subj="datasetWizardReviewCustomSettingsJson"
-                >
-                  {customSettingsJson}
-                </EuiCodeBlock>
-              </>
-            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiTitle size="xxs">
@@ -339,7 +323,11 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   return (
     <div data-test-subj="datasetWizardReviewStep">
       <EuiTitle size="s">
-        <h3>{datasetWizardStrings.reviewTitle(values.name.trim() || datasetWizardStrings.reviewUntitledDataset())}</h3>
+        <h3>
+          {datasetWizardStrings.reviewTitle(
+            values.name.trim() || datasetWizardStrings.reviewUntitledDataset()
+          )}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiTabbedContent tabs={tabs} data-test-subj="datasetWizardReviewTabs" />

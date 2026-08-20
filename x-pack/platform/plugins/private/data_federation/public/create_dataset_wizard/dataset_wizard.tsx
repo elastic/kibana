@@ -25,6 +25,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource, DataSourceWithSecrets } from '../../common';
 import { validateIndexNameRules } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
+import { applyCustomJsonToFormSettings } from '../create_dataset_flyout/settings_custom_json_utils';
 import { buildDatasetPayloadFromWizardValues } from './review_step_utils';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
@@ -56,6 +57,7 @@ import { ReviewStep } from './steps/review_step';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { TestConfigurationPreview } from './test_configuration_preview';
@@ -110,22 +112,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
 
-  const {
-    control,
-    getValues,
-    setValue,
-    trigger,
-    watch,
-  } = useForm<DatasetWizardFormValues>({
+  const { control, getValues, setValue, trigger, watch } = useForm<DatasetWizardFormValues>({
     defaultValues,
     mode: 'onChange',
     shouldUnregister: false,
   });
 
-  const watchedDataSource = watch('data_source');
-  const watchedName = watch('name');
-  const watchedResource = watch('resource');
-  const watchedRegion = watch('region');
+  const wizardFormValues = watch();
+  const watchedDataSource = wizardFormValues.data_source;
+  const watchedName = wizardFormValues.name;
+  const watchedResource = wizardFormValues.resource;
+  const watchedRegion = wizardFormValues.region;
 
   useEffect(() => {
     const subscription = watch((values) => {
@@ -325,6 +322,26 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     [history, location.pathname, location.search]
   );
 
+  const persistCustomJsonToForm = useCallback(() => {
+    if (!isDatasetWizardFlow3B(flowVariant)) {
+      return;
+    }
+
+    const values = getValues();
+    const nextSettings = applyCustomJsonToFormSettings(
+      values.settings,
+      values.settings_custom_json
+    );
+
+    (Object.keys(nextSettings) as Array<keyof typeof nextSettings>).forEach((key) => {
+      if (values.settings[key] === nextSettings[key]) {
+        return;
+      }
+
+      setValue(`settings.${key}`, nextSettings[key], { shouldDirty: true, shouldValidate: true });
+    });
+  }, [flowVariant, getValues, setValue]);
+
   const attemptGoToStep = useCallback(
     async (targetStep: DatasetWizardStep) => {
       setSaveError(undefined);
@@ -332,6 +349,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       if (targetStep <= currentStep) {
         goToStep(targetStep);
         return;
+      }
+
+      if (currentStep === ADDITIONAL_SETTINGS_STEP) {
+        persistCustomJsonToForm();
       }
 
       const values = getValues();
@@ -349,7 +370,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
       goToStep(targetStep);
     },
-    [currentStep, flowVariant, getValues, goToStep, trigger]
+    [currentStep, flowVariant, getValues, goToStep, persistCustomJsonToForm, trigger]
   );
 
   const stepDefinitions = useMemo(
@@ -360,8 +381,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         status: (currentStep === LOGISTICS_STEP
           ? 'current'
           : logisticsStepComplete
-            ? 'complete'
-            : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(LOGISTICS_STEP),
       },
       {
@@ -371,8 +392,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         status: (currentStep === ADDITIONAL_SETTINGS_STEP
           ? 'current'
           : currentStep > ADDITIONAL_SETTINGS_STEP
-            ? 'complete'
-            : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(ADDITIONAL_SETTINGS_STEP),
       },
       {
@@ -382,8 +403,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         status: (currentStep === SCHEMA_MAPPINGS_STEP
           ? 'current'
           : currentStep > SCHEMA_MAPPINGS_STEP
-            ? 'complete'
-            : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(SCHEMA_MAPPINGS_STEP),
       },
       {
@@ -399,6 +420,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const handleNext = async () => {
     setSaveError(undefined);
+
+    if (currentStep === ADDITIONAL_SETTINGS_STEP) {
+      persistCustomJsonToForm();
+    }
 
     const values = getValues();
     const fields = getWizardStepFields(currentStep, values, flowVariant);
@@ -439,6 +464,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const handleSubmit = async () => {
     setSaveError(undefined);
+    persistCustomJsonToForm();
 
     const values = getValues();
     const firstInvalidStep = await findFirstInvalidWizardStep({
@@ -469,8 +495,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const showBackButton = currentStep > LOGISTICS_STEP;
   const isLastStep = currentStep === REVIEW_STEP;
-  const showTestConfiguration =
-    isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
+  const showTestConfiguration = isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (
     <>
@@ -505,7 +530,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         />
       </div>
       <div hidden={currentStep !== REVIEW_STEP}>
-        <ReviewStep values={getValues()} dataSources={dataSources} flowVariant={flowVariant} />
+        <ReviewStep values={wizardFormValues} dataSources={dataSources} flowVariant={flowVariant} />
       </div>
     </>
   );
@@ -538,61 +563,61 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           </>
         ) : null}
 
-      <EuiSpacer size="xl" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
-            {datasetWizardStrings.cancelButton()}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {showBackButton ? (
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
+              {datasetWizardStrings.cancelButton()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {showBackButton ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
+                    {datasetWizardStrings.backButton()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+              {showTestConfiguration ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="datasetWizardTestConfiguration"
+                    isLoading={isTestConfigLoading}
+                    onClick={handleTestConfiguration}
+                  >
+                    {datasetWizardStrings.testConfigurationButton()}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
-                  {datasetWizardStrings.backButton()}
-                </EuiButtonEmpty>
+                {isLastStep ? (
+                  <EuiButton
+                    fill
+                    data-test-subj="datasetWizardSubmit"
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                    onClick={() => void handleSubmit()}
+                  >
+                    {isEditMode
+                      ? datasetWizardStrings.saveButton()
+                      : datasetWizardStrings.addButton()}
+                  </EuiButton>
+                ) : (
+                  <EuiButton
+                    fill
+                    data-test-subj="datasetWizardNext"
+                    onClick={() => void handleNext()}
+                  >
+                    {datasetWizardStrings.nextButton()}
+                  </EuiButton>
+                )}
               </EuiFlexItem>
-            ) : null}
-            {showTestConfiguration ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="datasetWizardTestConfiguration"
-                  isLoading={isTestConfigLoading}
-                  onClick={handleTestConfiguration}
-                >
-                  {datasetWizardStrings.testConfigurationButton()}
-                </EuiButton>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              {isLastStep ? (
-                <EuiButton
-                  fill
-                  data-test-subj="datasetWizardSubmit"
-                  isLoading={isSaving}
-                  disabled={isSaving}
-                  onClick={() => void handleSubmit()}
-                >
-                  {isEditMode
-                    ? datasetWizardStrings.saveButton()
-                    : datasetWizardStrings.addButton()}
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  fill
-                  data-test-subj="datasetWizardNext"
-                  onClick={() => void handleNext()}
-                >
-                  {datasetWizardStrings.nextButton()}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageSection>
-    {isCreateDataSourceFlyoutOpen ? (
+      {isCreateDataSourceFlyoutOpen ? (
         <CreateDataSourceFlyout
           existingDataSourceNames={existingDataSourceNames}
           onClose={closeCreateDataSourceFlyout}

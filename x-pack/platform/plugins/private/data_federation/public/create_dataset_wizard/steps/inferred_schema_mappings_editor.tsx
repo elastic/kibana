@@ -10,7 +10,13 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
-import { EuiButton, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiSplitButton,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -51,6 +57,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   });
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
+  const [isInferMenuOpen, setIsInferMenuOpen] = useState(false);
   const [seedFieldTypes, setSeedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
   );
@@ -115,6 +122,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   }, [applyFieldTypes, inferredFieldTypes]);
 
   const handleInferMissingFields = useCallback(() => {
+    setIsInferMenuOpen(false);
     applyFieldTypes(
       mergeMissingAutomaticFieldTypes(latestFieldTypesRef.current, inferredFieldTypes)
     );
@@ -125,8 +133,8 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   }, []);
 
   // Hides the editor's own "Add field" control and portals a matching outlined
-  // primary button into a sibling mount, alongside Infer schema / Infer missing
-  // fields. The extra node is untracked by the editor, so it won't fight React
+  // primary button into a sibling mount, alongside a split Infer schema control.
+  // The extra node is untracked by the editor, so it won't fight React
   // reconciliation the way relocating existing nodes would.
   useLayoutEffect(() => {
     const root = containerRef.current;
@@ -186,6 +194,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       <MappedFieldsEditorComponent
         key={schemaEditorKey}
         value={mappings}
+        compressed
         onChange={onMappingsChange}
       />
       {actionsMount
@@ -194,29 +203,53 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
               <EuiButton
                 iconType="plusCircle"
                 color="primary"
+                size="s"
                 data-test-subj="datasetWizardAddField"
                 onClick={handleAddField}
               >
                 {datasetWizardStrings.addFieldButton()}
               </EuiButton>
-              <EuiButton
-                iconType="refresh"
+              <EuiSplitButton
                 color="text"
-                data-test-subj="datasetWizardInferSchema"
-                onClick={handleInferSchema}
+                fill={false}
+                size="s"
+                data-test-subj="datasetWizardInferSchemaSplitButton"
               >
-                {datasetWizardStrings.inferSchemaButton()}
-              </EuiButton>
-              {hasFields ? (
-                <EuiButton
-                  iconType="plusInCircle"
-                  color="text"
-                  data-test-subj="datasetWizardInferMissingFields"
-                  onClick={handleInferMissingFields}
+                <EuiSplitButton.ActionPrimary
+                  iconType="indexMapping"
+                  data-test-subj="datasetWizardInferSchema"
+                  onClick={handleInferSchema}
                 >
-                  {datasetWizardStrings.inferMissingFieldsButton()}
-                </EuiButton>
-              ) : null}
+                  {datasetWizardStrings.inferSchemaButton()}
+                </EuiSplitButton.ActionPrimary>
+                <EuiSplitButton.ActionSecondary
+                  iconType="arrowDown"
+                  aria-label={datasetWizardStrings.inferSchemaMoreOptionsAriaLabel()}
+                  data-test-subj="datasetWizardInferSchemaMenuButton"
+                  onClick={() => setIsInferMenuOpen((isOpen) => !isOpen)}
+                  popoverProps={{
+                    isOpen: isInferMenuOpen,
+                    closePopover: () => setIsInferMenuOpen(false),
+                    anchorPosition: 'downRight',
+                    panelPaddingSize: 'none',
+                    children: (
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            key="inferMissingFields"
+                            icon="listBullet"
+                            disabled={!hasFields}
+                            data-test-subj="datasetWizardInferMissingFields"
+                            onClick={handleInferMissingFields}
+                          >
+                            {datasetWizardStrings.inferMissingFieldsButton()}
+                          </EuiContextMenuItem>,
+                        ]}
+                      />
+                    ),
+                  }}
+                />
+              </EuiSplitButton>
             </>,
             actionsMount
           )

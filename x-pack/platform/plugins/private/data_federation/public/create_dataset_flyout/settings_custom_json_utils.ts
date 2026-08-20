@@ -7,6 +7,7 @@
 
 import type { DatasetSettings } from '../../common/dataset_types';
 import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
+import type { CreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
 
 export const DATASET_SETTINGS_CUSTOM_JSON_API_KEYS = [
   'partition_detection',
@@ -35,7 +36,8 @@ export const DATASET_SETTINGS_CUSTOM_JSON_API_KEYS = [
   'target_split_size',
 ] as const;
 
-export type DatasetSettingsCustomJsonApiKey = (typeof DATASET_SETTINGS_CUSTOM_JSON_API_KEYS)[number];
+export type DatasetSettingsCustomJsonApiKey =
+  (typeof DATASET_SETTINGS_CUSTOM_JSON_API_KEYS)[number];
 
 const DATASET_SETTINGS_CUSTOM_JSON_API_KEY_SET = new Set<string>(
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS
@@ -49,9 +51,7 @@ export const stripJsonComments = (value: string): string =>
     .replace(/^\s*\/\/.*$/gm, '')
     .trim();
 
-export const parseSettingsCustomJson = (
-  value: string
-): Partial<DatasetSettings> | undefined => {
+export const parseSettingsCustomJson = (value: string): Partial<DatasetSettings> | undefined => {
   const stripped = stripJsonComments(value).trim();
 
   if (!stripped || stripped === '{}') {
@@ -79,6 +79,42 @@ export const parseSettingsCustomJson = (
   }
 
   return Object.fromEntries(filteredEntries) as Partial<DatasetSettings>;
+};
+
+export const jsonValueToFormValue = (value: unknown): string => {
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return '';
+};
+
+export const applyCustomJsonToFormSettings = (
+  settings: CreateDatasetSettingsFormValues,
+  customJson: string
+): CreateDatasetSettingsFormValues => {
+  const parsed = parseSettingsCustomJson(customJson);
+
+  if (!parsed) {
+    return settings;
+  }
+
+  const nextSettings = { ...settings };
+
+  for (const [key, value] of Object.entries(parsed)) {
+    if (key === 'format' || key === 'target_split_size' || !(key in nextSettings)) {
+      continue;
+    }
+
+    (nextSettings as Record<string, string>)[key] = jsonValueToFormValue(value);
+  }
+
+  return nextSettings;
 };
 
 export const validateSettingsCustomJson = (value: string): true | string => {
@@ -125,14 +161,4 @@ export const mergeCustomJsonIntoDatasetSettings = (
     ...base,
     ...parsed,
   };
-};
-
-export const formatSettingsCustomJsonForReview = (customJson: string): string | undefined => {
-  const parsed = parseSettingsCustomJson(customJson);
-
-  if (!parsed) {
-    return undefined;
-  }
-
-  return JSON.stringify(parsed, null, 2);
 };

@@ -181,6 +181,7 @@ export interface IndexMappingProps {
 
 export interface MappedFieldsEditorProps {
   value?: Record<string, unknown>;
+  compressed?: boolean;
   onChange: (update: {
     getData: () => Record<string, unknown> | undefined;
     validate: () => Promise<boolean>;

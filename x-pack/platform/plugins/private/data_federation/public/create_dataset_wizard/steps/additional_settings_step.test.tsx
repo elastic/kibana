@@ -544,5 +544,47 @@ describe('AdditionalSettingsStep', () => {
       const restoredJson = getByTestId('customJsonSnapshot').textContent ?? '';
       expect(restoredJson).toContain('"partition_detection"');
     });
+
+    it('updates form fields from valid JSON edits', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
+          defaultValues: emptyDatasetWizardFormValues(),
+        });
+        const hivePartitioning = watch('settings.hive_partitioning');
+
+        return (
+          <EuiProvider>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.csv"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+            />
+            <span data-test-subj="hivePartitioningValue">{hivePartitioning}</span>
+          </EuiProvider>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
+      });
+
+      const editor = getByTestId('datasetWizardSettingsCustomJsonEditor') as HTMLTextAreaElement;
+      fireEvent.change(editor, {
+        target: {
+          value: editor.value.replace('"hive_partitioning": false', '"hive_partitioning": true'),
+        },
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('hivePartitioningValue')).toHaveTextContent('true');
+      });
+    });
   });
 });

@@ -23,12 +23,13 @@ import { useMappingsStateListener } from './use_state_listener';
 export interface MappedFieldsEditorProps {
   onChange: OnUpdateHandler;
   value?: { [key: string]: unknown };
+  compressed?: boolean;
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
 }
 
 export const MappedFieldsEditor = React.memo(
-  ({ onChange, value, indexSettings, docLinks }: MappedFieldsEditorProps) => {
+  ({ onChange, value, compressed, indexSettings, docLinks }: MappedFieldsEditorProps) => {
     const { parsedDefaultValue, multipleMappingsDeclared } =
       useMemo<MappingsEditorParsedMetadata>(() => parseMappings(value), [value]);
 
@@ -74,6 +75,7 @@ export const MappedFieldsEditor = React.memo(
               <DocumentFieldsHeader
                 searchValue={state.search.term}
                 onSearchChange={onSearchChange}
+                compressed={compressed}
               />
               <EuiSpacer size="m" />
             </>

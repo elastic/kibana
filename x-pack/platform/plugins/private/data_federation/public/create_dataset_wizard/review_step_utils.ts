@@ -11,7 +11,10 @@ import type { DataSetWithName, DataSource, Dataset } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import { buildDatasetSettingsFromFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { mergeCustomJsonIntoDatasetSettings, formatSettingsCustomJsonForReview } from '../create_dataset_flyout/settings_custom_json_utils';
+import {
+  applyCustomJsonToFormSettings,
+  mergeCustomJsonIntoDatasetSettings,
+} from '../create_dataset_flyout/settings_custom_json_utils';
 import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
 import { getDefaultSettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import {
@@ -42,7 +45,6 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   isDatasetWizardFlow3,
-  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
@@ -164,8 +166,10 @@ const lookupOptionLabel = <T extends string>(
   options: Array<{ value: T; label: string }>
 ): string | undefined => options.find((option) => option.value === value)?.label;
 
-const lookupPresetLabel = (value: string, presets: Array<{ value: string; label: string }>): string =>
-  presets.find((preset) => preset.value === value)?.label ?? value;
+const lookupPresetLabel = (
+  value: string,
+  presets: Array<{ value: string; label: string }>
+): string => presets.find((preset) => preset.value === value)?.label ?? value;
 
 export const formatSettingsFieldDisplayValue = (
   fieldId: DatasetSettingsFieldId,
@@ -173,15 +177,9 @@ export const formatSettingsFieldDisplayValue = (
 ): string => {
   switch (fieldId) {
     case 'partition_detection':
-      return (
-        lookupOptionLabel(value, PARTITION_DETECTION_SUPER_SELECT_OPTIONS()) ??
-        value
-      );
+      return lookupOptionLabel(value, PARTITION_DETECTION_SUPER_SELECT_OPTIONS()) ?? value;
     case 'schema_resolution':
-      return (
-        lookupOptionLabel(value, SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()) ??
-        value
-      );
+      return lookupOptionLabel(value, SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()) ?? value;
     case 'hive_partitioning':
     case 'header_row':
     case 'optimized_reader':
@@ -192,8 +190,8 @@ export const formatSettingsFieldDisplayValue = (
           fieldId === 'hive_partitioning'
             ? HIVE_PARTITIONING_SUPER_SELECT_OPTIONS()
             : fieldId === 'header_row'
-              ? HEADER_ROW_SUPER_SELECT_OPTIONS()
-              : OPTIMIZED_READER_SUPER_SELECT_OPTIONS()
+            ? HEADER_ROW_SUPER_SELECT_OPTIONS()
+            : OPTIMIZED_READER_SUPER_SELECT_OPTIONS()
         ) ?? value
       );
     case 'mode':
@@ -217,7 +215,9 @@ export const formatSettingsFieldDisplayValue = (
   }
 };
 
-const getFormatLabel = (format: Exclude<DatasetWizardFormValues['settings']['format'], ''>): string => {
+const getFormatLabel = (
+  format: Exclude<DatasetWizardFormValues['settings']['format'], ''>
+): string => {
   const option = FORMAT_SUPER_SELECT_OPTIONS().find((entry) => entry.value === format);
   if (option && typeof option.inputDisplay === 'string') {
     return option.inputDisplay;
@@ -255,7 +255,9 @@ export const getReviewLogisticsRows = (
   values: DatasetWizardFormValues,
   dataSources: DataSource[]
 ): ReviewSummaryRow[] => {
-  const selectedDataSource = dataSources.find((dataSource) => dataSource.name === values.data_source);
+  const selectedDataSource = dataSources.find(
+    (dataSource) => dataSource.name === values.data_source
+  );
   const rows: ReviewSummaryRow[] = [
     {
       label: datasetWizardStrings.dataSourceLabel(),
@@ -293,13 +295,17 @@ export const getReviewLogisticsRows = (
 
 export const getReviewSettingsRows = (
   settings: DatasetWizardFormValues['settings'],
-  resource: string
+  resource: string,
+  customJson?: string
 ): ReviewSummaryRow[] => {
   const format = settings.format;
   if (!format) {
     return [];
   }
 
+  const effectiveSettings = customJson
+    ? applyCustomJsonToFormSettings(settings, customJson)
+    : settings;
   const defaults = getDefaultSettingsForFormat(format);
   const inferredFormat = inferFormatFromResource(resource);
   const formatBadge =
@@ -317,11 +323,11 @@ export const getReviewSettingsRows = (
     if (!isFieldVisibleForFormat(fieldId, format)) {
       continue;
     }
-    if (!isFieldVisibleForErrorMode(fieldId, settings.error_mode)) {
+    if (!isFieldVisibleForErrorMode(fieldId, effectiveSettings.error_mode)) {
       continue;
     }
 
-    const value = settings[fieldId];
+    const value = effectiveSettings[fieldId];
     if (!value || (typeof value === 'string' && value.trim() === '')) {
       continue;
     }
@@ -337,17 +343,6 @@ export const getReviewSettingsRows = (
   }
 
   return rows;
-};
-
-export const getReviewCustomSettingsJsonDisplay = (
-  values: DatasetWizardFormValues,
-  flowVariant: DatasetWizardFlowVariant
-): string | undefined => {
-  if (!isDatasetWizardFlow3B(flowVariant)) {
-    return undefined;
-  }
-
-  return formatSettingsCustomJsonForReview(values.settings_custom_json);
 };
 
 export const getReviewSchemaMappingRows = (

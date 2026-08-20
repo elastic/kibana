@@ -8,8 +8,9 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
+import type { Control, FieldPath, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
+import { debounce } from 'lodash';
 
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
@@ -22,10 +23,10 @@ import { buildDatasetSettingsFromFormValues } from './create_dataset_flyout_form
 import { DatasetSettingsCustomJsonEditor } from './dataset_settings_custom_json_editor';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import { getFlow3AdvancedFields } from './dataset_settings_flow3_layout';
-import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import { getVisibleCustomJsonApiKeys } from './settings_custom_json_schema';
 import {
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS,
+  applyCustomJsonToFormSettings,
   stripJsonComments,
   type DatasetSettingsCustomJsonApiKey,
 } from './settings_custom_json_utils';
@@ -34,13 +35,6 @@ type AdvancedViewMode = 'json' | 'list';
 
 const CUSTOM_JSON_API_KEY_SET = new Set<string>(DATASET_SETTINGS_CUSTOM_JSON_API_KEYS);
 const JSON_ONLY_API_KEYS = new Set<string>(['target_split_size']);
-
-const jsonValueToFormValue = (value: unknown): string => {
-  if (typeof value === 'boolean') return value ? 'true' : 'false';
-  if (typeof value === 'number') return String(value);
-  if (typeof value === 'string') return value;
-  return '';
-};
 
 const tryParseJson = (value: string): Record<string, unknown> | undefined => {
   try {
@@ -102,7 +96,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
 > = ({ control, getValues, setValue, format, errorMode, testSubjPrefix }) => {
   const [activeView, setActiveView] = useState<AdvancedViewMode>('json');
   const lastValidParsedRef = useRef<Record<string, unknown>>({});
-  const prevSettingsDigestRef = useRef<string>('');
+  const prevSettingsDigestRef = useRef<string | null>(null);
 
   const advancedFields = useMemo(
     () => getFlow3AdvancedFields(format, errorMode),
@@ -114,66 +108,106 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
     [format, errorMode]
   );
 
-  const allFormFieldIds = useMemo(
-    () =>
-      visibleJsonApiKeys.filter(
-        (key): key is DatasetSettingsFieldId => !JSON_ONLY_API_KEYS.has(key)
-      ),
-    [visibleJsonApiKeys]
-  );
-
   const settings = useWatch({ control, name: 'settings' });
   const customJson = useWatch({ control, name: 'settings_custom_json' });
+  const skipJsonToFormRef = useRef(false);
+  const expectedSettingsDigestFromJsonRef = useRef<string | null>(null);
+
+  const populateFieldsFromJson = useCallback(
+    (parsed: Record<string, unknown>) => {
+      const currentSettings = getValues('settings') as CreateDatasetSettingsFormValues;
+      const nextSettings = applyCustomJsonToFormSettings(currentSettings, JSON.stringify(parsed));
+
+      expectedSettingsDigestFromJsonRef.current = JSON.stringify(nextSettings);
+
+      (Object.keys(nextSettings) as Array<keyof CreateDatasetSettingsFormValues>).forEach((key) => {
+        if (currentSettings[key] === nextSettings[key]) {
+          return;
+        }
+
+        setValue(`settings.${key}` as FieldPath<DatasetWizardFormValues>, nextSettings[key], {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      });
+    },
+    [getValues, setValue]
+  );
+
+  const debouncedPopulateFieldsFromJson = useMemo(
+    () => debounce(populateFieldsFromJson, 250),
+    [populateFieldsFromJson]
+  );
+
+  useEffect(
+    () => () => {
+      debouncedPopulateFieldsFromJson.flush();
+    },
+    [debouncedPopulateFieldsFromJson]
+  );
 
   useEffect(() => {
     const parsed = tryParseJson(customJson);
-    if (parsed !== undefined) {
-      lastValidParsedRef.current = parsed;
+    if (parsed === undefined) {
+      return;
     }
-  }, [customJson]);
+
+    lastValidParsedRef.current = parsed;
+
+    if (skipJsonToFormRef.current) {
+      skipJsonToFormRef.current = false;
+      return;
+    }
+
+    debouncedPopulateFieldsFromJson(parsed);
+  }, [customJson, debouncedPopulateFieldsFromJson]);
 
   useEffect(() => {
-    if (activeView !== 'list') return;
-
     const settingsDigest = JSON.stringify(settings);
-    if (settingsDigest === prevSettingsDigestRef.current) return;
-    prevSettingsDigestRef.current = settingsDigest;
+    if (prevSettingsDigestRef.current === null) {
+      prevSettingsDigestRef.current = settingsDigest;
+      return;
+    }
 
+    if (settingsDigest === prevSettingsDigestRef.current) {
+      return;
+    }
+
+    if (expectedSettingsDigestFromJsonRef.current) {
+      if (settingsDigest !== expectedSettingsDigestFromJsonRef.current) {
+        return;
+      }
+
+      prevSettingsDigestRef.current = settingsDigest;
+      expectedSettingsDigestFromJsonRef.current = null;
+      return;
+    }
+
+    prevSettingsDigestRef.current = settingsDigest;
+    skipJsonToFormRef.current = true;
     const newJson = buildJsonFromFormSettings(
       settings as CreateDatasetSettingsFormValues,
       visibleJsonApiKeys,
       getValues('settings_custom_json')
     );
     setValue('settings_custom_json', newJson, { shouldDirty: true, shouldValidate: true });
-  }, [activeView, settings, visibleJsonApiKeys, getValues, setValue]);
-
-  const populateFieldsFromJson = useCallback(
-    (parsed: Record<string, unknown>) => {
-      for (const fieldId of allFormFieldIds) {
-        if (fieldId in parsed) {
-          const formValue = jsonValueToFormValue(parsed[fieldId]);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setValue(`settings.${fieldId}` as any, formValue as any, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-        }
-      }
-    },
-    [allFormFieldIds, setValue]
-  );
+  }, [getValues, setValue, settings, visibleJsonApiKeys]);
 
   const handleViewChange = useCallback(
     (nextViewId: string) => {
       const nextView = nextViewId as AdvancedViewMode;
-      if (nextView === activeView) return;
+      if (nextView === activeView) {
+        return;
+      }
+
+      debouncedPopulateFieldsFromJson.flush();
 
       if (nextView === 'list') {
         const parsed =
           tryParseJson(getValues('settings_custom_json')) ?? lastValidParsedRef.current;
         populateFieldsFromJson(parsed);
-        prevSettingsDigestRef.current = JSON.stringify(getValues('settings'));
       } else {
+        skipJsonToFormRef.current = true;
         const newJson = buildJsonFromFormSettings(
           getValues('settings') as CreateDatasetSettingsFormValues,
           visibleJsonApiKeys,
@@ -184,7 +218,14 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
 
       setActiveView(nextView);
     },
-    [activeView, getValues, populateFieldsFromJson, setValue, visibleJsonApiKeys]
+    [
+      activeView,
+      debouncedPopulateFieldsFromJson,
+      getValues,
+      populateFieldsFromJson,
+      setValue,
+      visibleJsonApiKeys,
+    ]
   );
 
   const toggleOptions = useMemo(

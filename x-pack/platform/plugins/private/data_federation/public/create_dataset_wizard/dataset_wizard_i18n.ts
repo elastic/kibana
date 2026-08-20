@@ -292,11 +292,6 @@ export const datasetWizardStrings = {
       defaultMessage: 'Custom settings must be a JSON object.',
     }),
 
-  reviewCustomSettingsJsonSectionTitle: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.reviewCustomSettingsJsonSectionTitle', {
-      defaultMessage: 'Custom settings (JSON)',
-    }),
-
   delimiterOptionComma: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.delimiterOptionComma', {
       defaultMessage: 'Comma (,)',
@@ -371,6 +366,11 @@ export const datasetWizardStrings = {
   inferMissingFieldsButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.inferMissingFieldsButton', {
       defaultMessage: 'Infer missing fields',
+    }),
+
+  inferSchemaMoreOptionsAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.inferSchemaMoreOptionsAriaLabel', {
+      defaultMessage: 'More infer schema options',
     }),
 
   addFieldButton: () =>
