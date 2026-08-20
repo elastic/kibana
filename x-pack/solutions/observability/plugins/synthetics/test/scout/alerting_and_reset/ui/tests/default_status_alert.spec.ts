@@ -27,7 +27,8 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     await syntheticsServices.deleteSettingsAndConnectors();
   });
 
-  test('creates default alert, triggers on down status, and recovers', async ({
+  // Failing: See https://github.com/elastic/kibana/issues/255548
+  test.skip('creates default alert, triggers on down status, and recovers', async ({
     pageObjects,
     page,
     browserAuth,
