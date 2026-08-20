@@ -21,12 +21,6 @@ That change is required to resolve most of the challenges related to circular de
 
 The Dependency Injection Subsystem is not a replacement for the existing plugin API. All the services exposed using InversifyJS are accessible in the classic plugins, or the other way around. A plugin can use both simultaneously and gradually migrate to the declarative DI API.
 
-To try DI in a new plugin, generate one with `--di`:
-
-```sh
-node scripts/generate_plugin --name myPlugin -y --di
-```
-
 ## Implementation
 The implementation utilizes the [hierarchical dependency injection](https://inversify.io/docs/fundamentals/di-hierarchy/) provided by InversifyJS. Every plugin has its own container inhertied from the root one. That provides sufficient level of isolation with an option to share common services.
 
