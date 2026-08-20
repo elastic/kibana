@@ -6,7 +6,7 @@ The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indi
 
 - KI free text is never reported. No `title`, `description`, `content`, `tags`, or `attributes` values appear in any payload.
 
-- User-owned AI index ids are hashed (SHA-256) with the cluster id as salt before reporting. Managed AI index ids are registered from code and are reported verbatim. When the managed state is unknown, the id is treated as user-owned and hashed. When the cluster id is not available yet (early startup, or Elasticsearch was unreachable), the id is reported as `unknown` rather than unhashed, and the cluster id fetch is retried on the next reported event.
+- User-owned AI index ids are hashed (SHA-256) with the cluster id as salt before reporting. Managed AI index ids are registered from code and are reported verbatim. When the managed state is unknown, the id is treated as user-owned and hashed. When the cluster id is not available yet (early startup, or Elasticsearch was unreachable), the id is reported as `unknown` rather than unhashed, and the cluster id fetch retries every second until it succeeds.
 
 - The same rule applies to log lines: a user-authored AI index id is never logged unhashed, even at `debug`. Log lines obtain the id through `aiIndexIdForTelemetry`, the same helper that builds the EBT payload.
 

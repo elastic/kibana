@@ -174,7 +174,7 @@ export class ContextEnginePlugin
     const esClient = this.esClient;
 
     // The cluster uuid salts hashed AI index ids in EBT payloads; the service
-    // fetches it now and retries on reported events until it succeeds.
+    // fetches it with a delayed retry until it succeeds.
     this.analyticsService?.setClusterUuidFetcher(async () => {
       const { cluster_uuid: clusterUuid } = await esClient.info();
       return clusterUuid;
@@ -236,5 +236,7 @@ export class ContextEnginePlugin
     };
   }
 
-  stop() {}
+  stop() {
+    this.analyticsService?.stop();
+  }
 }

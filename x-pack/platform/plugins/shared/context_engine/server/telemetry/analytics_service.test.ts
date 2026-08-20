@@ -151,7 +151,12 @@ describe('ContextEngineAnalyticsService', () => {
   });
 
   describe('cluster uuid fetch', () => {
-    it('retries on the next reported event after a failed fetch', async () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('retries with a delay after a failed fetch', async () => {
+      jest.useFakeTimers();
       const fetcher = jest
         .fn()
         .mockRejectedValueOnce(new Error('ES unavailable'))
@@ -161,19 +166,22 @@ describe('ContextEngineAnalyticsService', () => {
         logger as unknown as Logger
       );
       recovering.setClusterUuidFetcher(fetcher);
-      await flushPromises();
+      await jest.advanceTimersByTimeAsync(0);
 
       recovering.reportKiWrite({ action: 'create', aiIndexId: 'my-index', outcome: 'success' });
       expect(analytics.reportEvent.mock.calls[0][1].ai_index_id).toBe('unknown');
+      expect(fetcher).toHaveBeenCalledTimes(1);
 
-      await flushPromises();
+      await jest.advanceTimersByTimeAsync(1000);
       recovering.reportKiWrite({ action: 'create', aiIndexId: 'my-index', outcome: 'success' });
       expect(analytics.reportEvent.mock.calls[1][1].ai_index_id).toBe(hashed('my-index'));
       expect(fetcher).toHaveBeenCalledTimes(2);
+
+      recovering.stop();
     });
 
-    it('does not start concurrent fetches while one is in flight', async () => {
-      const fetcher = jest.fn().mockResolvedValue(CLUSTER_UUID);
+    it('does not fetch again on reported events', () => {
+      const fetcher = jest.fn().mockReturnValue(new Promise<string>(() => {}));
       const pending = new ContextEngineAnalyticsService(
         analytics as unknown as AnalyticsServiceSetup,
         logger as unknown as Logger
@@ -183,6 +191,23 @@ describe('ContextEngineAnalyticsService', () => {
       pending.reportKiWrite({ action: 'create', aiIndexId: 'my-index', outcome: 'success' });
       pending.reportKiWrite({ action: 'update', aiIndexId: 'my-index', outcome: 'success' });
 
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      pending.stop();
+    });
+
+    it('stops retrying once stopped', async () => {
+      jest.useFakeTimers();
+      const fetcher = jest.fn().mockRejectedValue(new Error('ES unavailable'));
+      const stopped = new ContextEngineAnalyticsService(
+        analytics as unknown as AnalyticsServiceSetup,
+        logger as unknown as Logger
+      );
+      stopped.setClusterUuidFetcher(fetcher);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      stopped.stop();
+      await jest.advanceTimersByTimeAsync(5000);
       expect(fetcher).toHaveBeenCalledTimes(1);
     });
   });

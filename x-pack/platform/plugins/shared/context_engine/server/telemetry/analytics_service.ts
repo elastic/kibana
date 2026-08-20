@@ -6,6 +6,8 @@
  */
 
 import { createHash } from 'crypto';
+import type { Subscription } from 'rxjs';
+import { defer, retry, timer } from 'rxjs';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ContextEngineWriteOutcome, ReportKiWriteEventParams } from './events';
@@ -19,6 +21,8 @@ const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
   delete: CONTEXT_ENGINE_EVENT_TYPES.KiDelete,
 };
 
+const CLUSTER_UUID_RETRY_DELAY_MS = 1000;
+
 /**
  * Server-side analytics wrapper for Context Engine telemetry.
  *
@@ -29,8 +33,7 @@ const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
  */
 export class ContextEngineAnalyticsService {
   private clusterUuid?: string;
-  private clusterUuidPromise?: Promise<void>;
-  private fetchClusterUuid?: () => Promise<string>;
+  private clusterUuidSubscription?: Subscription;
 
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
 
@@ -41,32 +44,32 @@ export class ContextEngineAnalyticsService {
   }
 
   /**
-   * Provides the fetcher for the cluster uuid that salts hashed AI index ids,
-   * and starts the first fetch. Until a fetch succeeds, events report the id
-   * as "unknown" and each reported event retries the fetch.
+   * Starts fetching the cluster uuid that salts hashed AI index ids, retrying
+   * every second until it succeeds, mirroring core's `getClusterInfo$`.
+   * Events report the id as "unknown" until the fetch succeeds.
    */
   setClusterUuidFetcher(fetchClusterUuid: () => Promise<string>): void {
-    this.fetchClusterUuid = fetchClusterUuid;
-    this.refreshClusterUuid();
+    this.clusterUuidSubscription?.unsubscribe();
+    this.clusterUuidSubscription = defer(fetchClusterUuid)
+      .pipe(
+        retry({
+          delay: (err) => {
+            this.logger.debug(
+              `Failed to resolve the cluster uuid for telemetry, retrying: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+            return timer(CLUSTER_UUID_RETRY_DELAY_MS);
+          },
+        })
+      )
+      .subscribe((clusterUuid) => {
+        this.clusterUuid = clusterUuid;
+      });
   }
 
-  private refreshClusterUuid(): void {
-    if (this.clusterUuid !== undefined || this.clusterUuidPromise || !this.fetchClusterUuid) {
-      return;
-    }
-    this.clusterUuidPromise = this.fetchClusterUuid()
-      .then((clusterUuid) => {
-        this.clusterUuid = clusterUuid;
-      })
-      .catch((err) => {
-        // Cleared so the next reported event retries the fetch.
-        this.clusterUuidPromise = undefined;
-        this.logger.debug(
-          `Failed to resolve the cluster uuid for telemetry: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      });
+  stop(): void {
+    this.clusterUuidSubscription?.unsubscribe();
   }
 
   reportKiWrite({
@@ -105,7 +108,6 @@ export class ContextEngineAnalyticsService {
       return aiIndexId;
     }
     if (!this.clusterUuid) {
-      this.refreshClusterUuid();
       return 'unknown';
     }
     return createHash('sha256')
