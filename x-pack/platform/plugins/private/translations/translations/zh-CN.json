@@ -1667,7 +1667,6 @@
     "core.ui.chrome.appHeader.editableTitle.emptyTitleErrorMessage": "标题不能为空。",
     "core.ui.chrome.appHeader.editableTitle.invalidTitleErrorMessage": "输入有效的标题。",
     "core.ui.chrome.appHeader.shareAriaLabel": "共享",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "痕迹导航",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Elastic 主页",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "搜索",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "查找内容……",

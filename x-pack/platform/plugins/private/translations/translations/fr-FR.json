@@ -1653,7 +1653,6 @@
     "core.ui.chrome.appHeader.editableTitle.emptyTitleErrorMessage": "Le titre ne peut pas être vide.",
     "core.ui.chrome.appHeader.editableTitle.invalidTitleErrorMessage": "Entrez un titre valide.",
     "core.ui.chrome.appHeader.shareAriaLabel": "Partager",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "Fil d'Ariane",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Page d'accueil Elastic",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "Recherche",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "Recherche de contenu…",

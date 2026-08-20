@@ -1668,7 +1668,6 @@
     "core.ui.chrome.appHeader.editableTitle.emptyTitleErrorMessage": "タイトルは空にできません。",
     "core.ui.chrome.appHeader.editableTitle.invalidTitleErrorMessage": "有効なタイトルを入力してください。",
     "core.ui.chrome.appHeader.shareAriaLabel": "共有",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "ブレッドクラム",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Elasticホーム",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "検索",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "コンテンツを検索...",
