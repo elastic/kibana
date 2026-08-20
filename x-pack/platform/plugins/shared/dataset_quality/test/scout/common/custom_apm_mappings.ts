@@ -22,12 +22,15 @@ export const logsApmAppMappings = (): MappingTypeMapping => ({
       properties: {
         dataset: {
           type: 'constant_keyword',
+          value: 'apm.app.fieldlimit',
         },
         namespace: {
           type: 'constant_keyword',
+          value: 'default',
         },
         type: {
           type: 'constant_keyword',
+          value: 'logs',
         },
       },
     },
