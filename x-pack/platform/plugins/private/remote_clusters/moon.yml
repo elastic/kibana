@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

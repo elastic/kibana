@@ -8,7 +8,7 @@
  */
 import { dirname, resolve } from 'path';
 import { createRequire } from 'node:module';
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 import minimatch from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
@@ -112,7 +112,7 @@ function hasTestFiles(configAbsPath: string): boolean {
   }
 
   return rules.roots.some((root) => {
-    const testFiles = globby.sync(UNIT_TEST_MATCH, {
+    const testFiles = globbySync(UNIT_TEST_MATCH, {
       cwd: root,
       ignore: rules.ignore,
       onlyFiles: true,

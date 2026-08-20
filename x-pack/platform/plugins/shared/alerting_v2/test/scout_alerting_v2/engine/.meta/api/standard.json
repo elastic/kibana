@@ -1,5 +1,5 @@
 {
-  "sha1": "150a7d60a39cdcecdb34eb85ec9141f18d0b5a94",
+  "sha1": "7fdffc8d71885fa2d71c2cbc2ec3184cc7b7a622",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -300,8 +300,8 @@
       }
     },
     {
-      "id": "1cdf702b9453e98-f671f4e4f7de76d",
-      "title": "Director no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+      "id": "1cdf702b9453e98-f90e3171bd2118a",
+      "title": "Director no_data_strategy 'recover' resolves the episode to inactive via a no_data event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

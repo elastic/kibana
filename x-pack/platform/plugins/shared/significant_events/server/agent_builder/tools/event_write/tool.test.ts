@@ -59,12 +59,12 @@ describe('events_write tool', () => {
     expect(emptyItems.success).toBe(false);
     if (!missingItems.success) {
       expect(missingItems.error.issues[0].message).toBe(
-        'Invalid input: expected array, received undefined'
+        'Pass items as a non-empty array of event objects.'
       );
     }
     if (!emptyItems.success) {
       expect(emptyItems.error.issues[0].message).toBe(
-        'Too small: expected array to have >=1 items'
+        'Pass items as a non-empty array of event objects.'
       );
     }
     expect(
@@ -82,8 +82,9 @@ describe('events_write tool', () => {
     const signal = {
       type: 'detection' as const,
       stream_name: 'logs.test',
-      description: 'Found: error. Impact: requests failed. Verdict: confirms.',
-      confirmed: true,
+      description: 'Found: error. Impact: requests failed.',
+      verdict: 'confirms',
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
