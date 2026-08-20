@@ -100,7 +100,9 @@ test.describe(
         // runs immediately on creation, so the alert fires without waiting a full
         // interval.
         await page.testSubj.locator('ruleScheduleNumberInput').fill('1');
-        await page.testSubj.locator('ruleScheduleUnitInput').selectOption('minutes');
+        // Select by option value ('s' | 'm' | 'h' | 'd') — the labels pluralize off
+        // the count ("minute" vs "minutes"), so label matching breaks at 1.
+        await page.testSubj.locator('ruleScheduleUnitInput').selectOption('m');
         await page.testSubj.click('ruleFormStep-details');
         await page.testSubj.locator('ruleDetailsNameInput').fill(tlsRuleName);
         await page.testSubj.click('ruleFlyoutFooterSaveButton');
