@@ -7,23 +7,16 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CalloutMessage } from '@kbn/ml-validators';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
-
-export const defaultIconType = 'question';
-
-const statusToEuiColor = (status: VALIDATION_STATUS) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'primary';
-    case VALIDATION_STATUS.ERROR:
-      return 'danger';
-    default:
-      return status;
-  }
-};
+import {
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+  KbnDangerCallout,
+} from '@kbn/ui-callout';
 
 export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   switch (status) {
@@ -40,6 +33,13 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   }
 };
 
+const statusToKbnCallout = {
+  [VALIDATION_STATUS.INFO]: KbnInfoCallout,
+  [VALIDATION_STATUS.ERROR]: KbnDangerCallout,
+  [VALIDATION_STATUS.SUCCESS]: KbnSuccessCallout,
+  [VALIDATION_STATUS.WARNING]: KbnWarningCallout,
+} as const;
+
 const Link: FC<{ url: string }> = ({ url }) => (
   <EuiLink href={url} target="_BLANK">
     <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
@@ -52,18 +52,18 @@ const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
   </>
 );
 
-export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
-  <>
-    <EuiCallOut
-      data-test-subj={`mlValidationCallout ${status}`}
-      // @ts-ignore
-      color={statusToEuiColor(status)}
-      size="s"
-      title={heading || <Message text={text} url={url} />}
-      iconType={status ? statusToEuiIconType(status) : defaultIconType}
-    >
-      {heading && <Message text={text} url={url} />}
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </>
-);
+export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => {
+  const KbnCalloutComponent = statusToKbnCallout[status] ?? KbnInfoCallout;
+  return (
+    <>
+      <KbnCalloutComponent
+        data-test-subj={`mlValidationCallout ${status}`}
+        size="s"
+        title={heading || <Message text={text} url={url} />}
+      >
+        {heading && <Message text={text} url={url} />}
+      </KbnCalloutComponent>
+      <EuiSpacer size="m" />
+    </>
+  );
+};

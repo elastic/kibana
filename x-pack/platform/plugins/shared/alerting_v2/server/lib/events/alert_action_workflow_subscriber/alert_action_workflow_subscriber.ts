@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -38,10 +38,10 @@ import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding 
  *    `OnStart` phase.
  *
  *  - **Error handling.** Each handler runs inside its own try/catch and
- *    logs failures with the binding's `triggerId` attached. The
- *    `AsyncDomainEventBus` already isolates handlers from each other,
- *    but logging the `triggerId` is more useful for triage than the
- *    bare bus-event-type tag the bus alone would emit.
+ *    logs failures with the binding's `eventType` attached as the
+ *    `event_type` label. The `AsyncDomainEventBus` already isolates
+ *    handlers from each other, but logging here attributes the failure
+ *    to this subscriber rather than to the bus.
  *
  *  - **Auth model.** The publisher's {@link AlertingPublisherContext}
  *    carries the originating `KibanaRequest` across the bus's
@@ -102,8 +102,13 @@ export class AlertActionWorkflowSubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_V2_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
-        type: `AlertActionWorkflowSubscriber:${trigger.triggerId}`,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
+        labels: {
+          event_type: trigger.eventType,
+          space_id: event.spaceId,
+          episode_id: event.episodeId ?? undefined,
+          ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
+        },
       });
     }
   }

@@ -304,6 +304,13 @@ export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.re
   defaultMessage: 'Remove filter',
 });
 
+export const FILTER_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.filterDetailsAriaLabel',
+  {
+    defaultMessage: 'Alert filter details',
+  }
+);
+
 export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
   defaultMessage: 'Save changes',
 });

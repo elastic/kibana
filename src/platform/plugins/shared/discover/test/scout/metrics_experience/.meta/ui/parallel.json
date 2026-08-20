@@ -1,5 +1,5 @@
 {
-  "sha1": "6fc06005199124ee154b845b49f6e9bb155f2328",
+  "sha1": "47ab5c13bb4d2fef4ee0d9b2ba3ddfec3e2a825b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -419,8 +419,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 105,
-        "column": 22
+        "line": 112,
+        "column": 9
       }
     },
     {
@@ -437,8 +437,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 115,
-        "column": 15
+        "line": 121,
+        "column": 22
       }
     },
     {
@@ -885,6 +885,24 @@
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
         "line": 46,
         "column": 24
+      }
+    },
+    {
+      "id": "8932175b6997324-46c474ef37c0901",
+      "title": "Metrics in Discover - Sorting restores a non-default sort after a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 62,
+        "column": 74
       }
     },
     {

@@ -157,6 +157,29 @@ describe('TemplateSettingsPopover', () => {
     expect(await openSelector()).toBeInTheDocument();
   });
 
+  it('explains what changing the template does to values already saved on the case', async () => {
+    renderWithTestingProviders(<TemplateSettingsPopover {...defaultProps} />);
+    await openSelector();
+
+    // The explanation lives in a tooltip on the title, so it is revealed rather than rendered
+    // inline: assert that hovering the glyph surfaces the copy.
+    await user.hover(screen.getByTestId('template-settings-change-hint'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "The current template's fields will be hidden, but their saved values stay on the case. To remove the values, clear the fields before changing the template."
+    );
+  });
+
+  it('labels the template selector rather than relying on its placeholder', async () => {
+    renderWithTestingProviders(<TemplateSettingsPopover {...defaultProps} />);
+    await openSelector();
+
+    // A visible label tied to the input, so the placeholder is not the only thing naming the field.
+    const label = screen.getByText('Template', { selector: 'label' });
+    const input = screen.getByTestId('comboBoxSearchInput');
+    expect(label).toHaveAttribute('for', input.getAttribute('id'));
+  });
+
   it('supports a custom data-test-subj', () => {
     renderWithTestingProviders(
       <TemplateSettingsPopover {...defaultProps} data-test-subj="custom-template-settings" />

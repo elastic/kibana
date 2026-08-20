@@ -1,5 +1,5 @@
 {
-  "sha1": "875878f34700284d6b5ba0a67fb8d3b8461ba08a",
+  "sha1": "de9e9cd56ce314840caf46ed8433654b10c09b0f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
-        "line": 12,
-        "column": 19
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.setup.ts",
-        "line": 12,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -36,8 +36,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_context_dashboard.spec.ts",
-        "line": 45,
-        "column": 14
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_context.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 78,
+        "column": 64
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_copy_to_clipboard.spec.ts",
-        "line": 72,
-        "column": 14
+        "line": 62,
+        "column": 64
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_copy_to_clipboard.spec.ts",
-        "line": 94,
-        "column": 14
+        "line": 72,
+        "column": 67
       }
     },
     {
@@ -88,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_density_saved_search.spec.ts",
-        "line": 43,
-        "column": 14
+        "line": 33,
+        "column": 25
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_navigation.spec.ts",
-        "line": 42,
-        "column": 14
+        "line": 32,
+        "column": 25
       }
     },
     {
@@ -114,8 +114,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_navigation.spec.ts",
-        "line": 54,
-        "column": 14
+        "line": 38,
+        "column": 24
       }
     },
     {
@@ -124,18 +124,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_table.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 45,
+        "column": 5
       }
     },
     {
@@ -144,18 +138,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_table.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 49,
+        "column": 48
       }
     },
     {
@@ -164,18 +152,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_table.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 62,
+        "column": 5
       }
     },
     {
@@ -184,18 +166,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_table.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 70,
+        "column": 23
       }
     },
     {
@@ -204,18 +180,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 38,
+        "column": 23
       }
     },
     {
@@ -224,18 +194,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 59,
+        "column": 68
       }
     },
     {
@@ -244,18 +208,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 79,
+        "column": 25
       }
     },
     {
@@ -264,18 +222,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 87,
+        "column": 70
       }
     },
     {
@@ -284,18 +236,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 91,
+        "column": 72
       }
     },
     {
@@ -304,18 +250,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_doc_viewer.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 99,
+        "column": 70
       }
     },
     {
@@ -327,8 +267,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer_date_nanos.spec.ts",
-        "line": 79,
-        "column": 14
+        "line": 64,
+        "column": 25
       }
     },
     {
@@ -340,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 39,
+        "column": 23
       }
     },
     {
@@ -353,8 +293,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 64,
+        "column": 19
       }
     },
     {
@@ -366,8 +306,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_in_table_search.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 29,
+        "column": 23
       }
     },
     {
@@ -379,8 +319,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_in_table_search.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 41,
+        "column": 37
       }
     },
     {
@@ -392,8 +332,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_in_table_search.spec.ts",
-        "line": 90,
-        "column": 12
+        "line": 63,
+        "column": 23
       }
     },
     {
@@ -405,8 +345,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_new_line.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 57,
+        "column": 64
       }
     },
     {
@@ -418,8 +358,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_new_line.spec.ts",
-        "line": 78,
-        "column": 14
+        "line": 64,
+        "column": 15
       }
     },
     {
@@ -431,8 +371,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_pagination_saved_search.spec.ts",
-        "line": 50,
-        "column": 14
+        "line": 34,
+        "column": 35
       }
     },
     {
@@ -444,8 +384,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_pagination_saved_search.spec.ts",
-        "line": 121,
-        "column": 14
+        "line": 89,
+        "column": 20
       }
     },
     {
@@ -457,8 +397,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 30,
+        "column": 23
       }
     },
     {
@@ -470,8 +410,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 33,
+        "column": 5
       }
     },
     {
@@ -483,8 +423,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 47,
+        "column": 60
       }
     },
     {
@@ -496,8 +436,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 57,
+        "column": 20
       }
     },
     {
@@ -509,8 +449,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 62,
+        "column": 17
       }
     },
     {
@@ -522,8 +462,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 115,
-        "column": 12
+        "line": 77,
+        "column": 14
       }
     },
     {
@@ -535,8 +475,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_navigation.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 89,
+        "column": 23
       }
     },
     {
@@ -548,8 +488,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection_clipboard.spec.ts",
-        "line": 136,
-        "column": 14
+        "line": 119,
+        "column": 72
       }
     },
     {
@@ -561,8 +501,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection_clipboard.spec.ts",
-        "line": 156,
-        "column": 14
+        "line": 128,
+        "column": 24
       }
     },
     {
@@ -574,8 +514,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection_clipboard.spec.ts",
-        "line": 169,
-        "column": 14
+        "line": 137,
+        "column": 15
       }
     },
     {
@@ -587,8 +527,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection_clipboard.spec.ts",
-        "line": 182,
-        "column": 14
+        "line": 147,
+        "column": 13
       }
     },
     {
@@ -600,8 +540,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection_clipboard.spec.ts",
-        "line": 198,
-        "column": 14
+        "line": 157,
+        "column": 26
       }
     },
     {
@@ -613,8 +553,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -626,8 +566,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 66,
+        "column": 72
       }
     },
     {
@@ -639,21 +579,47 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_selection.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 107,
+        "column": 59
       }
     },
     {
-      "id": "5e6b7e0aad76158-a966b4d2472039f",
-      "title": "Discover data grid sample size - saved search and Dashboard saves a custom sample size with a search",
+      "id": "5e6b7e0aad76158-4165cd5e8ccb60d",
+      "title": "Discover data grid sample size - saved search and Dashboard saves and restores a custom sample size",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 34,
+        "column": 24
+      }
+    },
+    {
+      "id": "5e6b7e0aad76158-02edc36d356bb8c",
+      "title": "Discover data grid sample size - saved search and Dashboard new Discover sessions use the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 71,
+        "column": 11
+      }
+    },
+    {
+      "id": "5e6b7e0aad76158-2e6bba352dc2c66",
+      "title": "Discover data grid sample size - saved search and Dashboard loading an archived saved search uses the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 94,
+        "column": 13
       }
     },
     {
@@ -665,8 +631,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 107,
+        "column": 22
       }
     },
     {
@@ -678,8 +644,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 124,
-        "column": 14
+        "line": 116,
+        "column": 51
       }
     },
     {
@@ -691,8 +657,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -704,8 +670,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 40,
+        "column": 48
       }
     },
     {
@@ -717,8 +683,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 56,
+        "column": 11
       }
     },
     {
@@ -730,8 +696,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 65,
+        "column": 5
       }
     },
     {
@@ -743,8 +709,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 92,
+        "column": 22
       }
     },
     {
@@ -756,8 +722,294 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
+        "line": 107,
+        "column": 24
+      }
+    },
+    {
+      "id": "7e9666b4e353711-820dc6c92beab2f",
+      "title": "Discover doc viewer - fields table (ES|QL) filters fields by type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table_esql.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "7e9666b4e353711-c938a71b3e690dd",
+      "title": "Discover doc viewer - fields table (ES|QL) toggles the show-only-selected-fields switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table_esql.spec.ts",
+        "line": 49,
+        "column": 60
+      }
+    },
+    {
+      "id": "63ae91a138c895f-7eeab2469ea2e35",
+      "title": "Discover doc viewer - fields table selection and pinning toggles the show-only-selected-fields switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table_selection.spec.ts",
+        "line": 42,
+        "column": 25
+      }
+    },
+    {
+      "id": "63ae91a138c895f-d1c8029d1f29d56",
+      "title": "Discover doc viewer - fields table selection and pinning pins and unpins fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table_selection.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a00c5204210411-69893d572647963",
+      "title": "Discover doc viewer - fields table filters fields by name or value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "0a00c5204210411-ec0c306b080f407",
+      "title": "Discover doc viewer - fields table filters fields by type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
+        "line": 47,
+        "column": 29
+      }
+    },
+    {
+      "id": "0a00c5204210411-75ef22fb7727d37",
+      "title": "Discover doc viewer - fields table hides fields with null values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
+        "line": 59,
+        "column": 18
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-8d69de228de34bc",
+      "title": "Discover doc viewer flyout - accessibility focuses the flyout on open and retains focus when resizing between push and overlay",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 49,
+        "column": 15
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-f86bf59432a1a7a",
+      "title": "Discover doc viewer flyout - accessibility returns focus to the trigger element when the flyout is closed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 67,
+        "column": 60
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-a41e9e6bb70e843",
+      "title": "Discover doc viewer flyout - accessibility renders the screen reader description only for the push flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 110,
+        "column": 15
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-e2db8950982d20a",
+      "title": "Discover doc viewer flyout - accessibility uses the expected a11y attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
         "line": 120,
-        "column": 12
+        "column": 60
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-0b5927f9f2af87e",
+      "title": "Discover doc viewer flyout - accessibility has no automated a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 143,
+        "column": 58
+      }
+    },
+    {
+      "id": "1d8be7f4e7153f0-3a32b0d02bdd238",
+      "title": "Discover doc viewer flyout - arrow keys navigates between documents with arrow keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_arrow_keys.spec.ts",
+        "line": 45,
+        "column": 58
+      }
+    },
+    {
+      "id": "1d8be7f4e7153f0-40ce8f486784140",
+      "title": "Discover doc viewer flyout - arrow keys does not navigate between documents with arrow keys when the search input is focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_arrow_keys.spec.ts",
+        "line": 60,
+        "column": 75
+      }
+    },
+    {
+      "id": "1d8be7f4e7153f0-271f5306a085f17",
+      "title": "Discover doc viewer flyout - arrow keys does not navigate between documents with arrow keys when the data grid is focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_arrow_keys.spec.ts",
+        "line": 76,
+        "column": 27
+      }
+    },
+    {
+      "id": "1d8be7f4e7153f0-1df9e11d33b8f90",
+      "title": "Discover doc viewer flyout - arrow keys does not navigate between documents with arrow keys when the tabs are focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_arrow_keys.spec.ts",
+        "line": 90,
+        "column": 22
+      }
+    },
+    {
+      "id": "1d8be7f4e7153f0-f5a8b1a9ee0441f",
+      "title": "Discover doc viewer flyout - arrow keys does not navigate between documents with arrow keys when the resize handle is focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_arrow_keys.spec.ts",
+        "line": 105,
+        "column": 40
+      }
+    },
+    {
+      "id": "da321f23b0593e5-2d9dbc3f8ae0ae2",
+      "title": "Discover doc viewer flyout - escape key closes the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_escape_key.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "da321f23b0593e5-68b5812862876c9",
+      "title": "Discover doc viewer flyout - escape key closes the flyout when the search input is focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_escape_key.spec.ts",
+        "line": 48,
+        "column": 15
+      }
+    },
+    {
+      "id": "da321f23b0593e5-9ebec54be842d4d",
+      "title": "Discover doc viewer flyout - escape key does not close the flyout when the data grid is focused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_escape_key.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "ee8b03ce049a9e3-f5c2bad90850337",
+      "title": "Discover doc viewer - pinning keeps the expanded classic document pinned when results reorder or exclude it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_pinning.spec.ts",
+        "line": 51,
+        "column": 23
+      }
+    },
+    {
+      "id": "ee8b03ce049a9e3-c024f4748351911",
+      "title": "Discover doc viewer - pinning keeps the expanded ES|QL result with METADATA _id, _index pinned when results reorder or exclude it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_pinning.spec.ts",
+        "line": 77,
+        "column": 20
       }
     }
   ]

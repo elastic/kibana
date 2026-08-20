@@ -19,8 +19,24 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  * field, because agent-emitted osquerybeat documents (results / action
  * responses) may not carry the field. Named spaces match the `space_id` term
  * exactly and never include field-less documents.
+ *
+ * `matchMissingSpaceId: false` drops that allowance. Equating "no field" with
+ * "default space" only holds while the search is confined to one project. A
+ * pack config saved without the per-query `space_id` (see #272411) keeps
+ * producing field-less documents until the pack is re-saved, so under CPS
+ * fan-out such a document from a linked project may belong to a named space
+ * there. Callers whose query is not already bound to an action or schedule id
+ * the user could only have learned from a space-stamped document must pass
+ * `false` when the read fans out.
  */
-export const buildSpaceIdFilter = (spaceId: string): estypes.QueryDslQueryContainer => {
+export const buildSpaceIdFilter = (
+  spaceId: string,
+  { matchMissingSpaceId = true }: { matchMissingSpaceId?: boolean } = {}
+): estypes.QueryDslQueryContainer => {
+  if (spaceId === DEFAULT_SPACE_ID && !matchMissingSpaceId) {
+    return { term: { space_id: DEFAULT_SPACE_ID } };
+  }
+
   if (spaceId === DEFAULT_SPACE_ID) {
     return {
       bool: {

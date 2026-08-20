@@ -236,6 +236,36 @@ describe('UiamOAuth', () => {
     });
   });
 
+  describe('deleteClient()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const request = createMockRequest('Bearer essu_token');
+
+      const result = await uiamOAuth.deleteClient(request, 'c1');
+
+      expect(result).toBeNull();
+      expect(mockUiam.deleteOAuthClient).not.toHaveBeenCalled();
+    });
+
+    it('deletes client successfully', async () => {
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.deleteClient(request, 'c1');
+
+      expect(result).toBe(true);
+      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1');
+    });
+
+    it('logs and throws error when UIAM call fails', async () => {
+      mockUiam.deleteOAuthClient.mockRejectedValue(new Error('UIAM error'));
+      const request = createMockRequest('Bearer essu_access_token');
+
+      await expect(uiamOAuth.deleteClient(request, 'c1')).rejects.toThrow('UIAM error');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to delete OAuth client c1: UIAM error');
+    });
+  });
+
   describe('listConnections()', () => {
     it('returns null when license is not enabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
@@ -368,6 +398,44 @@ describe('UiamOAuth', () => {
         'c1',
         'conn1',
         'reason'
+      );
+    });
+  });
+
+  describe('deleteConnection()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const request = createMockRequest('Bearer essu_token');
+
+      const result = await uiamOAuth.deleteConnection(request, 'c1', 'conn1');
+
+      expect(result).toBeNull();
+      expect(mockUiam.deleteOAuthConnection).not.toHaveBeenCalled();
+    });
+
+    it('deletes connection successfully', async () => {
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.deleteConnection(request, 'c1', 'conn1');
+
+      expect(result).toBe(true);
+      expect(mockUiam.deleteOAuthConnection).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        'conn1'
+      );
+    });
+
+    it('logs and throws error when UIAM call fails', async () => {
+      mockUiam.deleteOAuthConnection.mockRejectedValue(new Error('UIAM error'));
+      const request = createMockRequest('Bearer essu_access_token');
+
+      await expect(uiamOAuth.deleteConnection(request, 'c1', 'conn1')).rejects.toThrow(
+        'UIAM error'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to delete OAuth connection conn1 for client c1: UIAM error'
       );
     });
   });

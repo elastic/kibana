@@ -8,11 +8,15 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing, AppHeaderTitle } from '../types';
-import { useHasLegacyActionMenu } from './hooks/chrome';
+import {
+  useCanAccessIntegrations,
+  useHasLegacyActionMenu,
+  useInlineAppHeader,
+  useResolvedBadges,
+} from './hooks';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
 import { AppTabs } from './app_tabs';
@@ -22,13 +26,13 @@ import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
 import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
-import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
 export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
   back?: AppHeaderBack | AppHeaderBack[];
   /**
-   * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
-   * sticky-header mechanism for the correct scrolling container.
+   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
+   * `true`; set `false` only when the surrounding layout already pins the header in the correct
+   * scroll container. A header-height wrapper prevents CSS sticky.
    */
   sticky?: boolean;
   /**
@@ -54,6 +58,7 @@ const getPublicAppHeaderViewProps = ({
   badges,
   menu,
   favorite,
+  share,
   description,
   metadata,
   sticky,
@@ -70,6 +75,7 @@ const getPublicAppHeaderViewProps = ({
     badges,
     menu,
     favorite,
+    share,
     ...secondaryContent,
     sticky,
     spacing,
@@ -86,6 +92,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     badges,
     menu,
     favorite,
+    share,
     titleAppend,
     description,
     metadata,
@@ -96,7 +103,6 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
     const canAccessIntegrations = useCanAccessIntegrations();
     const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
@@ -111,7 +117,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !description &&
       !metadata?.length &&
       !titleAppend &&
-      !favorite;
+      !favorite &&
+      !share;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
 
     // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
@@ -125,7 +132,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !!resolvedBadges?.length ||
       !!menu?.items?.length ||
       !!titleAppend ||
-      !!shareAction ||
+      !!share ||
       !!favorite ||
       !!description ||
       !!metadata?.length ||
@@ -141,7 +148,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       <AppHeaderShell
         title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleActions={<TitleActions shareAction={share} favorite={favorite} />}
         titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
@@ -177,21 +184,14 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
 
 AppHeaderView.displayName = 'AppHeaderView';
 
-export type AppHeaderProps = AppHeaderViewProps & {
-  title: AppHeaderTitle;
-};
+export type AppHeaderProps = AppHeaderViewProps & { title: AppHeaderTitle };
 
 type InlineAppHeaderProps = AppHeaderViewInternalProps & {
   title: AppHeaderTitle;
 };
 
 const InlineAppHeader = React.memo<InlineAppHeaderProps>((props) => {
-  const chrome = useChromeService();
-  useLayoutEffect(() => {
-    chrome.next.inlineAppHeader.set(true);
-    return () => chrome.next.inlineAppHeader.set(false);
-  }, [chrome]);
-
+  useInlineAppHeader();
   return <AppHeaderViewInternal {...props} />;
 });
 
