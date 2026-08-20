@@ -8,7 +8,6 @@
  */
 
 import { BaseObject, type ObjectScope } from '@elastic/eui-test-helpers';
-import { expect } from '@playwright/test';
 
 /**
  * Playwright Component Object for a keyboard-reorderable
@@ -32,14 +31,17 @@ export class EuiDraggableObject extends BaseObject {
   /**
    * Reorders the item via keyboard: focus the handle, lift it (`Space`),
    * move it `steps` positions (`ArrowDown` for positive, `ArrowUp` for
-   * negative), drop it (`Space`), then wait for EUI's own
-   * `euiDraggable--isDragging` class to clear on the ancestor draggable item
-   * — the reliable signal the reorder has settled.
+   * negative), drop it (`Space`).
    *
    * Keyboard lift is used deliberately instead of simulating a mouse drag:
    * it's what `@hello-pangea/dnd` (which `EuiDraggable` wraps) itself
    * supports as an accessible interaction, and it's what every current
-   * consumer already drives it with.
+   * consumer already drives it with. No settle-wait follows the drop — EUI
+   * doesn't expose a synchronous, stable signal for "reorder animation
+   * finished" (the class some consumers checked for, `euiDraggable--isDragging`,
+   * hasn't existed since EUI moved this styling to Emotion; that check was a
+   * no-op). Callers relying on the new order should assert it with a
+   * retrying `expect`, which settles on its own.
    */
   async reorder(steps: number): Promise<void> {
     await this.root.focus();
@@ -49,10 +51,5 @@ export class EuiDraggableObject extends BaseObject {
       await this.root.press(key);
     }
     await this.root.press('Space');
-
-    const draggableItem = this.root.locator(
-      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " euiDraggable ")][1]'
-    );
-    await expect(draggableItem).not.toHaveClass(/euiDraggable--isDragging/);
   }
 }
