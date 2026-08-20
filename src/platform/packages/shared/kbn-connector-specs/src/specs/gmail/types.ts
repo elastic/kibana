@@ -23,6 +23,7 @@ export const GMAIL_MAX_EMAIL_LENGTH = 320; // RFC 5321
 export const GMAIL_MAX_RECIPIENTS = 50;
 export const GMAIL_MAX_SUBJECT_LENGTH = 998; // RFC 5322 line limit
 export const GMAIL_MAX_BODY_LENGTH = 100_000;
+export const DEFAULT_MAX_RESULTS = 10;
 
 // Bare addr-spec only; display names ("Alice" <a@b.com>) are not supported.
 // Dot handling: the local part is structured as atom(\.atom)* — consecutive dots,
@@ -44,8 +45,9 @@ export const SearchMessagesInputSchema = lazySchema(() =>
       ),
     maxResults: z
       .number()
+      .min(1)
       .optional()
-      .default(10)
+      .default(DEFAULT_MAX_RESULTS)
       .describe(
         'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small; increase only if user explicitly needs more.'
       ),
@@ -102,8 +104,9 @@ export const ListMessagesInputSchema = lazySchema(() =>
   z.object({
     maxResults: z
       .number()
+      .min(1)
       .optional()
-      .default(10)
+      .default(DEFAULT_MAX_RESULTS)
       .describe(
         'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small.'
       ),

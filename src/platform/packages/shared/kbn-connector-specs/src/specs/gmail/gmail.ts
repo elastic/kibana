@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { buildRawMessage, extractAddrSpec, findHeader } from './mime';
 import {
+  DEFAULT_MAX_RESULTS,
   GMAIL_EMAIL_REGEX,
   GetAttachmentInputSchema,
   GetMessageInputSchema,
@@ -34,7 +35,6 @@ import {
 } from './types';
 
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
-const DEFAULT_MAX_RESULTS = 10;
 const MAX_PAGE_SIZE = 100;
 const UNREAD_LABEL_ID = 'UNREAD';
 
