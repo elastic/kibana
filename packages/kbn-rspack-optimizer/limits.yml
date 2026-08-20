@@ -31,7 +31,8 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1962
+  contextEngine: 7385
+  contextEngineAgentBuilder: 4999
   controls: 4166
   core: 320
   cps: 6032
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
+  nightshiftInvestigations: 5000
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
@@ -187,7 +189,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 336543
   shared-misc: 114567
-  shared-packages: 5007950
+  shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3153
