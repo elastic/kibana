@@ -64,7 +64,7 @@ steps:
 
   - name: count_loop
     type: while
-    condition: '{{variables.count | lt: 3}}'
+    condition: '${{variables.count > 3}}'
     max-iterations: 5
     steps:
       - name: increment
