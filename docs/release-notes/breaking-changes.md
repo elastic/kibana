@@ -55,7 +55,7 @@ $$$kibana-285645$$$
 
 **Impact**<br> API callers or custom Kibana roles that grant `workflow_execution_read` without `workflow_read` receive HTTP 403 on the routes listed above.
 
-**Action**<br> Add the `workflow_read` sub-feature privilege to any custom role that grants `workflow_execution_read`. The built-in `read` role already includes both privileges and is not affected.
+**Action**<br> In any role that customizes Workflows sub-feature privileges, add **Read** (`workflow_read`) under **Analytics → Workflows → Workflows Actions** alongside **Read Workflow Execution** (`workflow_execution_read`). Roles that grant `All` or `Read` on **Analytics → Workflows** already include both privileges and need no change.
 
 View [#285645]({{kib-pull}}285645).
 ::::
