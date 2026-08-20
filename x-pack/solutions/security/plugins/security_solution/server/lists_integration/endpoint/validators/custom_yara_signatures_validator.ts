@@ -14,6 +14,7 @@ import type {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { YaraValidateResult } from '../../../endpoint/lib/libyara';
 import { getYaraEngineVersion, validateYaraRule } from '../../../endpoint/lib/libyara';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
@@ -211,9 +212,10 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
     }
 
     let errors;
+    let errorCount;
     try {
       // Only errors are rejected on create/update.
-      ({ errors } = await validateYaraRule(ruleText));
+      ({ errors, errorCount } = await this.validateCustomYaraRule(ruleText));
     } catch (error) {
       this.logger.error(error);
       throw new EndpointArtifactExceptionValidationError(
@@ -231,11 +233,22 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       }
 
       const details = errors
-        .map((e) => (e.line > 0 ? `line ${e.line}: ${e.message}` : e.message))
+        .map((e) => (e.line > 0 ? `[line ${e.line}] ${e.message}` : e.message))
         .join('; ');
       throw new EndpointArtifactExceptionValidationError(
-        `Invalid YARA rule (libyara ${libyaraVersion}): ${details}`
+        `Invalid YARA rules (libyara ${libyaraVersion}), ${errorCount} error${
+          errorCount > 1 ? 's' : ''
+        } found: ${details}`
       );
     }
+  }
+
+  /**
+   * Validates a YARA rule in regards of YARA syntax and Custom YARA Signatures specific requirements.
+   */
+  private async validateCustomYaraRule(ruleText: string): Promise<YaraValidateResult> {
+    const { errors, warnings, errorCount, warningCount, rules } = await validateYaraRule(ruleText);
+
+    return { errors, warnings, errorCount, warningCount, rules };
   }
 }

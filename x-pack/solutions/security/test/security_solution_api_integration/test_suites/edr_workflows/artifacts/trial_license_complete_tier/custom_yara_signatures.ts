@@ -219,6 +219,62 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           describe(`YARA rules validation - ${customYaraSignatureApiCall.info}`, () => {
+            describe('Syntax validation', () => {
+              it('accepts valid rules', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule2 { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it('rejects a rule with invalid syntax', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: cheese }
+                    // rule rule2 { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 2\] undefined identifier "cheese"/
+                    )
+                  );
+              });
+
+              it('returns total error count, while listed errors are capped', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(
+                      Array.from(
+                        { length: 100 },
+                        (_, i) => `rule r${i} { condition: cheese }`
+                      ).join('\n')
+                    )
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 100 errors found:/)
+                  )
+                  .expect((res: { body: { message: string } }) => {
+                    expect((res.body.message.match(/"cheese"/g) ?? []).length).to.be(64);
+                  });
+              });
+            });
             describe('Module support', () => {
               describe('Supported modules', () => {
                 const supportedModules: Record<string, string> = {
