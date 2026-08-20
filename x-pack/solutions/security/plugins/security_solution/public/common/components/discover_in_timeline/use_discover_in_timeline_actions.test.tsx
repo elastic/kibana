@@ -16,6 +16,7 @@ import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
 import * as timelineActions from '../../../timelines/store/actions';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -307,10 +308,20 @@ describe('useDiscoverInTimelineActions', () => {
         <TestProviders store={store}>{children}</TestProviders>
       );
 
+      const { columns, dataViewId, indexNames } = timelineDefaults;
+
       const newSavedSearchId = 'newly-created-saved-search-id';
       (startServicesMock.savedSearch.save as jest.Mock).mockImplementationOnce(async () => {
         // the user creates a new timeline before the save resolves
-        store.dispatch(timelineActions.createTimeline({ id: TimelineId.active, show: true }));
+        store.dispatch(
+          timelineActions.createTimeline({
+            id: TimelineId.active,
+            show: true,
+            columns,
+            dataViewId,
+            indexNames,
+          })
+        );
         return newSavedSearchId;
       });
 
