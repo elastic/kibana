@@ -164,7 +164,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               const { agentBuilder } = getServices();
               if (!agentBuilder) return;
               hasSaved = true;
-              previewHtml$.next(null);
               closeFlyout();
               agentBuilder.openChat({
                 attachments: [
@@ -179,27 +178,50 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               });
             };
 
-            return (
-              <EditCustomContentFlyout
-                esqlQuery={esqlQuery$.getValue()}
-                template={template$.getValue()}
-                timeRange={
-                  apiPublishesTimeRange(parentApi)
-                    ? parentApi.timeRange$.getValue() ?? undefined
-                    : undefined
-                }
-                isApproximate={isApproximate$.getValue()}
-                projectRouting={projectRouting$.getValue()}
-                query={query$.getValue()}
-                filters={filters$.getValue()}
-                isNewPanel={isNewPanel ?? false}
-                ariaLabelledBy={ariaLabelledBy}
-                onSave={handleSave}
-                onClose={handleClose}
-                onRunPreview={(html) => previewHtml$.next(html)}
-                onGenerateWithChat={handleGenerateWithChatFromFlyout}
-              />
-            );
+            function FlyoutWithReactiveState() {
+              const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
+                apiPublishesTimeRange(parentApi)
+                  ? parentApi.timeRange$.getValue() ?? undefined
+                  : undefined
+              );
+              const [isApproximate, setIsApproximate] = useState(isApproximate$.getValue());
+              const [projectRouting, setProjectRouting] = useState(projectRouting$.getValue());
+              const [query, setQuery] = useState(query$.getValue());
+              const [filters, setFilters] = useState(filters$.getValue());
+
+              useEffect(() => {
+                const subs = [
+                  ...(apiPublishesTimeRange(parentApi)
+                    ? [parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined))]
+                    : []),
+                  isApproximate$.subscribe(setIsApproximate),
+                  projectRouting$.subscribe(setProjectRouting),
+                  query$.subscribe(setQuery),
+                  filters$.subscribe(setFilters),
+                ];
+                return () => subs.forEach((s) => s.unsubscribe());
+              }, []);
+
+              return (
+                <EditCustomContentFlyout
+                  esqlQuery={esqlQuery$.getValue()}
+                  template={template$.getValue()}
+                  timeRange={timeRange}
+                  isApproximate={isApproximate}
+                  projectRouting={projectRouting}
+                  query={query}
+                  filters={filters}
+                  isNewPanel={isNewPanel ?? false}
+                  ariaLabelledBy={ariaLabelledBy}
+                  onSave={handleSave}
+                  onClose={handleClose}
+                  onRunPreview={(html) => previewHtml$.next(html)}
+                  onGenerateWithChat={handleGenerateWithChatFromFlyout}
+                />
+              );
+            }
+
+            return <FlyoutWithReactiveState />;
           },
           flyoutProps: {
             focusedPanelId: uuid,
@@ -342,7 +364,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
           isRetained = true;
-          previewHtml$.next(null);
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             attachments: [
