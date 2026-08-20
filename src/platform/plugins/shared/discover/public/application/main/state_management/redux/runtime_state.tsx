@@ -9,7 +9,6 @@
 
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverTabType } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -158,7 +157,7 @@ export const selectTabTypeForPersistence = ({
 }: {
   runtimeStateManager: RuntimeStateManager;
   tabState: TabState;
-}): DiscoverTabType | undefined => {
+}) => {
   const scopedProfilesManager = selectTabRuntimeState(
     runtimeStateManager,
     tabState.id

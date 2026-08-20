@@ -283,27 +283,19 @@ describe('selectHasUnsavedChanges', () => {
   });
 
   describe('tab type', () => {
-    const setupMetricsTab = async ({
-      persistedDimensions,
-      resolvedTabType,
-    }: {
-      persistedDimensions: string[];
-      resolvedTabType?: DiscoverTabType;
-    }) => {
+    const setupMetricsTab = async (persistedDimensions: string[]) => {
       const services = createDiscoverServicesMock();
       services.profileStateRegistry = createProfileStateRegistry();
 
       const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
       services.profilesManager = profilesManagerMock;
-      (dataSourceProfileProviderMock.resolve as jest.Mock).mockReturnValue({
+      jest.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue({
         isMatch: true,
-        context: resolvedTabType
-          ? {
-              category: DataSourceCategory.Metrics,
-              tabType: resolvedTabType,
-              profileState: METRICS_STATE_DEF,
-            }
-          : { category: DataSourceCategory.Logs },
+        context: {
+          category: DataSourceCategory.Metrics,
+          tabType: DiscoverTabType.Metrics,
+          profileState: METRICS_STATE_DEF,
+        },
       });
 
       const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab } =
@@ -330,11 +322,8 @@ describe('selectHasUnsavedChanges', () => {
       return { internalState, runtimeStateManager, services };
     };
 
-    it('does not flag unsaved changes when the resolved tab type and dimensions match what was persisted', async () => {
-      const { internalState, runtimeStateManager, services } = await setupMetricsTab({
-        persistedDimensions: ['host.name'],
-        resolvedTabType: DiscoverTabType.Metrics,
-      });
+    it('does not flag unsaved changes when the tab type state matches what was persisted', async () => {
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab(['host.name']);
 
       const result = selectHasUnsavedChanges(internalState.getState(), {
         runtimeStateManager,
@@ -345,10 +334,7 @@ describe('selectHasUnsavedChanges', () => {
     });
 
     it('flags unsaved changes when the live dimensions differ from what was persisted', async () => {
-      const { internalState, runtimeStateManager, services } = await setupMetricsTab({
-        persistedDimensions: ['host.name'],
-        resolvedTabType: DiscoverTabType.Metrics,
-      });
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab(['host.name']);
       const tabId = 'metrics-tab';
 
       internalState.dispatch(
@@ -371,18 +357,12 @@ describe('selectHasUnsavedChanges', () => {
       expect(result.unsavedTabIds).toEqual([tabId]);
     });
 
-    it('does not flag a phantom unsaved change when the tab type resolves for the first time with only default state', async () => {
-      const { internalState, runtimeStateManager, services } = await setupMetricsTab({
-        persistedDimensions: [],
-        resolvedTabType: DiscoverTabType.Metrics,
-      });
+    it('does not flag a phantom change when a persisted tab resolves with only default state', async () => {
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab([]);
 
-      const result = selectHasUnsavedChanges(internalState.getState(), {
-        runtimeStateManager,
-        services,
-      });
-
-      expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      expect(
+        selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+      ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
     });
   });
 });
