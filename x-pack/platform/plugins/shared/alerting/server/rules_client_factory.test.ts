@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -931,8 +932,18 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"UIAM API keys should only be used in serverless environments"`
+      `"Cannot use a Cloud API key to create or enable rule \\"test\\". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
     );
+
+    // A client error, so it has to surface as a 4xx rather than an opaque 500.
+    let thrown: Error | undefined;
+    try {
+      constructorCall.getAuthenticationAPIKey('test');
+    } catch (error) {
+      thrown = error;
+    }
+    expect(Boom.isBoom(thrown)).toBe(true);
+    expect((thrown as Boom.Boom).output.statusCode).toBe(400);
   });
 
   test('getAuthenticationAPIKey() returns uiamResult for a framework-granted UIAM API key encoded as base64(id:key)', async () => {

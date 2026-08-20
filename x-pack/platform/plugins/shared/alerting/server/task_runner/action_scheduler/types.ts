@@ -78,11 +78,10 @@ export interface ActionSchedulerOptions<
    */
   apiKey: string | null;
   /**
-   * True when `apiKey` is an external (user-created Cloud) UIAM credential. Derived from the
-   * rule run's fake request marker (`UIAM_EXTERNAL_CREDENTIAL_HEADER`, stamped by
-   * `getFakeKibanaRequest` from the rule's persisted `uiamApiKeyExternal` verdict), so the
-   * connector tasks authenticate exactly like the rule run itself: without the UIAM shared
-   * secret, which UIAM rejects for external keys.
+   * True when `apiKey` is an external (user-created Cloud) UIAM credential. Read off the rule
+   * run's own fake request (marked by `getFakeKibanaRequest` from the rule's persisted
+   * `uiamApiKeyExternal` verdict), so the connector tasks authenticate exactly like the rule run
+   * itself: without the UIAM shared secret, which UIAM rejects for external keys.
    */
   uiamApiKeyExternal?: boolean;
   ruleConsumer: string;

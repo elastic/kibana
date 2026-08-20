@@ -36,7 +36,7 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
-  UIAM_EXTERNAL_CREDENTIAL_HEADER,
+  markExternalUiamCredential,
   deriveInternalCallerAttestation,
 } from '@kbn/core-security-server';
 
@@ -1136,14 +1136,8 @@ describe('ClusterClient', () => {
     });
 
     it('does not specify client authentication for UIAM credentials in fake requests marked as carrying an external credential', () => {
-      // Include the marker in the whitelist to prove it is stripped from the outgoing headers
-      // even when a custom whitelist would otherwise forward it.
-      const config = createConfig({
-        requestHeadersWhitelist: ['authorization', UIAM_EXTERNAL_CREDENTIAL_HEADER],
-      });
-
       const clusterClient = new ClusterClient({
-        config,
+        config: createConfig(),
         logger,
         type: 'custom-type',
         authHeaders,
@@ -1153,11 +1147,9 @@ describe('ClusterClient', () => {
         onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const fakeRequest = httpServerMock.createFakeKibanaRequest({
-        headers: {
-          [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key',
-          [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
-        },
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
       });
+      markExternalUiamCredential(fakeRequest);
 
       const scopedClusterClient = clusterClient.asScoped(fakeRequest);
       // trigger client instantiation via getter
@@ -1172,9 +1164,44 @@ describe('ClusterClient', () => {
           },
         })
       );
-      const forwardedHeaders = scopedClient.child.mock.calls[0][0].headers;
-      expect(forwardedHeaders).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
-      expect(forwardedHeaders).not.toHaveProperty(UIAM_EXTERNAL_CREDENTIAL_HEADER);
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
+    });
+
+    it('specifies client authentication for an unmarked fake request carrying a UIAM credential', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      // A separate request object with the very same headers must not inherit the verdict: the
+      // marker is bound to the request instance, not to its credential.
+      markExternalUiamCredential(
+        httpServerMock.createFakeKibanaRequest({
+          headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+        })
+      );
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          }),
+        })
+      );
     });
   });
 
@@ -1573,11 +1600,9 @@ describe('ClusterClient', () => {
         onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const fakeRequest = httpServerMock.createFakeKibanaRequest({
-        headers: {
-          [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key',
-          [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
-        },
+        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_user_created_key' },
       });
+      markExternalUiamCredential(fakeRequest);
 
       const scopedClusterClient = clusterClient.asScoped(fakeRequest);
       // trigger client instantiation via getter
@@ -1591,9 +1616,9 @@ describe('ClusterClient', () => {
           }),
         })
       );
-      const forwardedHeaders = internalClient.child.mock.calls[0][0].headers;
-      expect(forwardedHeaders).not.toHaveProperty(ES_SECONDARY_CLIENT_AUTH_HEADER);
-      expect(forwardedHeaders).not.toHaveProperty(UIAM_EXTERNAL_CREDENTIAL_HEADER);
+      expect(internalClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_SECONDARY_CLIENT_AUTH_HEADER
+      );
     });
 
     describe('CPS routing', () => {

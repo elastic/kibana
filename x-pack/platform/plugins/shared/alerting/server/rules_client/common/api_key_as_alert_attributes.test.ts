@@ -97,6 +97,7 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: false,
       uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
     });
   });
 
@@ -119,6 +120,7 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
     });
   });
 
@@ -140,6 +142,7 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: false,
     });
   });
 
@@ -164,6 +167,22 @@ describe('apiKeyAsAlertAttributes', () => {
       uiamApiKey: 'essu_user_created_key',
       uiamApiKeyExternal: true,
     });
+  });
+
+  test('writes uiamApiKeyExternal: false alongside an internal key so a stale true cannot survive', () => {
+    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, which
+    // merges: omitting the attribute would leave a previously stored `true` in place and the run
+    // would then withhold the UIAM shared secret from this freshly granted internal key.
+    const properties = apiKeyAsRuleDomainProperties(
+      {
+        apiKeysEnabled: true,
+        uiamResult: { id: '456', name: '456', api_key: 'def' },
+      },
+      'test',
+      false
+    );
+
+    expect(properties.uiamApiKeyExternal).toBe(false);
   });
 
   test('does not store a UIAM API key without an id when it is not created by the user', () => {

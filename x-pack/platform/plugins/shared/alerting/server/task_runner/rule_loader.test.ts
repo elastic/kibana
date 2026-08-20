@@ -8,7 +8,7 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
-import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -348,8 +348,8 @@ describe('rule_loader', () => {
       );
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_user_created_key`,
-        [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
       });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(true);
     });
 
     test('marks the fake request as carrying an external credential when config is set to es and the rule has no ES API key', async () => {
@@ -361,8 +361,8 @@ describe('rule_loader', () => {
       });
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_user_created_key`,
-        [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
       });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(true);
     });
 
     test('does not mark the fake request when uiamApiKeyExternal is not persisted, even for user-created keys', async () => {
@@ -375,6 +375,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_user_created_key`,
       });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(false);
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {

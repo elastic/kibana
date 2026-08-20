@@ -40,7 +40,10 @@ export const transformBackfillParamToAdHocRun = (
       apiKeyToUse: rule.apiKey!,
       // Snapshot the rule's UIAM API key (when present) so the ad hoc task runner
       // can authenticate the same way a regular rule run does in UIAM deployments.
+      // `uiamApiKeyExternal` has to ride along: without it the backfill run would present a
+      // user-created (external) Cloud key with the UIAM shared secret, which UIAM rejects.
       ...(rule.uiamApiKey ? { uiamApiKey: rule.uiamApiKey } : {}),
+      ...(rule.uiamApiKey && rule.uiamApiKeyExternal === true ? { uiamApiKeyExternal: true } : {}),
       createdAt: new Date().toISOString(),
       duration: rule.schedule.interval,
       enabled: true,

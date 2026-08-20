@@ -13,7 +13,4 @@ export {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
 } from './attestation';
-export {
-  UIAM_EXTERNAL_CREDENTIAL_HEADER,
-  getExternalUiamCredentialHeaders,
-} from './external_credential';
+export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';

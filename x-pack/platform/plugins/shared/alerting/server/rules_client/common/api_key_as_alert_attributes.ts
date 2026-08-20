@@ -72,10 +72,11 @@ const getApiKeyRuleProperties = (
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
     // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
     // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
-    // rejects for external keys.
-    ...(encodedUiamApiKey && apiKey.uiamResult?.external === true
-      ? { uiamApiKeyExternal: true }
-      : {}),
+    // rejects for external keys. Written whenever a UIAM key is written, not only when true:
+    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, where
+    // omitting the attribute leaves the previously stored value in place. A stale `true` would
+    // then withhold the shared secret from a freshly granted internal key.
+    ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
   };
 };
 

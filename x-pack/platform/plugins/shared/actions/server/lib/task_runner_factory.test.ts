@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { ActionExecutor } from './action_executor';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -224,8 +224,8 @@ describe('Task Runner Factory', () => {
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
     expect(executeParams.request.headers).toEqual({
       authorization: 'ApiKey essu_user_created_key',
-      [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
     });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(true);
   });
 
   test('does not mark the fake request when uiamApiKeyExternal is absent', async () => {
@@ -253,6 +253,7 @@ describe('Task Runner Factory', () => {
     expect(executeParams.request.headers).toEqual({
       authorization: 'ApiKey essu_framework_granted_key',
     });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(false);
   });
 
   test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {

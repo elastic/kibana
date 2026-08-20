@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
   Logger,
@@ -507,7 +508,13 @@ export class RulesClientFactory {
           // `apiKeyCreatedByUser` gates every invalidation path.
           if (isUiamCredential(authorizationHeader)) {
             if (!this.shouldGrantUiam) {
-              throw new Error('UIAM API keys should only be used in serverless environments');
+              // A client error, not a server one: keep it a 4xx with an actionable message
+              // instead of surfacing an opaque 500.
+              throw Boom.badRequest(
+                `Cannot use a Cloud API key to create or enable rule "${name}". ` +
+                  `Cloud API keys are only supported in serverless environments; ` +
+                  `use a project-scoped Elasticsearch API key instead.`
+              );
             }
             return {
               apiKeysEnabled: true,

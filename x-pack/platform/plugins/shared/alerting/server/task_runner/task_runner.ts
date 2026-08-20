@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -514,9 +514,10 @@ export class TaskRunner<
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
-      // Mirror the rule run's own credential treatment onto the connector tasks: the marker
-      // is stamped by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`.
-      uiamApiKeyExternal: Boolean(fakeRequest.headers[UIAM_EXTERNAL_CREDENTIAL_HEADER]),
+      // Mirror the rule run's own credential treatment onto the connector tasks: the request is
+      // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
+      // it here cannot drift from what the cluster client will decide for this very run.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,

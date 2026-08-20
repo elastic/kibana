@@ -70,10 +70,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     // Execution success depends on the rule persisting UIAM's externality verdict
     // (`uiamApiKeyExternal`, captured from `AuthenticatedUser.api_key.internal === false` at
-    // creation) and the rule run's fake request being marked with
-    // `UIAM_EXTERNAL_CREDENTIAL_HEADER` (see `getFakeKibanaRequest` in `rule_loader.ts`): UIAM
-    // rejects external (user-created) API keys presented with client authentication, so the
-    // Elasticsearch cluster client must not attach the UIAM shared secret to this credential.
+    // creation) and the rule run's fake request being marked via `markExternalUiamCredential`
+    // (see `getFakeKibanaRequest` in `rule_loader.ts`): UIAM rejects external (user-created) API
+    // keys presented with client authentication, so the Elasticsearch cluster client must not
+    // attach the UIAM shared secret to this credential.
     it('creates a rule with a raw essu_ API key, reuses the key, and runs the rule successfully', async () => {
       const testStart = new Date();
 
@@ -149,9 +149,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // The connector task authenticates with the rule's raw key too: the `uiamApiKeyExternal`
-    // flag persisted on `action_task_params` makes the actions plugin mark its fake request
-    // with `UIAM_EXTERNAL_CREDENTIAL_HEADER` (see `getFakeRequest` in the actions
-    // `task_runner_factory.ts`), the same way the rule run itself does.
+    // flag persisted on `action_task_params` makes the actions plugin mark its fake request via
+    // `markExternalUiamCredential` (see `getFakeRequest` in the actions `task_runner_factory.ts`),
+    // the same way the rule run itself does.
     it('runs connector actions of a rule created with a raw essu_ API key', async () => {
       const createdConnector = await alertingApi.helpers.createIndexConnector({
         roleAuthc: roleAdmin,

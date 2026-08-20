@@ -196,6 +196,33 @@ describe('transformBackfillParamToAdHocRun', () => {
     expect(adHocRunSO).not.toHaveProperty('uiamApiKey');
   });
 
+  test('should snapshot the externality verdict alongside the UIAM api key', () => {
+    // Without it the backfill run presents a user-created (external) Cloud key with the UIAM
+    // shared secret attached, which UIAM rejects.
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({ uiamApiKey: 'essu_user_created_key', uiamApiKeyExternal: true }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).toEqual(
+      expect.objectContaining({
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      })
+    );
+  });
+
+  test('should not set the externality verdict for a framework-granted UIAM api key', () => {
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({ uiamApiKey: 'uiamApiKeyValue' }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).not.toHaveProperty('uiamApiKeyExternal');
+  });
+
   test('should omit rule actions when runActions=false', () => {
     const actions = [
       { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },

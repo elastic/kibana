@@ -17,7 +17,7 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
-import { getExternalUiamCredentialHeaders } from '@kbn/core-security-server';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -251,13 +251,6 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyE
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
-    // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with
-    // the UIAM shared secret — UIAM rejects external keys carrying client authentication. The
-    // verdict is UIAM's own, captured when the rule was created and persisted on the action task
-    // params. Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
-    if (uiamApiKeyExternal) {
-      Object.assign(requestHeaders, getExternalUiamCredentialHeaders());
-    }
   }
 
   const fakeRawRequest: FakeRawRequest = {
@@ -265,7 +258,17 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyE
     spaceId: brandSpaceId(spaceId),
   };
 
-  return kibanaRequestFactory(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+  // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with the
+  // UIAM shared secret - UIAM rejects external keys carrying client authentication. The verdict is
+  // UIAM's own, captured when the rule was created and persisted on the action task params.
+  // Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
+  if (apiKey && uiamApiKeyExternal === true) {
+    markExternalUiamCredential(fakeRequest);
+  }
+
+  return fakeRequest;
 }
 
 async function getActionTaskParams(

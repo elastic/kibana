@@ -33,8 +33,8 @@ export type UiamClientAuthenticationParams =
       /**
        * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
        * presented with client authentication, so the shared secret must never be attached to it.
-       * Consumers signal this via {@link UIAM_EXTERNAL_CREDENTIAL_HEADER} on the fake request
-       * that carries the credential.
+       * Consumers signal this by marking the fake request that carries the credential with
+       * `markExternalUiamCredential` from `@kbn/core-security-server`.
        */
       credentialSource: 'external';
       /** The credential that will be sent to Elasticsearch. */

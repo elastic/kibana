@@ -49,8 +49,8 @@ export {
   isRevokedApiKey,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
-  UIAM_EXTERNAL_CREDENTIAL_HEADER,
-  getExternalUiamCredentialHeaders,
+  markExternalUiamCredential,
+  isExternalUiamCredential,
 } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export {

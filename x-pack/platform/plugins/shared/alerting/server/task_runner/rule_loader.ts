@@ -7,7 +7,7 @@
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
-import { getExternalUiamCredentialHeaders } from '@kbn/core-security-server';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
@@ -189,6 +189,11 @@ export function getFakeKibanaRequest(
   const { uiamApiKey, uiamApiKeyExternal, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
   const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
+  // Whether the credential the run ends up presenting is a user-created (external) Cloud API key.
+  // `uiamApiKeyExternal` is UIAM's own verdict (`AuthenticatedUser.api_key.internal === false`),
+  // captured when the rule was created or updated; absent means internal treatment (fail closed).
+  // Only meaningful on the branches that actually present `uiamApiKey`.
+  let isExternalCredential = false;
 
   const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
 
@@ -235,7 +240,7 @@ export function getFakeKibanaRequest(
       const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
       requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
       effectiveApiKey = uiamApiKeyValue;
-      markExternalUiamCredential(requestHeaders, uiamApiKeyExternal);
+      isExternalCredential = uiamApiKeyExternal === true;
     }
   } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -255,7 +260,7 @@ export function getFakeKibanaRequest(
     const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
     effectiveApiKey = uiamApiKeyValue;
-    markExternalUiamCredential(requestHeaders, uiamApiKeyExternal);
+    isExternalCredential = uiamApiKeyExternal === true;
   }
 
   const fakeRawRequest: FakeRawRequest = {
@@ -265,24 +270,14 @@ export function getFakeKibanaRequest(
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
+  // The Elasticsearch cluster client must not attach the UIAM shared secret to a user-created
+  // (external) Cloud API key: UIAM rejects external keys presented with client authentication.
+  if (isExternalCredential) {
+    markExternalUiamCredential(fakeRequest);
+  }
+
   return { fakeRequest, effectiveApiKey };
 }
-
-/**
- * Marks the fake request as carrying an external (user-created Cloud) API key so the
- * Elasticsearch cluster client does not attach the UIAM shared secret to it — UIAM rejects
- * external API keys presented with client authentication. `uiamApiKeyExternal` is UIAM's own
- * verdict (`AuthenticatedUser.api_key.internal === false`), captured when the rule was created
- * or updated and persisted on the rule; absent means internal-key treatment (fail closed).
- */
-const markExternalUiamCredential = (
-  requestHeaders: Headers,
-  uiamApiKeyExternal?: boolean | null
-): void => {
-  if (uiamApiKeyExternal === true) {
-    Object.assign(requestHeaders, getExternalUiamCredentialHeaders());
-  }
-};
 
 const isLikelyNonCloudUserApiKeyOwner = (apiKeyOwner?: string | null): boolean => {
   if (typeof apiKeyOwner !== 'string') {
