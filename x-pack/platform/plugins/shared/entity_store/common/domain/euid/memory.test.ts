@@ -156,7 +156,7 @@ describe('getEuidFromObject', () => {
       ).toBe('user:a@b.com@okta');
     });
 
-    it('returns undefined when document does not satisfy IDP or non-IDP postAggFilter', () => {
+    it('returns undefined when document fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
         getEuidFromObject('user', {
           user: { email: 'a@b.com' },
