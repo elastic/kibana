@@ -1,5 +1,5 @@
 {
-  "sha1": "c64a5b6c10ca9241cc2b54ba1bf84df76136b8e3",
+  "sha1": "19d8252285b7a6297f831fd5ea0d95e0bd9e90e2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -21,7 +21,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 66
       }
     },
@@ -41,7 +41,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 18
       }
     },
@@ -61,7 +61,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 22
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 81
       }
     },
@@ -513,7 +513,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 11
       }
     },
@@ -533,7 +533,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 93,
+        "line": 94,
         "column": 18
       }
     },
@@ -553,7 +553,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 11
       }
     },
@@ -573,7 +573,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 270,
+        "line": 271,
         "column": 13
       }
     },
@@ -593,7 +593,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 288,
+        "line": 289,
         "column": 15
       }
     }
