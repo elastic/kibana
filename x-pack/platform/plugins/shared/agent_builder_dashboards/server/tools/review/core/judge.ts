@@ -128,7 +128,7 @@ const buildChartAuthoringRulesSection = (panelFacts: PanelFacts[]): string => {
 
   return `## Chart Authoring Rules
 
-Lens panels were authored under the rules below. Use them as context for judging whether a panel is genuinely broken or misleading — not as a checklist to enforce. Only report a rule violation when the config is objectively invalid (e.g. a legacy palette id, categorical color mapping on a numeric column) or clearly harms readability of the rendered chart.
+Lens panels were authored under the rules below. Use them as context for judging whether a panel is genuinely broken or misleading — not as a checklist to enforce. Only report a rule violation when it is objectively verifiable from the config (e.g. a legacy palette id, categorical color mapping on a numeric column, a panel title that duplicates what the chart already displays — such as a title on a metric/gauge panel restating the metric label) or clearly harms readability of the rendered chart.
 
 Some rules are conditional on the original user request (e.g. "unless the user asks"). You do not see that request, so a deviation those rules permit on explicit request is NOT a finding — assume it was intentional.
 
@@ -341,9 +341,10 @@ Always check each panel's execution facts for these data defects — they are re
 - execution errors, or a query returning 0 rows (the panel renders empty)
 - an all-zero metric or all-zero numeric column
 - null or empty-string values in a column used as a category, breakdown, or axis (\`top_values\` containing null, or a high \`null_share\`) — Lens renders these as a "(blank)" bucket; suggest excluding them in the query (e.g. \`WHERE field IS NOT NULL\`) or labelling them via \`COALESCE\` when they carry meaning. When the "(blank)" bucket is the largest or a dominant category, the chart is actively misleading — report it as \`critical\`; otherwise \`warning\`
+- a panel \`title\` that duplicates what the chart already renders inside itself — e.g. a metric/gauge/tagcloud/waffle panel whose title restates the metric label or value column shown by the chart. The title rules say to omit the title on these chart types; report as \`warning\` with the suggestion to remove the title
 
 You are a high-precision reviewer: your findings trigger automated fixes and user-facing follow-ups, so every false positive has a real cost. Report a finding ONLY when you are confident it describes a real, observable defect — grounded in the panel facts above (an error, a data shape that contradicts the config, an objectively invalid config value) — and fixing it would materially change what a viewer sees or understands. Do NOT report:
-- stylistic preferences, alternative phrasings of titles/descriptions, or "could also" ideas
+- stylistic preferences, alternative phrasings of titles/descriptions, or "could also" ideas (a title duplicating the chart's own rendered label is NOT phrasing — it is on the checklist above)
 - hypothetical concerns not evidenced by the executed results (e.g. "might be slow on larger data")
 - deviations from the guidelines that could plausibly be intentional
 - duplicate findings — if one root cause affects several panels, report it once at dashboard scope
