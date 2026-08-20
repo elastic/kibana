@@ -16,7 +16,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AppHeaderLoading, AppHeaderLoadingView } from './app_header_loading';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => 'xl',
 }));
 
