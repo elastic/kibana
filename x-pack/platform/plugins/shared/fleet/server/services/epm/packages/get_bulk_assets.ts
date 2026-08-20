@@ -12,7 +12,11 @@ import type {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type { AssetSOObject, GetBulkAssetsResponse, KibanaSavedObjectType } from '../../../../common';
+import type {
+  AssetSOObject,
+  GetBulkAssetsResponse,
+  KibanaSavedObjectType,
+} from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
