@@ -30,6 +30,7 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumClickMap } from '../../../services/rest/rum_api';
 import { pushRumPath } from '../../../utils/rum_search';
 import { ClickMapStage } from './click_map_stage';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const clickMapTitle = i18n.translate('xpack.ux.overview.clickMap.title', {
   defaultMessage: 'Click map',
@@ -60,12 +61,16 @@ export function ClickMapPanel() {
         onToggle={setIsOpen}
         buttonContent={
           <div>
-            <EuiTitle size="xs">
-              <h3>{clickMapTitle}</h3>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {clickMapSubtitle}
-            </EuiText>
+            <UxTourAnchor stepId="clickMap">
+              <div data-test-subj="uxClickMapTitle">
+                <EuiTitle size="xs">
+                  <h3>{clickMapTitle}</h3>
+                </EuiTitle>
+                <EuiText size="xs" color="subdued">
+                  {clickMapSubtitle}
+                </EuiText>
+              </div>
+            </UxTourAnchor>
           </div>
         }
         extraAction={

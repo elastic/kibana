@@ -47,6 +47,7 @@ import { fetchSessionReplaySessions } from '../../services/rest/session_replay_a
 import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
 import { TabTrendChart } from '../app/rum_overview/tab_trend_chart';
 import { useRumPageLoading } from '../app/rum_dashboard/rum_page_loading';
+import { UxTourAnchor } from '../app/rum_tour/ux_tour_anchor';
 import { LiveSessionsPanel } from './live_sessions_panel';
 import {
   JourneyTrail,
@@ -777,9 +778,13 @@ export function SessionReplayPanel() {
                 numFilters={facets.hasReplay}
                 data-test-subj="uxSessionFilterReplay"
               >
-                {i18n.translate('xpack.ux.sessions.filter.hasReplay', {
-                  defaultMessage: 'Has replay',
-                })}
+                <UxTourAnchor stepId="inspect">
+                  <span>
+                    {i18n.translate('xpack.ux.sessions.filter.hasReplay', {
+                      defaultMessage: 'Has replay',
+                    })}
+                  </span>
+                </UxTourAnchor>
               </EuiFilterButton>
               <EuiFilterButton
                 hasActiveFilters={onlyErrors}

@@ -36,6 +36,7 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumFilters } from '../../../services/rest/rum_api';
 import { mergeRumSearch, type RumFilterPatch } from '../../../utils/rum_search';
 import { FacetOptionRow } from './facet_option_row';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 import {
   bucketsToOptions,
   customPlaceholderFor,
@@ -537,9 +538,13 @@ export function OtelFilterBar() {
             grow={false}
             data-test-subj="uxOtelFiltersFlyoutOpen"
           >
-            {i18n.translate('xpack.ux.filters.allFiltersButtonLabel', {
-              defaultMessage: 'All filters',
-            })}
+            <UxTourAnchor stepId="filters">
+              <span>
+                {i18n.translate('xpack.ux.filters.allFiltersButtonLabel', {
+                  defaultMessage: 'All filters',
+                })}
+              </span>
+            </UxTourAnchor>
           </EuiFilterButton>
           {pinnedIds.map((id) => (
             <FacetSelect

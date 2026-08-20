@@ -46,6 +46,7 @@ import { uxAppHref, serviceNameFromSearch, uxQueryString } from '../utils/rum_se
 import { serviceNameFromPath, uxAppPath, uxTabSuffix } from '../utils/ux_app_path';
 import { uxHomeBreadcrumbs } from './ux_breadcrumbs';
 import { UX_HOME_PATHS, UX_TAB_SUFFIXES, matchUxHomeRoute } from './ux_home_route';
+import { UxTourProvider } from '../components/app/rum_tour/ux_tour_context';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -91,6 +92,14 @@ function UxHomePage({
 // Parent stays mounted across tab changes so the app selector / date picker
 // do not remount and refetch. Session detail and settings skip this chrome.
 function UxHomeChrome() {
+  return (
+    <UxTourProvider>
+      <UxHomeChromeBody />
+    </UxTourProvider>
+  );
+}
+
+function UxHomeChromeBody() {
   const { pathname, search } = useLocation();
   const home = matchUxHomeRoute(pathname);
   const pathServiceName = home?.serviceName;

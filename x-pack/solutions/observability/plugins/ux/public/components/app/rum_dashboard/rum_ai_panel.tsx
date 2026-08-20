@@ -32,6 +32,7 @@ import {
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import type { RumAiLocationState } from '../../../utils/rum_search';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const PRESETS: Array<{
   id: RumInvestigationId;
@@ -260,21 +261,23 @@ export function RumAiPanel() {
 
   return (
     <div data-test-subj="uxAiPanel">
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.ux.ai.presetsTitle', {
-            defaultMessage: 'Investigations',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.ai.presetsDescription', {
-            defaultMessage:
-              'Uses the current time range and filters. The RUM Analyst agent can also write reports and open follow-up questions.',
-          })}
-        </p>
-      </EuiText>
+      <UxTourAnchor stepId="ai" display="block">
+        <EuiTitle size="xs">
+          <h2>
+            {i18n.translate('xpack.ux.ai.presetsTitle', {
+              defaultMessage: 'Investigations',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.ai.presetsDescription', {
+              defaultMessage:
+                'Uses the current time range and filters. The RUM Analyst agent can also write reports and open follow-up questions.',
+            })}
+          </p>
+        </EuiText>
+      </UxTourAnchor>
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={3} gutterSize="m">
         {PRESETS.map((preset) => (

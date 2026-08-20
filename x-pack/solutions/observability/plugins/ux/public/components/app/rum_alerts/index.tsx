@@ -49,6 +49,7 @@ import {
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { RumAlertCharts } from './alert_charts';
 import { useRumAlertFlyout } from './alert_flyout_context';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const RelativeTime = ({ value }: { value?: string }) => {
   if (!value) {
@@ -367,26 +368,28 @@ export function RumAlertsPanel() {
     <div data-test-subj="uxRumAlerts">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{i18n.translate('xpack.ux.alerts.heading', { defaultMessage: 'RUM alerts' })}</h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <p>
-              {status?.notificationsConfigured
-                ? status.to.length > 0
-                  ? i18n.translate('xpack.ux.alerts.notifyRecipientsDescription', {
-                      defaultMessage: 'Email notifications go to {recipients}.',
-                      values: { recipients: status.to.join(', ') },
-                    })
-                  : i18n.translate('xpack.ux.alerts.notifyOn', {
-                      defaultMessage: 'Email notifications are configured.',
-                    })
-                : i18n.translate('xpack.ux.alerts.notifyOff', {
-                    defaultMessage:
-                      'Create an alert and add recipients to start emailing breaches.',
-                  })}
-            </p>
-          </EuiText>
+          <UxTourAnchor stepId="alerts" display="block">
+            <EuiTitle size="s">
+              <h2>{i18n.translate('xpack.ux.alerts.heading', { defaultMessage: 'RUM alerts' })}</h2>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>
+                {status?.notificationsConfigured
+                  ? status.to.length > 0
+                    ? i18n.translate('xpack.ux.alerts.notifyRecipientsDescription', {
+                        defaultMessage: 'Email notifications go to {recipients}.',
+                        values: { recipients: status.to.join(', ') },
+                      })
+                    : i18n.translate('xpack.ux.alerts.notifyOn', {
+                        defaultMessage: 'Email notifications are configured.',
+                      })
+                  : i18n.translate('xpack.ux.alerts.notifyOff', {
+                      defaultMessage:
+                        'Create an alert and add recipients to start emailing breaches.',
+                    })}
+              </p>
+            </EuiText>
+          </UxTourAnchor>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton

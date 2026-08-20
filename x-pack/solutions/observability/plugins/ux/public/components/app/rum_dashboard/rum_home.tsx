@@ -51,6 +51,8 @@ import { ConversionFunnelPage } from '../../session_replay/conversion_goal_panel
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
 import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
 import { RumPageLoadingBar, RumPageLoadingProvider } from './rum_page_loading';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
+import { UxProductTour } from '../rum_tour/ux_tour_context';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.overview.tab', {
   defaultMessage: 'Overview',
@@ -300,6 +302,9 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
         <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
+              <UxProductTour />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <AppSettingsButton />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -348,45 +353,61 @@ function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
   };
 
   return (
-    <EuiTabs>
-      <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
-        {DASHBOARD_LABEL}
-      </EuiTab>
-      <EuiTab
-        isSelected={tab === 'session-replay'}
-        data-test-subj="uxSessionReplayTab"
-        {...tabHref('/session-replay')}
-      >
-        {SESSIONS_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
-        {PAGES_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
-        {ERRORS_LABEL}
-      </EuiTab>
-      <EuiTab
-        isSelected={tab === 'journeys'}
-        data-test-subj="uxJourneysTab"
-        {...tabHref('/journeys')}
-      >
-        {JOURNEYS_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'funnels'} data-test-subj="uxFunnelsTab" {...tabHref('/funnels')}>
-        {FUNNELS_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
-        {AI_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'budgets'} data-test-subj="uxBudgetsTab" {...tabHref('/budgets')}>
-        {BUDGETS_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
-        {ALERTS_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'reports'} data-test-subj="uxReportsTab" {...tabHref('/reports')}>
-        {REPORTS_LABEL}
-      </EuiTab>
-    </EuiTabs>
+    <div data-test-subj="uxHomeTabs">
+      <EuiTabs>
+        <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
+          {DASHBOARD_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'session-replay'}
+          data-test-subj="uxSessionReplayTab"
+          {...tabHref('/session-replay')}
+        >
+          <UxTourAnchor stepId="sessions">
+            <span>{SESSIONS_LABEL}</span>
+          </UxTourAnchor>
+        </EuiTab>
+        <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
+          {PAGES_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
+          {ERRORS_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'journeys'}
+          data-test-subj="uxJourneysTab"
+          {...tabHref('/journeys')}
+        >
+          {JOURNEYS_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'funnels'}
+          data-test-subj="uxFunnelsTab"
+          {...tabHref('/funnels')}
+        >
+          {FUNNELS_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
+          {AI_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'budgets'}
+          data-test-subj="uxBudgetsTab"
+          {...tabHref('/budgets')}
+        >
+          {BUDGETS_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
+          {ALERTS_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'reports'}
+          data-test-subj="uxReportsTab"
+          {...tabHref('/reports')}
+        >
+          {REPORTS_LABEL}
+        </EuiTab>
+      </EuiTabs>
+    </div>
   );
 }

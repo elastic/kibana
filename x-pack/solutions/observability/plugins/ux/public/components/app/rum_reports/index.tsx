@@ -25,6 +25,7 @@ import {
 } from '../../../../common/rum_report';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { pushRumPath } from '../../../utils/rum_search';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const PURPOSE: Record<RumReportTemplateId, string> = {
   scorecard: i18n.translate('xpack.ux.reports.catalog.scorecardDescription', {
@@ -87,17 +88,21 @@ export function RumReportsCatalog() {
 
   return (
     <div data-test-subj="uxReportsCatalog">
-      <EuiTitle size="s">
-        <h2>{i18n.translate('xpack.ux.reports.catalog.title', { defaultMessage: 'Reporting' })}</h2>
-      </EuiTitle>
-      <EuiText color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.reports.catalog.subtitleDescription', {
-            defaultMessage:
-              'Named, time-bounded artifacts you can paste, print, or export. Opening a card uses the current calendar week unless the date picker already has an absolute range.',
-          })}
-        </p>
-      </EuiText>
+      <UxTourAnchor stepId="reports" display="block">
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('xpack.ux.reports.catalog.title', { defaultMessage: 'Reporting' })}
+          </h2>
+        </EuiTitle>
+        <EuiText color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.reports.catalog.subtitleDescription', {
+              defaultMessage:
+                'Named, time-bounded artifacts you can paste, print, or export. Opening a card uses the current calendar week unless the date picker already has an absolute range.',
+            })}
+          </p>
+        </EuiText>
+      </UxTourAnchor>
       <EuiSpacer />
       <EuiFlexGrid columns={2} gutterSize="m">
         {ORDER.map((templateId) => (

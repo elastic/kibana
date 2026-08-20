@@ -67,6 +67,7 @@ import { fetchSessionFunnel } from '../../services/rest/session_replay_api';
 import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
 import { serviceNameFromPath, uxAppPath } from '../../utils/ux_app_path';
 import { ConversionFunnelGraph } from './conversion_funnel_graph';
+import { UxTourAnchor } from '../app/rum_tour/ux_tour_anchor';
 import { hasFunnelDropOff } from './conversion_funnel_graph_data';
 import { ConversionGoalSequence } from './conversion_goal_sequence';
 
@@ -110,21 +111,23 @@ export function ConversionFunnelPage() {
 
   return (
     <EuiPanel paddingSize="m" data-test-subj="uxConversionFunnelPage">
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.ux.funnels.pageTitle', {
-            defaultMessage: 'Funnels',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.funnels.pageDescription', {
-            defaultMessage:
-              'Select a funnel to see conversion for this time range. Open Edit when you need to change steps.',
-          })}
-        </p>
-      </EuiText>
+      <UxTourAnchor stepId="funnels" display="block">
+        <EuiTitle size="xs">
+          <h2>
+            {i18n.translate('xpack.ux.funnels.pageTitle', {
+              defaultMessage: 'Funnels',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.funnels.pageDescription', {
+              defaultMessage:
+                'Select a funnel to see conversion for this time range. Open Edit when you need to change steps.',
+            })}
+          </p>
+        </EuiText>
+      </UxTourAnchor>
       <EuiSpacer size="m" />
       <ConversionGoalPanel
         presetSteps={presetSteps}

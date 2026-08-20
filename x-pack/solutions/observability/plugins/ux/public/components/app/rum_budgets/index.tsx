@@ -36,6 +36,7 @@ import { deleteRumBudget } from '../../../services/rest/rum_budgets_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useRumBudgetFlyout } from './budget_flyout_context';
 import { useRumBudgets } from './use_rum_budgets';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const percent = (ratio: number): string => {
   if (!Number.isFinite(ratio)) {
@@ -210,7 +211,12 @@ export function RumBudgetsPanel() {
 
   if (loading && items.length === 0) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: 240 }}
+        data-test-subj="uxRumBudgets"
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
@@ -257,21 +263,23 @@ export function RumBudgetsPanel() {
     <div data-test-subj="uxRumBudgets">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.ux.budgets.headingTitle', {
-                defaultMessage: 'Performance budgets',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.ux.budgets.headingDescription', {
-                defaultMessage:
-                  'Contracts on Core Web Vitals, JS errors, and session outcomes, tracked as 30-day occurrence SLOs. Burn-rate alerts fire on sustained regression.',
-              })}
-            </p>
-          </EuiText>
+          <UxTourAnchor stepId="budgets" display="block">
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate('xpack.ux.budgets.headingTitle', {
+                  defaultMessage: 'Performance budgets',
+                })}
+              </h2>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>
+                {i18n.translate('xpack.ux.budgets.headingDescription', {
+                  defaultMessage:
+                    'Contracts on Core Web Vitals, JS errors, and session outcomes, tracked as 30-day occurrence SLOs. Burn-rate alerts fire on sustained regression.',
+                })}
+              </p>
+            </EuiText>
+          </UxTourAnchor>
         </EuiFlexItem>
         {canWrite && (
           <EuiFlexItem grow={false}>

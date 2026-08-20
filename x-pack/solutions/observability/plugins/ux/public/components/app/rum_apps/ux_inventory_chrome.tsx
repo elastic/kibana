@@ -18,6 +18,7 @@ import {
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { uxAppHref } from '../../../utils/rum_search';
 import { RumDatePicker } from '../rum_dashboard/rum_datepicker';
+import { UxProductTour } from '../rum_tour/ux_tour_context';
 
 export type UxInventoryTab = 'applications' | 'errors';
 
@@ -62,7 +63,14 @@ export function UxInventoryChrome({
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-                <RumDatePicker />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <UxProductTour />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <RumDatePicker />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

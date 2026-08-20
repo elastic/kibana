@@ -66,6 +66,8 @@ import {
   type InventoryTableColumn,
 } from './use_inventory_column_selector';
 import { UxInventoryChrome } from './ux_inventory_chrome';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
+import { UxTourInventoryState } from '../rum_tour/ux_tour_context';
 
 const ERROR_RATE_WARN = 0.05;
 
@@ -521,6 +523,13 @@ export function RumAppsPage() {
 
   const fleetSessions = useMemo(() => apps.reduce((sum, app) => sum + app.sessions, 0), [apps]);
 
+  const tourAppName = useMemo(() => {
+    if (filteredApps.length === 0) {
+      return undefined;
+    }
+    return [...filteredApps].sort((left, right) => right.sessions - left.sessions)[0]?.name;
+  }, [filteredApps]);
+
   const environmentOptions = useMemo(() => {
     const names = new Set<string>();
     let hasUndefined = false;
@@ -609,7 +618,19 @@ export function RumAppsPage() {
             pathname: uxAppPath(name),
             search: mergeRumSearch(search, { serviceName: '' }),
           });
-          return (
+          const investigateButton = (
+            <EuiToolTip content={investigateLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={investigateLabel}
+                data-test-subj={`uxAppInvestigate-${name}`}
+                display="empty"
+                iconType="inspect"
+                onClick={(event: React.MouseEvent) => openEvidence(app, event)}
+                size="s"
+              />
+            </EuiToolTip>
+          );
+          const row = (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {app.platform === 'android' ? (
                 <EuiFlexItem grow={false}>
@@ -654,19 +675,18 @@ export function RumAppsPage() {
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={investigateLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    aria-label={investigateLabel}
-                    data-test-subj={`uxAppInvestigate-${name}`}
-                    display="empty"
-                    iconType="inspect"
-                    onClick={(event: React.MouseEvent) => openEvidence(app, event)}
-                    size="s"
-                  />
-                </EuiToolTip>
+                {name === tourAppName ? (
+                  <UxTourAnchor stepId="investigate">{investigateButton}</UxTourAnchor>
+                ) : (
+                  investigateButton
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           );
+          if (name !== tourAppName) {
+            return row;
+          }
+          return <UxTourAnchor stepId="welcome">{row}</UxTourAnchor>;
         },
       },
       {
@@ -675,9 +695,13 @@ export function RumAppsPage() {
         name: scoreColumnLabel,
         sortable: true,
         width: '200px',
-        render: (_score: number | null, app) => (
-          <InventoryScoreCell app={app} onOpen={setScoreApp} />
-        ),
+        render: (_score: number | null, app) => {
+          const cell = <InventoryScoreCell app={app} onOpen={setScoreApp} />;
+          if (app.name !== tourAppName) {
+            return cell;
+          }
+          return <UxTourAnchor stepId="score">{cell}</UxTourAnchor>;
+        },
       },
       {
         id: 'sessions',
@@ -867,7 +891,7 @@ export function RumAppsPage() {
         ),
       },
     ],
-    [firingNames, fleetSessions, history, openAlerts, openApp, openEvidence, search]
+    [firingNames, fleetSessions, history, openAlerts, openApp, openEvidence, search, tourAppName]
   );
 
   const [columns, columnSelector] = useInventoryColumnSelector(allColumns);
@@ -927,95 +951,106 @@ export function RumAppsPage() {
               </>
             ) : null}
             {loading && !data ? (
-              <EmptyStateLoading
-                message={i18n.translate('xpack.ux.inventory.loadingMessage', {
-                  defaultMessage: 'Loading applications…',
-                })}
-              />
+              <>
+                <UxTourInventoryState status="loading" />
+                <EmptyStateLoading
+                  message={i18n.translate('xpack.ux.inventory.loadingMessage', {
+                    defaultMessage: 'Loading applications…',
+                  })}
+                />
+              </>
             ) : !loading && apps.length === 0 ? (
-              <InventoryEmptyState
-                span={span}
-                spanLoading={spanLoading}
-                onSelectRange={onSelectSpanRange}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                http={http}
-                docLinks={docLinks}
-              />
+              <>
+                <UxTourInventoryState status="empty" />
+                <InventoryEmptyState
+                  span={span}
+                  spanLoading={spanLoading}
+                  onSelectRange={onSelectSpanRange}
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  http={http}
+                  docLinks={docLinks}
+                />
+              </>
             ) : (
-              <EuiInMemoryTable
-                data-test-subj="uxAppsTable"
-                tableCaption={i18n.translate('xpack.ux.inventory.tableCaption', {
-                  defaultMessage: 'Applications',
-                })}
-                items={filteredApps}
-                columns={columns as Array<EuiBasicTableColumn<RumAppInventoryRow>>}
-                loading={loading}
-                noItemsMessage={i18n.translate('xpack.ux.inventory.noMatchingAppsMessage', {
-                  defaultMessage: 'No applications match the current filters.',
-                })}
-                sorting={{ sort: { field: 'sessions', direction: 'desc' } }}
-                pagination={{ pageSize: 25, showPerPageOptions: false }}
-                search={{
-                  box: {
-                    incremental: true,
-                    placeholder: i18n.translate('xpack.ux.inventory.searchPlaceholder', {
-                      defaultMessage: 'Search applications',
-                    }),
-                  },
-                  toolsLeft: (
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      {chartHidden ? (
+              <>
+                <UxTourInventoryState status="ready" />
+                <EuiInMemoryTable
+                  data-test-subj="uxAppsTable"
+                  tableCaption={i18n.translate('xpack.ux.inventory.tableCaption', {
+                    defaultMessage: 'Applications',
+                  })}
+                  items={filteredApps}
+                  columns={columns as Array<EuiBasicTableColumn<RumAppInventoryRow>>}
+                  loading={loading}
+                  noItemsMessage={i18n.translate('xpack.ux.inventory.noMatchingAppsMessage', {
+                    defaultMessage: 'No applications match the current filters.',
+                  })}
+                  sorting={{ sort: { field: 'sessions', direction: 'desc' } }}
+                  pagination={{ pageSize: 25, showPerPageOptions: false }}
+                  search={{
+                    box: {
+                      incremental: true,
+                      placeholder: i18n.translate('xpack.ux.inventory.searchPlaceholder', {
+                        defaultMessage: 'Search applications',
+                      }),
+                    },
+                    toolsLeft: (
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        {chartHidden ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiToolTip content={showChartLabel} disableScreenReaderOutput>
+                              <EuiButtonIcon
+                                iconType="transitionTopIn"
+                                aria-label={showChartLabel}
+                                onClick={toggleChart}
+                                data-test-subj="uxAppsShowChartButton"
+                              />
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                        ) : null}
                         <EuiFlexItem grow={false}>
-                          <EuiToolTip content={showChartLabel} disableScreenReaderOutput>
-                            <EuiButtonIcon
-                              iconType="transitionTopIn"
-                              aria-label={showChartLabel}
-                              onClick={toggleChart}
-                              data-test-subj="uxAppsShowChartButton"
+                          <EuiFilterGroup>
+                            <FacetFilter
+                              label={i18n.translate('xpack.ux.inventory.environmentFilterLabel', {
+                                defaultMessage: 'Environment',
+                              })}
+                              value={
+                                environment === ENVIRONMENT_ALL.value ? undefined : environment
+                              }
+                              options={environmentOptions}
+                              onChange={(next) =>
+                                patchSearch({
+                                  environment: next || ENVIRONMENT_ALL.value,
+                                })
+                              }
                             />
-                          </EuiToolTip>
+                            <FacetFilter
+                              label={i18n.translate('xpack.ux.inventory.platformFilterLabel', {
+                                defaultMessage: 'Platform',
+                              })}
+                              value={platform}
+                              options={platformOptions}
+                              onChange={(next) => patchSearch({ platform: next })}
+                            />
+                          </EuiFilterGroup>
                         </EuiFlexItem>
-                      ) : null}
-                      <EuiFlexItem grow={false}>
-                        <EuiFilterGroup>
-                          <FacetFilter
-                            label={i18n.translate('xpack.ux.inventory.environmentFilterLabel', {
-                              defaultMessage: 'Environment',
-                            })}
-                            value={environment === ENVIRONMENT_ALL.value ? undefined : environment}
-                            options={environmentOptions}
-                            onChange={(next) =>
-                              patchSearch({
-                                environment: next || ENVIRONMENT_ALL.value,
-                              })
-                            }
-                          />
-                          <FacetFilter
-                            label={i18n.translate('xpack.ux.inventory.platformFilterLabel', {
-                              defaultMessage: 'Platform',
-                            })}
-                            value={platform}
-                            options={platformOptions}
-                            onChange={(next) => patchSearch({ platform: next })}
-                          />
-                        </EuiFilterGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                  toolsRight: <>{columnSelector}</>,
-                }}
-                rowProps={(app) => ({
-                  'data-test-subj': `uxAppRow-${app.name}`,
-                  onClick: (event: React.MouseEvent) => {
-                    if ((event.target as HTMLElement).closest('a, button, [role="button"]')) {
-                      return;
-                    }
-                    openApp(app.name);
-                  },
-                  style: { cursor: 'pointer' },
-                })}
-              />
+                      </EuiFlexGroup>
+                    ),
+                    toolsRight: <>{columnSelector}</>,
+                  }}
+                  rowProps={(app) => ({
+                    'data-test-subj': `uxAppRow-${app.name}`,
+                    onClick: (event: React.MouseEvent) => {
+                      if ((event.target as HTMLElement).closest('a, button, [role="button"]')) {
+                        return;
+                      }
+                      openApp(app.name);
+                    },
+                    style: { cursor: 'pointer' },
+                  })}
+                />
+              </>
             )}
           </>
         )}
