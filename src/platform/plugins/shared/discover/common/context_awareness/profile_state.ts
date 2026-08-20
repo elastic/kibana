@@ -93,14 +93,18 @@ type PartialProfileStates<TDefinitions extends ProfileStateDefinitions> = {
   [TIndex in keyof TDefinitions]: Partial<TDefinitions[TIndex]['defaultState']>;
 };
 
-/** Maps runtime profile state to and from part of a tab type's saved payload. */
+/** Maps an ordered tuple of profile states to and from a tab type's complete saved payload. */
 export interface ProfileSavedStateTransform<
   TTabType extends SavedTabType,
   TDefinitions extends ProfileStateDefinitions
 > {
+  /** Saved tab type handled by this transform. */
   tabType: TTabType;
+  /** State definitions in the order expected and returned by the transform callbacks. */
   stateDefinitions: TDefinitions;
+  /** Converts effective profile states, with defaults expanded, to the complete saved payload. */
   toSavedState: (profileStates: ProfileStates<TDefinitions>) => TabTypeState<TTabType>;
+  /** Restores partial profile states in the same order as `stateDefinitions`. */
   fromSavedState: (savedState: TabTypeState<TTabType>) => PartialProfileStates<TDefinitions>;
 }
 
@@ -164,7 +168,7 @@ export class ProfileStateRegistry {
   }
 
   /**
-   * Registers a saved state transform for an existing matching state definition.
+   * Registers a saved state transform for an ordered tuple of matching state definitions.
    */
   public registerTransform<
     TTabType extends SavedTabType,
