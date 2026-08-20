@@ -8,7 +8,6 @@
  */
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/discover_customization_examples/customizations.ts
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
@@ -21,7 +20,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('Customizations', () => {
@@ -57,15 +55,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');
       await header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        const { title, description } = await common.getSharedItemTitleAndDescription();
-        const expected = {
-          title: 'A Saved Search',
-          description: 'A Saved Search Description',
-        };
-        expect(title).to.eql(expected.title);
-        expect(description).to.eql(expected.description);
-      });
       await browser.goBack();
       await header.waitUntilLoadingHasFinished();
     });
