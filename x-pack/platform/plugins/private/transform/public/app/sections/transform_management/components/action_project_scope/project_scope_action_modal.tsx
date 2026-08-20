@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -200,17 +199,20 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       aria-labelledby={confirmModalTitleId}
       titleProps={{ id: confirmModalTitleId }}
+      maxWidth={576}
     >
-      <EuiTitle size="xxs">
-        <h5>
-          {i18n.translate(
-            'xpack.transform.transformList.projectScopeModalAffectedTransformsTitle',
-            {
-              defaultMessage: 'Affected transforms',
-            }
-          )}
-        </h5>
-      </EuiTitle>
+      <EuiText size="xs" css={{ marginBottom: 4 }}>
+        <p>
+          <strong>
+            {i18n.translate(
+              'xpack.transform.transformList.projectScopeModalAffectedTransformsTitle',
+              {
+                defaultMessage: 'Affected transforms',
+              }
+            )}
+          </strong>
+        </p>
+      </EuiText>
       <EuiPanel
         color="subdued"
         css={{ maxHeight: MAX_TRANSFORM_LIST_HEIGHT, overflowY: 'auto' }}
@@ -238,7 +240,7 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {index < items.length - 1 ? <EuiSpacer size="m" /> : null}
+            {index < items.length - 1 ? <EuiSpacer size="s" /> : null}
           </React.Fragment>
         ))}
       </EuiPanel>

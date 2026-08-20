@@ -17,8 +17,26 @@ import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../..
 
 import { isProjectScopeActionDisabled } from './project_scope_action_name';
 
-const getEffectiveProjectRouting = (projectRouting?: ProjectRouting): ProjectRouting =>
+const getEffectiveProjectRouting = (projectRouting?: ProjectRouting): NonNullable<ProjectRouting> =>
   projectRouting ?? PROJECT_ROUTING.ORIGIN;
+
+const getInitialProjectRouting = (
+  items: TransformListRow[],
+  defaultProjectRouting: NonNullable<ProjectRouting>
+): NonNullable<ProjectRouting> => {
+  const [firstItem] = items;
+
+  if (!firstItem) {
+    return defaultProjectRouting;
+  }
+
+  const firstProjectRouting = getEffectiveProjectRouting(firstItem.config.source.project_routing);
+  const hasSameProjectRouting = items.every(
+    (item) => getEffectiveProjectRouting(item.config.source.project_routing) === firstProjectRouting
+  );
+
+  return hasSameProjectRouting ? firstProjectRouting : defaultProjectRouting;
+};
 
 export type ProjectScopeAction = ReturnType<typeof useProjectScopeAction>;
 
@@ -93,7 +111,7 @@ export const useProjectScopeAction = () => {
       }
 
       setItems(newItems);
-      setTargetProjectRouting(defaultProjectRouting);
+      setTargetProjectRouting(getInitialProjectRouting(newItems, defaultProjectRouting));
       setFlyoutVisible(true);
       setModalVisible(false);
     },

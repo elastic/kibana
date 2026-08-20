@@ -246,7 +246,6 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="projectScopeAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        iconType="crossProjectSearch"
         onClick={() => {
           setIsActionsMenuOpen(false);
           bulkProjectScopeAction.openFlyout(transformSelection);
@@ -316,7 +315,6 @@ export const TransformList: FC<TransformListProps> = ({
         onClick={() => {
           setIsActionsMenuOpen(true);
         }}
-        size="s"
       >
         {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
           defaultMessage: '{count} selected',
