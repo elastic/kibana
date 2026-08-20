@@ -9,9 +9,9 @@ import { renderHook } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
-  useIsRuleManagementABSkillAvailable,
-  useRuleManagementABSkillRequirements,
-} from './use_is_rule_management_ab_skill_available';
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from './use_are_agent_builder_skills_available';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -49,7 +49,7 @@ const setupMocks = ({
   });
 };
 
-describe('useIsRuleManagementABSkillAvailable', () => {
+describe('useAreAgentBuilderSkillsAvailable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -57,7 +57,7 @@ describe('useIsRuleManagementABSkillAvailable', () => {
   it('returns true when agent builder capability is enabled and experimental features are on', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
+    const { result } = renderHook(() => useAreAgentBuilderSkillsAvailable());
 
     expect(result.current).toBe(true);
   });
@@ -65,7 +65,7 @@ describe('useIsRuleManagementABSkillAvailable', () => {
   it('returns false when agent builder capability is disabled', () => {
     setupMocks({ agentBuilderShow: false, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
+    const { result } = renderHook(() => useAreAgentBuilderSkillsAvailable());
 
     expect(result.current).toBe(false);
   });
@@ -73,7 +73,7 @@ describe('useIsRuleManagementABSkillAvailable', () => {
   it('returns false when experimental features are disabled', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: false });
 
-    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
+    const { result } = renderHook(() => useAreAgentBuilderSkillsAvailable());
 
     expect(result.current).toBe(false);
   });
@@ -81,7 +81,7 @@ describe('useIsRuleManagementABSkillAvailable', () => {
   it('returns false when both are disabled', () => {
     setupMocks({ agentBuilderShow: false, experimentalFeaturesEnabled: false });
 
-    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
+    const { result } = renderHook(() => useAreAgentBuilderSkillsAvailable());
 
     expect(result.current).toBe(false);
   });
@@ -100,13 +100,13 @@ describe('useIsRuleManagementABSkillAvailable', () => {
       return undefined as any;
     });
 
-    const { result } = renderHook(() => useIsRuleManagementABSkillAvailable());
+    const { result } = renderHook(() => useAreAgentBuilderSkillsAvailable());
 
     expect(result.current).toBe(false);
   });
 });
 
-describe('useRuleManagementABSkillRequirements', () => {
+describe('useAgentBuilderSkillsRequirements', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -114,7 +114,7 @@ describe('useRuleManagementABSkillRequirements', () => {
   it('reports both prerequisites as met when capability and experimental features are on', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useRuleManagementABSkillRequirements());
+    const { result } = renderHook(() => useAgentBuilderSkillsRequirements());
 
     expect(result.current).toEqual({
       hasAgentBuilderCapability: true,
@@ -125,7 +125,7 @@ describe('useRuleManagementABSkillRequirements', () => {
   it('reports the missing capability when the agent builder privilege is absent', () => {
     setupMocks({ agentBuilderShow: false, experimentalFeaturesEnabled: true });
 
-    const { result } = renderHook(() => useRuleManagementABSkillRequirements());
+    const { result } = renderHook(() => useAgentBuilderSkillsRequirements());
 
     expect(result.current).toEqual({
       hasAgentBuilderCapability: false,
@@ -136,7 +136,7 @@ describe('useRuleManagementABSkillRequirements', () => {
   it('reports the missing setting when experimental features are disabled', () => {
     setupMocks({ agentBuilderShow: true, experimentalFeaturesEnabled: false });
 
-    const { result } = renderHook(() => useRuleManagementABSkillRequirements());
+    const { result } = renderHook(() => useAgentBuilderSkillsRequirements());
 
     expect(result.current).toEqual({
       hasAgentBuilderCapability: true,
