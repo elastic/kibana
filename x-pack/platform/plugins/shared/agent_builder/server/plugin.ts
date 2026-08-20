@@ -39,7 +39,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-import { runToolIdMigrations } from './services/agents/persisted/tool_id_migration';
+import { runToolIdBackfill } from './services/agents/persisted/tool_id_backfill';
 
 export class AgentBuilderPlugin
   implements
@@ -250,8 +250,8 @@ export class AgentBuilderPlugin
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
-    this.runMigrations(elasticsearch).catch((error) => {
-      this.logger.error(`Migration failed: ${(error as Error).message}`);
+    this.runBackfill(elasticsearch).catch((error) => {
+      this.logger.error(`Backfill failed: ${(error as Error).message}`);
     });
 
     const startServices = this.serviceManager.startServices({
@@ -339,12 +339,12 @@ export class AgentBuilderPlugin
   }
 
   /**
-   * Applies all registered migrations
+   * Applies all registered tool ID backfills.
    */
-  private async runMigrations(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
-    const logger = this.logger.get('migrations');
+  private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+    const logger = this.logger.get('backfill');
     const esClient = elasticsearch.client.asInternalUser;
-    await runToolIdMigrations(logger, esClient);
+    await runToolIdBackfill(logger, esClient);
   }
 
   /**

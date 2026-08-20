@@ -55,6 +55,8 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
+  /** @deprecated Use `getAttachments` (read) and `manageAttachments` (write) instead. */
+  attachments: casesTool('attachments'),
   getAttachments: casesTool('get_attachments'),
   manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),

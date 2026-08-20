@@ -12,6 +12,7 @@ import type { CasesServerStartDependencies } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
+import { attachmentsTool } from './tools/attachment_tools';
 import { getAttachmentsTool } from './tools/get_attachments_tool';
 import { manageAttachmentsTool } from './tools/manage_attachments_tool';
 import { observablesTool } from './tools/observable_tools';
@@ -25,9 +26,10 @@ import { createCasesAttachmentType } from './attachments/cases_attachment_type';
  *
  * 1. `platform.core.cases` — read/search (get by ID, bulk get, find similar, by alert IDs, search/filter)
  * 2. `platform.core.cases.manage` — create, update, delete, assign, unassign, add tags, set custom field
- * 3. `platform.core.cases.get_attachments` — get all attachments
- * 4. `platform.core.cases.manage_attachments` — add comment/alerts/events/attachments
- * 5. `platform.core.cases.observables` — add, update, delete observables
+ * 3. `platform.core.cases.get_attachments` — get all attachments (read-only)
+ * 4. `platform.core.cases.manage_attachments` — add comment/alerts/events/attachments (write)
+ * 5. `platform.core.cases.attachments` — DEPRECATED: combined read+write, retained for backward compatibility
+ * 6. `platform.core.cases.observables` — add, update, delete observables
  *
  * Also registers the `cases-management` skill, and — only when Cases-as-Data v2
  * is enabled — the `cases-analytics` skill (ES|QL analytics + visualizations over
@@ -50,6 +52,9 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(getAttachmentsTool(getCasesClient));
   agentBuilder.tools.register(
     manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
+  );
+  agentBuilder.tools.register(
+    attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(observablesTool(getCasesClient));
   agentBuilder.skills.register(casesSkill);
