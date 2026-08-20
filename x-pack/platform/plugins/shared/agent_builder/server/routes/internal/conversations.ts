@@ -7,10 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type {
+  FeedbackChipId} from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
-  CONVERSATION_TITLE_MAX_LENGTH,
-  FeedbackChipId,
+  CONVERSATION_TITLE_MAX_LENGTH
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
