@@ -17,13 +17,7 @@ import type {
 } from './conversation';
 import type { RoundState } from './round_state';
 
-/**
- * The current schema version for an events-native conversation document.
- *
- * A conversation document carries this value in its `schema_version` field when it is
- * stored as an event timeline (as opposed to the legacy `conversation_rounds` shape).
- * Readers use it to tell the two formats apart.
- */
+/** The current schema version for an events-native conversation document.*/
 export const CONVERSATION_SCHEMA_VERSION = 1;
 
 /** The kind of participant that produced a timeline event. */
@@ -89,12 +83,6 @@ export enum TimelineEventType {
 
 /**
  * The fields a producer supplies for a timeline event.
- *
- * `id`, `created_at`, and `actor` are optional here: the server assigns them when a producer
- * omits them (id and timestamp are generated; the actor defaults to the scoped user).
- *
- * `execution_id` links an event to the agent run that produced it. `trigger_event_id` links a
- * run to the content event that started it.
  */
 export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> {
   /** The event type discriminator. */
@@ -156,8 +144,7 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
 >;
 
 /**
- * The run summary: everything describing the execution itself, independent of how it ended. The
- * outcome (a response, or a pause to ask the human) lives on `ExecutionTerminatedEventData.outcome`.
+ * The run summary: everything describing the execution itself, independent of how it ended.
  */
 export interface ExecutionRunSummary {
   /** The intermediate steps (tool calls, reasoning, etc.). */
