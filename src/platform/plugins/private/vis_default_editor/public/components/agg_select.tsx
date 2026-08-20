@@ -96,6 +96,20 @@ function DefaultEditorAggSelect({
     );
   }
 
+  if (isDirty) {
+    errors.push(
+      i18n.translate('visDefaultEditor.aggSelect.selectValidAggError', {
+        defaultMessage: 'Please select a valid aggregation.',
+      })
+    );
+  } else if (!value) {
+    errors.push(
+      i18n.translate('visDefaultEditor.aggSelect.selectAggError', {
+        defaultMessage: 'Please select an aggregation.',
+      })
+    );
+  }
+
   const isValid = !!value && !errors.length && !isDirty;
 
   const onChange = useCallback(

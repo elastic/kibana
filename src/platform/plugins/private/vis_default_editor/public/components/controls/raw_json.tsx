@@ -53,6 +53,14 @@ function RawJsonParamEditor({
     [jsonEditorLabelText, editorTooltipText]
   );
 
+  const jsonErrorMessage = useMemo(
+    () =>
+      i18n.translate('visDefaultEditor.controls.jsonInputInvalidError', {
+        defaultMessage: 'Invalid JSON format.',
+      }),
+    []
+  );
+
   const onChange = useCallback(
     (newValue: string) => {
       setValue(newValue);
@@ -75,6 +83,7 @@ function RawJsonParamEditor({
     <EuiFormRow
       label={label}
       isInvalid={showValidation ? !isFieldValid : false}
+      error={showValidation && !isFieldValid ? jsonErrorMessage : undefined}
       fullWidth={true}
       display="rowCompressed"
       onBlur={setTouched}
