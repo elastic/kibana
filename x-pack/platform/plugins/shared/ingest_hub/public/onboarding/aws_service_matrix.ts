@@ -19,6 +19,21 @@ export type SignalType = 'logs' | 'metrics';
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
+/**
+ * Log type identifiers used by the ECF CloudFormation templates.
+ * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
+ * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
+ */
+export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';
+
+/**
+ * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
+ * unified ECS template.
+ *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml), uses S3SourceBuckets
+ *   - `'crowdstrike_fdr'`— CrowdStrike FDR dedicated template
+ */
+export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
+
 export type Badge = 'technical_preview' | 'beta';
 
 function releaseToBadge(release: string | undefined): Badge | undefined {
@@ -72,6 +87,15 @@ export interface AwsServiceMatrixEntry {
   /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
   showInUI: boolean;
   badge?: Badge;
+  /**
+   * ECF log type identifier passed as the `LogTypes` parameter in the CloudFormation template.
+   * Present only for services deployable via the Elastic Cloud Forwarder (ECF).
+   */
+  ecfLogType?: EcfLogType;
+  /**
+   * When set, this service uses a dedicated ECF CloudFormation template instead of the unified one.
+   */
+  ecfDedicatedTemplate?: EcfDedicatedTemplate;
 }
 
 /**
@@ -182,6 +206,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
+    ecfLogType: 'cloudtrail',
   },
   {
     id: 'config',
@@ -236,6 +261,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
+    ecfLogType: 'waf',
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
@@ -282,6 +308,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
+    ecfLogType: 'vpcflow',
   },
   {
     id: 'vpn',
@@ -399,6 +426,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'application_integration',
     packageName: 'aws_mq',
     showInUI: false,
+    policyTemplate: 'amazon_mq',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────

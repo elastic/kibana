@@ -23,8 +23,8 @@ import {
 } from './authorization';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
-const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice' };
-const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
+const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice', isAdmin: false };
+const bob: CurrentUser = { id: 'bob-id', username: 'bob', isAdmin: false };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
