@@ -26,6 +26,11 @@ import * as i18n from '../translations';
 import { useApplyAttackAssignees } from '../apply_actions/use_apply_attack_assignees';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
+export const ATTACK_ASSIGNEE_ACTION_IDS = {
+  assign: 'manage-attack-assignees',
+  unassignAll: 'remove-all-attack-assignees',
+} as const;
+
 export interface UseBulkAttackAssigneesItemsProps {
   /** Callback when assignees are updated */
   onAssigneesUpdate?: () => void;
@@ -89,7 +94,7 @@ export const useBulkAttackAssigneesItems = ({
 
     return [
       {
-        key: 'manage-attack-assignees',
+        key: ATTACK_ASSIGNEE_ACTION_IDS.assign,
         'data-test-subj': 'attack-assignees-context-menu-item',
         name: i18n.ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
         panel: 2,
@@ -98,7 +103,7 @@ export const useBulkAttackAssigneesItems = ({
         disable: false,
       },
       {
-        key: 'remove-all-attack-assignees',
+        key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll,
         'data-test-subj': 'remove-attack-assignees-menu-item',
         name: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,
         label: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,

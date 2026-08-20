@@ -20,6 +20,12 @@ import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
+export const ATTACK_STATUS_ACTION_IDS = {
+  markAsAcknowledged: 'acknowledge-attack-status',
+  markAsClosed: 'closed-attack-status',
+  markAsOpen: 'open-attack-status',
+} as const;
+
 export interface UseBulkAttackWorkflowStatusItemsProps {
   /** Callback when workflow status is updated */
   onWorkflowStatusUpdate?: () => void;
@@ -111,7 +117,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_OPEN) {
       items.push({
         label: i18n.BULK_ACTION_OPEN_SELECTED,
-        key: 'open-attack-status',
+        key: ATTACK_STATUS_ACTION_IDS.markAsOpen,
         'data-test-subj': 'open-attack-status',
         onClick: handleStatusUpdate(FILTER_OPEN as AlertWorkflowStatus),
         disableOnQuery: true,
@@ -122,7 +128,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_ACKNOWLEDGED) {
       items.push({
         label: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-        key: 'acknowledge-attack-status',
+        key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged,
         'data-test-subj': 'acknowledged-attack-status',
         onClick: handleStatusUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
         disableOnQuery: true,
@@ -133,7 +139,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_CLOSED) {
       items.push({
         label: alertClosingReasonItem?.label ?? i18n.BULK_ACTION_CLOSE_SELECTED,
-        key: alertClosingReasonItem?.key ?? 'closed-attack-status',
+        key: alertClosingReasonItem?.key ?? ATTACK_STATUS_ACTION_IDS.markAsClosed,
         'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
         panel: alertClosingReasonItem?.panel,
         disableOnQuery: true,
