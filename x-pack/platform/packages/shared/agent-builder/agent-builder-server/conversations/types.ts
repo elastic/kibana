@@ -6,10 +6,10 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControlInput,
   ConversationListOptions,
-  ConversationWithoutRounds,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 
 /**
@@ -25,20 +25,6 @@ export interface ConversationCreatePublicRequest {
   /** Defaults to `{ access_mode: 'private', entries: [] }`. */
   accessControl?: ConversationAccessControlInput;
 }
-
-export interface ConversationPermissions {
-  rename: boolean;
-  delete: boolean;
-  update_access_control: boolean;
-}
-
-export type ConversationWithPermissions = Conversation & {
-  permissions: ConversationPermissions;
-};
-
-export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
-  permissions: ConversationPermissions;
-};
 
 /**
  * A conversation client exposing get, list, and create operations.
