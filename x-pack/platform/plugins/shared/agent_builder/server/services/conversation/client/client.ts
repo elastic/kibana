@@ -632,7 +632,9 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata(withPermissions({ conversation: fromEs(document), user: this.user }));
+    return withDeserializedMetadata(
+      withPermissions({ conversation: fromEs(document), user: this.user })
+    );
   }
 
   private toResponseConversationWithoutRounds(
