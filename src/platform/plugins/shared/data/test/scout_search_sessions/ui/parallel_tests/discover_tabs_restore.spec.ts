@@ -82,8 +82,16 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+    spaceTest.afterEach(async ({ page, kbnUrl, pageObjects, scoutSpace }) => {
       await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+
+      // Discover persists its tabs per user, so a restored tab left open comes back in the next
+      // test and re-persists the background search it holds. This has to run in the hook rather
+      // than the test body so it still happens when a test fails mid-restore.
+      const openTabs = await pageObjects.unifiedTabs.getTabLabels();
+      for (let i = 1; i < openTabs.length; i++) {
+        await pageObjects.unifiedTabs.closeTab(1);
+      }
     });
 
     spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
@@ -118,10 +126,6 @@ spaceTest.describe(
             CLASSIC_BACKGROUND_SEARCH_NAME
           );
         });
-
-        // Discover persists its tabs per user, so a restored tab left open would come back in
-        // the next test and re-persist the background search it holds.
-        await pageObjects.unifiedTabs.closeTab(1);
       }
     );
 

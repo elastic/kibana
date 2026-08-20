@@ -45,8 +45,9 @@ spaceTest.describe(
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
       // Re-submit so a search is genuinely in flight when we send it to the background.
+      // Nothing is awaited after this: the "saved" toast auto-dismisses, and the first test
+      // needs to still find its link. Each test waits for the render itself.
       await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
-      await pageObjects.dashboard.waitForRenderComplete();
     });
 
     spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
@@ -94,6 +95,8 @@ spaceTest.describe(
     spaceTest(
       'restores the unsaved dashboard after its draft has been discarded',
       async ({ page, pageObjects }) => {
+        await pageObjects.dashboard.waitForRenderComplete();
+
         await page.gotoApp('dashboards');
         await page.testSubj.click('discard-unsaved-New-Dashboard');
         await page.testSubj.click('confirmModalConfirmButton');
