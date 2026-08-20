@@ -176,9 +176,7 @@ describe('ScoutFailedTestReporter', () => {
     const configFile =
       '/repo/src/core/packages/user-storage/test/scout_user_storage/api/playwright.config.ts';
     mockedGetKibanaModuleData.mockImplementation(() => {
-      throw new Error(
-        'Manifest file not found: /repo/src/core/packages/user-storage/kibana.jsonc'
-      );
+      throw new Error('Manifest file not found: /repo/src/core/packages/user-storage/kibana.jsonc');
     });
     const warningSpy = jest.spyOn(ToolingLog.prototype, 'warning').mockImplementation(() => {});
     const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
