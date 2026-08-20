@@ -9,7 +9,7 @@
 
 import { getSafe } from '@kbn/std';
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max, pick } from 'lodash';
+import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -172,7 +172,7 @@ export function initializeLayoutManager(
     if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
       layout$.next({ ...layoutToApply });
     }
-    currentChildState = { ...childStateToApply };
+    currentChildState = cloneDeep(childStateToApply);
 
     let childrenModified = false;
     const currentChildren = { ...children$.value };
@@ -180,7 +180,7 @@ export function initializeLayoutManager(
     for (const uuid of Object.keys(currentChildren)) {
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
-        const nextChildState = childStateToApply[uuid];
+        const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
         if (apiHasSerializableState(child)) {
           setStatePromises.push(child.applySerializedState(nextChildState));
         }
