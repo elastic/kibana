@@ -299,7 +299,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
     try {
-      const computedFeatures = await identifyComputedFeatures({
+      const { features: computedFeatures, errors } = await identifyComputedFeatures({
         stream,
         streamName,
         start,
@@ -316,6 +316,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       return {
         computedFeatures,
         computedFeaturesCount: computedFeatures.length,
+        errors,
       };
     } catch (error) {
       routeLogger.error(

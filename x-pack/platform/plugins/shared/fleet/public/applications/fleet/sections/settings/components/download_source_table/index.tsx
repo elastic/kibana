@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -57,6 +58,22 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
                 {downloadSource.name}
               </p>
             </NameFlexItemWithMaxWidth>
+            {downloadSource.is_preconfigured && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.settings.downloadSourcesTable.managedTooltip',
+                    {
+                      defaultMessage:
+                        'This download source is managed outside of Fleet. Refer to your Kibana config file for more information.',
+                    }
+                  )}
+                  type="lock"
+                  size="m"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
         width: '288px',
@@ -105,7 +122,10 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       {
         width: '68px',
         render: (downloadSource: DownloadSource) => {
-          const isDeleteVisible = !downloadSource.is_default && hasAllSettingsPrivileges;
+          const isDeleteVisible =
+            !downloadSource.is_default &&
+            !downloadSource.is_preconfigured &&
+            hasAllSettingsPrivileges;
           const deleteDownloadSourceLabel = i18n.translate(
             'xpack.fleet.settings.downloadSourceSection.deleteButtonTitle',
             {

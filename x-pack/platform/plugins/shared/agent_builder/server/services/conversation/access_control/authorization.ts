@@ -10,7 +10,7 @@ import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import type { ConversationPermissions } from '../../../../common/http_api/conversations';
 import type { ConversationProperties } from '../client/storage';
 
-export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete';
+export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
 export const isConversationOwner = ({
   conversation,
