@@ -48,21 +48,34 @@ export class GlobalNavService extends FtrService {
    * new global header and, unlike the classic/project headers, no breadcrumb trail. Chrome style can
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
-   * The active header can be briefly absent while navigating, so we wait for one of the known headers
-   * to settle before deciding. Pages without a recognized header retain classic behavior.
+   * The active header can be briefly absent while navigating, so we wait until a known header is
+   * displayed before deciding. Pages without a recognized header retain classic behavior.
    */
   public async isNextProjectChrome(): Promise<boolean> {
-    // The chrome shell renders exactly one of these headers once loaded, but none while navigating,
-    // so wait for whichever appears before deciding rather than probing a single header once.
-    const anyHeaderSelector = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader']
-      .map((subj) => `[data-test-subj="${subj}"]`)
-      .join(',');
+    const detectHeader = async (): Promise<boolean | undefined> => {
+      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
+        return true;
+      }
+      if (
+        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
+        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
+      ) {
+        return false;
+      }
+      return undefined;
+    };
 
-    if (!(await this.find.existsByCssSelector(anyHeaderSelector, this.findTimeout))) {
-      return false;
+    try {
+      return await this.retry.tryForTime(this.findTimeout, async () => {
+        const result = await detectHeader();
+        if (result === undefined) {
+          throw new Error('no chrome header has rendered yet');
+        }
+        return result;
+      });
+    } catch {
+      return (await detectHeader()) ?? false;
     }
-
-    return await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
   }
 
   public async moveMouseToLogo(): Promise<void> {

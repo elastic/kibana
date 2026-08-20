@@ -23,6 +23,7 @@ import { useController, useFormContext } from 'react-hook-form';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
+import { getRunbookContent } from '../utils/artifact_data';
 
 export const RunbookArtifactField: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -36,7 +37,7 @@ export const RunbookArtifactField: React.FC = () => {
   const runbookArtifact = runbookArtifacts.find(
     (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
   );
-  const runbookValue = runbookArtifact?.value;
+  const runbookValue = runbookArtifact ? getRunbookContent(runbookArtifact) : undefined;
   const hasRunbook = Boolean(runbookValue?.trim());
   const runbookTitle = runbookValue
     ?.split('\n')

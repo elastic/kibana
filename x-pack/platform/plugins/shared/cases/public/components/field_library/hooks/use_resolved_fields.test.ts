@@ -64,6 +64,13 @@ describe('useResolvedFields', () => {
     expect(result.current.resolvedFields).toHaveLength(0);
   });
 
+  it('resolves a $ref that differs from the library name only in case', () => {
+    const refField: Field = { $ref: 'LIB_Field' };
+    const { result } = renderHook(() => useResolvedFields([refField], 'securitySolution'));
+    expect(result.current.resolvedFields).toHaveLength(1);
+    expect(result.current.resolvedFields[0].name).toBe('lib_field');
+  });
+
   it('silently drops a $ref whose library definition contains invalid YAML', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: {
