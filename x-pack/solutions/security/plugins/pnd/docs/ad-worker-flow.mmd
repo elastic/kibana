@@ -1,0 +1,23 @@
+flowchart TD
+  WF["Watch Floor orchestrator<br/>scheduled trigger · every 15m"]:::existing
+  WF -->|workflow.execute| RUN
+
+  subgraph ADW["AD Worker — system-security-watch-attack-discovery (managed worker)"]
+    RUN["run_attack_discovery<br/>security.attack-discovery.run (mode: sync)"]:::pnd
+    RUN ==>|fires pipeline| ENG
+    RUN -->|completed &amp; count &gt; 0| INV["write_investigation<br/>ai.agent · one per attack (foreach)"]:::pnd
+    RUN -->|completed &amp; count == 0| EMPTY["write_empty_run_investigation<br/>ai.agent · tracking investigation"]:::pnd
+    INV --> OUT["emit_result<br/>workflow.output"]:::pnd
+    EMPTY --> OUT
+  end
+
+  subgraph ENGINE["AD engine — runs inside the run step (existing)"]
+    ENG["generation pipeline<br/>generate · validate · persist"]:::existing
+  end
+  ENG ==>|persist| IDX[("shared ad-hoc<br/>Attack Discovery index")]:::store
+
+  OUT -. "discovery_count · execution_uuid · status" .-> WF
+
+  classDef pnd fill:#e0d7ff,stroke:#6741d9,color:#241b53;
+  classDef existing fill:#eef0f2,stroke:#495057,color:#20242a;
+  classDef store fill:#ffe8a3,stroke:#e0900a,color:#5a3a00;

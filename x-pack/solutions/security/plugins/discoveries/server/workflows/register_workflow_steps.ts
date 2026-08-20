@@ -18,7 +18,6 @@ import { getDefaultValidationStepDefinition } from './steps/default_validation_s
 import { getGenerateStepDefinition } from './steps/generate_step';
 import { getPersistDiscoveriesStepDefinition } from './steps/persist_discoveries_step';
 import { getRunStepDefinition } from './steps/run_step';
-import { getStatusStepDefinition } from './steps/status_step';
 import { withWorkflowsEnabledGuard } from './with_workflows_enabled_guard';
 
 export interface StepRegistrationResult {
@@ -200,30 +199,12 @@ export const registerWorkflowSteps = (
     workflowsExtensions,
   });
 
-  const statusStepDef = withWorkflowsEnabledGuard(
-    getStatusStepDefinition({
-      getEventLogIndex,
-      getStartServices,
-      logger,
-      workflowsManagementApi,
-    }),
-    getStartServices
-  );
-  logger.debug(() => `Registering statusStepDefinition with id: ${statusStepDef.id}`);
-  const statusOutcome = tryRegisterStep({
-    getStartServices,
-    logger,
-    stepDefinition: statusStepDef,
-    workflowsExtensions,
-  });
-
   const outcomes = [
     defaultAlertRetrievalOutcome,
     defaultValidationOutcome,
     generateOutcome,
     persistDiscoveriesOutcome,
     runOutcome,
-    statusOutcome,
   ];
 
   const registeredSteps = outcomes
