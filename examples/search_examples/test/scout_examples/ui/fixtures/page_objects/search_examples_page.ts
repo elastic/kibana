@@ -19,9 +19,6 @@ import { APP_ID, DATA_VIEW, LOGSTASH_TIME_RANGE } from '../constants';
  * `@elastic/eui-test-helpers`.
  */
 export class SearchExamplesPage {
-  readonly dataViewSelector: Locator;
-  readonly searchBucketField: Locator;
-  readonly searchMetricField: Locator;
   readonly searchSourceWithOther: Locator;
   readonly searchSourceWithoutOther: Locator;
   readonly searchWithWarning: Locator;
@@ -40,9 +37,6 @@ export class SearchExamplesPage {
     private readonly page: ScoutPage,
     private readonly datePicker: PageObjects['datePicker']
   ) {
-    this.dataViewSelector = this.page.testSubj.locator('dataViewSelector');
-    this.searchBucketField = this.page.testSubj.locator('searchBucketField');
-    this.searchMetricField = this.page.testSubj.locator('searchMetricField');
     this.searchSourceWithOther = this.page.testSubj.locator('searchSourceWithOther');
     this.searchSourceWithoutOther = this.page.testSubj.locator('searchSourceWithoutOther');
     this.searchWithWarning = this.page.testSubj.locator('searchWithWarning');
@@ -66,12 +60,12 @@ export class SearchExamplesPage {
 
   async gotoSearch(): Promise<void> {
     await this.page.gotoApp(`${APP_ID}/search`);
-    await this.dataViewSelector.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('dataViewSelector').waitFor({ state: 'visible' });
   }
 
   async gotoSearchSessions(): Promise<void> {
     await this.page.gotoApp(`${APP_ID}/search-sessions`);
-    await this.dataViewSelector.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('dataViewSelector').waitFor({ state: 'visible' });
   }
 
   async gotoSqlSearch(): Promise<void> {
@@ -85,7 +79,7 @@ export class SearchExamplesPage {
   async configureSearchDemo(): Promise<void> {
     await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
     // Field options load after the data view resolves.
-    await this.searchBucketField.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('searchBucketField').waitFor({ state: 'visible' });
     await this.selectSingleComboOption('searchBucketField', 'geo.src');
     await this.selectSingleComboOption('searchMetricField', 'memory');
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
@@ -97,13 +91,6 @@ export class SearchExamplesPage {
   async configureSearchSessionDemo(): Promise<void> {
     await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
     await this.selectSingleComboOption('searchMetricField', 'bytes');
-  }
-
-  /**
-   * Saves the in-flight background search via the unified search secondary button.
-   */
-  async saveBackgroundSearch(): Promise<void> {
-    await this.saveBackgroundSearchButton.click();
   }
 
   /**
@@ -123,9 +110,7 @@ export class SearchExamplesPage {
     await searchInput.fill(label);
 
     const listbox = this.page.getByRole('listbox');
-    const exactLabel = new RegExp(
-      `^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`
-    );
+    const exactLabel = new RegExp(`^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
     const option = listbox.getByRole('option').filter({ hasText: exactLabel });
     await option.waitFor({ state: 'visible', timeout });
     await option.click();

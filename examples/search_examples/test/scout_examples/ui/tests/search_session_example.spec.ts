@@ -94,7 +94,7 @@ test.describe('Search session example', { tag: '@local-stateful-classic' }, () =
 
     await test.step('start search and save session', async () => {
       await searchExamples.startSearch.click();
-      await searchExamples.saveBackgroundSearch();
+      await searchExamples.saveBackgroundSearchButton.click();
       // shard_delay keeps the search in-flight until save/restore finish
       await expect(searchExamples.restoreSearch).toBeVisible({ timeout: 120_000 });
     });
