@@ -98,8 +98,18 @@ export const ConversationSidebarView: React.FC = () => {
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
 
-  const { conversations = [] } = useConversationList({ agentId });
-  const hasConversations = conversations.length > 0;
+  // Pinned and unpinned conversations are fetched via separate server-side filtered queries.
+  const {
+    conversations: pinnedConversations,
+    total: pinnedTotal,
+    hasNextPage: pinnedHasNextPage,
+    fetchNextPage: fetchNextPinnedPage,
+    isFetchingNextPage: isFetchingNextPinnedPage,
+  } = useConversationList({ agentId, pinned: true });
+  const { total: unpinnedTotal } = useConversationList({ agentId, pinned: false });
+  // Enable the Search button when any conversations exist across either list.
+  const hasConversations = unpinnedTotal > 0 || pinnedTotal > 0;
+
   const { removeAllErrors, removeError } = useStreamingContext();
 
   const { markAsPinned, markAsUnpinned } = useConversationListMutations({
@@ -117,19 +127,6 @@ export const ConversationSidebarView: React.FC = () => {
   const onDragUpdate = useCallback(({ destination }: DragUpdate) => {
     setHoveredDroppableId(destination?.droppableId ?? null);
   }, []);
-
-  const pinnedConversations = useMemo(
-    () =>
-      conversations
-        .filter((c) => c.pinned)
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
-    [conversations]
-  );
-
-  const pinnedConversationIds = useMemo(
-    () => new Set(pinnedConversations.map((c) => c.id)),
-    [pinnedConversations]
-  );
 
   const dropBackgrounds = useMemo(() => {
     const bg = (id: string) =>
@@ -300,6 +297,9 @@ export const ConversationSidebarView: React.FC = () => {
                           agentId={agentId}
                           currentConversationId={conversationId}
                           pinnedConversations={pinnedConversations}
+                          hasNextPage={pinnedHasNextPage}
+                          fetchNextPage={fetchNextPinnedPage}
+                          isFetchingNextPage={isFetchingNextPinnedPage}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
                           onItemClick={handleConversationItemClick}
@@ -375,7 +375,6 @@ export const ConversationSidebarView: React.FC = () => {
                           currentConversationId={conversationId}
                           isNewConversationRoute={isNewConversationRoute}
                           onItemClick={handleConversationItemClick}
-                          pinnedConversationIds={pinnedConversationIds}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
                         />

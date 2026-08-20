@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import type { QueryClient } from '@kbn/react-query';
-
-import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
+import type { InfiniteData, QueryClient } from '@kbn/react-query';
+import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../common/constants';
+import type {
+  ListConversationsResponse,
+  ListConversationsResponseItem,
+} from '../../../common/http_api/conversations';
 import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
-const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
+type ConversationListCache = InfiniteData<ListConversationsResponse>;
+
+const unpinnedKey = (agentId: string) =>
+  queryKeys.conversations.byAgent(agentId, { pinned: false });
+const pinnedKey = (agentId: string) => queryKeys.conversations.byAgent(agentId, { pinned: true });
+
+const getNextPageParam = (lastPage: ListConversationsResponse) => {
+  const { page, per_page: pp, total } = lastPage._meta;
+  const next = page + 1;
+  return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
+};
 
 const buildSidebarConversationListRow = (p: {
   id: string;
@@ -30,6 +43,40 @@ const buildSidebarConversationListRow = (p: {
   };
 };
 
+/**
+ * Walk every paged list variant whose key starts with queryKeys.conversations.list and apply
+ * `updater` to each page's `results` array. Updates `_meta.total` by `delta`.
+ */
+const applyToAllListVariants = (
+  queryClient: QueryClient,
+  updater: (results: ListConversationsResponseItem[]) => ListConversationsResponseItem[],
+  delta: number = 0
+) => {
+  queryClient.setQueriesData<ConversationListCache>(
+    { queryKey: queryKeys.conversations.list },
+    (prev) => {
+      if (!prev) return prev;
+      const newPages = prev.pages.map((page) => {
+        const newResults = updater(page.results);
+        const same = newResults === page.results && delta === 0;
+        if (same) return page;
+        return {
+          ...page,
+          _meta: { ...page._meta, total: Math.max(0, page._meta.total + delta) },
+          results: newResults,
+        };
+      });
+      const pagesChanged = newPages.some((p, i) => p !== prev.pages[i]);
+      return pagesChanged ? { ...prev, pages: newPages } : prev;
+    }
+  );
+};
+
+/**
+ * Ensure the unpinned list for `agentId` is in the cache, then prepend a
+ * newly created conversation row. New conversations are never pinned so only
+ * the `pinned: false` cache variant needs updating.
+ */
 export const insertSidebarConversationListRow = async ({
   queryClient,
   conversationsService,
@@ -43,23 +90,21 @@ export const insertSidebarConversationListRow = async ({
   conversationId: string;
   title: string;
 }): Promise<boolean> => {
-  const row = buildSidebarConversationListRow({
-    id: conversationId,
-    agent_id: agentId,
-    title,
-  });
-  const key = agentConversationListKey(agentId);
+  const row = buildSidebarConversationListRow({ id: conversationId, agent_id: agentId, title });
+  const key = unpinnedKey(agentId);
 
-  // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
-  // below kills the in-flight GET and the sidebar ends up showing only the new row.
-  if (queryClient.getQueryData<ListConversationsResponseItem[]>(key) === undefined) {
+  // Cold-cache warm-up: must use fetchInfiniteQuery so the stored shape is
+  // { pages, pageParams } rather than a flat array.
+  if (queryClient.getQueryData<ConversationListCache>(key) === undefined) {
     try {
-      await queryClient.fetchQuery({
+      await queryClient.fetchInfiniteQuery({
         queryKey: key,
-        queryFn: () => conversationsService.list({ agentId }),
+        queryFn: ({ pageParam }: { pageParam?: number }) =>
+          conversationsService.list({ agentId, pinned: false, page: pageParam ?? 1 }),
+        getNextPageParam,
       });
     } catch {
-      // Proceed with the optimistic insert even if the prefetch fails — the next
+      // Proceed with the optimistic insert even if the prefetch fails; the next
       // explicit refresh of the sidebar will pick up the server state.
     }
   }
@@ -67,51 +112,69 @@ export const insertSidebarConversationListRow = async ({
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (prev?.some((c) => c.id === row.id)) {
-      return prev;
-    }
+  queryClient.setQueryData<ConversationListCache>(key, (prev) => {
+    // When the prefetch failed (or the cache is otherwise empty), synthesise a
+    // minimal first page so the optimistic row is still visible immediately.
+    const data: ConversationListCache = prev ?? {
+      pages: [{ _meta: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] }],
+      pageParams: [undefined],
+    };
+    if (data.pages[0]?.results.some((c) => c.id === row.id)) return prev;
     inserted = true;
-    return [row, ...(prev ?? [])];
+    const [firstPage, ...rest] = data.pages;
+    return {
+      ...data,
+      pages: [
+        {
+          ...firstPage,
+          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
+          results: [row, ...firstPage.results],
+        },
+        ...rest,
+      ],
+    };
   });
 
   return inserted;
 };
 
+/**
+ * Remove a conversation from every paged list variant (pinned and unpinned).
+ */
 export const removeSidebarConversationListRow = ({
   queryClient,
-  agentId,
   conversationId,
 }: {
   queryClient: QueryClient;
-  agentId: string;
+  agentId: string; // kept for call-site compatibility; removal is prefix-wide
   conversationId: string;
 }) => {
-  const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (!prev?.length) {
-      return prev;
-    }
-    return prev.filter((c) => c.id !== conversationId);
-  });
+  applyToAllListVariants(
+    queryClient,
+    (results) => {
+      const next = results.filter((c) => c.id !== conversationId);
+      return next.length < results.length ? next : results;
+    },
+    -1
+  );
 };
 
+/**
+ * Update a conversation's fields in every paged list variant.
+ */
 export const patchConversationList = ({
   queryClient,
-  agentId,
   conversationId,
   values,
 }: {
   queryClient: QueryClient;
-  agentId: string;
+  agentId: string; // kept for call-site compatibility; patching is prefix-wide
   conversationId: string;
   values: Partial<ListConversationsResponseItem>;
 }) => {
-  const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (!prev?.length) return prev;
+  applyToAllListVariants(queryClient, (results) => {
     let changed = false;
-    const next = prev.map((c) => {
+    const next = results.map((c) => {
       if (c.id !== conversationId) return c;
       const hasChanges = (Object.keys(values) as Array<keyof ListConversationsResponseItem>).some(
         (k) => values[k] !== c[k]
@@ -120,6 +183,64 @@ export const patchConversationList = ({
       changed = true;
       return { ...c, ...values };
     });
-    return changed ? next : prev;
+    return changed ? next : results;
+  });
+};
+
+/**
+ * Move a conversation between the pinned and unpinned list caches.
+ * Called optimistically when the user pins or unpins a conversation.
+ */
+export const movePinnedConversationBetweenLists = ({
+  queryClient,
+  agentId,
+  conversationId,
+  pinned,
+}: {
+  queryClient: QueryClient;
+  agentId: string;
+  conversationId: string;
+  /** The new pinned state. */
+  pinned: boolean;
+}) => {
+  const sourceKey = pinned ? unpinnedKey(agentId) : pinnedKey(agentId);
+  const targetKey = pinned ? pinnedKey(agentId) : unpinnedKey(agentId);
+
+  let movedRow: ListConversationsResponseItem | undefined;
+
+  // Remove from source list.
+  queryClient.setQueryData<ConversationListCache>(sourceKey, (prev) => {
+    if (!prev) return prev;
+    const newPages = prev.pages.map((page) => {
+      const idx = page.results.findIndex((c) => c.id === conversationId);
+      if (idx === -1) return page;
+      movedRow = page.results[idx];
+      return {
+        ...page,
+        _meta: { ...page._meta, total: Math.max(0, page._meta.total - 1) },
+        results: [...page.results.slice(0, idx), ...page.results.slice(idx + 1)],
+      };
+    });
+    return { ...prev, pages: newPages };
+  });
+
+  if (!movedRow) return;
+  const row = { ...movedRow, pinned };
+
+  // Prepend to the first page of the target list, if it's cached.
+  queryClient.setQueryData<ConversationListCache>(targetKey, (prev) => {
+    if (!prev) return prev;
+    const [firstPage, ...rest] = prev.pages;
+    return {
+      ...prev,
+      pages: [
+        {
+          ...firstPage,
+          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
+          results: [row, ...firstPage.results],
+        },
+        ...rest,
+      ],
+    };
   });
 };

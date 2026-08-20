@@ -8,7 +8,6 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
-  ListConversationsResponseItem,
   GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
@@ -33,16 +32,22 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions): Promise<ListConversationsResponseItem[]> {
-    const response = await this.http.get<ListConversationsResponse>(
-      `${publicApiPath}/conversations`,
-      {
-        query: {
-          agent_id: agentId,
-        },
-      }
-    );
-    return response.results;
+  async list({
+    agentId,
+    page,
+    perPage,
+    sortOrder,
+    pinned,
+  }: ConversationListOptions): Promise<ListConversationsResponse> {
+    return await this.http.get<ListConversationsResponse>(`${publicApiPath}/conversations`, {
+      query: {
+        agent_id: agentId,
+        page,
+        per_page: perPage,
+        sort_order: sortOrder,
+        pinned,
+      },
+    });
   }
 
   async get({ conversationId }: ConversationGetOptions) {
