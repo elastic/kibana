@@ -582,7 +582,7 @@ export async function syncClearIlmPolicy({
   }
 
   // Delete the ILM component templates
-  await deleteComponentTemplates(esClient, deletedTemplateNames);
+  await deleteComponentTemplates(esClient, deletedTemplateNames, { packageName });
 
   // Remove the component templates from installed_es tracking BEFORE rollover so a rollover
   // failure doesn't leave deleted templates still tracked in installed_es (r3518806806).

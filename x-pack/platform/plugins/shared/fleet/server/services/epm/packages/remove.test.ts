@@ -807,6 +807,33 @@ describe('restoreAdoptedStreams', () => {
       })
     ).resolves.toBeUndefined();
   });
+
+  it('restores streams from fallback index patterns when the package has no claims', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([]);
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [stream()] } as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      '.ds-x': { settings: { index: { default_pipeline: 'logs-payroll.records-1.0.0' } } },
+    } as never);
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      template: { settings: { index: { default_pipeline: 'logs@default-pipeline' } } },
+    } as never);
+
+    await restoreAdoptedStreams({
+      esClient,
+      soClient,
+      packageName: 'evil',
+      packagePipelineIds: new Set(['logs-payroll.records-1.0.0']),
+      fallbackIndexPatterns: ['logs-payroll.records-*'],
+    });
+
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-payroll.records-*' })
+    );
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: 'logs-payroll.records-teamb',
+      settings: { default_pipeline: 'logs@default-pipeline' },
+    });
+  });
 });
 
 describe('removeInstallation claim release', () => {

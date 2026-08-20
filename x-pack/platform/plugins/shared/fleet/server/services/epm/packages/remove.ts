@@ -61,6 +61,7 @@ import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 import { deleteClaims, findClaimsForPackage } from './dataset_ownership';
+import type { AdoptedStreamBaseline } from './dataset_ownership';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -197,6 +198,9 @@ export async function removeInstallation(options: {
       .map((asset) => asset.id)
   );
 
+  const claims = await findClaimsForPackage(savedObjectsClient, pkgName);
+  const fallbackIndexPatterns = await snapshotRestoreIndexPatterns(esClient, installation, claims);
+
   await deleteAssets(savedObjectsClient, installation, esClient, {
     onTemplatesDeleted: () =>
       restoreAdoptedStreams({
@@ -204,13 +208,14 @@ export async function removeInstallation(options: {
         soClient: savedObjectsClient,
         packageName: pkgName,
         packagePipelineIds,
+        fallbackIndexPatterns,
       }),
   });
 
   // Claims last, so a failed cleanup never frees the dataset for someone else to claim.
   await deleteClaims(
     savedObjectsClient,
-    (await findClaimsForPackage(savedObjectsClient, pkgName)).map(({ id }) => id)
+    claims.map(({ id }) => id)
   );
 
   // Delete the manager saved object with references to the asset objects
@@ -338,7 +343,8 @@ async function bulkDeleteSavedObjects(
 
 export const deleteESAsset = async (
   installedObject: EsAssetReference,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  packageName?: string
 ): Promise<void> => {
   const { id, type } = installedObject;
   const assetType = type as AssetType;
@@ -347,7 +353,7 @@ export const deleteESAsset = async (
   } else if (assetType === ElasticsearchAssetType.indexTemplate) {
     return deleteIndexTemplate(esClient, id);
   } else if (assetType === ElasticsearchAssetType.componentTemplate) {
-    return deleteComponentTemplates(esClient, [id]);
+    return deleteComponentTemplates(esClient, [id], { packageName });
   } else if (assetType === ElasticsearchAssetType.transform) {
     return deleteTransforms(esClient, [id], true);
   } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
@@ -363,9 +369,12 @@ export const deleteESAsset = async (
 
 export const deleteESAssets = (
   installedObjects: EsAssetReference[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  packageName?: string
 ): Array<Promise<void>> => {
-  return installedObjects.map((installedObject) => deleteESAsset(installedObject, esClient));
+  return installedObjects.map((installedObject) =>
+    deleteESAsset(installedObject, esClient, packageName)
+  );
 };
 
 type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[], EsAssetReference[]];
@@ -499,54 +508,110 @@ const putIndexSettingsStrict = async (
  * claimed it. Only streams still pointing at one of this package's own pipelines are touched, so a
  * stream a third party has since re-pointed is left alone.
  */
+/**
+ * Collects index patterns this package may have governed, from claims, es_index_patterns, and
+ * live templates. Must run before those templates are deleted.
+ */
+export const snapshotRestoreIndexPatterns = async (
+  esClient: ElasticsearchClient,
+  installation: Installation,
+  claims: Array<{ attributes: { index_patterns: string[] } }>
+): Promise<string[]> => {
+  const patterns = new Set<string>();
+  for (const { attributes } of claims) {
+    for (const pattern of attributes.index_patterns) {
+      patterns.add(pattern);
+    }
+  }
+  for (const pattern of Object.values(installation.es_index_patterns ?? {})) {
+    if (pattern) patterns.add(pattern);
+  }
+  for (const ref of installation.installed_es ?? []) {
+    if (ref.type !== ElasticsearchAssetType.indexTemplate || ref.id.includes('@')) continue;
+    try {
+      const result = await esClient.indices.getIndexTemplate({ name: ref.id });
+      for (const pattern of ([] as string[]).concat(
+        result?.index_templates?.[0]?.index_template?.index_patterns ?? []
+      )) {
+        patterns.add(pattern);
+      }
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error;
+    }
+  }
+  return [...patterns];
+};
+
+/**
+ * Points every data stream this package governs back at the pipeline it had before the package
+ * claimed it. Only streams still pointing at one of this package's own pipelines are touched, so a
+ * stream a third party has since re-pointed is left alone.
+ *
+ * `fallbackIndexPatterns` covers packages with no claims (pre-existing uploads): snapshot those
+ * from the installation before deleting templates.
+ */
 export const restoreAdoptedStreams = async ({
   esClient,
   soClient,
   packageName,
   packagePipelineIds,
+  fallbackIndexPatterns = [],
 }: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   packageName: string;
   packagePipelineIds: Set<string>;
+  fallbackIndexPatterns?: string[];
 }): Promise<void> => {
   const claims = await findClaimsForPackage(soClient, packageName);
+  const baselinesByPattern = new Map<string, AdoptedStreamBaseline[]>();
+  const patterns = new Set<string>(fallbackIndexPatterns);
 
   for (const { attributes } of claims) {
     for (const indexPattern of attributes.index_patterns) {
-      let live: Awaited<ReturnType<typeof esClient.indices.getDataStream>>;
-      try {
-        live = await esClient.indices.getDataStream({
-          name: indexPattern,
-          expand_wildcards: ['open', 'hidden'],
-        });
-      } catch (error) {
-        if (!isNotFoundError(error)) throw error;
-        continue;
+      patterns.add(indexPattern);
+      baselinesByPattern.set(indexPattern, [
+        ...(baselinesByPattern.get(indexPattern) ?? []),
+        ...(attributes.adopted_streams ?? []),
+      ]);
+    }
+  }
+
+  for (const indexPattern of patterns) {
+    let live: Awaited<ReturnType<typeof esClient.indices.getDataStream>>;
+    try {
+      live = await esClient.indices.getDataStream({
+        name: indexPattern,
+        expand_wildcards: ['open', 'hidden'],
+      });
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error;
+      continue;
+    }
+
+    for (const stream of live.data_streams ?? []) {
+      const writeIndex = stream.indices?.at(-1)?.index_name;
+      if (!writeIndex) continue;
+
+      const settings = await esClient.indices.getSettings({ index: writeIndex });
+      const current = settings[writeIndex]?.settings?.index?.default_pipeline;
+      // Only streams still pointing at one of this package's pipelines, across versions.
+      if (!current || !packagePipelineIds.has(current)) continue;
+
+      const recorded = baselinesByPattern
+        .get(indexPattern)
+        ?.find(({ name }) => name === stream.name);
+      let restored: string;
+      if (recorded) {
+        // A record with no pipeline means there genuinely was none. That is not the same as
+        // having no record, so do not fall through to the simulate.
+        restored = recorded.previous_default_pipeline ?? '';
+      } else {
+        const simulated = await esClient.indices.simulateIndexTemplate({ name: stream.name });
+        restored = simulated.template?.settings?.index?.default_pipeline ?? '';
       }
 
-      for (const stream of live.data_streams ?? []) {
-        const writeIndex = stream.indices?.at(-1)?.index_name;
-        if (!writeIndex) continue;
-
-        const settings = await esClient.indices.getSettings({ index: writeIndex });
-        const current = settings[writeIndex]?.settings?.index?.default_pipeline;
-        // Only streams still pointing at one of this package's pipelines, across versions.
-        if (!current || !packagePipelineIds.has(current)) continue;
-
-        const recorded = attributes.adopted_streams?.find(({ name }) => name === stream.name);
-        let restored: string;
-        if (recorded) {
-          // A record with no pipeline means there genuinely was none. That is not the same as
-          // having no record, so do not fall through to the simulate.
-          restored = recorded.previous_default_pipeline ?? '';
-        } else {
-          const simulated = await esClient.indices.simulateIndexTemplate({ name: stream.name });
-          restored = simulated.template?.settings?.index?.default_pipeline ?? '';
-        }
-
-        await putIndexSettingsStrict(esClient, stream.name, { default_pipeline: restored });
-      }
+      await putIndexSettingsStrict(esClient, stream.name, { default_pipeline: restored });
     }
   }
 };
@@ -586,7 +651,7 @@ async function deleteAssets(
 
     // delete the other asset types
     await Promise.all([
-      ...deleteESAssets(otherAssets, esClient),
+      ...deleteESAssets(otherAssets, esClient, name),
       deleteKibanaAssets({
         installedObjects: installedKibana,
         spaceId,
@@ -701,12 +766,13 @@ export function deleteMLModels(
 
 export function cleanupComponentTemplate(
   installedObjects: EsAssetReference[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  packageName?: string
 ) {
   const idsToDelete = installedObjects
     .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
     .map((asset) => asset.id);
-  return deleteComponentTemplates(esClient, idsToDelete);
+  return deleteComponentTemplates(esClient, idsToDelete, { packageName });
 }
 
 export function cleanupTransforms(

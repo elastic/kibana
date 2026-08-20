@@ -12,10 +12,12 @@ import {
 } from '@kbn/core/server/mocks';
 
 import type { InstallablePackage } from '../../../../../common/types';
+import { appContextService } from '../../../app_context';
 
 import { enforceInstallDatasetOwnership } from './enforce_install_ownership';
 import { DatasetOwnershipConflictError } from './errors';
 
+jest.mock('../../../app_context');
 jest.mock('./resolve_ownership');
 jest.mock('./claims');
 jest.mock('../namespace_template_utils', () => ({ isOtelDataStream: () => false }));
@@ -30,6 +32,8 @@ const mockedAcquire = acquireDatasetClaims as jest.MockedFunction<typeof acquire
 const mockedRecord = recordAdoptedStreamBaselines as jest.MockedFunction<
   typeof recordAdoptedStreamBaselines
 >;
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const withLock = jest.fn(async (_id: string, fn: () => Promise<unknown>) => fn());
 
 const packageInfo = {
   name: 'mine',
@@ -52,9 +56,57 @@ const clean = { allowlist: [], adoptedStreams: [], conflicts: [], warnings: [] }
 beforeEach(() => {
   jest.clearAllMocks();
   mockedAcquire.mockResolvedValue({ acquired: [] });
+  withLock.mockImplementation(async (_id, fn) => fn());
+  mockedAppContextService.getLockManagerService.mockReturnValue({ withLock } as never);
 });
 
 describe('enforceInstallDatasetOwnership', () => {
+  it('throws when the lock manager is unavailable', async () => {
+    mockedAppContextService.getLockManagerService.mockReturnValue(undefined as never);
+    mockedResolve.mockResolvedValue(clean);
+
+    await expect(enforceInstallDatasetOwnership(args())).rejects.toThrow(
+      /Dataset ownership lock is unavailable/
+    );
+    expect(mockedResolve).not.toHaveBeenCalled();
+    expect(mockedAcquire).not.toHaveBeenCalled();
+  });
+
+  it('runs resolve and acquire under the dataset ownership lock', async () => {
+    mockedResolve.mockResolvedValue(clean);
+
+    await enforceInstallDatasetOwnership(args());
+
+    expect(withLock).toHaveBeenCalledWith('fleet-dataset-ownership', expect.any(Function));
+  });
+
+  it('runs afterAcquire under the lock after claims are acquired', async () => {
+    const order: string[] = [];
+    mockedResolve.mockImplementation(async () => {
+      order.push('resolve');
+      return clean;
+    });
+    mockedAcquire.mockImplementation(async () => {
+      order.push('acquire');
+      return { acquired: [] };
+    });
+    withLock.mockImplementation(async (_id, fn) => {
+      order.push('lock');
+      const result = await fn();
+      order.push('unlock');
+      return result;
+    });
+
+    await enforceInstallDatasetOwnership({
+      ...args(),
+      afterAcquire: async () => {
+        order.push('reserve');
+      },
+    });
+
+    expect(order).toEqual(['lock', 'resolve', 'acquire', 'reserve', 'unlock']);
+  });
+
   it('throws and acquires nothing when the package would take over a foreign stream', async () => {
     mockedResolve.mockResolvedValue({
       ...clean,

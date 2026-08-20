@@ -207,7 +207,7 @@ export async function cleanupIndexTemplatePipelinesStep(context: InstallContext)
     });
     logger.debug('Retry transition - clean up component template');
     await withPackageSpan('Retry transition - clean up component template', async () => {
-      await cleanupComponentTemplate(installedEs, esClient);
+      await cleanupComponentTemplate(installedEs, esClient, installedPkg.attributes.name);
     });
   }
 }

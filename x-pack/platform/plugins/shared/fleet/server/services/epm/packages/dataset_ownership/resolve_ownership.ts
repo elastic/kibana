@@ -19,7 +19,8 @@ export type OwnershipConflictReason =
   | 'would_govern'
   | 'same_template_name'
   | 'equal_priority_overlap'
-  | 'outranks_specific_template';
+  | 'outranks_specific_template'
+  | 'lower_priority_specific_overlap';
 
 export interface OwnershipConflict {
   kind: 'data_stream' | 'index_template';
@@ -173,7 +174,20 @@ export const resolveDatasetOwnership = async ({
           continue;
         }
 
-        if (foreignPriority > priority) continue;
+        if (foreignPriority > priority) {
+          // Installing under a higher-priority specific template is a dormant takeover: this
+          // template becomes governing if that owner is later removed.
+          if (overlapping.some(isDatasetSpecificPattern)) {
+            add(conflicts, {
+              kind: 'index_template',
+              name,
+              reason: 'lower_priority_specific_overlap',
+              owningPackage: ownerOf(name),
+              governingPriority: foreignPriority,
+            });
+          }
+          continue;
+        }
 
         // Outranking a generic template such as the built-in `logs-*-*` is how Fleet is meant to
         // work, so that is a warning. Outranking one that singles out this dataset is a takeover of

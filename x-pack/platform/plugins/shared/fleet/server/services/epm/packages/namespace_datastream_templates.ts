@@ -355,7 +355,7 @@ async function deleteNamespaceTemplatesForPackage({
   );
   const componentTemplatesToDelete = deleted.filter((name) => trackedComponentTemplates.has(name));
   if (componentTemplatesToDelete.length > 0) {
-    await deleteComponentTemplates(esClient, componentTemplatesToDelete);
+    await deleteComponentTemplates(esClient, componentTemplatesToDelete, { packageName });
   }
 
   const assetsToRemove = [

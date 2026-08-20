@@ -1350,3 +1350,17 @@ export const DatasetClaimResponseSchema = schema.object(
   },
   { meta: { id: 'dataset_claim_response' } }
 );
+
+export const DatasetClaimDeleteRequestSchema = {
+  params: schema.object({
+    baseName: schema.string({ maxLength: 256 }),
+  }),
+};
+
+export const DatasetClaimDeleteResponseSchema = schema.object(
+  {
+    baseName: schema.string(),
+    deleted: schema.boolean(),
+  },
+  { meta: { id: 'dataset_claim_delete_response' } }
+);

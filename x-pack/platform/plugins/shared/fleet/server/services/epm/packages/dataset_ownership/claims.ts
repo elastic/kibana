@@ -8,10 +8,12 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { DATASET_CLAIMS_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
+import { DATASET_CLAIMS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../common/constants';
 import type { InstallSource } from '../../../../../common/types';
 
 import { DatasetClaimConflictError } from './errors';
+import { withDatasetOwnershipLock } from './lock';
+import { patternsOverlap } from './patterns';
 
 export type DatasetClaimOrigin = 'install' | 'adoption' | 'backfill';
 
@@ -54,6 +56,36 @@ const getClaim = async (
   }
 };
 
+/** Rejects a write whose index patterns overlap a claim owned by a different package. */
+export const assertNoOverlappingForeignClaims = async (
+  soClient: SavedObjectsClientContract,
+  packageName: string,
+  claims: DatasetClaimRequest[]
+): Promise<void> => {
+  const existingClaims =
+    (
+      await soClient.find<DatasetClaimAttributes>({
+        type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+        perPage: SO_SEARCH_LIMIT,
+      })
+    )?.saved_objects ?? [];
+
+  for (const { baseName, indexPatterns } of claims) {
+    for (const { id, attributes } of existingClaims) {
+      if (attributes.package_name === packageName) continue;
+      const foreignPatterns = attributes.index_patterns ?? [];
+      const overlaps = indexPatterns.some((pattern) =>
+        foreignPatterns.some((foreign) => patternsOverlap(pattern, foreign))
+      );
+      if (overlaps) {
+        throw new DatasetClaimConflictError(
+          `Dataset "${baseName}" overlaps "${id}" claimed by package "${attributes.package_name}".`
+        );
+      }
+    }
+  }
+};
+
 /**
  * Acquires a claim per base name by atomic create, and returns only the ids this call created.
  *
@@ -81,6 +113,8 @@ export const acquireDatasetClaims = async ({
   /** `install` and `backfill` claims never authorize takeover. Only `adoption` does (spec R2-1). */
   origin?: DatasetClaimOrigin;
 }): Promise<{ acquired: string[] }> => {
+  await assertNoOverlappingForeignClaims(soClient, packageName, claims);
+
   const acquired: string[] = [];
 
   for (const { baseName, indexPatterns } of claims) {
@@ -192,27 +226,40 @@ export const finalizeDatasetClaims = async ({
 
 /**
  * Releases the claims this attempt created. Claims created by any other attempt, and claims that are
- * already active, are never touched.
+ * already active, are never touched. Runs under the ownership lock so POST cannot promote a pending
+ * claim and then have this cleanup delete it.
  */
 export const releaseAttemptClaims = async (
   soClient: SavedObjectsClientContract,
   packageName: string,
   attemptId: string
 ): Promise<void> => {
-  const pending = await soClient.find<DatasetClaimAttributes>({
-    type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
-    filter: [
-      attributesFilter('package_name', packageName),
-      attributesFilter('status', 'pending'),
-      attributesFilter('attempt_id', attemptId),
-    ].join(' and '),
-    perPage: 1000,
-  });
+  return withDatasetOwnershipLock(async () => {
+    const pending = await soClient.find<DatasetClaimAttributes>({
+      type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+      filter: [
+        attributesFilter('package_name', packageName),
+        attributesFilter('status', 'pending'),
+        attributesFilter('attempt_id', attemptId),
+      ].join(' and '),
+      perPage: 1000,
+    });
 
-  await deleteClaims(
-    soClient,
-    pending.saved_objects.map(({ id }) => id)
-  );
+    const stillThisAttempt: string[] = [];
+    for (const { id } of pending.saved_objects) {
+      const current = await getClaim(soClient, id);
+      if (
+        current &&
+        current.package_name === packageName &&
+        current.status === 'pending' &&
+        current.attempt_id === attemptId
+      ) {
+        stillThisAttempt.push(id);
+      }
+    }
+
+    await deleteClaims(soClient, stillThisAttempt);
+  });
 };
 
 export const getDatasetClaims = async (

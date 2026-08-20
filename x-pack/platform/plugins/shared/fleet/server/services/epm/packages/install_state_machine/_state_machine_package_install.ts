@@ -262,6 +262,7 @@ export async function _stateMachineInstallPackage(
     throw new FleetError('An install attempt id is required to resolve dataset ownership');
   }
 
+  let reservedPackageInstall = false;
   const ownership =
     context.useStreaming || !context.datasetClaimAttemptId
       ? undefined
@@ -272,6 +273,14 @@ export async function _stateMachineInstallPackage(
           packageInfo: context.packageInstallContext.packageInfo,
           installSource: context.installSource,
           attemptId: context.datasetClaimAttemptId,
+          afterAcquire: async () => {
+            // DELETE treats origin:adoption + missing package SO as abandoned. Hold the lock until
+            // that SO exists so an in-flight first install cannot lose its claim.
+            if (!installedPkg) {
+              await stepCreateRestartInstallation(context);
+              reservedPackageInstall = true;
+            }
+          },
         });
 
   // if retryFromLastState, restart install from last install state
@@ -286,6 +295,8 @@ export async function _stateMachineInstallPackage(
     );
     // we need to clean up latest_executed_state or it won't be refreshed
     await cleanupLatestExecutedState(context);
+  } else if (reservedPackageInstall) {
+    initialState = findNextState(INSTALL_STATES.CREATE_RESTART_INSTALLATION, statesDefinition);
   }
 
   const installStates: StateMachineDefinition<StateNames> = {

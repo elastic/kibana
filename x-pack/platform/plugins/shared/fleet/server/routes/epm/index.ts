@@ -91,6 +91,8 @@ import {
   NamespacePreflightCheckResponseSchema,
   DatasetClaimRequestSchema,
   DatasetClaimResponseSchema,
+  DatasetClaimDeleteRequestSchema,
+  DatasetClaimDeleteResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -137,7 +139,7 @@ import {
   postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
-import { datasetClaimsHandler } from './dataset_claims_handler';
+import { datasetClaimsDeleteHandler, datasetClaimsHandler } from './dataset_claims_handler';
 import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -1974,11 +1976,45 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
             409: {
               body: genericErrorResponse,
-              description: 'The dataset is already claimed by another package.',
+              description:
+                'The dataset is already claimed by another package, or its index patterns overlap an existing claim.',
             },
           },
         },
       },
       datasetClaimsHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DATASET_CLAIMS_DELETE_PATTERN,
+      security: DATASET_CLAIMS_SECURITY,
+      summary: `Release an abandoned dataset claim`,
+      description: `Delete an abandoned pre-install adoption claim so the dataset can be adopted by another package. Claims for installed packages cannot be released this way; uninstall the package instead. Only available to superusers.`,
+      options: { tags: ['oas-tag:Elastic Package Manager (EPM)'] },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DatasetClaimDeleteRequestSchema,
+          response: {
+            200: {
+              body: () => DatasetClaimDeleteResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            404: {
+              body: genericErrorResponse,
+              description: 'The dataset is not claimed.',
+            },
+            409: {
+              body: genericErrorResponse,
+              description:
+                'The claim is not an abandoned pre-install adoption claim. Uninstall the package to release it.',
+            },
+          },
+        },
+      },
+      datasetClaimsDeleteHandler
     );
 };

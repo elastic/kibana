@@ -196,5 +196,55 @@ export default function (providerContext: FtrProviderContext) {
         .send(zipFixtureFor(PKG))
         .expect(403);
     });
+
+    it('lets a superuser release an abandoned adoption claim', async () => {
+      await adopt(PKG.name).expect(200);
+
+      await supertest
+        .delete(`/api/fleet/epm/dataset_claims/${CLAIM}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      await adopt('someone_else').expect(200);
+
+      await supertest
+        .delete(`/api/fleet/epm/dataset_claims/${CLAIM}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
+    it('does not let a non-superuser release a claim', async () => {
+      await adopt(PKG.name).expect(200);
+
+      await supertestWithoutAuth
+        .delete(`/api/fleet/epm/dataset_claims/${CLAIM}`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(403);
+
+      await supertest
+        .delete(`/api/fleet/epm/dataset_claims/${CLAIM}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
+    it('refuses to release a claim after the adopting package is installed', async () => {
+      const before = await writeIndexPipelineOf(FOREIGN_STREAM);
+      await adopt(PKG.name).expect(200);
+      await uploadPackage();
+      expect(await writeIndexPipelineOf(FOREIGN_STREAM)).to.not.eql(before);
+
+      await supertest
+        .delete(`/api/fleet/epm/dataset_claims/${CLAIM}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(409);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${PKG.name}/${PKG.version}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(await writeIndexPipelineOf(FOREIGN_STREAM)).to.eql(before);
+    });
   });
 }

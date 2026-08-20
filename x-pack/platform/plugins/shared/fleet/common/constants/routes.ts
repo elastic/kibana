@@ -67,6 +67,7 @@ export const EPM_API_ROUTES = {
   ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
   NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
   DATASET_CLAIMS_PATTERN: `${EPM_API_ROOT}/dataset_claims`,
+  DATASET_CLAIMS_DELETE_PATTERN: `${EPM_API_ROOT}/dataset_claims/{baseName}`,
 };
 
 // Data stream API routes

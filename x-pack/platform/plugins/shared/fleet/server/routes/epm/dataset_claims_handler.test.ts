@@ -8,7 +8,10 @@
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { datasetClaimsHandler } from './dataset_claims_handler';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../../services/app_context';
+
+import { datasetClaimsDeleteHandler, datasetClaimsHandler } from './dataset_claims_handler';
 
 const setup = (body: Record<string, unknown>) => {
   const soClient = savedObjectsClientMock.create();
@@ -22,6 +25,14 @@ const notFound = () => SavedObjectsErrorHelpers.createGenericNotFoundError('t', 
 const validBody = { baseName: 'logs-payroll.records', packageName: 'new' };
 
 describe('datasetClaimsHandler', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   it('creates an active adoption claim for an unclaimed dataset', async () => {
     const { soClient, context, request, response } = setup(validBody);
     soClient.get.mockRejectedValue(notFound());
@@ -153,5 +164,100 @@ describe('datasetClaimsHandler', () => {
     await datasetClaimsHandler(context, request, response);
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
+  });
+
+  it('rejects an adoption claim that overlaps another package prefix claim', async () => {
+    const { soClient, context, request, response } = setup({
+      ...validBody,
+      baseName: 'logs-foo.bar',
+    });
+    soClient.get.mockRejectedValue(notFound());
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'logs-foo',
+          attributes: {
+            package_name: 'prefix-owner',
+            index_patterns: ['logs-foo.*-*'],
+          },
+        },
+      ],
+    } as never);
+
+    await datasetClaimsHandler(context, request, response);
+
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
+  });
+});
+
+describe('datasetClaimsDeleteHandler', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
+  const setupDelete = (baseName: string) => {
+    const soClient = savedObjectsClientMock.create();
+    const context = { core: Promise.resolve({ savedObjects: { client: soClient } }) } as never;
+    const request = httpServerMock.createKibanaRequest({ params: { baseName } });
+    const response = httpServerMock.createResponseFactory();
+    return { soClient, context, request, response };
+  };
+
+  it('releases an abandoned adoption claim when the package is not installed', async () => {
+    const { soClient, context, request, response } = setupDelete('logs-payroll.records');
+    soClient.get
+      .mockResolvedValueOnce({
+        attributes: { origin: 'adoption', package_name: 'new', status: 'active' },
+      } as never)
+      .mockRejectedValueOnce(notFound());
+    soClient.delete.mockResolvedValue({} as never);
+
+    await datasetClaimsDeleteHandler(context, request, response);
+
+    expect(soClient.delete).toHaveBeenCalledWith('fleet-dataset-claims', 'logs-payroll.records');
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { baseName: 'logs-payroll.records', deleted: true } })
+    );
+  });
+
+  it('returns 404 when the claim does not exist', async () => {
+    const { soClient, context, request, response } = setupDelete('logs-payroll.records');
+    soClient.get.mockRejectedValue(notFound());
+
+    await datasetClaimsDeleteHandler(context, request, response);
+
+    expect(soClient.delete).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 404 }));
+  });
+
+  it('refuses to release a claim for an installed package', async () => {
+    const { soClient, context, request, response } = setupDelete('logs-payroll.records');
+    soClient.get
+      .mockResolvedValueOnce({
+        attributes: { origin: 'adoption', package_name: 'new', status: 'active' },
+      } as never)
+      .mockResolvedValueOnce({ attributes: { name: 'new' } } as never);
+
+    await datasetClaimsDeleteHandler(context, request, response);
+
+    expect(soClient.delete).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
+  });
+
+  it('refuses to release an install-origin claim', async () => {
+    const { soClient, context, request, response } = setupDelete('logs-payroll.records');
+    soClient.get.mockResolvedValue({
+      attributes: { origin: 'install', package_name: 'new', status: 'active' },
+    } as never);
+
+    await datasetClaimsDeleteHandler(context, request, response);
+
+    expect(soClient.delete).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
   });
 });

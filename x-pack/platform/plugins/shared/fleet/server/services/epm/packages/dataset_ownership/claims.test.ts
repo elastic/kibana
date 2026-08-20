@@ -8,8 +8,12 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { appContextService } from '../../../app_context';
+
 import { acquireDatasetClaims, finalizeDatasetClaims, releaseAttemptClaims } from './claims';
 import { DatasetClaimConflictError } from './errors';
+
+jest.mock('../../../app_context');
 
 const conflict = () => SavedObjectsErrorHelpers.createConflictError('t', 'logs-mine');
 
@@ -155,6 +159,56 @@ describe('acquireDatasetClaims', () => {
       expect.anything()
     );
   });
+
+  it('rejects a claim whose index patterns overlap another package claim', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'logs-foo',
+          attributes: {
+            package_name: 'prefix-owner',
+            index_patterns: ['logs-foo.*-*'],
+          },
+        },
+      ],
+    } as never);
+
+    await expect(
+      acquireDatasetClaims({
+        soClient,
+        ...base,
+        packageName: 'exact-owner',
+        claims: [{ baseName: 'logs-foo.bar', indexPatterns: ['logs-foo.bar-*'] }],
+      })
+    ).rejects.toBeInstanceOf(DatasetClaimConflictError);
+
+    expect(soClient.create).not.toHaveBeenCalled();
+  });
+
+  it('allows overlapping patterns that already belong to the same package', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'logs-foo',
+          attributes: {
+            package_name: 'mine',
+            index_patterns: ['logs-foo.*-*'],
+          },
+        },
+      ],
+    } as never);
+    soClient.create.mockResolvedValue({ id: 'logs-foo.bar' } as never);
+
+    const result = await acquireDatasetClaims({
+      soClient,
+      ...base,
+      claims: [{ baseName: 'logs-foo.bar', indexPatterns: ['logs-foo.bar-*'] }],
+    });
+
+    expect(result.acquired).toEqual(['logs-foo.bar']);
+  });
 });
 
 describe('finalizeDatasetClaims', () => {
@@ -229,10 +283,22 @@ describe('finalizeDatasetClaims', () => {
 });
 
 describe('releaseAttemptClaims', () => {
+  const withLock = jest.fn(async (_id: string, fn: () => Promise<unknown>) => fn());
+  const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    withLock.mockImplementation(async (_id, fn) => fn());
+    mockedAppContextService.getLockManagerService.mockReturnValue({ withLock } as never);
+  });
+
   it('deletes only this attempt pending claims', async () => {
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({
       saved_objects: [{ id: 'logs-new', attributes: { status: 'pending' } }],
+    } as never);
+    soClient.get.mockResolvedValue({
+      attributes: { package_name: 'mine', status: 'pending', attempt_id: 'attempt-1' },
     } as never);
 
     await releaseAttemptClaims(soClient, 'mine', 'attempt-1');
@@ -240,6 +306,26 @@ describe('releaseAttemptClaims', () => {
     const filter = soClient.find.mock.calls[0][0].filter as string;
     expect(filter).toContain('status:"pending"');
     expect(filter).toContain('attempt_id:"attempt-1"');
+    expect(withLock).toHaveBeenCalledWith('fleet-dataset-ownership', expect.any(Function));
     expect(soClient.delete).toHaveBeenCalledWith('fleet-dataset-claims', 'logs-new');
+  });
+
+  it('does not delete a claim POST promoted to an active adoption', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [{ id: 'logs-new', attributes: { status: 'pending' } }],
+    } as never);
+    soClient.get.mockResolvedValue({
+      attributes: {
+        package_name: 'mine',
+        status: 'active',
+        origin: 'adoption',
+        attempt_id: 'adoption-1',
+      },
+    } as never);
+
+    await releaseAttemptClaims(soClient, 'mine', 'attempt-1');
+
+    expect(soClient.delete).not.toHaveBeenCalled();
   });
 });

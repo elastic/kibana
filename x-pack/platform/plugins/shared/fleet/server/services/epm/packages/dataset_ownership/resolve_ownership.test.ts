@@ -135,13 +135,37 @@ describe('resolveDatasetOwnership', () => {
     ]);
   });
 
-  it('does not conflict with a dataset-specific foreign template at higher priority', async () => {
+  it('conflicts on a dataset-specific foreign template at higher priority', async () => {
     const result = await resolveDatasetOwnership({
       esClient: esMock({
         templates: [
           {
             name: 'teamb-payroll',
             index_template: { priority: 400, index_patterns: ['logs-payroll.*-*'] },
+          },
+        ],
+      }),
+      soClient: soMock(),
+      packageName: 'mine',
+      prospective,
+    });
+
+    expect(result.conflicts).toEqual([
+      expect.objectContaining({
+        kind: 'index_template',
+        name: 'teamb-payroll',
+        reason: 'lower_priority_specific_overlap',
+      }),
+    ]);
+  });
+
+  it('still allows a generic higher-priority template such as logs-*-*', async () => {
+    const result = await resolveDatasetOwnership({
+      esClient: esMock({
+        templates: [
+          {
+            name: 'logs',
+            index_template: { priority: 400, index_patterns: ['logs-*-*'] },
           },
         ],
       }),

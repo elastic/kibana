@@ -26,6 +26,7 @@ export type {
 } from './resolve_ownership';
 export {
   acquireDatasetClaims,
+  assertNoOverlappingForeignClaims,
   deleteClaims,
   finalizeDatasetClaims,
   findClaimsForPackage,
@@ -33,6 +34,7 @@ export {
   recordAdoptedStreamBaselines,
   releaseAttemptClaims,
 } from './claims';
+export { withDatasetOwnershipLock } from './lock';
 export type {
   AdoptedStreamBaseline,
   DatasetClaimAttributes,

@@ -13,6 +13,7 @@ import { withPackageSpan } from '../utils';
 import { getPackageClaimNames, getPackageProspectiveTemplates } from './claim_names';
 import { acquireDatasetClaims, recordAdoptedStreamBaselines } from './claims';
 import { DatasetOwnershipConflictError } from './errors';
+import { withDatasetOwnershipLock } from './lock';
 import { resolveDatasetOwnership } from './resolve_ownership';
 
 const UNTRUSTED_SOURCES: InstallSource[] = ['upload', 'custom'];
@@ -25,7 +26,27 @@ const UNTRUSTED_SOURCES: InstallSource[] = ['upload', 'custom'];
  * creation without it. Resolution deliberately precedes acquisition: a claim written by this attempt
  * must never be readable as evidence that the attempt already owned the name.
  */
-export const enforceInstallDatasetOwnership = async ({
+export const enforceInstallDatasetOwnership = async (args: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  logger: Logger;
+  packageInfo: InstallablePackage;
+  installSource: InstallSource;
+  attemptId: string;
+  /**
+   * Runs before the lock is released, after claims are acquired. Used to create the package SO so
+   * DELETE cannot treat an in-flight first install as an abandoned adoption.
+   */
+  afterAcquire?: () => Promise<void>;
+}): Promise<{ ownedDataStreams: string[]; acquiredDatasetClaims: string[] }> => {
+  return withDatasetOwnershipLock(async () => {
+    const result = await runEnforceInstallDatasetOwnership(args);
+    await args.afterAcquire?.();
+    return result;
+  });
+};
+
+const runEnforceInstallDatasetOwnership = async ({
   esClient,
   soClient,
   logger,

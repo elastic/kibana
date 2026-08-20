@@ -434,9 +434,11 @@ describe('syncIlmPolicy — clear', () => {
       ilmPolicy: undefined,
     });
 
-    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(esClient, [
-      'logs-nginx.access@namespace.production',
-    ]);
+    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(
+      esClient,
+      ['logs-nginx.access@namespace.production'],
+      { packageName: 'nginx' }
+    );
   });
 
   it('removes the ILM entry from the namespace index template composed_of when namespace is still opted in', async () => {
@@ -476,9 +478,11 @@ describe('syncIlmPolicy — clear', () => {
 
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     // Component template is still deleted
-    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(esClient, [
-      'logs-nginx.access@namespace.production',
-    ]);
+    expect(mockedDeleteComponentTemplates).toHaveBeenCalledWith(
+      esClient,
+      ['logs-nginx.access@namespace.production'],
+      { packageName: 'nginx' }
+    );
   });
 
   it('removes the component templates from installed_es', async () => {

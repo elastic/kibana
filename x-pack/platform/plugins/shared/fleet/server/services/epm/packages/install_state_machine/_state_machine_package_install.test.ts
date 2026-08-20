@@ -50,7 +50,7 @@ import {
   regularStatesDefinition,
   streamingStatesDefinition,
 } from './_state_machine_package_install';
-import { cleanupLatestExecutedState } from './steps';
+import { cleanupLatestExecutedState, stepCreateRestartInstallation } from './steps';
 import { enforceInstallDatasetOwnership } from '../dataset_ownership';
 
 jest.mock('./state_machine');
@@ -478,6 +478,55 @@ describe('_stateMachineInstallPackage', () => {
   it('refuses a non-streaming install with no attempt id', async () => {
     await expect(_stateMachineInstallPackage(baseContext() as never)).rejects.toThrow(
       /attempt id/i
+    );
+  });
+
+  it('creates the package SO under the ownership lock before later states run', async () => {
+    mockedEnforce.mockImplementation(async (opts) => {
+      await opts.afterAcquire?.();
+      return { ownedDataStreams: [], acquiredDatasetClaims: [] };
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+    const mockCreateRestart = stepCreateRestartInstallation as jest.MockedFunction<
+      typeof stepCreateRestartInstallation
+    >;
+    mockCreateRestart.mockResolvedValue(undefined as never);
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+    } as never);
+
+    expect(mockCreateRestart).toHaveBeenCalled();
+    expect(mockHandleState).toHaveBeenCalledWith(
+      INSTALL_STATES.RESOLVE_DEPENDENCIES,
+      expect.anything(),
+      expect.objectContaining({ initialState: INSTALL_STATES.RESOLVE_DEPENDENCIES })
+    );
+  });
+
+  it('does not recreate the package SO when one already exists', async () => {
+    mockedEnforce.mockImplementation(async (opts) => {
+      await opts.afterAcquire?.();
+      return { ownedDataStreams: [], acquiredDatasetClaims: [] };
+    });
+    mockHandleState.mockResolvedValue({ installedKibanaAssetsRefs: [], esReferences: [] });
+    const mockCreateRestart = stepCreateRestartInstallation as jest.MockedFunction<
+      typeof stepCreateRestartInstallation
+    >;
+    mockCreateRestart.mockClear();
+
+    await _stateMachineInstallPackage({
+      ...baseContext(),
+      datasetClaimAttemptId: 'attempt-1',
+      installedPkg: { attributes: { name: 'xyz' } },
+    } as never);
+
+    expect(mockCreateRestart).not.toHaveBeenCalled();
+    expect(mockHandleState).toHaveBeenCalledWith(
+      INSTALL_STATES.CREATE_RESTART_INSTALLATION,
+      expect.anything(),
+      expect.anything()
     );
   });
 });
