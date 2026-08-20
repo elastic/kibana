@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { projectRoutingCodec } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
   occurrencesBudgetingMethodSchema,
@@ -26,19 +25,14 @@ import {
   type SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
-import {
-  ALL_PROJECT_ROUTING,
-  LOCAL_PROJECT_ROUTING,
-  toPickerProjectRouting,
-} from '../../../../../common/project_routings';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
   toDurationAdverbLabel,
   toDurationLabel,
 } from '../../../../utils/slo/labels';
+import { ProjectScopeRow } from './project_scope_row';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -46,7 +40,6 @@ export interface Props {
 
 export function SettingsPanel({ slo }: Props) {
   const { uiSettings } = useKibana().services;
-  const { isServerless } = usePluginContext();
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasTags = slo.tags && slo.tags.length > 0;
 
@@ -161,23 +154,7 @@ export function SettingsPanel({ slo }: Props) {
           </EuiText>
         </EuiDescriptionListDescription>
 
-        {isServerless && (
-          <>
-            <EuiDescriptionListTitle>
-              {i18n.translate('xpack.slo.sloDetails.definition.projectScopeTitle', {
-                defaultMessage: 'Project scope',
-              })}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiText size="s">
-                {toEffectiveProjectScopeLabel(
-                  slo.settings.projectRoutings,
-                  slo.settings.preventCrossProjectSearch
-                )}
-              </EuiText>
-            </EuiDescriptionListDescription>
-          </>
-        )}
+        <ProjectScopeRow slo={slo} />
 
         {hasTags && (
           <>
@@ -200,38 +177,6 @@ export function SettingsPanel({ slo }: Props) {
       </EuiDescriptionList>
     </EuiPanel>
   );
-}
-
-function toEffectiveProjectScopeLabel(
-  projectRoutings: string | null | undefined,
-  preventCrossProjectSearch: boolean | undefined
-): string {
-  const effective = toPickerProjectRouting(projectRoutings, preventCrossProjectSearch);
-
-  if (effective === undefined || effective === LOCAL_PROJECT_ROUTING) {
-    return i18n.translate('xpack.slo.sloDetails.definition.thisProjectLabel', {
-      defaultMessage: 'This project',
-    });
-  }
-
-  if (effective === ALL_PROJECT_ROUTING) {
-    return i18n.translate('xpack.slo.sloDetails.definition.allProjectsLabel', {
-      defaultMessage: 'All projects',
-    });
-  }
-
-  const { selectedProjectIds } = projectRoutingCodec.decode(effective);
-
-  if (selectedProjectIds.length > 0) {
-    return i18n.translate('xpack.slo.sloDetails.definition.selectedProjectsLabel', {
-      defaultMessage: '{count, plural, one {# project} other {# projects}}',
-      values: { count: selectedProjectIds.length },
-    });
-  }
-
-  return i18n.translate('xpack.slo.sloDetails.definition.customProjectScopeLabel', {
-    defaultMessage: 'Custom',
-  });
 }
 
 function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {

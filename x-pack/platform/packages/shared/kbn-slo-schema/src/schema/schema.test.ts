@@ -94,11 +94,19 @@ describe('Schema', () => {
       }
     });
 
-    it('rejects projectRoutings longer than 1024 characters', () => {
+    it('decodes projectRoutings of exactly 8192 characters', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: 'x'.repeat(8192),
+      });
+      expect(isRight(result)).toBe(true);
+    });
+
+    it('rejects projectRoutings longer than 8192 characters', () => {
       const result = settingsSchema.decode({
         ...requiredSettings,
         preventCrossProjectSearch: false,
-        projectRoutings: 'x'.repeat(1025),
+        projectRoutings: 'x'.repeat(8193),
       });
       expect(isLeft(result)).toBe(true);
     });
@@ -158,8 +166,13 @@ describe('Schema', () => {
       }
     });
 
-    it('rejects projectRoutings longer than 1024 characters', () => {
-      const result = optionalSettingsSchema.decode({ projectRoutings: 'x'.repeat(1025) });
+    it('decodes projectRoutings of exactly 8192 characters', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: 'x'.repeat(8192) });
+      expect(isRight(result)).toBe(true);
+    });
+
+    it('rejects projectRoutings longer than 8192 characters', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: 'x'.repeat(8193) });
       expect(isLeft(result)).toBe(true);
     });
 

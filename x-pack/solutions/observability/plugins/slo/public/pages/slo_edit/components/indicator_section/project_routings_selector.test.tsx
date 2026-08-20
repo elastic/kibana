@@ -19,20 +19,21 @@ import { ProjectRoutingsSelector } from './project_routings_selector';
 
 jest.mock('../../../../hooks/use_plugin_context');
 jest.mock('../../../../hooks/use_kibana');
+const mockProjectScopePickerSpy = jest.fn();
+
 jest.mock('@kbn/cps-utils', () => {
   const actual = jest.requireActual('@kbn/cps-utils');
   const mockReact = jest.requireActual('react');
   return {
     ...actual,
     useFetchProjects: jest.fn(),
-    ProjectScopePicker: ({
-      onProjectRoutingChange,
-      originProjectId,
-    }: {
+    ProjectScopePicker: (props: {
       onProjectRoutingChange: (projectRouting: string) => void;
       originProjectId?: string;
-    }) =>
-      mockReact.createElement('button', {
+    }) => {
+      mockProjectScopePickerSpy(props);
+      const { onProjectRoutingChange, originProjectId } = props;
+      return mockReact.createElement('button', {
         type: 'button',
         'data-test-subj': 'mockProjectScopePicker',
         onClick: () => {
@@ -40,7 +41,8 @@ jest.mock('@kbn/cps-utils', () => {
             onProjectRoutingChange(`_id:${originProjectId}`);
           }
         },
-      }),
+      });
+    },
   };
 });
 
@@ -195,5 +197,43 @@ describe('ProjectRoutingsSelector', () => {
     await waitFor(() => {
       expect(getProjectRoutings()).toBe(LOCAL_PROJECT_ROUTING);
     });
+  });
+
+  it('hands the stored origin routing to the picker unmapped', async () => {
+    renderSelector({ ...defaultSettings, projectRoutings: LOCAL_PROJECT_ROUTING });
+
+    fireEvent.click(await screen.findByTestId('sloProjectRoutingsSelector'));
+
+    await waitFor(() => {
+      expect(mockProjectScopePickerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originProjectId: ORIGIN_PROJECT._id,
+          projectRouting: LOCAL_PROJECT_ROUTING,
+        })
+      );
+    });
+  });
+
+  it('pins the picker to the snapshot routing strategy', async () => {
+    renderSelector({ ...defaultSettings, projectRoutings: ALL_PROJECT_ROUTING });
+
+    fireEvent.click(await screen.findByTestId('sloProjectRoutingsSelector'));
+
+    await waitFor(() => {
+      expect(mockProjectScopePickerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRoutingStrategy: 'snapshot' })
+      );
+    });
+  });
+
+  it('shows a selected-over-total count for a multi-project selection', async () => {
+    renderSelector({
+      ...defaultSettings,
+      projectRoutings: `_id:${ORIGIN_PROJECT._id} OR _id:${LINKED_PROJECT._id}`,
+    });
+
+    expect(await screen.findByTestId('sloProjectRoutingsSelector')).toHaveTextContent(
+      '2/2 projects'
+    );
   });
 });

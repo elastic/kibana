@@ -27,7 +27,9 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
-const MAX_PROJECT_ROUTINGS_LENGTH = 1024;
+// A `snapshot` project routing encodes every selected project id, so the bound scales with
+// the number of linked projects rather than with the number of exclusions.
+const MAX_PROJECT_ROUTINGS_LENGTH = 8192;
 
 const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
   'boundedProjectRoutingSchema',
