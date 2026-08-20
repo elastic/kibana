@@ -417,8 +417,6 @@ export class AssetManagerClient {
 
     // Install creates the concrete `.entities.v2.*` latest index (+ alias) and the
     // updates/metadata data streams as the requesting user, so each needs `read` + `manage`.
-    // Maintainer tasks run as the installing user and write entity documents, so `write` is also
-    // required - without it the store installs successfully but maintainers silently produce no data.
     // The updates data stream is also an extraction source (`view_index_metadata`), so we
     // merge privileges into one map. Patterns starting with `-` are stripped: `_has_privileges`
     // treats them as literal index names, not exclusions.
