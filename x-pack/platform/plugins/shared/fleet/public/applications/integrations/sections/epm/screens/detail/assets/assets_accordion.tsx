@@ -6,8 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import { Fragment } from 'react';
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -19,9 +18,13 @@ import {
   EuiNotificationBadge,
   EuiSpacer,
   EuiSplitPanel,
+  EuiTab,
+  EuiTabs,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 
 import { AssetTitleMap } from '../../../constants';
 import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
@@ -30,9 +33,14 @@ import { KibanaAssetType } from '../../../../../types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
-const ALERTING_ENGINE_V1_BADGE = i18n.translate(
-  'xpack.fleet.epm.assets.alertingEngineV1BadgeLabel',
-  { defaultMessage: 'v1' }
+type AlertingEngineTab = 'v2' | 'v1';
+
+const isV2AlertingAsset = (asset: GetBulkAssetsResponse['items'][number]): boolean =>
+  asset.attributes?.engine === 'v2';
+
+const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
+  'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
+  { defaultMessage: 'Classic' }
 );
 
 const ALERTING_ENGINE_V2_BADGE = i18n.translate(
@@ -40,9 +48,9 @@ const ALERTING_ENGINE_V2_BADGE = i18n.translate(
   { defaultMessage: 'v2' }
 );
 
-const ALERTING_ENGINE_V1_ARIA_LABEL = i18n.translate(
-  'xpack.fleet.epm.assets.alertingEngineV1BadgeAriaLabel',
-  { defaultMessage: 'Alerting v1' }
+const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(
+  'xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel',
+  { defaultMessage: 'Classic Alerting' }
 );
 
 const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
@@ -51,31 +59,45 @@ const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
 );
 
 const getAlertingEngineBadge = (
-  type: DisplayedAssetType,
   engine: GetBulkAssetsResponse['items'][number]['attributes']['engine']
-): { label: string; ariaLabel: string } | undefined => {
-  if (type !== KibanaAssetType.alertingRuleTemplate) {
-    return undefined;
-  }
-
+): { label: string; ariaLabel: string } => {
   if (engine === 'v2') {
     return { label: ALERTING_ENGINE_V2_BADGE, ariaLabel: ALERTING_ENGINE_V2_ARIA_LABEL };
   }
 
-  return { label: ALERTING_ENGINE_V1_BADGE, ariaLabel: ALERTING_ENGINE_V1_ARIA_LABEL };
+  return { label: ALERTING_ENGINE_CLASSIC_BADGE, ariaLabel: ALERTING_ENGINE_CLASSIC_ARIA_LABEL };
 };
 
 export const AssetsAccordion: FunctionComponent<{
   type: DisplayedAssetType;
   savedObjects: GetBulkAssetsResponse['items'];
 }> = ({ savedObjects, type }) => {
-  const { http } = useStartServices();
+  const startServices = useStartServices();
+  const { http } = startServices;
+  const hasV2Templates = savedObjects.some(isV2AlertingAsset);
+  const [selectedEngineTab, setSelectedEngineTab] = useState<AlertingEngineTab>(
+    hasV2Templates ? 'v2' : 'v1'
+  );
 
   const isDashboard = type === KibanaAssetType.dashboard;
+  const isAlertingRuleTemplate = type === KibanaAssetType.alertingRuleTemplate;
+  const alertingV2Enabled = isAlertingV2Enabled(startServices);
+  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Enabled;
+
+  const listedSavedObjects =
+    isAlertingRuleTemplate && !alertingV2Enabled
+      ? savedObjects.filter((asset) => !isV2AlertingAsset(asset))
+      : savedObjects;
+
+  const visibleSavedObjects = showEngineUi
+    ? listedSavedObjects.filter((asset) =>
+        selectedEngineTab === 'v2' ? isV2AlertingAsset(asset) : !isV2AlertingAsset(asset)
+      )
+    : listedSavedObjects;
 
   return (
     <EuiAccordion
-      initialIsOpen={isDashboard}
+      initialIsOpen={isDashboard || showEngineUi}
       data-test-subj={`fleetAssetsAccordion.button.${type}`}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
@@ -86,7 +108,7 @@ export const AssetsAccordion: FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued" size="m">
-              <h3>{savedObjects.length}</h3>
+              <h3>{listedSavedObjects.length}</h3>
             </EuiNotificationBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -95,20 +117,47 @@ export const AssetsAccordion: FunctionComponent<{
     >
       <>
         <EuiSpacer size="m" />
+        {showEngineUi && (
+          <>
+            <EuiTabs data-test-subj="fleetAlertingEngineTabs">
+              <EuiTab
+                data-test-subj="fleetAlertingEngineTab-v2"
+                onClick={() => setSelectedEngineTab('v2')}
+                isSelected={selectedEngineTab === 'v2'}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epm.assets.alertingV2TabLabel"
+                  defaultMessage="Alerting v2"
+                />
+              </EuiTab>
+              <EuiTab
+                data-test-subj="fleetAlertingEngineTab-v1"
+                onClick={() => setSelectedEngineTab('v1')}
+                isSelected={selectedEngineTab === 'v1'}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epm.assets.classicAlertingTabLabel"
+                  defaultMessage="Classic Alerting"
+                />
+              </EuiTab>
+            </EuiTabs>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiSplitPanel.Outer
           hasBorder
           hasShadow={false}
           data-test-subj={`fleetAssetsAccordion.content.${type}`}
         >
-          {savedObjects.map(({ id, attributes, appLink }, idx) => {
-            const { title: soTitle, description, engine } = attributes || {};
-            // Ignore custom asset views or if not a Kibana asset
+          {visibleSavedObjects.map(({ id, attributes, appLink }, idx) => {
+            const { title: soTitle, description } = attributes || {};
             if (type === 'view') {
               return;
             }
 
             const title = soTitle ?? id;
-            const engineBadge = getAlertingEngineBadge(type, engine);
+            const engine = attributes?.engine;
+            const engineBadge = showEngineUi ? getAlertingEngineBadge(engine) : undefined;
             return (
               <Fragment key={id}>
                 <EuiSplitPanel.Inner
@@ -154,7 +203,7 @@ export const AssetsAccordion: FunctionComponent<{
                     </>
                   )}
                 </EuiSplitPanel.Inner>
-                {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
+                {idx + 1 < visibleSavedObjects.length && <EuiHorizontalRule margin="none" />}
               </Fragment>
             );
           })}
