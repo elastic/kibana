@@ -27,6 +27,7 @@ import {
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
+  createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
@@ -76,7 +77,6 @@ import {
   createRequestToEs,
   updateConversation,
   withPermissions,
-  isConversationDocument,
   type Document,
 } from './converters';
 
@@ -660,11 +660,15 @@ class ConversationClientImpl implements ConversationClient {
 
     const hit = response.hits.hits[0];
 
-    if (!hit || !isConversationDocument(hit)) {
+    if (!hit || !hit._id || !hit._source) {
       return undefined;
     }
 
-    return hit;
+    if (hit._seq_no === undefined || hit._primary_term === undefined) {
+      throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
+    }
+
+    return hit as Document;
   }
 
   /**
