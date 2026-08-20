@@ -36,6 +36,6 @@
     "@kbn/search-errors",
     "@kbn/utility-types",
     "@kbn/esql-language",
-    "@kbn/as-code-discover-schema",
+    "@kbn/saved-search-constants",
   ]
 }

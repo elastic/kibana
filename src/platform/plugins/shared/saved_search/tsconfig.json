@@ -31,9 +31,9 @@
     "@kbn/core-http-browser-internal",
     "@kbn/core-http-browser",
     "@kbn/discover-utils",
-    "@kbn/as-code-discover-schema",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/logging-mocks",
+    "@kbn/saved-search-constants",
   ],
   "exclude": ["target/**/*"]
 }
