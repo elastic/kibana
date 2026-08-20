@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
+import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { resetWatchStore } from '../watch_store/watch_store';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
@@ -21,8 +22,19 @@ interface PersistentWatchDocument {
   id: string;
   enabled: boolean;
   values: Record<string, unknown> | null;
+  yaml: string;
   version: number;
 }
+
+const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> | null): string => {
+  const definition = getManagedWorkflowDefinition(id);
+  if (!definition) throw new Error(`Missing managed workflow definition for "${id}"`);
+  if ('yaml' in definition && typeof definition.yaml === 'string') return definition.yaml;
+  if ('yamlTemplate' in definition && typeof definition.yamlTemplate === 'function' && values) {
+    return (definition.yamlTemplate as (templateValues: Record<string, unknown>) => string)(values);
+  }
+  throw new Error(`Managed workflow "${id}" cannot be rendered`);
+};
 
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWatchDocument>();
@@ -38,11 +50,14 @@ const createPersistentHarness = () => {
     ) => {
       const idWithSuffix = documentId(id, options.workflowIdSuffix ?? options.spaceId);
       const existing = documents.get(idWithSuffix);
+      const values = options.values ?? existing?.values ?? null;
+      const yaml = renderManagedWorkflowYaml(id, values);
       documents.set(idWithSuffix, {
         id: idWithSuffix,
         enabled: existing?.enabled ?? false,
-        values: options.values ?? existing?.values ?? null,
-        version: (existing?.version ?? 0) + 1,
+        values,
+        yaml,
+        version: existing?.yaml === yaml ? existing.version : (existing?.version ?? 0) + 1,
       });
     }
   );
@@ -113,7 +128,7 @@ const createPersistentHarness = () => {
       lastUpdatedAt: '2026-08-14T00:00:00.000Z',
       lastUpdatedBy: 'elastic/kibana',
       definition: definition(document.enabled),
-      yaml: 'name: Watch Floor',
+      yaml: document.yaml,
       valid: true,
       version: document.version,
     };

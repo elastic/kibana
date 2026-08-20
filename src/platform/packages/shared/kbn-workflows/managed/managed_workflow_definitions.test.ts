@@ -128,7 +128,7 @@ it('requires an explicit Watch Floor version decision when imported YAML changes
 
   // yamlTemplate hashing sees only the function source, not this imported string. Update this
   // fingerprint only together with an intentional definition-version decision.
-  expect(`${definition.version}:${contentFingerprint}`).toBe('1:a65d9483');
+  expect(`${definition.version}:${contentFingerprint}`).toBe('1:003be341');
 });
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {

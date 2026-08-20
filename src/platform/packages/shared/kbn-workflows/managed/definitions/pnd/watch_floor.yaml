@@ -11,6 +11,10 @@ triggers:
   - type: alert
   - type: manual
 consts:
+  watch_settings:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
   watch_policy:
     mandate: Frontline triage
     ui:

@@ -14,11 +14,20 @@ import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_WATCH_FLOOR_WORKFLOW_ID = 'system-security-watch-floor';
 
+export const renderPndWatchFloorYaml = ({
+  settingsVersion,
+  autonomyLevel,
+}: PndWatchTemplateValues): string =>
+  WATCH_FLOOR_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion)).replaceAll(
+    '__WATCH_AUTONOMY_LEVEL__',
+    autonomyLevel
+  );
+
 export const PND_WATCH_FLOOR_WORKFLOW = {
   billable: false,
   id: PND_WATCH_FLOOR_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yamlTemplate: (_values: PndWatchTemplateValues): string => WATCH_FLOOR_YAML,
+  yamlTemplate: renderPndWatchFloorYaml,
 } as const satisfies ManagedWorkflowDefinition<PndWatchTemplateValues>;
