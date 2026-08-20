@@ -261,8 +261,15 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
+    // Flush instances to session storage so step 4 can read them without going through step 2 again.
+    // instances is computed in-memory (reconcileInstances) and only written on explicit saves;
+    // without this flush, step 4 sees serviceSettings.instances === undefined → [] → no ECF section.
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      instances,
+    });
     onContinue();
-  }, [onContinue]);
+  }, [onContinue, persisted, setPersisted, instances]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
