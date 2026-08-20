@@ -32,10 +32,10 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_rename`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string(),
+          conversation_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
-          title: schema.string(),
+          title: schema.string({ maxLength: 500 }),
         }),
       },
       options: { access: 'internal' },
