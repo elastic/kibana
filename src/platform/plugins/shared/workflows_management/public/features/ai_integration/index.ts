@@ -20,7 +20,7 @@ export { setActiveProposalManager, acceptAllActiveProposals } from './active_pro
 export { findLinkedWorkflowAttachment, WORKFLOW_EDITOR_ATTACHMENT_ID } from './attachment_link';
 
 export {
-  setLastCreateAttachmentId,
+  setLastCreateSessionId,
   carryConversationToWorkflow,
   hasPersistedConversation,
   setSidebarOpen,

@@ -14,10 +14,13 @@
 const SESSION_TAG_PREFIX = 'workflow-editor:';
 const STORAGE_KEY_PREFIX = 'agentBuilder.lastConversation.';
 
-let lastCreateAttachmentId: string | undefined;
+// Session id of the `/workflows/create` chat, so its conversation can be moved
+// onto the saved workflow's session tag. This is the id the tag is built from,
+// not the id of the attachment the chat carries.
+let lastCreateSessionId: string | undefined;
 
-export const setLastCreateAttachmentId = (attachmentId: string | undefined): void => {
-  lastCreateAttachmentId = attachmentId;
+export const setLastCreateSessionId = (sessionId: string | undefined): void => {
+  lastCreateSessionId = sessionId;
 };
 
 let sidebarOpen = false;
@@ -64,8 +67,8 @@ export const hasPersistedConversation = (sessionId: string): boolean => {
  * was tracked or `localStorage` is unavailable.
  */
 export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
-  const from = lastCreateAttachmentId;
-  lastCreateAttachmentId = undefined;
+  const from = lastCreateSessionId;
+  lastCreateSessionId = undefined;
 
   if (!from || from === savedWorkflowId) return;
   if (typeof window === 'undefined' || !window.localStorage) return;

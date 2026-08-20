@@ -79,6 +79,7 @@ const createFakeAgentBuilder = () => {
   let acceptsAttachments = false;
   let pending: PendingAttachment[] = [];
   let sessionTag: string | undefined;
+  const boundConversations: Array<string | undefined> = [];
 
   const upsert = (into: PendingAttachment[], next: PendingAttachment[]) => {
     const merged = [...into];
@@ -126,6 +127,7 @@ const createFakeAgentBuilder = () => {
 
       const stored = window.localStorage.getItem(lastConversationKey(options.sessionTag));
       const restoredId = stored ? (JSON.parse(stored) as string) : undefined;
+      boundConversations.push(restoredId);
 
       // The chat UI publishes the binding as it renders, before its attachment
       // callbacks are registered and before the conversation fetch lands.
@@ -221,8 +223,12 @@ const createFakeAgentBuilder = () => {
       .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
       .map((attachment) => attachment.id);
 
+  /** Conversation the sidebar bound to on its most recent open, if any. */
+  const lastBoundConversation = () => boundConversations.at(-1);
+
   return {
     contract,
+    lastBoundConversation,
     submitRound,
     seedConversation,
     pointSessionAtConversation,
@@ -288,6 +294,10 @@ describe('workflow attachment sync', () => {
 
     const savedSession = await renderEditor('workflow-a');
     act(() => savedSession.result.current.openAgentChat());
+
+    // The chat must continue where it left off, not open a blank one.
+    expect(fake.lastBoundConversation()).toBe('conv-1');
+
     act(() => fake.submitRound('conv-1'));
 
     expect(fake.workflowAttachmentIds('conv-1')).toEqual([draftId]);

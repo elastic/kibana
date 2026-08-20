@@ -50,7 +50,7 @@ jest.mock('../../../../features/ai_integration', () => ({
     hasPendingProposals: jest.fn().mockReturnValue(false),
   })),
   setActiveProposalManager: jest.fn(),
-  setLastCreateAttachmentId: jest.fn(),
+  setLastCreateSessionId: jest.fn(),
   setSidebarOpen: jest.fn(),
   consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
   hasPersistedConversation: jest.fn().mockReturnValue(false),
@@ -62,12 +62,12 @@ jest.mock('../../../../features/ai_integration', () => ({
 
 type AiIntegrationModule = typeof import('../../../../features/ai_integration');
 const {
-  setLastCreateAttachmentId: mockSetLastCreateAttachmentId,
+  setLastCreateSessionId: mockSetLastCreateSessionId,
   setSidebarOpen: mockSetSidebarOpen,
   consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
   hasPersistedConversation: mockHasPersistedConversation,
 } = jest.requireMock('../../../../features/ai_integration') as {
-  setLastCreateAttachmentId: jest.MockedFunction<AiIntegrationModule['setLastCreateAttachmentId']>;
+  setLastCreateSessionId: jest.MockedFunction<AiIntegrationModule['setLastCreateSessionId']>;
   setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
   consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   hasPersistedConversation: jest.MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
@@ -811,7 +811,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('conversation handoff registration', () => {
-    it('registers the unsaved attachment id when there is no workflowId', async () => {
+    it('registers the unsaved session id when there is no workflowId', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -825,7 +825,9 @@ describe('useAgentBuilderIntegration', () => {
 
       await flushChatAccessCheck();
 
-      expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(ATTACHMENT_ID);
+      // The chat session tag is built from this, so it must be the session id
+      // and not the (fixed) attachment id.
+      expect(mockSetLastCreateSessionId).toHaveBeenCalledWith(MOCK_UUID);
     });
 
     it('does NOT register or clear the create-attachment when a workflowId is present', () => {
@@ -845,7 +847,7 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
-      expect(mockSetLastCreateAttachmentId).not.toHaveBeenCalled();
+      expect(mockSetLastCreateSessionId).not.toHaveBeenCalled();
     });
   });
 

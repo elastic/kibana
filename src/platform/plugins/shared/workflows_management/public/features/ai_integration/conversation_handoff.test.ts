@@ -13,14 +13,14 @@ import {
   hasPersistedConversation,
   isSidebarOpen,
   requestSidebarRestore,
-  setLastCreateAttachmentId,
+  setLastCreateSessionId,
   setSidebarOpen,
 } from './conversation_handoff';
 
 describe('conversation_handoff', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    setLastCreateAttachmentId(undefined);
+    setLastCreateSessionId(undefined);
     setSidebarOpen(false);
     // Drain any lingering restore pending from a previous test.
     consumeSidebarRestoreFor('__reset__');
@@ -40,7 +40,7 @@ describe('conversation_handoff', () => {
   });
 
   it('carries persisted conversation ids from the create session tag to the saved workflow tag', () => {
-    setLastCreateAttachmentId('unsaved-uuid-A');
+    setLastCreateSessionId('unsaved-uuid-A');
     window.localStorage.setItem(
       'agentBuilder.lastConversation.workflow-editor:unsaved-uuid-A.default',
       'conv-1'
@@ -71,7 +71,7 @@ describe('conversation_handoff', () => {
   });
 
   it('single-shot: a second carry after consume does not migrate again', () => {
-    setLastCreateAttachmentId('unsaved-uuid-A');
+    setLastCreateSessionId('unsaved-uuid-A');
     window.localStorage.setItem(
       'agentBuilder.lastConversation.workflow-editor:unsaved-uuid-A.default',
       'conv-1'
@@ -88,7 +88,7 @@ describe('conversation_handoff', () => {
   });
 
   it('is a no-op when source and target ids match (e.g. already-saved workflow re-save)', () => {
-    setLastCreateAttachmentId('saved-wf-1');
+    setLastCreateSessionId('saved-wf-1');
     window.localStorage.setItem(
       'agentBuilder.lastConversation.workflow-editor:saved-wf-1.default',
       'conv-1'
@@ -135,7 +135,7 @@ describe('conversation_handoff', () => {
   });
 
   it('does not touch localStorage keys outside the create tag prefix', () => {
-    setLastCreateAttachmentId('unsaved-uuid-A');
+    setLastCreateSessionId('unsaved-uuid-A');
     window.localStorage.setItem('unrelated.key', 'stays');
     window.localStorage.setItem(
       'agentBuilder.lastConversation.workflow-editor:unsaved-uuid-A.default',

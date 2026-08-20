@@ -22,7 +22,7 @@ import {
   hasPersistedConversation,
   ProposalManager,
   setActiveProposalManager,
-  setLastCreateAttachmentId,
+  setLastCreateSessionId,
   setSidebarOpen,
   WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
@@ -212,7 +212,7 @@ export const useAgentBuilderIntegration = ({
     // workflowId presence would race that consume after setWorkflow re-fires
     // this effect.
     if (!workflowId) {
-      setLastCreateAttachmentId(attachmentId);
+      setLastCreateSessionId(sessionId);
     }
 
     const bridge = new AttachmentBridge();
