@@ -1,0 +1,237 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Client, estypes } from '@elastic/elasticsearch';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import type { KbnClient } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import type { ProjectRouting } from '@kbn/es-query';
+import { test, testData } from '../fixtures';
+
+const CREATED_TRANSFORM_ID = 'scout_cps_ui_create_project_scope';
+const EDITED_TRANSFORM_ID = 'scout_cps_ui_edit_project_scope';
+const TRANSFORM_IDS = [CREATED_TRANSFORM_ID, EDITED_TRANSFORM_ID];
+const ORIGIN_PROJECT_ROUTING = `_id:${testData.ORIGIN_PROJECT_ID}`;
+
+const DATA_VIEW_API_PATH = 'api/data_views/data_view';
+
+const getDestinationIndex = (transformId: string) => `user-${transformId}`;
+
+const getTransformConfig = (
+  transformId: string,
+  projectRouting?: ProjectRouting
+): Omit<estypes.TransformPutTransformRequest, 'transform_id'> => ({
+  source: {
+    index: [testData.DATA_VIEW_TITLE],
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
+  },
+  pivot: {
+    group_by: {
+      airline: {
+        terms: {
+          field: 'airline',
+        },
+      },
+    },
+    aggregations: {
+      timestamp_count: {
+        value_count: {
+          field: '@timestamp',
+        },
+      },
+    },
+  },
+  dest: {
+    index: getDestinationIndex(transformId),
+  },
+});
+
+const ignoreCleanupError = async (cleanup: () => Promise<unknown>): Promise<void> => {
+  try {
+    await cleanup();
+  } catch {
+    // Cleanup is idempotent because tests may fail before creating every resource.
+  }
+};
+
+const createDataView = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `${DATA_VIEW_API_PATH}/${testData.DATA_VIEW_ID}`,
+    headers: testData.COMMON_HEADERS,
+    ignoreErrors: [404],
+  });
+  await kbnClient.request({
+    method: 'POST',
+    path: DATA_VIEW_API_PATH,
+    headers: testData.COMMON_HEADERS,
+    body: {
+      data_view: {
+        id: testData.DATA_VIEW_ID,
+        title: testData.DATA_VIEW_TITLE,
+        timeFieldName: testData.DATA_VIEW_TIME_FIELD,
+      },
+    },
+  });
+};
+
+const deleteTransform = async (esClient: Client, transformId: string): Promise<void> => {
+  await ignoreCleanupError(() =>
+    esClient.transform.stopTransform({
+      transform_id: transformId,
+      force: true,
+      wait_for_completion: true,
+    })
+  );
+  await ignoreCleanupError(() =>
+    esClient.transform.deleteTransform({
+      transform_id: transformId,
+      force: true,
+    })
+  );
+  await ignoreCleanupError(() =>
+    esClient.indices.delete({
+      index: getDestinationIndex(transformId),
+      ignore_unavailable: true,
+    })
+  );
+};
+
+const createTransform = async (
+  esClient: Client,
+  transformId: string,
+  projectRouting?: ProjectRouting
+): Promise<void> => {
+  await deleteTransform(esClient, transformId);
+  await esClient.transform.putTransform({
+    transform_id: transformId,
+    ...getTransformConfig(transformId, projectRouting),
+  });
+};
+
+const getProjectRouting = async (
+  esClient: Client,
+  transformId: string
+): Promise<ProjectRouting | undefined> => {
+  const response = await esClient.transform.getTransform({ transform_id: transformId });
+  return response.transforms[0]?.source.project_routing;
+};
+
+test.describe(
+  'Transform CPS project scope UI flows',
+  { tag: tags.serverless.security.complete },
+  () => {
+    test.beforeAll(async ({ kbnClient }) => {
+      await createDataView(kbnClient);
+    });
+
+    test.beforeEach(async ({ browserAuth, esClient }) => {
+      for (const transformId of TRANSFORM_IDS) {
+        await deleteTransform(esClient, transformId);
+      }
+      await browserAuth.loginAsAdmin();
+    });
+
+    test.afterEach(async ({ esClient }) => {
+      for (const transformId of TRANSFORM_IDS) {
+        await deleteTransform(esClient, transformId);
+      }
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${DATA_VIEW_API_PATH}/${testData.DATA_VIEW_ID}`,
+        headers: testData.COMMON_HEADERS,
+        ignoreErrors: [404],
+      });
+    });
+
+    test('creates a transform with project scope and verifies the table details', async ({
+      esClient,
+      page,
+      pageObjects,
+    }) => {
+      const { transform } = pageObjects;
+
+      await test.step('create a transform with only the origin project selected', async () => {
+        await transform.gotoCreate(testData.DATA_VIEW_ID);
+        await transform.selectCreateProjectScope(testData.ORIGIN_PROJECT_ID, testData.PROJECT_IDS);
+        await expect(page.testSubj.locator('transformProjectScopePicker')).toHaveText(
+          '1/2 projects'
+        );
+        await transform.useFullData();
+        await transform.configureBasicPivot();
+        await transform.createTransform(CREATED_TRANSFORM_ID);
+      });
+
+      await test.step('verify project routing was saved', async () => {
+        await expect
+          .poll(() => getProjectRouting(esClient, CREATED_TRANSFORM_ID))
+          .toBe(ORIGIN_PROJECT_ROUTING);
+      });
+
+      await test.step('verify the project scope column and expanded details', async () => {
+        await transform.returnToManagementFromCreate();
+        const row = transform.getTransformRow(CREATED_TRANSFORM_ID);
+
+        await expect(page.testSubj.locator('transformListColumnProjectScope')).toBeVisible();
+        await expect(row).toBeVisible();
+        await expect(row.getByTestId('transformListProjectScopeButton')).toHaveText('1/2');
+
+        await transform.expandTransformRow(CREATED_TRANSFORM_ID);
+        await expect(page.testSubj.locator('transformExpandedRowTabbedContent')).toContainText(
+          'Project routing'
+        );
+        await expect(page.testSubj.locator('transformExpandedRowTabbedContent')).toContainText(
+          ORIGIN_PROJECT_ROUTING
+        );
+      });
+    });
+
+    test('edits a transform project scope through the Edit action', async ({
+      esClient,
+      page,
+      pageObjects,
+    }) => {
+      const { transform } = pageObjects;
+
+      await test.step('set up a transform with all projects selected', async () => {
+        await createTransform(esClient, EDITED_TRANSFORM_ID, PROJECT_ROUTING.ALL);
+      });
+
+      await test.step('change the project scope from the edit flyout', async () => {
+        await transform.gotoManagement();
+        const row = transform.getTransformRow(EDITED_TRANSFORM_ID);
+
+        await expect(row).toBeVisible();
+        await expect(row.getByTestId('transformListProjectScopeButton')).toHaveText('All');
+        await transform.openEditFlyout(EDITED_TRANSFORM_ID);
+        await expect(page.testSubj.locator('transformEditProjectScopeButton')).toHaveText(
+          'All projects'
+        );
+
+        await transform.selectEditProjectScope(testData.ORIGIN_PROJECT_ID, testData.PROJECT_IDS);
+        await expect(page.testSubj.locator('transformEditProjectScopeButton')).toHaveText(
+          '1/2 projects'
+        );
+        await transform.updateTransform();
+      });
+
+      await test.step('verify the updated project routing', async () => {
+        await expect
+          .poll(() => getProjectRouting(esClient, EDITED_TRANSFORM_ID))
+          .toBe(ORIGIN_PROJECT_ROUTING);
+      });
+    });
+
+    test.skip('edits multiple transform project scopes from the bulk action', () => {
+      // Blocked until https://github.com/elastic/kibana/pull/285798 is merged.
+    });
+  }
+);
