@@ -363,6 +363,7 @@ export const GmailConnector: ConnectorSpec = {
       // Deliberately not a tool: mailbox mutation, workflow steps only.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
       isTool: false,
+      scope: 'destroy',
       description:
         'Add and/or remove Gmail labels on a message. This is the quarantine primitive: pass the quarantine label ID in addLabelIds and ["INBOX"] in removeLabelIds to move a message out of the inbox. Call listLabels first to resolve a label name to its ID. Roll back by swapping addLabelIds and removeLabelIds. At least one of addLabelIds or removeLabelIds is required. Not available with Elastic managed authentication.',
       input: ModifyLabelsInputSchema,
@@ -375,6 +376,7 @@ export const GmailConnector: ConnectorSpec = {
 
     markAsRead: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mark a Gmail message as read by removing its UNREAD label. Reversible with markAsUnread. Returns the message id, threadId, and updated labelIds. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
@@ -390,6 +392,7 @@ export const GmailConnector: ConnectorSpec = {
 
     markAsUnread: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mark a Gmail message as unread by adding its UNREAD label. Reversible with markAsRead. Returns the message id, threadId, and updated labelIds. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
@@ -410,6 +413,7 @@ export const GmailConnector: ConnectorSpec = {
       // workflow steps only. Gmail permanently purges trashed mail after 30 days.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
       isTool: false,
+      scope: 'destroy',
       description:
         'Move a Gmail message to Trash. Reversible with untrashMessage within 30 days; after that Gmail permanently deletes trashed mail. Distinct from a permanent delete, which is not supported by this connector. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
@@ -426,6 +430,7 @@ export const GmailConnector: ConnectorSpec = {
       // mailbox-mutation connectors (sublime_security.ts restoreMessageGroups).
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore a Gmail message from Trash. Rolls back a trashMessage call. Only effective within 30 days — Gmail permanently removes trashed mail after that period. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
@@ -446,6 +451,7 @@ export const GmailConnector: ConnectorSpec = {
       // Workflow steps only, so a human authored the send step.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
       isTool: false,
+      scope: 'write',
       description:
         "Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain text and HTML bodies. No attachments in v1. Not available with Elastic managed authentication.",
       input: SendMessageInputSchema,
@@ -483,6 +489,7 @@ export const GmailConnector: ConnectorSpec = {
       // is irreversible and leaves the organisation.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
       isTool: false,
+      scope: 'write',
       description:
         'Send a reply to an existing Gmail message, preserving the thread. The handler fetches the original message to extract threading headers (In-Reply-To, References) and to determine the default reply-to address from Reply-To or From. Pass "to" explicitly to override the recipient. Not available with Elastic managed authentication.',
       input: ReplyMessageInputSchema,
