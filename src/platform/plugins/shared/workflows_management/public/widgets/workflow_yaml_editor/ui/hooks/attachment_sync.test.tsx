@@ -199,6 +199,11 @@ const createFakeAgentBuilder = () => {
     window.localStorage.setItem(lastConversationKey(tag), JSON.stringify(conversationId));
   };
 
+  /** What the save handoff leaves behind: the session tag points at the conversation. */
+  const pointSessionAtConversation = (tag: string, conversationId: string) => {
+    window.localStorage.setItem(lastConversationKey(tag), JSON.stringify(conversationId));
+  };
+
   const emitYamlChange = (conversationId: string, attachmentId: string, afterYaml: string) => {
     stream$(conversationId).next({
       type: ChatEventType.toolUi,
@@ -216,7 +221,14 @@ const createFakeAgentBuilder = () => {
       .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
       .map((attachment) => attachment.id);
 
-  return { contract, submitRound, seedConversation, emitYamlChange, workflowAttachmentIds };
+  return {
+    contract,
+    submitRound,
+    seedConversation,
+    pointSessionAtConversation,
+    emitYamlChange,
+    workflowAttachmentIds,
+  };
 };
 
 type FakeAgentBuilder = ReturnType<typeof createFakeAgentBuilder>;
@@ -297,6 +309,32 @@ describe('workflow attachment sync', () => {
       act(() => fake.submitRound('conv-2'));
 
       expect(fake.workflowAttachmentIds('conv-2')).toEqual(['draft-from-before-reload']);
+    });
+
+    it('reuses the attachment even when its origin was never linked', async () => {
+      // A create session persisted its attachment, but the origin link never
+      // landed. After a reload the handoff state is gone, so the only thing
+      // that can still identify that attachment is its id.
+      const fake = createFakeAgentBuilder();
+      setupKibana(fake.contract);
+
+      const createSession = await renderEditor(undefined);
+      act(() => createSession.result.current.openAgentChat());
+      act(() => fake.submitRound('conv-4'));
+      createSession.unmount();
+
+      const [attachmentFromBeforeReload] = fake.workflowAttachmentIds('conv-4');
+      expect(attachmentFromBeforeReload).toBeDefined();
+
+      // The reload: local storage still points this workflow's chat at the
+      // conversation, but nothing in memory survives.
+      fake.pointSessionAtConversation('workflow-editor:workflow-e', 'conv-4');
+
+      const reloaded = await renderEditor('workflow-e');
+      act(() => reloaded.result.current.openAgentChat());
+      act(() => fake.submitRound('conv-4'));
+
+      expect(fake.workflowAttachmentIds('conv-4')).toEqual([attachmentFromBeforeReload]);
     });
 
     it('applies the diff the agent sends back for that round', async () => {

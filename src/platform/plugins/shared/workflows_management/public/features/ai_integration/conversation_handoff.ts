@@ -42,13 +42,6 @@ export const consumeSidebarRestoreFor = (workflowId: string): boolean => {
   return true;
 };
 
-// Create-session attachment id, keyed by the workflow it was saved as. The
-// destination editor reuses it instead of starting a second attachment.
-const carriedAttachmentIds = new Map<string, string>();
-
-export const getCarriedAttachmentId = (workflowId: string): string | undefined =>
-  carriedAttachmentIds.get(workflowId);
-
 /**
  * True when the sidebar will restore a conversation for this session, which the
  * editor cannot sync into until it knows which attachment that conversation
@@ -75,9 +68,6 @@ export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
   lastCreateAttachmentId = undefined;
 
   if (!from || from === savedWorkflowId) return;
-
-  carriedAttachmentIds.set(savedWorkflowId, from);
-
   if (typeof window === 'undefined' || !window.localStorage) return;
 
   const fromTag = `${SESSION_TAG_PREFIX}${from}`;

@@ -11,14 +11,19 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
+/**
+ * Id the editor gives its workflow attachment. Fixed, so saving a workflow
+ * cannot move it and leave the editor writing into a second attachment.
+ * `screen-context` and `ai-rule-creation` work the same way.
+ */
+export const WORKFLOW_EDITOR_ATTACHMENT_ID = 'workflow-yaml-editor';
+
 export interface FindLinkedWorkflowAttachmentParams {
   attachments: VersionedAttachment[] | undefined;
   /** Attachment id this editor session would use on its own. */
   attachmentId: string;
   /** Saved workflow id, or undefined on the `/workflows/create` route. */
   workflowId?: string;
-  /** Create-session attachment id handed over across the first save. */
-  carriedAttachmentId?: string;
 }
 
 /**
@@ -31,7 +36,6 @@ export const findLinkedWorkflowAttachment = ({
   attachments,
   attachmentId,
   workflowId,
-  carriedAttachmentId,
 }: FindLinkedWorkflowAttachmentParams): VersionedAttachment | undefined => {
   const candidates = (attachments ?? []).filter(
     (attachment) =>
@@ -40,10 +44,7 @@ export const findLinkedWorkflowAttachment = ({
 
   return (
     candidates.find((attachment) => attachment.id === attachmentId) ??
-    // Survives a reload, where the handoff state is gone.
-    (workflowId ? candidates.find((attachment) => attachment.origin === workflowId) : undefined) ??
-    (carriedAttachmentId
-      ? candidates.find((attachment) => attachment.id === carriedAttachmentId)
-      : undefined)
+    // Attachments predating the fixed id are only identifiable by origin.
+    (workflowId ? candidates.find((attachment) => attachment.origin === workflowId) : undefined)
   );
 };

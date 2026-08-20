@@ -65,17 +65,6 @@ describe('findLinkedWorkflowAttachment', () => {
     ).toBe('draft-uuid');
   });
 
-  it('matches the carried draft attachment before its origin is set', () => {
-    expect(
-      findLinkedWorkflowAttachment({
-        attachments: [workflowAttachment('draft-uuid')],
-        attachmentId: 'workflow-a',
-        workflowId: 'workflow-a',
-        carriedAttachmentId: 'draft-uuid',
-      })?.id
-    ).toBe('draft-uuid');
-  });
-
   it('ignores a workflow attachment linked to a different workflow', () => {
     expect(
       findLinkedWorkflowAttachment({

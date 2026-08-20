@@ -19,12 +19,12 @@ import {
   AttachmentBridge,
   consumeSidebarRestoreFor,
   findLinkedWorkflowAttachment,
-  getCarriedAttachmentId,
   hasPersistedConversation,
   ProposalManager,
   setActiveProposalManager,
   setLastCreateAttachmentId,
   setSidebarOpen,
+  WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
@@ -94,10 +94,9 @@ export const useAgentBuilderIntegration = ({
   // onto the saved workflow across the first save.
   const sessionId = workflowId ?? unsavedWorkflowIdRef.current;
 
-  // Follows `sessionId` except right after the first save, where the
-  // conversation already holds the create session's attachment. Resolved during
-  // render because the editor syncs before the conversation loads.
-  const attachmentId = (workflowId ? getCarriedAttachmentId(workflowId) : undefined) ?? sessionId;
+  // Fixed, so saving a new workflow cannot move the attachment the conversation
+  // is already writing into.
+  const attachmentId = WORKFLOW_EDITOR_ATTACHMENT_ID;
 
   useEffect(() => {
     if (!agentBuilder || !hasShowPrivilege) {
@@ -306,7 +305,6 @@ export const useAgentBuilderIntegration = ({
           attachments: activeConversation.conversation?.attachments,
           attachmentId,
           workflowId,
-          carriedAttachmentId: workflowId ? getCarriedAttachmentId(workflowId) : undefined,
         });
         if (linked) {
           syncAttachmentIdRef.current = linked.id;

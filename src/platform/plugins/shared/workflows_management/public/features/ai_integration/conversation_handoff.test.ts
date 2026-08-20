@@ -10,7 +10,6 @@
 import {
   carryConversationToWorkflow,
   consumeSidebarRestoreFor,
-  getCarriedAttachmentId,
   hasPersistedConversation,
   isSidebarOpen,
   requestSidebarRestore,
@@ -146,26 +145,6 @@ describe('conversation_handoff', () => {
     carryConversationToWorkflow('saved-wf-1');
 
     expect(window.localStorage.getItem('unrelated.key')).toBe('stays');
-  });
-
-  describe('carried attachment id', () => {
-    it('records the create session attachment id against the saved workflow', () => {
-      setLastCreateAttachmentId('draft-uuid');
-      carryConversationToWorkflow('workflow-a');
-
-      expect(getCarriedAttachmentId('workflow-a')).toBe('draft-uuid');
-    });
-
-    it('returns undefined for a workflow that was never carried', () => {
-      expect(getCarriedAttachmentId('never-saved-from-create')).toBeUndefined();
-    });
-
-    it('records nothing when the ids already match', () => {
-      setLastCreateAttachmentId('workflow-b');
-      carryConversationToWorkflow('workflow-b');
-
-      expect(getCarriedAttachmentId('workflow-b')).toBeUndefined();
-    });
   });
 
   describe('hasPersistedConversation', () => {

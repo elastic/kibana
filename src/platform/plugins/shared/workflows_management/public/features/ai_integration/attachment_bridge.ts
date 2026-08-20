@@ -191,6 +191,9 @@ export class AttachmentBridge {
 
     // Secondary guard on top of the per-conversation scope: even within one
     // conversation, a payload for a different saved workflow must be dropped.
+    // Every workflow editor shares one attachment id, so the workflow id is
+    // what tells them apart.
+    if (this.workflowId && workflowId && workflowId !== this.workflowId) return;
     if (this.workflowId) {
       const payloadAttachmentId = payload.attachmentId ?? workflowId;
       if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
