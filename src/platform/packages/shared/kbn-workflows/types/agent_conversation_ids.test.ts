@@ -11,14 +11,36 @@ import { extractAgentConversationIds } from './agent_conversation_ids';
 import type { WorkflowStepExecutionDto } from './v1';
 
 /**
- * Covers the multi-agent case (one conversation id per `ai.agent` step) and the
- * `step_level_timeout` wrapper, which reuses the agent step's `stepId` with a
- * null output.
+ * Covers the multi-agent case (one conversation id per `ai.agent` step), the
+ * `step_level_timeout` wrapper (which reuses the agent step's `stepId` with a
+ * null output), and non-agent steps that copy a `conversation_id` into their
+ * output (e.g. `workflow.output`) being excluded.
  */
 const step = (over: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({ stepId: 'draft_creation', ...over } as WorkflowStepExecutionDto);
 
 describe('extractAgentConversationIds', () => {
+  it('skips non-agent steps whose output carries a conversation_id', () => {
+    // skill_alert_retrieval.yaml copies conversation_id into a workflow.output
+    // step; a workflow.execute wrapper would surface it typed as its own stepType.
+    const steps = [
+      step({
+        stepId: 'output',
+        stepType: 'workflow.output',
+        output: { conversation_id: 'conv-copied' },
+      }),
+      step({
+        stepId: 'retrieval_agent',
+        stepType: 'ai.agent',
+        output: { conversation_id: 'conv-agent' },
+      }),
+    ];
+
+    expect(extractAgentConversationIds(steps)).toEqual([
+      { stepId: 'retrieval_agent', conversationId: 'conv-agent', stepType: 'ai.agent' },
+    ]);
+  });
+
   it('skips the step_level_timeout wrapper and reads the real ai.agent step', () => {
     const steps = [
       step({ stepType: 'step_level_timeout', output: undefined }),

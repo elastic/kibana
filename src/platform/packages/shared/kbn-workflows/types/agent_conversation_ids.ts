@@ -26,13 +26,14 @@ export interface AgentConversationId {
 }
 
 /**
- * Collects every non-empty `conversation_id` from workflow step executions.
+ * Collects the conversation id of every `ai.agent` step execution.
  *
  * A workflow may contain multiple `ai.agent` steps, each with its own
- * conversation id, so all of them are returned. Selection keys off the output
- * shape rather than `stepId`, because `step_level_timeout` wrappers reuse the
- * agent step's id with a null output. Results are deduped by `conversationId`
- * in first-seen order so a retried step yields one join key.
+ * conversation id, so all of them are returned. Only steps whose `stepType`
+ * is `ai.agent` are considered: other step types (e.g. a `workflow.output`
+ * step) may copy a `conversation_id` into their output and must not be
+ * reported as agent join keys. Results are deduped by `conversationId` in
+ * first-seen order so a retried step yields one join key.
  */
 export function extractAgentConversationIds(
   steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>
@@ -40,7 +41,9 @@ export function extractAgentConversationIds(
   const seen = new Set<string>();
   const result: AgentConversationId[] = [];
 
-  for (const step of steps) {
+  const agentSteps = steps.filter((step) => step.stepType === 'ai.agent');
+
+  for (const step of agentSteps) {
     const conversationId = (step.output as { conversation_id?: unknown } | undefined)
       ?.conversation_id;
     if (
@@ -49,11 +52,7 @@ export function extractAgentConversationIds(
       !seen.has(conversationId)
     ) {
       seen.add(conversationId);
-      result.push({
-        stepId: step.stepId,
-        conversationId,
-        ...(step.stepType !== undefined ? { stepType: step.stepType } : {}),
-      });
+      result.push({ stepId: step.stepId, conversationId, stepType: step.stepType });
     }
   }
 
