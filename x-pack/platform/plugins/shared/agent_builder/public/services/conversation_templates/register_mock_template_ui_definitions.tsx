@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { ConversationTemplateTabRenderProps } from '@kbn/agent-builder-browser';
 import type { ConversationTemplatesService } from './conversation_templates_service';
 
-const ConversationJson: React.FC<{ conversation: Conversation }> = ({ conversation }) => (
+const ConversationJson: React.FC<ConversationTemplateTabRenderProps> = ({ conversation }) => (
   <EuiCodeBlock language="json" fontSize="s" paddingSize="s" whiteSpace="pre-wrap">
     {JSON.stringify(conversation, null, 2)}
   </EuiCodeBlock>

@@ -9,6 +9,14 @@ import type { ComponentType } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
 
 /**
+ * Props passed to a conversation template tab's `content` component.
+ */
+export interface ConversationTemplateTabRenderProps {
+  /** The conversation the flyout is showing. */
+  conversation: Conversation;
+}
+
+/**
  * A reusable conversation flyout tab, registered once and referenced by id from any
  * number of template UI definitions.
  */
@@ -22,7 +30,7 @@ export interface ConversationTemplateTabDefinition {
    * mount any providers you need inside this component. The flyout can render outside any
    * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
    */
-  content: ComponentType<{ conversation: Conversation }>;
+  content: ComponentType<ConversationTemplateTabRenderProps>;
 }
 
 /**

@@ -1755,7 +1755,8 @@ module.exports = {
         'playwright/expect-expect': [
           'warn',
           {
-            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
           },
         ],
         'playwright/no-commented-out-tests': 'error',
@@ -3104,13 +3105,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: [
-              '@kbn/*',
-              '!@kbn/i18n',
-              '!@kbn/i18n-react',
-              '!@kbn/ui-chrome-layout-constants',
-              '!@kbn/ui-chrome-layout-utils',
-            ],
+            patterns: ['@kbn/*', '!@kbn/i18n', '!@kbn/i18n-react', '!@kbn/ui-chrome-layout'],
           },
         ],
       },
