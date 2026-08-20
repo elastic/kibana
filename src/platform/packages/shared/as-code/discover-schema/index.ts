@@ -24,7 +24,13 @@ export {
   discoverSessionApiDataSchema,
 } from './src/schemas';
 
-export type { DiscoverSessionData, DiscoverSessionApiInput } from './src/types';
+export type {
+  DiscoverSessionData,
+  DiscoverSessionApiInput,
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiEsqlTab,
+  DiscoverSessionApiTab,
+} from './src/types';
 
 export {
   MAX_SESSION_TITLE_LENGTH,

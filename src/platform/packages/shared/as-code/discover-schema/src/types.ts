@@ -8,10 +8,18 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { discoverSessionApiDataSchema } from './schemas/session_data';
+import type {
+  discoverSessionApiDataSchema,
+  discoverSessionClassicTabSchema,
+  discoverSessionEsqlTabSchema,
+  discoverSessionApiTabSchema,
+} from './schemas/session_data';
 
 // Output types (after parsing — all defaults resolved)
 export type DiscoverSessionData = z.output<typeof discoverSessionApiDataSchema>;
+export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;
+export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
+export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 
 // Input types (before parsing — fields with defaults are optional)
 export type DiscoverSessionApiInput = z.input<typeof discoverSessionApiDataSchema>;

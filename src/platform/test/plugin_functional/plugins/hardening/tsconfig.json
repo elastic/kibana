@@ -9,7 +9,6 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "test/**/*.ts",
     "../../../../../../typings/**/*",
   ],
   "exclude": [
@@ -17,6 +16,5 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/scout",
   ]
 }
