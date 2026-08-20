@@ -2995,7 +2995,9 @@ function buildVerifierCredentialVars(
   if (provider === 'aws') {
     const awsVars = connectorVars as AwsCloudConnectorVars;
     vars.credentials_role_arn = awsVars.role_arn;
-    vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
+    if (awsVars.external_id) {
+      vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
+    }
   } else if (provider === 'azure') {
     const azureVars = connectorVars as AzureCloudConnectorVars;
     vars.credentials_tenant_id = azureVars.tenant_id;

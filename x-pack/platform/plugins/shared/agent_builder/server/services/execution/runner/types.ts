@@ -24,6 +24,7 @@ import type { RendererServiceStart } from '../../renderers';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -50,6 +51,7 @@ export interface RunnerFactoryDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface RunnerFactory {
