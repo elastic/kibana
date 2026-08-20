@@ -250,7 +250,7 @@
       "id": "endpoint-osquery-trap",
       "name": "Endpoint (Osquery capability trap)",
       "slackChannel": "#security-defend-workflows-tests",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery-trap.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery_trap.config.ts",
       "tags": [
         "security",
         "defend-workflows",

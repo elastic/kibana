@@ -60,7 +60,7 @@ describe('Endpoint Osquery eval isolation', () => {
     // and stack — a shared stack leaks the install into other specs.
     expect(endpointOsqueryTrap).toMatchObject({
       configPath:
-        'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery-trap.config.ts',
+        'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery_trap.config.ts',
       serverConfigSet: 'evals_endpoint',
     });
   });
@@ -73,7 +73,7 @@ describe('Endpoint Osquery eval isolation', () => {
       'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery.config.ts'
     );
     const trapConfig = read(
-      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery-trap.config.ts'
+      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.osquery_trap.config.ts'
     );
 
     expect(baseConfig).toContain('testDir: `${__dirname}/evals`');
