@@ -164,7 +164,8 @@ When the investigation completes, summarise the structured output for the user:
 |---|---|
 | `summary` | Final narrative summary of the investigation |
 | `hypotheses` | Every candidate cause investigated, each with a `confidence` score 0–1, a `status` (`confirmed`, `dismissed`, or `investigating`), and a `reason` |
-| `conclusion` | Markdown describing the confirmed root cause mechanism and recommended next steps |
-| `gaps_found` | Data or signal gaps that limited the investigation |
+| `conclusion` | Prose narrative naming the confirmed root cause and its mechanism |
+| `recommendations` | Concrete, actionable next steps, each with a `title` and optional `description`/`code` |
+| `blind_spots` | Data or signal gaps that limited the investigation, each with a `title` and `description` |
 
-Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then surface the `dismissed` hypotheses (with their reasons) and `gaps_found` if they add useful context.
+Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then the `recommendations`, then surface the `dismissed` hypotheses (with their reasons) and `blind_spots` if they add useful context.
