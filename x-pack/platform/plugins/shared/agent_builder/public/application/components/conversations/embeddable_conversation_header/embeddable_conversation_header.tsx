@@ -9,11 +9,16 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationRightActions } from '../conversation_header/conversation_actions_right';
-import { ConversationTitle } from '../conversation_header/conversation_title';
+import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
+import { EmbeddableConversationRightActions } from './embeddable_conversation_actions';
+import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 import { EmbeddableMenuButton } from './embeddable_menu_button';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import {
+  useAgentId,
+  useConversation,
+  useHasActiveConversation,
+} from '../../../hooks/use_conversation';
 
 const newConversationTitleLabel = i18n.translate(
   'xpack.agentBuilder.embeddableHeader.newConversation',
@@ -36,6 +41,11 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
   const { agents } = useAgentBuilderAgents();
   const hasActiveConversation = useHasActiveConversation();
   const currentAgent = agents.find((a) => a.id === agentId);
+  const { conversation } = useConversation();
+  const templateName = conversation?.template_id
+    ? CONVERSATION_TEMPLATES.find((template) => template.id === conversation.template_id)?.name ??
+      conversation.template_id
+    : undefined;
 
   return (
     <div
@@ -56,7 +66,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
         `}
       >
         {hasActiveConversation ? (
-          <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+          <EmbeddableConversationTitle ariaLabelledBy={ariaLabelledBy} />
         ) : (
           <h4
             id={ariaLabelledBy}
@@ -81,12 +91,13 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
             `}
           >
             {currentAgent.name}
+            {templateName && ` / ${templateName}`}
           </EuiText>
         )}
       </div>
 
       {/* Right: kebab menu + close */}
-      <ConversationRightActions onClose={onClose} />
+      <EmbeddableConversationRightActions onClose={onClose} />
     </div>
   );
 };

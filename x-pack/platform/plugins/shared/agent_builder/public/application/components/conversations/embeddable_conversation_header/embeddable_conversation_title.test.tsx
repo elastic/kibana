@@ -14,7 +14,7 @@ import {
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
-import { ConversationTitle } from './conversation_title';
+import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
@@ -30,12 +30,15 @@ jest.mock('../delete_conversation_modal', () => ({
   DeleteConversationModal: () => null,
 }));
 
-const mockUseConversationTitle = jest.mocked(useConversationTitle);
+const mockUseEmbeddableConversationTitle = jest.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
 const renderTitle = (permissions: Partial<ConversationPermissions>) => {
-  mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
+  mockUseEmbeddableConversationTitle.mockReturnValue({
+    title: 'My conversation',
+    isLoading: false,
+  });
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,
@@ -46,7 +49,7 @@ const renderTitle = (permissions: Partial<ConversationPermissions>) => {
 
   render(
     <IntlProvider locale="en">
-      <ConversationTitle />
+      <EmbeddableConversationTitle />
     </IntlProvider>
   );
 };
@@ -54,7 +57,7 @@ const renderTitle = (permissions: Partial<ConversationPermissions>) => {
 const openTitleMenu = () =>
   fireEvent.click(screen.getByTestId('agentBuilderConversationTitleButton'));
 
-describe('ConversationTitle', () => {
+describe('EmbeddableConversationTitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

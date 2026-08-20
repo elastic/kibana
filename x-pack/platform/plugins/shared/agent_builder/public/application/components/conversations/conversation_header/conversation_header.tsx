@@ -16,13 +16,9 @@ const titleSlotStyles = css`
 `;
 
 interface ConversationHeaderProps {
-  onClose?: () => void;
   ariaLabelledBy?: string;
 }
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
-  onClose,
-  ariaLabelledBy,
-}) => {
+export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ ariaLabelledBy }) => {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -34,7 +30,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
         <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ConversationRightActions onClose={onClose} />
+        <ConversationRightActions />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
