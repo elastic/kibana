@@ -26,7 +26,9 @@ export type GridDataInput = z.input<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
 export type DashboardPanel = z.output<ReturnType<typeof getPanelSchema>>;
 /** A section in a dashboard that groups panels. */
-export type DashboardSection = z.output<ReturnType<typeof getSectionSchema>>;
+export type DashboardSection = Omit<z.output<ReturnType<typeof getSectionSchema>>, 'panels'> & {
+  panels: DashboardPanel[];
+};
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = z.output<ReturnType<typeof getDashboardDataSchema>>;
 /** The complete state of a dashboard (input shape — fields with defaults are optional). */

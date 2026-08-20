@@ -20,6 +20,10 @@ export type {
   DashboardOptionsInput,
   GridData,
   GridDataInput,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanelsStateInput,
+  DashboardPinnedPanel,
+  DashboardPinnedPanelInput,
 } from '@kbn/as-code-dashboard-schema';
 
 export type Warnings = z.output<typeof warningsSchema>;

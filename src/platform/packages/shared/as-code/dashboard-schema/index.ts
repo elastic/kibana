@@ -8,6 +8,7 @@
  */
 
 export { getDashboardDataSchema, getPanelSchema } from './src/schemas';
+export { accessControlSchema } from './src/schemas';
 
 export type {
   DashboardApiDataInput,
@@ -19,6 +20,10 @@ export type {
   DashboardOptionsInput,
   GridData,
   GridDataInput,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanelsStateInput,
+  DashboardPinnedPanel,
+  DashboardPinnedPanelInput,
 } from './src/types';
 
 export {
