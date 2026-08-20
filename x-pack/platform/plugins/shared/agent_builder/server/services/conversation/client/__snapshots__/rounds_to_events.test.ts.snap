@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`roundsToEvents projection-drift snapshot: maximal round shape (bump CONVERSATION_SCHEMA_VERSION if this changes semantically) 1`] = `
+Array [
+  Object {
+    "actor": Object {
+      "full_name": "Bob Person",
+      "id": "slack-U123",
+      "origin": Object {
+        "type": "slack",
+      },
+      "type": "external",
+      "username": "bob",
+    },
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "data": Object {
+      "message": "compute a query",
+    },
+    "id": "round-max::user_message",
+    "type": "user_message",
+  },
+  Object {
+    "actor": Object {
+      "id": "agent-1",
+      "type": "agent",
+    },
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "data": Object {
+      "trigger_type": "user_message",
+    },
+    "execution_id": "round-max::execution",
+    "id": "round-max::execution_started",
+    "trigger_event_id": "round-max::user_message",
+    "type": "execution_started",
+  },
+  Object {
+    "actor": Object {
+      "id": "agent-1",
+      "type": "agent",
+    },
+    "created_at": "2026-01-01T00:00:00.500Z",
+    "data": Object {
+      "model_usage": Object {
+        "connector_id": "connector-1",
+        "input_tokens": 40,
+        "llm_calls": 2,
+        "output_tokens": 12,
+      },
+      "outcome": Object {
+        "response": Object {
+          "message": "here is the result",
+        },
+        "type": "responded",
+      },
+      "steps": Array [
+        Object {
+          "reasoning": "thinking about the problem",
+          "type": "reasoning",
+        },
+        Object {
+          "params": Object {
+            "query": "FROM logs | LIMIT 1",
+          },
+          "results": Array [
+            Object {
+              "data": Object {
+                "rows": 1,
+              },
+              "tool_result_id": "result-1",
+              "type": "other",
+            },
+          ],
+          "tool_call_id": "call-1",
+          "tool_id": "esql.execute",
+          "type": "tool_call",
+        },
+      ],
+      "time_to_first_token": 100,
+      "time_to_last_token": 500,
+      "trace_id": "trace-abc",
+    },
+    "execution_id": "round-max::execution",
+    "id": "round-max::execution_terminated",
+    "trigger_event_id": "round-max::user_message",
+    "type": "execution_terminated",
+  },
+]
+`;

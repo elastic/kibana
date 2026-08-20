@@ -7,6 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+  TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
   isConversationWriteConflictError,
@@ -18,7 +23,11 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
-import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationTemplate,
+  SerializedMetadataValue,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
@@ -70,6 +79,8 @@ describe('ConversationClient', () => {
     attachments,
     workspaceId,
     read = false,
+    schemaVersion,
+    events,
   }: {
     id?: string;
     agentId?: string;
@@ -85,6 +96,10 @@ describe('ConversationClient', () => {
     attachments?: unknown[];
     workspaceId?: string;
     read?: boolean;
+    // Events-native docs set both; legacy docs leave them undefined so the
+    // read path derives events and the write path never persists a projection.
+    schemaVersion?: number;
+    events?: TimelineEvent[];
   } = {}): Document =>
     ({
       _id: id,
@@ -101,6 +116,8 @@ describe('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
+        ...(events !== undefined ? { events } : {}),
         access_control: {
           access_mode: accessMode,
           entries,
@@ -2097,6 +2114,241 @@ describe('ConversationClient', () => {
       await expect(
         adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Events persistence: create / upsertRound / update wired through the OCC
+  // writer must produce an atomic (rounds + events + schema_version) write for
+  // events-native documents, and a rounds-only write for legacy documents.
+  // ---------------------------------------------------------------------------
+
+  describe('events persistence', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
+      // The mock returns some doc from the follow-up `get`; only the initial
+      // `index` payload matters for what was actually written.
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ schemaVersion: 1 })] },
+      });
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
+      // Same physical write carries the rounds — atomic by construction (one
+      // `storage.index` call), which is Pierre's "no desynced second write".
+      expect(indexed.conversation_rounds).toHaveLength(1);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('round-trips attachment_refs through the stored events projection', async () => {
+      // Pins the hydration ordering: `createRequestToEs` derives events from
+      // the caller's rounds, so `events[0].data` is the round's input verbatim
+      // — including `attachment_refs`. Later reads must return the same shape.
+      const attachmentRefs = [
+        { attachment_id: 'attachment-a', version: 1 },
+        { attachment_id: 'attachment-b', version: 2 },
+      ];
+
+      // Follow-up `get` returns the doc the create wrote (schema_version = 1,
+      // events non-empty ⇒ stored projection served, no derivation).
+      const written = createConversationDocument({
+        schemaVersion: 1,
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [written] } });
+
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+
+      // (a) Write path: `_source.events[0].data.attachment_refs` matches the
+      // input array passed by the caller.
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
+      };
+      expect(indexed.events?.[0]?.data.attachment_refs).toEqual(attachmentRefs);
+
+      // (b) Read path: the API-returned event carries the same refs (fromEs
+      // serves stored events for events-native docs), and the round's input
+      // still has them (verifying the ordering rule "merge → recompute events
+      // → serialize" leaves rounds and events in agreement).
+      expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
+      expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
+    });
+
+    it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
+      // Simulates an execution that persisted only its `execution_started` before
+      // the process crashed. After a successful upsertRound completing the round,
+      // the stored projection must carry exactly one `execution_terminated` — no
+      // stale in-progress artifacts, no duplicated terminals.
+      const inProgressRound = createRound({
+        id: 'round-crash',
+        status: ConversationRoundStatus.inProgress,
+      });
+      const stalePartialEvents: TimelineEvent[] = [
+        {
+          id: 'round-crash::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: inProgressRound.input,
+        },
+        {
+          id: 'round-crash::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'round-crash::execution',
+          trigger_event_id: 'round-crash::user_message',
+          data: { trigger_type: TimelineTriggerType.userMessage },
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [inProgressRound],
+              events: stalePartialEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.upsertRound({
+        id: 'conversation-1',
+        round: {
+          ...inProgressRound,
+          status: ConversationRoundStatus.completed,
+          response: { message: 'now finished' },
+        },
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ id: string; type: string }> };
+      };
+      const terminals = indexed.events?.filter(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
+      expect(terminals).toHaveLength(1);
+      expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
+      // The projection is fully reconciled from the completed round, not
+      // appended to the stale partial: no duplicate `user_message` or
+      // `execution_started` from the pre-crash state.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-crash::user_message',
+        'round-crash::execution_started',
+        'round-crash::execution_terminated',
+      ]);
+    });
+
+    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
+      // No `schemaVersion` on the read doc ⇒ legacy. `updateConversation`
+      // skips reconcile and `toEs` omits both fields — a plain title update
+      // must never accidentally migrate the doc.
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          title: string;
+          schema_version?: number;
+          events?: unknown[];
+        };
+      };
+      expect(indexed.title).toBe('Renamed');
+      expect(indexed.schema_version).toBeUndefined();
+      expect(indexed.events).toBeUndefined();
+    });
+
+    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+      const existingRound = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+      });
+      // A minimal stored projection covering the existing round; on update the
+      // reconcile step must regenerate these from the current rounds (unchanged
+      // here) and re-stamp `schema_version` at the current format version.
+      const storedEvents: TimelineEvent[] = [
+        {
+          id: 'round-1::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: existingRound.started_at,
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: existingRound.input,
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [existingRound],
+              events: storedEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      // Round-derived events regenerated from the current round set: id, plus
+      // the two lifecycle events that stored projection was missing.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
     });
   });
 });

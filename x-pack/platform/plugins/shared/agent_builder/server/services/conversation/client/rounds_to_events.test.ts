@@ -10,8 +10,10 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  ToolResultType,
 } from '@kbn/agent-builder-common';
 import { roundsToEvents } from './rounds_to_events';
 
@@ -158,5 +160,60 @@ describe('roundsToEvents', () => {
       'round-2::execution_started',
       'round-2::execution_terminated',
     ]);
+  });
+
+  // --- Projection-drift guard ------------------------------------------------
+  // This snapshot is the persisted contract: every field/id shape below is
+  // materialized onto `.chat-conversations._source.events` for events-native
+  // conversations. If the snapshot changes and `CONVERSATION_SCHEMA_VERSION`
+  // did not, decide whether the change is semantic (event ids, actor logic,
+  // timestamps, `data` shape); if yes, bump the constant so every stored doc
+  // self-heals to the new projection on its next write. Cosmetic or internal
+  // refactors do not require a bump.
+  it('projection-drift snapshot: maximal round shape (bump CONVERSATION_SCHEMA_VERSION if this changes semantically)', () => {
+    const maximalRound: ConversationRound = {
+      id: 'round-max',
+      status: ConversationRoundStatus.completed,
+      input: { message: 'compute a query' },
+      author: { id: 'slack-U123', username: 'bob', full_name: 'Bob Person' },
+      origin: { type: ConversationOriginType.Slack },
+      steps: [
+        {
+          type: ConversationRoundStepType.reasoning,
+          reasoning: 'thinking about the problem',
+        },
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'esql.execute',
+          params: { query: 'FROM logs | LIMIT 1' },
+          results: [
+            {
+              tool_result_id: 'result-1',
+              type: ToolResultType.other,
+              data: { rows: 1 },
+            },
+          ],
+        },
+      ],
+      response: { message: 'here is the result' },
+      started_at: '2026-01-01T00:00:00.000Z',
+      time_to_first_token: 100,
+      time_to_last_token: 500,
+      model_usage: {
+        connector_id: 'connector-1',
+        llm_calls: 2,
+        input_tokens: 40,
+        output_tokens: 12,
+      },
+      trace_id: 'trace-abc',
+      // `state` / `configuration_overrides` intentionally omitted: they carry
+      // opaque payloads that are covered by dedicated round-trip tests. This
+      // fixture pins the *shape* of every round-derived event and the mapping
+      // from round fields onto their event slots, which is the contract that
+      // must move in lockstep with CONVERSATION_SCHEMA_VERSION.
+    };
+
+    expect(roundsToEvents(baseConversation([maximalRound]))).toMatchSnapshot();
   });
 });

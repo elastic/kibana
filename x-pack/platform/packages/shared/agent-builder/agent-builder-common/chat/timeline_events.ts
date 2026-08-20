@@ -17,7 +17,9 @@ import type {
 } from './conversation';
 import type { RoundState } from './round_state';
 
-/** The current schema version for an events-native conversation document.*/
+/**
+ * The current schema version for an events-native conversation document.
+ */
 export const CONVERSATION_SCHEMA_VERSION = 1;
 
 /** The kind of participant that produced a timeline event. */
