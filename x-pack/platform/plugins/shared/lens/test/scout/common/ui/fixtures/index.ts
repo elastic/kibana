@@ -19,7 +19,6 @@ export * as testData from './constants';
 export * from './helpers';
 export * from './open_discover_popup';
 export * from './page_objects';
-export * from './query_bar_language';
 export * from './saved_object_helpers';
 
 export interface LensParallelTestFixtures extends ScoutParallelTestFixtures {

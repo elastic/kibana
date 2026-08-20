@@ -10,8 +10,6 @@ import {
   createLogstashLensEditorSuiteSetup,
   openDiscoverFromPopup,
   spaceTest,
-  submitQueryBar,
-  switchQueryLanguage,
   testData,
 } from '../../fixtures';
 
@@ -37,6 +35,7 @@ spaceTest.describe(
     spaceTest(
       'brings dashboard and visualization context to Discover',
       async ({ page, pageObjects, context, kbnUrl, scoutSpace }) => {
+        // Save to dashboard, two query-language switches, then Discover popup first paint.
         spaceTest.setTimeout(120_000);
         const { visualize, lens, dashboard, queryBar, filterBar } = pageObjects;
         const panelTitle = 'Embedded Visualization';
@@ -48,16 +47,20 @@ spaceTest.describe(
             waitFor: 'lens',
           });
           await lens.waitForVisualization(testData.XY_CHART);
-          await lens.saveAsNewToNewDashboard(panelTitle);
+          await lens.save(panelTitle, {
+            addToDashboard: 'new',
+            saveAsNew: true,
+            saveToLibrary: false,
+          });
           await dashboard.waitForRenderComplete();
           await dashboard.saveDashboard(`Open in Discover Testing ${scoutSpace.id}-${Date.now()}`);
         });
 
         await spaceTest.step('add a Lucene query and filter on the Lens panel', async () => {
           await dashboard.navigateToLensEditorFromPanel(panelTitle);
-          await switchQueryLanguage(page, 'lucene');
+          await queryBar.switchQueryLanguage('lucene');
           await queryBar.setQuery('host.keyword www.elastic.co');
-          await submitQueryBar(page);
+          await page.testSubj.click('querySubmitButton');
           await lens.waitForVisualization(testData.XY_CHART);
           await filterBar.addFilter({ field: 'geo.src', operator: 'is', value: 'AF' });
           await expect(page.testSubj.locator('~filter-key-geo.src')).toBeVisible();
@@ -65,9 +68,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('add a KQL query and filter on the dashboard', async () => {
-          await switchQueryLanguage(page, 'kql');
+          await queryBar.switchQueryLanguage('kql');
           await queryBar.setQuery('request.keyword : "/apm"');
-          await submitQueryBar(page);
+          await page.testSubj.click('querySubmitButton');
           await dashboard.waitForRenderComplete();
           await filterBar.addFilter({
             field: 'host.raw',
@@ -75,7 +78,7 @@ spaceTest.describe(
             value: 'cdn.theacademyofperformingartsandscience.org',
           });
           await expect(page.testSubj.locator('~filter-key-host.raw')).toBeVisible();
-          await dashboard.clickQuickSave();
+          await dashboard.saveChangesToExistingDashboard();
         });
 
         await spaceTest.step('open Discover from the panel and assert merged context', async () => {
@@ -94,20 +97,22 @@ spaceTest.describe(
           });
           try {
             await expect(discoverPage.testSubj.locator('^filter-badge')).toHaveCount(3);
-            await expect(
-              discoverPage.testSubj.locator('~filter-key-host.raw', {
-                hasText: 'cdn.theacademyofperformingartsandscience.org',
-              })
-            ).toBeVisible();
-            await expect(
-              discoverPage.testSubj.locator('~filter-key-geo.src', { hasText: 'AF' })
-            ).toBeVisible();
-            await expect(
-              discoverPage.testSubj.locator('~filter', { hasText: 'Lens context (lucene)' })
-            ).toBeVisible();
-            await expect(discoverPage.testSubj.locator('queryInput')).toHaveValue(
-              'request.keyword : "/apm"'
-            );
+            await expect
+              .soft(
+                discoverPage.testSubj.locator('~filter-key-host.raw', {
+                  hasText: 'cdn.theacademyofperformingartsandscience.org',
+                })
+              )
+              .toBeVisible();
+            await expect
+              .soft(discoverPage.testSubj.locator('~filter-key-geo.src', { hasText: 'AF' }))
+              .toBeVisible();
+            await expect
+              .soft(discoverPage.testSubj.locator('~filter', { hasText: 'Lens context (lucene)' }))
+              .toBeVisible();
+            await expect
+              .soft(discoverPage.testSubj.locator('queryInput'))
+              .toHaveValue('request.keyword : "/apm"');
           } finally {
             await discoverPage.close();
           }

@@ -290,6 +290,9 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
         await expect(lens.workspace.dimensionFilterTrigger).toHaveText('bytes > 4000');
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
+        // Terms filters come from chart rows; wait until the post-formula top values exist
+        // (beforeEach is png/css/jpg; count() + bytes filter changes that set to css/gif/jpg).
+        await expect(lens.workspace.xyLegendItems.getByText('gif', { exact: true })).toBeVisible();
       });
 
       await spaceTest.step('open Discover and assert combined KQL', async () => {

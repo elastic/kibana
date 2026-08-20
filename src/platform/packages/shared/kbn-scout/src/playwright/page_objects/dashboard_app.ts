@@ -234,16 +234,12 @@ export class DashboardApp {
       .toBeGreaterThan(0);
   }
 
-  /** Exits edit mode; confirms the discard modal if it appears, then waits for view mode. */
+  /**
+   * Clicks the cancel button to exit edit mode without saving.
+   */
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    const confirmTitle = this.page.testSubj.locator('confirmModalTitleText');
-    await expect(confirmTitle.or(this.editModeButton)).toBeVisible();
-    if (await confirmTitle.isVisible()) {
-      await this.page.testSubj.locator('confirmModalConfirmButton').click();
-      await expect(confirmTitle).toBeHidden();
-    }
     await expect(this.editModeButton).toBeVisible();
   }
 
