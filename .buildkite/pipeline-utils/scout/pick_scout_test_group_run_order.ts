@@ -119,11 +119,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   ) as ModuleDiscoveryInfo[];
 
   if (modulesWithTests.length === 0) {
-    bk.setAnnotation(
-      'scout-not-dispatched',
-      'warning',
-      'No Scout test steps were dispatched for this build.'
-    );
+    // no scout configs found, nothing to need to upload steps
     return;
   }
 
@@ -163,8 +159,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     };
   });
 
-  if (scoutCiRunGroups.length === 0) return;
-
   const steps = [
     {
       group: 'Scout Configs',
@@ -203,6 +197,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     JSON.stringify(scoutCiRunGroups.map(({ key }) => key))
   );
 
+  // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
-  bk.setMetadata('test-steps-dispatched:scout', 'true');
 }

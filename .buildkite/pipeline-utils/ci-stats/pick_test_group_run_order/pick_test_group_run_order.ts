@@ -231,8 +231,6 @@ export async function pickTestGroupRunOrder() {
       }),
   ].filter((s): s is BuildkiteStep => Boolean(s));
 
-  if (steps.length === 0) return;
-
   registerCancelKeys(bk, {
     unitCount: unit.count,
     integrationCount: integration.count,
@@ -240,7 +238,6 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
-  bk.setMetadata('test-steps-dispatched:ftr', 'true');
 }
 
 /**
