@@ -95,9 +95,9 @@ describe('getClusters', () => {
     const sizeError = new errors.RequestAbortedError('Response content length exceeded');
     const esClient = { search: jest.fn().mockRejectedValue(sizeError) };
 
-    await expect(
-      getClusters(esClient as any, {}, pit, {}, logger as any)
-    ).rejects.toMatchObject({ statusCode: 413 });
+    await expect(getClusters(esClient as any, {}, pit, {}, logger as any)).rejects.toMatchObject({
+      statusCode: 413,
+    });
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('max response size'));
     expect(logger.error).not.toHaveBeenCalled();
@@ -107,9 +107,9 @@ describe('getClusters', () => {
     const unexpectedError = new Error('unexpected ES error');
     const esClient = { search: jest.fn().mockRejectedValue(unexpectedError) };
 
-    await expect(
-      getClusters(esClient as any, {}, pit, {}, logger as any)
-    ).rejects.toThrow('unexpected ES error');
+    await expect(getClusters(esClient as any, {}, pit, {}, logger as any)).rejects.toThrow(
+      'unexpected ES error'
+    );
 
     expect(logger.error).toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();

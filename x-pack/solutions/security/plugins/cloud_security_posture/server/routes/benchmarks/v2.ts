@@ -89,7 +89,13 @@ export const getBenchmarksData = async (
           },
         };
         const benchmarkScore = await getStats(esClient, query, pit, runtimeMappings, logger);
-        const benchmarkEvaluation = await getClusters(esClient, query, pit, runtimeMappings, logger);
+        const benchmarkEvaluation = await getClusters(
+          esClient,
+          query,
+          pit,
+          runtimeMappings,
+          logger
+        );
 
         result.push({
           id: benchmarkId,
