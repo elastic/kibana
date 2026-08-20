@@ -12449,7 +12449,7 @@
     estree-walker "^2.0.2"
     picomatch "^4.0.2"
 
-"@rsbuild/core@^1.7.6":
+"@rsbuild/core@1.7.6":
   version "1.7.6"
   resolved "https://registry.yarnpkg.com/@rsbuild/core/-/core-1.7.6.tgz#1ba6b1f7c5df76b142269ba3c40eb00c6db0c2db"
   integrity sha512-T1mLz745L59SM4F5HQFkeGAAsDBeHh2e5sT0cSC5c7xkBpstVWXJrQe5HALS+GvIxiV8cUOy2yD8QBT/Ah11lg==
@@ -12471,7 +12471,7 @@
     picocolors "^1.1.1"
     source-map "^0.7.6"
 
-"@rsbuild/plugin-react@^1.4.6":
+"@rsbuild/plugin-react@1.4.6":
   version "1.4.6"
   resolved "https://registry.yarnpkg.com/@rsbuild/plugin-react/-/plugin-react-1.4.6.tgz#69dda9e9821976e476eb839ba4eb53153e7a2eb9"
   integrity sha512-LAT6xHlEyZKA0VjF/ph5d50iyG+WSmBx+7g98HNZUwb94VeeTMZFB8qVptTkbIRMss3BNKOXmHOu71Lhsh9oEw==
@@ -12479,7 +12479,7 @@
     "@rspack/plugin-react-refresh" "^1.6.1"
     react-refresh "^0.18.0"
 
-"@rsbuild/plugin-sass@^1.5.3":
+"@rsbuild/plugin-sass@1.5.3":
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/@rsbuild/plugin-sass/-/plugin-sass-1.5.3.tgz#0d287d422445f4f629928c232a32c3ee4c603c09"
   integrity sha512-NViSITZF3J3i96GfemWfTZBZ43CNZUgTaaKgfti0I7odwy36Qlo8MIAbGjOy8pBSygIYn7Xl4+Jw8qAbTysCBw==
