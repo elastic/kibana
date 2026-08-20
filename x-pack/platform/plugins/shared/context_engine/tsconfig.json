@@ -27,9 +27,7 @@
     "@kbn/core-http-server",
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
-    "@kbn/task-manager-plugin",
     "@kbn/es-errors",
-    "@kbn/es-types",
     "@kbn/management-settings-ids",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
@@ -57,6 +55,11 @@
     "@kbn/content-list",
     "@kbn/content-list-provider",
     "@kbn/content-list-provider-client",
-    "@kbn/content-management-table-list-view-common"
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/security-plugin",
+    "@kbn/zod",
+    "@kbn/es-types",
+    "@kbn/task-manager-plugin"
   ]
 }
