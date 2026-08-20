@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { AppMenuLoading } from '@kbn/ui-app-menu';
-import type { AppHeaderBack, AppHeaderSpacing } from './types';
+import type { AppHeaderViewProps } from './app_header';
+import type { AppHeaderSpacing } from './types';
 import { AppHeaderShell } from './app_header_shell';
 import { TitleArea } from './title_area';
 import { AppHeaderSkeletonTitle } from './app_header_skeleton';
@@ -29,21 +30,13 @@ export interface AppHeaderLoadingMenu {
   hasPrimary?: boolean;
 }
 
-export interface AppHeaderLoadingViewProps {
-  back?: AppHeaderBack | AppHeaderBack[];
+export type AppHeaderLoadingViewProps = Pick<AppHeaderViewProps, 'back' | 'sticky'> & {
   menu?: AppHeaderLoadingMenu;
   /**
-   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
-   * `true`; set `false` only when the surrounding layout already pins the header in the correct
-   * scroll container. A header-height wrapper prevents CSS sticky.
-   */
-  sticky?: boolean;
-  /**
-   * Controls the horizontal inset. Defaults to `standard` so the skeleton matches a
-   * typical title + app menu header.
+   * Defaults to `standard` so the skeleton matches a typical title + app menu header.
    */
   spacing?: AppHeaderSpacing;
-}
+};
 
 export const AppHeaderLoadingView = React.memo<AppHeaderLoadingViewProps>(
   ({ back, menu, sticky, spacing = 'standard' }) => {

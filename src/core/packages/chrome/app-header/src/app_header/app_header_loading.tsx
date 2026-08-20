@@ -10,28 +10,12 @@
 import React from 'react';
 import {
   AppHeaderLoadingView as AppHeaderLoadingPresentation,
-  type AppHeaderLoadingMenu,
+  type AppHeaderLoadingViewProps,
 } from '@kbn/ui-app-header';
-import type { AppHeaderBack, AppHeaderSpacing } from '../types';
 import { useBackNavTargets, useInlineAppHeader } from './hooks';
 
-export type { AppHeaderLoadingMenu };
-
-export interface AppHeaderLoadingProps {
-  back?: AppHeaderBack | AppHeaderBack[];
-  menu?: AppHeaderLoadingMenu;
-  /**
-   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
-   * `true`; set `false` only when the surrounding layout already pins the header in the correct
-   * scroll container. A header-height wrapper prevents CSS sticky.
-   */
-  sticky?: boolean;
-  /**
-   * Controls the horizontal inset. Defaults to `standard` so the skeleton matches a
-   * typical title + app menu header.
-   */
-  spacing?: AppHeaderSpacing;
-}
+export type { AppHeaderLoadingMenu } from '@kbn/ui-app-header';
+export type AppHeaderLoadingProps = AppHeaderLoadingViewProps;
 
 /**
  * Loading-state header view without claiming the inline slot. Prefer {@link AppHeaderLoading}.

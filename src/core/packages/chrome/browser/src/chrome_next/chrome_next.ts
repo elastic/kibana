@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DistributiveOmit } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppHeaderBack, AppHeaderConfig } from '@kbn/ui-app-header';
@@ -50,7 +51,7 @@ export type {
  *
  * @public
  */
-export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
+export type ChromeAppHeaderConfig = DistributiveOmit<AppHeaderConfig, 'back'> & {
   back?: AppHeaderBack | false;
 };
 

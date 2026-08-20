@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
 import { hasNonGlobalStaticItems, type AppMenuStaticItem } from '@kbn/ui-app-menu';
-import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing } from './types';
+import type { AppHeaderBack, AppHeaderConfig } from './types';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
 import { AppTabs } from './app_tabs';
@@ -22,7 +22,7 @@ import { AppHeaderMetadata } from './app_header_metadata';
 import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
-export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
+export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
   back?: AppHeaderBack | AppHeaderBack[];
   /**
    * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
@@ -30,13 +30,6 @@ export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spa
    * scroll container. A header-height wrapper prevents CSS sticky.
    */
   sticky?: boolean;
-  /**
-   * Controls the horizontal inset. `standard` keeps the 16px symmetric gutter. When omitted it
-   * defaults to `standard`, except a titleless header (only a back and/or overflow button) defaults
-   * to `compact` so sparse legacy states don't look too tall. Bleed modes are compatibility options
-   * for headers that cannot yet move outside a padded parent.
-   */
-  spacing?: AppHeaderSpacing;
   staticItems?: AppMenuStaticItem[];
   /** Legacy action-menu mount, used when no structured `menu` is provided. */
   fallbackMenu?: ReactNode;

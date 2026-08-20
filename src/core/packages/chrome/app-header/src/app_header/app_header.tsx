@@ -14,7 +14,7 @@ import {
   AppHeaderView as AppHeaderPresentation,
   type AppHeaderViewProps as AppHeaderPresentationProps,
 } from '@kbn/ui-app-header';
-import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing, AppHeaderTitle } from '../types';
+import type { AppHeaderTitle } from '../types';
 import {
   useAppHeaderStaticItems,
   useBackNavTargets,
@@ -24,21 +24,10 @@ import {
 } from './hooks';
 import { LegacyHeaderActionMenu } from './legacy_action_menu';
 
-export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
-  back?: AppHeaderBack | AppHeaderBack[];
-  /**
-   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
-   * `true`; set `false` only when the surrounding layout already pins the header in the correct
-   * scroll container. A header-height wrapper prevents CSS sticky.
-   */
-  sticky?: boolean;
-  /**
-   * Controls the horizontal inset. `standard` keeps the 16px symmetric gutter. When omitted it
-   * defaults to `standard`, except a titleless header (only a back and/or overflow button) defaults
-   * to `compact` so sparse legacy states don't look too tall. Bleed modes are compatibility options
-   * for headers that cannot yet move outside a padded parent.
-   */
-  spacing?: AppHeaderSpacing;
+export type AppHeaderViewProps = DistributiveOmit<
+  AppHeaderPresentationProps,
+  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
+> & {
   docLink?: string;
   showAddIntegrations?: boolean;
 };

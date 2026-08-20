@@ -187,11 +187,11 @@ export interface AppHeaderEditableTitle {
 export type AppHeaderTitle = string | AppHeaderEditableTitle;
 
 /**
- * Outer header spacing. `standard` (also the default when omitted) is a 16px symmetric inset,
- * `compact` is an 8px inset, and `flush` lets the surrounding layout own the inset. `bleed` and
- * `largeBleed` must match a direct parent's 16px or 24px symmetric padding respectively (e.g. when
- * the header is wrapped by `EuiPageTemplate`). Bleed modes are compatibility options for headers
- * that cannot yet move outside the padded content section.
+ * Outer header spacing. `standard` is a 16px symmetric inset, `compact` is an 8px inset, and
+ * `flush` lets the surrounding layout own the inset. `bleed` and `largeBleed` must match a direct
+ * parent's 16px or 24px symmetric padding respectively (e.g. when the header is wrapped by
+ * `EuiPageTemplate`). Bleed modes are compatibility options for headers that cannot yet move
+ * outside the padded content section.
  */
 export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
 
@@ -238,6 +238,10 @@ interface AppHeaderConfigBase {
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
+  /**
+   * Defaults to `standard`, except a sparse header (no title, badges, tabs, description, metadata,
+   * title append, favorite, or share) defaults to `compact`. An explicit value always wins.
+   */
   spacing?: AppHeaderSpacing;
 }
 
