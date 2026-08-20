@@ -1952,7 +1952,7 @@
 
 "@elastic/eui@file:./elastic-eui-119.0.0.tgz":
   version "119.0.0"
-  resolved "file:./elastic-eui-119.0.0.tgz#b822ab39ce0c2b0916d1a24ec20cbc1f12bcda24"
+  resolved "file:./elastic-eui-119.0.0.tgz#10ff82cb90661b648f201a2fd1ada414d389ef23"
   dependencies:
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
