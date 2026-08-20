@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import type { StandardNodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName } from '../constants';
+import type { RootNodePanelOpenerDefinition } from '@kbn/core-chrome-browser';
+import { SecurityPageName, SecurityGroupName } from '../constants';
+import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (): StandardNodeDefinition => {
-  const children: StandardNodeDefinition[] = [
+export const createCasesNavigationTree = (): RootNodePanelOpenerDefinition => ({
+  id: SecurityGroupName.cases,
+  title: SecurityLinkGroup[SecurityGroupName.cases].title,
+  icon: 'briefcase',
+  renderAs: 'panelOpener',
+  children: [
     {
-      id: `${SecurityPageName.case}-all`,
+      id: SecurityPageName.case,
       link: securityLink(SecurityPageName.case),
     },
     {
       id: SecurityPageName.caseCreate,
       link: securityLink(SecurityPageName.caseCreate),
+      sideNavStatus: 'hidden',
     },
     {
       id: SecurityPageName.caseConfigure,
       link: securityLink(SecurityPageName.caseConfigure),
+      sideNavStatus: 'hidden',
     },
-  ];
-
-  return {
-    id: SecurityPageName.case,
-    link: securityLink(SecurityPageName.case),
-    icon: 'briefcase',
-    children,
-  };
-};
+    {
+      id: SecurityPageName.caseTemplates,
+      link: securityLink(SecurityPageName.caseTemplates),
+    },
+  ],
+});

@@ -14,7 +14,7 @@ export const ADD_TEMPLATE = i18n.translate('xpack.cases.templates.addTemplate', 
 });
 
 export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
-  defaultMessage: 'Templates',
+  defaultMessage: 'Template library',
 });
 
 export const TEMPLATE_DESCRIPTION = i18n.translate('xpack.cases.templates.description', {

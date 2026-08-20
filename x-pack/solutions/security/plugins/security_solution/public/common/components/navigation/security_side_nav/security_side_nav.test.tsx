@@ -59,6 +59,28 @@ const alertsNavLink: NavigationLink = {
   description: 'alerts description',
 };
 
+const casesNavLink: NavigationLink = {
+  id: SecurityPageName.case,
+  title: 'Cases',
+  description: 'Cases description',
+  links: [
+    {
+      id: SecurityPageName.caseCreate,
+      title: 'Create',
+      disabled: true,
+    },
+    {
+      id: SecurityPageName.caseConfigure,
+      title: 'Settings',
+      disabled: true,
+    },
+    {
+      id: SecurityPageName.caseTemplates,
+      title: 'Template library',
+    },
+  ],
+};
+
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
   ...jest.requireActual('@kbn/security-solution-side-nav'),
@@ -183,6 +205,34 @@ describe('SecuritySideNav', () => {
                 label: 'title 2',
                 href: '/endpoints',
                 isBeta: true,
+              },
+            ],
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should prepend the Cases list link above Template library in the classic panel', () => {
+    mockUseNavLinks.mockReturnValue([casesNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.case,
+            label: 'Cases',
+            href: `/${SecurityPageName.case}`,
+            items: [
+              {
+                id: SecurityPageName.case,
+                label: 'Cases',
+                href: `/${SecurityPageName.case}`,
+              },
+              {
+                id: SecurityPageName.caseTemplates,
+                label: 'Template library',
+                href: `/${SecurityPageName.caseTemplates}`,
               },
             ],
           }),

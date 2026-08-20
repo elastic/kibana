@@ -20,9 +20,8 @@ interface UseValidationAccordionPositioningReturn {
 
 /**
  * Wires the YAML editor to its validation accordion: tracks the Monaco instance,
- * the current validation errors, and click-to-line navigation. The accordion is
- * rendered inline (in normal flow) beneath the editor, so no manual positioning is
- * required — it tracks the panel width via the layout, not JavaScript.
+ * the current validation errors, and click-to-line navigation. The accordion sits
+ * in a sticky footer beneath the editor so it stays visible while YAML scrolls.
  */
 export const useValidationAccordionPositioning = (): UseValidationAccordionPositioningReturn => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);

@@ -16,7 +16,7 @@ export const CONFIGURE_CASES_PAGE_NAME = i18n.translate('xpack.cases.configureCa
 });
 
 export const TEMPLATES_PAGE_NAME = i18n.translate('xpack.cases.templates', {
-  defaultMessage: 'Templates',
+  defaultMessage: 'Template library',
 });
 
 export const READ_ONLY_BADGE_TEXT = i18n.translate('xpack.cases.badge.readOnly.text', {

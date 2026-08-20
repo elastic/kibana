@@ -18,6 +18,7 @@ export const INVESTIGATIONS_PANEL_BTN =
   '[data-test-subj*="nav-item-id-securityGroup:investigations"]';
 export const EXPLORE_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:explore"]';
 export const RULES_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:rules"]';
+export const CASES_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:cases"]';
 export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:assets"]';
 
 export const DETECTIONS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:alertDetections"]';
@@ -33,7 +34,8 @@ export const CSP_FINDINGS =
 export const THREAT_INTELLIGENCE =
   '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:threat_intelligence"]';
 
-export const CASES = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cases"]';
+export const CASES = '[data-test-subj~="nav-item-id-cases"]';
+export const CASE_TEMPLATES = '[data-test-subj~="nav-item-id-cases_templates"]';
 
 // nested panel links
 export const TIMELINES = '[data-test-subj~="nav-item-id-timelines"]';
@@ -85,6 +87,11 @@ export const openNavigationPanelFor = (pageName: string) => {
     case EXCEPTIONS:
     case RULES_COVERAGE: {
       panel = RULES_PANEL_BTN;
+      break;
+    }
+    case CASES:
+    case CASE_TEMPLATES: {
+      panel = CASES_PANEL_BTN;
       break;
     }
     case TIMELINES:

@@ -34,13 +34,6 @@ export const CASES_LIST_TOUR_STEPS: CasesTourStep[] = [
     content: wrap(i18n.STEP_FIELDS_DESCRIPTION),
   },
   {
-    stepId: 'templates',
-    title: i18n.STEP_TEMPLATES_TITLE,
-    anchor: '[data-test-subj="cases-templates-button"]',
-    anchorPosition: 'downCenter',
-    content: wrap(i18n.STEP_TEMPLATES_DESCRIPTION),
-  },
-  {
     stepId: 'settings',
     title: i18n.STEP_SETTINGS_TITLE,
     anchor: '[data-test-subj="configure-case-button"]',

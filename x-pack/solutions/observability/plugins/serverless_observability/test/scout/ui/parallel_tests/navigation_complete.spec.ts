@@ -44,7 +44,7 @@ test.describe(
       });
 
       await test.step('More linked items are visible and linked', async () => {
-        const moreDeepLinks = ['observability-overview:cases', 'slo'];
+        const moreDeepLinks = ['slo'];
         for (const deepLinkId of moreDeepLinks) {
           const item = nav.navItemInMoreByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -53,7 +53,13 @@ test.describe(
       });
 
       await test.step('More panel-opener items are visible (complete tier)', async () => {
-        const morePanelIds = ['applications', 'metrics', 'machine_learning-landing', 'otherTools'];
+        const morePanelIds = [
+          'observability-cases',
+          'applications',
+          'metrics',
+          'machine_learning-landing',
+          'otherTools',
+        ];
         for (const id of morePanelIds) {
           await expect(nav.navItemInMoreById(id)).toBeVisible();
         }
@@ -119,7 +125,14 @@ test.describe(
 
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
-        await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
+        await nav.navItemInMoreById('observability-cases').click();
+        await expect(nav.nestedPanel('observability-cases')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+        await nav
+          .nestedPanel('observability-cases')
+          .locator('[data-test-subj~="nav-item-deepLinkId-observability-overview:cases"]')
+          .click();
         // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
         // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
         await expect(

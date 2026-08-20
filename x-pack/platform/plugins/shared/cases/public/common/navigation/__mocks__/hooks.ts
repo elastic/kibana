@@ -33,7 +33,9 @@ export const useCasesTemplatesNavigation = jest.fn().mockReturnValue({
 });
 
 export const useCasesFieldLibraryNavigation = jest.fn().mockReturnValue({
-  getCasesFieldLibraryUrl: jest.fn().mockReturnValue('/app/security/cases/configure/field_library'),
+  getCasesFieldLibraryUrl: jest
+    .fn()
+    .mockReturnValue('/app/security/cases/configure/templates/field_library'),
   navigateToCasesFieldLibrary: jest.fn(),
 });
 

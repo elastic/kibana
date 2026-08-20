@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
 import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import { TemplateYamlEditorBase } from '../../templates_v2/components/template_yaml_editor';
@@ -39,17 +39,11 @@ const containerCss = (height: number) =>
     minHeight: 0,
   });
 
-// Relative positioning anchors the actions menu's floating trigger to the editor box.
 const editorContainerCss = css({
   flex: '1 1 0',
   minHeight: 0,
   width: '100%',
   position: 'relative',
-  overflow: 'hidden',
-});
-
-const validationFooterCss = css({
-  flexShrink: 0,
   overflow: 'hidden',
 });
 
@@ -91,6 +85,7 @@ export const FieldDefinitionYamlEditor: React.FC<FieldDefinitionYamlEditorProps>
   height = 300,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     editorRef,
     validationErrors,
@@ -134,7 +129,16 @@ export const FieldDefinitionYamlEditor: React.FC<FieldDefinitionYamlEditorProps>
           />
         ) : null}
       </div>
-      <div css={validationFooterCss}>
+      <div
+        css={css({
+          flexShrink: 0,
+          overflow: 'hidden',
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 2,
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
+        })}
+      >
         <TemplateYamlValidationAccordion
           isMounted={isEditorMounted}
           validationErrors={allValidationErrors}

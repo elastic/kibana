@@ -56,11 +56,11 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
     },
 
     /**
-     * Navigates to the v2 field library page (`configure/field_library`).
+     * Navigates to the v2 field library page (`configure/templates/field_library`).
      * Only reachable when `xpack.cases.templates.enabled` is ON.
      */
     async navigateToFieldLibraryPage(app: string = 'cases') {
-      await common.navigateToUrlWithBrowserHistory(app, 'configure/field_library');
+      await common.navigateToUrlWithBrowserHistory(app, 'configure/templates/field_library');
       await testSubjects.existOrFail('cases-app');
     },
 

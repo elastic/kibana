@@ -56,6 +56,11 @@ jest.mock('../templates_v2/pages/edit_template/page', () => ({
   default: () => <div>{'Edit template'}</div>,
 }));
 
+jest.mock('../field_library/pages/all_field_definitions_page', () => ({
+  __esModule: true,
+  default: () => <div>{'Field library'}</div>,
+}));
+
 jest.mock('../cases_redesign/configure_cases/configure_cases', () => ({
   __esModule: true,
   default: () => <div>{'Settings redesign'}</div>,
@@ -181,7 +186,7 @@ describe('Cases routes', () => {
 
         it('does not register the v2 field library route', async () => {
           mockConfig(false);
-          renderWithRouter(['/cases/configure/field_library']);
+          renderWithRouter(['/cases/configure/templates/field_library']);
           expect(await screen.findByText('Settings redesign')).toBeInTheDocument();
         });
       });
@@ -223,6 +228,16 @@ describe('Cases routes', () => {
         buildCasesPermissions({ settings: false, manageTemplates: true })
       );
       expect(await screen.findByText('All templates')).toBeInTheDocument();
+    });
+
+    it('navigates to the field library page', async () => {
+      renderWithRouter(['/cases/configure/templates/field_library']);
+      expect(await screen.findByText('Field library')).toBeInTheDocument();
+    });
+
+    it('redirects the legacy field library path to the templates nested path', async () => {
+      renderWithRouter(['/cases/configure/field_library']);
+      expect(await screen.findByText('Field library')).toBeInTheDocument();
     });
 
     it('navigates to the create template page', async () => {

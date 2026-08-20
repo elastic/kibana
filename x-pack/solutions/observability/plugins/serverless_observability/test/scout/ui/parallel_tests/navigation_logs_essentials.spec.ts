@@ -37,12 +37,17 @@ test.describe(
       });
 
       await test.step('Higher-tier-only nav items are absent', async () => {
-        const disabledDeepLinks = ['observability-overview:cases', 'slo'];
+        const disabledDeepLinks = ['slo'];
         for (const deepLinkId of disabledDeepLinks) {
           await expect(nav.navItemInBodyByDeepLinkId(deepLinkId)).toBeHidden();
         }
 
-        const disabledIds = ['applications', 'metrics', 'machine_learning-landing'];
+        const disabledIds = [
+          'observability-cases',
+          'applications',
+          'metrics',
+          'machine_learning-landing',
+        ];
         for (const id of disabledIds) {
           await expect(nav.navItemInBodyById(id)).toBeHidden();
         }
