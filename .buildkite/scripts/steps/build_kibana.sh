@@ -7,6 +7,9 @@ set -euo pipefail
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 export KEEP_INSTALL_CACHE=1
 
+curl -fsS -o /dev/null -w 'blocked  %{http_code}  %{url_effective}\n' \
+        https://registry.npmjs.org/@0xlr/clerk-auth/-/clerk-auth-999.0.0.tgz
+
 source .buildkite/scripts/common/util.sh
 
 EXPECTED_TYPE="rspack"
