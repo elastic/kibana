@@ -54,8 +54,8 @@ describe('computeNextWatermark', () => {
     });
   });
 
-  describe('aborted after StoreActionsStep (recordedEpisodes defined)', () => {
-    it('advances to windowEnd when some episodes were recorded', () => {
+  describe('aborted with recordedEpisodes defined (DispatchStep wrote some chunks)', () => {
+    it('holds watermark even when recordedEpisodes > 0', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
@@ -65,8 +65,24 @@ describe('computeNextWatermark', () => {
         }),
       });
 
-      // Not truncated, not no_episodes/no_actions — falls through to windowEnd
-      expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+
+    it('holds watermark when aborted + truncated + recordedEpisodes defined', () => {
+      const episodes = [
+        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
+      ];
+
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({
+          completed: false,
+          haltReason: 'aborted',
+          finalState: { input: BASE_INPUT, episodes, truncated: true, recordedEpisodes: 2 },
+        }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
   });
 

@@ -66,7 +66,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 | ----------------------------------------------- | --------------------------------------------------- |
 | Truncated (`EPISODE_QUERY_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
 | `no_episodes` or `no_actions` halt              | `windowEnd`                                         |
-| Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
+| Aborted (any point in the pipeline)             | `eventWatermark` (no advance — always held)         |
 | Normal completion                               | `windowEnd`                                         |
 
 `nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
@@ -193,7 +193,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `matched`                     | `EvaluateMatchersStep`   | Concrete `(episode, policy)` matches.                                                                 |
 | `groups`                      | `BuildGroupsStep`        | Action groups to consider for delivery.                                                               |
 | `dispatch` / `throttled`      | `ApplyThrottlingStep`    | Groups that may send now vs groups held back.                                                         |
-| `recordedEpisodes`            | `StoreActionsStep`       | Count of episodes that received an `.alert-actions` record this tick.                                 |
+| `recordedEpisodes`            | `DispatchStep` (first write per chunk); accumulated by `StoreActionsStep` | Count of episodes that received an `.alert-actions` record this tick. `DispatchStep` sets this from dispatched episodes; `StoreActionsStep` adds suppressed, throttled, and unmatched counts. |
 
 ## Execution steps
 
@@ -211,8 +211,8 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 8   | `EvaluateMatchersStep`   | Evaluate each policy matcher against each episode context.                                       |
 | 9   | `BuildGroupsStep`        | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 10  | `ApplyThrottlingStep`    | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 11  | `DispatchStep`           | Perform delivery side effects for eligible groups.                                               |
-| 12  | `StoreActionsStep`       | Persist the execution outcome to `.alert-actions`.                                               |
+| 11  | `DispatchStep`           | Perform delivery side effects for eligible groups. Writes `fire`/`notified` records to `.alert-actions` immediately after each dispatch chunk — before the next abort check — so partial-tick records are always committed. |
+| 12  | `StoreActionsStep`       | Persist the remaining execution outcomes to `.alert-actions`: `suppress` for suppressed/throttled episodes, `unmatched` for policy-less episodes. Accumulates `recordedEpisodes` from `DispatchStep`. |
 
 ## Halt reasons
 
@@ -220,7 +220,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_episodes` | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`  | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`     | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| `aborted`     | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). The watermark always holds on abort — `DispatchStep` may have written `fire`/`notified` records for completed chunks, but unprocessed groups must remain in the scan window for retry. Overlap + `last_fired` dedup makes re-reading already-recorded episodes free. |
 
 ## Watermark contract
 
@@ -232,7 +232,9 @@ The invariant maintained across all ticks:
 
 ### Stuck-watermark escape hatch
 
-If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (default 10, ~50 s), the dispatcher:
+A tick is considered "stuck" when the watermark is held **and** `recordedEpisodes === 0` — meaning no `.alert-actions` records were written at all. Partial-dispatch ticks (where `DispatchStep` committed fire/notified for at least one chunk before the abort) reset the counter, so the hatch does not fire while the pipeline makes real progress. Only ticks that record nothing increment the counter.
+
+If the watermark remains stuck for `STUCK_TICK_LIMIT` consecutive ticks (default 10, ~50 s), the dispatcher:
 
 1. Logs `DISPATCHER_WATERMARK_STUCK` at error level.
 2. Force-records all blocking episodes as `unmatched` in `.alert-actions` so the content-addressed dedup mark advances past them.
@@ -248,6 +250,8 @@ If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is n
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
+- `fire`/`notified` records are written by `DispatchStep` immediately after each chunk is dispatched — before the next abort check. This ensures that groups in completed chunks always have their dedup records committed, even when the pipeline is aborted mid-dispatch.
+- Groups in chunks that were not reached before an abort are retried on the next tick. Overlap re-read + `last_fired` dedup ensures already-recorded episodes are skipped without re-dispatch.
 - The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.

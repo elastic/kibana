@@ -11,7 +11,10 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted before StoreActionsStep (recordedEpisodes undefined): no advance.
+ * - Aborted: always hold, even when `recordedEpisodes` is set. DispatchStep may have
+ *   written fire records for completed chunks before the abort check fired — but
+ *   unprocessed groups must remain in the scan window for the next tick to retry.
+ *   Overlap + `last_fired` dedup makes re-reading already-recorded episodes free.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === EPISODE_QUERY_LIMIT): advance to the last fetched
  *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.
@@ -31,8 +34,8 @@ export const computeNextWatermark = ({
 
   let nextWatermark: Date;
 
-  if (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) {
-    // Pipeline stopped before StoreActionsStep — no records written, do not advance.
+  if (haltReason === 'aborted') {
+    // Always hold on abort — unprocessed groups must remain in the scan window for retry.
     nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All episodes were filtered (e.g. maintenance window) — window fully consumed.

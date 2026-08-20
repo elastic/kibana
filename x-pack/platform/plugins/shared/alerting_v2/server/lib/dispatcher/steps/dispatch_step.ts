@@ -19,8 +19,11 @@ import type {
 } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import type { StorageServiceContract } from '../../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
@@ -31,9 +34,11 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   DispatchFailure,
+  ActionPolicy,
 } from '../types';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { toAction, toNotifiedAction } from './utils/action_builders';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
 
@@ -72,7 +77,9 @@ export class DispatchStep implements DispatcherStep {
 
   constructor(
     @inject(WorkflowsManagementApiToken)
-    private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
+    private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
+    @inject(StorageServiceInternalToken)
+    private readonly storageService: StorageServiceContract
   ) {}
 
   public async execute(
@@ -84,13 +91,15 @@ export class DispatchStep implements DispatcherStep {
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
     const dispatchFailures: DispatchFailure[] = [];
-    const done = (): DispatcherStepOutput => ({
+    let firedEpisodesCount = 0;
+
+    const result = (): DispatcherStepOutput => ({
       type: 'continue',
-      data: { dispatchedExecutions, dispatchFailures },
+      data: { dispatchedExecutions, dispatchFailures, recordedEpisodes: firedEpisodesCount },
     });
 
     if (dispatch.length === 0 || signal.aborted) {
-      return done();
+      return result();
     }
 
     const groupsByApiKey = new Map<string, ActionGroup[]>();
@@ -104,12 +113,14 @@ export class DispatchStep implements DispatcherStep {
     }
 
     if (groupsByApiKey.size === 0) {
-      return done();
+      return result();
     }
 
     const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(
       [...groupsByApiKey.values()].flat()
     );
+
+    const now = new Date();
 
     for (const [apiKey, groups] of groupsByApiKey) {
       const pending = this.buildPendingSchedules(
@@ -124,17 +135,52 @@ export class DispatchStep implements DispatcherStep {
         if (signal.aborted) {
           break;
         }
-        await this.dispatchChunk(
-          pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
-          request,
-          dispatchedExecutions,
-          dispatchFailures,
-          logger
-        );
+
+        const chunk = pending.slice(offset, offset + DISPATCH_CHUNK_SIZE);
+        const chunkGroups = new Map<ActionGroupId, ActionGroup>();
+        for (const { group } of chunk) {
+          if (!dispatchedExecutions.has(group.id)) chunkGroups.set(group.id, group);
+        }
+
+        await this.dispatchChunk(chunk, request, dispatchedExecutions, dispatchFailures, logger);
+
+        const newlyDispatched: ActionGroup[] = [];
+        for (const [id, group] of chunkGroups) {
+          if (dispatchedExecutions.has(id)) newlyDispatched.push(group);
+        }
+        if (newlyDispatched.length > 0) {
+          await this.recordFiredGroups(newlyDispatched, policies, now);
+          firedEpisodesCount += newlyDispatched.reduce((n, g) => n + g.episodes.length, 0);
+        }
       }
     }
 
-    return done();
+    return result();
+  }
+
+  private async recordFiredGroups(
+    groups: ActionGroup[],
+    policies: DispatcherPipelineState['policies'],
+    now: Date
+  ): Promise<void> {
+    await this.storageService.bulkIndexDocs({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs: groups.flatMap((group) => {
+        const groupingMode = policies?.get(group.policyId)?.groupingMode;
+        return [
+          ...group.episodes.map((episode) =>
+            toAction({
+              episode,
+              actionType: 'fire',
+              now,
+              reason: `dispatched by policy ${group.policyId}`,
+              spaceId: episode.space_id,
+            })
+          ),
+          toNotifiedAction(group, groupingMode, now),
+        ];
+      }),
+    });
   }
 
   private recordMissingApiKey(
@@ -166,17 +212,16 @@ export class DispatchStep implements DispatcherStep {
 
     const workflowsBySpace = new Map<string, Map<string, WorkflowDetailDto>>();
     const failedSpaces = new Map<string, Error>();
-    for (const [spaceId, ids] of idsBySpace) {
-      try {
-        const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
-        workflowsBySpace.set(
-          spaceId,
-          new Map(workflows.map((workflow) => [workflow.id, workflow]))
-        );
-      } catch (err) {
-        failedSpaces.set(spaceId, toError(err));
-      }
-    }
+    await Promise.all(
+      [...idsBySpace].map(async ([spaceId, ids]) => {
+        try {
+          const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
+          workflowsBySpace.set(spaceId, new Map(workflows.map((w) => [w.id, w])));
+        } catch (err) {
+          failedSpaces.set(spaceId, toError(err));
+        }
+      })
+    );
 
     return { workflowsBySpace, failedSpaces };
   }

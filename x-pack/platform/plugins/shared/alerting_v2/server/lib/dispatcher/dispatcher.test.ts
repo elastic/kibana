@@ -112,8 +112,27 @@ function mockNpFindAllDecrypted(
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIds: jest.fn().mockResolvedValue([
+      {
+        id: 'workflow-test-id',
+        name: 'Test Workflow',
+        enabled: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        createdBy: 'elastic',
+        lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+        lastUpdatedBy: 'elastic',
+        definition: null,
+        yaml: '',
+        valid: true,
+      },
+    ]),
+    bulkScheduleWorkflow: jest
+      .fn()
+      .mockImplementation((items: unknown[]) =>
+        Promise.resolve(
+          items.map((_, i) => ({ status: 'scheduled', workflowExecutionId: `exec-id-${i}` }))
+        )
+      ),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
@@ -136,7 +155,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement),
+    new DispatchStep(deps.workflowsManagement, deps.storageService),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -191,6 +210,11 @@ describe('DispatcherService', () => {
   });
 
   describe('run', () => {
+    const extractBulkDocs = () =>
+      storageEsClient.bulk.mock.calls.flatMap(([call]) =>
+        (call.operations ?? []).filter((_: unknown, i: number) => i % 2 === 1)
+      );
+
     it('indexes fire actions for dispatchable alert episodes when no suppressions exist', async () => {
       const alertEpisodes: AlertEpisode[] = [
         {
@@ -387,16 +411,15 @@ describe('DispatcherService', () => {
 
       expect(result.startedAt).toBeInstanceOf(Date);
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const safeOperations = operations ?? [];
-      const docs = safeOperations.filter((_, index) => index % 2 === 1);
+      // DispatchStep writes fire+notified in one bulk call; StoreActionsStep writes suppress in another.
+      const allDocs = extractBulkDocs();
 
-      const suppressDocs = docs.filter((d: any) => d.action_type === 'suppress');
-      const fireDocs = docs.filter((d: any) => d.action_type === 'fire');
+      const suppressDocs = allDocs.filter((d: any) => d.action_type === 'suppress');
+      const fireDocs = allDocs.filter((d: any) => d.action_type === 'fire');
       expect(suppressDocs).toHaveLength(1);
       expect(fireDocs).toHaveLength(1);
 
-      expect(docs).toEqual(
+      expect(allDocs).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             group_hash: 'hash-1',
@@ -634,9 +657,8 @@ describe('DispatcherService', () => {
       expect(result.startedAt).toBeInstanceOf(Date);
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      // DispatchStep writes fire+notified; StoreActionsStep writes suppress — aggregate all calls.
+      const docs = extractBulkDocs() as AlertAction[];
 
       const fireActions = docs.filter((doc) => doc.action_type === 'fire');
       const suppressActions = docs.filter((doc) => doc.action_type === 'suppress');
@@ -791,8 +813,8 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      // DispatchStep writes fire+notified for space-b; StoreActionsStep writes suppress for space-a.
+      const docs = extractBulkDocs() as AlertAction[];
 
       expect(docs.filter((doc) => doc.action_type === 'fire')).toEqual([
         expect.objectContaining({
@@ -879,8 +901,8 @@ describe('DispatcherService', () => {
         taskId: 'task-1',
       });
 
-      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
-      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      // DispatchStep writes fire+notified for hash-1; StoreActionsStep writes unmatched for hash-2.
+      const docs = extractBulkDocs() as AlertAction[];
 
       const fireActions = docs.filter((d: any) => d.action_type === 'fire');
       expect(fireActions).toHaveLength(1);
@@ -1200,46 +1222,45 @@ describe('DispatcherService', () => {
     });
   });
 
+  // Shared builder: aborted pipeline that held the watermark. Pass `recordedEpisodes` to
+  // simulate DispatchStep writing some chunks before the abort; omit (undefined) to simulate
+  // no records written — the only path where computeNextWatermark returns input.eventWatermark.
+  function buildAbortedPipeline(
+    episodes: AlertEpisode[],
+    recordedEpisodes?: number
+  ): jest.Mocked<DispatcherPipelineContract> {
+    return {
+      execute: jest
+        .fn()
+        .mockImplementation(
+          ({ signal, eventWatermark, windowStart, windowEnd, startedAt, executionUuid }) => {
+            const input = {
+              startedAt,
+              eventWatermark,
+              windowStart,
+              windowEnd,
+              executionUuid,
+              signal,
+            };
+            return Promise.resolve({
+              completed: false,
+              haltReason: 'aborted',
+              finalState: { input, episodes, recordedEpisodes },
+            });
+          }
+        ),
+    };
+  }
+
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
-    // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
-    // no `recordedEpisodes` is the only path through computeNextWatermark that
-    // returns `input.eventWatermark` unchanged — simulating a tick where the pipeline
-    // was interrupted before StoreActionsStep wrote any records.
-    function buildStuckPipeline(episodes: AlertEpisode[]): jest.Mocked<DispatcherPipelineContract> {
-      return {
-        execute: jest
-          .fn()
-          .mockImplementation(
-            ({ signal, eventWatermark, windowStart, windowEnd, startedAt, executionUuid }) => {
-              const input = {
-                startedAt,
-                eventWatermark,
-                windowStart,
-                windowEnd,
-                executionUuid,
-                signal,
-              };
-              return Promise.resolve({
-                completed: false,
-                haltReason: 'aborted',
-                finalState: {
-                  input,
-                  episodes,
-                  // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
-                },
-              });
-            }
-          ),
-      };
-    }
 
     it('nextStuckTicks increments on stuck ticks and resets to 0 on advance', async () => {
       const { storageService: noopStorage } = createStorageService();
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
       // Stuck pipeline — episodes present but no recordedEpisodes → watermark won't advance
-      const mockPipeline = buildStuckPipeline([
+      const mockPipeline = buildAbortedPipeline([
         createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(
@@ -1307,7 +1328,7 @@ describe('DispatcherService', () => {
         space_id: 'default',
       });
 
-      const mockPipeline = buildStuckPipeline([blockingEpisode]);
+      const mockPipeline = buildAbortedPipeline([blockingEpisode]);
       const service = new DispatcherService(
         mockPipeline,
         escapeStorage,
@@ -1350,7 +1371,7 @@ describe('DispatcherService', () => {
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      const mockPipeline = buildStuckPipeline([
+      const mockPipeline = buildAbortedPipeline([
         createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
@@ -1376,7 +1397,7 @@ describe('DispatcherService', () => {
       // Lag ≈ 1m, well under PRE_FETCH_STUCK_ADVANCE_LAG_MS (15m).
       const eventWatermark = new Date(Date.now() - 60_000);
 
-      const mockPipeline = buildStuckPipeline([]);
+      const mockPipeline = buildAbortedPipeline([]);
       const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
 
       const result = await service.run({
@@ -1402,7 +1423,7 @@ describe('DispatcherService', () => {
         createStorageService();
       const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
 
-      const mockPipeline = buildStuckPipeline([]);
+      const mockPipeline = buildAbortedPipeline([]);
       const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
 
       const result = await service.run({
@@ -1422,6 +1443,50 @@ describe('DispatcherService', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('stuck counter with recordedEpisodes from DispatchStep', () => {
+    it('resets stuckTicks to 0 when aborted but recordedEpisodes > 0', async () => {
+      const { storageService: noopStorage } = createStorageService();
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const episode = createAlertEpisode({
+        episode_id: 'e1',
+        last_event_timestamp: '2026-01-22T07:31:00.000Z',
+      });
+
+      const mockPipeline = buildAbortedPipeline([episode], 1);
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        createLoggerService().loggerService
+      );
+
+      const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
+
+      expect(result.nextStuckTicks).toBe(0);
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+    });
+
+    it('increments stuckTicks when aborted and recordedEpisodes = 0', async () => {
+      const { storageService: noopStorage } = createStorageService();
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const episode = createAlertEpisode({
+        episode_id: 'e1',
+        last_event_timestamp: '2026-01-22T07:31:00.000Z',
+      });
+
+      const mockPipeline = buildAbortedPipeline([episode], 0);
+      const service = new DispatcherService(
+        mockPipeline,
+        noopStorage,
+        createLoggerService().loggerService
+      );
+
+      const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
+
+      expect(result.nextStuckTicks).toBe(5);
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
     });
   });
 });

@@ -25,7 +25,7 @@ import {
   TICK_DEADLINE_MS,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import { toAction } from './steps/store_actions_step';
+import { toAction } from './steps/utils/action_builders';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -164,7 +164,9 @@ export class DispatcherService implements DispatcherServiceContract {
       }
 
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
-      const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
+      const recordedEpisodes = pipelineResult.finalState.recordedEpisodes ?? 0;
+      const watermarkHeld = nextWatermark.getTime() === resolvedWatermark.getTime();
+      const isStuck = watermarkHeld && recordedEpisodes === 0;
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
 
       // Per-tick observability. All fields are lazy so the string is never built

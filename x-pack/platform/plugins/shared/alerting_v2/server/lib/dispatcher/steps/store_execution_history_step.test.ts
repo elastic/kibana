@@ -889,4 +889,75 @@ describe('StoreExecutionHistoryStep', () => {
       expect(event?.kibana?.saved_objects).toEqual([]);
     });
   });
+
+  describe('abort-skipped group filter', () => {
+    it('emits dispatched event only for groups present in dispatchedExecutions', async () => {
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const ep1 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+      const ep2 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-2' });
+      const group1 = createActionGroup({
+        id: 'group-1',
+        policyId: 'policy-1',
+        episodes: [ep1],
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+      });
+      const group2 = createActionGroup({
+        id: 'group-2',
+        policyId: 'policy-1',
+        episodes: [ep2],
+        destinations: [{ type: 'workflow', id: 'wf-2' }],
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [group1, group2],
+          dispatchable: [ep1, ep2],
+          policies: new Map([[policy.id, policy]]),
+          // group2 absent from dispatchedExecutions and dispatchFailures → abort-skipped
+          dispatchedExecutions: new Map([['group-1', ['exec-1']]]),
+          dispatchFailures: [],
+        }),
+        logger
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+      const [[event]] = eventLogger.logEvent.mock.calls;
+      expect(event?.event?.action).toBe('dispatched');
+      expect(event?.kibana?.alerting_v2?.dispatcher?.action_group_ids).toEqual(['group-1']);
+      expect(event?.kibana?.alerting_v2?.dispatcher?.episode_ids).toEqual(['ep-1']);
+    });
+
+    it('still emits dispatched event for a group that has dispatch failures', async () => {
+      const policy = createActionPolicy({ id: 'policy-1' });
+      const ep1 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+      const group1 = createActionGroup({
+        id: 'group-1',
+        policyId: 'policy-1',
+        episodes: [ep1],
+        destinations: [{ type: 'workflow', id: 'wf-1' }, { type: 'workflow', id: 'wf-2' }],
+      });
+
+      const failure = createDispatchFailure({
+        actionGroupId: 'group-1',
+        workflowId: 'wf-2',
+        policyId: 'policy-1',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatch: [group1],
+          dispatchable: [ep1],
+          policies: new Map([[policy.id, policy]]),
+          // group1 dispatched wf-1 successfully; wf-2 failed
+          dispatchedExecutions: new Map([['group-1', ['exec-1']]]),
+          dispatchFailures: [failure],
+        }),
+        logger
+      );
+
+      // dispatched event (wf-1 succeeded) + dispatch_failed event (wf-2 failed)
+      const actions = eventLogger.logEvent.mock.calls.map(([e]) => e?.event?.action);
+      expect(actions).toContain('dispatched');
+    });
+  });
 });

@@ -164,148 +164,6 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('records dispatched episodes with fire and notified actions', async () => {
-    const mockService = createMockStorageServiceContract();
-    const step = new StoreActionsStep(mockService);
-
-    const episode = createAlertEpisode({
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      last_event_timestamp: '2026-01-22T07:00:00.000Z',
-    });
-
-    const group = createActionGroup({
-      id: 'group-1',
-      policyId: 'policy-1',
-      episodes: [episode],
-    });
-
-    const state = createDispatcherPipelineState({
-      suppressed: [],
-      throttled: [],
-      dispatch: [group],
-      rules: createRules('rule-1'),
-    });
-
-    const result = await step.execute(state, logger);
-
-    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(2);
-    expect(callArgs.docs[0]).toEqual({
-      '@timestamp': mockDate.toISOString(),
-      group_hash: 'hash-1',
-      last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: 'system',
-      action_type: 'fire',
-      rule_id: 'rule-1',
-      source: 'internal',
-      reason: 'dispatched by policy policy-1',
-      space_id: 'default',
-    });
-    expect(callArgs.docs[1]).toEqual({
-      '@timestamp': mockDate.toISOString(),
-      actor: 'system',
-      action_type: 'notified',
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      last_series_event_timestamp: mockDate.toISOString(),
-      action_group_id: 'group-1',
-      source: 'internal',
-      reason: 'notified by policy policy-1',
-      episode_status: 'active',
-      space_id: 'default',
-    });
-  });
-
-  it('includes episode_status on notified record for per_episode mode', async () => {
-    const mockService = createMockStorageServiceContract();
-    const step = new StoreActionsStep(mockService);
-
-    const episode = createAlertEpisode({
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      episode_status: 'recovering',
-      last_event_timestamp: '2026-01-22T07:00:00.000Z',
-    });
-
-    const group = createActionGroup({
-      id: 'group-1',
-      policyId: 'policy-1',
-      episodes: [episode],
-    });
-
-    const state = createDispatcherPipelineState({
-      dispatch: [group],
-      policies: new Map([
-        ['policy-1', createActionPolicy({ id: 'policy-1', throttle: { interval: '1h' } })],
-      ]),
-      rules: createRules('rule-1'),
-    });
-
-    const result = await step.execute(state, logger);
-
-    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    const notifiedDoc = callArgs.docs.find(
-      (d: Record<string, unknown>) => d.action_type === 'notified'
-    );
-    expect(notifiedDoc).toEqual(
-      expect.objectContaining({
-        action_type: 'notified',
-        group_hash: 'hash-1',
-        action_group_id: 'group-1',
-        episode_status: 'recovering',
-        reason: 'notified by policy policy-1',
-        space_id: 'default',
-      })
-    );
-  });
-
-  it('omits episode_status on notified record for all mode', async () => {
-    const mockService = createMockStorageServiceContract();
-    const step = new StoreActionsStep(mockService);
-
-    const episode = createAlertEpisode({
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      last_event_timestamp: '2026-01-22T07:00:00.000Z',
-    });
-
-    const group = createActionGroup({
-      id: 'group-1',
-      policyId: 'policy-1',
-      episodes: [episode],
-    });
-
-    const state = createDispatcherPipelineState({
-      dispatch: [group],
-      policies: new Map([
-        [
-          'policy-1',
-          createActionPolicy({
-            id: 'policy-1',
-            groupingMode: 'all',
-            throttle: { strategy: 'time_interval', interval: '5m' },
-          }),
-        ],
-      ]),
-      rules: createRules('rule-1'),
-    });
-
-    const result = await step.execute(state, logger);
-
-    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    const notifiedDoc = callArgs.docs.find(
-      (d: Record<string, unknown>) => d.action_type === 'notified'
-    );
-    expect(notifiedDoc).toBeDefined();
-    expect(notifiedDoc?.episode_status).toBeUndefined();
-  });
-
   it('handles combined suppressed, throttled, and dispatch arrays', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
@@ -344,15 +202,10 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
+      recordedEpisodes: 1,
       suppressed: [{ ...suppressedEpisode, reason: 'manually suppressed' }],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
-      policies: new Map([
-        [
-          'dispatch-policy',
-          createActionPolicy({ id: 'dispatch-policy', throttle: { interval: '1h' } }),
-        ],
-      ]),
       rules: createRules('rule-suppressed', 'rule-throttled', 'rule-dispatch'),
     });
 
@@ -363,7 +216,7 @@ describe('StoreActionsStep', () => {
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     expect(callArgs.index).toBe(ALERT_ACTIONS_DATA_STREAM);
-    expect(callArgs.docs).toHaveLength(4);
+    expect(callArgs.docs).toHaveLength(2);
 
     expect(callArgs.docs[0]).toEqual({
       '@timestamp': mockDate.toISOString(),
@@ -388,30 +241,6 @@ describe('StoreActionsStep', () => {
       reason: 'suppressed by throttled policy throttle-policy',
       space_id: 'default',
     });
-
-    expect(callArgs.docs[2]).toEqual({
-      '@timestamp': mockDate.toISOString(),
-      group_hash: 'hash-dispatch',
-      last_series_event_timestamp: '2026-01-22T07:20:00.000Z',
-      actor: 'system',
-      action_type: 'fire',
-      rule_id: 'rule-dispatch',
-      source: 'internal',
-      reason: 'dispatched by policy dispatch-policy',
-      space_id: 'default',
-    });
-
-    expect(callArgs.docs[3]).toEqual(
-      expect.objectContaining({
-        action_type: 'notified',
-        rule_id: 'rule-dispatch',
-        group_hash: 'hash-dispatch',
-        action_group_id: 'dispatch-group',
-        episode_status: 'active',
-        reason: 'notified by policy dispatch-policy',
-        space_id: 'default',
-      })
-    );
   });
 
   it('records unmatched episodes with action_type unmatched', async () => {
@@ -528,6 +357,7 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
+      recordedEpisodes: 1,
       dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
       suppressed: [],
       throttled: [throttledGroup],
@@ -545,7 +375,6 @@ describe('StoreActionsStep', () => {
       (d: Record<string, unknown>) => d.action_type as AlertAction['action_type']
     );
     expect(actionTypes).toContain('suppress');
-    expect(actionTypes).toContain('fire');
     expect(actionTypes).toContain('unmatched');
 
     const noActionDocs = callArgs.docs.filter(
@@ -565,49 +394,6 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('records multiple episodes within a single dispatch group', async () => {
-    const mockService = createMockStorageServiceContract();
-    const step = new StoreActionsStep(mockService);
-
-    const episode1 = createAlertEpisode({
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      episode_id: 'ep-1',
-      last_event_timestamp: '2026-01-22T07:00:00.000Z',
-    });
-
-    const episode2 = createAlertEpisode({
-      rule_id: 'rule-1',
-      group_hash: 'hash-2',
-      episode_id: 'ep-2',
-      last_event_timestamp: '2026-01-22T07:05:00.000Z',
-    });
-
-    const group = createActionGroup({
-      id: 'group-1',
-      policyId: 'policy-1',
-      episodes: [episode1, episode2],
-    });
-
-    const state = createDispatcherPipelineState({
-      dispatch: [group],
-      rules: createRules('rule-1'),
-    });
-
-    const result = await step.execute(state, logger);
-
-    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-
-    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(3);
-    expect(callArgs.docs[0].action_type).toBe('fire');
-    expect(callArgs.docs[0].group_hash).toBe('hash-1');
-    expect(callArgs.docs[1].action_type).toBe('fire');
-    expect(callArgs.docs[1].group_hash).toBe('hash-2');
-    expect(callArgs.docs[2].action_type).toBe('notified');
-    expect(callArgs.docs[2].group_hash).toBe('hash-1');
-  });
 
   describe('space_id resolution', () => {
     it('uses the space_id from the episode directly', async () => {
@@ -705,89 +491,6 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  describe('external alerts (source-based, no rule_id)', () => {
-    it('records external episode fire action with vendor source and null rule_id', async () => {
-      const mockService = createMockStorageServiceContract();
-      const step = new StoreActionsStep(mockService);
-
-      const externalEpisode = createAlertEpisode({
-        rule_id: null,
-        source: 'pagerduty',
-        space_id: 'space-a',
-        group_hash: 'pd-group-hash',
-        last_event_timestamp: '2026-01-22T07:00:00.000Z',
-      });
-
-      const group = createActionGroup({
-        id: 'group-pd',
-        policyId: 'policy-1',
-        episodes: [externalEpisode],
-      });
-
-      const state = createDispatcherPipelineState({
-        dispatch: [group],
-      });
-
-      const result = await step.execute(state, logger);
-
-      expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-
-      const fireDoc = callArgs.docs.find((d: Record<string, unknown>) => d.action_type === 'fire');
-      expect(fireDoc).toEqual(
-        expect.objectContaining({
-          action_type: 'fire',
-          source: 'pagerduty',
-          rule_id: null,
-          group_hash: 'pd-group-hash',
-          space_id: 'space-a',
-          actor: 'system',
-        })
-      );
-    });
-
-    it('records external episode notified action with vendor source and null rule_id', async () => {
-      const mockService = createMockStorageServiceContract();
-      const step = new StoreActionsStep(mockService);
-
-      const externalEpisode = createAlertEpisode({
-        rule_id: null,
-        source: 'pagerduty',
-        space_id: 'space-a',
-        group_hash: 'pd-group-hash',
-        last_event_timestamp: '2026-01-22T07:00:00.000Z',
-      });
-
-      const group = createActionGroup({
-        id: 'group-pd',
-        policyId: 'policy-1',
-        episodes: [externalEpisode],
-      });
-
-      const state = createDispatcherPipelineState({
-        dispatch: [group],
-      });
-
-      const result = await step.execute(state, logger);
-
-      expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
-      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-
-      const notifiedDoc = callArgs.docs.find(
-        (d: Record<string, unknown>) => d.action_type === 'notified'
-      );
-      expect(notifiedDoc).toEqual(
-        expect.objectContaining({
-          action_type: 'notified',
-          source: 'pagerduty',
-          rule_id: null,
-          group_hash: 'pd-group-hash',
-          space_id: 'space-a',
-          actor: 'system',
-        })
-      );
-    });
-  });
 
   describe('recordedEpisodes count', () => {
     it('counts suppressed episodes', async () => {
@@ -836,11 +539,12 @@ describe('StoreActionsStep', () => {
       );
     });
 
-    it('counts dispatch episodes across groups', async () => {
+    it('propagates state.recordedEpisodes from DispatchStep', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const state = createDispatcherPipelineState({
+        recordedEpisodes: 2,
         suppressed: [],
         throttled: [],
         dispatch: [
@@ -883,11 +587,11 @@ describe('StoreActionsStep', () => {
       );
     });
 
-    it('sums all buckets', async () => {
+    it('sums all buckets: state.recordedEpisodes + suppressed + throttled + unmatched', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      // 1 suppressed + 1 throttled (in a group) + 1 dispatch (in a group) + 1 unmatched = 4
+      // state.recordedEpisodes=1 (from DispatchStep) + 1 suppressed + 1 throttled + 1 unmatched = 4
       const unmatchedEpisode = createAlertEpisode({
         episode_id: 'ep-unmatched',
         group_hash: 'h-unmatched',
@@ -902,6 +606,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
+        recordedEpisodes: 1,
         dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
         suppressed: [{ ...createAlertEpisode({ episode_id: 'ep-sup' }), reason: 'acked' }],
         throttled: [createActionGroup({ id: 'g-throttle', episodes: [throttledEpisode] })],
@@ -913,6 +618,101 @@ describe('StoreActionsStep', () => {
       expect(result).toEqual(
         expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 4 } })
       );
+    });
+  });
+
+  describe('halt guard with state.recordedEpisodes from DispatchStep', () => {
+    it('halts with no_actions when dispatch non-empty but recordedEpisodes=0 and no suppress/throttle/unmatched', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        dispatchable: [],
+        suppressed: [],
+        throttled: [],
+        dispatch: [createActionGroup({ id: 'g1' })],
+        recordedEpisodes: 0,
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
+      expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
+    });
+
+    it('continues when state.recordedEpisodes > 0 even if suppress/throttle/unmatched are empty', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        dispatchable: [],
+        suppressed: [],
+        throttled: [],
+        dispatch: [],
+        recordedEpisodes: 3,
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result.type).toBe('continue');
+    });
+
+    it('accumulates state.recordedEpisodes from DispatchStep with local suppress/throttle/unmatched counts', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const suppEpisode = createAlertEpisode({ episode_id: 'e-supp', group_hash: 'h-supp' });
+      const throttleEpisode = createAlertEpisode({
+        episode_id: 'e-throttle',
+        group_hash: 'h-throttle',
+      });
+      const unmatchedEpisode = createAlertEpisode({
+        episode_id: 'e-unmatched',
+        group_hash: 'h-unmatched',
+      });
+
+      const state = createDispatcherPipelineState({
+        recordedEpisodes: 5,
+        dispatchable: [unmatchedEpisode],
+        suppressed: [{ ...suppEpisode, reason: 'acked' }],
+        throttled: [
+          createActionGroup({ id: 'g-t', policyId: 'p1', episodes: [throttleEpisode] }),
+        ],
+        dispatch: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.recordedEpisodes).toBe(8);
+    });
+
+    it('does not write fire or notified records for dispatch groups', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const episode = createAlertEpisode({ episode_id: 'e1', group_hash: 'h1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1', episodes: [episode] });
+
+      const state = createDispatcherPipelineState({
+        recordedEpisodes: 1,
+        dispatchable: [episode],
+        suppressed: [],
+        throttled: [],
+        dispatch: [group],
+      });
+
+      await step.execute(state, logger);
+
+      if (mockService.bulkIndexDocs.mock.calls.length > 0) {
+        const { docs } = mockService.bulkIndexDocs.mock.calls[0][0];
+        const fireOrNotified = docs.filter(
+          (d: Record<string, unknown>) =>
+            d.action_type === 'fire' || d.action_type === 'notified'
+        );
+        expect(fireOrNotified).toHaveLength(0);
+      }
     });
   });
 });
