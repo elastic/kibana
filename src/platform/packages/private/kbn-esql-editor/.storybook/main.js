@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const defaultConfig = require('@kbn/storybook').defaultConfig;
+const { createReactDocgenTypescriptOptions, defaultConfig } = require('@kbn/storybook');
 
 module.exports = {
   ...defaultConfig,
   typescript: {
     ...defaultConfig.typescript,
     reactDocgen: 'react-docgen-typescript',
+    ...createReactDocgenTypescriptOptions(__dirname),
   },
 };

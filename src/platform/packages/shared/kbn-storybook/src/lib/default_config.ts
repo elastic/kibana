@@ -7,216 +7,215 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createRequire } from 'module';
 import * as path from 'path';
 import fs from 'fs';
-import type { StorybookConfig as BaseStorybookConfig } from '@storybook/react-webpack5';
-import type { TypescriptOptions } from '@storybook/preset-react-webpack';
-import webpack from 'webpack';
 import { resolve } from 'path';
+import { mergeRsbuildConfig, rspack } from '@rsbuild/core';
+import type { Rspack } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginSass } from '@rsbuild/plugin-sass';
+import type { StorybookConfig } from 'storybook-react-rsbuild';
+import { externals } from '@kbn/ui-shared-deps-src';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import { IgnoreNotFoundExportPlugin } from '../ignore_not_found_export_plugin';
 import { REPO_ROOT } from './constants';
-import { default as WebpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js', '.tsx'];
-
-/*
- * false is a valid option for typescript.reactDocgen,
- * but it is not in the type definition
- */
-interface StorybookConfig extends BaseStorybookConfig {
-  typescript: Partial<TypescriptOptions>;
-}
+const globalStylesPath = JSON.stringify(
+  resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_borealislight.scss')
+);
+const resolveModule = createRequire(__filename).resolve;
+const emotionSwcPlugin = resolveModule('@swc/plugin-emotion');
 
 export type { StorybookConfig };
 
-// This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
-// changes to packages to cause a refresh in Storybook.
-const IGNORE_GLOBS = [
-  '**/node_modules/**',
-  '!**/node_modules/@kbn/**',
-  '!**/node_modules/@kbn/*/**',
-  '!**/node_modules/@kbn/*/!(node_modules)/**',
-];
+/** Finds the nearest TypeScript project for Storybook React docgen. */
+export const createReactDocgenTypescriptOptions = (configDir: string) => {
+  let directory = resolve(configDir);
+
+  while (directory !== path.dirname(directory)) {
+    const tsconfigPath = path.join(directory, 'tsconfig.json');
+    if (fs.existsSync(tsconfigPath)) {
+      return { reactDocgenTypescriptOptions: { tsconfigPath } };
+    }
+    directory = path.dirname(directory);
+  }
+
+  throw new Error(`No tsconfig.json found above Storybook config [${configDir}].`);
+};
+
+const createMockReplacementPlugin = (request: RegExp) =>
+  new rspack.NormalModuleReplacementPlugin(request, (resource: any) => {
+    if (resource.contextInfo.issuer?.includes('node_modules')) {
+      return;
+    }
+
+    const parsedRequest = path.parse(resource.request);
+    const mockedPath = path.resolve(
+      resource.context,
+      parsedRequest.dir,
+      MOCKS_DIRECTORY,
+      parsedRequest.base
+    );
+
+    for (const extension of EXTENSIONS) {
+      if (fs.existsSync(mockedPath + extension)) {
+        resource.request = `${parsedRequest.dir ? `${parsedRequest.dir}/` : './'}${path.join(
+          MOCKS_DIRECTORY,
+          parsedRequest.base
+        )}`;
+        return;
+      }
+    }
+  });
+
+const createRsbuildRspackConfig = (config: Rspack.Configuration): Rspack.Configuration => ({
+  ...config,
+  externals,
+  module: {
+    ...config.module,
+    rules: [
+      ...(config.module?.rules ?? []),
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.(html|md|txt|tmpl|yaml|yml)$/,
+        type: 'asset/source',
+      },
+      {
+        test: /\.peggy$/,
+        use: {
+          loader: resolveModule('@kbn/peggy-loader'),
+        },
+      },
+      {
+        test: /\.text$/,
+        use: {
+          loader: resolveModule('@kbn/dot-text-loader'),
+        },
+      },
+    ],
+  },
+  plugins: [
+    ...(config.plugins ?? []),
+    new NodeLibsBrowserPlugin(),
+    new IgnoreNotFoundExportPlugin(),
+  ],
+  resolve: {
+    ...config.resolve,
+    extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
+    mainFields: ['browser', 'main'],
+    alias: {
+      ...config.resolve?.alias,
+      core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+    },
+  },
+  stats: 'errors-only',
+});
 
 export const defaultConfig: StorybookConfig = {
   addons: [
     '@kbn/storybook/preset',
     '@storybook/addon-a11y',
-    '@storybook/addon-webpack5-compiler-babel',
-    // https://storybook.js.org/docs/essentials
     '@storybook/addon-essentials',
     '@storybook/addon-jest',
     '@storybook/addon-docs',
-    {
-      /**
-       * This addon replaces rules in the default SB webpack config
-       * to avoid duplicate rule issues caused by directly using the rules
-       * in the custom webpack config.
-       */
-      name: '@storybook/addon-styling-webpack',
-      options: {
-        rules: [
-          {
-            test: /\.css$/,
-            use: ['style-loader', 'css-loader'],
-          },
-          {
-            test: /\.scss$/,
-            exclude: /\.module.(s(a|c)ss)$/,
-            use: [
-              { loader: 'style-loader' },
-              { loader: 'css-loader', options: { importLoaders: 2 } },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    config: require.resolve('@kbn/optimizer/postcss.config'),
-                  },
-                },
-              },
-              {
-                loader: 'sass-loader',
-                options: {
-                  additionalData(content: string, loaderContext: any) {
-                    const req = JSON.stringify(
-                      loaderContext.utils.contextify(
-                        loaderContext.context || loaderContext.rootContext,
-                        resolve(
-                          REPO_ROOT,
-                          'src/core/public/styles/core_app/_globals_borealislight.scss'
-                        )
-                      )
-                    );
-                    return `@import ${req};\n${content}`;
-                  },
-                  implementation: require('sass-embedded'),
-                  sassOptions: {
-                    includePaths: [resolve(REPO_ROOT, 'node_modules')],
-                    quietDeps: true,
-                    silenceDeprecations: ['import', 'legacy-js-api'],
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      },
-    },
   ],
   stories: ['../**/*.stories.tsx', '../**/*.mdx'],
-  framework: {
-    name: '@storybook/react-webpack5',
-    options: {},
-  },
+  framework: 'storybook-react-rsbuild',
   typescript: {
     reactDocgen: false,
   },
   core: {
     disableTelemetry: true,
   },
-  async babel(config: any, options: any) {
-    if (!config?.presets) {
-      config.presets = [];
-    }
-
-    config.presets.push(
-      require.resolve('@kbn/babel-preset/common_preset'),
-      [
-        require.resolve('@emotion/babel-preset-css-prop'),
-        {
-          // There's an issue where emotion classnames may be duplicated,
-          // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-          // https://github.com/emotion-js/emotion/issues/2417
-          autoLabel: 'always',
-          labelFormat: '[filename]--[local]',
-        },
-      ],
+  rsbuildFinal: async (rsbuildConfig) =>
+    mergeRsbuildConfig(
+      rsbuildConfig,
       {
         plugins: [
-          process.env.NODE_ENV !== 'production' && require.resolve('react-refresh/babel'),
-        ].filter(Boolean),
-      }
-    );
-
-    return config;
-  },
-  webpackFinal: (config, options) => {
-    if (process.env.CI) {
-      config.parallelism = 4;
-      config.cache = true;
-    }
-
-    // required for react refresh
-    config.target = 'web';
-
-    // This will go over every component which is imported and check its import statements.
-    // For every import which starts with ./ it will do a check to see if a file with the same name
-    // exists in the __storybook_mocks__ folder. If it does, use that import instead.
-    // This allows you to mock hooks and functions when rendering components in Storybook.
-    // It is akin to Jest's manual mocks (__mocks__).
-    config.plugins?.push(
-      new webpack.NormalModuleReplacementPlugin(/^\.\//, async (resource: any) => {
-        if (!resource.contextInfo.issuer?.includes('node_modules')) {
-          const mockedPath = path.resolve(resource.context, MOCKS_DIRECTORY, resource.request);
-
-          EXTENSIONS.forEach((ext) => {
-            const isReplacementPathExists = fs.existsSync(mockedPath + ext);
-
-            if (isReplacementPathExists) {
-              const newImportPath = './' + path.join(MOCKS_DIRECTORY, resource.request);
-              resource.request = newImportPath;
-            }
-          });
-        }
-      })
-    );
-
-    // Same, but for imports statements which import modules outside of the directory (../)
-    config.plugins?.push(
-      new webpack.NormalModuleReplacementPlugin(/^\.\.\//, async (resource: any) => {
-        if (!resource.contextInfo.issuer?.includes('node_modules')) {
-          const prs = path.parse(resource.request);
-
-          const mockedPath = path.resolve(resource.context, prs.dir, MOCKS_DIRECTORY, prs.base);
-
-          EXTENSIONS.forEach((ext) => {
-            const isReplacementPathExists = fs.existsSync(mockedPath + ext);
-
-            if (isReplacementPathExists) {
-              const newImportPath = prs.dir + '/' + path.join(MOCKS_DIRECTORY, prs.base);
-              resource.request = newImportPath;
-            }
-          });
-        }
-      })
-    );
-
-    if (process.env.NODE_ENV !== 'production') {
-      config.plugins?.push(
-        new ReactRefreshWebpackPlugin({
-          overlay: false,
-        })
-      );
-    }
-
-    config.resolve = {
-      ...config.resolve,
-      fallback: {
-        ...config?.resolve?.fallback,
-        fs: false,
+          pluginReact({
+            swcReactOptions: {
+              importSource: '@emotion/react',
+            },
+          }),
+          pluginSass({
+            sassLoaderOptions: {
+              additionalData: (content) => `@import ${globalStylesPath};\n${content.toString()}`,
+              sassOptions: {
+                loadPaths: [REPO_ROOT, resolve(REPO_ROOT, 'node_modules')],
+                quietDeps: true,
+                silenceDeprecations: ['import', 'legacy-js-api'],
+              },
+            },
+          }),
+        ],
+        tools: {
+          rspack: createRsbuildRspackConfig({
+            plugins: [createMockReplacementPlugin(/^\.\//), createMockReplacementPlugin(/^\.\.\//)],
+            resolve: {
+              fallback: {
+                fs: false,
+              },
+            },
+          }),
+          swc: {
+            jsc: {
+              experimental: {
+                plugins: [
+                  [
+                    emotionSwcPlugin,
+                    {
+                      autoLabel: 'always',
+                      labelFormat: '[filename]--[local]',
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        },
       },
-    };
-
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: IGNORE_GLOBS,
-    };
-
-    return WebpackConfig({ config });
-  },
+      {
+        tools: {
+          rspack: {
+            module: {
+              rules: [
+                {
+                  test: /\.(js|jsx|ts|tsx)$/,
+                  exclude: /node_modules/,
+                  enforce: 'pre',
+                  use: {
+                    loader: resolveModule('babel-loader'),
+                    options: {
+                      babelrc: false,
+                      configFile: false,
+                      presets: [
+                        resolveModule('@kbn/babel-preset/common_preset'),
+                        [
+                          resolveModule('@emotion/babel-preset-css-prop'),
+                          {
+                            autoLabel: 'always',
+                            labelFormat: '[filename]--[local]',
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }
+    ),
   previewHead: (head) => `
   ${head}
   <meta name="eui-global" />

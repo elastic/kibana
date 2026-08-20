@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
+import { cache } from '@storybook/core/common';
 import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
 import type { Flags } from '@kbn/dev-cli-runner';
@@ -64,7 +65,7 @@ export async function buildStorybook({
     // Some transitive deps of addon-docs are ESM and not loading properly
     // See: https://github.com/storybookjs/storybook/issues/29467
     require('fix-esm').require('react-docgen');
-    await build(config);
+    await build({ ...config, cache });
   } finally {
     require('fix-esm').unregister();
   }

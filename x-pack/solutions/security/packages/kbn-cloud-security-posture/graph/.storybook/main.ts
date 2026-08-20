@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { mergeRsbuildConfig } from '@rsbuild/core';
 import type { StorybookConfig } from '@kbn/storybook';
-import { defaultConfig } from '@kbn/storybook';
-import type { Configuration } from 'webpack';
-import { merge as webpackMerge } from 'webpack-merge';
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
+import { defaultConfig } from '@kbn/storybook';
 
-const graphWebpack: Configuration = {
+const graphRsbuild = {
   resolve: {
     alias: {
       '../../hooks/use_fetch_graph_data': resolve(
@@ -30,8 +29,11 @@ const graphWebpack: Configuration = {
 
 const sbConfig: StorybookConfig = {
   ...defaultConfig,
-  webpackFinal(config, options) {
-    return webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, graphWebpack);
+  async rsbuildFinal(config, options) {
+    return mergeRsbuildConfig(
+      (await defaultConfig.rsbuildFinal?.(config, options)) ?? config,
+      graphRsbuild
+    );
   },
 };
 

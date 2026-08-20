@@ -87,6 +87,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
         ...process.env,
         STORYBOOK_BASE_URL,
         NODE_OPTIONS: '--max-old-space-size=6144',
+        CACHE_DIR: path.resolve(STORYBOOK_BUILD_DIR, '.cache', storybook),
       },
     });
 

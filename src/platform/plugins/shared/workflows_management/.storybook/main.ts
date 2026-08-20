@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mergeRsbuildConfig } from '@rsbuild/core';
 import { resolve } from 'path';
-import type { Configuration } from 'webpack';
-import { merge as webpackMerge } from 'webpack-merge';
 import type { StorybookConfig } from '@kbn/storybook';
 import { defaultConfig } from '@kbn/storybook';
 
-const webpackConfig: Configuration = {
+const rsbuildConfig = {
   resolve: {
     alias: {
       '../../../hooks/use_workflow_url_state': resolve(
@@ -26,8 +25,11 @@ const webpackConfig: Configuration = {
 
 const sbConfig: StorybookConfig = {
   ...defaultConfig,
-  webpackFinal(config, options) {
-    return webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, webpackConfig);
+  async rsbuildFinal(config, options) {
+    return mergeRsbuildConfig(
+      (await defaultConfig.rsbuildFinal?.(config, options)) ?? config,
+      rsbuildConfig
+    );
   },
 };
 

@@ -11,9 +11,9 @@ import type { StorybookConfig } from './src/lib/default_config';
 import { defaultConfig } from './src/lib/default_config';
 export { defaultConfig };
 export type { StorybookConfig };
+export { createReactDocgenTypescriptOptions } from './src/lib/default_config';
 export { runStorybookCli } from './src/lib/run_storybook_cli';
 export { buildStorybookDocsArtifacts, runStorybookDocsTestServer } from './src/lib/docs_test';
-export { default as WebpackConfig } from './src/webpack.config';
 export { DEFAULT_THEME, THEMES } from './src/lib/themes';
 export {
   buildInlineRegistryBundle,
@@ -22,7 +22,7 @@ export {
   buildDocsRegistry,
   createDocsManifest,
   createDocsRegistry,
-  createInlineRegistryWebpackConfig,
+  createInlineRegistryRspackConfig,
   createInlineRegistryEntrySource,
 } from './src/lib/docs_assets';
 export { EMBEDDABLE_STORYBOOK_TAG, EMBEDDABLE_RESIZE_EVENT } from './src/lib/embeddable';
@@ -44,7 +44,7 @@ export type {
   BuildDocsRegistryOptions,
   BuildDocsRegistryResult,
   BuildDocsAssetsOptions,
-  CreateInlineRegistryWebpackConfigOptions,
+  CreateInlineRegistryRspackConfigOptions,
   StorybookDocsBootstrap,
   StorybookDocsBundleParameters,
   StorybookDocsFilterOptions,

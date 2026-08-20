@@ -18,7 +18,7 @@ import {
   createDocsManifest,
   createDocsRegistry,
   createInlineRegistryEntrySource,
-  createInlineRegistryWebpackConfig,
+  createInlineRegistryRspackConfig,
 } from './docs_assets';
 import type { StorybookIndex } from './docs_assets';
 import { EMBEDDABLE_STORYBOOK_TAG } from './embeddable';
@@ -358,9 +358,9 @@ describe('createInlineRegistryEntrySource', () => {
   });
 });
 
-describe('createInlineRegistryWebpackConfig', () => {
+describe('createInlineRegistryRspackConfig', () => {
   it('targets an ESM docs registry bundle with lazy chunks beside it', () => {
-    const config = createInlineRegistryWebpackConfig({
+    const config = createInlineRegistryRspackConfig({
       entryPath: '/storybook-docs/shared_ux/registry_entry.js',
       docsDir: '/storybook-docs/shared_ux',
     });
@@ -384,7 +384,7 @@ describe('createInlineRegistryWebpackConfig', () => {
   });
 
   it('shakes the docs entry and test runtime out of the @storybook/react chunks', () => {
-    const config = createInlineRegistryWebpackConfig({
+    const config = createInlineRegistryRspackConfig({
       entryPath: '/storybook-docs/shared_ux/registry_entry.js',
       docsDir: '/storybook-docs/shared_ux',
     });

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-const defaultConfig = require('@kbn/storybook').defaultConfig;
+const { createReactDocgenTypescriptOptions, defaultConfig } = require('@kbn/storybook');
 
 module.exports = {
   ...defaultConfig,
   typescript: {
     reactDocgen: 'react-docgen-typescript',
+    ...createReactDocgenTypescriptOptions(__dirname),
   },
 };

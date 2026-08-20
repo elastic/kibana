@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-import { merge as webpackMerge } from 'webpack-merge';
+import { mergeRsbuildConfig } from '@rsbuild/core';
 import { resolve } from 'path';
+import { defaultConfig } from '@kbn/storybook';
 
-const mockConfig = {
+const rsbuildConfig = {
   resolve: {
     alias: {
       '../format_service': resolve(__dirname, '../public/__mocks__/format_service.ts'),
@@ -21,5 +21,9 @@ const mockConfig = {
 
 module.exports = {
   ...defaultConfig,
-  webpackFinal: (config) => webpackMerge(config, mockConfig),
+  rsbuildFinal: async (config, options) =>
+    mergeRsbuildConfig(
+      (await defaultConfig.rsbuildFinal?.(config, options)) ?? config,
+      rsbuildConfig
+    ),
 };

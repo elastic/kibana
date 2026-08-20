@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { createReactDocgenTypescriptOptions, defaultConfig } from '@kbn/storybook';
 
 // Aggregates stories from every `@kbn/ui-*` package under `src/platform/kbn-ui`.
 module.exports = {
@@ -15,5 +15,6 @@ module.exports = {
   stories: ['../**/*.stories.+(tsx|mdx)'],
   typescript: {
     reactDocgen: 'react-docgen-typescript',
+    ...createReactDocgenTypescriptOptions(__dirname),
   },
 };

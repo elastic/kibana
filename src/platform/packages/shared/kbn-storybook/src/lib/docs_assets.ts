@@ -12,9 +12,9 @@ import { createReadStream, createWriteStream } from 'fs';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import archiver from 'archiver';
-import webpack from 'webpack';
-import type { Configuration, StatsError, Watching } from 'webpack';
-import { default as WebpackConfig } from '../webpack.config';
+import { rspack } from '@rspack/core';
+import type { Configuration, StatsError, Watching } from '@rspack/core';
+import { createStorybookRspackConfig } from '../rspack.config';
 import { EMBEDDABLE_STORYBOOK_TAG } from './embeddable';
 
 export interface StorybookIndexEntry {
@@ -135,7 +135,7 @@ export interface BuildDocsArchiveResult {
   size: number;
 }
 
-export interface CreateInlineRegistryWebpackConfigOptions {
+export interface CreateInlineRegistryRspackConfigOptions {
   entryPath: string;
   docsDir: string;
 }
@@ -234,140 +234,137 @@ export const { mountStory, unmountStory, getStoryParameters } = createDocsRegist
 `;
 };
 
-export const createInlineRegistryWebpackConfig = ({
+export const createInlineRegistryRspackConfig = ({
   entryPath,
   docsDir,
-}: CreateInlineRegistryWebpackConfigOptions): Configuration =>
-  WebpackConfig({
-    config: {
-      mode: 'production',
-      target: 'web',
-      entry: {
-        registry: resolve(entryPath),
+}: CreateInlineRegistryRspackConfigOptions): Configuration =>
+  createStorybookRspackConfig({
+    mode: 'production',
+    target: 'web',
+    entry: {
+      registry: resolve(entryPath),
+    },
+    output: {
+      path: resolve(docsDir),
+      filename: 'registry.js',
+      chunkFilename: '[name].[contenthash].registry.js',
+      publicPath: 'auto',
+      module: true,
+      library: {
+        type: 'module',
       },
-      output: {
-        path: resolve(docsDir),
-        filename: 'registry.js',
-        chunkFilename: '[name].[contenthash].registry.js',
-        publicPath: 'auto',
-        module: true,
-        library: {
-          type: 'module',
+    },
+    experiments: {
+      outputModule: true,
+    },
+    externalsType: 'var',
+    devtool: 'source-map',
+    module: {
+      rules: [
+        {
+          // `@storybook/react`'s barrel has a bare import of its `entry-preview-docs` chunk
+          // (docgen argTypes, source snippets, `jsdoc-type-pratt-parser`) to support
+          // `__definePreview`, which the embed runtime never uses. The package declares no
+          // `sideEffects`, so Rspack cannot drop that ~360KB on its own. These chunks only
+          // declare bindings, making unused ones safe to elide. The name carries a build hash,
+          // so `docs_assets.test.ts` asserts the pattern still matches what is installed.
+          test: /[\\/]node_modules[\\/]@storybook[\\/]react[\\/]dist[\\/]chunk-[A-Za-z0-9]+\.mjs$/,
+          sideEffects: false,
+          resolve: {
+            // Those same chunks lazily import `@storybook/test` (~635KB) from `beforeAll`, only
+            // to install testing-library `act()` wrappers. The embed runtime never invokes
+            // `beforeAll`, and Storybook wraps the import in a bare `try`/`catch`, so stubbing it
+            // is inert. Scoped to this rule so a story's own `@storybook/test` import still
+            // resolves to the real package.
+            alias: { '@storybook/test': false },
+          },
         },
-      },
-      experiments: {
-        outputModule: true,
-      },
-      externalsType: 'var',
-      devtool: 'source-map',
-      module: {
-        rules: [
-          {
-            // `@storybook/react`'s barrel has a bare import of its `entry-preview-docs` chunk
-            // (docgen argTypes, source snippets, `jsdoc-type-pratt-parser`) to support
-            // `__definePreview`, which the embed runtime never uses. The package declares no
-            // `sideEffects`, so webpack cannot drop that ~360KB on its own. These chunks only
-            // declare bindings, making unused ones safe to elide. The name carries a build hash,
-            // so `docs_assets.test.ts` asserts the pattern still matches what is installed.
-            test: /[\\/]node_modules[\\/]@storybook[\\/]react[\\/]dist[\\/]chunk-[A-Za-z0-9]+\.mjs$/,
-            sideEffects: false,
-            resolve: {
-              // Those same chunks lazily import `@storybook/test` (~635KB) from `beforeAll`, only
-              // to install testing-library `act()` wrappers. The embed runtime never invokes
-              // `beforeAll`, and Storybook wraps the import in a bare `try`/`catch`, so stubbing it
-              // is inert. Scoped to this rule so a story's own `@storybook/test` import still
-              // resolves to the real package.
-              alias: { '@storybook/test': false },
-            },
-          },
-          {
-            test: /\.(js|jsx|ts|tsx|mjs)$/,
-            exclude: /node_modules/,
-            use: {
-              loader: require.resolve('babel-loader'),
-              options: {
-                presets: [
-                  require.resolve('@kbn/babel-preset/common_preset'),
-                  [
-                    require.resolve('@emotion/babel-preset-css-prop'),
-                    {
-                      autoLabel: 'always',
-                      labelFormat: '[filename]--[local]',
-                    },
-                  ],
+        {
+          test: /\.(js|jsx|ts|tsx|mjs)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('babel-loader'),
+            options: {
+              presets: [
+                require.resolve('@kbn/babel-preset/common_preset'),
+                [
+                  require.resolve('@emotion/babel-preset-css-prop'),
+                  {
+                    autoLabel: 'always',
+                    labelFormat: '[filename]--[local]',
+                  },
                 ],
-              },
+              ],
             },
           },
-          {
-            test: /\.css$/,
-            use: ['style-loader', 'css-loader'],
+        },
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+        },
+        {
+          test: /\.mdx?$/,
+          type: 'asset/source',
+        },
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|webp)(\?|$)/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/[name].[contenthash][ext]',
           },
-          {
-            test: /\.mdx?$/,
-            type: 'asset/source',
-          },
-          {
-            test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|webp)(\?|$)/,
-            type: 'asset/resource',
-            generator: {
-              filename: 'assets/[name].[contenthash][ext]',
+        },
+        {
+          test: /\.scss$/,
+          exclude: /\.module.(s(a|c)ss)$/,
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader', options: { importLoaders: 2 } },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
+                },
+              },
             },
-          },
-          {
-            test: /\.scss$/,
-            exclude: /\.module.(s(a|c)ss)$/,
-            use: [
-              { loader: 'style-loader' },
-              { loader: 'css-loader', options: { importLoaders: 2 } },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    config: require.resolve('@kbn/optimizer/postcss.config'),
-                  },
+            {
+              loader: 'sass-loader',
+              options: {
+                additionalData: (content: string): string => {
+                  const globalsPath = stringify(
+                    resolve(
+                      __dirname,
+                      '../../../../../../core/public/styles/core_app/_globals_borealislight.scss'
+                    )
+                  );
+                  return `@import ${globalsPath};\n${content}`;
+                },
+                implementation: require('sass-embedded'),
+                sassOptions: {
+                  includePaths: [resolve(__dirname, '../../../../../../../node_modules')],
+                  quietDeps: true,
+                  silenceDeprecations: ['import', 'legacy-js-api'],
                 },
               },
-              {
-                loader: 'sass-loader',
-                options: {
-                  additionalData: (content: string): string => {
-                    const globalsPath = stringify(
-                      resolve(
-                        __dirname,
-                        '../../../../../../core/public/styles/core_app/_globals_borealislight.scss'
-                      )
-                    );
-                    return `@import ${globalsPath};\n${content}`;
-                  },
-                  implementation: require('sass-embedded'),
-                  sassOptions: {
-                    includePaths: [resolve(__dirname, '../../../../../../../node_modules')],
-                    quietDeps: true,
-                    silenceDeprecations: ['import', 'legacy-js-api'],
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      },
-      plugins: [
-        new webpack.DefinePlugin({
-          'process.env.NODE_ENV': JSON.stringify('production'),
-        }),
+            },
+          ],
+        },
       ],
-      resolve: {
-        extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
-      },
-      optimization: {
-        runtimeChunk: false,
-      },
-      stats: 'errors-only',
+    },
+    plugins: [
+      new rspack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify('production'),
+      }),
+    ],
+    resolve: {
+      extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
+    },
+    optimization: {
+      runtimeChunk: false,
     },
   });
 
-const formatWebpackError = (error: StatsError): string => {
+const formatRspackError = (error: StatsError): string => {
   if (error.message) {
     return error.message;
   }
@@ -378,11 +375,11 @@ const formatWebpackError = (error: StatsError): string => {
 export const buildInlineRegistryBundle = async ({
   entryPath,
   docsDir,
-}: CreateInlineRegistryWebpackConfigOptions): Promise<void> => {
-  const config = createInlineRegistryWebpackConfig({ entryPath, docsDir });
+}: CreateInlineRegistryRspackConfigOptions): Promise<void> => {
+  const config = createInlineRegistryRspackConfig({ entryPath, docsDir });
 
   await new Promise<void>((resolvePromise, reject) => {
-    const compiler = webpack(config);
+    const compiler = rspack(config);
 
     compiler.run((runError, stats) => {
       compiler.close((closeError) => {
@@ -399,7 +396,7 @@ export const buildInlineRegistryBundle = async ({
         const errors = stats?.toJson({ errors: true }).errors ?? [];
 
         if (errors.length) {
-          reject(new Error(errors.map(formatWebpackError).join('\n\n')));
+          reject(new Error(errors.map(formatRspackError).join('\n\n')));
           return;
         }
 
@@ -422,11 +419,11 @@ export const watchInlineRegistryBundle = ({
   entryPath,
   docsDir,
   onRebuild,
-}: CreateInlineRegistryWebpackConfigOptions & {
+}: CreateInlineRegistryRspackConfigOptions & {
   onRebuild?: (error: Error | undefined) => void;
 }): WatchInlineRegistryBundleResult => {
-  const config = createInlineRegistryWebpackConfig({ entryPath, docsDir });
-  const compiler = webpack(config);
+  const config = createInlineRegistryRspackConfig({ entryPath, docsDir });
+  const compiler = rspack(config);
 
   let settleFirstBuild: (error?: Error) => void = () => {};
   const firstBuild = new Promise<void>((resolvePromise, reject) => {
@@ -439,7 +436,7 @@ export const watchInlineRegistryBundle = ({
       ? runError
       : (() => {
           const errors = stats?.toJson({ errors: true }).errors ?? [];
-          return errors.length ? new Error(errors.map(formatWebpackError).join('\n\n')) : undefined;
+          return errors.length ? new Error(errors.map(formatRspackError).join('\n\n')) : undefined;
         })();
 
     if (!firstBuildSettled) {
