@@ -60,7 +60,9 @@ Checkout deploy introduced a regression.
 
 ## Next Steps
 - Roll back checkout deployment · Revert commit abc123 and monitor error rate.`,
-  gaps_found: ['Missing trace coverage · No spans for payment gateway calls.'],
+  blind_spots: [
+    { title: 'Missing trace coverage', description: 'No spans for payment gateway calls.' },
+  ],
 };
 
 const renderInvestigation = (
