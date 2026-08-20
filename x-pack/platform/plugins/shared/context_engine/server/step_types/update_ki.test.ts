@@ -41,18 +41,20 @@ describe('getUpdateKiStepDefinition', () => {
       esClient,
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: async () => false,
       checkWritePrivilege: allowed,
-      ...mockKiStepTelemetry(),
+      ...telemetry,
     });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('FeatureDisabledError');
     expect(esClient.update).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
   });
 
   it('throws PermissionError when the workflow user lacks the write privilege', async () => {
