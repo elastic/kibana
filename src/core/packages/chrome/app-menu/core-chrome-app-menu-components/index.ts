@@ -6,8 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+/** @deprecated Import from `@kbn/app-menu` instead. */
 export {
   AppMenuComponent,
+  AppMenuLoading,
   AppMenuItem,
   AppMenuActionButton,
   AppMenuOverflowButton,
@@ -30,9 +33,11 @@ export {
   getPopoverActionItems,
   getIsSelectedColor,
   hasNonGlobalStaticItems,
-} from '@kbn/ui-app-menu';
+} from '@kbn/app-menu';
 
+/** @deprecated Import from `@kbn/app-menu` instead. */
 export type {
+  AppMenuLoadingProps,
   AppMenuBreakpointSource,
   AppMenuRunAction,
   AppMenuRunActionParams,
@@ -43,4 +48,4 @@ export type {
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
   AppMenuStaticItem,
-} from '@kbn/ui-app-menu';
+} from '@kbn/app-menu';

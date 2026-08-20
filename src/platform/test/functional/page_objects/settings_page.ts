@@ -356,7 +356,10 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(true);
-    await this.testSubjects.click(`selectable-option-${option}`);
+    // Center the option in the popover's scroll list so the click clears an edge-pinned option.
+    const optionToClear = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToClear.scrollIntoView({ block: 'center' });
+    await optionToClear.click();
     await this.retry.waitFor(
       'option to be unchecked',
       async () => !(await this.isOptionChecked(option))
@@ -371,7 +374,10 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(false);
-    await this.testSubjects.click(`selectable-option-${option}`);
+    // Center the option in the popover's scroll list so the click toggles an edge-pinned option.
+    const optionToSelect = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToSelect.scrollIntoView({ block: 'center' });
+    await optionToSelect.click();
     await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);

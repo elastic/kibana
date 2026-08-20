@@ -1,5 +1,5 @@
 {
-  "sha1": "d627d4eef3bacebd0494896497995f989c8c4b95",
+  "sha1": "dd9ff587667a91a769754d26157d39494517d94d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 25
       }
     },
@@ -63,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
-        "line": 65,
-        "column": 23
+        "line": 68,
+        "column": 76
       }
     },
     {
@@ -83,8 +83,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
-        "line": 123,
-        "column": 33
+        "line": 129,
+        "column": 58
       }
     },
     {
@@ -103,7 +103,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 23
       }
     },
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 42,
-        "column": 27
+        "line": 43,
+        "column": 32
       }
     },
     {
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 86,
-        "column": 9
+        "line": 88,
+        "column": 30
       }
     },
     {
@@ -163,8 +163,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 125,
-        "column": 15
+        "line": 130,
+        "column": 27
       }
     },
     {
@@ -183,8 +183,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 161,
-        "column": 21
+        "line": 168,
+        "column": 13
       }
     },
     {
@@ -203,8 +203,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 223,
-        "column": 13
+        "line": 229,
+        "column": 18
       }
     },
     {
@@ -742,8 +742,8 @@
       }
     },
     {
-      "id": "bd30a08bd26a48f-c5c5a049bc79180",
-      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "id": "bd30a08bd26a48f-7dd6b07417dee5c",
+      "title": "Discover field data shows top-level object keys and supports source-column URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1901,7 +1901,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 60,
+        "line": 65,
         "column": 5
       }
     },
@@ -1921,7 +1921,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 69,
+        "line": 74,
         "column": 20
       }
     },
@@ -1941,7 +1941,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 79,
+        "line": 84,
         "column": 25
       }
     },
@@ -1961,8 +1961,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 92,
-        "column": 32
+        "line": 97,
+        "column": 25
       }
     },
     {
@@ -1981,8 +1981,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 98,
-        "column": 25
+        "line": 101,
+        "column": 20
       }
     },
     {
@@ -2001,8 +2001,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 144,
-        "column": 20
+        "line": 151,
+        "column": 22
       }
     },
     {
@@ -2021,8 +2021,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 191,
-        "column": 29
+        "line": 200,
+        "column": 32
       }
     },
     {
