@@ -45,22 +45,32 @@ async function createToolIfMissing({
   log,
   body,
 }: SeedToolsOptions & { body: Record<string, unknown> }): Promise<void> {
+  const toolPath = `/api/agent_builder/tools/${encodeURIComponent(String(body.id))}`;
   try {
     await kbnClient.request({
-      method: 'POST',
-      path: '/api/agent_builder/tools',
+      method: 'GET',
+      path: toolPath,
       headers: AGENT_BUILDER_TOOLS_HEADERS,
-      body,
     });
-    log.info(`[persona-matrix] created tool '${body.id}'`);
-  } catch (error) {
-    const status = (error as { status?: number })?.status;
-    if (status === 409) {
-      log.info(`[persona-matrix] tool '${body.id}' already exists, reusing`);
-      return;
-    }
-    throw error;
+    // Tool exists from a previous run — delete first so the POST below always
+    // installs the CURRENT definition (verified live: duplicate POST returns
+    // 400 "already exists", and DELETE-then-POST is the upsert path).
+    await kbnClient.request({
+      method: 'DELETE',
+      path: toolPath,
+      headers: AGENT_BUILDER_TOOLS_HEADERS,
+    });
+    log.info(`[persona-matrix] removed stale tool '${body.id}', reinstalling`);
+  } catch {
+    // 404: tool not present, nothing to clean up
   }
+  await kbnClient.request({
+    method: 'POST',
+    path: '/api/agent_builder/tools',
+    headers: AGENT_BUILDER_TOOLS_HEADERS,
+    body,
+  });
+  log.info(`[persona-matrix] created tool '${body.id}'`);
 }
 
 export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOptions): Promise<void> {
@@ -79,11 +89,16 @@ export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOption
       configuration: {
         // Queries the eval-seeded mock verdict index (see env_seeds.ts) so the
         // tool returns a coherent VirusTotal-style answer without any network
-        // access or real VirusTotal subscription.
+        // access or real VirusTotal subscription. `params` is REQUIRED by the
+        // esql tool schema (verified live: omitting it fails with "[params]:
+        // expected value of type [object] but got [undefined]"; a params entry
+        // not referenced by a {{placeholder}} fails with "Defined parameters
+        // not used in query"). The {{hash}} placeholder drives the input
+        // schema; params stays empty.
         query:
           'FROM ti-mock-default | WHERE threat_intel.indicator.value == "{{hash}}" ' +
           '| KEEP threat_intel.verdict, threat_intel.detection_ratio, threat_intel.classification | LIMIT 5',
-        params: { hash: { type: 'string', description: 'The hash, URL, or domain to look up' } },
+        params: {},
       },
     },
   });
@@ -100,6 +115,9 @@ export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOption
       tags: ['persona-matrix', 'incident-response'],
       configuration: {
         query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.severity | LIMIT 10`,
+        // esql tool schema requires `params` present (even empty) — omitting
+        // it fails validation with "expected value of type [object] but got
+        // [undefined]" (verified live).
         params: {},
       },
     },
