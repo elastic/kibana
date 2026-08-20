@@ -21,6 +21,8 @@ export {
 } from './access_control';
 export {
   DEFAULT_CONVERSATION_TITLE,
+  CONVERSATION_TITLE_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,

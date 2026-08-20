@@ -57,6 +57,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     trackingService,
     experimentalFeatures,
     projectRouting,
+    conversationTemplates,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -114,6 +115,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),

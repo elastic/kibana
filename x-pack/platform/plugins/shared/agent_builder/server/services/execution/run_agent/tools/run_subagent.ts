@@ -18,7 +18,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
@@ -120,7 +120,7 @@ export const createSubagentTool = ({
   subagentTracker?: SubagentTracker;
   /** Existence probe for stale-entry recovery. */
   conversationExists?: (id: string) => Promise<boolean>;
-}): BuiltinToolDefinition<typeof schema> => {
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
     description: toolDescription,

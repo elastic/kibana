@@ -88,10 +88,9 @@ import {
   getInvestigationTimeLabel,
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
-  mapBlindSpots,
   parseInvestigationRecommendations,
   sortInvestigationHypotheses,
-  type InvestigationRecommendation,
+  type RecommendationItem,
 } from './investigation_presentation';
 
 export type InvestigationFlyoutTabId = 'recommendations' | 'blindSpots' | 'hypotheses';
@@ -310,7 +309,7 @@ function RecommendationRow({
   index,
   onOpenInChat,
 }: {
-  recommendation: InvestigationRecommendation;
+  recommendation: RecommendationItem;
   index: number;
   onOpenInChat: () => void;
 }): React.ReactElement {
@@ -572,7 +571,7 @@ export function InvestigationFlyout({
   const goalText = getInvestigationGoalText(state);
   const conclusionBody = getConclusionBody(state?.conclusion);
   const recommendations = useMemo(() => parseInvestigationRecommendations(state), [state]);
-  const blindSpots = useMemo(() => mapBlindSpots(state?.gaps_found), [state?.gaps_found]);
+  const blindSpots = useMemo(() => state?.blind_spots ?? [], [state?.blind_spots]);
   const hypotheses = useMemo(
     () => sortInvestigationHypotheses(state?.hypotheses ?? []),
     [state?.hypotheses]
@@ -603,7 +602,7 @@ export function InvestigationFlyout({
   });
 
   const openRecommendationInChat = useCallback(
-    (recommendation: InvestigationRecommendation, index: number) => {
+    (recommendation: RecommendationItem, index: number) => {
       agentBuilder?.openChat(
         buildRecommendationChatOptions(recommendation, `nightshift-flyout-recommendation-${index}`)
       );
