@@ -727,6 +727,27 @@ describe('EvaluatorDefinitionClient', () => {
       ]);
     });
 
+    it('does not count a version deleted concurrently', async () => {
+      const { client, bulk, docs } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      bulk.mockImplementationOnce(
+        async ({ operations }: { operations: Array<{ delete?: { _id: string } }> }) => {
+          for (const operation of operations) {
+            if (operation.delete) {
+              docs.delete(operation.delete._id);
+            }
+          }
+
+          return {
+            errors: false,
+            items: operations.map(() => ({ delete: { result: 'not_found' } })),
+          };
+        }
+      );
+
+      await expect(client.delete('tone', { version: '1.0.0' })).resolves.toEqual({ deleted: 0 });
+    });
+
     it('reports nothing deleted for an unknown name', async () => {
       const { client } = createClient();
 

@@ -406,7 +406,9 @@ export class EvaluatorDefinitionClient {
       );
     }
 
-    return { deleted: targets.length };
+    return {
+      deleted: response.items.filter((item) => item.delete?.result === 'deleted').length,
+    };
   }
 }
 
