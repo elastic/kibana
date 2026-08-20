@@ -77,7 +77,7 @@ export const isEventsNativeVersion = (v: number | undefined): v is number =>
 /**
  * Discriminates the ids produced by `roundToEvents` (see rounds_to_events.ts)
  * from any additive event that lives on the timeline but has no round shape
- * - think errors, background agent completions, etc.
+ * think errors, background agent completions, etc.
  */
 const isRoundDerivedEventId = (id: string): boolean =>
   id.endsWith('::user_message') ||
