@@ -155,10 +155,10 @@ Using the imported reviewer instructions:
 
 ## Critical checks
 
-Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as:
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Use short, fix-oriented finding titles rather than repeating the checklist heading verbatim. When the linked best practice is useful to cite, include it in the body of the finding. Format each Critical-check finding title as:
 
 ```md
-#### ⚠️ <Concern (use exact checklist heading)> — <short summary>
+#### ⚠️ <short fix-oriented title>
 ```
 
 Then append a GitHub `> [!IMPORTANT]` alert at the **bottom** of that finding (after the finding details), containing exactly this line:
