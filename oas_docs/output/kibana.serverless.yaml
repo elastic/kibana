@@ -131514,7 +131514,7 @@ components:
         projectRoutings:
           description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
           example: _alias:_origin
-          maxLength: 1024
+          maxLength: 8192
           nullable: true
           type: string
         syncDelay:
