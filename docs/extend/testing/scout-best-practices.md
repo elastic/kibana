@@ -158,7 +158,7 @@ The same logic applies in reverse: whatever your suite creates or changes doesn'
 Clean up in the right place:
 
 - **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers finish.
+- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
 
 :::::{tip}
 If your suite passes locally and alone but fails in CI, suspect this whole class first: check what state the failing assertion actually depends on, and which other suite could have created or deleted it.
