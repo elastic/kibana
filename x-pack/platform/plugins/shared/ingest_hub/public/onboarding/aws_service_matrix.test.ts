@@ -150,17 +150,17 @@ describe('AWS service matrix', () => {
           inputs: [{ type: 'aws-s3', title: 'GuardDuty S3' }],
         },
         {
-          name: 'cloudtrail',
-          data_streams: ['cloudtrail'],
+          name: 'config',
+          data_streams: ['config'],
           inputs: [
             {
               type: 'aws-s3',
-              title: 'CloudTrail S3',
+              title: 'Config S3',
               hide_in_var_group_options: { credential_type: ['identity_federation'] },
             },
             {
               type: 'aws-cloudwatch',
-              title: 'CloudTrail CW',
+              title: 'Config CW',
               hide_in_var_group_options: { credential_type: ['identity_federation'] },
             },
           ],
@@ -181,7 +181,7 @@ describe('AWS service matrix', () => {
       data_streams: [
         { path: 'guardduty', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
         {
-          path: 'cloudtrail',
+          path: 'config',
           type: 'logs',
           streams: [
             { input: 'aws-s3', vars: [] },
@@ -202,7 +202,7 @@ describe('AWS service matrix', () => {
     const IF_PACKAGES = { aws: IF_MOCK_PKG_CONTENT } as any;
 
     const IF_STATIC = AWS_SERVICES_STATIC.filter((e) =>
-      ['guardduty', 'cloudtrail', 'elb_logs'].includes(e.id)
+      ['guardduty', 'config', 'elb_logs'].includes(e.id)
     );
     const IF_MATRIX = buildAwsServiceMatrix(IF_PACKAGES, IF_STATIC);
 
@@ -212,8 +212,8 @@ describe('AWS service matrix', () => {
     });
 
     it('is false when all inputs hide identity_federation', () => {
-      const cloudtrail = IF_MATRIX.find((e) => e.id === 'cloudtrail');
-      expect(cloudtrail?.identityFederationSupported).toBe(false);
+      const config = IF_MATRIX.find((e) => e.id === 'config');
+      expect(config?.identityFederationSupported).toBe(false);
     });
 
     it('is true when at least one input does not hide identity_federation', () => {
