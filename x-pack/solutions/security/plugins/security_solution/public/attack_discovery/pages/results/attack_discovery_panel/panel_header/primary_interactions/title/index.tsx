@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
-  replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscovery,
   type AttackDiscoveryAlert,
   type Replacements,
@@ -30,7 +29,6 @@ import { ScheduleDetailsButton } from '../../../../../../../detections/component
 import { isAttackDiscoveryAlert } from '../../../../../utils/is_attack_discovery_alert';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../../../common/lib/telemetry';
-import * as i18n from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
@@ -67,6 +65,10 @@ const TitleComponent: React.FC<Props> = ({
     prefix: 'attackDiscoveryCheckbox',
   });
 
+  const titleId = useGeneratedHtmlId({
+    prefix: 'attackDiscoveryTitle',
+  });
+
   const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
 
   const onCheckboxChange = useCallback(() => {
@@ -101,17 +103,6 @@ const TitleComponent: React.FC<Props> = ({
 
   const onClose = useCallback(() => setScheduleDetailsId(undefined), []);
 
-  const checkboxAriaLabel = useMemo(() => {
-    const title = showAnonymized
-      ? attackDiscovery.title
-      : replaceAnonymizedValuesWithOriginalValues({
-          messageContent: attackDiscovery.title,
-          replacements: { ...replacements },
-        });
-
-    return i18n.SELECT_ATTACK_DISCOVERY(title);
-  }, [attackDiscovery.title, replacements, showAnonymized]);
-
   const accordionButton = useMemo(() => {
     isAttackDiscoveryAlert(attackDiscovery);
 
@@ -124,9 +115,10 @@ const TitleComponent: React.FC<Props> = ({
         replacements={replacements}
         showAnonymized={showAnonymized}
         title={attackDiscovery.title}
+        titleId={titleId}
       />
     );
-  }, [attackDiscovery, replacements, showAnonymized]);
+  }, [attackDiscovery, replacements, showAnonymized, titleId]);
 
   return (
     <>
@@ -142,7 +134,7 @@ const TitleComponent: React.FC<Props> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiCheckbox
-            aria-label={checkboxAriaLabel}
+            aria-labelledby={titleId}
             checked={isSelected}
             css={css`
               display: inline;

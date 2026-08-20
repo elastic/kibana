@@ -130,7 +130,7 @@ describe('Title', () => {
       expect(screen.getByTestId('attackDiscoveryCheckbox')).toBeInTheDocument();
     });
 
-    it('labels the checkbox with the original values of the title', () => {
+    it('labels the checkbox with the title, with the original values replaced', () => {
       jest.mocked(replaceAnonymizedValuesWithOriginalValues).mockReturnValue('Original title');
 
       render(
@@ -139,9 +139,7 @@ describe('Title', () => {
         </TestWrapper>
       );
 
-      expect(
-        screen.getByRole('checkbox', { name: 'Select attack discovery: Original title' })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Original title' })).toBeInTheDocument();
     });
 
     it('labels the checkbox with the anonymized title when showAnonymized is true', () => {
@@ -153,9 +151,7 @@ describe('Title', () => {
         </TestWrapper>
       );
 
-      expect(
-        screen.getByRole('checkbox', { name: `Select attack discovery: ${mockRawResponse.title}` })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: mockRawResponse.title })).toBeInTheDocument();
     });
 
     it('renders the accordion', () => {
