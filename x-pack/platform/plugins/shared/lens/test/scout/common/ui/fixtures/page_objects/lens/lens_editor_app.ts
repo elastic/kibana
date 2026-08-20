@@ -36,9 +36,15 @@ export class LensEditorApp extends LensApp {
    * (geo, extra drop types, reorder, keyboard DnD, data-panel switch).
    */
   public readonly dragDrop: LensDragDrop;
+  readonly newDashboardOption;
+  readonly addToLibraryCheckbox;
+  readonly dashboardViewport;
 
   constructor(page: ScoutPage) {
     super(page);
+    this.newDashboardOption = page.locator('#new-dashboard-option');
+    this.addToLibraryCheckbox = page.locator('#add-to-library-checkbox');
+    this.dashboardViewport = page.testSubj.locator('dshDashboardViewport');
     this.layers = createLazyPageObject(LensLayers, page);
     this.dimensions = createLazyPageObject(LensDimensions, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
@@ -61,5 +67,19 @@ export class LensEditorApp extends LensApp {
       html5DragAndDrop: (from: string, to: string) => this.html5DragAndDrop(from, to),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
+  }
+
+  /** Saves an already-saved visualization as a new copy onto a new dashboard. */
+  async saveAsNewToNewDashboard(title: string): Promise<void> {
+    // Shared LensApp.save() has no saveAsNew / saveToLibrary; lift this there if more suites need it.
+    await this.saveButton.click();
+    await this.saveModal.waitFor({ state: 'visible' });
+    await this.savedObjectTitleInput.fill(title);
+    await this.setEuiSwitch('saveAsNewCheckbox', true);
+    await this.newDashboardOption.check();
+    await this.addToLibraryCheckbox.uncheck();
+    await this.confirmSaveButton.click();
+    await this.saveModal.waitFor({ state: 'hidden' });
+    await this.dashboardViewport.waitFor({ state: 'visible' });
   }
 }
