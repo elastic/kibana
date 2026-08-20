@@ -169,8 +169,17 @@ export function PackageCard({
     );
   }
 
-  const collectionBadgeCount =
-    isCollectionCard && groupMembers?.length ? groupMembers.length : null;
+  let collectionBadge: React.ReactNode | null = null;
+  if (isCollectionCard && groupMembers?.length) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <VariantCountBadge count={groupMembers.length} />
+        </span>
+      </EuiFlexItem>
+    );
+  }
 
   let contentBadge: React.ReactNode | null = null;
   if (type === 'content') {
@@ -277,17 +286,6 @@ export function PackageCard({
         }
         onClick={onClickProp ?? onCardClick}
       >
-        {collectionBadgeCount !== null && (
-          <div
-            css={css`
-              position: absolute;
-              top: 8px;
-              right: 8px;
-            `}
-          >
-            <VariantCountBadge count={collectionBadgeCount} />
-          </div>
-        )}
         <EuiFlexGroup
           gutterSize="xs"
           wrap={true}
@@ -310,6 +308,7 @@ export function PackageCard({
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}
+          {collectionBadge}
           <InstallationStatus
             installStatus={installStatus}
             showInstallationStatus={showInstallationStatus}
