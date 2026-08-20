@@ -25,6 +25,9 @@ import WATCH_DETECTION_RULE_TUNING_WORKER_YAML from './watch_detection_rule_tuni
 import WATCH_FLOOR_ORCHESTRATOR_YAML from './watch_floor_orchestrator.yaml';
 import WATCH_FLOOR_WORKER_YAML from './watch_floor_worker.yaml';
 import WATCH_OFFICER_YAML from './watch_officer.yaml';
+import RULE_CREATION_YAML from './rule_creation.yaml';
+import RULE_PREVIEW_YAML from './rule_preview.yaml';
+import RULE_TUNING_YAML from './rule_tuning.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 // Orchestrators keep the canonical Watch ids (1:1 Watch projection).
@@ -34,6 +37,10 @@ export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-watch-dark';
 export const PND_WATCH_DEEP_WORKFLOW_ID = 'system-security-watch-deep';
 export const PND_WATCH_DETECTION_WORKFLOW_ID = 'system-security-watch-detection';
 export const PND_WATCH_AD_CONTINUATION_WORKFLOW_ID = 'system-security-watch-ad';
+
+export const PND_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
+export const PND_RULE_TUNING_WORKFLOW_ID = 'system-security-rule-tuning';
+export const PND_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
 // Workers (domain workflows invoked by the Orchestrators).
 export const PND_WATCH_FLOOR_WORKER_WORKFLOW_ID = 'system-security-watch-floor-worker';
@@ -198,6 +205,37 @@ export const PND_WATCH_AD_CONTINUATION_WORKER_WORKFLOW = {
   yaml: WATCH_AD_CONTINUATION_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+
+export const PND_RULE_PREVIEW_WORKFLOW = {
+  billable: false,
+  id: PND_RULE_PREVIEW_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 3,
+  visibility: WORKER_VISIBILITY,
+  yaml: RULE_PREVIEW_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const PND_RULE_TUNING_WORKFLOW = {
+  billable: false,
+  id: PND_RULE_TUNING_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 9,
+  visibility: WORKER_VISIBILITY,
+  yaml: RULE_TUNING_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const PND_RULE_CREATION_WORKFLOW = {
+  billable: false,
+  id: PND_RULE_CREATION_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 7,
+  visibility: WORKER_VISIBILITY,
+  yaml: RULE_CREATION_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
 export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_FLOOR_WORKFLOW,
   PND_WATCH_FLOOR_WORKER_WORKFLOW,
@@ -212,6 +250,9 @@ export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_DETECTION_RULE_TUNING_WORKER_WORKFLOW,
   PND_WATCH_AD_CONTINUATION_WORKFLOW,
   PND_WATCH_AD_CONTINUATION_WORKER_WORKFLOW,
+  PND_RULE_PREVIEW_WORKFLOW,
+  PND_RULE_TUNING_WORKFLOW,
+  PND_RULE_CREATION_WORKFLOW,
 ] as const;
 
 export const PND_WATCH_WORKFLOW_IDS = [
@@ -228,4 +269,7 @@ export const PND_WATCH_WORKFLOW_IDS = [
   PND_WATCH_DETECTION_RULE_TUNING_WORKER_WORKFLOW_ID,
   PND_WATCH_AD_CONTINUATION_WORKFLOW_ID,
   PND_WATCH_AD_CONTINUATION_WORKER_WORKFLOW_ID,
+  PND_RULE_PREVIEW_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKFLOW_ID,
+  PND_RULE_CREATION_WORKFLOW_ID,
 ] as const;
