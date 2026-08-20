@@ -157,10 +157,10 @@ Using the imported reviewer instructions:
 
 Use short, fix-oriented finding titles for **all** review comments instead of repeating the checklist heading verbatim. If the linked best practice is useful to cite, mention it briefly in the explanation.
 
-Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as:
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as a level-3 heading:
 
 ```md
-#### ⚠️ <short fix-oriented title>
+### ⚠️ <short fix-oriented title>
 ```
 
 Then append a GitHub `> [!IMPORTANT]` alert at the **bottom** of that finding (after the finding details), containing exactly this line:

@@ -6,17 +6,17 @@ Output **only** the applicable sections below. Use headings and lists (**no tabl
 
 Finding titles should be short, easy-to-skim phrases that capture the fix or risk — **not** the full checklist heading. If the linked best practice is relevant, mention it briefly in the explanation.
 
-When a finding comes from a **Critical check**, format its title as a level-4 heading and prefix it with `⚠️`:
+When a finding comes from a **Critical check**, format its title as a level-3 heading and prefix it with `⚠️`:
 
 ```md
-#### ⚠️ <short fix-oriented title>
+### ⚠️ <short fix-oriented title>
 ```
 
 ## 1. Findings
 
 ### Blocker
 
-#### ⚠️ <short fix-oriented title>  <!-- Critical check only; otherwise use the bullet form below -->
+### ⚠️ <short fix-oriented title>  <!-- Critical check only; otherwise use the bullet form below -->
   - **Explanation**: <1-3 concise, actionable sentences, optionally naming the linked best practice when useful>
   - **Evidence**: `<file:line>` (add multiple as needed)
   - **Suggested change**: <Specific code edit; include a small snippet if helpful>
