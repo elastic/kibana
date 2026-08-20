@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -12,6 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
+import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -40,6 +42,8 @@ export interface AnalyzeChatOptions {
   attachments: AttachmentInput[];
 }
 
+export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
+
 export interface SuggestAutomationParams {
   aiIndex: GetAiIndexResponse;
   onSaved: () => void;
@@ -58,8 +62,9 @@ export interface AgentBuilderIntegration {
   suggestAutomation: SuggestAutomationProvider;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginSetup {}
+export interface ContextEnginePluginSetup {
+  registerAppChromeAdapter: (adapter: ContextEngineAppChromeAdapter) => void;
+}
 
 export interface ContextEnginePluginStart {
   /** Registers suggest-automation hooks used by the Context Engine UI. */
@@ -76,3 +81,10 @@ export interface ContextEngineStartDependencies {
   console?: ConsolePluginStart;
   spaces?: SpacesPluginStart;
 }
+
+export interface ContextEngineServicesContextDeps {
+  history: AppMountParameters['history'];
+  appChrome?: ContextEngineAppChromeAdapter;
+}
+
+export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;
