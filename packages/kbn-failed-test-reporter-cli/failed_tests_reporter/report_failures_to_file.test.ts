@@ -120,14 +120,14 @@ describe('reportFailuresToFile', () => {
     ]);
 
     const html = readHtml();
-    expect(html).toContain('Run aborted after this failure');
+    expect(html).toContain('This failure aborted the run');
     expect(html).toContain('&quot;after all&quot; hook: afterTestSuite.trigger');
   });
 
   it('omits the aborted section when nothing cascaded', async () => {
     await report([makeFailure('a')]);
 
-    expect(readHtml()).not.toContain('Run aborted after this failure');
+    expect(readHtml()).not.toContain('This failure aborted the run');
   });
 
   it('offers the full stack behind a toggle when repository frames were cut', async () => {
