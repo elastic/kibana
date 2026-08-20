@@ -18,8 +18,8 @@ const ignore = require('ignore');
 
 const LABEL = 'flaky-test-fixer';
 const REMINDER_MARKER = '<!-- flaky-fix-review-reminder -->';
-// The bot that authors our reminder comments (default GITHUB_TOKEN identity).
-const REMINDER_AUTHOR = 'github-actions[bot]';
+// must be kibanamachine (github-actions wouldn't send the notification to the team)
+const REMINDER_AUTHOR = 'kibanamachine';
 // Calendar days (weekends included) before the first ping; also the re-ping cadence.
 const REMINDER_AFTER_DAYS = 4;
 // Max reminder comments posted per run. Bounds the noise (and API writes) of a
@@ -100,8 +100,7 @@ function buildCommentBody(ownerHandles) {
   ].join('\n');
 }
 
-const isBot = (user) =>
-  Boolean(user) && (user.type === 'Bot' || user.login.endsWith('[bot]'));
+const isBot = (user) => Boolean(user) && (user.type === 'Bot' || user.login.endsWith('[bot]'));
 
 /**
  * Whether a human (non-author, non-bot) submitted an APPROVED /
@@ -180,11 +179,11 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
     repo,
     state: 'open',
     labels: LABEL,
-    state: 'open',
-    labels: LABEL,
     sort: 'created',
     direction: 'asc',
     per_page: 100,
+  });
+
   let pinged = 0;
   let considered = 0;
 
@@ -225,7 +224,10 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
       pull_number: pr.number,
       per_page: 100,
     });
-    const owners = resolveOwners(entries, files.map((f) => f.filename));
+    const owners = resolveOwners(
+      entries,
+      files.map((f) => f.filename)
+    );
     if (owners.length === 0) {
       core.info(`No codeowners resolved for #${pr.number}, skipping`);
       continue;
@@ -234,7 +236,9 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
 
     if (dryRun) {
       pinged += 1;
-      core.info(`[dry run] would ping #${pr.number} (${elapsed}d since ${reference}) -> ${mentioned}`);
+      core.info(
+        `[dry run] would ping #${pr.number} (${elapsed}d since ${reference}) -> ${mentioned}`
+      );
       continue;
     }
 
@@ -261,7 +265,9 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
   }
 
   core.info(
-    `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${dryRun ? ' (dry run)' : ''}`
+    `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${
+      dryRun ? ' (dry run)' : ''
+    }`
   );
 };
 
