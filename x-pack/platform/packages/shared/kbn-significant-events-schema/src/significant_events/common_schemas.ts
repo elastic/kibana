@@ -28,6 +28,12 @@ const blastRadiusDependencySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this dependency entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   source: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -59,6 +65,12 @@ const blastRadiusInfrastructureSchema = z.object({
     .describe(
       'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
     ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   title: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -83,6 +95,12 @@ const blastRadiusEntitySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
   stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
 });
@@ -95,12 +113,34 @@ export const blastRadiusEntrySchema = z.discriminatedUnion('type', [
 
 export type BlastRadiusEntry = z.infer<typeof blastRadiusEntrySchema>;
 
+/**
+ * A causal entity, carrying the classification of the Knowledge Indicator it references.
+ *
+ * `type` here is **not** the same field as `blast_radius[].type`. This one is the referenced
+ * indicator's own type, drawn from `INFERRED_FEATURE_TYPES` (`entity`, `infrastructure`,
+ * `technology`, `dependency`, `schema`). On a blast radius row, `type` is the discriminated-union
+ * tag that selects between the three row shapes (`entity`, `infrastructure`, `dependency`) and says
+ * nothing about the indicator. The two vocabularies overlap, so a value alone cannot tell you which
+ * field you are holding.
+ */
 export const causalFeatureSchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
       'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+    ),
+  type: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
+    ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
   name: z
     .string()
