@@ -208,7 +208,8 @@ export const executeEvaluators = async ({
         scores: result.scores,
       });
     } catch (error) {
-      logger.error(`Failed to execute evaluator "${definition.name}": ${error}`);
+      const errorDetail = error instanceof Error ? error.stack ?? error.message : String(error);
+      logger.error(`Failed to execute evaluator "${definition.name}": ${errorDetail}`);
       results.push({
         status: 'error',
         evaluator: await describeEvaluator(definition, connectorId),

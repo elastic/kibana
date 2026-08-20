@@ -27,7 +27,9 @@ export class EvaluatorsPage {
   }
 
   row(name: string): Locator {
-    return this.table.getByRole('row', { name: new RegExp(name) });
+    return this.table
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('cell', { name, exact: true }) });
   }
 
   async goto(spaceId?: string): Promise<void> {
@@ -52,14 +54,14 @@ export class EvaluatorsPage {
     await this.page.testSubj.locator('evalsEvaluatorScoreName-0').fill('quality');
   }
 
-  async editUserDefinedEvaluator(description: string): Promise<void> {
-    await this.page.testSubj.locator('evalsEvaluatorEdit').click();
+  async editUserDefinedEvaluator(name: string, description: string): Promise<void> {
+    await this.row(name).getByTestId('evalsEvaluatorEdit').click();
     await this.page.testSubj.locator('evalsEvaluatorDescription').fill(description);
     await this.saveButton.click();
   }
 
-  async deleteUserDefinedEvaluator(): Promise<void> {
-    await this.page.testSubj.locator('evalsEvaluatorDelete').click();
+  async deleteUserDefinedEvaluator(name: string): Promise<void> {
+    await this.row(name).getByTestId('evalsEvaluatorDelete').click();
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
   }
 

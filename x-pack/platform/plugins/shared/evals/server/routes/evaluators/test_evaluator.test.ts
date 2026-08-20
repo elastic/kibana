@@ -83,7 +83,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       }),
     } as unknown as Parameters<typeof handler>[0];
 
-    return { handler, routeConfig, context, prompt, getClient };
+    return { handler, routeConfig, context, prompt, getClient, logger };
   };
 
   const request = (overrides: Record<string, unknown> = {}) =>
@@ -252,8 +252,10 @@ describe('POST /internal/evals/evaluators/_test', () => {
   });
 
   it('returns inference failures as an evaluator result', async () => {
-    const { handler, context } = setup({
-      prompt: jest.fn().mockRejectedValue(new AbortError('offline')),
+    const inferenceError = new Error('offline');
+    inferenceError.stack = 'inference failure stack';
+    const { handler, context, logger } = setup({
+      prompt: jest.fn().mockRejectedValue(new AbortError(inferenceError)),
     });
     const response = await handler(context, request(), kibanaResponseFactory);
 
@@ -263,6 +265,9 @@ describe('POST /internal/evals/evaluators/_test', () => {
         status: 'error',
         error: expect.objectContaining({ message: 'Error: offline' }),
       })
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to execute evaluator "quality": inference failure stack'
     );
   });
 

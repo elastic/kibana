@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { mockEvaluatorApis } from '../fixtures/mocks';
 
-test.describe('Evaluator management', { tag: tags.deploymentAgnostic }, () => {
+test.describe('Evaluator management', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
     await mockEvaluatorApis(page);
@@ -46,10 +46,10 @@ test.describe('Evaluator management', { tag: tags.deploymentAgnostic }, () => {
     await expect(pageObjects.evaluators.row('new-quality')).toBeVisible();
 
     await pageObjects.evaluators.search.fill('new-quality');
-    await pageObjects.evaluators.editUserDefinedEvaluator('Updated description');
+    await pageObjects.evaluators.editUserDefinedEvaluator('new-quality', 'Updated description');
     await expect(pageObjects.evaluators.row('new-quality')).toContainText('Updated description');
 
-    await pageObjects.evaluators.deleteUserDefinedEvaluator();
+    await pageObjects.evaluators.deleteUserDefinedEvaluator('new-quality');
     await expect(pageObjects.evaluators.row('new-quality')).toHaveCount(0);
   });
 
