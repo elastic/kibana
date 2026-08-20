@@ -9,6 +9,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { DISCOVER_TABS_LOCAL_STORAGE_KEY } from '../constants';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -225,5 +226,22 @@ export class MetricsExperiencePage {
       return '';
     }
     return new URLSearchParams(hash.slice(queryStart + 1)).get(PROFILE_STATE_URL_KEY) ?? '';
+  }
+
+  /**
+   * Reads the sort direction persisted in local tab storage, or `undefined` when no open tab
+   * carries one (the default 'asc' is stripped rather than written). Tab state is written on a
+   * 300ms trailing throttle, so poll this before reloading or navigating.
+   */
+  public getPersistedSortDirection(): Promise<string | undefined> {
+    return this.page.evaluate((storageKey) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return undefined;
+      const { openTabs } = JSON.parse(raw) as {
+        openTabs?: Array<{ profileState?: { metricsState?: { sortDirection?: string } } }>;
+      };
+      return openTabs?.find((tab) => tab.profileState?.metricsState?.sortDirection != null)
+        ?.profileState?.metricsState?.sortDirection;
+    }, DISCOVER_TABS_LOCAL_STORAGE_KEY);
   }
 }
