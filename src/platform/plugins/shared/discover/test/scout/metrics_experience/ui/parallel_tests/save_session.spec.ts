@@ -10,9 +10,8 @@
 /**
  * Save session tests.
  *
- * Validates that a configured metrics view (query, breakdown selection,
- * card count) can be saved, cleared, and then reloaded from saved searches
- * with full metrics-specific state restoration.
+ * Validates that a configured metrics view can be saved, reloaded, and
+ * restored after unsaved metrics-specific changes.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -20,6 +19,7 @@ import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixt
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
+const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
 
 spaceTest.describe(
   'Metrics in Discover - Save Session',
@@ -48,10 +48,14 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
 
-      await spaceTest.step('select a breakdown dimension', async () => {
+      await spaceTest.step('select two breakdown dimensions', async () => {
         await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+        await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
         ).toBeVisible();
         await discover.waitUntilSearchingHasFinished();
       });
@@ -79,9 +83,12 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
       });
 
-      await spaceTest.step('breakdown selection should be preserved', async () => {
+      await spaceTest.step('breakdown selections should be preserved', async () => {
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
         ).toBeVisible();
       });
 
@@ -93,6 +100,25 @@ spaceTest.describe(
       await spaceTest.step('ES|QL query should be preserved', async () => {
         const queryAfter = await discover.getEsqlQueryValue();
         expect(queryAfter).toStrictEqual(queryBefore);
+      });
+
+      await spaceTest.step('remove a saved breakdown selection', async () => {
+        await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeHidden();
+        await expect(discover.unsavedChangesIndicator()).toBeVisible();
+      });
+
+      await spaceTest.step('revert to the saved breakdown selection', async () => {
+        await discover.revertUnsavedChanges();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeVisible();
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
       });
     });
   }
