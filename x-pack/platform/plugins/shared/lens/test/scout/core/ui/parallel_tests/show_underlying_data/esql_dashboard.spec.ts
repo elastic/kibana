@@ -95,16 +95,11 @@ spaceTest.describe(
               click: () => page.testSubj.click(openInDiscoverAction),
             });
             const discoverEditor = new KibanaCodeEditorWrapper(discoverPage);
-            try {
-              await expect(discoverPage.testSubj.locator('ESQLEditor')).toBeVisible();
-              await discoverEditor.waitCodeEditorReady('ESQLEditor');
-              await expect(discoverEditor.getCodeEditorContent()).toContainText('from logs*');
-              await expect(discoverEditor.getCodeEditorContent()).toContainText(
-                'maxB = max(bytes)'
-              );
-            } finally {
-              await discoverPage.close();
-            }
+
+            await expect(discoverPage.testSubj.locator('ESQLEditor')).toBeVisible();
+            await discoverEditor.waitCodeEditorReady('ESQLEditor');
+            await expect(discoverEditor.getCodeEditorContent()).toContainText('from logs*');
+            await expect(discoverEditor.getCodeEditorContent()).toContainText('maxB = max(bytes)');
           }
         );
       }
