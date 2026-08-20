@@ -207,7 +207,9 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock('./monitor_locations_utils');
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
     const forbidden = { status: 403 };
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 
