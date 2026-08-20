@@ -20,8 +20,8 @@ echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
 echo '--- Update Scout Test Config Manifests'
-# Updates **/test/scout/.meta (manifest) files. Those paths are excluded from affected-packages
-# so they do not cause extra modules to be considered "changed" in the next step.
+# Rewrites **/test/**/.meta (manifest) files in the working tree. The next step ignores those
+# paths (GENERATED_TEST_CONFIG_MANIFESTS) so a rewrite is not treated as a real change.
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 # Resolve Scout's selective-testing scope once, before either distribution
