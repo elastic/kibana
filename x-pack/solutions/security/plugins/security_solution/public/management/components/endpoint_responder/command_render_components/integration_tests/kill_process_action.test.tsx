@@ -25,6 +25,8 @@ import type {
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetailsApiResponse,
+  ActionResponseOutput,
+  EndpointActionResponseDataOutput,
   KillProcessActionOutputContent,
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
@@ -79,6 +81,24 @@ describe('When using the kill-process action from response actions console', () 
     mockedContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     setConsoleCommands();
+
+    const actionDetailsMockResponder =
+      apiMocks.responseProvider.actionDetails.getMockImplementation()!;
+    apiMocks.responseProvider.actionDetails.mockImplementation((...props) => {
+      const response = actionDetailsMockResponder(...props);
+      response.data.command = 'kill-process';
+      response.data.outputs = {
+        [response.data.agents[0]]: {
+          type: 'json',
+          content: {
+            pid: 5,
+            process_name: 'foo',
+            entity_id: 'entity-foo',
+          },
+        } as ActionResponseOutput<EndpointActionResponseDataOutput>,
+      };
+      return response;
+    });
 
     render = async () => {
       renderResult = mockedContext.render(
@@ -256,7 +276,9 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        'Action completed.'
+      );
     });
   });
 
@@ -265,8 +287,87 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        'Action completed.'
+      );
     });
+  });
+  it('should display the process result output content returned by the action', async () => {
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+    });
+
+    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+
+    expect(output).toContain('PID 5');
+    expect(output).toContain('Name foo');
+    expect(output).toContain('Entity ID entity-foo');
+  });
+
+  it('should display the response code message as the result title', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
+    detailResponse.data.command = 'kill-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = true;
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_kill-process_success_done',
+          pid: 5,
+          process_name: 'foo',
+          entity_id: 'entity-foo',
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
+        endpointActionResponseCodes['ra_kill-process_success_done']
+      );
+    });
+    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent('PID 5');
+  });
+
+  it('should only display output fields that are present in the content', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
+    detailResponse.data.command = 'kill-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = true;
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_kill-process_success_done',
+          pid: 5,
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+    });
+
+    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+
+    expect(output).toContain('PID 5');
+    expect(output).not.toContain('Name');
+    expect(output).not.toContain('Entity ID');
   });
 
   it('should show error if kill-process failed to complete successfully', async () => {

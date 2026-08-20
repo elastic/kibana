@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -17,10 +27,12 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -31,6 +43,8 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -72,6 +86,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -125,6 +153,8 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     accessControl,
+    readOnly,
+    projectRouting,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -146,12 +176,12 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    readOnly,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   });
 
@@ -181,17 +211,21 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    projectRouting,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
-    conversation.operation === 'CREATE'
+  // Generate title when creating a new conversation
+  // OR when the conversation still carries the default placeholder title
+  const needsTitle = conversation.operation === 'CREATE' || conversationNeedsTitle(conversation);
+  const title$ = (
+    needsTitle
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
-      : of(conversation.title);
+      : of(conversation.title)
+  ).pipe(shareReplay(1));
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
@@ -229,10 +263,33 @@ const handleConversationExecution = async ({
       spaceId,
       opikHeaders,
     },
-    () =>
-      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+    (span) => {
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes(span, {
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
+      const titleAttr$ = storeConversation
+        ? title$.pipe(
+            tap((title) => {
+              span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+            }),
+            ignoreElements()
+          )
+        : EMPTY;
+
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
+          if (isConversationCreatedEvent(event) && !author) {
+            setUserAttributes(span, {
+              id: event.data.user.id,
+              username: event.data.user.username,
+            });
+          }
+
           try {
             if (isRoundCompleteEvent(event)) {
               const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
@@ -280,13 +337,14 @@ const handleConversationExecution = async ({
           conversationId: conversation.id,
           executionId: execution.executionId,
         })
-      )
+      );
+    }
   );
 };
 
 /**
  * Subscribe to the event stream and append events to the execution document with 200ms batching.
- * Returns a promise that resolves with the collected events when the observable completes and all events are flushed.
+ * Returns a promise that resolves when the observable completes and all events are flushed.
  */
 export const collectAndWriteEvents = ({
   events$,
@@ -298,9 +356,8 @@ export const collectAndWriteEvents = ({
   execution: AgentExecution;
   executionClient: AgentExecutionClient;
   logger: Logger;
-}): Promise<ChatEvent[]> => {
-  return new Promise<ChatEvent[]>((resolve, reject) => {
-    const collectedEvents: ChatEvent[] = [];
+}): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
     let pendingEvents: ChatEvent[] = [];
     let flushTimer: ReturnType<typeof setTimeout> | undefined;
     let flushInProgress: Promise<void> | undefined;
@@ -336,7 +393,6 @@ export const collectAndWriteEvents = ({
 
     events$.subscribe({
       next: (event) => {
-        collectedEvents.push(event);
         pendingEvents.push(event);
         scheduleFlush();
       },
@@ -352,7 +408,7 @@ export const collectAndWriteEvents = ({
           }
           await flush();
         };
-        finalFlush().then(() => resolve(collectedEvents), reject);
+        finalFlush().then(resolve, reject);
       },
     });
   });
@@ -395,6 +451,9 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
     : undefined;
 };
 
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
@@ -422,9 +481,9 @@ const buildPersistenceEvents = ({
   return updateConversation$({
     conversationClient,
     conversation,
-    title$,
     roundCompletedEvents$,
     action,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
   });
 };
 
@@ -445,7 +504,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -467,6 +526,7 @@ const handleStandaloneExecution = async ({
     telemetryMetadata,
     maxContentLength,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
   });
 

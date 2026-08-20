@@ -9,8 +9,13 @@ import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
+
+const isTracedEsClient = (
+  esClient: ElasticsearchClient | TracedElasticsearchClient
+): esClient is TracedElasticsearchClient => typeof esClient.esql === 'function';
 
 export interface EsqlColumnSchema {
   name: string;
@@ -19,11 +24,11 @@ export interface EsqlColumnSchema {
 }
 
 export interface GetEsqlColumnSchemaParams {
-  esClient: ElasticsearchClient;
+  esClient: ElasticsearchClient | TracedElasticsearchClient;
   index: string | string[];
   start?: number;
   end?: number;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export async function getEsqlColumnSchema({
@@ -43,9 +48,14 @@ export async function getEsqlColumnSchema({
     query: esql.from(indices).limit(0).print('basic'),
     ...(filter ? { filter } : {}),
   };
-  const response = (await esClient.esql.query(queryParams, {
-    signal,
-  })) as unknown as ESQLSearchResponse;
+  const response = isTracedEsClient(esClient)
+    ? ((await esClient.esql(
+        'get_esql_column_schema',
+        queryParams
+      )) as unknown as ESQLSearchResponse)
+    : ((await esClient.esql.query(queryParams, {
+        signal,
+      })) as unknown as ESQLSearchResponse);
 
   return parseColumns(response);
 }

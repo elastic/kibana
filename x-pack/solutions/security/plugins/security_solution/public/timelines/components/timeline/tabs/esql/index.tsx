@@ -29,7 +29,7 @@ import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineDefaults } from '../../../../store/defaults';
-import { savedSearchComparator } from './utils';
+import { savedSearchComparator, hasNonEmptyEsqlQuery } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
@@ -114,6 +114,19 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
       return;
     }
+    // Self-heal stale savedSearchIds from the phantom-creation bug. If the linked saved
+    // search has no actual ES|QL query, the savedSearchId was created when the user opened
+    // the ES|QL tab without typing anything (now prevented by the hasNonEmptyEsqlQuery guard
+    // above). Clear the stale reference so the timeline is no longer incorrectly flagged as
+    // ES|QL-incompatible. The user should save the timeline to persist this correction.
+    if (
+      savedSearchId &&
+      savedSearchById &&
+      !hasNonEmptyEsqlQuery(savedSearchById.searchSource.getField('query'))
+    ) {
+      dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
+      return;
+    }
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     if (!canSaveTimeline) return;
@@ -126,6 +139,15 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       if (!index) return;
       if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
       if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
+      // Don't create a saved search just because the ES|QL tab was opened — only persist
+      // when there is an actual ES|QL query. Without this guard, visiting the tab with an
+      // empty Discover state sets savedSearchId on any KQL timeline, making it appear
+      // incompatible with Super Timeline even though no ES|QL query was ever authored.
+      // The guard only applies when no saved search exists yet; once savedSearchId is set,
+      // normal update-on-change behaviour continues unchanged.
+      if (!savedSearchId && !hasNonEmptyEsqlQuery(latestState.searchSource.getField('query'))) {
+        return;
+      }
       await updateSavedSearch(latestState, timelineId, function onUpdate() {
         combinedDiscoverSavedSearchStateRef.current = latestState;
       });

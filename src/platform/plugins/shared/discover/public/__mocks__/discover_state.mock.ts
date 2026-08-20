@@ -54,6 +54,7 @@ import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
 import { FetchStatus } from '../application/types';
+import type { ProfileStateMap } from '../../common/context_awareness';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -255,9 +256,11 @@ export function getDiscoverInternalStateMock({
       async ({
         tabId,
         skipWaitForDataFetching,
+        profileState,
       }: {
         tabId: string;
         skipWaitForDataFetching?: boolean;
+        profileState?: ProfileStateMap;
       }) => {
         await toolkit.switchToTab({ tabId });
 
@@ -298,6 +301,7 @@ export function getDiscoverInternalStateMock({
               dataViewSpec: undefined,
               esqlControls: undefined,
               defaultUrlState: undefined,
+              profileState,
             },
           })
         );

@@ -78,9 +78,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
           'topValuesAndDistribution'
         );
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
         expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
-          '0\n3.2%\n3,954\n0.1%\n5,846\n0.1%\n6,497\n0.1%\n1,840\n0.1%\n4,206\n0.1%\n4,328\n0.1%\n4,669\n0.1%\n5,863\n0.1%\n6,631\n0.1%\nOther\n96.0%'
+          '0\n3.2%\n3,954\n0.1%\n6,497\n0.1%\n1,840\n0.1%\n4,206\n0.1%\n4,328\n0.1%\n4,669\n0.1%\n5,846\n0.1%\n5,863\n0.1%\n6,631\n0.1%\nOther\n96.0%'
         );
       });
 
@@ -89,13 +89,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
           'timeDistribution'
         );
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
       });
 
       it('should return top values for strings', async () => {
         await PageObjects.unifiedFieldList.clickFieldListItem('geo.src');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
         expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
           'CN\n18.0%\nIN\n17.4%\nUS\n9.2%\nID\n3.4%\nBR\n3.1%\nPK\n2.5%\nBD\n2.3%\nNG\n2.0%\nRU\n1.8%\nJP\n1.6%\nOther\n38.8%'
         );
@@ -104,7 +104,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('should return top values for ip fields', async () => {
         await PageObjects.unifiedFieldList.clickFieldListItem('ip');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
         expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
           '177.194.175.66\n0.3%\n18.55.141.62\n0.3%\n53.55.251.105\n0.3%\n21.111.249.239\n0.2%\n97.63.84.25\n0.2%\n100.99.207.174\n0.2%\n112.34.138.226\n0.2%\n194.68.89.92\n0.2%\n235.186.79.201\n0.2%\n57.79.108.136\n0.2%\nOther\n97.6%'
         );
@@ -125,7 +125,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('should return top values for index pattern runtime string fields', async () => {
         await PageObjects.unifiedFieldList.clickFieldListItem('runtime_string_field');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
         expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
           'hello world!\n100%'
         );
@@ -148,7 +148,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItem('runtime_number_field');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('topValues');
-        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4634);
+        expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(4633);
         expect(await PageObjects.unifiedFieldList.getFieldStatsTopValueBucketsVisibleText()).to.be(
           '5\n100%'
         );

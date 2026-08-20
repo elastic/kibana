@@ -292,7 +292,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         <>
           <EuiCallOut
             color={'warning'}
-            iconType={'alert'}
+            iconType={'warning'}
             size="m"
             data-test-subj="protection-updates-manifest-outdated"
             title={i18n.translate(

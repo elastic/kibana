@@ -10,3 +10,4 @@ products:
   target: 9.6.0
 title: "Fix query sandbox rejecting ES|QL data federation datasets"
 description: "Query sandbox ES|QL autocomplete and validation now resolve data federation datasets and views instead of reporting them as unknown data sources."
+feature-id: data-federation

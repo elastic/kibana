@@ -15,7 +15,7 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 
 ## HTTP APIs
 
-- [Register and access an endpoint](./registering-and-accessing-an-endpoint.md) — add a custom HTTP API and call it from client-side code
+- [Register and access an endpoint](./registering-and-accessing-an-endpoint.md) — add a custom HTTP API, call it from client-side code, or invoke Kibana APIs from a route handler via the HTTP self client
 - [Versioning HTTP APIs](./versioning-http-apis.md) — create or migrate to versioned HTTP APIs
 - [Versioning interfaces](./versioning-interfaces.md) — manage request and response schema versions over time
 - [Generate OAS documentation](./generating-oas-for-http-apis.md) — generate OpenAPI Specification docs for your HTTP APIs

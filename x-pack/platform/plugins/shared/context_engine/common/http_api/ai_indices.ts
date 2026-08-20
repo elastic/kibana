@@ -16,7 +16,7 @@ export interface AiIndexDest {
   value: string;
 }
 
-export type AiIndexSourceType = 'esql';
+export type AiIndexSourceType = 'esql' | 'connector';
 
 export interface AiIndexSource {
   type: AiIndexSourceType;
@@ -35,10 +35,13 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  /** Agent Builder agent id used for this index's Analyze & improve analysis. */
+  feedback_agent_id?: string;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {
   id: string;
+  managed: boolean;
   date_created: string;
   date_modified: string;
 }
@@ -49,10 +52,29 @@ export interface ListAiIndexResponse {
   ai_indices: AiIndexHttpItem[];
 }
 
+export interface CreateAiIndexRequest extends AiIndexProperties {
+  id: string;
+}
+
+export interface CreateAiIndexResponse {
+  status: 'created';
+}
+
 export interface PutAiIndexResponse {
   status: 'created' | 'updated';
 }
 
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
+}
+
+export interface KiTypeCount {
+  type: string;
+  count: number;
+}
+
+export interface GetAiIndexKiSummaryResponse {
+  count: number;
+  dest: AiIndexDest;
+  counts_by_type: KiTypeCount[];
 }

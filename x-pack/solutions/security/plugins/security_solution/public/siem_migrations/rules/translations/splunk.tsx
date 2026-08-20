@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigrationVendorCopy } from './types';
@@ -13,6 +14,11 @@ import type { RuleMigrationVendorCopy } from './types';
 const LOOKUPS_SPLUNK_APP = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingLookupsList.appSection',
   { defaultMessage: 'Splunk App for Lookup File Editing' }
+);
+
+const RULES_SPLUNK_APP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section',
+  { defaultMessage: 'Search and Reporting' }
 );
 
 export const SPLUNK_RULE_MIGRATION_VENDOR_COPY: RuleMigrationVendorCopy = {
@@ -111,6 +117,40 @@ export const SPLUNK_RULE_MIGRATION_VENDOR_COPY: RuleMigrationVendorCopy = {
       'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.lookupsFileUpload.title',
       { defaultMessage: 'Update your lookups export' }
     ),
+  },
+  rulesFileUpload: {
+    description: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.vendorCopy.splunk.rulesFileUploadDescription',
+      {
+        defaultMessage:
+          'For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.',
+      }
+    ),
+    prompt: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptSplunk',
+      { defaultMessage: 'Select or drag and drop the exported JSON file' }
+    ),
+  },
+  copyExportQuery: {
+    description: (
+      <FormattedMessage
+        id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.splunk.description"
+        defaultMessage="Log in to your Splunk admin account, go to the {section} app and run the following query. Export your results as {format}."
+        values={{
+          section: <b>{RULES_SPLUNK_APP}</b>,
+          format: <b>{'JSON'}</b>,
+        }}
+      />
+    ),
+    details: {
+      queryLimitDisclaimer: (
+        <FormattedMessage
+          id="xpack.securitySolution.siemMigrations.rulesFileUpload.disclaimer"
+          defaultMessage="Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting rules in batches, for example by adding {operator} to the query above"
+          values={{ operator: <EuiCode>{'| head'}</EuiCode> }}
+        />
+      ),
+    },
   },
   copyrightNotice: i18n.translate(
     'xpack.securitySolution.siemMigrations.common.splunk.copyrightNotice',

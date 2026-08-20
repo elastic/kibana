@@ -21,9 +21,9 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiCallOut,
   EuiTextArea,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
@@ -56,6 +56,7 @@ import {
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
+import { isProjectScopedSourceIndexUnavailableError } from '../../../../hooks/use_transform_config_data';
 import type { EsIndexName } from './common';
 import {
   isContinuousModeDelay,
@@ -124,7 +125,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         searchItems.dataView,
         transformConfigQuery,
         partialPreviewRequest,
-        stepDefineState.runtimeMappings
+        stepDefineState.runtimeMappings,
+        undefined,
+        stepDefineState.projectRouting
       );
     }, [searchItems.dataView, stepDefineState]);
 
@@ -182,7 +185,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     }, [transformsError]);
 
     useEffect(() => {
-      if (transformsPreviewError !== null) {
+      if (
+        transformsPreviewError !== null &&
+        !isProjectScopedSourceIndexUnavailableError(
+          transformsPreviewError,
+          stepDefineState.projectRouting
+        )
+      ) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
             defaultMessage: 'An error occurred fetching the transform preview',
@@ -524,23 +533,33 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
               <EuiSpacer size={'m'} />
-              <EuiCallOut announceOnMount color="warning" iconType="warning" size="m">
-                <p>
-                  <FormattedMessage
-                    id="xpack.transform.stepDetailsForm.destinationIndexWarning"
-                    defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
-                    values={{
-                      docsLink: (
-                        <EuiLink href={esIndicesCreateIndex} target="_blank">
-                          {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
-                            defaultMessage: 'Create index API',
-                          })}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiCallOut>
+              <KbnWarningCallout
+                announceOnMount
+                size="m"
+                title={i18n.translate(
+                  'xpack.transform.stepDetailsForm.destinationIndexWarningTitle',
+                  {
+                    defaultMessage: 'Verify destination index mappings',
+                  }
+                )}
+                text={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.transform.stepDetailsForm.destinationIndexWarning"
+                      defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
+                      values={{
+                        docsLink: (
+                          <EuiLink href={esIndicesCreateIndex} target="_blank">
+                            {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
+                              defaultMessage: 'Create index API',
+                            })}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                }
+              />
               <EuiSpacer size={'m'} />
             </>
           ) : null}

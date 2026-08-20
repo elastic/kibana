@@ -9,8 +9,10 @@
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
-import type { ProfileStateDefinition } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../../../common/context_awareness';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -27,8 +29,12 @@ import {
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import { SearchSessionStatus } from '@kbn/data-plugin/common';
+import type { DiscoverAppLocatorParams } from '../../../../../../common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-interface SecondaryProfileState {
+interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
 }
 
@@ -41,6 +47,22 @@ const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState>
     secondaryUrlValue: 'defaultSecondaryUrl',
   },
 };
+
+const createSearchSession = (restoreState: DiscoverAppLocatorParams): UISession => ({
+  id: 'search-session',
+  name: 'Background search',
+  appId: 'discover',
+  created: '2025-01-01T00:00:00.000Z',
+  expires: null,
+  status: SearchSessionStatus.COMPLETE,
+  idMapping: {},
+  numSearches: 1,
+  reloadUrl: '',
+  restoreUrl: '',
+  initialState: {},
+  restoreState,
+  version: '1.0.0',
+});
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -84,6 +106,7 @@ describe('tabs actions', () => {
           to: 'now',
         },
         tabLabel: 'Logs',
+        esqlApproximation: true,
       };
 
       await internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
@@ -94,7 +117,51 @@ describe('tabs actions', () => {
       expect(tabs).toHaveLength(initialTabs.length + 1);
       expect(newTab.label).toBe('Logs');
       expect(newTab.appState.query).toEqual(params.query);
+      expect(newTab.appState.esqlApproximation).toBe(params.esqlApproximation);
       expect(newTab.globalState.timeRange).toEqual(params.timeRange);
+    });
+  });
+
+  describe('openSearchSessionInNewTab', () => {
+    it('seeds the new tab with parsed Persistent and Url profile state', async () => {
+      const { internalState } = await setup();
+      const initialTabs = selectAllTabs(internalState.getState());
+      const searchSession = createSearchSession({
+        searchSessionId: 'search-session-id',
+        profileState: {
+          [TEST_PROFILE_STATE_DEF.key]: {
+            uiValue: 'ignoredUi',
+            urlValue: TEST_PROFILE_STATE_DEF.defaultState.urlValue,
+            persistentValue: 'restoredPersistent',
+            unknownValue: 'ignored',
+          },
+          [SECONDARY_PROFILE_STATE_DEF.key]: {
+            secondaryUrlValue: 'restoredSecondaryUrl',
+          },
+          unknownProfileState: {
+            urlValue: 'ignored',
+          },
+        },
+      });
+
+      await internalState.dispatch(
+        internalStateActions.openSearchSessionInNewTab({ searchSession })
+      );
+
+      const tabs = selectAllTabs(internalState.getState());
+      const newTab = tabs[tabs.length - 1];
+
+      expect(tabs).toHaveLength(initialTabs.length + 1);
+      expect(newTab.label).toBe(searchSession.name);
+      expect(newTab.profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: TEST_PROFILE_STATE_DEF.defaultState.urlValue,
+          persistentValue: 'restoredPersistent',
+        },
+        [SECONDARY_PROFILE_STATE_DEF.key]: {
+          secondaryUrlValue: 'restoredSecondaryUrl',
+        },
+      });
     });
   });
 

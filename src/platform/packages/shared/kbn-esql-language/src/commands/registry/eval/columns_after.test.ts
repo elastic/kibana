@@ -192,6 +192,27 @@ describe('EVAL > columnsAfter', () => {
     ]);
   });
 
+  it('handles unmapped field with LOAD_ALL strategy', () => {
+    const command = synth.cmd`EVAL newField = unmappedField`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.LOAD_ALL
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'newField',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
+    ]);
+  });
+
   it('handles unmapped field with NULLIFY strategy', () => {
     const command = synth.cmd`EVAL newField = unmappedField`;
     const result = columnsAfter(

@@ -39,6 +39,7 @@ describe('Serialization utils', () => {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
       getEmbeddableTransformsEnabled: jest.fn(() => false),
+      getDataTableJsonViewEnabled: jest.fn(() => false),
     },
   } satisfies DiscoverServices;
 
@@ -344,7 +345,6 @@ describe('Serialization utils', () => {
             column_order: ['_source'],
             sort: [{ name: 'order_date', direction: 'desc' }],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-            density: DataGridDensity.COMPACT,
             data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
           }),
         ],

@@ -20,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { deriveBucketInterval } from '../../../../common/entity_analytics/anomalies/derive_bucket_interval';
@@ -210,42 +211,54 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
 
   const styling = getAnomalyChartStyling(true);
   const baseTheme = useElasticChartsTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexItem
-      css={{
-        height: `${styling.heightOfHeatmap(yAxisNames.length)}px`,
-      }}
-    >
-      <Chart>
-        <Tooltip customTooltip={swimlaneTooltip} />
-        <Settings
-          baseTheme={baseTheme}
-          locale={i18n.getLocale()}
-          theme={{ heatmap: heatmapComponentStyle }}
-          xDomain={xDomain}
-        />
-        <Heatmap
-          id={heatmapId}
-          xScale={{
-            type: ScaleType.Time,
-            interval: { type: 'fixed', value: bucketInterval.value, unit: bucketInterval.unit },
-          }}
-          colorScale={{
-            type: 'bands',
-            bands: chartBands,
-          }}
-          data={records}
-          name={ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE}
-          xAccessor={SWIMLANE_X_ACCESSOR_KEY}
-          xAxisLabelName={ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL}
-          xAxisLabelFormatter={formatDateTick}
-          yAccessor={yAxisAccessor}
-          yAxisLabelName={yAxisLabel}
-          ySortPredicate={ySortPredicate}
-          valueAccessor={SWIMLANE_Y_ACCESSOR_KEY}
-        />
-      </Chart>
-    </EuiFlexItem>
+    <>
+      {/* @elastic/charts portal z-index stays at 100 on re-render; toast level clears all flyout stacking.
+          Scoped to this chart's portal via the Chart id prop: portal id = echTooltipPortal{scope}__{chartId}. */}
+      <Global
+        styles={css`
+          [id='echTooltipPortalMainTooltip__${heatmapId}'] {
+            z-index: ${Number(euiTheme.levels.toast)} !important;
+          }
+        `}
+      />
+      <EuiFlexItem
+        css={{
+          height: `${styling.heightOfHeatmap(yAxisNames.length)}px`,
+        }}
+      >
+        <Chart id={heatmapId}>
+          <Tooltip customTooltip={swimlaneTooltip} />
+          <Settings
+            baseTheme={baseTheme}
+            locale={i18n.getLocale()}
+            theme={{ heatmap: heatmapComponentStyle }}
+            xDomain={xDomain}
+          />
+          <Heatmap
+            id={heatmapId}
+            xScale={{
+              type: ScaleType.Time,
+              interval: { type: 'fixed', value: bucketInterval.value, unit: bucketInterval.unit },
+            }}
+            colorScale={{
+              type: 'bands',
+              bands: chartBands,
+            }}
+            data={records}
+            name={ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE}
+            xAccessor={SWIMLANE_X_ACCESSOR_KEY}
+            xAxisLabelName={ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL}
+            xAxisLabelFormatter={formatDateTick}
+            yAccessor={yAxisAccessor}
+            yAxisLabelName={yAxisLabel}
+            ySortPredicate={ySortPredicate}
+            valueAccessor={SWIMLANE_Y_ACCESSOR_KEY}
+          />
+        </Chart>
+      </EuiFlexItem>
+    </>
   );
 };
