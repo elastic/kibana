@@ -32,7 +32,7 @@ export const agentBuilderSpaceSettingsType: SavedObjectsType<AgentBuilderSpaceSe
     mappings: {
       dynamic: false,
       properties: {
-        defaultAgentId: { type: 'keyword' },
+        defaultAgentId: { type: 'keyword', ignore_above: MAX_AGENT_ID_LENGTH },
       },
     },
     modelVersions: {
