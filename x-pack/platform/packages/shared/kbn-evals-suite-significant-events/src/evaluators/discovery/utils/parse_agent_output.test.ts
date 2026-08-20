@@ -11,6 +11,7 @@ import {
   extractDiscoveriesFromToolCall,
   extractRequestedEventIdsFromToolCall,
   extractSignificantEventsFromToolCall,
+  extractWriteItemsFromToolCall,
 } from './parse_agent_output';
 
 const TOOL_ID_EVENTS_WRITE = platformSignificantEventsTools.eventsWrite;
@@ -234,6 +235,41 @@ describe('extractRequestedEventIdsFromToolCall', () => {
     ];
 
     expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['event-A', 'event-B']);
+  });
+});
+
+describe('extractWriteItemsFromToolCall', () => {
+  it('returns raw events_write request items without handler-assigned IDs', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-bulk',
+        params: {
+          items: [
+            {
+              event_id: 'event-1',
+              causal_features: [
+                { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+              ],
+              blast_radius: [],
+            },
+            { status: 'dismissed', causal_features: [], blast_radius: [] },
+          ],
+        },
+      },
+    ];
+
+    expect(extractWriteItemsFromToolCall(steps)).toEqual([
+      {
+        event_id: 'event-1',
+        causal_features: [
+          { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+        ],
+        blast_radius: [],
+      },
+      { status: 'dismissed', causal_features: [], blast_radius: [] },
+    ]);
   });
 });
 
