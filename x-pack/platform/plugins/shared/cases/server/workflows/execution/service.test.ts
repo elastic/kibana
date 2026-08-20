@@ -170,6 +170,24 @@ describe('CasesWorkflowRunService', () => {
     expect(management.executeWorkflow).not.toHaveBeenCalled();
   });
 
+  it('rejects a single-alert origin that is not selected', async () => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      comments: [
+        { type: 'alert', alertId: 'alert-1' },
+        { type: 'alert', alertId: 'alert-2' },
+      ],
+    } as unknown as Case);
+
+    await expect(
+      run({
+        inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        origin: { type: 'cases.alert', id: 'alert-2' },
+      })
+    ).rejects.toThrow('Alert workflow origin "alert-2" is not selected.');
+    expect(management.executeWorkflow).not.toHaveBeenCalled();
+  });
+
   it('accepts selected alerts that are attached to the case', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,

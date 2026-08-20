@@ -8,7 +8,11 @@
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
-import { createRunWorkflowRoute, runCaseWorkflowBodySchema } from './run_workflow';
+import {
+  createRunWorkflowRoute,
+  runCaseWorkflowBodySchema,
+  runCaseWorkflowParamsSchema,
+} from './run_workflow';
 
 describe('run workflow route', () => {
   const casesClient = createCasesClientMock();
@@ -87,6 +91,16 @@ describe('run workflow route', () => {
       runCaseWorkflowBodySchema.validate({
         inputs: {},
         origin: { type: 'cases.comment', id: 'comment-1' },
+      })
+    ).toThrow();
+  });
+
+  it.each(['case_id', 'workflow_id'] as const)('rejects an oversized %s', (parameter) => {
+    expect(() =>
+      runCaseWorkflowParamsSchema.validate({
+        case_id: 'case-1',
+        workflow_id: 'workflow-1',
+        [parameter]: 'a'.repeat(1025),
       })
     ).toThrow();
   });

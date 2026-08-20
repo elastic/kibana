@@ -40,6 +40,14 @@ export const runCaseWorkflowBodySchema = schema.object({
   }),
 });
 
+export const runCaseWorkflowParamsSchema = schema.object({
+  case_id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+  workflow_id: schema.string({
+    minLength: 1,
+    maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+  }),
+});
+
 interface RunWorkflowRouteDeps {
   service: CasesWorkflowRunService;
   getSpaceId: (request: KibanaRequest) => string;
@@ -55,13 +63,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
       },
     },
     params: {
-      params: schema.object({
-        case_id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
-        workflow_id: schema.string({
-          minLength: 1,
-          maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
-        }),
-      }),
+      params: runCaseWorkflowParamsSchema,
       body: runCaseWorkflowBodySchema,
     },
     routerOptions: {
