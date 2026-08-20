@@ -88,12 +88,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       },
       this.deps.logger
     );
-    if (response.errors) {
-      const errorCount = response.items.filter((item) => item.error).length;
-      this.deps.logger.debug(
-        `Bulk operation on ${this.deps.indexName} completed with ${errorCount} error(s)`
-      );
-    }
+
     return response;
   }
 
