@@ -14,7 +14,7 @@ import { ImportLifecycleFlyout } from './import_lifecycle_flyout';
 import type { ImportLifecycleOption } from './types';
 
 jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: false } })),
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
 }));
 
 const options: ImportLifecycleOption[] = [
