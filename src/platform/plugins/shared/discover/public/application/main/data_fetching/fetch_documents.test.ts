@@ -21,6 +21,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { selectTabRuntimeState } from '../state_management/redux';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { IndexPatternSource } from '@kbn/data-source';
 
 const getDeps = async (): Promise<CommonFetchParams> => {
   const services = createDiscoverServicesMock();
@@ -70,6 +71,7 @@ describe('test fetchDocuments', () => {
     expect(await fetchDocuments(savedSearchMock.searchSource, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
+      dataSource: expect.any(IndexPatternSource),
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[0] });
@@ -105,6 +107,7 @@ describe('test fetchDocuments', () => {
     expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
+      dataSource: expect.any(IndexPatternSource),
     });
 
     expect(searchSourceRegular.fetch$ as jest.Mock).toHaveBeenCalledWith(
@@ -124,6 +127,7 @@ describe('test fetchDocuments', () => {
     expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
+      dataSource: expect.any(IndexPatternSource),
     });
 
     expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(

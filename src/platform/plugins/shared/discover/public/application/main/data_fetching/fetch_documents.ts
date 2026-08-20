@@ -15,6 +15,7 @@ import { isRunningResponse } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import type { CommonFetchParams } from './fetch_all';
@@ -96,6 +97,7 @@ export const fetchDocuments = (
 
     return {
       records,
+      dataSource: new IndexPatternSource(dataView),
       interceptedWarnings,
     };
   });
