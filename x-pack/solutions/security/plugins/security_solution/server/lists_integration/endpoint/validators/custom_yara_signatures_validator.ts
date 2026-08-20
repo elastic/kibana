@@ -247,8 +247,17 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
    * Validates a YARA rule in regards of YARA syntax and Custom YARA Signatures specific requirements.
    */
   private async validateCustomYaraRule(ruleText: string): Promise<YaraValidateResult> {
-    const { errors, warnings, errorCount, warningCount, rules } = await validateYaraRule(ruleText);
+    const result = await validateYaraRule(ruleText);
 
-    return { errors, warnings, errorCount, warningCount, rules };
+    if (result.errorCount === 0 && result.rules.length === 0) {
+      result.errors.push({
+        message: 'No YARA rules found. Please provide at least one rule',
+        line: 0,
+        severity: 'error',
+      });
+      result.errorCount++;
+    }
+
+    return result;
   }
 }

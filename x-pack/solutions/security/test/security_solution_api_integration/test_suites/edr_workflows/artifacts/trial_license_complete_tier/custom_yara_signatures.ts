@@ -274,7 +274,23 @@ export default function ({ getService }: FtrProviderContext) {
                     expect((res.body.message.match(/"cheese"/g) ?? []).length).to.be(64);
                   });
               });
+
+              it('rejects a string value that does not contain rules', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(customYaraSignatureApiCall.getBody('// rule rule1 { condition: true }'))
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: No YARA rules found. Please provide at least one rule/
+                    )
+                  );
+              });
             });
+
             describe('Module support', () => {
               describe('Supported modules', () => {
                 const supportedModules: Record<string, string> = {
