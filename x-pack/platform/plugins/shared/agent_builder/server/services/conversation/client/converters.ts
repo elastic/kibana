@@ -69,7 +69,10 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-const convertBaseFromEs = (document: Document, user: CurrentUser) => {
+export const fromEsWithoutRounds = (
+  document: Document,
+  user: CurrentUser
+): ConversationWithoutRounds => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -203,7 +206,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 };
 
 export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
-  const base = convertBaseFromEs(document, user);
+  const base = fromEsWithoutRounds(document, user);
   const readBy = { read_by: migrateReadBy(document._source) };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
@@ -252,13 +255,6 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
-};
-
-export const fromEsWithoutRounds = (
-  document: Document,
-  user: CurrentUser
-): ConversationWithoutRounds => {
-  return convertBaseFromEs(document, user);
 };
 
 export const withPermissions = <T extends ConversationWithoutRounds>({
