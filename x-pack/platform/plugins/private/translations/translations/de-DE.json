@@ -28659,7 +28659,6 @@
     "xpack.investigationOutput.evaluatingHypothesesTitle": "Auswertung von {count} {count, plural, one {hypothesis} other {Hypothesen}}",
     "xpack.investigationOutput.failedStatusTitle": "Untersuchung fehlgeschlagen",
     "xpack.investigationOutput.failedWithoutDetailsErrorMessage": "Die Untersuchung wurde nicht abgeschlossen.",
-    "xpack.investigationOutput.gapsFoundTitle": "Lücken gefunden",
     "xpack.investigationOutput.gatheringEvidenceTitle": "Beweise sammeln",
     "xpack.investigationOutput.hypothesis": "Hypothese:",
     "xpack.investigationOutput.hypothesisConfidenceBadgeLabel": "{confidence, number, percent}",
