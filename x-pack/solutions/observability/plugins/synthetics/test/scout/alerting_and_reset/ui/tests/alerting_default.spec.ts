@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/286329
+test.describe.skip('AlertingDefaults', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deleteSettingsAndConnectors();
   });
