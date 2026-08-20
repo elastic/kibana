@@ -57,6 +57,27 @@ interface ExecutionListFiltersItem {
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 
+const getExecutionFilterStatusLabel = (status: ExecutionStatus): string => {
+  switch (status) {
+    case ExecutionStatus.WAITING_FOR_INPUT:
+      return i18n.translate(
+        'workflows.workflowExecutionList.filterIconButton.waitingForInputLabel',
+        {
+          defaultMessage: 'Waiting for input',
+        }
+      );
+    case ExecutionStatus.WAITING_FOR_CHILD:
+      return i18n.translate(
+        'workflows.workflowExecutionList.filterIconButton.waitingForChildLabel',
+        {
+          defaultMessage: 'Waiting for child workflow',
+        }
+      );
+    default:
+      return getStatusLabel(status);
+  }
+};
+
 export function ExecutionListFilters({
   filters,
   onFiltersChange,
@@ -78,7 +99,7 @@ export function ExecutionListFilters({
       group: 'status' as const,
     },
     ...Object.values(ExecutionStatus).map((status) => ({
-      label: getStatusLabel(status),
+      label: getExecutionFilterStatusLabel(status),
       key: status,
       checked: filters.statuses.includes(status) ? ('on' as const) : undefined,
       group: 'status' as const,
