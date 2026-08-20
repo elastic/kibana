@@ -8,12 +8,14 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type SignificantEvent,
+  type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -93,10 +95,14 @@ const eventsSearchRoute = createServerRoute({
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z
-        .union([significantEventStatusSchema, z.array(significantEventStatusSchema).max(3)])
+        .union([
+          significantEventStatusSchema,
+          z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+        ])
         .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
+      event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
     }),
   }),
@@ -105,19 +111,31 @@ const eventsSearchRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<PaginatedResponse<SignificantEvent>> => {
+  }): Promise<PaginatedResponse<SignificantEventResponse>> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, severity, ...rest } = params.query;
+    const {
+      status,
+      stream,
+      search,
+      severity,
+      from,
+      to,
+      event_id: eventId,
+      ...rest
+    } = params.query ?? {};
 
     return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
+      from,
+      to,
       status: toArray(status),
       stream: toArray(stream),
       severity: toArray(severity),
       search: search || undefined,
+      ...(eventId ? { eventIds: [eventId] } : {}),
     });
   },
 });
@@ -156,8 +174,10 @@ const eventsLifecycleRoute = createServerRoute({
     }
 
     const { event_id: eventId } = initialHits[0];
-
     const { hits: events } = await getEventClient().findByEventId(eventId);
+    if (events.length === 0) {
+      return { detections: [], events: [] };
+    }
 
     const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(

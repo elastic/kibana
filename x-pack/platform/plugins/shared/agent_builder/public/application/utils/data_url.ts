@@ -56,6 +56,36 @@ export const readBlobAsDataUrl = (blob: Blob): Promise<string> =>
   });
 
 /**
+ * Converts a base64 `data:` URL back into a `File`.
+ *
+ * @param dataUrl - A base64 data URL of the form `data:<mediaType>;base64,<data>`.
+ * @param fileName - Name to give the resulting file. Data URLs carry no file
+ *   name, so callers must supply one.
+ * @returns The decoded file, or `null` when the input isn't a recognized base64
+ *   data URL or its payload isn't valid base64.
+ */
+export const dataUrlToFile = (dataUrl: string, fileName: string): File | null => {
+  const parsed = parseDataUrl(dataUrl);
+  if (!parsed) {
+    return null;
+  }
+
+  let binary: string;
+  try {
+    binary = atob(parsed.data);
+  } catch {
+    return null;
+  }
+
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index++) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new File([bytes], fileName, { type: parsed.mediaType });
+};
+
+/**
  * Fetches a resource and returns its contents as a base64 `data:` URL.
  * Short-circuits when given a `data:` URL since webpack inlines small assets
  * that way.

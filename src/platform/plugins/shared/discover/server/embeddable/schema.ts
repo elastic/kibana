@@ -57,11 +57,11 @@ export const viewModeSchema = z
 
 export const dataTableLimitsSchema = z
   .object({
-    rows_per_page: z.number().min(1).max(10000).default(100).optional().meta({
+    rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
         'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
     }),
-    sample_size: z.number().min(10).max(10000).default(500).optional().meta({
+    sample_size: z.number().min(10).max(10000).optional().meta({
       description:
         'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
     }),
@@ -74,7 +74,6 @@ export const dataTableSchema = z
     column_order: z
       .array(z.string().meta({ description: 'Field name of a column in display order.' }))
       .max(100)
-      .default([])
       .optional()
       .meta({
         description:
@@ -93,23 +92,20 @@ export const dataTableSchema = z
         z.literal(DataGridDensity.EXPANDED),
         z.literal(DataGridDensity.NORMAL),
       ])
-      .default(DataGridDensity.COMPACT)
       .optional()
       .meta({
         description:
-          'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
+          'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
-      .default(3)
       .optional()
       .meta({
         description:
-          'Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
+          'Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
-      .default(3)
       .optional()
       .meta({
         description:

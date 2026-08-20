@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 
-const mockUseMaintenanceWindows = jest.fn();
+const mockUseFetchMaintenanceWindows = jest.fn();
 
-jest.mock('../../monitor_add_edit/fields/maintenance_windows/use_maintenance_windows', () => ({
-  useMaintenanceWindows: () => mockUseMaintenanceWindows(),
+jest.mock('../../../hooks', () => ({
+  useFetchMaintenanceWindows: () => mockUseFetchMaintenanceWindows(),
 }));
 
 jest.mock(
@@ -26,14 +26,14 @@ jest.mock(
 
 describe('MonitorMaintenanceWindows', () => {
   beforeEach(() => {
-    mockUseMaintenanceWindows.mockReset();
+    mockUseFetchMaintenanceWindows.mockReset();
   });
 
   it('resolves maintenance window ids to their titles', () => {
-    mockUseMaintenanceWindows.mockReturnValue({
+    mockUseFetchMaintenanceWindows.mockReturnValue({
       isLoading: false,
       data: {
-        data: [
+        maintenanceWindows: [
           { id: 'mw-1', title: 'Weekend window' },
           { id: 'mw-2', title: 'Nightly window' },
         ],
@@ -47,9 +47,9 @@ describe('MonitorMaintenanceWindows', () => {
   });
 
   it('falls back to the id when the window title cannot be resolved', () => {
-    mockUseMaintenanceWindows.mockReturnValue({
+    mockUseFetchMaintenanceWindows.mockReturnValue({
       isLoading: false,
-      data: { data: [] },
+      data: { maintenanceWindows: [] },
     });
 
     render(<MonitorMaintenanceWindows monitorMWs={['mw-missing']} />);
@@ -58,7 +58,7 @@ describe('MonitorMaintenanceWindows', () => {
   });
 
   it('shows a loading skeleton while windows are loading', () => {
-    mockUseMaintenanceWindows.mockReturnValue({ isLoading: true, data: undefined });
+    mockUseFetchMaintenanceWindows.mockReturnValue({ isLoading: true, data: undefined });
 
     const { container } = render(<MonitorMaintenanceWindows monitorMWs={['mw-1']} />);
 

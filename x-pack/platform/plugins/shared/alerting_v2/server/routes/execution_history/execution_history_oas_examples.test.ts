@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { listRuleExecutionsResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  listPolicyExecutionHistoryResponseSchema,
+  listRuleExecutionsResponseSchema,
+} from '@kbn/alerting-v2-schemas';
+import { LIST_ACTION_POLICY_EXECUTIONS_RESPONSE } from './list_action_policy_executions_oas_example';
 import { LIST_RULE_EXECUTIONS_RESPONSE } from './list_rule_executions_oas_example';
 
 describe('execution history OAS example payloads', () => {
@@ -13,5 +17,12 @@ describe('execution history OAS example payloads', () => {
     expect(listRuleExecutionsResponseSchema.safeParse(LIST_RULE_EXECUTIONS_RESPONSE).success).toBe(
       true
     );
+  });
+
+  it('keeps the action policy executions response example valid against listPolicyExecutionHistoryResponseSchema', () => {
+    expect(
+      listPolicyExecutionHistoryResponseSchema.safeParse(LIST_ACTION_POLICY_EXECUTIONS_RESPONSE)
+        .success
+    ).toBe(true);
   });
 });

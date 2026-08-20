@@ -12,7 +12,13 @@ import {
   getManagedWorkflowDefinition,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { INVESTIGATE_STEP_ID, investigationStateSchema } from './investigation_state';
+import {
+  INVESTIGATE_STEP_ID,
+  investigationStateSchema,
+  MAX_BLIND_SPOTS,
+  MAX_HYPOTHESIS_EVIDENCE,
+  MAX_RECOMMENDATIONS,
+} from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
   steps: Array<{ name: string; with?: { schema?: object } }>;
@@ -142,7 +148,19 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
-    gaps_found: ['No profiling data available'],
+    recommendations: [
+      {
+        title: 'Revert the pool-size config change',
+        description: 'Raise it back above the previous value.',
+        code: 'connection_pool:\n  max_size: 100',
+      },
+    ],
+    blind_spots: [
+      {
+        title: 'No profiling data available',
+        description: 'Would have confirmed whether a leak compounded the exhaustion.',
+      },
+    ],
     significant_event_updates: [severityUpdate],
   };
 
@@ -185,6 +203,189 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(invalidHypothesis).success).toBe(false);
   });
 
+  it('accepts hypothesis evidence carrying a query and its window under both schemas', () => {
+    const withEvidence = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'Connection pool exhaustion after the 14:02 deploy',
+          confidence: 0.9,
+          status: 'confirmed',
+          reason: 'Pool metrics spiked exactly at deploy time.',
+          evidence: [
+            {
+              description: 'Pool utilization saturates at 14:02.',
+              esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
+              time_range: { from: '2026-07-28T13:30:00Z', to: '2026-07-28T15:00:00Z' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(withEvidence)).toBe(true);
+    expect(investigationStateSchema.safeParse(withEvidence).success).toBe(true);
+  });
+
+  it('accepts evidence that is an observation with no query under both schemas', () => {
+    const observationOnly = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'Missing null check',
+          confidence: 0.8,
+          status: 'confirmed',
+          evidence: [{ description: 'All checkout pods were in CrashLoopBackOff.' }],
+        },
+      ],
+    };
+
+    expect(validate(observationOnly)).toBe(true);
+    expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
+  });
+
+  it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
+    const withCode = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'A 1ms gRPC timeout in the product validation loop',
+          confidence: 0.95,
+          status: 'confirmed',
+          evidence: [
+            {
+              description: 'Errors spike at 08:40 and the handler re-raises on deadline exceeded.',
+              esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
+              time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
+              code: {
+                source: 'github_connector',
+                repo: 'elastic/otel-demo-scenario',
+                path: 'src/recommendationservice/recommendation_server.py',
+                host: 'github.com',
+                ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(withCode)).toBe(true);
+    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
+  });
+
+  it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
+    const unlinkable = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'The retry guard is missing.',
+              code: {
+                source: 'code_search',
+                repo: 'open-telemetry/opentelemetry-demo',
+                path: 'src/recommendationservice/recommendation_server.py',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(unlinkable)).toBe(true);
+    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
+  });
+
+  it('rejects a code reference missing its repo under both schemas', () => {
+    const missingRepo = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'github_connector', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(missingRepo)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
+  });
+
+  it('rejects a code reference with an unknown source under both schemas', () => {
+    const badSource = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'gitlab', repo: 'acme/foo', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(badSource)).toBe(false);
+    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
+  });
+
+  it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
+    const tooMuchEvidence = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: Array.from({ length: MAX_HYPOTHESIS_EVIDENCE + 1 }, (_, index) => ({
+            description: `Observation ${index}`,
+          })),
+        },
+      ],
+    };
+
+    expect(validate(tooMuchEvidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooMuchEvidence).success).toBe(false);
+  });
+
+  it('rejects evidence with a half-specified time range under both schemas', () => {
+    const missingTo = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Ran a query.',
+              esql_query: 'FROM logs-* | LIMIT 1',
+              time_range: { from: '2026-07-28T13:30:00Z' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(missingTo)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTo).success).toBe(false);
+  });
+
   it('rejects an invalid hypothesis status under both schemas', () => {
     const invalidStatus = {
       summary: 'ok',
@@ -200,6 +401,61 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(oversized)).toBe(false);
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
+  });
+
+  it('accepts a minimal recommendation (title only) under both schemas', () => {
+    const minimalRecommendation = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment' }],
+    };
+
+    expect(validate(minimalRecommendation)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
+  });
+
+  it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
+    const tooManyRecommendations = {
+      ...validPayload,
+      recommendations: Array.from({ length: MAX_RECOMMENDATIONS + 1 }, (_, index) => ({
+        title: `Step ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyRecommendations)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyRecommendations).success).toBe(false);
+  });
+
+  it('rejects a recommendation missing its title under both schemas', () => {
+    const missingTitle = {
+      ...validPayload,
+      recommendations: [{ description: 'Do the thing' }],
+    };
+
+    expect(validate(missingTitle)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
+  });
+
+  it('rejects a blind spot missing its description under both schemas', () => {
+    const missingDescription = {
+      ...validPayload,
+      blind_spots: [{ title: 'No traces for the cart service' }],
+    };
+
+    expect(validate(missingDescription)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
+  });
+
+  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
+    const tooManyBlindSpots = {
+      ...validPayload,
+      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
+        title: `Gap ${index}`,
+        description: `Missing data ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyBlindSpots)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
   it('rejects an event_update with an unknown field under both schemas', () => {
@@ -233,7 +489,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   it('rejects a status event_update with an invalid enum value under both schemas', () => {
     const invalidStatus = {
       ...validPayload,
-      significant_event_updates: [{ ...statusUpdate, to: 'pending' }],
+      significant_event_updates: [{ ...statusUpdate, to: 'unknown' }],
     };
 
     expect(validate(invalidStatus)).toBe(false);

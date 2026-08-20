@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const MIN_EDITOR_HEIGHT = 80;
+export const MIN_EDITOR_HEIGHT = 40;
+export const INITIAL_EDITOR_HEIGHT = 100;
+export const MAX_EDITOR_HEIGHT = 600;

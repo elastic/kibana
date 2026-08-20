@@ -80,7 +80,7 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
   const button = (
     <EuiButtonEmpty
       size="m"
-      iconType="exportAction"
+      iconType="upload"
       onClick={openModal}
       isLoading={isExporting || isInitialLoading}
       isDisabled={isEmpty}

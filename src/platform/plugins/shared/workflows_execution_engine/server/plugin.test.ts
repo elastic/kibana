@@ -111,7 +111,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
@@ -166,7 +166,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true);
+      expect(result.skipped).toBe(true);
+      expect(result.workflowExecutionId).toEqual(expect.any(String));
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -241,7 +242,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           logger
         );
 
-        expect(result).toBe(true);
+        expect(result.skipped).toBe(true);
         expect(esClient.index).toHaveBeenCalled();
         jest.clearAllMocks();
       }
@@ -265,7 +266,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           logger
         );
 
-        expect(result).toBe(false);
+        expect(result.skipped).toBe(false);
         expect(esClient.index).not.toHaveBeenCalled();
         jest.clearAllMocks();
       }
@@ -288,7 +289,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.index).not.toHaveBeenCalled();
     });
 
@@ -309,7 +310,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.index).not.toHaveBeenCalled();
     });
 
@@ -330,7 +331,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.index).not.toHaveBeenCalled();
     });
 
@@ -413,7 +414,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false); // Proceed with new execution
+      expect(result.skipped).toBe(false); // Proceed with new execution
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_EXECUTIONS_INDEX,
@@ -463,7 +464,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true);
+      expect(result.skipped).toBe(true);
+      expect(result.workflowExecutionId).toBe('existing-execution-id');
       expect(esClient.update).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
     });
@@ -502,7 +504,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true); // Skip (don't mark as failed - execution is from this attempt)
+      expect(result.skipped).toBe(true); // Skip (don't mark as failed - execution is from this attempt)
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark as failed
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -544,7 +546,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true); // Skip current run
+      expect(result.skipped).toBe(true); // Skip current run
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark as failed
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -589,7 +591,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true); // Skip to be safe
+      expect(result.skipped).toBe(true); // Skip to be safe
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark legacy execution as failed
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -632,7 +634,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true); // Skip when we can't compare
+      expect(result.skipped).toBe(true); // Skip when we can't compare
       expect(esClient.update).not.toHaveBeenCalled();
       expect(esClient.index).toHaveBeenCalled();
     });
@@ -671,7 +673,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false); // Proceed - mark stale as failed
+      expect(result.skipped).toBe(false); // Proceed - mark stale as failed
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           doc: expect.objectContaining({
@@ -711,7 +713,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'abandoned-pending-id',
@@ -761,7 +763,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      expect(result).toBe(true);
+      expect(result.skipped).toBe(true);
       expect(esClient.update).not.toHaveBeenCalled();
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -805,7 +807,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { createSkippedForInFlightDuplicates: false, hasActiveTaskForExecution }
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(hasActiveTaskForExecution).toHaveBeenCalledWith('promoted-queued-id');
       expect(esClient.update).not.toHaveBeenCalled();
       expect(esClient.index).not.toHaveBeenCalled();
@@ -846,7 +848,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { createSkippedForInFlightDuplicates: false, hasActiveTaskForExecution }
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(hasActiveTaskForExecution).toHaveBeenCalledWith('orphan-pending-id');
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -892,7 +894,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { createSkippedForInFlightDuplicates: false }
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'orphaned-pending-id',
@@ -934,7 +936,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { createSkippedForInFlightDuplicates: false }
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.update).not.toHaveBeenCalled();
       expect(esClient.index).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
@@ -971,7 +973,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { createSkippedForInFlightDuplicates: false }
       );
 
-      expect(result).toBe(false);
+      expect(result.skipped).toBe(false);
       expect(esClient.update).not.toHaveBeenCalled();
       expect(esClient.index).not.toHaveBeenCalled();
     });

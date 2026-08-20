@@ -64,6 +64,23 @@ describe('useHasChromeAppHeaderContent', () => {
     expect(screen.getByText('has content')).toBeInTheDocument();
   });
 
+  it('detects share-only registered content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.next.appHeader.set({
+      share: {
+        onClick: jest.fn(),
+      },
+    });
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
   it('detects metadata-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.next.appHeader.set({
@@ -124,6 +141,59 @@ describe('useHasChromeAppHeaderContent', () => {
         { text: 'Current page' },
       ])
     );
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
+  it('treats back: false as suppressing breadcrumb fallback without creating header content', () => {
+    window.history.replaceState({}, '', '/app/example/page');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.project.getBreadcrumbs$.mockReturnValue(
+      new BehaviorSubject<ChromeBreadcrumb[]>([
+        { text: 'Parent', href: '/app/example' },
+        { text: 'Current page' },
+      ])
+    );
+    chrome.next.appHeader.set({ back: false });
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('empty')).toBeInTheDocument();
+  });
+
+  it('keeps fallback menu content when back: false suppresses only the breadcrumb back', () => {
+    window.history.replaceState({}, '', '/app/example/page');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.project.getBreadcrumbs$.mockReturnValue(
+      new BehaviorSubject<ChromeBreadcrumb[]>([
+        { text: 'Parent', href: '/app/example' },
+        { text: 'Current page' },
+      ])
+    );
+    chrome.getAppMenu$.mockReturnValue(
+      new BehaviorSubject({
+        items: [
+          {
+            id: 'share',
+            order: 0,
+            label: 'Share',
+            iconType: 'share',
+            run: jest.fn(),
+          },
+        ],
+      })
+    );
+    chrome.next.appHeader.set({ back: false });
 
     render(
       <TestChromeProviders chrome={chrome}>

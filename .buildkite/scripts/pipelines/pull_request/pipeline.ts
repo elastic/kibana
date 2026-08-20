@@ -92,7 +92,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
+      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
 
@@ -102,7 +104,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       'pick_test_group_run_order',
       'build_scout_tests',
       'report_package_metrics',
-      'verify_rspack_build',
     ]);
 
     if (prHasFIPSLabel()) {

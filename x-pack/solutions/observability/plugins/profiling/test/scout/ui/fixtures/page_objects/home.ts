@@ -13,21 +13,23 @@ export class ProfilingHomePage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}`);
-    await this.waitForThreadsTab();
+    await this.waitForExecutablesTab();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.waitForThreadsTab();
+    await this.waitForExecutablesTab();
   }
 
   /*
-   * Waits for the Threads tab to be visible
+   * Waits for the Executables tab to be visible
    */
-  private async waitForThreadsTab() {
-    await this.page.getByRole('tab', { name: 'Threads' }).waitFor({ timeout: EXTENDED_TIMEOUT });
+  private async waitForExecutablesTab() {
+    await this.page
+      .getByRole('tab', { name: 'Executables' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Tab navigation methods
@@ -45,7 +47,7 @@ export class ProfilingHomePage {
 
   // Content verification methods
   async expectTopNContent() {
-    await this.page.getByText('Top 46').waitFor({ state: 'visible' });
+    await this.page.getByText('Top 1').waitFor({ state: 'visible' });
   }
 
   async expectUserPrivilegeLimitation() {

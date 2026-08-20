@@ -12470,7 +12470,7 @@ Object {
                                 "rules": Array [
                                   Object {
                                     "args": Object {
-                                      "limit": 1,
+                                      "limit": 0,
                                     },
                                     "name": "min",
                                   },

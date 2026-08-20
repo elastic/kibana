@@ -144,9 +144,14 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async openDashboardWithId(id: string) {
+  async openDashboardWithId(
+    id: string,
+    opts: { waitForRender?: boolean } = { waitForRender: true }
+  ) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
-    await this.waitForRenderComplete();
+    if (opts.waitForRender) {
+      await this.waitForRenderComplete();
+    }
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
@@ -569,6 +574,20 @@ export class DashboardApp {
   }
 
   /**
+   * Id of the dashboard's control, including one that is not in a control group, such as an
+   * ES|QL control saved as a top-level `esql_control` panel. Expects a single control, so
+   * assert the count in the test first.
+   */
+  async getDashboardControlId(): Promise<string> {
+    const controlId = await this.getDashboardControlsLocator().getAttribute('data-control-id');
+    if (!controlId) {
+      throw new Error('Dashboard control is rendered but has an empty data-control-id');
+    }
+
+    return controlId;
+  }
+
+  /**
    * Gets the count of dashboard controls
    */
   async getControlCount(): Promise<number> {
@@ -597,6 +616,30 @@ export class DashboardApp {
 
     const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
     await option.click();
+  }
+
+  /**
+   * Closes the options-list popover if it is open, and waits for it to disappear.
+   *
+   * Dismisses with Escape rather than by toggling the control button: selecting an option
+   * re-renders the control, so a click aimed at the button can land on a detached node and
+   * leave the popover open.
+   */
+  async optionsListEnsurePopoverIsClosed() {
+    if (await this.optionsListControlSearchInput.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
+    }
+  }
+
+  /**
+   * Locator for the selected-options label of an options-list control, e.g. `AE`
+   * for a single selection or `AE, CN` for multiple.
+   */
+  getOptionsListSelectionsLocator(controlId: string) {
+    return this.page.testSubj
+      .locator(`optionsList-control-${controlId}`)
+      .getByTestId('optionsListSelections');
   }
 
   async getSavedSearchRowCount(): Promise<number> {
@@ -1070,11 +1113,11 @@ export class DashboardApp {
   }
 
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Create visualization');
   }
 
   async addNewESQLPanel() {
-    await this.addNewPanel('Visualization (query)');
+    await this.addNewPanel('Create visualization (query)');
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
@@ -1197,6 +1240,9 @@ export class DashboardApp {
       await toggleAction.click();
     } else {
       await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+      await expect(
+        panelWrapper.locator('[data-test-subj="embeddablePanelContextMenuOpen"]')
+      ).toBeVisible();
       await this.page.testSubj.click('embeddablePanelAction-togglePanel');
     }
   }

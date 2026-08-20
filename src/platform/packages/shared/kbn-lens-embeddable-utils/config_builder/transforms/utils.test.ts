@@ -260,7 +260,7 @@ describe('addLayerColumn', () => {
     expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
   });
 
-  test('adds column with postfix and reference', () => {
+  test('adds column with reference', () => {
     const layer: PersistedIndexPatternLayer = {
       columns: {},
       columnOrder: [],
@@ -282,7 +282,7 @@ describe('addLayerColumn', () => {
       isBucketed: false,
     };
 
-    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+    addLayerColumn(layer, 'metric_trendline', [parentColumn, referenceColumn], false);
 
     expect(layer.columns.metric_trendline).toBeDefined();
     expect(layer.columns.metric_trendline_reference).toBeDefined();

@@ -67,6 +67,20 @@ describe('SuggestionOrderingEngine', () => {
     expect(statsByResult[1].label).toBe('keyword');
   });
 
+  it('should rank the required query text above the optional prefix keyword in HIGHLIGHT', () => {
+    const suggestions = [
+      createSuggestion('prefix = "..."', SuggestionCategory.LANGUAGE_KEYWORD),
+      createSuggestion('The text to highlight', SuggestionCategory.CONSTANT_VALUE),
+    ];
+
+    const evalResult = engine.sort([...suggestions], { command: 'EVAL' });
+    expect(evalResult[0].label).toBe('prefix = "..."');
+
+    const highlightResult = engine.sort([...suggestions], { command: 'HIGHLIGHT' });
+    expect(highlightResult[0].label).toBe('The text to highlight');
+    expect(highlightResult[1].label).toBe('prefix = "..."');
+  });
+
   it('should boost aggregate functions in STATS context', () => {
     const suggestions = [
       createSuggestion('abs', SuggestionCategory.FUNCTION_SCALAR),

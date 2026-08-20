@@ -19,7 +19,7 @@ jest.mock('@kbn/presentation-util', () => ({
 }));
 
 const exportJsonFlyoutSpy = jest
-  .spyOn(ExportJsonFlyout, 'ExportJsonFlyout')
+  .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
 jest.mock('../services/kibana_services', () => ({
@@ -88,7 +88,12 @@ describe('Export JSON action', () => {
 
     const renderFlyoutContent = async () => {
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
-      render(await loadContent({ closeFlyout: jest.fn() }));
+      render(
+        await loadContent({
+          closeFlyout: jest.fn(),
+          ariaLabelledBy: 'dashboardExportJsonFlyoutTitle',
+        })
+      );
       return exportJsonFlyoutSpy.mock.calls[0][0];
     };
 

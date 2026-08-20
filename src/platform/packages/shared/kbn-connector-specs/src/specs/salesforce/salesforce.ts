@@ -277,23 +277,13 @@ export const SalesforceConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Salesforce test handler');
-
-      try {
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
-        await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
-          params: { q: 'SELECT Id FROM User LIMIT 1' },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to Salesforce',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: error instanceof Error ? error.message : String(error),
-        };
-      }
+      const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+      await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
+        params: { q: 'SELECT Id FROM User LIMIT 1' },
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

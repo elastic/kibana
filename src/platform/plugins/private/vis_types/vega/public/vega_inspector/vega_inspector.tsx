@@ -13,17 +13,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { VegaAdapter } from './vega_adapter';
+import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { VegaDataInspectorProps } from './vega_data_inspector';
 
 const VegaDataInspector = lazy(() => import('./vega_data_inspector'));
-
-export interface VegaInspectorAdapters extends Adapters {
-  requests: RequestAdapter;
-  vega: VegaAdapter;
-}
 
 const vegaDebugLabel = i18n.translate('visTypeVega.inspector.vegaDebugLabel', {
   defaultMessage: 'Vega debug',
@@ -47,8 +40,3 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
       </KibanaContextProvider>
     ),
   } as InspectorViewDescription);
-
-export const createInspectorAdapters = (): VegaInspectorAdapters => ({
-  requests: new RequestAdapter(),
-  vega: new VegaAdapter(),
-});

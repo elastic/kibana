@@ -21,7 +21,7 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataGridDensity, isLegacySort, type SortOrder } from '@kbn/discover-utils';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
@@ -196,16 +196,12 @@ export function fromStoredTab(
     sort,
     sampleSize,
     rowsPerPage,
-    headerRowHeight,
-    density,
     viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
     ...toDiscoverSessionPanelOverrides(tab),
     sort: fromStoredSort(sort),
-    header_row_height: fromStoredHeight(headerRowHeight),
-    density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const { index, query, filter } = injectReferences(searchSourceValues, references);
@@ -269,10 +265,10 @@ export function toDiscoverSessionPanelOverrides(
     ...(columns && { column_order: columns }),
     ...(grid &&
       Object.keys(grid?.columns ?? {}).length && { column_settings: fromStoredGrid(grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
+    ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
     ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
+    ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
   };
 }
@@ -333,7 +329,7 @@ export function toStoredSort(
   return sort.map((s) => [s.name, s.direction]);
 }
 
-export function fromStoredHeight(height: number = 3): DiscoverSessionTab['row_height'] {
+export function fromStoredRowHeight(height: number) {
   return height === -1 ? 'auto' : height;
 }
 
