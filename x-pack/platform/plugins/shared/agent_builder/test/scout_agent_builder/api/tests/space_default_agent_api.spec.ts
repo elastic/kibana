@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ListAgentResponse } from '../../../../common/http_api/agents';
@@ -29,6 +30,7 @@ function mockAgent(id: string) {
     id,
     name: `Space default fixture agent ${id}`,
     description: 'Fixture agent used to test per-space default assignment.',
+    access_control: { access_mode: AgentAccessControlMode.Public },
     configuration: {
       instructions: 'You are a test agent.',
       tools: [{ tool_ids: [] as string[] }],

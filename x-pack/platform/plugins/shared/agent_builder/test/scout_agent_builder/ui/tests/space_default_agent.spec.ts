@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/kbn-client';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -48,8 +49,16 @@ test.describe(
     test.beforeAll(async ({ kbnClient }) => {
       // createAgentViaKbn deletes-then-creates by id, so no index-wide wipe is
       // needed — this keeps the spec from deleting agents other specs seeded.
-      await createAgentViaKbn(kbnClient, { id: DEFAULT_AGENT.id, name: DEFAULT_AGENT.name });
-      await createAgentViaKbn(kbnClient, { id: OTHER_AGENT.id, name: OTHER_AGENT.name });
+      await createAgentViaKbn(kbnClient, {
+        id: DEFAULT_AGENT.id,
+        name: DEFAULT_AGENT.name,
+        accessMode: AgentAccessControlMode.Public,
+      });
+      await createAgentViaKbn(kbnClient, {
+        id: OTHER_AGENT.id,
+        name: OTHER_AGENT.name,
+        accessMode: AgentAccessControlMode.Public,
+      });
     });
 
     test.afterEach(async ({ kbnClient }) => {
