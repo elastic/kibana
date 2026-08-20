@@ -138,10 +138,8 @@ export class CasesWorkflowRunService {
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,
-      data: {
-        caseId,
-        origin: body.origin,
-      },
+      caseId,
+      origin: body.origin,
     });
     const { workflowExecutionId } = await this.management.executeWorkflow({
       workflowId,

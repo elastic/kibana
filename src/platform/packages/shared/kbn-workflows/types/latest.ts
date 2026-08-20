@@ -39,7 +39,6 @@ export type {
   WorkflowStepExecutionDto,
   WorkflowTokenUsage,
   WorkflowStepTokenUsage,
-  WorkflowExecutionMetadata,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
@@ -96,7 +95,6 @@ export {
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
   ConcurrencySlotOccupyingExecutionStatuses,
-  createWorkflowExecutionMetadataSchema,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants

@@ -89,10 +89,8 @@ describe('CasesWorkflowRunService', () => {
       metadata: {
         schemaVersion: 1,
         source: 'cases',
-        data: {
-          caseId: 'case-1',
-          origin: defaultBody.origin,
-        },
+        caseId: 'case-1',
+        origin: defaultBody.origin,
       },
     });
     expect(onWorkflowStarted).toHaveBeenCalledWith({
