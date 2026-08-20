@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { FieldError } from 'react-hook-form';
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 function errorMessageFromType(type: FieldError['type']): string {
   switch (type) {
@@ -28,12 +28,5 @@ export interface FieldErrorCalloutProps {
 }
 
 export const FieldErrorCallout = ({ error }: FieldErrorCalloutProps) => {
-  return (
-    <EuiCallOut
-      color="danger"
-      iconType="error"
-      title={error.message ?? errorMessageFromType(error.type)}
-      size="s"
-    />
-  );
+  return <KbnDangerCallout title={error.message ?? errorMessageFromType(error.type)} size="s" />;
 };
