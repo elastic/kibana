@@ -2173,9 +2173,9 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
-      "reviewers": ["team:cloud-services"],
+      "reviewers": ["team:siem-conduit"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security-Cloud Services"],
+      "addLabels": ["Team:security-siem-conduit"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
