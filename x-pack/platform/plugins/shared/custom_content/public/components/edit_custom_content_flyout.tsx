@@ -35,7 +35,7 @@ import { EsqlPreviewSection } from './esql_preview_section';
 const EDITOR_DEFAULT_HEIGHT = 400;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
 // so the computed max-height always prevents a scrollbar regardless of minor layout changes.
-const FLYOUT_FIXED_CHROME_HEIGHT = 360;
+const FLYOUT_FIXED_CHROME_HEIGHT = 380;
 
 export interface EditCustomContentFlyoutProps {
   esqlQuery: string | undefined;
