@@ -320,7 +320,7 @@ export class AdHocTaskRunner implements CancellableTask {
         `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`,
         {
           labels: {
-            spaceId,
+            spaceId: this.taskInstance.params.spaceId,
             executionId: this.executionId,
             ruleId: rule.id,
             ruleType: this.ruleTypeId,
@@ -340,7 +340,7 @@ export class AdHocTaskRunner implements CancellableTask {
         `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`,
         {
           labels: {
-            spaceId,
+            spaceId: this.taskInstance.params.spaceId,
             executionId: this.executionId,
             ruleId: rule.id,
             ruleType: this.ruleTypeId,
