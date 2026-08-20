@@ -8,7 +8,14 @@ import { formatKibanaNamespace } from '../../../../../../common/formatters';
 import { DEFAULT_FIELDS } from '../constants';
 
 import type { SyntheticsMonitor, BrowserFields, HTTPFields, ScheduleUnit } from '../types';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
+import { ConfigKey, HttpAuthMethod, MonitorTypeEnum, FormMonitorType } from '../types';
+
+const getHttpAuthType = (monitor: HTTPFields): HttpAuthMethod => {
+  if (monitor[ConfigKey.NTLM_ENABLED]) return HttpAuthMethod.NTLM;
+  if (monitor[ConfigKey.KERBEROS_ENABLED]) return HttpAuthMethod.KERBEROS;
+  if (monitor[ConfigKey.USERNAME] || monitor[ConfigKey.PASSWORD]) return HttpAuthMethod.BASIC;
+  return HttpAuthMethod.NONE;
+};
 
 export const getDefaultFormFields = (
   spaceId: string = 'default'
@@ -33,6 +40,7 @@ export const getDefaultFormFields = (
     [FormMonitorType.HTTP]: {
       ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       isTLSEnabled: false,
+      authType: HttpAuthMethod.NONE,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
@@ -111,6 +119,11 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
         ...monitorWithFormMonitorType,
       };
     case FormMonitorType.HTTP:
+      return {
+        ...monitorWithFormMonitorType,
+        isTLSEnabled: (monitor as HTTPFields)[ConfigKey.METADATA].is_tls_enabled,
+        authType: getHttpAuthType(monitor as HTTPFields),
+      };
     case FormMonitorType.TCP:
       return {
         ...monitorWithFormMonitorType,

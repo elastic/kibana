@@ -396,6 +396,58 @@ describe('validateMonitor', () => {
     });
   });
 
+  describe('HTTP authentication mutual exclusivity', () => {
+    it('validates an HTTP monitor using only Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS_ENABLED]: true,
+        [ConfigKey.KERBEROS_REALM]: 'CORP.LOCAL',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('validates an HTTP monitor using only NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM_ENABLED]: true,
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates an HTTP monitor combining basic and Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.KERBEROS_ENABLED]: true,
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+      });
+    });
+
+    it('invalidates an HTTP monitor combining Kerberos and NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS_ENABLED]: true,
+        [ConfigKey.NTLM_ENABLED]: true,
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+      });
+    });
+  });
+
   describe('should invalidate when incomplete properties are received', () => {
     it('for ICMP monitor', () => {
       const testMonitor = {

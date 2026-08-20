@@ -41,6 +41,33 @@ const MAINTENANCE_WINDOWS_OPTIONS = (readOnly: boolean) => ({
 });
 
 const HTTP_ADVANCED = (readOnly: boolean) => ({
+  authentication: {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.authentication.title', {
+      defaultMessage: 'Authentication',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.authentication.description',
+      {
+        defaultMessage:
+          'Configure how the monitor authenticates with the server. Only one method can be used per monitor.',
+      }
+    ),
+    components: [
+      FIELD(readOnly).authType,
+      FIELD(readOnly)[ConfigKey.USERNAME],
+      FIELD(readOnly)[ConfigKey.PASSWORD],
+      FIELD(readOnly)[ConfigKey.KERBEROS_AUTH_TYPE],
+      FIELD(readOnly)[ConfigKey.KERBEROS_REALM],
+      FIELD(readOnly)[ConfigKey.KERBEROS_CONFIG_PATH],
+      FIELD(readOnly)[ConfigKey.KERBEROS_SERVICE_NAME],
+      FIELD(readOnly)[ConfigKey.KERBEROS_USERNAME],
+      FIELD(readOnly)[ConfigKey.KERBEROS_PASSWORD],
+      FIELD(readOnly)[ConfigKey.KERBEROS_KEYTAB],
+      FIELD(readOnly)[ConfigKey.NTLM_USERNAME],
+      FIELD(readOnly)[ConfigKey.NTLM_PASSWORD],
+      FIELD(readOnly)[ConfigKey.NTLM_DOMAIN],
+    ],
+  },
   requestConfig: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfiguration.title', {
       defaultMessage: 'Request configuration',
@@ -53,8 +80,6 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       }
     ),
     components: [
-      FIELD(readOnly)[ConfigKey.USERNAME],
-      FIELD(readOnly)[ConfigKey.PASSWORD],
       FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
@@ -233,6 +258,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
       MAINTENANCE_WINDOWS_OPTIONS(readOnly),
+      HTTP_ADVANCED(readOnly).authentication,
       HTTP_ADVANCED(readOnly).requestConfig,
       HTTP_ADVANCED(readOnly).responseConfig,
       HTTP_ADVANCED(readOnly).responseChecks,

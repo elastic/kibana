@@ -21,6 +21,7 @@ import type {
 } from '../../../../common/runtime_types';
 import {
   ConfigKey,
+  KerberosAuthType,
   MonitorTypeEnum,
   ScheduleUnit,
   VerificationMode,
@@ -181,6 +182,64 @@ describe('formatMonitorConfig', () => {
         });
       }
     );
+
+    it('emits the Kerberos block only when Kerberos is enabled and omits NTLM', () => {
+      const kerberosConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS_ENABLED]: true,
+        [ConfigKey.KERBEROS_AUTH_TYPE]: KerberosAuthType.PASSWORD,
+        [ConfigKey.KERBEROS_REALM]: 'CORP.LOCAL',
+        [ConfigKey.KERBEROS_USERNAME]: 'svc-heartbeat',
+        [ConfigKey.KERBEROS_PASSWORD]: 'secret',
+        [ConfigKey.NTLM_ENABLED]: false,
+        [ConfigKey.NTLM_DOMAIN]: 'CORP',
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(kerberosConfig) as ConfigKey[],
+        kerberosConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig).toMatchObject({
+        [ConfigKey.KERBEROS_ENABLED]: true,
+        [ConfigKey.KERBEROS_AUTH_TYPE]: KerberosAuthType.PASSWORD,
+        [ConfigKey.KERBEROS_REALM]: 'CORP.LOCAL',
+        [ConfigKey.KERBEROS_USERNAME]: 'svc-heartbeat',
+        [ConfigKey.KERBEROS_PASSWORD]: 'secret',
+      });
+      // NTLM fields are dropped because NTLM is disabled.
+      expect(yamlConfig[ConfigKey.NTLM_ENABLED]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM_DOMAIN]).toBeUndefined();
+      // Basic auth fields are empty and therefore omitted.
+      expect(yamlConfig[ConfigKey.USERNAME]).toBeUndefined();
+    });
+
+    it('omits both Kerberos and NTLM blocks when neither is enabled', () => {
+      const noAuthConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.KERBEROS_ENABLED]: false,
+        [ConfigKey.KERBEROS_AUTH_TYPE]: KerberosAuthType.PASSWORD,
+        [ConfigKey.KERBEROS_REALM]: 'CORP.LOCAL',
+        [ConfigKey.NTLM_ENABLED]: false,
+        [ConfigKey.NTLM_DOMAIN]: 'CORP',
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(noAuthConfig) as ConfigKey[],
+        noAuthConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS_ENABLED]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.KERBEROS_REALM]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM_ENABLED]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM_DOMAIN]).toBeUndefined();
+    });
   });
 });
 

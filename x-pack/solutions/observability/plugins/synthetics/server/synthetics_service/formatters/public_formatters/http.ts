@@ -13,9 +13,29 @@ import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter } from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
+
+// Only emit the Kerberos / NTLM blocks when the respective scheme is enabled so
+// disabled monitors don't ship empty auth config to Heartbeat.
+const kerberosFormatter: Formatter = (fields, key) =>
+  fields[ConfigKey.KERBEROS_ENABLED] ? (fields[key] as string | boolean) ?? null : null;
+const ntlmFormatter: Formatter = (fields, key) =>
+  fields[ConfigKey.NTLM_ENABLED] ? (fields[key] as string | boolean) ?? null : null;
+
 export const httpFormatters: HTTPFormatMap = {
   ...tlsFormatters,
   ...commonFormatters,
+  [ConfigKey.KERBEROS_ENABLED]: kerberosFormatter,
+  [ConfigKey.KERBEROS_AUTH_TYPE]: kerberosFormatter,
+  [ConfigKey.KERBEROS_USERNAME]: kerberosFormatter,
+  [ConfigKey.KERBEROS_PASSWORD]: kerberosFormatter,
+  [ConfigKey.KERBEROS_KEYTAB]: kerberosFormatter,
+  [ConfigKey.KERBEROS_CONFIG_PATH]: kerberosFormatter,
+  [ConfigKey.KERBEROS_REALM]: kerberosFormatter,
+  [ConfigKey.KERBEROS_SERVICE_NAME]: kerberosFormatter,
+  [ConfigKey.NTLM_ENABLED]: ntlmFormatter,
+  [ConfigKey.NTLM_USERNAME]: ntlmFormatter,
+  [ConfigKey.NTLM_PASSWORD]: ntlmFormatter,
+  [ConfigKey.NTLM_DOMAIN]: ntlmFormatter,
   [ConfigKey.MAX_REDIRECTS]: null,
   [ConfigKey.REQUEST_METHOD_CHECK]: null,
   [ConfigKey.RESPONSE_BODY_INDEX]: null,

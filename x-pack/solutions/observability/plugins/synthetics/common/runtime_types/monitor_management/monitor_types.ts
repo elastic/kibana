@@ -23,6 +23,7 @@ import {
   TLSVersionCodec,
   VerificationModeCodec,
   RequestBodyCheckCodec,
+  KerberosAuthTypeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
@@ -199,6 +200,15 @@ export const HTTPAdvancedFieldsCodec = t.intersection([
     [ConfigKey.RESPONSE_BODY_MAX_BYTES]: t.string,
     [ConfigKey.IPV4]: t.boolean,
     [ConfigKey.IPV6]: t.boolean,
+    // Non-secret Kerberos / NTLM authentication options.
+    [ConfigKey.KERBEROS_ENABLED]: t.boolean,
+    [ConfigKey.KERBEROS_AUTH_TYPE]: KerberosAuthTypeCodec,
+    [ConfigKey.KERBEROS_KEYTAB]: t.string,
+    [ConfigKey.KERBEROS_CONFIG_PATH]: t.string,
+    [ConfigKey.KERBEROS_REALM]: t.string,
+    [ConfigKey.KERBEROS_SERVICE_NAME]: t.string,
+    [ConfigKey.NTLM_ENABLED]: t.boolean,
+    [ConfigKey.NTLM_DOMAIN]: t.string,
   }),
 ]);
 
@@ -215,6 +225,11 @@ export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.PROXY_HEADERS]: t.record(t.string, t.string),
     [ConfigKey.RESPONSE_JSON_CHECK]: t.array(ResponseCheckJSONCodec),
+    // Secret Kerberos / NTLM credentials.
+    [ConfigKey.KERBEROS_USERNAME]: t.string,
+    [ConfigKey.KERBEROS_PASSWORD]: t.string,
+    [ConfigKey.NTLM_USERNAME]: t.string,
+    [ConfigKey.NTLM_PASSWORD]: t.string,
   }),
 ]);
 
