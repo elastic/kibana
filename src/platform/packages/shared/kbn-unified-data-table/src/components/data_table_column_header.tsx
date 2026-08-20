@@ -35,9 +35,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {showColumnTokens && (
-        <DataTableColumnToken columnName={columnName} dataSource={dataSource} />
-      )}
+      {showColumnTokens && <DataTableColumnToken columnName={columnName} dataSource={dataSource} />}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
     </ColumnHeaderTruncateContainer>
   );

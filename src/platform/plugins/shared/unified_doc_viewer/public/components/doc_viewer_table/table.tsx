@@ -232,9 +232,7 @@ const InternalDocViewerTable = ({
         canPrependTimeFieldColumn(
           columns,
           dataView.timeFieldName,
-          Boolean(
-            dataView.timeFieldName && dataSource?.getColumn(dataView.timeFieldName)
-          ),
+          Boolean(dataView.timeFieldName && dataSource?.getColumn(dataView.timeFieldName)),
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
           isEsqlMode
         )

@@ -70,7 +70,8 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = resolveFieldFromDataSource(dataSource, name) ?? dataView.fields.getByName(name);
+    this.dataViewField =
+      resolveFieldFromDataSource(dataSource, name) ?? dataView.fields.getByName(name);
     this.isPinned = isPinned;
     this.dataSource = dataSource;
   }
@@ -147,7 +148,9 @@ function resolveFieldFromDataSource(
   }
   if (dataSource instanceof EsqlSource) {
     const column = dataSource.resultColumns.find((c) => c.name === name);
-    return column ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)) : undefined;
+    return column
+      ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
+      : undefined;
   }
   return undefined;
 }

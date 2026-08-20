@@ -39,7 +39,9 @@ function resolveField(dataSource: DataSource | undefined, fieldName: string) {
   }
   if (dataSource instanceof EsqlSource) {
     const column = dataSource.resultColumns.find((c) => c.name === fieldName);
-    return column ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)) : undefined;
+    return column
+      ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
+      : undefined;
   }
   return undefined;
 }
