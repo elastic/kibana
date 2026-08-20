@@ -45,12 +45,12 @@ export const ruleKindSchema = z
     z
       .literal('alert')
       .describe(
-        'Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
+        'Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.'
       ),
     z
       .literal('signal')
       .describe(
-        'Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.'
+        'Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.'
       ),
   ])
   .describe('The kind of the rule.');
@@ -143,7 +143,7 @@ export const noDataStrategySchema = z.union([
     .describe(
       'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
     ),
-  z.literal('recover').describe('Forces recovery when no data is present.'),
+  z.literal('recover').describe('Resolves the alert episode to inactive on the first no-data run.'),
   z.literal('none').describe('No-data situations are ignored (default).'),
 ]);
 export const noDataStrategy = {

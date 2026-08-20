@@ -112,7 +112,7 @@ Rule names: \`{{ inputs.payload.rules[ep.rule_id].name }}\`.
 `;
 
 exports[`schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Episode Lifecycle
+"# Episode Lifecycle
 
 Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:
 
@@ -134,7 +134,7 @@ exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skil
 `;
 
 exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
-"## No-Data Strategy
+"# No-Data Strategy
 
 \`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.
 
@@ -142,20 +142,38 @@ exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed ski
 |---|---|
 | \`last_known_status\` | Holds the last known episode status when no data is present. |
 | \`emit\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API. |
-| \`recover\` | Forces recovery when no data is present. |
+| \`recover\` | Resolves the alert episode to inactive on the first no-data run. |
 | \`none\` | No-data situations are ignored (default). |
 
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
 
-Signal rules cannot set \`no_data_strategy\`.
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints."
+Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./rule-kind.md))."
+`;
+
+exports[`schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Notifications via Action Policies
+
+Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
+
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`action-policy-management\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+
+## Notifications Require Alert Kind
+
+Action policies only process Alerts (\`kind: alert\`). Events (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [episode-lifecycle reference](./episode-lifecycle.md).
+
+When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
+
+1. **Explain the difference**: Events (\`kind: signal\`) rules are observation-only and do not trigger notifications. Alerts (\`kind: alert\`) track episode lifecycle and can dispatch to action policies.
+2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`action-policy-management\` skill for notification setup.
+3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing Events (\`kind: signal\`) rule cannot be converted. Offer to create a new Alerts (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.
+4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
 `;
 
 exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Recovery Strategy
+"# Recovery Strategy
 
-\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\` ([rule-kind reference](./rule-kind.md)).
 
 - \`no_breach\`: recovers groups that stop breaching (default).
 - \`query\`: uses a custom recovery query to detect recovery.
@@ -163,25 +181,23 @@ exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed s
 
 When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
 - **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
-- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
-
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints."
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`"
 `;
 
 exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Rule Kind: Alert vs Signal
+"# Rule Kind: Alerts vs Events
 
-Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
+Rules declare a \`kind\` of \`alert\` (Alerts) or \`signal\` (Events). This is the most important behavioral split in the system.
 
-### Alert (\`kind: alert\`)
-Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+### Alerts (\`kind: alert\`)
+Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
 
-### Signal (\`kind: signal\`)
-Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+### Events (\`kind: signal\`)
+Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
 
-### Immutability
+## Immutability
 \`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely."
 `;
 
@@ -304,7 +320,7 @@ Standalone queries: independent full queries for breach, recovery, and no_data.
 `;
 
 exports[`schema_to_skill_docs generateSeverityDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Alert Event Severity
+"# Alert Event Severity
 
 Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
 
@@ -321,19 +337,6 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = \\"critical\\"\`
 - **Conditional severity** — severity varies per group based on data:
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
-`;
-
-exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`] = `
-"## State Transition
-
-Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
-
-- \`pending_count\` — Consecutive breaches before transitioning to active.
-- \`pending_timeframe\` — Time window for pending evaluation, e.g. 5m, 15m.
-- \`recovering_count\` — Consecutive recoveries before transitioning to inactive.
-- \`recovering_timeframe\` — Time window for recovering evaluation, e.g. 5m, 15m.
-
-State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema."
 `;
 
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `

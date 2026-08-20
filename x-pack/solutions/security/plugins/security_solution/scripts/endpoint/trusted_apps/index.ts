@@ -156,7 +156,7 @@ const ensureCreateEndpointTrustedAppsList = async (kbn: KbnClient) => {
     })
     .catch((e) => {
       // Ignore if list was already created
-      if (e.response.status !== 409) {
+      if (e.status !== 409) {
         throw e;
       }
     });
