@@ -474,11 +474,12 @@ export function buildAwsServiceMatrix(
       const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === entry.id);
 
       // Agentless is read at the policy-template level, which may cover both logs and metrics
-      // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template). In aws-7.1.1
-      // all agentless-enabled templates are logs-only, so this is safe today. If a future
-      // version enables agentless on a mixed template, the metrics data stream would incorrectly
-      // inherit managed_integration. The clean fix is per-data-stream deployment fields in the
-      // manifest; until then this is a known latent risk.
+      // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template; dynamodb, rds,
+      // and s3 are similar). Both signal types inherit managed_integration from the same flag,
+      // which is the correct behaviour today — all those templates are intended for agentless.
+      // The latent risk is a future template that covers signal types with different deployment
+      // requirements; the clean fix for that case is per-data-stream deployment fields in the
+      // manifest.
       managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
 
       if (!name && (ds as any)?.title) {
