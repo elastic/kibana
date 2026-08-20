@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntitiesAlias } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import {
   createV2HostRiskEnrichments,
@@ -52,7 +52,7 @@ const resolveV2Enrichments = async <T extends DetectionAlertLatest>(
   // legacy `.entities.v2.latest.security_{space}` index, which only the alias covers.
   const entityStoreIndexExists = await isIndexExist({
     services,
-    index: getLatestEntitiesAlias(spaceId),
+    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
   });
 
   if (!entityStoreIndexExists) {

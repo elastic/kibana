@@ -166,7 +166,6 @@ export {
   getEntityIndexPattern,
   getLegacySecurityEntityIndexPattern,
   getEntitiesAlias,
-  getLatestEntitiesAlias,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
   getLegacySecurityLatestEntitiesIndexName,

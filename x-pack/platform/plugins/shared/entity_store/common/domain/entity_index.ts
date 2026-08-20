@@ -100,12 +100,3 @@ export const getLegacySecurityLatestEntityIndexPattern = (namespace: string) =>
 // Returns the write alias for the entity metadata datastream.
 export const getEntityMetadataAlias = (namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${ENTITY_METADATA}-${namespace}` as const;
-
-/**
- * Alias for the latest entities index. Unlike the concrete/pattern names, the alias
- * name is naming-scheme agnostic: it points at the legacy `security_{namespace}` index
- * until migration retargets it, so readers that cannot resolve the concrete name
- * (or must work on both sides of the migration) should query this.
- */
-export const getLatestEntitiesAlias = (namespace: string) =>
-  getEntitiesAlias(ENTITY_LATEST, namespace);

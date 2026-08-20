@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
-import { getLatestEntitiesAlias } from '@kbn/entity-store/common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
 
 import type { EntityRelationshipRecord } from './types';
 import { entityTypeFromEuid } from './types';
@@ -64,8 +64,8 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
  * EUIDs derived from `host.name` values that have never been indexed as
  * entities, producing dangling IDs in `entity.relationships.*.ids`.
  *
- * Uses `getLatestEntitiesAlias`: the alias survives mapping-version rollovers and,
- * unlike the neutral wildcard pattern, still matches legacy `security_{namespace}`
+ * Uses the `entities-latest-{namespace}` alias: it survives mapping-version rollovers
+ * and, unlike the neutral wildcard pattern, still matches legacy `security_{namespace}`
  * indices before the shared-index migration runs — same name the raw_identifiers
  * query itself uses in Step 2.
  */
@@ -76,7 +76,7 @@ export const matchExistingTargetIds = async (
 ): Promise<Set<string>> => {
   if (candidateIds.size === 0) return new Set();
 
-  const index = getLatestEntitiesAlias(namespace);
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   const result = await esClient.search({
     index,
     size: candidateIds.size,

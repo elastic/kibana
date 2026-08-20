@@ -45,12 +45,7 @@ export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
-export {
-  getLatestEntitiesIndexName,
-  getLatestEntitiesAlias,
-  getEntitiesAlias,
-  ENTITY_LATEST,
-} from '../common';
+export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
 export {
   resolveLatestEntitiesIndexName,

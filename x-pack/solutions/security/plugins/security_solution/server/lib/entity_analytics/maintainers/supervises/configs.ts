@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntitiesAlias } from '@kbn/entity-store/common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import { ENGINE_COLUMNS } from '../engine/columns';
@@ -66,7 +66,7 @@ function buildSupervisesEsqlQuery(
   namespace: string,
   lastProcessedTimestamp?: string
 ): string {
-  const entityIndex = getLatestEntitiesAlias(namespace);
+  const entityIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
   const rawIdentifiersPrefix = `entity.relationships.${RELATIONSHIP_KEY}.raw_identifiers`;
   const emailField = `${rawIdentifiersPrefix}.user.email`;
   const idField = `${rawIdentifiersPrefix}.user.id`;
@@ -112,7 +112,7 @@ function buildSupervisesConfig(
     // Actors are entity docs, so Step 1 discovers by entity.id over the entity
     // index, and the entity-index @timestamp lookback is disabled in favour of a
     // last_seen watermark.
-    indexPattern: getLatestEntitiesAlias,
+    indexPattern: (namespace) => getEntitiesAlias(ENTITY_LATEST, namespace),
     targetEntityType: 'user',
     relationshipKey: RELATIONSHIP_KEY,
     customActor: {
