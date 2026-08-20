@@ -495,6 +495,40 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('handleGenerateWithChat', () => {
+    it('clicking "Generate with chat" from the empty prompt on a new panel does not remove it', async () => {
+      const removePanel = jest.fn();
+      const openChat = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      // clearOverlays simulates overlay tracker closing the flyout
+      const clearOverlays = jest.fn(() => mockFlyoutClose());
+      const { embeddable } = await buildEmbeddable(baseState, {
+        removePanel,
+        clearOverlays,
+        openOverlay: jest.fn(),
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      // Simulate new-panel flyout being open
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await renderFlyoutContent();
+
+      // User clicks "Generate with chat" from the panel's empty state (not the flyout).
+      // handleGenerateWithChat sets isRetained=true then calls clearOverlays() which
+      // closes the flyout, resolving flyoutRef.onClose.
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+      await act(async () => mockFlyoutOnClose);
+
+      expect(openChat).toHaveBeenCalled();
+      expect(removePanel).not.toHaveBeenCalled();
+    });
+
     it('opens the agent builder with the correct attachment', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {

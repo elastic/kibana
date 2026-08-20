@@ -70,6 +70,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
+    let isRetained = false;
     let storedPrompt = initialState.prompt ?? '';
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
@@ -208,7 +209,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           },
         });
         flyoutRef.onClose.then(() => {
-          if (!hasSaved && isNewPanel && apiIsPresentationContainer(parentApi)) {
+          if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
             parentApi.removePanel(uuid);
           }
           previewHtml$.next(null);
@@ -340,6 +341,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
+          isRetained = true;
           previewHtml$.next(null);
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
