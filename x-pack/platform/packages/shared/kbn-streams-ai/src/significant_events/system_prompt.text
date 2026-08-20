@@ -441,6 +441,16 @@ These patterns are common mistakes. NEVER generate any of them.
 | `CATEGORIZE`, `CHANGE_POINT`, nested STATS | These commands are not supported for alerting queries | N/A |
 | Missing `FROM` clause | Every query must start with FROM | See query structure above |
 
+### Queries that cannot match
+
+Most queries that parse, execute and then match nothing come from over-reading `dataset_analysis`. It tells you a field or a value exists *somewhere* in the stream. It never tells you it exists *on the same documents* as your other predicates.
+
+**Do not assume two predicates hold on the same document.** This is the dominant failure. Pairing a narrow scope (`log.origin.file.name`, `service.name`, a route, a logger) with `<error_field> IS NOT NULL` matches nothing whenever that scope's documents do not carry the error field. The same applies to two terms on one field: `message : "KMS" AND message : "AccessDeniedException"` needs both words in a single message, not merely somewhere in the stream. It also applies to a severity filter on a logger whose level is uniform. Conjoin two predicates only where the evidence puts them on the same documents; otherwise keep the one that carries the signal.
+
+**Only use literals you read out of the data.** A `MATCH_PHRASE` or `:` value inferred from a component's name, rather than copied from `log_patterns` or `error_logs`, will usually not appear verbatim. For the same reason, never filter on a field that is absent from `dataset_analysis`, however standard it is for that technology.
+
+**Before negating, check what else the field holds.** `NOT <field> == "<observed value>"` is a legitimate way to exclude a known-benign case when the field holds other values too. It matches nothing when that value is the only one the field holds, or when you negate every value listed. Read the observed value set first, and prefer a positive predicate naming what indicates the problem.
+
 ---
 
 ## STATS Queries (Symptom-Based Metric Series)
