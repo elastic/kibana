@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 interface DateWindowParams {
   isScheduled: boolean;
   timestamp?: string;
-  expirationDate?: string;
   lastResultTime?: string[];
   interval?: number;
 }
@@ -27,29 +26,9 @@ const UNSET_WINDOW: DateWindowResult = {
   mode: undefined,
 };
 
-/**
- * End bound for a live action, mirroring the toolbar "View in Discover" button,
- * which ends its window at the action's `expiration`. Without an expiration the
- * end is left open so results ingested after this render still show up.
- */
-const getLiveEndBound = ({
-  lastResult,
-  expirationDate,
-}: {
-  lastResult?: string;
-  expirationDate?: string;
-}): moment.Moment | undefined => {
-  if (!expirationDate) {
-    return lastResult ? moment(lastResult) : undefined;
-  }
-
-  return moment.min(lastResult ? moment(lastResult) : moment(), moment(expirationDate));
-};
-
 export const getPackViewDateWindow = ({
   isScheduled,
   timestamp,
-  expirationDate,
   lastResultTime,
   interval,
 }: DateWindowParams): DateWindowResult => {
@@ -68,21 +47,14 @@ export const getPackViewDateWindow = ({
   const lastResult = lastResultTime?.[0];
 
   if (timestamp) {
-    const start = moment(timestamp);
-    const end = getLiveEndBound({ lastResult, expirationDate });
-
-    if (!end) {
-      return { startDate: start.toISOString(), endDate: 'now', mode: 'relative' };
-    }
-
-    // `timestamp` is stamped by Kibana when the action is created, while the end
-    // bound comes from `event.ingested` on the agent's own documents. Clock skew
-    // between the two can invert the range, and Elasticsearch answers `gte > lte`
-    // with zero hits and no error — the same symptom as the collapsed window this
-    // function exists to avoid. Order the bounds so both instants stay inside it.
-    const [from, to] = end.isBefore(start) ? [end, start] : [start, end];
-
-    return { startDate: from.toISOString(), endDate: to.toISOString(), mode: 'absolute' };
+    // The end stays open. Any fixed end would be a render-time snapshot: results
+    // keep arriving while the row is on screen, and `usePackQueryLastResults` has
+    // no `refetchInterval`, so a `lastResultTime`-derived bound freezes wherever
+    // the first fetch landed and cuts off slow agents — the SDH symptom.
+    //
+    // The action's `expiration` is no bound either: it is `@timestamp + 2 weeks`
+    // (`ACTION_EXPIRATION_WEEKS`), always far past both `now` and any result.
+    return { startDate: moment(timestamp).toISOString(), endDate: 'now', mode: 'relative' };
   }
 
   // Defensive fallback only. `interval` lives on scheduled pack queries, which

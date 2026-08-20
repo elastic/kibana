@@ -51,25 +51,8 @@ describe('PackViewInDiscoverAction', () => {
     const { startDate, endDate } = capturedProps();
 
     expect(startDate).toBe(timestamp);
-    expect(endDate).toBe('2026-08-10T09:48:47.000Z');
+    expect(endDate).toBe('now');
     expect(startDate).not.toEqual(endDate);
-  });
-
-  it('clamps the window to the action expiration', () => {
-    render(
-      <PackViewInDiscoverAction
-        item={item}
-        timestamp={timestamp}
-        expirationDate="2026-08-10T09:05:00.000Z"
-      />
-    );
-
-    expect(capturedProps()).toEqual(
-      expect.objectContaining({
-        startDate: timestamp,
-        endDate: '2026-08-10T09:05:00.000Z',
-      })
-    );
   });
 
   it('leaves the window open when no results have been indexed yet', () => {

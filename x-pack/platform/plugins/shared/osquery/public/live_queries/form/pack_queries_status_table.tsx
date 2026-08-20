@@ -316,10 +316,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         scheduleId={scheduleId}
         executionCount={executionCount}
         timestamp={startDate}
-        expirationDate={expirationDate}
       />
     ),
-    [scheduleId, executionCount, startDate, expirationDate]
+    [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
@@ -329,10 +328,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         scheduleId={scheduleId}
         executionCount={executionCount}
         timestamp={startDate}
-        expirationDate={expirationDate}
       />
     ),
-    [scheduleId, executionCount, startDate, expirationDate]
+    [scheduleId, executionCount, startDate]
   );
 
   const getHandleErrorsToggle = useCallback(

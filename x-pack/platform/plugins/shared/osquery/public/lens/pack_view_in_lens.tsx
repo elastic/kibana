@@ -18,14 +18,12 @@ interface PackViewInActionProps {
   scheduleId?: string;
   executionCount?: number;
   timestamp?: string;
-  expirationDate?: string;
 }
 const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   item,
   scheduleId,
   executionCount,
   timestamp,
-  expirationDate,
 }) => {
   const isScheduled = !!scheduleId;
   const { action_id: actionId, interval } = item;
@@ -38,7 +36,6 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   const { startDate, endDate, mode } = getPackViewDateWindow({
     isScheduled,
     timestamp,
-    expirationDate,
     lastResultTime: lastResultsData?.lastResultTime,
     interval,
   });

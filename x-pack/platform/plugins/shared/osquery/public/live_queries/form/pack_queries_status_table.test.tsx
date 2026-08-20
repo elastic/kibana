@@ -152,7 +152,6 @@ describe('PackQueriesStatusTable — export filters store', () => {
 
 describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
   const startDate = '2026-08-10T09:00:00.000Z';
-  const expirationDate = '2026-08-10T09:05:00.000Z';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -166,14 +165,13 @@ describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
   it.each([
     ['Discover', () => mockPackViewInDiscoverAction],
     ['Lens', () => mockPackViewInLensAction],
-  ])('forwards the action window to %s for a live query row', (_name, getMock) => {
+  ])('forwards the action timestamp to %s for a live query row', (_name, getMock) => {
     renderWithContext(
       <PackQueriesStatusTable
         actionId="parent-action-id"
         agentIds={['agent-1']}
         data={twoItemData}
         startDate={startDate}
-        expirationDate={expirationDate}
       />
     );
 
@@ -182,7 +180,6 @@ describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
       expect.objectContaining({
         scheduleId: undefined,
         timestamp: startDate,
-        expirationDate,
       })
     );
   });
