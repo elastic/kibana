@@ -22,6 +22,21 @@ export interface CreateRuleVariables {
   enabled?: boolean;
 }
 
+/** Thrown when createRule succeeds but the follow-up disableRule fails. */
+class DisableAfterCreateFailedError extends Error {
+  readonly createdRule: RuleResponse;
+
+  constructor(createdRule: RuleResponse, cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+    this.name = 'DisableAfterCreateFailedError';
+    this.createdRule = createdRule;
+    if (cause instanceof Error) {
+      this.cause = cause;
+      this.stack = cause.stack;
+    }
+  }
+}
+
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
@@ -29,40 +44,68 @@ export const useCreateRule = () => {
   const { basePath } = useService(CoreStart('http'));
   const queryClient = useQueryClient();
 
+  const viewRuleActionProps = (ruleId: string) => {
+    const href = basePath.prepend(paths.ruleDetails(ruleId));
+    return {
+      primary: {
+        children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
+          defaultMessage: 'View rule',
+        }),
+        href,
+        onClick: (event: MouseEvent) => {
+          event.preventDefault();
+          void navigateToUrl(href);
+        },
+        'data-test-subj': 'alertingV2ViewRuleToastLink',
+      },
+    };
+  };
+
+  const invalidateAfterCreate = () => {
+    void invalidateRulesContentList();
+    queryClient.invalidateQueries(ruleKeys.lists());
+    queryClient.invalidateQueries(ruleKeys.allTags());
+  };
+
   return useMutation({
     mutationFn: async ({ payload, enabled = true }: CreateRuleVariables): Promise<RuleResponse> => {
       const rule = await rulesApi.createRule(payload);
       if (enabled) {
         return rule;
       }
-      return rulesApi.disableRule(rule.id);
+      try {
+        return await rulesApi.disableRule(rule.id);
+      } catch (error) {
+        throw new DisableAfterCreateFailedError(rule, error);
+      }
     },
     onSuccess: (data) => {
-      const href = basePath.prepend(paths.ruleDetails(data.id));
       toasts.addSuccess({
         title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.successMessage', {
           defaultMessage: 'Rule "{ruleName}" created successfully',
           values: { ruleName: data.metadata.name },
         }),
-        actionProps: {
-          primary: {
-            children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
-              defaultMessage: 'View rule',
-            }),
-            href,
-            onClick: (event: MouseEvent) => {
-              event.preventDefault();
-              void navigateToUrl(href);
-            },
-            'data-test-subj': 'alertingV2ViewRuleToastLink',
-          },
-        },
+        actionProps: viewRuleActionProps(data.id),
       });
-      void invalidateRulesContentList();
-      queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.allTags());
+      invalidateAfterCreate();
     },
     onError: (error: Error) => {
+      if (error instanceof DisableAfterCreateFailedError) {
+        toasts.addDanger({
+          title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.disableFailedErrorMessage', {
+            defaultMessage: 'Rule created but could not be disabled',
+          }),
+          text: i18n.translate('xpack.alertingV2.hooks.useCreateRule.disableFailedDescription', {
+            defaultMessage:
+              '"{ruleName}" is enabled and will start running. Disable it from the rule details page.',
+            values: { ruleName: error.createdRule.metadata.name },
+          }),
+          actionProps: viewRuleActionProps(error.createdRule.id),
+        });
+        invalidateAfterCreate();
+        return;
+      }
+
       toasts.addError(enrichHttpErrorMessage(error), {
         title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
           defaultMessage: 'Rule not created',

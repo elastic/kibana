@@ -71,6 +71,7 @@ describe('useInstallRuleTemplate', () => {
   const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockAddDanger = jest.fn();
   const mockNavigateToUrl = jest.fn();
   const mockPrepend = jest.fn((path: string) => path);
 
@@ -84,7 +85,9 @@ describe('useInstallRuleTemplate', () => {
         return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
+        return {
+          toasts: { addSuccess: mockAddSuccess, addError: mockAddError, addDanger: mockAddDanger },
+        } as any;
       }
       if (service === 'application') {
         return { navigateToUrl: mockNavigateToUrl } as any;
@@ -138,6 +141,30 @@ describe('useInstallRuleTemplate', () => {
         title: 'Rule not created',
         toastMessage: 'Network down',
       });
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows that the rule was created but could not be disabled', async () => {
+    mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockRejectedValue(new Error('disable failed'));
+    const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
+
+    result.current.mutate(mockTemplate);
+
+    await waitFor(() => {
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Rule created but could not be disabled',
+          actionProps: {
+            primary: expect.objectContaining({
+              children: 'View rule',
+            }),
+          },
+        })
+      );
+      expect(mockAddError).not.toHaveBeenCalled();
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
   });

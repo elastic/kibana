@@ -62,6 +62,7 @@ describe('useCreateRule', () => {
   const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockAddDanger = jest.fn();
   const mockNavigateToUrl = jest.fn();
   const mockPrepend = jest.fn((path: string) => path);
 
@@ -75,7 +76,9 @@ describe('useCreateRule', () => {
         return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
+        return {
+          toasts: { addSuccess: mockAddSuccess, addError: mockAddError, addDanger: mockAddDanger },
+        } as any;
       }
       if (service === 'application') {
         return { navigateToUrl: mockNavigateToUrl } as any;
@@ -141,7 +144,7 @@ describe('useCreateRule', () => {
     );
   });
 
-  it('should not toast when disable fails after create', async () => {
+  it('should show a disable-failed toast with a view-rule action when disable fails after create', async () => {
     const disableError = new Error('disable failed');
     mockCreateRule.mockResolvedValue(mockRuleResponse);
     mockDisableRule.mockRejectedValue(disableError);
@@ -151,12 +154,26 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
-      expect(mockAddError).toHaveBeenCalledWith(disableError, {
-        title: 'Rule not created',
-        toastMessage: 'disable failed',
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'Rule created but could not be disabled',
+        text: '"My CPU Alert" is enabled and will start running. Disable it from the rule details page.',
+        actionProps: {
+          primary: expect.objectContaining({
+            children: 'View rule',
+            href: '/app/management/alertingV2/rules/rule-1',
+            'data-test-subj': 'alertingV2ViewRuleToastLink',
+          }),
+        },
       });
+      expect(mockAddError).not.toHaveBeenCalled();
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
+
+    const toast = mockAddDanger.mock.calls[0][0];
+    const preventDefault = jest.fn();
+    toast.actionProps.primary.onClick({ preventDefault });
+    expect(preventDefault).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {
