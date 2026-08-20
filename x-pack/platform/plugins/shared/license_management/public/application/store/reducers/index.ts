@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { licenseManagement } from './license_management';
+export { getLicenseManagementReducer } from './license_management';

@@ -19,3 +19,5 @@ export const ccr = combineReducers({
 });
 
 export type CcrState = ReturnType<typeof ccr>;
+
+export type CcrAction = Parameters<typeof ccr>[1];

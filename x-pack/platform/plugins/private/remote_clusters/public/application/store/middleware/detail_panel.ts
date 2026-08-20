@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux-v4';
+import { isAction } from 'redux-v4';
+import type { Middleware } from 'redux-v4';
 import { getRouter, getUserHasLeftApp } from '../../services';
 import { CLOSE_DETAIL_PANEL } from '../action_types';
-import type { RemoteClustersAction } from '../types';
+import type { RemoteClustersState } from '../types';
 
-export const detailPanel =
-  () => (next: Dispatch<RemoteClustersAction>) => (action: RemoteClustersAction) => {
-    const { type } = action;
+export const detailPanel: Middleware<{}, RemoteClustersState> = () => (next) => (action) => {
+  if (isAction(action) && action.type === CLOSE_DETAIL_PANEL && !getUserHasLeftApp()) {
+    const { history } = getRouter();
 
-    switch (type) {
-      case CLOSE_DETAIL_PANEL:
-        if (!getUserHasLeftApp()) {
-          const { history } = getRouter();
+    // Persist state to query params by removing deep link.
+    history.replace({
+      search: '',
+    });
+  }
 
-          // Persist state to query params by removing deep link.
-          history.replace({
-            search: '',
-          });
-        }
-
-        break;
-    }
-
-    return next(action);
-  };
+  return next(action);
+};
