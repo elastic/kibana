@@ -13,8 +13,8 @@ import { FavoriteButton } from '@kbn/favorite-button';
 import { i18n } from '@kbn/i18n';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
-import type { AppHeaderFavoriteAction } from '../types';
-import type { ShareAction } from './hooks';
+import type { AppHeaderFavoriteAction, AppHeaderShareAction } from '../types';
+import { asOptionalPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
@@ -63,7 +63,7 @@ const useTitleActionsStyles = () => {
 };
 
 export interface TitleActionsProps {
-  shareAction?: ShareAction;
+  shareAction?: AppHeaderShareAction;
   favorite?: AppHeaderFavoriteAction;
 }
 
@@ -74,15 +74,16 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
     return null;
   }
 
-  const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
-  const hasCustomShareTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
+  const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
+  const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
+  const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
 
   return (
     <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
       {shareAction ? (
         <EuiToolTip
-          content={shareTooltipContent}
-          title={shareAction.tooltipTitle}
+          content={shareTooltipContent ?? SHARE_ARIA_LABEL}
+          title={shareTooltipTitle}
           {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
         >
           <EuiButtonIcon
@@ -93,12 +94,13 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
             isDisabled={shareAction.isDisabled}
-            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${
-              shareAction.testId ?? ''
-            }`.trim()}
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
-              shareAction.onClick(event.currentTarget)
-            }
+            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`}
+            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+              const triggerElement = event.currentTarget;
+              void shareAction.onClick({
+                returnFocus: () => triggerElement.focus(),
+              });
+            }}
           />
         </EuiToolTip>
       ) : null}

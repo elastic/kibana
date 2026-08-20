@@ -21,7 +21,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
+import {
+  AutomationsPanel,
+  DescriptionPanel,
+  KnowledgeIndicatorsPanel,
+  SignalsPanel,
+  SourcesPanel,
+} from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -61,7 +67,7 @@ export const AiIndexDetailPage = () => {
             actions={[
               <EuiButton
                 key="back-to-list"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 href={landingUrl}
                 data-test-subj="contextAiIndexBackToListButton"
               >
@@ -105,7 +111,7 @@ export const AiIndexDetailPage = () => {
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-list"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={landingUrl}
             data-test-subj="contextAiIndexBackToListButton"
           >
@@ -129,12 +135,16 @@ export const AiIndexDetailPage = () => {
           isManaged={hideEditControls}
         />
         <EuiSpacer size="m" />
+        <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
+        <EuiSpacer size="m" />
         <AutomationsPanel
           isLoading={isLoading}
           aiIndex={aiIndex}
           onSaved={refetch}
           isManaged={isManaged}
         />
+        <EuiSpacer size="m" />
+        <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

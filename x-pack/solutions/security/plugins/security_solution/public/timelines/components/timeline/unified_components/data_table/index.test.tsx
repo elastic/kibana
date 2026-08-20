@@ -15,7 +15,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import {
+  mockBrowserFieldsWithId,
+  mockDataViewSpec,
+} from '../../../../../data_view_manager/mocks/timeline_data_view';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -23,6 +26,7 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { PageScope } from '../../../../../data_view_manager/constants';
+import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
@@ -78,10 +82,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-const initialEnrichedColumns = getColumnHeaders(
-  defaultUdtHeaders,
-  mockSourcererScope.browserFields
-);
+const initialEnrichedColumns = getColumnHeaders(defaultUdtHeaders, mockBrowserFieldsWithId);
 
 const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
 const mockAttackTimelineData = [
@@ -109,7 +110,7 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 const SPECIAL_TEST_TIMEOUT = 50000;
 
 const mockDataView = new DataView({
-  spec: mockSourcererScope.sourcererDataView,
+  spec: mockDataViewSpec,
   fieldFormats: fieldFormatsMock,
 });
 
@@ -253,6 +254,10 @@ describe('unified data table', () => {
 
       expect(cellAction.props.metadata).toEqual({ scopeId: TimelineId.test });
       expect(cellAction.props.sourcererScopeId).toEqual(PageScope.timeline);
+      // The details-flyout trigger is required so the "Toggle column in table" action (only
+      // registered on that trigger) is available on Timeline alert/event fields in the new flyout.
+      expect(cellAction.props.triggerId).toEqual(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT);
+      expect(cellAction.props.visibleCellActions).toEqual(6);
     },
     SPECIAL_TEST_TIMEOUT
   );

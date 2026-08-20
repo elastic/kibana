@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { validateDateString } from './utils';
 
 describe('validateDateString', () => {
@@ -25,7 +25,7 @@ describe('validateDateString', () => {
       isBoom: true,
       output: { statusCode: 400 },
       data: {
-        code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+        code: ALERTING_ERROR_CODES.INVALID_DATE_STRING,
         details: { value: 'not-a-date' },
       },
     });
@@ -43,7 +43,7 @@ describe('validateDateString', () => {
       isBoom: true,
       output: { statusCode: 400 },
       data: {
-        code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+        code: ALERTING_ERROR_CODES.INVALID_DATE_STRING,
         details: { value: '2025-06-01' },
       },
     });
@@ -61,7 +61,7 @@ describe('validateDateString', () => {
       isBoom: true,
       output: { statusCode: 400 },
       data: {
-        code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+        code: ALERTING_ERROR_CODES.INVALID_DATE_STRING,
         details: { value: '' },
       },
     });

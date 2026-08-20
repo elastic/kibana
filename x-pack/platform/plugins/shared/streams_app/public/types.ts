@@ -80,7 +80,7 @@ export interface StreamsAppStartDependencies {
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
-  significant_events?: SignificantEventsPublicPluginStart;
+  significantEvents?: SignificantEventsPublicPluginStart;
   significantEventsApp?: SignificantEventsAppPublicStart;
 }
 

@@ -10,7 +10,7 @@ module.exports = {
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server'],
   haste: {
-    throwOnCollision: false,
+    throwOnModuleCollision: false,
   },
   forceExit: true,
 };

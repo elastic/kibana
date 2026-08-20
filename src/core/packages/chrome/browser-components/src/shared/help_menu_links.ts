@@ -96,7 +96,7 @@ const buildNewsfeedLink = (newsfeedHandler?: () => void): ChromeHelpMenuLink[] =
           title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuWhatsNewTitle', {
             defaultMessage: "What's new?",
           }),
-          iconType: 'cheer',
+          iconType: 'popper',
           onClick: newsfeedHandler,
           dataTestSubj: 'helpMenuWhatsNewButton',
         },

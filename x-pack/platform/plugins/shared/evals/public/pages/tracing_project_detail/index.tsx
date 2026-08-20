@@ -298,7 +298,7 @@ export const TracingProjectDetailPage: React.FC = () => {
           />
         ) : !isLoading && (data?.traces ?? []).length === 0 ? (
           <EuiEmptyPrompt
-            iconType="editorStrike"
+            iconType="textStrike"
             title={<h3>{i18n.NO_TRACES_TITLE}</h3>}
             body={<p>{i18n.NO_TRACES_BODY}</p>}
           />

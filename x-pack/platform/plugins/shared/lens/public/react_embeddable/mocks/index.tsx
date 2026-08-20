@@ -114,6 +114,7 @@ function getDefaultLensApiMock() {
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
     usesEsql$: new BehaviorSubject<boolean>(false),
     supportsJsonExport: true,
+    cancelRequests: jest.fn(),
   };
   return LensApiMock;
 }

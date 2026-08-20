@@ -199,7 +199,7 @@ export const createEntityAttachmentDefinition = ({
         return [
           {
             label: OPEN_IN_ENTITY_ANALYTICS_LABEL,
-            icon: 'popout',
+            icon: 'external',
             type: ActionButtonType.SECONDARY,
             handler: () => {
               closeCanvas?.();

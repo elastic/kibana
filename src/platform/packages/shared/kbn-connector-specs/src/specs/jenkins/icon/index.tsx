@@ -11,8 +11,10 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 
-import jenkinsIcon from './jenkins.svg';
+// The official full-color butler, which reads on both themes. The monochrome
+// glyph this replaced is a thin outline that collapses into a smudge at 16px.
+import icon from './jenkins.svg';
 
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={jenkinsIcon} {...props} />;
+  return <EuiIcon type={icon} {...props} />;
 };
