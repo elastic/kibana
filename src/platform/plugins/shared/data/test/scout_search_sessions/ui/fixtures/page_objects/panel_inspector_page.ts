@@ -45,25 +45,18 @@ export class PanelInspectorPage {
     await hoverActions.scrollIntoViewIfNeeded();
     await hoverActions.hover();
 
-    // The inspector action may be directly in the toolbar or behind the "..." overflow menu.
-    const directAction = hoverActions.locator(`[data-test-subj="${OPEN_INSPECTOR_ACTION}"]`);
-    if (!(await directAction.isVisible())) {
-      await hoverActions.locator(`[data-test-subj="${CONTEXT_MENU_TOGGLE}"]`).click();
-      await this.page.testSubj.locator(OPEN_INSPECTOR_ACTION).waitFor({ state: 'visible' });
-    }
-    await this.page.testSubj.locator(OPEN_INSPECTOR_ACTION).click();
+    // Dashboard panels keep the inspector under the "..." overflow menu rather than in the
+    // hover toolbar itself.
+    await hoverActions.getByTestId(CONTEXT_MENU_TOGGLE).click();
+    await this.page.testSubj.click(OPEN_INSPECTOR_ACTION);
     await this.panel.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Switch the open inspector to its Requests view. Panels that expose only that view render
-   * no chooser at all, which is why this tolerates the chooser being absent.
-   */
+  /** Switch the open inspector to its Requests view. */
   async showRequestsView() {
     await this.panel.waitFor({ state: 'visible' });
-    if ((await this.viewChooser.count()) === 0) return;
     await this.viewChooser.click();
-    await this.page.testSubj.locator(INSPECTOR_REQUESTS_VIEW).click();
+    await this.page.testSubj.click(INSPECTOR_REQUESTS_VIEW);
   }
 
   async close() {

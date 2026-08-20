@@ -18,9 +18,7 @@
  * which is not present on Elastic Cloud.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { BackgroundSearchTestFixtures } from '../fixtures';
 import {
   spaceTest,
   deleteAllBackgroundSearches,
@@ -30,36 +28,6 @@ import {
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
 } from '../fixtures';
-
-/**
- * Reopen the flyout until the single background search row reports `complete` — only then does
- * its name become a restore link.
- *
- * The flyout cannot be refreshed in place: it hides the manual refresh button, and the table's
- * auto-refresh is off by default (`refreshInterval: 0s`). Remounting it by reopening is the only
- * way to re-fetch.
- */
-const reopenFlyoutUntilRowIsComplete = async (
-  page: ScoutPage,
-  pageObjects: BackgroundSearchTestFixtures['pageObjects']
-) => {
-  const statusBadge = page.testSubj.locator('sessionManagementStatusLabel');
-
-  await expect
-    .poll(
-      async () => {
-        const status = await statusBadge.getAttribute('data-test-status');
-        if (status === 'complete') return status;
-
-        await pageObjects.backgroundSearch.closeFlyout();
-        await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
-        await pageObjects.backgroundSearch.waitForFlyout();
-        return statusBadge.getAttribute('data-test-status');
-      },
-      { timeout: 60_000, intervals: [2_000] }
-    )
-    .toBe('complete');
-};
 
 const CLASSIC_BACKGROUND_SEARCH_NAME = 'Classic background search';
 const ESQL_BACKGROUND_SEARCH_NAME = 'ESQL background search';
@@ -102,7 +70,7 @@ spaceTest.describe(
 
     spaceTest(
       'restores a background search stored from a classic search into a new tab',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         await spaceTest.step('store a named classic background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'classic' });
           await pageObjects.discover.waitUntilSearchingHasFinished();
@@ -116,9 +84,10 @@ spaceTest.describe(
         });
 
         await spaceTest.step('restoring it opens a tab named after the search', async () => {
-          await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
-          await pageObjects.backgroundSearch.waitForFlyout();
-          await reopenFlyoutUntilRowIsComplete(page, pageObjects);
+          // Completion is polled from the management page rather than the flyout: the flyout
+          // hides the refresh button and does not auto-refresh, so it cannot be re-fetched.
+          await pageObjects.backgroundSearchManagement.goTo();
+          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
           await pageObjects.backgroundSearchManagement.viewRow();
           await pageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -145,9 +114,10 @@ spaceTest.describe(
         });
 
         await spaceTest.step('restoring it opens a tab named after the search', async () => {
-          await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
-          await pageObjects.backgroundSearch.waitForFlyout();
-          await reopenFlyoutUntilRowIsComplete(page, pageObjects);
+          // Completion is polled from the management page rather than the flyout: the flyout
+          // hides the refresh button and does not auto-refresh, so it cannot be re-fetched.
+          await pageObjects.backgroundSearchManagement.goTo();
+          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
           await pageObjects.backgroundSearchManagement.viewRow();
           await pageObjects.discover.waitUntilSearchingHasFinished();
 

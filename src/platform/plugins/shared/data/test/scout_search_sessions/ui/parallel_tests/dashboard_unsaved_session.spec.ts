@@ -51,21 +51,20 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+      await scoutSpace.savedObjects.cleanStandardList();
+
       // The leftover "New Dashboard" draft would be restored by the next openNewDashboard(). It has
       // to be discarded from the listing: while the dashboard is mounted its unsaved-changes
       // manager keeps rewriting the session storage key, so clearing it in place is undone.
       await page.gotoApp('dashboards');
       const discardDraftButton = page.testSubj.locator('discard-unsaved-New-Dashboard');
-      // A test that failed before creating the draft has nothing to discard, and the rest of this
-      // hook still has to run.
+      // Guarded because a test that failed before adding the panel leaves no draft behind.
       if (await discardDraftButton.isVisible()) {
         await discardDraftButton.click();
         await page.testSubj.click('confirmModalConfirmButton');
         await discardDraftButton.waitFor({ state: 'hidden' });
       }
-
-      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
-      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
