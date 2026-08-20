@@ -76,7 +76,6 @@ describe('TableGrid', () => {
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
     onFindSearchTermMatch: jest.fn(),
     searchTerm: '',
-    initialPageSize: 0,
   };
 
   it('renders the grid and displays field names and values', () => {
@@ -123,5 +122,15 @@ describe('TableGrid', () => {
       '[data-test-subj*="unifiedDocViewer_pinControl"]'
     );
     expect(pinControls.length).toBe(0);
+  });
+
+  it('never renders pagination controls, regardless of row count', () => {
+    const manyRows: FieldRow[] = Array.from({ length: 30 }, (_, i) =>
+      buildFieldRow(`field${i}`, `value${i}`)
+    );
+    render(<TableGrid {...defaultProps} rows={manyRows} />);
+    expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
+    expect(screen.getByText('field0')).toBeInTheDocument();
+    expect(screen.getByText('field29')).toBeInTheDocument();
   });
 });
