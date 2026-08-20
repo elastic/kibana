@@ -67,8 +67,7 @@ export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
   id: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  // Bumped when moving inference endpoints from static yaml consts to yamlTemplate values.
-  version: 2,
+  version: 1,
   visibility: VISIBILITY,
   yamlTemplate: ({
     enrichInferenceEndpoint = THREAT_INTEL_DEFAULT_ENRICH_INFERENCE_ENDPOINT,
