@@ -180,6 +180,32 @@ describe('ContextEngineAnalyticsService', () => {
       recovering.stop();
     });
 
+    it.each([['_na_'], ['']])(
+      'treats a "%s" cluster uuid as unavailable and retries',
+      async (invalidUuid) => {
+        jest.useFakeTimers();
+        const fetcher = jest
+          .fn()
+          .mockResolvedValueOnce(invalidUuid)
+          .mockResolvedValue(CLUSTER_UUID);
+        const recovering = new ContextEngineAnalyticsService(
+          analytics as unknown as AnalyticsServiceSetup,
+          logger as unknown as Logger
+        );
+        recovering.setClusterUuidFetcher(fetcher);
+        await jest.advanceTimersByTimeAsync(0);
+
+        recovering.reportKiWrite({ action: 'create', aiIndexId: 'my-index', outcome: 'success' });
+        expect(analytics.reportEvent.mock.calls[0][1].ai_index_id).toBe('unknown');
+
+        await jest.advanceTimersByTimeAsync(1000);
+        recovering.reportKiWrite({ action: 'create', aiIndexId: 'my-index', outcome: 'success' });
+        expect(analytics.reportEvent.mock.calls[1][1].ai_index_id).toBe(hashed('my-index'));
+
+        recovering.stop();
+      }
+    );
+
     it('does not fetch again on reported events', () => {
       const fetcher = jest.fn().mockReturnValue(new Promise<string>(() => {}));
       const pending = new ContextEngineAnalyticsService(

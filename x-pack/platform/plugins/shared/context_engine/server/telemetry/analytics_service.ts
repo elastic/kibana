@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { Subscription } from 'rxjs';
-import { defer, retry, timer } from 'rxjs';
+import { defer, map, retry, timer } from 'rxjs';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ContextEngineWriteOutcome, ReportKiWriteEventParams } from './events';
@@ -52,6 +52,14 @@ export class ContextEngineAnalyticsService {
     this.clusterUuidSubscription?.unsubscribe();
     this.clusterUuidSubscription = defer(fetchClusterUuid)
       .pipe(
+        map((clusterUuid) => {
+          // Elasticsearch reports '_na_' before cluster state recovery; caching
+          // it would salt every deployment identically. Keep retrying instead.
+          if (!clusterUuid || clusterUuid === '_na_') {
+            throw new Error(`cluster uuid is not available yet: '${clusterUuid}'`);
+          }
+          return clusterUuid;
+        }),
         retry({
           delay: (err) => {
             this.logger.debug(
