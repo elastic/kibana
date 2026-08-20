@@ -169,6 +169,7 @@ const openSidebarAndRegisterCallbacks = (
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
     addAttachment: jest.fn(),
+    removeAttachmentById: jest.fn(),
   });
   return { mockUpdateProps };
 };

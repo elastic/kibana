@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_po
 import { DeleteActionPolicyConfirmModal } from '../delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../../pages/list_action_policies_page/components/update_api_key_confirmation_modal';
 import { UserCapabilities } from '../../../services/user_capabilities';
-import { FocusedActionPolicyService } from '../../../services/focused_action_policy_service';
+import { useActionPolicyAutoAttach } from '../../../agent_builder/use_action_policy_auto_attach';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 interface Props {
@@ -35,25 +35,12 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
-  const focusedActionPolicyService = useService(FocusedActionPolicyService);
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
   const { data: policy, isLoading, isError } = useFetchActionPolicy(policyId);
-
-  useEffect(() => {
-    if (!policy) {
-      return;
-    }
-
-    focusedActionPolicyService.setFocusedActionPolicy(policy);
-
-    return () => {
-      focusedActionPolicyService.clearFocusedActionPolicy(policy.id);
-    };
-  }, [policy, focusedActionPolicyService]);
-
+  useActionPolicyAutoAttach(policy);
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {

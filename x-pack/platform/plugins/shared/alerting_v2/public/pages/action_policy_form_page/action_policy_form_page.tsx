@@ -20,7 +20,7 @@ import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alertin
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
@@ -33,7 +33,7 @@ import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
 import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
 import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
-import { FocusedActionPolicyService } from '../../services/focused_action_policy_service';
+import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
@@ -146,20 +146,7 @@ const ActionPolicyFormPageContent = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
-  const focusedActionPolicyService = useService(FocusedActionPolicyService);
-
-  useEffect(() => {
-    if (!initialPolicy) {
-      return;
-    }
-
-    focusedActionPolicyService.setFocusedActionPolicy(initialPolicy);
-
-    return () => {
-      focusedActionPolicyService.clearFocusedActionPolicy(initialPolicy.id);
-    };
-  }, [initialPolicy, focusedActionPolicyService]);
-
+  useActionPolicyAutoAttach(initialPolicy);
   const { toasts } = useService(CoreStart('notifications'));
   const { mutateAsync: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
   const { mutateAsync: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();

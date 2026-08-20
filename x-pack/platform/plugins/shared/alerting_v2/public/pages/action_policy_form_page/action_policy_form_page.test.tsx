@@ -11,15 +11,10 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
+import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
-const mockFocusedActionPolicyService = {
-  setFocusedActionPolicy: jest.fn(),
-  clearFocusedActionPolicy: jest.fn(),
-  getFocusedActionPolicy: jest.fn(),
-  focusedActionPolicy$: { subscribe: jest.fn() },
-};
 
 jest.mock('../../components/action_policy/form/components/matcher_input', () => ({
   MatcherInput: (props: {
@@ -40,15 +35,9 @@ jest.mock('../../application/breadcrumb_context', () => ({
 }));
 
 jest.mock('@kbn/core-di-browser', () => {
-  const { FocusedActionPolicyService: ActualFocusedActionPolicyService } = jest.requireActual(
-    '../../services/focused_action_policy_service'
-  );
   return {
     useService: jest.fn((token: unknown) => {
       const tokenStr = String(token);
-      if (token === ActualFocusedActionPolicyService) {
-        return mockFocusedActionPolicyService;
-      }
       if (tokenStr.includes('application')) {
         return {
           navigateToUrl: mockNavigateToUrl,
@@ -129,6 +118,10 @@ const mockCreateMutateAsync = jest.fn();
 const mockUpdateMutateAsync = jest.fn();
 const mockCreateInlineWorkflows = jest.fn();
 const mockRollbackWorkflows = jest.fn();
+
+jest.mock('../../agent_builder/use_action_policy_auto_attach', () => ({
+  useActionPolicyAutoAttach: jest.fn(),
+}));
 
 jest.mock('../../hooks/use_create_action_policy', () => ({
   useCreateActionPolicy: () => ({
@@ -230,6 +223,8 @@ const renderPage = () => {
     </I18nProvider>
   );
 };
+
+const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
 
 describe('ActionPolicyFormPage', () => {
   beforeEach(() => {
@@ -358,6 +353,12 @@ describe('ActionPolicyFormPage', () => {
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });
+
+    it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
+      renderPage();
+
+      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined);
+    });
   });
 
   describe('edit mode', () => {
@@ -459,8 +460,8 @@ describe('ActionPolicyFormPage', () => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });
 
-    describe('Agent Builder focus', () => {
-      it('sets the focused action policy when the edit page loads', () => {
+    describe('Agent Builder auto-attach', () => {
+      it('passes the loaded action policy to useActionPolicyAutoAttach', () => {
         mockUseFetchActionPolicy.mockReturnValue({
           data: EXISTING_POLICY,
           isLoading: false,
@@ -470,25 +471,7 @@ describe('ActionPolicyFormPage', () => {
 
         renderPage();
 
-        expect(mockFocusedActionPolicyService.setFocusedActionPolicy).toHaveBeenCalledWith(
-          EXISTING_POLICY
-        );
-      });
-
-      it('clears the focused action policy on unmount with the policy id', () => {
-        mockUseFetchActionPolicy.mockReturnValue({
-          data: EXISTING_POLICY,
-          isLoading: false,
-          isError: false,
-          error: null,
-        });
-
-        const { unmount } = renderPage();
-        unmount();
-
-        expect(mockFocusedActionPolicyService.clearFocusedActionPolicy).toHaveBeenCalledWith(
-          'policy-1'
-        );
+        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(EXISTING_POLICY);
       });
     });
   });

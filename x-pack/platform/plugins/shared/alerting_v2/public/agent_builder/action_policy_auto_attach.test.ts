@@ -9,12 +9,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ACTION_POLICY_ATTACHMENT_TYPE, type ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import { FocusedActionPolicyService } from '../services/focused_action_policy_service';
-import { registerActionPolicyAutoAttach, type IdGenerator } from './action_policy_auto_attach';
+import { registerActionPolicyAutoAttach } from './action_policy_auto_attach';
 
 const createPolicy = (overrides?: Partial<ActionPolicyResponse>): ActionPolicyResponse =>
   ({
@@ -37,48 +35,12 @@ const createPolicy = (overrides?: Partial<ActionPolicyResponse>): ActionPolicyRe
     ...overrides,
   } as ActionPolicyResponse);
 
-const createVersionedAttachment = (id: string): VersionedAttachment => ({
-  id,
-  type: ACTION_POLICY_ATTACHMENT_TYPE,
-  versions: [
-    {
-      version: 1,
-      data: createPolicy(),
-      created_at: '2026-01-01T00:00:00.000Z',
-      content_hash: 'hash',
-    },
-  ],
-  current_version: 1,
-});
-
-const createRoundCompleteEvent = (attachmentId: string): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {} as never,
-    attachments: [createVersionedAttachment(attachmentId)],
-  },
-});
-
-const createIdGenerator = (): IdGenerator => {
-  let current = 'draft-id-1';
-
-  return {
-    get current() {
-      return current;
-    },
-    next: jest.fn(() => {
-      current = current === 'draft-id-1' ? 'draft-id-2' : 'draft-id-3';
-      return current;
-    }),
-  };
-};
-
 describe('registerActionPolicyAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
-  let focusedActionPolicyService: FocusedActionPolicyService;
+  let focusedActionPolicy$: BehaviorSubject<ActionPolicyResponse | undefined>;
   let addAttachment: jest.Mock;
-  let draftAttachmentId: IdGenerator;
+  let removeAttachment: jest.Mock;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
@@ -86,9 +48,9 @@ describe('registerActionPolicyAutoAttach', () => {
     jest.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
-    focusedActionPolicyService = new FocusedActionPolicyService();
+    focusedActionPolicy$ = new BehaviorSubject<ActionPolicyResponse | undefined>(undefined);
     addAttachment = jest.fn();
-    draftAttachmentId = createIdGenerator();
+    removeAttachment = jest.fn();
     chatEventsByConversationId = new Map();
 
     const chrome = {
@@ -99,6 +61,7 @@ describe('registerActionPolicyAutoAttach', () => {
 
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -117,8 +80,7 @@ describe('registerActionPolicyAutoAttach', () => {
     cleanup = registerActionPolicyAutoAttach({
       agentBuilder,
       chrome,
-      focusedActionPolicyService,
-      draftAttachmentId,
+      focusedActionPolicy$,
     });
   });
 
@@ -128,14 +90,14 @@ describe('registerActionPolicyAutoAttach', () => {
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy());
+    focusedActionPolicy$.next(createPolicy());
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('attaches the focused action policy to a new conversation draft when chat is open', () => {
+  it('attaches the focused action policy with a deterministic id', () => {
     const policy = createPolicy({
       matcher: null,
       group_by: null,
@@ -143,13 +105,13 @@ describe('registerActionPolicyAutoAttach', () => {
       snoozed_until: null,
     });
 
-    focusedActionPolicyService.setFocusedActionPolicy(policy);
+    focusedActionPolicy$.next(policy);
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
-      id: 'draft-id-1',
+      id: 'action_policy:policy-1',
       type: ACTION_POLICY_ATTACHMENT_TYPE,
       origin: 'policy-1',
       data: expect.objectContaining({
@@ -164,7 +126,7 @@ describe('registerActionPolicyAutoAttach', () => {
   });
 
   it('attaches the focused action policy when an existing conversation becomes active', () => {
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy());
+    focusedActionPolicy$.next(createPolicy());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
@@ -172,24 +134,18 @@ describe('registerActionPolicyAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'policy-1' }));
   });
 
-  it('restages the focused action policy with a new draft id after the conversation is persisted', () => {
+  it('does not restage after the conversation is persisted', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-1' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'policy-1' })
-    );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'policy-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledTimes(1);
   });
 
   it('attaches when navigating to an action policy while an existing conversation is open', () => {
@@ -199,7 +155,7 @@ describe('registerActionPolicyAutoAttach', () => {
 
     expect(addAttachment).not.toHaveBeenCalled();
 
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-1' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'policy-1' }));
@@ -208,72 +164,52 @@ describe('registerActionPolicyAutoAttach', () => {
   it('attaches a different focused action policy after the conversation has started', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-1' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'policy-1' })
+      expect.objectContaining({ id: 'action_policy:policy-1', origin: 'policy-1' })
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'policy-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledTimes(1);
 
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-2' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-2' }));
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(3);
+    expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'policy-2' })
+      expect.objectContaining({ id: 'action_policy:policy-2', origin: 'policy-2' })
     );
   });
 
-  it('updates the same draft attachment when the focused action policy changes before send', () => {
+  it('uses deterministic ids based on action policy id', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-1' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-1' }));
     jest.runOnlyPendingTimers();
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy({ id: 'policy-2' }));
+    focusedActionPolicy$.next(createPolicy({ id: 'policy-2' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'policy-1' })
+      expect.objectContaining({ id: 'action_policy:policy-1', origin: 'policy-1' })
     );
     expect(addAttachment).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'policy-2' })
+      expect.objectContaining({ id: 'action_policy:policy-2', origin: 'policy-2' })
     );
-  });
-
-  it('rotates the draft id after it is created in a completed round', () => {
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy());
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    chatEventsByConversationId.get('conversation-1')?.next(createRoundCompleteEvent('draft-id-1'));
-
-    currentAppId$.next(null);
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-3' }));
   });
 
   it('unsubscribes on cleanup', () => {
     cleanup();
 
-    focusedActionPolicyService.setFocusedActionPolicy(createPolicy());
+    focusedActionPolicy$.next(createPolicy());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
