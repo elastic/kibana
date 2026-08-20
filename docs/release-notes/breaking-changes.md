@@ -43,7 +43,7 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
-**Details**<br> The following Workflows public API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (`workflow_execution_read` sub-feature). Because execution documents include a YAML snapshot of the workflow definition, such callers could recover the full workflow definition without holding the `read` privilege. These routes now require both `read` and `readExecution`:
+**Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
 
 - `GET /api/workflows/executions/{executionId}`
 - `GET /api/workflows/executions/{executionId}/step/{stepExecutionId}`
