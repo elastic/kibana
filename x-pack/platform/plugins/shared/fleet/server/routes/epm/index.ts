@@ -90,6 +90,7 @@ import {
   NamespacePreflightCheckRequestSchema,
   NamespacePreflightCheckResponseSchema,
   DatasetClaimRequestSchema,
+  DatasetClaimResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -1958,7 +1959,26 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       options: { tags: ['oas-tag:Elastic Package Manager (EPM)'] },
     })
     .addVersion(
-      { version: API_VERSIONS.public.v1, validate: { request: DatasetClaimRequestSchema } },
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DatasetClaimRequestSchema,
+          response: {
+            200: {
+              body: () => DatasetClaimResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+            409: {
+              body: genericErrorResponse,
+              description: 'The dataset is already claimed by another package.',
+            },
+          },
+        },
+      },
       datasetClaimsHandler
     );
 };

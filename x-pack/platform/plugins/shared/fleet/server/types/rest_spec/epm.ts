@@ -1341,3 +1341,12 @@ export const DatasetClaimRequestSchema = {
     datasetIsPrefix: schema.maybe(schema.boolean()),
   }),
 };
+
+export const DatasetClaimResponseSchema = schema.object(
+  {
+    baseName: schema.string(),
+    packageName: schema.string(),
+    created: schema.boolean(),
+  },
+  { meta: { id: 'dataset_claim_response' } }
+);

@@ -41841,6 +41841,110 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/epm/dataset_claims:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/dataset_claims</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Assign ownership of a generated dataset name to a package, permitting an install that would otherwise be rejected as a takeover. Only available to superusers.<br/><br/>[Required authorization] Route required privileges: superuser.
+      operationId: post-fleet-epm-dataset-claims
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                baseName:
+                  maxLength: 256
+                  type: string
+                datasetIsPrefix:
+                  type: boolean
+                installSource:
+                  enum:
+                    - registry
+                    - upload
+                    - bundled
+                    - custom
+                  type: string
+                packageName:
+                  maxLength: 256
+                  type: string
+                packageVersion:
+                  maxLength: 64
+                  type: string
+              required:
+                - baseName
+                - packageName
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_dataset_claim_response'
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+        '409':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: The dataset is already claimed by another package.
+      summary: Adopt a dataset for a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/epm/packages:
     get:
       description: |-
@@ -41942,7 +42046,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: superuser.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -87135,6 +87239,21 @@ components:
           required:
             - view_type
             - query
+    Kibana_HTTP_APIs_dataset_claim_response:
+      additionalProperties: false
+      properties:
+        baseName:
+          type: string
+        created:
+          type: boolean
+        packageName:
+          type: string
+      required:
+        - baseName
+        - packageName
+        - created
+      title: dataset_claim_response
+      type: object
     Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting:
       additionalProperties: false
       properties:

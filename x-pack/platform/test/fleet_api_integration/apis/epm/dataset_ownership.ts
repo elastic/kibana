@@ -54,15 +54,15 @@ export default function (providerContext: FtrProviderContext) {
     return settings[writeIndex]?.settings?.index?.default_pipeline;
   };
 
-  const uploadPackage = (pkg = PKG) => {
+  const uploadPackage = async (pkg = PKG, expectedStatus = 200) => {
     // Upload is rate limited to one attempt per 10s; wait like install_by_upload.ts.
-    return new Promise((resolve) => setTimeout(resolve, 10000)).then(() =>
-      supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(zipFixtureFor(pkg))
-    );
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    return await supertest
+      .post(`/api/fleet/epm/packages`)
+      .set('kbn-xsrf', 'xxxx')
+      .type('application/zip')
+      .send(zipFixtureFor(pkg))
+      .expect(expectedStatus);
   };
 
   const adopt = (packageName: string) =>
@@ -102,21 +102,21 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('rejects an install that would take over a foreign data stream', async () => {
-      const response = await uploadPackage().expect(409);
+      const response = await uploadPackage(PKG, 409);
 
       expect(response.body.message).to.contain(FOREIGN_STREAM);
     });
 
     it('leaves the existing stream pipeline unchanged after a rejected install', async () => {
       const before = await writeIndexPipelineOf(FOREIGN_STREAM);
-      await uploadPackage().expect(409);
+      await uploadPackage(PKG, 409);
 
       expect(await writeIndexPipelineOf(FOREIGN_STREAM)).to.eql(before);
     });
 
     it('does not change the existing stream after a forced rollover', async () => {
       const before = await writeIndexPipelineOf(FOREIGN_STREAM);
-      await uploadPackage().expect(409);
+      await uploadPackage(PKG, 409);
       await es.indices.rollover({ alias: FOREIGN_STREAM });
 
       // The component template carries default_pipeline too, so a rollover is the real proof that
@@ -125,24 +125,26 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('leaves no residue after a rejected install', async () => {
-      await uploadPackage().expect(409);
+      await uploadPackage(PKG, 409);
 
-      await es.transport
-        .request({ method: 'GET', path: `/_index_template/${CLAIM}` }, { ignore: [404] })
-        .then((res: { statusCode?: number }) => expect(res.statusCode).to.eql(404));
+      const templateRes = await es.transport.request(
+        { method: 'GET', path: `/_index_template/${CLAIM}` },
+        { ignore: [404], meta: true }
+      );
+      expect(templateRes.statusCode).to.eql(404);
       await supertest.get(`/api/fleet/epm/packages/${PKG.name}/${PKG.version}`).expect(404);
     });
 
     it('allows the install after the dataset is adopted', async () => {
       await adopt(PKG.name).expect(200);
 
-      await uploadPackage().expect(200);
+      await uploadPackage();
     });
 
     it('restores the original pipeline when the adopting package is uninstalled', async () => {
       const before = await writeIndexPipelineOf(FOREIGN_STREAM);
       await adopt(PKG.name).expect(200);
-      await uploadPackage().expect(200);
+      await uploadPackage();
       expect(await writeIndexPipelineOf(FOREIGN_STREAM)).to.not.eql(before);
 
       await supertest
@@ -162,17 +164,17 @@ export default function (providerContext: FtrProviderContext) {
     it('rejects a second package claiming the same dataset', async () => {
       await deleteForeignStream();
       await adopt(PKG.name).expect(200);
-      await uploadPackage().expect(200);
+      await uploadPackage();
 
-      await uploadPackage(TWIN).expect(409);
+      await uploadPackage(TWIN, 409);
     });
 
     it('re-resolves ownership on a resumed install', async () => {
       // The first attempt fails on the ownership conflict, so retryFromLastState has nothing to
       // resume past. The retry must be rejected for the same reason rather than proceeding.
-      await uploadPackage().expect(409);
+      await uploadPackage(PKG, 409);
 
-      await uploadPackage().expect(409);
+      await uploadPackage(PKG, 409);
     });
 
     it('does not let a non-superuser adopt a dataset', async () => {
