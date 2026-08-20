@@ -109,14 +109,6 @@ components:
           enum: [skill, workflow]
         summary:
           type: string
-        gated:
-          type: boolean
-        enabled:
-          type: boolean
-        lastRun:
-          type: string
-          nullable: true
-          description: ISO 8601 timestamp of last invocation, or null
 
     WatchRecentRunStep:
       type: object

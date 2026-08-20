@@ -139,11 +139,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-<<<<<<< HEAD
-  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
   `${internalNamespaces.security}.pnd-type`,
-=======
->>>>>>> de7777e05c9441ad5daa275f6c399960f22090fc
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];

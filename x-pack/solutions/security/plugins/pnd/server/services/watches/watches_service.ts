@@ -22,6 +22,8 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   WATCH_TAG,
   compareWatchesForDisplay,
@@ -40,24 +42,10 @@ import {
 } from './project_watch';
 import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
-import {
-  getWatch as getStoredWatch,
-  getWatchSettings as getStoredWatchSettings,
-  listSkills as listStoredSkills,
-  listWatches as listStoredWatches,
-  listWorkers as listStoredWorkers,
-  setSkillEnabled as setStoredSkillEnabled,
-  setWatchApprovalGate,
-  setWatchAutonomy,
-  setWatchEnabled as setStoredWatchEnabled,
-  setWatchScopeRouting,
-  setWatchSkillEnabled,
-  setWatchTriggers,
-  setWatchWorkerEnabled,
-  setWorkerEnabled as setStoredWorkerEnabled,
-  type WatchScopeRoutingPatch,
-  type WatchTriggersPatch,
-} from '../watch_store/watch_store';
+import { buildAgentLookup } from './build_agent_lookup';
+import { MockWatchStore } from '../watch_store/watch_store_mock';
+import { WatchStore } from '../watch_store/watch_store';
+import type { IWatchStore, WatchScopeRoutingPatch, WatchTriggersPatch } from '../watch_store/types';
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
 
@@ -91,12 +79,27 @@ export type WatchUpdateResult =
   | { outcome: 'unavailable' };
 
 export class WatchesService {
+  private readonly store: IWatchStore;
+  private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
+
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
     private readonly logger: Logger,
     private readonly useMockData: boolean,
-    private readonly installationReady: Promise<void> = Promise.resolve()
-  ) {}
+    private readonly installationReady: Promise<void> = Promise.resolve(),
+    private readonly options: {
+      /** Lazy ensure of the shared thin agent for the caller's space. */
+      ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      agentBuilder?: AgentBuilderPluginStart;
+      /** Code-registered agent types owned by this plugin, used for skill base resolution. */
+      agentTypes?: readonly AgentTypeDefinition[];
+    } = {}
+  ) {
+    this.agentTypeMap = new Map((options.agentTypes ?? []).map((t) => [t.id, t]));
+    this.store = useMockData
+      ? new MockWatchStore()
+      : new WatchStore(management!, logger, options.agentBuilder, options.agentTypes);
+  }
 
   private requireManagement(): WatchWorkflowsManagementClient {
     if (!this.management) {
@@ -105,57 +108,52 @@ export class WatchesService {
     return this.management;
   }
 
+  private async prepareSpace(spaceId: string): Promise<void> {
+    await this.installationReady;
+    await this.options.ensureAgentForSpace?.(spaceId);
+  }
+
+  private async buildAgentLookup(request: KibanaRequest) {
+    if (!this.options.agentBuilder) return undefined;
+    return buildAgentLookup(this.options.agentBuilder, this.agentTypeMap, request, this.logger);
+  }
+
   /* ---------------------------------------------------------------------- */
   /* Reads                                                                  */
   /* ---------------------------------------------------------------------- */
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
+    await this.prepareSpace(spaceId);
+
     if (this.useMockData) {
-      const watches = await this.withWorkflowEnablement(listStoredWatches(), spaceId);
+      const watches = await this.withWorkflowEnablement(this.store.listWatches(), spaceId);
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
     }
 
-    await this.installationReady;
-    const management = this.requireManagement();
-    // Managed catalog watches opt into `selector:watch` visibility; custom
-    // unmanaged watches still match via tag `watch` under managedFilter `all`.
-    // Default getWorkflows managedFilter is 'unmanaged' — must request 'all'.
-    const result = await management.getWorkflows(
-      {
-        tags: [WATCH_TAG],
-        size: 100,
-        page: 1,
-        enabled: [true, false],
-        managedFilter: 'all',
-        visibilityContext: [WATCH_VISIBILITY_CONTEXT],
-      },
-      spaceId,
-      { includeExecutionHistory: true, includeManagedExecutionHistory: true }
-    );
-
-    const watches = result.results
-      .filter((item) => {
-        const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
-        return tags.includes(WATCH_TAG);
-      })
-      .map(projectWorkflowToWatch)
-      .sort(compareWatchesForDisplay);
-
-    return ListWatchesResponse.parse({ watches });
+    await this.store.ensurePopulated(request, spaceId);
+    return ListWatchesResponse.parse({ watches: this.store.listWatches() });
   }
 
-  async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
+  async get(
+    watchId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetWatchResponse | undefined> {
+    await this.prepareSpace(spaceId);
+
     if (this.useMockData) {
-      const stored = getStoredWatch(watchId);
+      const stored = this.store.getWatch(watchId);
       if (!stored) {
         return undefined;
       }
       const [watch] = await this.withWorkflowEnablement([stored], spaceId);
-      return GetWatchResponse.parse({ watch, settings: getStoredWatchSettings(watchId) });
+      return GetWatchResponse.parse({ watch, settings: this.store.getWatchSettings(watchId) });
     }
 
-    await this.installationReady;
+    await this.store.ensurePopulated(request, spaceId);
+
     const management = this.requireManagement();
+    const agents = await this.buildAgentLookup(request);
     const detail = await management.getWorkflow(watchId, spaceId);
     if (!detail) {
       return undefined;
@@ -195,7 +193,10 @@ export class WatchesService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const watch = projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags });
+      const watch = projectWorkflowToWatch(
+        { ...listItem, history, tags: detail.definition?.tags },
+        agents
+      );
 
       // Attach step summaries for the latest few runs
       const enrichedRuns = await Promise.all(
@@ -219,20 +220,21 @@ export class WatchesService {
         })
       );
 
-      return GetWatchResponse.parse({
-        watch: {
-          ...watch,
-          // Enrich the latest 5 with step detail; keep any additional projected runs.
-          recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
-        },
-      });
+      const enrichedWatch = {
+        ...watch,
+        recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
+      };
+      const settings = this.store.getWatchSettings(watchId) ?? { watchId, autonomy: 'manual' };
+      return GetWatchResponse.parse({ watch: enrichedWatch, settings });
     } catch (error) {
       this.logger.debug(
         `Failed to load executions for watch ${watchId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
+      const fallbackWatch = projectWorkflowToWatch(listItem, agents);
+      const settings = this.store.getWatchSettings(watchId) ?? { watchId, autonomy: 'manual' };
+      return GetWatchResponse.parse({ watch: fallbackWatch, settings });
     }
   }
 
@@ -299,29 +301,29 @@ export class WatchesService {
     // reach it: a body carrying both would otherwise disable the workflow and then return 400 for the
     // invalid setting, telling the caller that nothing had changed.
     if (touchesSettings) {
-      if (!getStoredWatchSettings(watchId)) {
+      if (!this.store.getWatchSettings(watchId)) {
         return { outcome: 'not-found' };
       }
 
-      if (autonomyLevel != null && !setWatchAutonomy(watchId, autonomyLevel)) {
+      if (autonomyLevel != null && !this.store.setWatchAutonomy(watchId, autonomyLevel)) {
         return { outcome: 'rejected', what: 'autonomy level' };
       }
-      if (triggers && !setWatchTriggers(watchId, triggers)) {
+      if (triggers && !this.store.setWatchTriggers(watchId, triggers)) {
         return { outcome: 'rejected', what: 'trigger settings' };
       }
-      if (scopeRouting && !setWatchScopeRouting(watchId, scopeRouting)) {
+      if (scopeRouting && !this.store.setWatchScopeRouting(watchId, scopeRouting)) {
         return { outcome: 'rejected', what: 'scope and routing settings' };
       }
       if (approvalGate) {
         const { gateId, ...gatePatch } = approvalGate;
-        if (!setWatchApprovalGate(watchId, gateId, gatePatch)) {
+        if (!this.store.setWatchApprovalGate(watchId, gateId, gatePatch)) {
           return { outcome: 'rejected', what: `approval gate "${gateId}"` };
         }
       }
-      if (worker && !setWatchWorkerEnabled(watchId, worker.workerId, worker.enabled)) {
+      if (worker && !this.store.setWatchWorkerEnabled(watchId, worker.workerId, worker.enabled)) {
         return { outcome: 'rejected', what: `worker "${worker.workerId}"` };
       }
-      if (skill && !setWatchSkillEnabled(watchId, skill.skillId, skill.enabled)) {
+      if (skill && !this.store.setWatchSkillEnabled(watchId, skill.skillId, skill.enabled)) {
         return { outcome: 'rejected', what: `skill "${skill.skillId}"` };
       }
     }
@@ -333,7 +335,7 @@ export class WatchesService {
       }
     }
 
-    const response = await this.get(watchId, spaceId);
+    const response = await this.get(watchId, spaceId, request);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
@@ -347,12 +349,12 @@ export class WatchesService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<'applied' | 'not-found'> {
-    if (this.useMockData && !getStoredWatch(watchId)) {
+    if (this.useMockData && !this.store.getWatch(watchId)) {
       return 'not-found';
     }
 
     if (!this.management) {
-      return setStoredWatchEnabled(watchId, enabled) ? 'applied' : 'not-found';
+      return this.store.setWatchEnabled(watchId, enabled) ? 'applied' : 'not-found';
     }
 
     try {
@@ -370,7 +372,7 @@ export class WatchesService {
     }
 
     // Keep the store in step so a mock-mode read agrees even if the workflow write failed.
-    setStoredWatchEnabled(watchId, enabled);
+    this.store.setWatchEnabled(watchId, enabled);
     return 'applied';
   }
 
@@ -379,19 +381,24 @@ export class WatchesService {
   /* ---------------------------------------------------------------------- */
 
   listWorkers(): WatchWorker[] {
-    return listStoredWorkers();
+    return this.store.listWorkers();
   }
 
-  listSkills(): WatchSkill[] {
-    return listStoredSkills();
+  async listSkills(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
+    if (this.useMockData) {
+      return this.store.listSkills();
+    }
+    await this.prepareSpace(spaceId);
+    await this.store.ensurePopulated(request, spaceId);
+    return this.store.listSkills();
   }
 
   setWorkerEnabled(workerId: string, enabled: boolean): WatchWorker | undefined {
-    return setStoredWorkerEnabled(workerId, enabled);
+    return this.store.setWorkerEnabled(workerId, enabled);
   }
 
   setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
-    return setStoredSkillEnabled(skillId, enabled);
+    return this.store.setSkillEnabled(skillId, enabled);
   }
 
   /* ---------------------------------------------------------------------- */
@@ -403,6 +410,7 @@ export class WatchesService {
     spaceId: string,
     body: CreateWatchRequest
   ): Promise<GetWatchResponse> {
+    await this.prepareSpace(spaceId);
     const management = this.requireManagement();
     const name = body.name.trim() || 'Custom watch';
     const description =
@@ -410,7 +418,7 @@ export class WatchesService {
       'Custom watch scaffold — tagged watch so it appears in the Watches catalog.';
     const yaml = buildCustomWatchYaml(name, description);
     const created = await management.createWorkflow({ yaml }, spaceId, request);
-    const projected = await this.get(created.id, spaceId);
+    const projected = await this.get(created.id, spaceId, request);
     if (!projected) {
       throw new Error(`Created watch "${created.id}" but failed to reload it`);
     }

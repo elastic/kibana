@@ -244,8 +244,6 @@ describe('project watch', () => {
               id: 'my-skill',
               name: 'Override Name',
               summary: 'Override description',
-              gated: true,
-              enabled: false,
             },
           ],
         };
@@ -256,8 +254,6 @@ describe('project watch', () => {
         );
         expect(callable.name).toBe('Override Name');
         expect(callable.summary).toBe('Override description');
-        expect(callable.gated).toBe(true);
-        expect(callable.enabled).toBe(false);
       });
 
       it('falls back to humanized id and empty summary when skill is not in registry', () => {

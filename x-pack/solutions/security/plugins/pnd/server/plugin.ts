@@ -43,7 +43,6 @@ export class PndPlugin
   private readonly config: PndConfig;
   private spaces?: PndStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  private agentBuilder?: PndStartDependencies['agentBuilder'];
 
   /**
    * Created during `start` once Workflows management is known. Routes resolve it lazily, so it is
@@ -113,7 +112,6 @@ export class PndPlugin
 
   start(_core: CoreStart, plugins: PndStartDependencies): PndPluginStart {
     this.spaces = plugins.spaces;
-    this.agentBuilder = plugins.agentBuilder;
 
     if (!this.config.enabled) {
       return {};
@@ -139,7 +137,6 @@ export class PndPlugin
       });
     }
 
-
     // Built whether or not Workflows management is available: the watch store backs settings either
     // way, and `enabled` falls back to the store when there is no workflow to write to.
     this.watchesService = new WatchesService(
@@ -148,7 +145,15 @@ export class PndPlugin
         : undefined,
       this.logger,
       this.config.ui.useMockData,
-      installationReady
+      installationReady,
+      {
+        ensureAgentForSpace: plugins.agentBuilder
+          ? (spaceId) =>
+              ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+          : undefined,
+        agentBuilder: plugins.agentBuilder,
+        agentTypes: [agentType],
+      }
     );
 
     return {};

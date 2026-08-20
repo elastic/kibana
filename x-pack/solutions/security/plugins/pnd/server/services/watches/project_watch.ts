@@ -259,18 +259,6 @@ export const projectCallablesFromDefinition = (
       name: asString(c.name, id),
       kind: c.kind === 'workflow' ? 'workflow' : 'skill',
       summary: asString(c.summary, ''),
-      gated: asBoolean(c.gated, false),
-      // This is reading from the "callables" constant on the workflow but
-      // if we add the ability to enable/disable, we'll have to read that state
-      // from persistence
-      enabled: asBoolean(c.enabled, true),
-
-      // What does this mean for a skill? We're projecting the list of skills bound
-      // to the workflow but not all skills are used in every ai.agent step even if
-      // they are available. Do we have this information now (which skills are called
-      // for an ai.agent) or is this something we'll be able to get from the investigation/
-      // conversation trail?
-      lastRun: typeof c.lastRun === 'string' ? c.lastRun : null,
     });
   }
 
@@ -285,9 +273,6 @@ export const projectCallablesFromDefinition = (
       name: override?.name ?? skillDef?.name ?? humanizeId(id),
       kind: 'skill',
       summary: override?.summary ?? skillDef?.description ?? '',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
-      lastRun: override?.lastRun ?? null,
     });
   }
 
@@ -298,9 +283,6 @@ export const projectCallablesFromDefinition = (
       name: override?.name ?? humanizeId(id.replace(/^system-/, '')),
       kind: 'workflow',
       summary: override?.summary ?? 'Nested workflow',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
-      lastRun: override?.lastRun ?? null,
     });
   }
 
@@ -350,7 +332,6 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto, agents?: Agent
     scopeSummary: asString(policy?.scopeSummary, '—'),
     scopes: projectScopes(policy),
     callables: projectCallablesFromDefinition(definition, policy, agents),
-    autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.
       runs7d: null,

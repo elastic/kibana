@@ -103,12 +103,6 @@ export const WatchCallableRef = lazySchema(() =>
     name: z.string(),
     kind: z.enum(['skill', 'workflow']),
     summary: z.string(),
-    gated: z.boolean(),
-    enabled: z.boolean(),
-    /**
-     * ISO 8601 timestamp of last invocation, or null
-     */
-    lastRun: z.string().nullable(),
   })
 );
 export type WatchCallableRef = z.infer<typeof WatchCallableRef>;

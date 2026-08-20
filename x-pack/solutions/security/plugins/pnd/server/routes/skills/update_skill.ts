@@ -15,7 +15,6 @@ import {
 } from '@kbn/pnd-common';
 import { getWatchWriteRoutePrivileges } from '../watches/watch_route_security';
 import type { RouteDependencies } from '../register_routes';
-import { storeUnavailableResponse } from '../store_route_guard';
 
 const UpdateSkillRequestParams = z.object({
   skillId: z.string().min(1).max(128),
@@ -29,7 +28,6 @@ const UpdateSkillRequestBody = z.object({
 export const registerUpdateSkillRoute = ({
   router,
   logger,
-  config,
   getWatchesService,
 }: RouteDependencies) => {
   router.versioned
@@ -55,10 +53,6 @@ export const registerUpdateSkillRoute = ({
       },
       async (_context, request, response) => {
         try {
-          if (!config.ui.useMockData) {
-            return storeUnavailableResponse(response);
-          }
-
           const { skillId } = request.params;
           const skill = getWatchesService().setSkillEnabled(skillId, request.body.enabled);
           if (!skill) {

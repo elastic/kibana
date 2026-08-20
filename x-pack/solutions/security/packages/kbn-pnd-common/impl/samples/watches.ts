@@ -82,9 +82,6 @@ const floorWatchBase: Watch = {
       name: 'Alert analysis',
       kind: 'skill',
       summary: 'On alert · classifies FP / TP / inconclusive',
-      gated: false,
-      enabled: true,
-      lastRun: '2026-07-20T14:02:00Z',
     },
   ],
   metrics: {

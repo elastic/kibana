@@ -5,217 +5,257 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID, WATCHES_SEED, WATCH_SETTINGS_SEED } from '@kbn/pnd-common';
-import {
-  getWatch,
-  getWatchSettings,
-  listSkills,
-  listWatches,
-  listWorkers,
-  resetWatchStore,
-  setSkillEnabled,
-  setWatchApprovalGate,
-  setWatchAutonomy,
-  setWatchEnabled,
-  setWatchScopeRouting,
-  setWatchSkillEnabled,
-  setWatchTriggers,
-  setWatchWorkerEnabled,
-  setWorkerEnabled,
-} from './watch_store';
+import { WATCH_TAG } from '@kbn/pnd-common';
+import type { KibanaRequest } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { WatchStore } from './watch_store';
+import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 
-const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
+describe('WatchStore', () => {
+  let liveStore: WatchStore;
+  let getWorkflows: jest.Mock;
+  const request = {} as KibanaRequest;
+  const SPACE = 'default';
 
-describe('watch store', () => {
+  const makeWorkflowDto = (id: string, options: { agentId?: string; tags?: string[] } = {}) => ({
+    id,
+    name: `Watch ${id}`,
+    enabled: true,
+    managed: true,
+    managedBy: 'pnd',
+    definition: {
+      tags: options.tags ?? [WATCH_TAG],
+      ...(options.agentId && {
+        steps: [{ name: 'run_agent', type: 'ai.agent', 'agent-id': options.agentId, with: {} }],
+      }),
+    },
+  });
+
+  const makeAgentBuilder = (agentId: string, skillIds: string[]): AgentBuilderPluginStart =>
+    ({
+      agents: {
+        getRegistry: jest.fn().mockResolvedValue({
+          list: jest
+            .fn()
+            .mockResolvedValue([{ id: agentId, configuration: { skill_ids: skillIds } }]),
+        }),
+      },
+      skills: {
+        getRegistry: jest.fn().mockResolvedValue({ list: jest.fn().mockResolvedValue([]) }),
+      },
+    } as unknown as AgentBuilderPluginStart);
+
   beforeEach(() => {
-    resetWatchStore();
+    getWorkflows = jest.fn().mockResolvedValue({ results: [] });
+    const management = {
+      getWorkflows,
+    } as unknown as WatchWorkflowsManagementClient;
+    liveStore = new WatchStore(management, loggingSystemMock.createLogger());
   });
 
-  describe('seeding', () => {
-    it('stamps relative seed offsets as absolute timestamps', () => {
-      const worker = listWorkers().find(({ id }) => id === 'threat-intel-enrichment');
-      // Seeded at 4 minutes ago, so it must parse as a date close to but before now.
-      expect(Date.parse(worker!.lastRun!)).toBeLessThanOrEqual(Date.now());
-      expect(Date.parse(worker!.lastRun!)).toBeGreaterThan(Date.now() - 10 * 60 * 1000);
+  describe('initial state (before refresh)', () => {
+    it('listWatches returns empty', () => {
+      expect(liveStore.listWatches()).toEqual([]);
     });
 
-    it('leaves lastRun null when the seed has never run', () => {
-      expect(listSkills().find(({ id }) => id === 'virustotal-lookup')?.lastRun).toBeNull();
-      expect(listWorkers().find(({ id }) => id === 'host-context')?.lastRun).toBeNull();
+    it('listSkills returns empty', () => {
+      expect(liveStore.listSkills()).toEqual([]);
     });
 
-    it('does not mutate the shared seed constants', () => {
-      setWatchEnabled(FLOOR, false);
-      setWorkerEnabled('threat-intel-enrichment', false);
-
-      expect(WATCHES_SEED.find(({ id }) => id === FLOOR)?.enabled).toBe(true);
-      resetWatchStore();
-      expect(getWatch(FLOOR)?.enabled).toBe(true);
+    it('getWatch returns undefined', () => {
+      expect(liveStore.getWatch('any')).toBeUndefined();
     });
 
-    it('reseeds after a reset', () => {
-      setWatchEnabled(FLOOR, false);
-      expect(getWatch(FLOOR)?.enabled).toBe(false);
+    it('getWatchSettings returns undefined', () => {
+      expect(liveStore.getWatchSettings('any')).toBeUndefined();
+    });
 
-      resetWatchStore();
-      expect(getWatch(FLOOR)?.enabled).toBe(true);
+    it('listWorkers returns empty', () => {
+      expect(liveStore.listWorkers()).toEqual([]);
     });
   });
 
-  describe('watches', () => {
-    it('lists every seeded watch', () => {
-      expect(listWatches()).toHaveLength(Object.keys(WATCH_SETTINGS_SEED).length);
+  describe('refresh()', () => {
+    it('calls getWorkflows with the watch tag and all-managed filter', async () => {
+      await liveStore.refresh(request, SPACE);
+      expect(getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ tags: [WATCH_TAG], managedFilter: 'all' }),
+        SPACE,
+        expect.anything()
+      );
     });
 
-    it('toggles enabled and reflects it in subsequent reads', () => {
-      expect(setWatchEnabled(FLOOR, false)).toBeDefined();
-      expect(getWatch(FLOOR)?.enabled).toBe(false);
-      expect(listWatches().find(({ id }) => id === FLOOR)?.enabled).toBe(false);
+    it('populates watches from results tagged with WATCH_TAG', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+      expect(liveStore.listWatches()).toHaveLength(1);
+      expect(liveStore.getWatch('watch-a')).toBeDefined();
+    });
+
+    it('excludes results that do not carry the watch tag', async () => {
+      getWorkflows.mockResolvedValueOnce({
+        results: [makeWorkflowDto('watch-a', { tags: [] })],
+      });
+      await liveStore.refresh(request, SPACE);
+      expect(liveStore.listWatches()).toHaveLength(0);
+    });
+
+    it('initializes default settings for every fetched watch', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+      expect(liveStore.getWatchSettings('watch-a')).toMatchObject({
+        watchId: 'watch-a',
+        autonomy: 'manual',
+      });
+    });
+
+    it('returns the projected watch list', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      const watches = await liveStore.refresh(request, SPACE);
+      expect(watches).toHaveLength(1);
+      expect(watches[0].id).toBe('watch-a');
+    });
+
+    it('preserves existing per-watch settings across refreshes', async () => {
+      getWorkflows.mockResolvedValue({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+
+      const settingsBefore = liveStore.getWatchSettings('watch-a')!;
+      settingsBefore.autonomy = 'supervised';
+
+      await liveStore.refresh(request, SPACE);
+      expect(liveStore.getWatchSettings('watch-a')).toBe(settingsBefore);
+      expect(liveStore.getWatchSettings('watch-a')?.autonomy).toBe('supervised');
+    });
+  });
+
+  describe('ensurePopulated()', () => {
+    it('calls refresh when the store has no skills', async () => {
+      await liveStore.ensurePopulated(request, SPACE);
+      expect(getWorkflows).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls refresh again when skills remain empty after the first fetch', async () => {
+      // Watches without skill callables keep listSkills() at [], so ensurePopulated always
+      // re-fetches.  The guard only prevents repeated fetches when skills were actually built.
+      await liveStore.ensurePopulated(request, SPACE);
+      await liveStore.ensurePopulated(request, SPACE);
+      expect(getWorkflows).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('setWatchEnabled()', () => {
+    it('updates the enabled flag and returns the mutated watch', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+
+      const result = liveStore.setWatchEnabled('watch-a', false);
+      expect(result).toBeDefined();
+      expect(liveStore.getWatch('watch-a')?.enabled).toBe(false);
     });
 
     it('returns undefined for an unknown watch', () => {
-      expect(setWatchEnabled('nope', false)).toBeUndefined();
-      expect(getWatch('nope')).toBeUndefined();
+      expect(liveStore.setWatchEnabled('nope', false)).toBeUndefined();
     });
   });
 
-  describe('autonomy', () => {
-    it('accepts any level on the shared scale', () => {
-      expect(setWatchAutonomy(FLOOR, 'supervised')).toBeDefined();
-      expect(getWatchSettings(FLOOR)?.autonomy).toBe('supervised');
+  describe('settings setters — not supported in live mode', () => {
+    it('setWatchAutonomy returns undefined', () => {
+      expect(liveStore.setWatchAutonomy('any', 'assisted')).toBeUndefined();
     });
 
-    it('returns undefined for a watch with no settings', () => {
-      expect(setWatchAutonomy('nope', 'supervised')).toBeUndefined();
-    });
-  });
-
-  describe('triggers', () => {
-    it('accepts a schedule the watch offers', () => {
-      expect(setWatchTriggers(FLOOR, { scheduleId: 'hourly' })).toBeDefined();
-      expect(getWatchSettings(FLOOR)?.triggers?.schedule.selectedId).toBe('hourly');
+    it('setWatchTriggers returns undefined', () => {
+      expect(liveStore.setWatchTriggers('any', {})).toBeUndefined();
     });
 
-    it('rejects an unknown schedule without touching the stored value', () => {
-      const before = getWatchSettings(FLOOR)?.triggers?.schedule.selectedId;
-
-      expect(setWatchTriggers(FLOOR, { scheduleId: 'every-century' })).toBeUndefined();
-      expect(getWatchSettings(FLOOR)?.triggers?.schedule.selectedId).toBe(before);
+    it('setWatchScopeRouting returns undefined', () => {
+      expect(liveStore.setWatchScopeRouting('any', {})).toBeUndefined();
     });
 
-    it('rejects a patch for a watch with no triggers section', () => {
-      const settings = getWatchSettings(FLOOR)!;
-      delete settings.triggers;
+    it('setWatchApprovalGate returns undefined', () => {
+      expect(liveStore.setWatchApprovalGate('any', 'gate', {})).toBeUndefined();
+    });
 
-      expect(setWatchTriggers(FLOOR, { allowManualRun: false })).toBeUndefined();
+    it('setWatchWorkerEnabled returns undefined', () => {
+      expect(liveStore.setWatchWorkerEnabled('any', 'worker', true)).toBeUndefined();
+    });
+
+    it('setWorkerEnabled returns undefined', () => {
+      expect(liveStore.setWorkerEnabled('any', true)).toBeUndefined();
     });
   });
 
-  describe('scope and routing', () => {
-    it('accepts offered ids across several selects at once', () => {
-      expect(
-        setWatchScopeRouting(FLOOR, { dataSources: 'alerts-only', assigneeQueue: 'threat-hunting' })
-      ).toBeDefined();
+  describe('setWatchSkillEnabled()', () => {
+    let storeWithAgent: WatchStore;
 
-      const { scopeRouting } = getWatchSettings(FLOOR)!;
-      expect(scopeRouting?.dataSources.selectedId).toBe('alerts-only');
-      expect(scopeRouting?.assigneeQueue.selectedId).toBe('threat-hunting');
-    });
-
-    it('rejects an unknown id', () => {
-      expect(setWatchScopeRouting(FLOOR, { escalationContact: 'the-void' })).toBeUndefined();
-    });
-  });
-
-  describe('approval gates', () => {
-    it('refuses to weaken a locked gate', () => {
-      expect(
-        setWatchApprovalGate(FLOOR, 'host-isolation', { requirement: 'in-scope' })
-      ).toBeUndefined();
-
-      const gate = getWatchSettings(FLOOR)?.approvalGates?.find(
-        ({ id }) => id === 'host-isolation'
+    beforeEach(() => {
+      const management = { getWorkflows } as unknown as WatchWorkflowsManagementClient;
+      storeWithAgent = new WatchStore(
+        management,
+        loggingSystemMock.createLogger(),
+        makeAgentBuilder('test-agent', ['alert-triage'])
       );
-      expect(gate?.requirement).toBe('always');
     });
 
-    it('allows changing the requirement of an unlocked gate', () => {
+    it('toggles the per-watch skill attachment and returns settings', async () => {
+      getWorkflows.mockResolvedValueOnce({
+        results: [makeWorkflowDto('watch-a', { agentId: 'test-agent' })],
+      });
+      await storeWithAgent.refresh(request, SPACE);
+
+      const result = storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false);
+      expect(result).toBeDefined();
       expect(
-        setWatchApprovalGate(FLOOR, 'hunt-execution', { requirement: 'always' })
-      ).toBeDefined();
-
-      const gate = getWatchSettings(FLOOR)?.approvalGates?.find(
-        ({ id }) => id === 'hunt-execution'
-      );
-      expect(gate?.requirement).toBe('always');
-    });
-
-    it('accepts an approver role the gate offers and rejects one it does not', () => {
-      expect(
-        setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'soc-lead' })
-      ).toBeDefined();
-      expect(
-        setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'the-intern' })
-      ).toBeUndefined();
-    });
-
-    it('rejects an approver role on a gate that takes none', () => {
-      expect(
-        setWatchApprovalGate(FLOOR, 'evidence-only-investigation', { approverRoleId: 'soc-lead' })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined for an unknown gate', () => {
-      expect(setWatchApprovalGate(FLOOR, 'nope', { requirement: 'always' })).toBeUndefined();
-    });
-  });
-
-  describe('global flags versus per-watch attachments', () => {
-    it('keeps the per-watch attachment independent of the global flag', () => {
-      expect(setSkillEnabled('alert-triage', false)).toBeDefined();
-
-      // The global flag flipped, but Watch Floor's attachment is untouched — the UI ANDs the two.
-      expect(listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(false);
-      expect(
-        getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
-      ).toBe(true);
-    });
-
-    it('leaves the global flag alone when a per-watch attachment is toggled', () => {
-      expect(setWatchSkillEnabled(FLOOR, 'alert-triage', false)).toBeDefined();
-
-      expect(listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(true);
-      expect(
-        getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
+        storeWithAgent
+          .getWatchSettings('watch-a')
+          ?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(false);
     });
 
-    it('toggles a worker attachment without touching the global worker flag', () => {
-      expect(setWatchWorkerEnabled(FLOOR, 'host-context', true)).toBeDefined();
+    it('preserves the skill attachment state across refreshes', async () => {
+      getWorkflows.mockResolvedValue({
+        results: [makeWorkflowDto('watch-a', { agentId: 'test-agent' })],
+      });
+      await storeWithAgent.refresh(request, SPACE);
+      storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false);
 
-      expect(listWorkers().find(({ id }) => id === 'host-context')?.enabled).toBe(false);
+      await storeWithAgent.refresh(request, SPACE);
       expect(
-        getWatchSettings(FLOOR)?.workers?.find(({ workerId }) => workerId === 'host-context')
-          ?.enabled
-      ).toBe(true);
+        storeWithAgent
+          .getWatchSettings('watch-a')
+          ?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
+      ).toBe(false);
     });
 
-    it('does not confuse a worker id with the identically named skill id', () => {
-      // Containment exists as both a worker and a skill, so the two must move independently.
-      expect(setWorkerEnabled('containment', false)).toBeDefined();
+    it('returns undefined for a skill not attached to the watch', async () => {
+      getWorkflows.mockResolvedValueOnce({
+        results: [makeWorkflowDto('watch-a', { agentId: 'test-agent' })],
+      });
+      await storeWithAgent.refresh(request, SPACE);
 
-      expect(listWorkers().find(({ id }) => id === 'containment')?.enabled).toBe(false);
-      expect(listSkills().find(({ id }) => id === 'containment')?.enabled).toBe(true);
+      expect(
+        storeWithAgent.setWatchSkillEnabled('watch-a', 'unknown-skill', false)
+      ).toBeUndefined();
     });
 
-    it('rejects toggling an entity the watch does not attach', () => {
-      expect(setWatchWorkerEnabled(FLOOR, 'rule-tuning', false)).toBeUndefined();
-      expect(setWatchSkillEnabled(FLOOR, 'escalation', false)).toBeUndefined();
+    it('returns undefined for watches with no skill callables', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+
+      expect(liveStore.setWatchSkillEnabled('watch-a', 'alert-triage', false)).toBeUndefined();
+    });
+  });
+
+  describe('skill catalog', () => {
+    it('listSkills returns empty when watches have no skill callables', async () => {
+      getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
+      await liveStore.refresh(request, SPACE);
+      expect(liveStore.listSkills()).toEqual([]);
     });
 
-    it('returns undefined for unknown global ids', () => {
-      expect(setWorkerEnabled('nope', false)).toBeUndefined();
-      expect(setSkillEnabled('nope', false)).toBeUndefined();
+    it('setSkillEnabled returns undefined when there are no skills', () => {
+      expect(liveStore.setSkillEnabled('nope', false)).toBeUndefined();
     });
   });
 });

@@ -6,279 +6,242 @@
  */
 
 /**
- * In-memory read/write store backing the watch settings UI while it has no real persistence.
+ * In-memory watch store for live (non-mock) mode.
  *
- * State lives at module scope and is seeded from `@kbn/pnd-common` on first access, so writes
- * survive a browser reload but reset when Kibana restarts. That is the intended behaviour for a UX
- * reference implementation — see https://github.com/elastic/security-team/issues/18717 for the real
- * persistence work.
- *
- * Every route that touches this store is gated on `config.ui.useMockData`, so none of it is
- * reachable against live projected watches.
+ * Populated by calling refresh() with a KibanaRequest and spaceId. Fetches watches from the
+ * Workflows API, projects them via project_watch, and builds the global skill catalog. State
+ * resets when Kibana restarts; there is no persistence yet.
  */
 
-import type {
-  Watch,
-  WatchApprovalGate,
-  WatchAutonomyLevel,
-  WatchSettings,
-  WatchSkill,
-  WatchWorker,
-} from '@kbn/pnd-common';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WATCH_SETTINGS_SEED,
-  WORKERS_SEED,
-  type WatchSettingsSeed,
+  WATCH_TAG,
+  compareWatchesForDisplay,
+  type Watch,
+  type WatchApprovalGate,
+  type WatchAutonomyLevel,
+  type WatchSettings,
+  type WatchSkill,
+  type WatchWorker,
 } from '@kbn/pnd-common';
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
+import { projectWorkflowToWatch } from '../watches/project_watch';
+import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
+import { buildAgentLookup } from '../watches/build_agent_lookup';
+import type {
+  IWatchStore,
+  WatchScopeRoutingPatch,
+  WatchTriggersPatch,
+  WatchStoreState,
+} from './types';
 
-interface WatchStoreState {
-  watches: Watch[];
-  settingsByWatchId: Map<string, WatchSettings>;
-  workers: WatchWorker[];
-  skills: WatchSkill[];
-}
+const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
 
-let state: WatchStoreState | undefined;
+export class WatchStore implements IWatchStore {
+  private state: WatchStoreState | undefined;
+  private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
 
-/** Seed-relative offsets become absolute timestamps once, when the store first seeds. */
-const isoSecondsAgo = (seededAt: number, secondsAgo: number): string =>
-  new Date(seededAt - secondsAgo * 1000).toISOString();
-
-const seedSettings = (seed: WatchSettingsSeed, seededAt: number): WatchSettings => {
-  const { runsLedger, ...rest } = seed;
-  return {
-    ...rest,
-    runsLedger: runsLedger?.map(({ timeSecondsAgo, ...entry }) => ({
-      ...entry,
-      time: isoSecondsAgo(seededAt, timeSecondsAgo),
-    })),
-  };
-};
-
-const seedStore = (): WatchStoreState => {
-  const seededAt = Date.now();
-
-  // Deep clone so mutations never reach the shared seed constants.
-  return {
-    watches: structuredClone(WATCHES_SEED),
-    settingsByWatchId: new Map(
-      Object.entries(structuredClone(WATCH_SETTINGS_SEED)).map(([watchId, seed]) => [
-        watchId,
-        seedSettings(seed, seededAt),
-      ])
-    ),
-    workers: structuredClone(WORKERS_SEED).map(({ lastRunSecondsAgo, ...worker }) => ({
-      ...worker,
-      lastRun: lastRunSecondsAgo == null ? null : isoSecondsAgo(seededAt, lastRunSecondsAgo),
-    })),
-    skills: structuredClone(SKILLS_SEED).map(({ lastRunSecondsAgo, ...skill }) => ({
-      ...skill,
-      lastRun: lastRunSecondsAgo == null ? null : isoSecondsAgo(seededAt, lastRunSecondsAgo),
-    })),
-  };
-};
-
-const getState = (): WatchStoreState => {
-  if (!state) {
-    state = seedStore();
-  }
-  return state;
-};
-
-/** Drops all state so the next read reseeds. Intended for tests. */
-export const resetWatchStore = (): void => {
-  state = undefined;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Watches                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export const listWatches = (): Watch[] => getState().watches;
-
-export const getWatch = (watchId: string): Watch | undefined =>
-  getState().watches.find((watch) => watch.id === watchId);
-
-export const setWatchEnabled = (watchId: string, enabled: boolean): Watch | undefined => {
-  const watch = getWatch(watchId);
-  if (!watch) {
-    return undefined;
-  }
-  watch.enabled = enabled;
-  return watch;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Per-watch settings                                                         */
-/* -------------------------------------------------------------------------- */
-
-export const getWatchSettings = (watchId: string): WatchSettings | undefined =>
-  getState().settingsByWatchId.get(watchId);
-
-export const setWatchAutonomy = (
-  watchId: string,
-  level: WatchAutonomyLevel
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  if (!settings) {
-    return undefined;
-  }
-  // The scale is shared across watches and the route validates the enum, so there is nothing
-  // per-watch left to check here.
-  settings.autonomy = level;
-  return settings;
-};
-
-export interface WatchTriggersPatch {
-  scheduleId?: string;
-  allowManualRun?: boolean;
-}
-
-export const setWatchTriggers = (
-  watchId: string,
-  { scheduleId, allowManualRun }: WatchTriggersPatch
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  if (!settings?.triggers) {
-    return undefined;
+  constructor(
+    private readonly management: WatchWorkflowsManagementClient,
+    private readonly logger: Logger,
+    private readonly agentBuilder?: AgentBuilderPluginStart,
+    agentTypes: readonly AgentTypeDefinition[] = []
+  ) {
+    this.state = { watches: [], skills: [], settingsByWatchId: new Map() };
+    this.agentTypeMap = new Map(agentTypes.map((t) => [t.id, t]));
   }
 
-  if (scheduleId != null) {
-    // Reject ids the watch does not offer rather than storing an unresolvable value.
-    if (!settings.triggers.schedule.optionIds.includes(scheduleId)) {
+  async refresh(request: KibanaRequest, spaceId: string): Promise<Watch[]> {
+    const agents = this.agentBuilder
+      ? await buildAgentLookup(this.agentBuilder, this.agentTypeMap, request, this.logger)
+      : undefined;
+
+    const result = await this.management.getWorkflows(
+      {
+        tags: [WATCH_TAG],
+        size: 100,
+        page: 1,
+        enabled: [true, false],
+        managedFilter: 'all',
+        visibilityContext: [WATCH_VISIBILITY_CONTEXT],
+      },
+      spaceId,
+      { includeExecutionHistory: true, includeManagedExecutionHistory: true }
+    );
+
+    const watches = result.results
+      .filter((item) => {
+        const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
+        return tags.includes(WATCH_TAG);
+      })
+      .map((item) => projectWorkflowToWatch(item, agents))
+      .sort(compareWatchesForDisplay);
+
+    const settings = new Map<string, WatchSettings>();
+    for (const watch of watches) {
+      const existing = this.state?.settingsByWatchId.get(watch.id);
+      const entry: WatchSettings = existing ?? { watchId: watch.id, autonomy: 'manual' };
+      const skillAttachments = watch.callables
+        .filter((c) => c.kind === 'skill')
+        .map(
+          (c) =>
+            existing?.skills?.find((s) => s.skillId === c.id) ?? { skillId: c.id, enabled: true }
+        );
+      if (skillAttachments.length > 0) {
+        entry.skills = skillAttachments;
+      }
+      settings.set(watch.id, entry);
+    }
+
+    this.state = {
+      watches,
+      skills: this.buildSkillsFromWatches(watches, this.listSkills()),
+      settingsByWatchId: settings,
+    };
+
+    return watches;
+  }
+
+  async ensurePopulated(request: KibanaRequest, spaceId: string): Promise<void> {
+    if (this.listSkills().length > 0) return;
+    await this.refresh(request, spaceId);
+  }
+
+  private buildSkillsFromWatches(watches: Watch[], existingCatalog: WatchSkill[]): WatchSkill[] {
+    const skillMap = new Map<string, Set<string>>();
+    for (const watch of watches) {
+      for (const callable of watch.callables) {
+        if (callable.kind !== 'skill') continue;
+        const watchIds = skillMap.get(callable.id) ?? new Set<string>();
+        watchIds.add(watch.id);
+        skillMap.set(callable.id, watchIds);
+      }
+    }
+    return [...skillMap.entries()].map(([id, watchIds]) => {
+      const existing = existingCatalog.find((s) => s.id === id);
+      return {
+        id,
+        watchIds: [...watchIds],
+        enabled: existing?.enabled ?? true,
+        lastRun: existing?.lastRun ?? null,
+      };
+    });
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /* Watches                                                                    */
+  /* -------------------------------------------------------------------------- */
+
+  listWatches(): Watch[] {
+    return this.state?.watches ?? [];
+  }
+
+  getWatch(watchId: string): Watch | undefined {
+    return this.listWatches().find((w) => w.id === watchId);
+  }
+
+  setWatchEnabled(watchId: string, enabled: boolean): Watch | undefined {
+    const watch = this.getWatch(watchId);
+    if (!watch) {
       return undefined;
     }
-    settings.triggers.schedule.selectedId = scheduleId;
+    watch.enabled = enabled;
+    return watch;
   }
-  if (allowManualRun != null) {
-    settings.triggers.allowManualRun = allowManualRun;
+
+  /* -------------------------------------------------------------------------- */
+  /* Per-watch settings — not supported in live mode; service gates on useMockData */
+  /* -------------------------------------------------------------------------- */
+
+  getWatchSettings(watchId: string): WatchSettings | undefined {
+    return this.state?.settingsByWatchId.get(watchId);
   }
-  return settings;
-};
 
-/** Keys of `WatchScopeRoutingSettings` that hold a single-choice setting. */
-const SCOPE_ROUTING_SELECTS = ['dataSources', 'assigneeQueue', 'escalationContact'] as const;
-
-export type WatchScopeRoutingPatch = Partial<
-  Record<(typeof SCOPE_ROUTING_SELECTS)[number], string>
->;
-
-export const setWatchScopeRouting = (
-  watchId: string,
-  patch: WatchScopeRoutingPatch
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  if (!settings?.scopeRouting) {
+  setWatchAutonomy(_watchId: string, _level: WatchAutonomyLevel): WatchSettings | undefined {
+    // not supportedfor live data
     return undefined;
   }
 
-  const { scopeRouting } = settings;
+  setWatchTriggers(_watchId: string, _patch: WatchTriggersPatch): WatchSettings | undefined {
+    // not supportedfor live data
+    return undefined;
+  }
 
-  // Validate the full patch before mutating anything — a partially-applied patch would leave
-  // the store diverged from what the 400 response led the client to expect.
-  for (const key of SCOPE_ROUTING_SELECTS) {
-    const selectedId = patch[key];
-    if (selectedId != null && !scopeRouting[key].optionIds.includes(selectedId)) {
+  setWatchScopeRouting(
+    _watchId: string,
+    _patch: WatchScopeRoutingPatch
+  ): WatchSettings | undefined {
+    // not supportedfor live data
+    return undefined;
+  }
+
+  setWatchApprovalGate(
+    _watchId: string,
+    _gateId: string,
+    _patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
+  ): WatchSettings | undefined {
+    // not supportedfor live data
+    return undefined;
+  }
+
+  setWatchWorkerEnabled(
+    _watchId: string,
+    _workerId: string,
+    _enabled: boolean
+  ): WatchSettings | undefined {
+    // not supportedfor live data
+    return undefined;
+  }
+
+  setWatchSkillEnabled(
+    watchId: string,
+    skillId: string,
+    enabled: boolean
+  ): WatchSettings | undefined {
+    const settings = this.getWatchSettings(watchId);
+    const attachment = settings?.skills?.find((candidate) => candidate.skillId === skillId);
+
+    if (!settings || !attachment) {
       return undefined;
     }
+    attachment.enabled = enabled;
+    return settings;
   }
-  for (const key of SCOPE_ROUTING_SELECTS) {
-    const selectedId = patch[key];
-    if (selectedId != null) {
-      scopeRouting[key].selectedId = selectedId;
+
+  /* -------------------------------------------------------------------------- */
+  /* Skill catalog                                                               */
+  /* -------------------------------------------------------------------------- */
+
+  projectSkillsForWatch(watch: Watch): WatchSkill[] {
+    return this.buildSkillsFromWatches([watch], this.listSkills());
+  }
+
+  listSkills(): WatchSkill[] {
+    return this.state?.skills ?? [];
+  }
+
+  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
+    const skill = this.listSkills().find((candidate) => candidate.id === skillId);
+    if (!skill) {
+      return undefined;
     }
+    skill.enabled = enabled;
+    return skill;
   }
-  return settings;
-};
 
-export const setWatchApprovalGate = (
-  watchId: string,
-  gateId: string,
-  patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  const gate = settings?.approvalGates?.find(({ id }) => id === gateId);
-  if (!settings || !gate) {
+  /* -------------------------------------------------------------------------- */
+  /* Worker catalog — not populated in live mode                                */
+  /* -------------------------------------------------------------------------- */
+
+  listWorkers(): WatchWorker[] {
+    // not supportedfor live data
+    return [];
+  }
+
+  setWorkerEnabled(_workerId: string, _enabled: boolean): WatchWorker | undefined {
+    // not supportedfor live data
     return undefined;
   }
-
-  const { requirement, approverRoleId } = patch;
-
-  // Validate both fields before mutating either — writing `requirement` then finding
-  // `approverRoleId` invalid would silently loosen a gate while returning 400 to the caller.
-  // A locked gate always gates — refuse to weaken it however the request is shaped.
-  if (requirement != null && gate.requirementLocked) {
-    return undefined;
-  }
-  if (approverRoleId != null && !gate.approverRoleOptionIds?.includes(approverRoleId)) {
-    return undefined;
-  }
-
-  if (requirement != null) {
-    gate.requirement = requirement;
-  }
-  if (approverRoleId != null) {
-    gate.approverRoleId = approverRoleId;
-  }
-  return settings;
-};
-
-export const setWatchWorkerEnabled = (
-  watchId: string,
-  workerId: string,
-  enabled: boolean
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  const attachment = settings?.workers?.find((candidate) => candidate.workerId === workerId);
-  if (!settings || !attachment) {
-    return undefined;
-  }
-  attachment.enabled = enabled;
-  return settings;
-};
-
-export const setWatchSkillEnabled = (
-  watchId: string,
-  skillId: string,
-  enabled: boolean
-): WatchSettings | undefined => {
-  const settings = getWatchSettings(watchId);
-  const attachment = settings?.skills?.find((candidate) => candidate.skillId === skillId);
-  if (!settings || !attachment) {
-    return undefined;
-  }
-  attachment.enabled = enabled;
-  return settings;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Global worker catalog                                                      */
-/* -------------------------------------------------------------------------- */
-
-export const listWorkers = (): WatchWorker[] => getState().workers;
-
-export const setWorkerEnabled = (workerId: string, enabled: boolean): WatchWorker | undefined => {
-  const worker = getState().workers.find((candidate) => candidate.id === workerId);
-  if (!worker) {
-    return undefined;
-  }
-  worker.enabled = enabled;
-  return worker;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Global skill catalog                                                       */
-/* -------------------------------------------------------------------------- */
-
-export const listSkills = (): WatchSkill[] => getState().skills;
-
-export const setSkillEnabled = (skillId: string, enabled: boolean): WatchSkill | undefined => {
-  const skill = getState().skills.find((candidate) => candidate.id === skillId);
-  if (!skill) {
-    return undefined;
-  }
-  skill.enabled = enabled;
-  return skill;
-};
+}
