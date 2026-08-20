@@ -29,11 +29,11 @@ describe('normalizeColorMappingConfig', () => {
       ],
     });
 
-    const configMatch = {
+    const configMatch = normalizeColorMappingConfig({
       ...DEFAULT_COLOR_MAPPING_CONFIG,
       assignments: [
         {
-          rules: [{ type: 'match', value: '__other__', matchEntireWord: true }],
+          rules: [{ type: 'match', pattern: '__other__', matchEntireWord: true }],
           color: { type: 'colorCode', colorCode: 'red' },
           touched: false,
         },
@@ -43,7 +43,7 @@ describe('normalizeColorMappingConfig', () => {
           touched: false,
         },
       ],
-    };
+    });
 
     const result = {
       ...DEFAULT_COLOR_MAPPING_CONFIG,

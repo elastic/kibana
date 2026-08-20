@@ -26,6 +26,7 @@ export { SPECIAL_TOKENS_STRING_CONVERSION, getSpecialString } from './special_to
 export { type ColorAssignmentMatcher } from './color/color_assignment_matcher';
 export {
   DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_OTHER_ASSIGNMENT,
   DEFAULT_OTHERS_BUCKET_ASSIGNMENT,
   getPaletteColors,
   getColorsFromMapping,

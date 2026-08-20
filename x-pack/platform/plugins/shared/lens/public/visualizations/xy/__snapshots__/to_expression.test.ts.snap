@@ -42,7 +42,7 @@ Object {
                     "c",
                   ],
                   "colorMapping": Array [
-                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
+                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false},{\\"rules\\":[{\\"type\\":\\"others_bucket\\"}],\\"color\\":{\\"type\\":\\"theme\\",\\"color\\":{\\"LIGHT\\":{\\"type\\":\\"categorical\\",\\"paletteId\\":\\"neutral\\",\\"colorIndex\\":1},\\"DARK\\":{\\"type\\":\\"categorical\\",\\"paletteId\\":\\"neutral\\",\\"colorIndex\\":3}}},\\"touched\\":false}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
                   ],
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
