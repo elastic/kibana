@@ -50,7 +50,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
+      await kbnClient.savedObjects.clean({ types: ['search', 'dashboard'] });
     });
 
     apiTest(
