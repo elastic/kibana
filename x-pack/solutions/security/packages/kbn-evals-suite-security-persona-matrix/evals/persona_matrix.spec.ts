@@ -10,6 +10,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import { evaluate } from '../src/evaluate';
 import { personaMatrixDataset } from '../src/datasets';
 import { seedChrysalisAlerts, cleanupChrysalisAlerts } from '../src/fixtures/chrysalis_seed';
+import { seedPersonaMatrixEnvironment, cleanupEnvSeeds } from '../src/fixtures/env_seeds';
 import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
@@ -23,12 +24,23 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
+    await seedPersonaMatrixEnvironment({
+      esClient: esClient as unknown as EsClient,
+      kbnClient,
+      log,
+    });
+    log.info('[persona-matrix] seeded environment-truth data (endpoint, labs, ti-mock, entity)');
     await seedPersonaMatrixTools({ kbnClient, log });
     log.info('[persona-matrix] seeded virustotal_lookup + on_call_lookup tools');
   });
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
     await cleanupChrysalisAlerts({ esClient: esClient as unknown as EsClient, log });
+    await cleanupEnvSeeds({
+      esClient: esClient as unknown as EsClient,
+      kbnClient,
+      log,
+    });
     await cleanupPersonaMatrixTools({ kbnClient, log });
   });
 

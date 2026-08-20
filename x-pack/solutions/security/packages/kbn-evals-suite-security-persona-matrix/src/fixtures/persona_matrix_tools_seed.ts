@@ -72,12 +72,18 @@ export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOption
       type: 'esql',
       description:
         'Look up a file hash, URL, or domain against VirusTotal threat intelligence to check ' +
-        'for known-malicious indicators. Use this to verify whether a given hash, URL, or ' +
+        'for known-malicious indicators. Returns the verdict (benign/malicious), detection ' +
+        'ratio, and classification. Use this to verify whether a given hash, URL, or ' +
         'domain has been flagged by security vendors.',
       tags: ['persona-matrix', 'threat-intel'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
-        params: {},
+        // Queries the eval-seeded mock verdict index (see env_seeds.ts) so the
+        // tool returns a coherent VirusTotal-style answer without any network
+        // access or real VirusTotal subscription.
+        query:
+          'FROM ti-mock-default | WHERE threat_intel.indicator.value == "{{hash}}" ' +
+          '| KEEP threat_intel.verdict, threat_intel.detection_ratio, threat_intel.classification | LIMIT 5',
+        params: { hash: { type: 'string', description: 'The hash, URL, or domain to look up' } },
       },
     },
   });
