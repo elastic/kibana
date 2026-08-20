@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { CONVERSATION_TITLE_MAX_LENGTH } from '@kbn/agent-builder-common';
+import {
+  CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
+} from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -33,7 +36,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_rename`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           title: schema.string({ maxLength: CONVERSATION_TITLE_MAX_LENGTH }),
@@ -69,7 +72,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_apply_template`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           template_id: schema.string({ maxLength: 256 }),
@@ -102,7 +105,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/metadata`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           metadata: schema.recordOf(
@@ -153,7 +156,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_mark_read`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           read: schema.boolean(),
@@ -192,7 +195,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_set_pinned`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           pinned: schema.boolean(),

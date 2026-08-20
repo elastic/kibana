@@ -11,6 +11,7 @@ import { validate as uuidValidate } from 'uuid';
 import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -275,7 +276,7 @@ export function registerConversationRoutes({
               ),
               conversation_id: schema.maybe(
                 schema.string({
-                  maxLength: 256,
+                  maxLength: CONVERSATION_ID_MAX_LENGTH,
                   validate: (v) =>
                     uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID',
                   meta: {
@@ -387,7 +388,7 @@ export function registerConversationRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
-                maxLength: 256,
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: {
                   description:
                     'The unique identifier of the conversation whose access control to update.',
