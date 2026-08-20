@@ -16,7 +16,7 @@ const API_KEY = 'sk-test';
 
 function httpJsonFor(models) {
   return async (url) => {
-    expect(url).toBe(`${BASE_URL}/models`);
+    expect(url).toBe(`${BASE_URL}/models/user`);
     return { data: models };
   };
 }
@@ -24,7 +24,7 @@ function httpJsonFor(models) {
 const TOOLS = ['tools', 'tool_choice', 'temperature'];
 
 describe('generateOpenrouterConnectors', () => {
-  it('generates every tool-calling catalog model when no --models are given', async () => {
+  it('generates every tool-calling model available to this API key when no --models are given', async () => {
     const connectors = await generateOpenrouterConnectors({
       baseUrl: BASE_URL,
       apiKey: API_KEY,
@@ -60,7 +60,7 @@ describe('generateOpenrouterConnectors', () => {
     expect(Object.keys(connectors)).toEqual(['openrouter-openai-gpt-5-4']);
   });
 
-  it('fails when a requested model is missing from GET /models', async () => {
+  it('fails when a requested model is missing from GET /models/user', async () => {
     await expect(
       generateOpenrouterConnectors({
         baseUrl: BASE_URL,
@@ -71,7 +71,7 @@ describe('generateOpenrouterConnectors', () => {
     ).rejects.toThrow(/openai\/does-not-exist/);
   });
 
-  it('resolves `openrouter/<provider>-<model>` groups against GET /models', async () => {
+  it('resolves `openrouter/<provider>-<model>` groups against GET /models/user', async () => {
     const connectors = await generateOpenrouterConnectors({
       baseUrl: BASE_URL,
       apiKey: API_KEY,

@@ -10,9 +10,10 @@
  * Generate `KIBANA_TESTING_AI_CONNECTORS` payload for @kbn/evals from OpenRouter.
  *
  * This script:
- * - fetches available models via GET {baseUrl}/models
+ * - fetches models available to this API key via GET {baseUrl}/models/user
+ *   (respects OpenRouter guardrails; not the public catalog at GET /models)
  * - emits a `.gen-ai` connector per requested model (`--models` / `EVAL_MODEL_GROUPS`)
- * - when none are requested, emits every catalog model that advertises tool calling
+ * - when none are requested, emits every key-available model that advertises tool calling
  * - skips EIS (`eis/*`) entries (handled separately)
  *
  * Auth: OpenRouter API key via Authorization Bearer.
@@ -112,7 +113,7 @@ async function httpJson(url, apiKey) {
 }
 
 async function fetchAvailableModels(baseUrl, apiKey, httpJsonFn = httpJson) {
-  const response = await httpJsonFn(`${baseUrl}/models`, apiKey);
+  const response = await httpJsonFn(`${baseUrl}/models/user`, apiKey);
   const entries = response && Array.isArray(response.data) ? response.data : [];
   /** @type {Map<string, object>} */
   const byId = new Map();
@@ -209,7 +210,7 @@ async function generateOpenrouterConnectors({
 
   if (missing.length > 0) {
     throw new Error(
-      `OpenRouter model(s) not found via GET ${baseUrl}/models:\n` +
+      `OpenRouter model(s) not found via GET ${baseUrl}/models/user:\n` +
         missing.map((m) => `  - ${m}`).join('\n')
     );
   }
