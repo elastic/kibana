@@ -144,7 +144,9 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
+    core.security.registerSecurityDelegate(
+      buildSecurityApi({ authc: this.authc, config: this.config })
+    );
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
     );
@@ -155,7 +157,6 @@ export class SecurityPlugin
         management,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
-        uiSettings: core.uiSettings,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
       });

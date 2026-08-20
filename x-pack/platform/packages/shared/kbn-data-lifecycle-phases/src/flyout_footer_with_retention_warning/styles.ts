@@ -18,7 +18,8 @@ export const getFlyoutFooterWithRetentionWarningStyles = ({ euiTheme }: { euiThe
   return {
     padding,
     callout: css`
-      ${padding};
+      padding: ${euiTheme.size.m} ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.l};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
       border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     `,
   };

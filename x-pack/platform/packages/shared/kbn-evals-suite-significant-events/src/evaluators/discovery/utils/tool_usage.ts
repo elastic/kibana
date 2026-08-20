@@ -48,6 +48,47 @@ export function getToolCallCount(steps: ConverseStep[]): number {
   return steps.filter((step) => step.type === 'tool_call').length;
 }
 
+const getRetryableBulkErrorCount = (step: ConverseStep): number => {
+  if (step.type !== 'tool_call' || !Array.isArray(step.results)) return 0;
+  return step.results.reduce<number>((count, result) => {
+    if (!isRecord(result) || !isRecord(result.data) || !Array.isArray(result.data.results)) {
+      return count;
+    }
+    return (
+      count +
+      result.data.results.filter(
+        (item) => isRecord(item) && item.written === false && item.reason === 'bulk_error'
+      ).length
+    );
+  }, 0);
+};
+
+const getBulkInputCount = (step: ConverseStep): number =>
+  step.type === 'tool_call' && isRecord(step.params) && Array.isArray(step.params.items)
+    ? step.params.items.length
+    : 0;
+
+export interface PersistenceCallSummary {
+  count: number;
+  valid: boolean;
+  retriedPartialFailure: boolean;
+}
+
+/** One normal persistence call, or one retry after a completed call exposed item-level bulk errors. */
+export function summarizePersistenceCalls(
+  steps: ConverseStep[],
+  toolId: string
+): PersistenceCallSummary {
+  const calls = steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId);
+  if (calls.length === 1) {
+    return { count: 1, valid: true, retriedPartialFailure: false };
+  }
+  const failedItemCount = calls.length === 2 ? getRetryableBulkErrorCount(calls[0]) : 0;
+  const retriedPartialFailure =
+    failedItemCount > 0 && getBulkInputCount(calls[1]) === failedItemCount;
+  return { count: calls.length, valid: retriedPartialFailure, retriedPartialFailure };
+}
+
 /**
  * Number of continuation candidates the (last) `platform_sig_events_event_search` call in
  * `steps` returned, or `null` if the tool was never called. Reads `data.total` when present

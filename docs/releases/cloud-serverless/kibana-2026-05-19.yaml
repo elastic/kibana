@@ -1,9 +1,10 @@
 products:
 - product: cloud-serverless
   target: 2026-05-19
-  lifecycle: preview
+  lifecycle: ga
   repo: kibana
   owner: elastic
+release-date: 2026-05-19
 entries:
 - file:
     name: 268873.yaml

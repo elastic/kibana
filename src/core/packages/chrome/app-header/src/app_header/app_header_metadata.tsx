@@ -10,16 +10,31 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import type { AppHeaderMetadataItem, AppHeaderMetadataItems } from '../types';
 
-const AppHeaderMetadataEntry = ({ item }: { item: AppHeaderMetadataItem }) => {
+const AppHeaderMetadataEntry = ({
+  item,
+  isFirst,
+}: {
+  item: AppHeaderMetadataItem;
+  isFirst: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
+  const label = asPlainText(item.label);
+  const value = item.type === 'text' ? asOptionalPlainText(item.value) : undefined;
 
   // Shared resting style for every metadata entry: subdued color, bold label.
   const labelStyles = css`
     color: ${euiTheme.colors.textSubdued};
     font-weight: ${euiTheme.font.weight.bold};
   `;
+  const firstItemOffset =
+    isFirst && item.type !== 'health'
+      ? css`
+          padding-inline-start: ${euiTheme.size.xs};
+        `
+      : undefined;
 
   if (item.type === 'button') {
     const buttonInteraction = item.href ? { href: item.href } : { onClick: item.onClick };
@@ -29,6 +44,7 @@ const AppHeaderMetadataEntry = ({ item }: { item: AppHeaderMetadataItem }) => {
         color="text"
         css={[
           labelStyles,
+          firstItemOffset,
           // Collapse the button to its content height so it doesn't add vertical
           // space and inflate the centered metadata row.
           css`
@@ -42,7 +58,7 @@ const AppHeaderMetadataEntry = ({ item }: { item: AppHeaderMetadataItem }) => {
         size="xs"
         {...buttonInteraction}
       >
-        {item.label}
+        {label}
       </EuiButtonEmpty>
     );
   }
@@ -55,22 +71,22 @@ const AppHeaderMetadataEntry = ({ item }: { item: AppHeaderMetadataItem }) => {
         data-test-subj={item['data-test-subj']}
         textSize="xs"
       >
-        {item.label}
+        {label}
       </EuiHealth>
     );
   }
 
   return (
-    <EuiText css={labelStyles} data-test-subj={item['data-test-subj']} size="xs">
-      {item.label}
-      {item.value !== undefined && (
+    <EuiText css={[labelStyles, firstItemOffset]} data-test-subj={item['data-test-subj']} size="xs">
+      {label}
+      {value !== undefined && (
         <span
           css={css`
             font-weight: ${euiTheme.font.weight.medium};
           `}
         >
           {' '}
-          {item.value}
+          {value}
         </span>
       )}
     </EuiText>
@@ -85,7 +101,11 @@ export const AppHeaderMetadata = React.memo<{ metadata: AppHeaderMetadataItems }
           .slice(0, 3)
           .filter((item): item is AppHeaderMetadataItem => item !== undefined)
           .map((item, index) => (
-            <AppHeaderMetadataEntry item={item} key={`${item.type}-${item.label}-${index}`} />
+            <AppHeaderMetadataEntry
+              item={item}
+              isFirst={index === 0}
+              key={`${item.type}-${asPlainText(item.label)}-${index}`}
+            />
           ))}
       </>
     );

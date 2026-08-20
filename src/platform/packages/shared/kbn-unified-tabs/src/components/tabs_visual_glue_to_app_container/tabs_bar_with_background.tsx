@@ -19,7 +19,8 @@ const globalCss = cssString`
   overscroll-behavior: none;
 
   // Removes the shadow from the global header
-  .header__secondBar {
+  .header__secondBar,
+  [data-test-subj='kibanaProjectHeaderActionMenu'] {
     box-shadow: none;
   }
 `;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FeedbackPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -16,6 +16,7 @@ describe('Feedback Plugin', () => {
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let cloudStartMock: ReturnType<typeof cloudMock.createStart>;
   let isOptedIn$: Subject<boolean>;
+  let currentAppId$: BehaviorSubject<string | undefined>;
   let telemetryStartMock: TelemetryPluginStart;
   let plugin: FeedbackPlugin;
 
@@ -24,10 +25,16 @@ describe('Feedback Plugin', () => {
 
   const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
+  const enableChromeNext = () => {
+    Object.defineProperty(coreStartMock.chrome.next, 'isEnabled', { value: true });
+  };
+
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
     cloudStartMock = cloudMock.createStart();
     isOptedIn$ = new Subject<boolean>();
+    currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+    coreStartMock.application.currentAppId$ = currentAppId$;
     // The plugin only consumes `isOptedIn$`, so a Subject we can emit on is all we need.
     telemetryStartMock = {
       telemetryService: { isOptedIn$ },
@@ -56,30 +63,114 @@ describe('Feedback Plugin', () => {
     expect(coreStartMock.chrome.navControls.registerRight).not.toHaveBeenCalled();
   });
 
-  it('registers the feedback handler only once opt-in resolves to true', () => {
-    enableFeedback();
-    startPlugin();
+  describe('Chrome Next', () => {
+    beforeEach(() => {
+      enableFeedback();
+      enableChromeNext();
+    });
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+    it('registers the feedback handler only once opt-in resolves to true', () => {
+      startPlugin();
 
-    isOptedIn$.next(true);
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
-      expect.any(Function)
-    );
+      isOptedIn$.next(true);
+
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
+
+    it('unregisters the feedback handler when opt-in becomes false', () => {
+      const unregister = jest.fn();
+      coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
+
+      startPlugin();
+
+      isOptedIn$.next(true);
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
+
+      isOptedIn$.next(false);
+      expect(unregister).toHaveBeenCalled();
+    });
   });
 
-  it('unregisters the feedback handler when opt-in becomes false', () => {
+  it('does not register the feedback handler when Chrome Next is disabled', () => {
     enableFeedback();
-    const unregister = jest.fn();
-    coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
+    Object.defineProperty(coreStartMock.chrome.next, 'isEnabled', { value: false });
 
     startPlugin();
-
     isOptedIn$.next(true);
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
 
-    isOptedIn$.next(false);
-    expect(unregister).toHaveBeenCalled();
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+  });
+
+  describe('setContext', () => {
+    const getAppDetailsFromTrigger = () => {
+      const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
+      return (content as React.ReactElement).props.children.props.getAppDetails as () => {
+        title: string;
+        id: string;
+        url: string;
+        context?: Record<string, string | boolean | number>;
+      };
+    };
+
+    it('no-ops when appId does not match the current app', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('dashboard');
+
+      setContext('discover', { isEsql: true });
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('stores context only while appId is the current app', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+
+      setContext('discover', { isEsql: true });
+
+      expect(getAppDetailsFromTrigger()().context).toEqual({ isEsql: true });
+    });
+
+    it('clears context when the current app changes', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+      setContext('discover', { isEsql: true });
+
+      currentAppId$.next('dashboard');
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('clears context on unregister', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+      const unregister = setContext('discover', { isEsql: true });
+
+      unregister();
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('uses options.title as a full app title override', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+
+      setContext('discover', { isEsql: true }, { title: 'Analytics - Discover ES|QL' });
+
+      expect(getAppDetailsFromTrigger()()).toEqual(
+        expect.objectContaining({
+          title: 'Analytics - Discover ES|QL',
+          context: { isEsql: true },
+        })
+      );
+    });
   });
 });

@@ -9,9 +9,10 @@
 
 import { esql } from '@elastic/esql';
 import { sanitazeESQLInput, isSingleSource } from '@kbn/esql-utils';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { firstNonNullable } from '../first_null_nullable';
-import type { ParsedMetricItem, MetricsGridSettings } from '../../../types';
+import type { ParsedMetricItem } from '../../../types';
 
 /**
  * Formats a single-line ES|QL query into a multi-line format where each

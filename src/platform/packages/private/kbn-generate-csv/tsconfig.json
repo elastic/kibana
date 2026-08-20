@@ -34,5 +34,6 @@
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/safer-lodash-set",
+    "@kbn/datemath",
   ]
 }

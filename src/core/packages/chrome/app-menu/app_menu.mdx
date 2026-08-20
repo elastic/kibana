@@ -19,7 +19,7 @@ It offers a structured and organized way to present navigation options and actio
 
 The `AppMenuConfig` object accepts:
 
-- **`items`** — menu items displayed in the app menu bar. Items beyond the limit overflow into a "More" popover.
+- **`items`** — menu items displayed in ascending `order`. The optional `order` defaults to `0`, and items with the same order retain their array order. Items beyond the limit overflow into a "More" popover.
 - **`primaryActionItem`** — a primary action button placed as the rightmost item. Can be a simple button (with `run`), a button with a popover (with `items`), or a split button (with `run` and `splitButtonProps`).
 - **`switch`** — an optional `AppMenuSwitch` rendered to the left of the menu items. Only one switch is available per app menu.
 
@@ -29,7 +29,7 @@ There are two ways of adding the app menu to your application:
 - declaratively: by rendering the `<AppMenu />` component from `@kbn/core-chrome-app-menu` package, passing the configuration and the `setAppMenu` method from the `chrome` service as props
 - imperatively: by calling `setAppMenu` method from the `chrome` service.
 
-It is also possible to use the standalone `<AppMenuComponent />` component by importing it from `@kbn/core-chrome-app-menu-components` package.
+It is also possible to use the standalone `<AppMenuComponent />` component by importing it from `@kbn/app-menu` package.
 
 ## Examples
 
@@ -38,7 +38,7 @@ It is also possible to use the standalone `<AppMenuComponent />` component by im
 ```tsx
 import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -57,7 +57,7 @@ const Example = ({ config, core }: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -80,7 +80,7 @@ const Example = ({ config , core}: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/app-menu';
 
 interface Props {
   config: AppMenuConfig;

@@ -94,6 +94,40 @@ describe('InspectIlmPolicyFlyout primaryAction', () => {
     expect(screen.getByTestId('inspectIlmPolicyFlyoutSelectAndApplyButton')).toBeInTheDocument();
   });
 
+  it('renders a "Managed" badge when the policy is managed by Elastic', () => {
+    renderWithTheme(
+      <InspectIlmPolicyFlyout
+        policyName="my-managed-policy"
+        policy={{ ...policy, _meta: { managed: true } }}
+        onBack={() => {}}
+        onEditPolicy={() => {}}
+        primaryAction={{
+          label: 'Apply',
+          onClick: () => {},
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('inspectIlmPolicyFlyoutManagedBadge')).toBeInTheDocument();
+  });
+
+  it('does not render a "Managed" badge for a non-managed policy', () => {
+    renderWithTheme(
+      <InspectIlmPolicyFlyout
+        policyName="my-policy"
+        policy={policy}
+        onBack={() => {}}
+        onEditPolicy={() => {}}
+        primaryAction={{
+          label: 'Apply',
+          onClick: () => {},
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId('inspectIlmPolicyFlyoutManagedBadge')).not.toBeInTheDocument();
+  });
+
   it('renders the JSON tab in a non-scrolling flyout body with a scrollable code block', async () => {
     const user = userEvent.setup();
 

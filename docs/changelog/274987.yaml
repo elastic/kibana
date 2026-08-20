@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/274987
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Update endpoint response action APIs to enforce field length limits
+description: Endpoint response action APIs now validate the length of request fields,
+  including comments, IDs, commands, file paths, and script content.
+impact: Requests that exceed the new field-length limits are rejected.
+action: Update endpoint response action API clients to keep request fields within
+  the documented limits.
+subtype: api

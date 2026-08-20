@@ -154,14 +154,7 @@ const tableScrollStyles = css`
 
 export const EntityListTable: React.FC<{
   entities: EntityListRow[];
-  /**
-   * Dismisses the Agent Builder canvas flyout. When present, the Name-column
-   * "open entity" button closes the canvas before navigating to Entity
-   * Analytics so the just-opened URL-backed expandable flyout isn't hidden
-   * underneath the canvas overlay.
-   */
-  closeCanvas?: () => void;
-}> = ({ entities, closeCanvas }) => {
+}> = ({ entities }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateWithFlyout, navigateToHome } = useEntityAnalyticsAgentNavigation();
 
@@ -194,11 +187,6 @@ export const EntityListTable: React.FC<{
                         identifier: displayName,
                         entityStoreId: row.entity_id,
                       });
-                      // Close the canvas first: both navigation helpers only
-                      // update the URL (and, when wired, the Agent Builder
-                      // sidebar). Leaving the canvas open would overlay the
-                      // expandable flyout that the URL change is about to open.
-                      closeCanvas?.();
                       if (rightPanel) {
                         navigateWithFlyout({ preview: [], right: rightPanel });
                       } else {
@@ -341,7 +329,7 @@ export const EntityListTable: React.FC<{
         ),
       },
     ],
-    [navigateWithFlyout, navigateToHome, closeCanvas, euiTheme.font.familyCode]
+    [navigateWithFlyout, navigateToHome, euiTheme.font.familyCode]
   );
 
   return (

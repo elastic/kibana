@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -343,7 +344,9 @@ export const push = async (
         references: myCase.references,
       },
       comments: comments.saved_objects.map((origComment) => {
-        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const foundComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const updatedComment =
+          foundComment && !isSavedObjectErrorResult(foundComment) ? foundComment : undefined;
         return {
           ...origComment,
           ...updatedComment,

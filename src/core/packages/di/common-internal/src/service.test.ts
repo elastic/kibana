@@ -35,7 +35,7 @@ describe('CoreInjectionService', () => {
     let setup: ReturnType<CoreInjectionService['setup']>;
 
     beforeEach(() => {
-      jest.spyOn(Container.prototype, 'loadSync').mockReturnValue(undefined);
+      jest.spyOn(Container.prototype, 'load').mockReturnValue(undefined);
       setup = service.setup();
     });
 
@@ -46,7 +46,7 @@ describe('CoreInjectionService', () => {
     });
 
     it('should load the plugin module into the root container', () => {
-      expect(Container.prototype.loadSync).toHaveBeenCalledWith(pluginModuleMock);
+      expect(Container.prototype.load).toHaveBeenCalledWith(pluginModuleMock);
     });
 
     describe('getContainer', () => {

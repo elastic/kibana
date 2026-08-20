@@ -20,7 +20,7 @@ beforeEach(() => {
 describe('resolveCpsData', () => {
   it('resolves the expression as the internal user and the linked projects as the current user', async () => {
     internalUserEsClient.transport.request.mockResolvedValueOnce({
-      kibana_space_default_default: { expression: '_alias:my-project' },
+      expression: '_alias:my-project',
     });
     currentUserEsClient.transport.request.mockResolvedValueOnce({
       linked_projects: {
@@ -48,6 +48,24 @@ describe('resolveCpsData', () => {
       resolvedExpression: '_alias:my-project',
       linkedProjects: [{ id: 'p1', alias: 'alias1', type: 'type1', organization: 'org1' }],
     });
+  });
+
+  it('falls back to PROJECT_ROUTING_ALL on 400', async () => {
+    internalUserEsClient.transport.request.mockRejectedValueOnce({ statusCode: 400 });
+    currentUserEsClient.transport.request.mockResolvedValueOnce({ linked_projects: {} });
+
+    const result = await resolveCpsData(
+      internalUserEsClient,
+      currentUserEsClient,
+      'default',
+      logger
+    );
+
+    expect(result).toEqual({
+      resolvedExpression: PROJECT_ROUTING_ALL,
+      linkedProjects: [],
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('falls back to PROJECT_ROUTING_ALL on 404', async () => {
@@ -102,7 +120,7 @@ describe('resolveCpsData', () => {
 
   it('resolves the correct NPRE for a custom space', async () => {
     internalUserEsClient.transport.request.mockResolvedValueOnce({
-      kibana_space_my_space_default: { expression: '_alias:custom-project' },
+      expression: '_alias:custom-project',
     });
     currentUserEsClient.transport.request.mockResolvedValueOnce({
       linked_projects: {
@@ -126,9 +144,33 @@ describe('resolveCpsData', () => {
     });
   });
 
+  it('stamps origin provenance for an origin-routed space (regression for #279328)', async () => {
+    internalUserEsClient.transport.request.mockResolvedValueOnce({
+      expression: '_alias:_origin',
+    });
+    currentUserEsClient.transport.request.mockResolvedValueOnce({ linked_projects: {} });
+
+    const result = await resolveCpsData(
+      internalUserEsClient,
+      currentUserEsClient,
+      'default',
+      logger
+    );
+
+    expect(currentUserEsClient.transport.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { project_routing: '_alias:_origin' },
+      })
+    );
+    expect(result).toEqual({
+      resolvedExpression: '_alias:_origin',
+      linkedProjects: [],
+    });
+  });
+
   it('returns empty linkedProjects when the tags request fails', async () => {
     internalUserEsClient.transport.request.mockResolvedValueOnce({
-      kibana_space_default_default: { expression: '_alias:*' },
+      expression: '_alias:*',
     });
     currentUserEsClient.transport.request.mockRejectedValueOnce(new Error('tags failed'));
 

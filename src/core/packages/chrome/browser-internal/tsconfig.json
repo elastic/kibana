@@ -53,6 +53,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-user-profile-common",
     "@kbn/core-theme-browser-internal",
+    "@kbn/app-menu",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-sidebar-internal",
     "@kbn/core-chrome-sidebar-context",

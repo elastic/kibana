@@ -15,21 +15,19 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import { getUseGASchemas } from '../get_use_ga_schemas';
-import type {
-  DashboardSearchRequestParams,
-  DashboardSearchResponseBody,
-  LegacyDashboardSearchRequestParams,
-  LegacyDashboardSearchResponseBody,
-} from './types';
+import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  useAsCodeSearchSchemas: boolean
-): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
+  searchParams: DashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+): Promise<DashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+
+  // Plain listings get a deterministic newest-first order; search requests keep relevance.
+  const sortOptions = searchParams.query
+    ? {}
+    : { sortField: 'updated_at', sortOrder: 'desc' as const };
 
   const soResponse = await findWithTagFilter<DashboardSavedObjectAttributes>(
     core.savedObjects.client,
@@ -48,22 +46,15 @@ export async function search(
       perPage: searchParams.per_page,
       page: searchParams.page,
       defaultSearchOperator: 'AND',
+      ...sortOptions,
     },
     searchParams
   );
 
-  const useGASchemas = await getUseGASchemas(core);
-
   const dashboards = soResponse.saved_objects.map((so) => {
     const {
       dashboardState: { description, tags, time_range, title },
-    } = transformDashboardOut(
-      so.attributes,
-      so.references,
-      undefined,
-      strictValidationSchema,
-      useGASchemas
-    );
+    } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
     return {
       id: so.id,
@@ -84,9 +75,5 @@ export async function search(
 
   const { total, page, per_page } = soResponse;
 
-  // The dashboard summaries are identical across schemas; only the response envelope differs.
-  // The legacy branch can be removed once the `asCode.useGASchemas` flag is gone.
-  return useAsCodeSearchSchemas
-    ? ({ data: dashboards, meta: { total, page, per_page } } as DashboardSearchResponseBody)
-    : ({ dashboards, page, total } as LegacyDashboardSearchResponseBody);
+  return { data: dashboards, meta: { total, page, per_page } };
 }

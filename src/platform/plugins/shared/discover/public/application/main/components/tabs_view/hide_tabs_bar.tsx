@@ -18,14 +18,16 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
+import { useIsChromeNextProjectHeader } from '../chrome_app_header';
+
 export const HideTabsBar: FC<{
   customizationContext: DiscoverCustomizationContext;
   children: ReactNode;
 }> = ({ customizationContext, children }) => {
   const dispatch = useInternalStateDispatch();
   const { chrome } = useDiscoverServices();
-  const isProjectChrome = chrome.getChromeStyle() === 'project';
-  const topNavMenuItems = useTopNavMenuItems();
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const { topNavMenuItems } = useTopNavMenuItems();
 
   useEffect(() => {
     dispatch(internalStateActions.setTabsBarVisibility(TabsBarVisibility.hidden));
@@ -40,7 +42,7 @@ export const HideTabsBar: FC<{
         /**
          * The tabs bar renders the app menu, but it still needs to be shown when tabs are hidden
          */
-        !isProjectChrome &&
+        !isChromeNextProjectHeader &&
           customizationContext.displayMode === 'standalone' &&
           topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
       }

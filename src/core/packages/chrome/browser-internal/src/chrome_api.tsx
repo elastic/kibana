@@ -10,7 +10,7 @@
 import React, { type ReactNode } from 'react';
 import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { AppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
+import type { ChromeAppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -184,6 +184,9 @@ export function createChromeApi({
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
     next: {
+      get isEnabled() {
+        return true;
+      },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
         register: (button: GlobalHeaderAiButton) => {
@@ -205,13 +208,17 @@ export function createChromeApi({
         get$: () => state.contextSwitcher.$,
         set: state.contextSwitcher.set,
       },
+      projectPicker: {
+        get$: () => state.projectPicker.$,
+        set: state.projectPicker.set,
+      },
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,
         set: state.inlineAppHeader.set,
       },
       appHeader: {
         get$: () => state.appHeader.$,
-        set: (config: AppHeaderConfig) => {
+        set: (config: ChromeAppHeaderConfig) => {
           const registrationId = ++appHeaderRegistrationId;
           state.appHeader.set(config);
           return () => {

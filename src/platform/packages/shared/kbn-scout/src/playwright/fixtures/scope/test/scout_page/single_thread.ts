@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectScope } from '@elastic/eui-test-helpers';
+import { EuiComboBoxObject, type ObjectScope } from '@elastic/eui-test-helpers';
 import { subj } from '@kbn/test-subj-selector';
 import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
-import { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
+import {
+  EuiBasicTableObject,
+  EuiDataGridObject,
+  EuiDraggableObject,
+  EuiGlobalToastListObject,
+  EuiSelectableObject,
+  EuiSuperSelectObject,
+} from '../../../../eui_components';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
@@ -101,7 +108,19 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
 function extendPageWithComponents(page: Page): ScoutPage['components'] {
   return {
     comboBox: (testSubj: string, scope?: ObjectScope) =>
-      new KbnComboBoxObject(scope ?? page, testSubj),
+      new EuiComboBoxObject(scope ?? page, testSubj),
+    dataGrid: (testSubj: string, scope?: ObjectScope) =>
+      new EuiDataGridObject(scope ?? page, testSubj),
+    superSelect: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSuperSelectObject(scope ?? page, testSubj),
+    selectable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSelectableObject(scope ?? page, testSubj),
+    basicTable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiBasicTableObject(scope ?? page, testSubj),
+    draggable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiDraggableObject(scope ?? page, testSubj),
+    toast: (testSubj: string = 'globalToastList', scope?: ObjectScope) =>
+      new EuiGlobalToastListObject(scope ?? page, testSubj),
   };
 }
 

@@ -9,9 +9,11 @@ import { useEffect, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { resolveTimeField } from '@kbn/alerting-v2-utils';
 import { useDataFields } from '../../form/hooks/use_data_fields';
+import { isDateLikeFieldType } from '../../form/utils';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { extractFromSourceQuery } from './extract_from_source_query';
 
@@ -22,6 +24,13 @@ interface UseResolveTimeFieldParams {
   onTimeFieldChange?: (timeField: string) => void;
   http: HttpStart;
   dataViews: DataViewsPublicPluginStart;
+  /**
+   * When provided, ES|QL column introspection is used for field discovery instead
+   * of the DataView field-caps API. Preferred for all ES|QL sources because it
+   * reflects the actual schema the query will return; required for federated sources
+   * that don't exist as Elasticsearch indices.
+   */
+  search?: ISearchGeneric;
   /** When false, skips field resolution and auto-correction. Defaults to true. */
   enabled?: boolean;
 }
@@ -38,21 +47,27 @@ export const useResolveTimeField = ({
   onTimeFieldChange,
   http,
   dataViews,
+  search,
   enabled = true,
 }: UseResolveTimeFieldParams) => {
   const fromSourceQuery = useMemo(() => extractFromSourceQuery(query), [query]);
   const resolutionQuery = enabled ? fromSourceQuery : '';
 
-  const { data: fieldMap, isLoading: isLoadingFields } = useDataFields({
+  const {
+    data: fieldMap,
+    isLoading: isLoadingFields,
+    isError: isFieldMapError,
+  } = useDataFields({
     query: resolutionQuery,
     http,
     dataViews,
+    search,
   });
 
   const dateFields = useMemo(
     () =>
       Object.values(fieldMap)
-        .filter((f) => f.type === 'date')
+        .filter((f) => isDateLikeFieldType(f.type))
         .map((f) => f.name)
         .sort(),
     [fieldMap]
@@ -63,7 +78,7 @@ export const useResolveTimeField = ({
 
   const { data: apiTimeField, isLoading: isLoadingApiTimeField } = useQuery({
     queryKey: ruleFormKeys.composeDiscoverApiTimeField(fromSourceQuery),
-    queryFn: () => getESQLTimeFieldFromQuery({ query: fromSourceQuery, http }),
+    queryFn: () => getESQLTimeField({ query: fromSourceQuery, http }),
     enabled: needsApiTimeField,
     refetchOnWindowFocus: false,
     retry: false,
@@ -95,6 +110,13 @@ export const useResolveTimeField = ({
     return [];
   }, [dateFields, apiTimeField]);
 
+  // Field discovery failed and neither the API fallback nor field-caps returned
+  // any date fields. We can't distinguish a transient introspection error from a
+  // genuinely date-field-free index, so preserve the existing selection rather
+  // than clearing it.
+  const isDiscoveryErrored =
+    isFieldMapError && !isLoadingApiTimeField && candidateDateFields.length === 0;
+
   const isTimeFieldResolved = useMemo(() => {
     if (!enabled || !fromSourceQuery) {
       return true;
@@ -102,11 +124,28 @@ export const useResolveTimeField = ({
     if (isLoadingResolution) {
       return false;
     }
+    // Treat the current value as unverified-but-valid when discovery errored so
+    // the form can still be submitted; the warning callout already surfaces the issue.
+    if (isDiscoveryErrored) {
+      return true;
+    }
     return timeField === resolvedTimeField;
-  }, [enabled, fromSourceQuery, isLoadingResolution, resolvedTimeField, timeField]);
+  }, [
+    enabled,
+    fromSourceQuery,
+    isLoadingResolution,
+    isDiscoveryErrored,
+    resolvedTimeField,
+    timeField,
+  ]);
 
   useEffect(() => {
     if (!enabled || !onTimeFieldChange || !fromSourceQuery || isLoadingResolution) {
+      return;
+    }
+    // When discovery errored and no fallback succeeded, we can't tell whether the
+    // index genuinely has no date fields. Preserve the saved timeField; don't clear it.
+    if (isDiscoveryErrored) {
       return;
     }
     // Sync the form value to the resolved field. `null` (no resolvable date field
@@ -121,6 +160,7 @@ export const useResolveTimeField = ({
     enabled,
     fromSourceQuery,
     isLoadingResolution,
+    isDiscoveryErrored,
     resolvedTimeField,
     timeField,
     onTimeFieldChange,

@@ -67,7 +67,7 @@ Use the rule IDs below to identify the problem and the appropriate fix.
 
 **Scenario 1:** You have several unrelated changes that each require a model version. Ship them in separate PRs.
 
-**Scenario 2:** You only added one version but CI still reports two. Validation uses two baselines: your PR merge-base and the **current Serverless release**. If the Serverless release was recently rolled back, the "current release" baseline may make your branch look like it defines two new versions. Wait for the release state to normalize, or contact the {{kib}} Core team.
+**Scenario 2:** You only added one version but CI still reports two. Validation uses two baselines: your PR merge-base and the **current Serverless release**. If the Serverless release was recently rolled back, the "current release" baseline may make your branch look like it defines two new versions. Wait for the release state to normalize, or [open an issue](https://github.com/elastic/kibana/issues/new/choose) if the check still reports two versions.
 
 **Fix:** Split the change so that each PR adds exactly one new model version.
 

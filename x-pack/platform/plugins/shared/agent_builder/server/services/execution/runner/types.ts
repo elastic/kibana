@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -23,11 +24,13 @@ import type { RendererServiceStart } from '../../renderers';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
 
 export interface RunnerFactoryDeps {
   // core services
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -48,6 +51,7 @@ export interface RunnerFactoryDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface RunnerFactory {

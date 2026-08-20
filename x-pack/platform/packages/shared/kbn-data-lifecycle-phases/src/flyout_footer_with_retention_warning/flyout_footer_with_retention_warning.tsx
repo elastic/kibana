@@ -91,16 +91,17 @@ export const FlyoutFooterWithRetentionWarning = ({
   return (
     <EuiFlyoutFooter>
       {showWarning && (
-        <EuiCallOut
-          title={footerStrings.downsamplingNotAppliedTitle}
-          color="primary"
-          size="s"
-          announceOnMount
-          css={styles.callout}
-          data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
-        >
-          <EuiText size="s">{warningBody}</EuiText>
-        </EuiCallOut>
+        <div css={styles.callout}>
+          <EuiCallOut
+            title={footerStrings.downsamplingNotAppliedTitle}
+            color="primary"
+            size="s"
+            announceOnMount
+            data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
+          >
+            <EuiText size="s">{warningBody}</EuiText>
+          </EuiCallOut>
+        </div>
       )}
 
       <EuiFlexGroup

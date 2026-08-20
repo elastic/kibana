@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/278097
+issues:
+- https://github.com/elastic/kibana/issues/259257
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Fix exposed Synthetics monitor secrets in the "Inspect configuration" flyout
+description: The Synthetics monitor "Inspect configuration" flyout could show decrypted
+  secrets such as passwords in plain text. Secret values are now redacted in the inspect
+  output.

@@ -38,13 +38,20 @@ const FIELD_DEFINITIONS_PAGE_SIZE = 100;
  * How long an "ensured" entry stays trusted before the next request in
  * that space re-runs the full ensure path. Bounds the recovery time when
  * an administrator deletes a per-space data view out-of-band (e.g. via
- * Stack Management). `/reset` clears the cache directly.
+ * Stack Management), and — more commonly — the lag before runtime fields
+ * appear when config is created through a path that can't fire the refresh
+ * hook (the legacy customFields → v2 templates migration, or raw
+ * `repo.create` writes that bypass the services). `/reset` and the
+ * migration-completion nudge clear the cache directly for the paths they
+ * own; this TTL is the fallback for everything else.
  *
- * Trade-off: every request after the TTL pays one templates page-read
- * plus one data view `get`. Both are typically single round-trips and the
- * cost is bounded by space count, not request volume.
+ * Kept short (one minute) so that fallback self-heal is measured in
+ * seconds rather than the minutes it used to take. Trade-off: every
+ * request after the TTL pays one templates page-read plus one data view
+ * `get`. Both are typically single round-trips and the cost is bounded by
+ * space count, not request volume, so a shorter window is cheap.
  */
-const BOOTSTRAP_CACHE_TTL_MS = 5 * 60 * 1000;
+const BOOTSTRAP_CACHE_TTL_MS = 60 * 1000;
 
 /**
  * Detects the "another node already created this data view" outcome of the

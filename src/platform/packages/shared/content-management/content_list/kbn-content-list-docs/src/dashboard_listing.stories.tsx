@@ -279,7 +279,7 @@ const ProposalStory = () => {
           title="Dashboards"
           tabs={[{ label: 'Dashboards', isSelected: true, onClick: () => undefined }]}
           actions={
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusCircle">
               Create dashboard
             </EuiButton>
           }

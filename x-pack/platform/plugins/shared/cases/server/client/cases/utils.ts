@@ -8,6 +8,7 @@
 import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
@@ -624,6 +625,76 @@ export const getUserProfiles = async (
   }, new Map());
 };
 
+/**
+ * Best-effort `getUserProfiles`: resolves profiles for `uids`, returning
+ * `undefined` (not throwing) if the user-profiles service fails. A transient
+ * `bulkGet` failure must not block case create/update — callers fall back to
+ * storing assignees uid-only, and the read path still resolves identity live.
+ */
+export const getUserProfilesSafe = async (
+  securityStartPlugin: SecurityPluginStart,
+  uids: Set<string>,
+  logger: Logger
+): Promise<Map<string, UserProfileWithAvatar> | undefined> => {
+  try {
+    return await getUserProfiles(securityStartPlugin, uids);
+  } catch (error) {
+    logger.warn(
+      `Failed to resolve assignee user profiles; storing assignees without identity: ${error}`
+    );
+    return undefined;
+  }
+};
+
+/**
+ * Maps resolved user profiles onto assignees, populating `username`,
+ * `full_name` and `email`. Uids without a resolvable profile stay uid-only.
+ * Pure — the profiles are fetched once by the caller so a bulk operation can
+ * share a single `bulkGet`.
+ */
+export const applyProfilesToAssignees = (
+  assignees: CaseAssignees,
+  profiles: Map<string, UserProfileWithAvatar>
+): CaseAssignees =>
+  assignees.map(({ uid }) => {
+    const profile = profiles.get(uid);
+
+    if (!profile) {
+      return { uid };
+    }
+
+    return {
+      uid,
+      username: profile.user.username ?? null,
+      full_name: profile.user.full_name ?? null,
+      email: profile.user.email ?? null,
+    };
+  });
+
+/**
+ * Resolves each assignee's `uid` to its identity via the user-profiles service
+ * and returns the assignees with those fields populated. The caller gates
+ * invocation on the `assigneeIdentity` config flag. Non-fatal: on a profile
+ * lookup failure the original (uid-only) assignees are returned unchanged.
+ */
+export const populateAssigneesIdentity = async (
+  securityStartPlugin: SecurityPluginStart,
+  logger: Logger,
+  assignees?: CaseAssignees
+): Promise<CaseAssignees | undefined> => {
+  if (assignees == null || assignees.length === 0) {
+    return assignees;
+  }
+
+  const profiles = await getUserProfilesSafe(
+    securityStartPlugin,
+    new Set(assignees.map(({ uid }) => uid)),
+    logger
+  );
+
+  return profiles ? applyProfilesToAssignees(assignees, profiles) : assignees;
+};
+
 export const fillMissingCustomFields = ({
   customFields = [],
   customFieldsConfiguration = [],
@@ -698,9 +769,13 @@ export const processObservables = (
 /**
  *
  * For cases that have extended fields, populates `extended_fields_labels` with a mapping from
- * storage keys (e.g., `priority_as_keyword`) to user-facing labels (e.g., "Priority").
- * Labels come from the case's template `fieldDefinitions` (when present) merged with global
- * field-library definitions. Template labels win on key collision. Cases without extended
+ * storage keys (e.g., `priority_as_keyword`) to user-facing labels (e.g., "Priority"), and
+ * `extended_fields_controls` with a mapping from the same storage keys to the field's control
+ * type (e.g., `USER_PICKER`) — needed by any consumer that must parse a value (user picker,
+ * checkbox group, toggle) rather than display it verbatim, without having to re-fetch or thread
+ * through full field definitions itself.
+ * Both come from the case's template `fieldDefinitions` (when present) merged with global
+ * field-library definitions. Template entries win on key collision. Cases without extended
  * fields are returned unchanged.
  *
  * @param cases - Array of cases to enrich
@@ -732,34 +807,53 @@ export const enrichCasesWithFieldLabels = (
       field.label ?? field.name,
     ])
   );
+  const globalControlMap = Object.fromEntries(
+    globalFields.map((field) => [getFieldSnakeKey(field.name, field.type), field.control])
+  );
 
   const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  const controlsByTemplateKey = new Map<string, Record<string, string>>();
   for (const so of templateSOs) {
-    const fieldKeyToLabel = Object.fromEntries(
-      (so.attributes.fieldDefinitions ?? []).map((field) => [
-        getFieldSnakeKey(field.name, field.type),
-        field.label,
-      ])
-    );
+    const fieldDefinitions = so.attributes.fieldDefinitions ?? [];
+    const templateKey = `${so.attributes.templateId}:${so.attributes.templateVersion}`;
     labelsByTemplateKey.set(
-      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
-      fieldKeyToLabel
+      templateKey,
+      Object.fromEntries(
+        fieldDefinitions.map((field) => [getFieldSnakeKey(field.name, field.type), field.label])
+      )
+    );
+    controlsByTemplateKey.set(
+      templateKey,
+      Object.fromEntries(
+        fieldDefinitions.map((field) => [getFieldSnakeKey(field.name, field.type), field.control])
+      )
     );
   }
 
   const enrichedCasesById = new Map(
     eligibleCases.flatMap((c) => {
-      const templateLabelMap =
-        c.template?.id != null
-          ? labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`)
-          : undefined;
+      const templateKey = c.template?.id != null ? `${c.template.id}:${c.template.version}` : null;
       const fieldKeyToLabel = {
         ...globalLabelMap,
-        ...(templateLabelMap ?? {}),
+        ...(templateKey != null ? labelsByTemplateKey.get(templateKey) ?? {} : {}),
       };
-      return Object.keys(fieldKeyToLabel).length > 0
-        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
-        : [];
+      if (Object.keys(fieldKeyToLabel).length === 0) {
+        return [];
+      }
+      const fieldKeyToControl = {
+        ...globalControlMap,
+        ...(templateKey != null ? controlsByTemplateKey.get(templateKey) ?? {} : {}),
+      };
+      return [
+        [
+          c.id,
+          {
+            ...c,
+            extended_fields_labels: fieldKeyToLabel,
+            extended_fields_controls: fieldKeyToControl,
+          },
+        ],
+      ];
     })
   );
 

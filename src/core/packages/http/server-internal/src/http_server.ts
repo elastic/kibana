@@ -66,6 +66,7 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
+import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -324,6 +325,8 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
+    this.server.ext('onPreHandler', createSelfCallPreHandler());
+    this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();

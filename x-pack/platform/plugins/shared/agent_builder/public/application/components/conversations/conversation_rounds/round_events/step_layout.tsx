@@ -19,6 +19,7 @@ interface StepLayoutProps {
   label: ReactNode;
   onClick?: () => void;
   isExpanded?: boolean;
+  isExpandable?: boolean;
   expansion?: ReactNode;
   ebtAction?: ConversationAction;
 }
@@ -27,6 +28,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   label,
   onClick,
   isExpanded = false,
+  isExpandable = true,
   expansion,
   ebtAction,
 }) => {
@@ -53,7 +55,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
     <div>
       <EuiFlexGroup
         direction="row"
-        gutterSize="s"
+        gutterSize="xs"
         alignItems="center"
         responsive={false}
         css={rowStyles}
@@ -79,11 +81,11 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
           : {})}
       >
         <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-        {isClickable && (
+        {isClickable && isExpandable && (
           <EuiFlexItem grow={false}>
             <EuiIcon
-              type={isExpanded ? 'arrowDown' : 'arrowRight'}
-              color="subdued"
+              type={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              color={euiTheme.colors.textDisabled}
               size="s"
               aria-hidden={true}
             />

@@ -161,7 +161,7 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
       traceId: accessor.traceId,
       resolveMetricValue: async () => {
         const { aggregations } = await accessor.runSearch<{
-          tool_calls?: { doc_count?: number };
+          tool_calls?: { distinct_spans?: { value?: number } };
         }>('traces', {
           size: 0,
           aggs: {
@@ -171,11 +171,18 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
                   'attributes.elastic.inference.span.kind': 'TOOL',
                 },
               },
+              aggs: {
+                distinct_spans: {
+                  cardinality: {
+                    field: 'span_id',
+                  },
+                },
+              },
             },
           },
         });
 
-        return aggregations?.tool_calls?.doc_count;
+        return aggregations?.tool_calls?.distinct_spans?.value;
       },
       log,
     });

@@ -38,7 +38,7 @@ export const ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW = {
   id: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 1,
+  version: 2,
   yaml: ALERT_RETRIEVAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -47,7 +47,7 @@ export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW = {
   id: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 12,
+  version: 13,
   yaml: SKILL_ALERT_RETRIEVAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -56,7 +56,7 @@ export const ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW = {
   id: ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 3,
+  version: 4,
   yaml: SKILL_REPORT_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -65,7 +65,7 @@ export const ATTACK_DISCOVERY_GENERATION_WORKFLOW = {
   id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 1,
+  version: 2,
   yaml: GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -74,7 +74,7 @@ export const ATTACK_DISCOVERY_VALIDATE_WORKFLOW = {
   id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 2,
+  version: 3,
   yaml: VALIDATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -83,7 +83,7 @@ export const ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW = {
   id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 2,
+  version: 3,
   yaml: RUN_EXAMPLE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -92,6 +92,6 @@ export const ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW = {
   id: ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 2,
+  version: 3,
   yaml: CUSTOM_VALIDATION_EXAMPLE_YAML,
 } as const satisfies ManagedWorkflowDefinition;

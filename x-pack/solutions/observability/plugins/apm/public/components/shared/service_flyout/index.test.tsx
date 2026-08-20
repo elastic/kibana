@@ -7,8 +7,22 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ServiceNodeData } from '../../../../common/service_map';
+import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
+
+jest.mock('../../../plugin', () => ({
+  getApmInternalServices: () => ({ callApmApi: jest.fn() }),
+}));
+
+jest.mock('./hooks/use_apm_indices', () => ({
+  useApmIndices: () => ({ indices: undefined, loading: false }),
+}));
+
+jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
+  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -20,8 +34,16 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <section data-test-subj="responsiveFlyoutMock">
+  ResponsiveFlyout: ({
+    children,
+    onClose,
+    historyKey,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    historyKey?: symbol;
+  }) => (
+    <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
       <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
         close
       </button>
@@ -47,101 +69,112 @@ jest.mock('./header', () => ({
   ),
 }));
 
-jest.mock('./overview', () => ({
-  ServiceFlyoutOverview: ({
-    environment,
-    transactionType,
-    onEnvironmentChange,
-    onTransactionTypeChange,
-  }: {
-    environment: string;
-    transactionType: string;
-    onEnvironmentChange: (environment: string) => void;
-    onTransactionTypeChange: (transactionType: string) => void;
-  }) => (
-    <div data-test-subj="serviceFlyoutOverviewMock">
-      <button
-        data-test-subj="mockEnvironmentChange"
-        onClick={() => onEnvironmentChange('production')}
-      >
-        change environment
-      </button>
-      <button
-        data-test-subj="mockTransactionTypeChange"
-        onClick={() => onTransactionTypeChange('page-load')}
-      >
-        change transaction type
-      </button>
-      <span data-test-subj="serviceFlyoutOverviewReadout">
-        {environment}:{transactionType}
-      </span>
-    </div>
-  ),
-}));
+// The overview reads environment/transactionType from context and calls the context setters.
+jest.mock('./overview', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutOverview: () => {
+      const {
+        filters: { environment, transactionType, setEnvironment, setTransactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutOverviewMock">
+          <button
+            data-test-subj="mockEnvironmentChange"
+            onClick={() => setEnvironment('production')}
+          >
+            change environment
+          </button>
+          <button
+            data-test-subj="mockTransactionTypeChange"
+            onClick={() => setTransactionType?.('page-load')}
+          >
+            change transaction type
+          </button>
+          <span data-test-subj="serviceFlyoutOverviewReadout">
+            {environment}:{transactionType}
+          </span>
+        </div>
+      );
+    },
+  };
+});
 
-jest.mock('./footer', () => ({
-  ServiceFlyoutFooter: ({
-    environment,
-    transactionType,
-  }: {
-    environment: string;
-    transactionType: string;
-  }) => (
-    <div data-test-subj="serviceFlyoutFooterMock">
-      {environment}:{transactionType}
-    </div>
-  ),
-}));
+// The footer reads environment/transactionType from context to display them.
+jest.mock('./footer', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutFooter: () => {
+      const {
+        filters: { environment, transactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutFooterMock">
+          {environment}:{transactionType}
+        </div>
+      );
+    },
+  };
+});
 
-const service: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const service: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
+};
+
+const mockReportServiceFlyoutViewed = jest.fn();
+
+const contextProps = {
+  deps: {
+    core: {} as any,
+    share: {} as any,
+    lens: {} as any,
+    dataViews: {} as any,
+  },
+  telemetry: {
+    client: { reportServiceFlyoutViewed: mockReportServiceFlyoutViewed },
+    source: 'test-source',
+  },
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('ServiceFlyout onView', () => {
-  it('notifies the consumer with the initial tab on mount', () => {
-    const onView = jest.fn();
-
+describe('ServiceFlyout telemetry', () => {
+  it('reports the initial tab on mount', () => {
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
-        onView={onView}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
 
-    expect(onView).toHaveBeenCalledTimes(1);
-    expect(onView).toHaveBeenCalledWith({ tabId: 'overview' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledTimes(1);
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledWith({
+      tabId: 'overview',
+      source: 'test-source',
+    });
   });
 
-  it('notifies the consumer with the new tab when the selected tab changes', () => {
-    const onView = jest.fn();
-
+  it('reports the new tab when the selected tab changes', () => {
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
-        onView={onView}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
 
     fireEvent.click(screen.getByTestId('mockTabChange'));
 
-    expect(onView).toHaveBeenLastCalledWith({ tabId: 'alerts' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenLastCalledWith({
+      tabId: 'alerts',
+      source: 'test-source',
+    });
   });
 });
 
@@ -149,11 +182,9 @@ describe('ServiceFlyout initial state', () => {
   it('does not seed transactionType from a hardcoded default before the fetch resolves', () => {
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -168,11 +199,9 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -192,11 +221,9 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -209,11 +236,9 @@ describe('ServiceFlyout local filter state', () => {
   it('does not reset local filter edits when host props change without a remount', () => {
     const { rerender } = render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -224,11 +249,9 @@ describe('ServiceFlyout local filter state', () => {
     // Same key (same service): a host environment change must not clobber the local edit.
     rerender(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="staging"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -239,12 +262,10 @@ describe('ServiceFlyout local filter state', () => {
   it('re-seeds local state from props when remounted for a different service', () => {
     const { rerender } = render(
       <ServiceFlyout
-        key={service.id}
+        {...contextProps}
+        key={service.name}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -253,19 +274,54 @@ describe('ServiceFlyout local filter state', () => {
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('production:');
 
     // A different `key` (different service) remounts the flyout, re-seeding from the new props.
-    const otherService: ServiceNodeData = { ...service, id: 'opbeans-go', label: 'opbeans-go' };
+    const otherService: ServiceFlyoutService = {
+      ...service,
+      name: 'opbeans-go',
+    };
     rerender(
       <ServiceFlyout
-        key={otherService.id}
+        {...contextProps}
+        key={otherService.name}
         service={otherService}
-        environment="staging"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
 
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('staging:');
+  });
+});
+
+describe('ServiceFlyout historyKey', () => {
+  it('forwards historyKey to ResponsiveFlyout when provided', () => {
+    const historyKey = Symbol('test-history-key');
+
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+        historyKey={historyKey}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute(
+      'data-history-key',
+      historyKey.toString()
+    );
+  });
+
+  it('renders without historyKey when not provided', () => {
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).not.toHaveAttribute('data-history-key');
   });
 });

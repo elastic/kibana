@@ -53,7 +53,16 @@ async function loginStateful(page: import('@playwright/test').Page) {
   log.info('...waiting for login page elements to appear.');
 
   if (!isLocalCluster) {
-    await page.getByRole('button', { name: 'Log in with Elasticsearch' }).click();
+    // Some ESS deployments show an intermediate "Log in with Elasticsearch"
+    // provider-selection button before the credentials form; others show the
+    // username/password form directly. Wait for whichever appears first.
+    const [index] = await waitForOneOf([
+      page.getByRole('button', { name: 'Log in with Elasticsearch' }),
+      page.getByLabel('Username'),
+    ]);
+    if (index === 0) {
+      await page.getByRole('button', { name: 'Log in with Elasticsearch' }).click();
+    }
   }
 
   await page.getByLabel('Username').fill(process.env.KIBANA_USERNAME!);
