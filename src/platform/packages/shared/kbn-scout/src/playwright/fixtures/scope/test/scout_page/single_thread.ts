@@ -13,7 +13,9 @@ import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import {
   EuiDataGridObject,
+  EuiDraggableObject,
   EuiGlobalToastListObject,
+  EuiSelectableObject,
   EuiSuperSelectObject,
 } from '../../../../eui_components';
 import type { ScoutPage } from '.';
@@ -110,6 +112,10 @@ function extendPageWithComponents(page: Page): ScoutPage['components'] {
       new EuiDataGridObject(scope ?? page, testSubj),
     superSelect: (testSubj: string, scope?: ObjectScope) =>
       new EuiSuperSelectObject(scope ?? page, testSubj),
+    selectable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiSelectableObject(scope ?? page, testSubj),
+    draggable: (testSubj: string, scope?: ObjectScope) =>
+      new EuiDraggableObject(scope ?? page, testSubj),
     toast: (testSubj: string = 'globalToastList', scope?: ObjectScope) =>
       new EuiGlobalToastListObject(scope ?? page, testSubj),
   };

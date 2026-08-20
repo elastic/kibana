@@ -8,8 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const EMPTY_SORT_SNAPSHOT_URL =
   '/app/discover?_t=1453775307251#/' +
@@ -102,6 +101,33 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
       await pageObjects.discover.waitUntilTabIsLoaded();
 
       await expect(page).toHaveURL(/discover/);
+    }
+  );
+
+  spaceTest(
+    'should round-trip selected columns via share URL',
+    async ({ page, pageObjects, scoutSpace }) => {
+      await scoutSpace.uiSettings.set({ 'state:storeInSessionStorage': false });
+      await page.reload();
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await expect
+        .poll(() => pageObjects.dataGrid.getColumnTitles())
+        .toStrictEqual(['@timestamp', 'bytes']);
+
+      const sharedUrl = await pageObjects.discover.getSharedUrl();
+
+      await page.goto(sharedUrl);
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await expect
+        .poll(() => pageObjects.dataGrid.getColumnTitles())
+        .toStrictEqual(['@timestamp', 'bytes']);
+
+      await expect.poll(() => decodeURIComponent(page.url())).toContain('columns:!(bytes)');
     }
   );
 });

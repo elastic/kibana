@@ -59,7 +59,16 @@ describe('getGroupHash', () => {
       },
       spaceId
     );
-    expect(hash).toBe(sha256('default:datadog:monitor_id|scope|labels.env|55501|host:web-01|prod'));
+    expect(hash).toBe(
+      sha256(
+        'default:datadog:' +
+          JSON.stringify([
+            ['monitor_id', '55501'],
+            ['scope', 'host:web-01'],
+            ['labels.env', 'prod'],
+          ])
+      )
+    );
   });
 
   it('ignores root fields named in fingerprint_fields', () => {
@@ -81,7 +90,7 @@ describe('getGroupHash', () => {
       spaceId
     );
     expect(withRoot).toBe(missing);
-    expect(withRoot).toBe(sha256('default:datadog:rule_id|'));
+    expect(withRoot).toBe(sha256('default:datadog:' + JSON.stringify([['rule_id', '']])));
   });
 
   it('is deterministic for the same fingerprint_fields inputs', () => {
@@ -100,7 +109,7 @@ describe('getGroupHash', () => {
   });
 });
 
-describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
+describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
   const spaceId = 'default';
 
   const createClient = (
@@ -128,7 +137,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
 
   it('mints a new episode id when no prior episode exists', async () => {
     const { client, storageService } = createClient([]);
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
@@ -146,7 +155,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
@@ -161,7 +170,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.inactive },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,

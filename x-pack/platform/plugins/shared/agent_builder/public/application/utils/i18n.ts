@@ -644,6 +644,9 @@ export const labels = {
         edit: i18n.translate('xpack.agentBuilder.mcpClients.actions.edit', {
           defaultMessage: 'Edit',
         }),
+        delete: i18n.translate('xpack.agentBuilder.mcpClients.actions.delete', {
+          defaultMessage: 'Delete',
+        }),
       },
       form: {
         pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
@@ -850,6 +853,31 @@ export const labels = {
           }),
         errorToast: i18n.translate('xpack.agentBuilder.mcpClients.revoke.errorToast', {
           defaultMessage: 'Failed to revoke MCP client',
+        }),
+      },
+      delete: {
+        title: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.delete.title', {
+            defaultMessage: 'Delete {name}?',
+            values: { name },
+          }),
+        confirmationText: i18n.translate('xpack.agentBuilder.mcpClients.delete.confirmationText', {
+          defaultMessage:
+            'This action will permanently remove the MCP client. This cannot be undone.',
+        }),
+        deleteButton: i18n.translate('xpack.agentBuilder.mcpClients.delete.deleteButton', {
+          defaultMessage: 'Delete',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.delete.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        successToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.delete.successToast', {
+            defaultMessage: 'MCP client "{name}" deleted successfully',
+            values: { name },
+          }),
+        errorToast: i18n.translate('xpack.agentBuilder.mcpClients.delete.errorToast', {
+          defaultMessage: 'Failed to delete MCP client',
         }),
       },
     },
