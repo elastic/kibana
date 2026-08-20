@@ -300,7 +300,7 @@ describe('EventFlyout', () => {
         'Investigation failed'
       );
       expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
-        'Investigation failed'
+        'Failed'
       );
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
       expect(

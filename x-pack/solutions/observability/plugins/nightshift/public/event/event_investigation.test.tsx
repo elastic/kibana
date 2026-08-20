@@ -309,7 +309,7 @@ describe('EventInvestigation', () => {
       conversationId: undefined,
     });
 
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent(
       'Determine whether the deploy caused the spike.'
     );
@@ -452,7 +452,7 @@ Checkout deploy introduced a regression.
       });
 
       expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
-        'Investigation failed'
+        'Failed'
       );
       expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
         'The investigation did not complete.'

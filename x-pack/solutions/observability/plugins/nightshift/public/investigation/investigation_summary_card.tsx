@@ -39,9 +39,9 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_c
 import { nightshiftOpacityTransition, nightshiftReducedMotionStyles } from '../common/transition';
 import {
   getConclusionBody,
+  getInvestigationCompleteStatusLabel,
   getInvestigationGoalText,
   getInvestigationHeadline,
-  getInvestigationWorkflowStatusLabel,
   getInvestigationTimeLabel,
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
@@ -59,12 +59,31 @@ const recommendationChatTooltip = i18n.translate(
   }
 );
 
-const completedStatusLabel = i18n.translate(
-  'xpack.nightshift.investigation.summaryCompleteStatusLabel',
-  {
-    defaultMessage: 'Complete',
+/**
+ * Short status wording for the card, which already sits under an "Investigation" heading. The
+ * badges keep the long form because nothing else there names what the status refers to.
+ */
+const getSummaryStatusLabel = (status: InvestigationStatus): string => {
+  if (isInvestigationInvestigated(status)) {
+    return getInvestigationCompleteStatusLabel();
   }
-);
+
+  if (isInvestigationTerminalFailure(status)) {
+    return i18n.translate('xpack.nightshift.investigation.summaryFailedStatusLabel', {
+      defaultMessage: 'Failed',
+    });
+  }
+
+  if (status === 'loading') {
+    return i18n.translate('xpack.nightshift.investigation.summaryLoadingStatusLabel', {
+      defaultMessage: 'Loading',
+    });
+  }
+
+  return i18n.translate('xpack.nightshift.investigation.summaryInProgressStatusLabel', {
+    defaultMessage: 'In progress',
+  });
+};
 
 function InvestigationStatusRow({
   status,
@@ -79,7 +98,7 @@ function InvestigationStatusRow({
 }): React.ReactElement {
   const isInvestigated = isInvestigationInvestigated(status);
   const isTerminalFailure = isInvestigationTerminalFailure(status);
-  const statusLabel = getInvestigationWorkflowStatusLabel(status);
+  const statusLabel = getSummaryStatusLabel(status);
   const timeLabel = getInvestigationTimeLabel({
     startedAt,
     endedAt,
@@ -93,7 +112,7 @@ function InvestigationStatusRow({
           <EuiTitle size="xxs">
             <h4>
               <InvestigationCompleteStatus
-                label={completedStatusLabel}
+                label={statusLabel}
                 testSubj="nightshiftInvestigationStatusIcon"
               />
             </h4>
