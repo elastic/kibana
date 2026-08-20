@@ -105,7 +105,8 @@ const processExampleBatch = (
   modelId: string,
   suiteId: string,
   executionId: string,
-  traces: MatrixTraceData
+  traces: MatrixTraceData,
+  examplePrefixes: ReadonlySet<string> = new Set()
 ): boolean => {
   // Filter to this model + this execution, newest first
   const relevant = scores
@@ -129,12 +130,31 @@ const processExampleBatch = (
   if (exampleId) {
     traces[traceKey(modelId, exampleId)] = entry;
   }
+  // Category columns slice the dataset by example.id prefix (examplePrefixes),
+  // synthesizing `prefix:<name>` dataset ids. Emit one trace per matching
+  // prefix — mirroring scoresByPrefixToDatasets' semantics exactly (equality
+  // or boundary dash) — so every category card shows ITS OWN example's
+  // conversation instead of falling through to the suite key (which
+  // previously made all cards render the same, last-processed example).
+  if (exampleId) {
+    for (const prefix of examplePrefixes) {
+      if (exampleId === prefix || exampleId.startsWith(`${prefix}-`)) {
+        const key = traceKey(modelId, `prefix:${prefix}`);
+        // First variant wins: all matching variants are valid examples of the
+        // category, so keep the lookup deterministic across Set iteration order.
+        if (traces[key] === undefined) traces[key] = entry;
+      }
+    }
+  }
   if (datasetId) {
     traces[traceKey(modelId, datasetId)] = entry;
   }
-  // For the suite-level key, only complete runs qualify.
-  if (complete) {
-    traces[traceKey(modelId, suiteId)] = entry;
+  // For the suite-level key, only complete runs qualify — and the FIRST
+  // complete one wins. Overwriting on every example made the suite key
+  // "last example processed", which every non-matching card then inherited.
+  const suiteTraceKey = traceKey(modelId, suiteId);
+  if (complete && traces[suiteTraceKey] === undefined) {
+    traces[suiteTraceKey] = entry;
   }
 
   // If the newest doc is incomplete, fall back to the newest complete one
@@ -144,7 +164,9 @@ const processExampleBatch = (
       const fallbackEntry = extractTraceFromScore(firstComplete);
       const fid = firstComplete.example?.id;
       if (fid) traces[traceKey(modelId, fid)] = fallbackEntry;
-      traces[traceKey(modelId, suiteId)] = fallbackEntry;
+      if (traces[suiteTraceKey] === undefined) {
+        traces[suiteTraceKey] = fallbackEntry;
+      }
     }
   }
 
@@ -241,13 +263,33 @@ export const queryMatrixTraces = async (
     }
   }
 
+  // Category prefixes come from the same synthetic `prefix:*` dataset ids the
+  // score aggregation created (scoresByPrefixToDatasets), so trace bucketing
+  // always matches score bucketing — no separate config source to keep in sync.
+  const examplePrefixes = new Set<string>();
+  for (const modelScores of aggregated) {
+    for (const suite of modelScores.suites) {
+      for (const dataset of suite.datasets) {
+        if (!dataset.datasetId?.startsWith('prefix:')) continue;
+        examplePrefixes.add(dataset.datasetId.slice('prefix:'.length));
+      }
+    }
+  }
+
   // 3. For each run, pick the newest complete document per example and merge
   //    into the traces map.
   for (const ref of runRefs) {
     let completeCount = 0;
     for (const exampleId of ref.exampleIds) {
       const scores = exampleScores.get(exampleId) ?? [];
-      const ok = processExampleBatch(scores, ref.modelId, ref.suiteId, ref.executionId, traces);
+      const ok = processExampleBatch(
+        scores,
+        ref.modelId,
+        ref.suiteId,
+        ref.executionId,
+        traces,
+        examplePrefixes
+      );
       if (ok) completeCount++;
     }
     if (completeCount === 0) {

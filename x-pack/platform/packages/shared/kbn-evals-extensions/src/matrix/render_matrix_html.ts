@@ -272,15 +272,18 @@ const renderModelCard = (
               ? '<span class="status err">failed</span>'
               : '<span class="status err">missing</span>';
 
+          const column = config.columns.find((c) => c.id === col.id);
           const trace =
             traces?.[traceKey(row.modelId, col.id)] ??
+            // examplePrefixes columns consume synthetic `prefix:<p>` datasets;
+            // resolve the trace for that prefix's own example.
+            column?.examplePrefixes
+              ?.map((p) => traces?.[traceKey(row.modelId, `prefix:${p}`)])
+              .find((t) => t != null) ??
             // Column IDs (e.g. 'alert_triage') don't match suite IDs (e.g.
             // 'security-alert-triage'). Fall back to the current column's
             // configured suite IDs to find the first matching trace.
-            config.columns
-              .find((c) => c.id === col.id)
-              ?.suites.map((s) => traces?.[traceKey(row.modelId, s)])
-              .find((t) => t != null);
+            column?.suites.map((s) => traces?.[traceKey(row.modelId, s)]).find((t) => t != null);
           const scoreStr = cell.kind === 'score' ? `score ${cell.value}` : '';
           const metaParts = [
             scoreStr,
