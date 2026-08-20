@@ -21,7 +21,6 @@ import {
   type DeploymentMethod,
 } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
-import { EcfSection } from './authenticate_and_deploy_step/ecf_section';
 
 interface AuthenticateAndDeployStepProps {
   onContinue: () => void;
@@ -43,14 +42,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     [selectedServiceIds, awsServicesMap]
   );
 
-  const ecfServiceIds = useMemo(
-    () =>
-      selectedServiceIds.filter((id) =>
-        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
-      ),
-    [selectedServiceIds, awsServicesMap]
-  );
-
   const showIdentityFederation = useMemo(() => {
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
@@ -62,7 +53,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
 
-      {(miServiceIds.length > 0 || ecfServiceIds.length > 0) && <EuiHorizontalRule margin="l" />}
+      {miServiceIds.length > 0 && <EuiHorizontalRule margin="l" />}
 
       {miServiceIds.length > 0 && (
         <ManagedIntegrationsSection
@@ -70,10 +61,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           showIdentityFederation={showIdentityFederation}
         />
       )}
-
-      {miServiceIds.length > 0 && ecfServiceIds.length > 0 && <EuiSpacer size="m" />}
-
-      {ecfServiceIds.length > 0 && <EcfSection serviceCount={ecfServiceIds.length} />}
 
       <EuiSpacer size="l" />
 
