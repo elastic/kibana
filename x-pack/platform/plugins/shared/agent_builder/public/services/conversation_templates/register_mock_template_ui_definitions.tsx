@@ -40,10 +40,14 @@ export const registerMockTemplateUIDefinitions = (
   });
 
   conversationTemplatesService.registerTemplateUIDefinition('security-finding', {
+    name: 'Security Finding',
+    icon: 'warning',
     tabs: ['mock-overview'],
   });
 
   conversationTemplatesService.registerTemplateUIDefinition('phishing', {
+    name: 'Phishing Investigation',
+    icon: 'warning',
     tabs: ['mock-overview', 'mock-custom'],
   });
 };

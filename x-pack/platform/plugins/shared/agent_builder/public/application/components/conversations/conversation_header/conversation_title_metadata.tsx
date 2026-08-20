@@ -10,19 +10,21 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversation, useConversationPermissions } from '../../../hooks/use_conversation';
+import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -62,10 +64,24 @@ const labels = {
   private: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.private', {
     defaultMessage: 'Private',
   }),
+  defaultChatType: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.defaultChatType', {
+    defaultMessage: 'Default',
+  }),
 };
 
-const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => {
+const InfoRow: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  icon?: IconType;
+  iconPosition?: 'left' | 'right';
+}> = ({ label, value, icon, iconPosition = 'right' }) => {
   const { euiTheme } = useEuiTheme();
+
+  const iconItem = icon && (
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={icon} size="s" aria-hidden={true} />
+    </EuiFlexItem>
+  );
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
@@ -80,14 +96,13 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          css={css`
-            font-weight: ${euiTheme.font.weight.regular};
-          `}
-        >
-          {value}
-        </EuiText>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {iconPosition === 'left' && iconItem}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{value}</EuiText>
+          </EuiFlexItem>
+          {iconPosition === 'right' && iconItem}
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -109,10 +124,9 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const displayedTitle = isLoadingTitle ? '' : conversation?.title || labels.newConversation;
-  const templateName = conversation?.template_id
-    ? CONVERSATION_TEMPLATES.find((template) => template.id === conversation.template_id)?.name ??
-      conversation.template_id
-    : undefined;
+  const templateDisplay = useConversationTemplateDisplay();
+  const templateName = templateDisplay?.name;
+  const templateIcon = templateDisplay?.icon;
   const visibilityLabel =
     conversation?.access_control?.access_mode === ConversationAccessControlMode.Public
       ? labels.public
@@ -209,11 +223,14 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
               <EuiFlexItem grow={false}>
                 <InfoRow label={labels.visibility} value={visibilityLabel} />
               </EuiFlexItem>
-              {templateName && (
-                <EuiFlexItem grow={false}>
-                  <InfoRow label={labels.chatType} value={templateName} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <InfoRow
+                  label={labels.chatType}
+                  value={templateName || labels.defaultChatType}
+                  icon={templateIcon || 'comment'}
+                  iconPosition="left"
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </div>
         )}

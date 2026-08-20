@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversation, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 import { ConversationTitleMetadata } from './conversation_title_metadata';
 
 const labels = {
@@ -28,10 +28,9 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
 
-  const templateName = conversation?.template_id
-    ? CONVERSATION_TEMPLATES.find((template) => template.id === conversation.template_id)?.name ??
-      conversation.template_id
-    : undefined;
+  const templateDisplay = useConversationTemplateDisplay();
+  const templateName = templateDisplay?.name;
+  const templateIcon = templateDisplay?.icon;
 
   // No popover for unsaved conversations — just show the title
   if (!hasPersistedConversation) {
@@ -63,7 +62,11 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       </EuiFlexItem>
       {templateName && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="primary" data-test-subj="agentBuilderConversationTemplateBadge">
+          <EuiBadge
+            color="hollow"
+            iconType={templateIcon}
+            data-test-subj="agentBuilderConversationTemplateBadge"
+          >
             {templateName}
           </EuiBadge>
         </EuiFlexItem>

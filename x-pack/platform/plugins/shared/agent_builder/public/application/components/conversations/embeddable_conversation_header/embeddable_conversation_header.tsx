@@ -9,16 +9,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { EmbeddableConversationRightActions } from './embeddable_conversation_actions';
 import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 import { EmbeddableMenuButton } from './embeddable_menu_button';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import {
-  useAgentId,
-  useConversation,
-  useHasActiveConversation,
-} from '../../../hooks/use_conversation';
+import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 
 const newConversationTitleLabel = i18n.translate(
   'xpack.agentBuilder.embeddableHeader.newConversation',
@@ -41,11 +37,8 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
   const { agents } = useAgentBuilderAgents();
   const hasActiveConversation = useHasActiveConversation();
   const currentAgent = agents.find((a) => a.id === agentId);
-  const { conversation } = useConversation();
-  const templateName = conversation?.template_id
-    ? CONVERSATION_TEMPLATES.find((template) => template.id === conversation.template_id)?.name ??
-      conversation.template_id
-    : undefined;
+  const templateDisplay = useConversationTemplateDisplay();
+  const templateName = templateDisplay?.name;
 
   return (
     <div

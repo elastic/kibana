@@ -24,7 +24,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
-import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useApplyTemplate } from '../../../hooks/use_apply_template';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -52,6 +51,40 @@ const labels = {
 };
 
 type TemplateOption = EuiSelectableOption<{ template: ConversationTemplate }>;
+
+// TODO: templates now live in a server-side registry with no browser-facing list API yet.
+// For now, hardcode templates we know exist.
+const AVAILABLE_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
+  {
+    id: 'security-finding',
+    version: 1,
+    name: 'Security Finding',
+    description: 'Structured output for a security finding.',
+    fields: {
+      severity: {
+        input_type: 'SELECT',
+        description: 'Severity of the finding.',
+        required: true,
+        options: ['low', 'medium', 'high', 'critical'],
+      },
+    },
+  },
+  {
+    id: 'phishing',
+    version: 1,
+    name: 'Phishing Investigation',
+    description: 'Use for investigating suspected phishing attempts.',
+    fields: {
+      status: {
+        input_type: 'SELECT',
+        description: 'Current investigation status.',
+        default_value: 'open',
+        required: true,
+        options: ['open', 'in_progress', 'closed'],
+      },
+    },
+  },
+];
 
 const popoverPanelStyles = css`
   width: 440px;
@@ -92,7 +125,7 @@ export const SetTypeControl: React.FC = () => {
 
   // While the conversation is loading we don't yet know whether a template is
   // already applied — render nothing rather than flash enabled before flipping to disabled.
-  if (!conversationId || !CONVERSATION_TEMPLATES.length || isLoading) {
+  if (!conversationId || !AVAILABLE_TEMPLATES.length || isLoading) {
     return null;
   }
 
@@ -115,7 +148,7 @@ export const SetTypeControl: React.FC = () => {
     }
   };
 
-  const options = CONVERSATION_TEMPLATES.map(
+  const options = AVAILABLE_TEMPLATES.map(
     (template): TemplateOption => ({
       key: template.id,
       label: template.name,
