@@ -4,11 +4,7 @@ Use this format when invoking the Scout Best Practices Reviewer skill directly (
 
 Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
 
-Finding titles should be short, easy-to-skim phrases that capture the fix or risk — **not** the full checklist heading. When the linked best practice is useful to cite, include it in the body as a separate bullet:
-
-```md
-- **Best practice**: [Section name](path-or-url-to-guidance)
-```
+Finding titles should be short, easy-to-skim phrases that capture the fix or risk — **not** the full checklist heading. If the linked best practice is relevant, mention it briefly in the explanation.
 
 When a finding comes from a **Critical check**, format its title as a level-4 heading and prefix it with `⚠️`:
 
@@ -21,38 +17,33 @@ When a finding comes from a **Critical check**, format its title as a level-4 he
 ### Blocker
 
 #### ⚠️ <short fix-oriented title>  <!-- Critical check only; otherwise use the bullet form below -->
-  - **Explanation**: <1-3 concise, actionable sentences>
-  - **Best practice**: <Optional. Cite the linked guidance when useful>
+  - **Explanation**: <1-3 concise, actionable sentences, optionally naming the linked best practice when useful>
   - **Evidence**: `<file:line>` (add multiple as needed)
   - **Suggested change**: <Specific code edit; include a small snippet if helpful>
 
 - **<short fix-oriented title>**
-  - **Explanation**: <1-3 concise, actionable sentences>
-  - **Best practice**: <Optional. Cite the linked guidance when useful>
+  - **Explanation**: <1-3 concise, actionable sentences, optionally naming the linked best practice when useful>
   - **Evidence**: `<file:line>` (add multiple as needed)
   - **Suggested change**: <Specific code edit; include a small snippet if helpful>
 
 ### Major
 
 - **<short fix-oriented title>**
-  - **Explanation**: <...>
-  - **Best practice**: <Optional. Cite the linked guidance when useful>
+  - **Explanation**: <...; optionally name the linked best practice when useful>
   - **Evidence**: `<file:line>`
   - **Suggested change**: <...>
 
 ### Minor
 
 - **<short fix-oriented title>**
-  - **Explanation**: <...>
-  - **Best practice**: <Optional. Cite the linked guidance when useful>
+  - **Explanation**: <...; optionally name the linked best practice when useful>
   - **Evidence**: `<file:line>`
   - **Suggested change**: <...>
 
 ### Nit
 
 - **<short fix-oriented title>**
-  - **Explanation**: <...>
-  - **Best practice**: <Optional. Cite the linked guidance when useful>
+  - **Explanation**: <...; optionally name the linked best practice when useful>
   - **Evidence**: `<file:line>`
   - **Suggested change**: <...>
 

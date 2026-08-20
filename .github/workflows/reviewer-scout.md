@@ -155,7 +155,7 @@ Using the imported reviewer instructions:
 
 ## Critical checks
 
-Use short, fix-oriented finding titles for **all** review comments instead of repeating the checklist heading verbatim. When the linked best practice is useful to cite, include it in the body of the finding.
+Use short, fix-oriented finding titles for **all** review comments instead of repeating the checklist heading verbatim. If the linked best practice is useful to cite, mention it briefly in the explanation.
 
 Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as:
 
