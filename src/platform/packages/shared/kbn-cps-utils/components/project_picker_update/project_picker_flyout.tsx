@@ -82,6 +82,7 @@ export function ProjectPickerFlyoutContent({
   fetchProjectsByRouting,
   originProjectId,
   projectRouting,
+  projectRoutingStrategy,
   titleId: titleIdProp,
   title = defaultTitle,
 }: ProjectPickerFlyoutProps) {
@@ -136,6 +137,7 @@ export function ProjectPickerFlyoutContent({
       originProjectId={originProjectId}
       onProjectRoutingChange={setStagedProjectRouting}
       fetchProjectsByRouting={fetchProjectsByRouting}
+      projectRoutingStrategy={projectRoutingStrategy}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
