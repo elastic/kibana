@@ -583,6 +583,24 @@ filterlist: {}
       expect((q as ParseFailureQuery)._raw).toBeDefined();
       expect((q as ParseFailureQuery).id).toBe('q-future');
     });
+
+    it('marks unrecognised version with failureReason unknown_version', () => {
+      const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);
+      expect((q as ParseFailureQuery).failureReason).toBe('unknown_version');
+    });
+
+    it('marks malformed known-version descriptor with failureReason invalid_descriptor', () => {
+      const yaml = `---
+id: bad
+name: bad
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+    });
   });
 
   describe('multi-document artifact', () => {

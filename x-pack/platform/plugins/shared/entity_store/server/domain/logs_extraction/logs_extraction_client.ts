@@ -39,8 +39,10 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
-import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
+import {
+  resolveLatestEntitiesIndexName,
+  resolveUpdatesDataStreamName,
+} from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
@@ -257,7 +259,7 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
-      latestIndex: getLatestEntitiesIndexName(this.namespace),
+      latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: localIndexPatterns,
     });
 
@@ -1006,7 +1008,7 @@ export class LogsExtractionClient {
   private async getAllIndexPatternsIncludingRemote(
     additionalIndexPatterns: string[] = []
   ): Promise<string[]> {
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
+    const updatesDataStream = await resolveUpdatesDataStreamName(this.esClient, this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
 
     try {

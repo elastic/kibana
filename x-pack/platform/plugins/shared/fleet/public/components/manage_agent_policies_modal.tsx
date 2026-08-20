@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -186,7 +180,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         {removedPolicies.length > 0 && (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount={false}
               data-test-subj="confirmRemovePoliciesCallout"
               title={
@@ -195,15 +189,14 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
                   defaultMessage="This action will update this integration"
                 />
               }
-            >
-              <EuiText size="s">
+              text={
                 <FormattedMessage
                   id="xpack.fleet.manageAgentPolicies.calloutBody"
                   defaultMessage="{removedPolicies} will no longer use this integration."
                   values={{ removedPolicies: <b>{removedPolicies.join(', ')}</b> }}
                 />
-              </EuiText>
-            </EuiCallOut>
+              }
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
