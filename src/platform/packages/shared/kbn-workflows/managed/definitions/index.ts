@@ -103,14 +103,10 @@ export {
 } from './pnd';
 export {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
-  THREAT_INTEL_DEFAULT_DIAMOND_CONNECTOR,
-  THREAT_INTEL_DEFAULT_GATE_CONNECTOR,
-  THREAT_INTEL_ENRICH_REPORT_DEFAULT_TEMPLATE_VALUES,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
-export type { ThreatIntelEnrichReportWorkflowTemplateValues } from './threat_intel';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the

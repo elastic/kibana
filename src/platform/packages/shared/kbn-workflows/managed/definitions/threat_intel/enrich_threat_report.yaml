@@ -3,9 +3,6 @@ version: "1"
 # Driver `size: 50` caps wall clock and inference load. Each item runs several
 # LLM steps sequentially; partial drain per pass is intentional.
 # Scoped to `workflow.spaceId` plus global (`*`) report rows via `space_id`.
-# Connector ids are install-time template values (__GATE_CONNECTOR__ /
-# __DIAMOND_CONNECTOR__), persisted as managedTemplateValues so per-space
-# overrides survive definition upgrades.
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
@@ -17,8 +14,8 @@ settings:
     strategy: drop
     max: 1
 consts:
-  gate_connector: __GATE_CONNECTOR__
-  diamond_connector: __DIAMOND_CONNECTOR__
+  gate_connector: Anthropic-Claude-Haiku-4-5
+  diamond_connector: .anthropic-claude-4.7-opus-chat_completion
 triggers:
   - type: scheduled
     with:

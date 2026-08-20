@@ -10,30 +10,12 @@
 import ATTRIBUTE_ALERTS_TO_REPORTS_YAML from './attribute_alerts_to_reports.yaml';
 import ENRICH_THREAT_REPORT_YAML from './enrich_threat_report.yaml';
 import INGEST_THREAT_FEEDS_YAML from './ingest_threat_feeds.yaml';
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 export const THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID = 'system-security-threat-intel-ingest-feeds';
 export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID = 'system-security-threat-intel-enrich-report';
 export const THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID =
   'system-security-threat-intel-attribute-alerts';
-
-/** Default Haiku connector for taxonomy / severity / relevance gate steps. */
-export const THREAT_INTEL_DEFAULT_GATE_CONNECTOR = 'Anthropic-Claude-Haiku-4-5' as const;
-/** Default Opus connector for Diamond extraction. */
-export const THREAT_INTEL_DEFAULT_DIAMOND_CONNECTOR =
-  '.anthropic-claude-4.7-opus-chat_completion' as const;
-
-export interface ThreatIntelEnrichReportWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues {
-  gateConnector: string;
-  diamondConnector: string;
-}
-
-export const THREAT_INTEL_ENRICH_REPORT_DEFAULT_TEMPLATE_VALUES: ThreatIntelEnrichReportWorkflowTemplateValues =
-  {
-    gateConnector: THREAT_INTEL_DEFAULT_GATE_CONNECTOR,
-    diamondConnector: THREAT_INTEL_DEFAULT_DIAMOND_CONNECTOR,
-  };
 
 const MANAGEMENT = {
   enablement: 'restorable',
@@ -46,11 +28,6 @@ const PLUGIN_ID = 'securitySolution';
 const VISIBILITY = {
   solutions: ['security'],
 } as const;
-
-// Exact-token replacement into the static yaml (same pattern as significant
-// events scheduled workflows). Values are install-time, not runtime Liquid.
-const renderTemplate = (template: string, values: Record<string, string>): string =>
-  Object.entries(values).reduce((yaml, [token, value]) => yaml.split(token).join(value), template);
 
 export const THREAT_INTEL_INGEST_FEEDS_WORKFLOW = {
   billable: false,
@@ -67,18 +44,10 @@ export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
   id: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  // Bumped when moving connectors from static yaml consts to yamlTemplate values.
-  version: 2,
+  version: 1,
   visibility: VISIBILITY,
-  yamlTemplate: ({
-    gateConnector = THREAT_INTEL_DEFAULT_GATE_CONNECTOR,
-    diamondConnector = THREAT_INTEL_DEFAULT_DIAMOND_CONNECTOR,
-  }) =>
-    renderTemplate(ENRICH_THREAT_REPORT_YAML, {
-      __GATE_CONNECTOR__: gateConnector,
-      __DIAMOND_CONNECTOR__: diamondConnector,
-    }),
-} as const satisfies ManagedWorkflowDefinition<ThreatIntelEnrichReportWorkflowTemplateValues>;
+  yaml: ENRICH_THREAT_REPORT_YAML,
+} as const satisfies ManagedWorkflowDefinition;
 
 export const THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW = {
   billable: false,
