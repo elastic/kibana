@@ -326,7 +326,7 @@ export const AddAttachmentInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to attach the file to.'),
-    file: z.string().max(10_000_000).describe('Base64-encoded file content.'),
+    file: z.string().base64().max(10_000_000).describe('Base64-encoded file content.'),
     filename: z.string().max(255).describe('Filename including extension (e.g. screenshot.png).'),
   })
 );
@@ -357,8 +357,9 @@ export const LinkIssuesInputSchema = lazySchema(() =>
       .string()
       .max(255)
       .describe(
-        'Link type name as it appears in Jira (e.g. "relates to", "blocks", "is blocked by", "duplicates", "clones"). ' +
-          'The exact available names depend on the Jira instance configuration.'
+        'Link type name as configured in your Jira instance (e.g. "Relates", "Blocks", "Duplicate"). ' +
+          'The value is case-sensitive and must match exactly — use the type name, not its directional description ' +
+          '(e.g. "Relates" not "relates to"). Available names depend on the instance configuration.'
       ),
     comment: z
       .string()

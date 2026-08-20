@@ -451,9 +451,6 @@ export const JiraConnector: ConnectorSpec = {
       input: AddAttachmentInputSchema,
       handler: async (ctx, input: AddAttachmentInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(input.file)) {
-          throw new Error('file must be valid base64-encoded content');
-        }
         const buffer = Buffer.from(input.file, 'base64');
         const formData = new FormData();
         formData.append('file', new Blob([buffer]), input.filename);
