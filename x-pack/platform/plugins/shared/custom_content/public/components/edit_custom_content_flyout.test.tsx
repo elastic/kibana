@@ -50,7 +50,6 @@ const baseFlyoutState = {
 };
 
 const defaultProps = {
-  embeddableId: 'panel-1',
   esqlQuery: undefined as string | undefined,
   template: undefined as string | undefined,
   timeRange: undefined,

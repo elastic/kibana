@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiResizeObserver,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -31,8 +32,9 @@ import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
 
+const EDITOR_DEFAULT_HEIGHT = 400;
+
 export interface EditCustomContentFlyoutProps {
-  embeddableId: string;
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
@@ -49,7 +51,6 @@ export interface EditCustomContentFlyoutProps {
 }
 
 export const EditCustomContentFlyout = ({
-  embeddableId,
   esqlQuery,
   template,
   timeRange,
@@ -103,8 +104,30 @@ export const EditCustomContentFlyout = ({
     onClose();
   }, [draftEsqlQuery, draftTemplate, onSave, onClose]);
 
+  const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
+  const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
+  const editorHeightRef = useRef(EDITOR_DEFAULT_HEIGHT);
+
+  // Flyout header + footer + body padding + template label row + spacers + help text.
+  // Intentionally overestimated so max-height always prevents a scrollbar.
+  const CHROME = 360;
+  const onEsqlSectionResize = useCallback(({ height }: { width: number; height: number }) => {
+    setMaxEditorHeight(Math.max(120, window.innerHeight - CHROME - height));
+  }, []);
+
+  const onEditorContainerResize = useCallback(({ height }: { width: number; height: number }) => {
+    if (height !== editorHeightRef.current) {
+      editorHeightRef.current = height;
+      setEditorHeight(height);
+    }
+  }, []);
+
   const editorContainerCss = css({
     position: 'relative',
+    resize: 'vertical',
+    minHeight: EDITOR_DEFAULT_HEIGHT,
+    height: EDITOR_DEFAULT_HEIGHT,
+    ...(maxEditorHeight !== undefined && { maxHeight: maxEditorHeight }),
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     borderRadius: euiTheme.border.radius.medium,
     overflow: 'hidden',
@@ -200,54 +223,67 @@ export const EditCustomContentFlyout = ({
               'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
-          <div css={editorContainerCss}>
-            <CodeEditor
-              languageId="liquid"
-              value={draftTemplate}
-              onChange={setDraftTemplate}
-              height={240}
-              placeholder={i18n.translate('xpack.customContent.editFlyout.templatePlaceholder', {
-                defaultMessage:
-                  '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
-              })}
-              options={{
-                fontSize: 12,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                lineNumbers: 'on',
-                folding: true,
-              }}
-            />
-            <EuiToolTip
-              content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                defaultMessage: 'Copy template',
-              })}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                css={copyButtonCss}
-                iconType="copy"
-                aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                  defaultMessage: 'Copy template',
-                })}
-                onClick={() => navigator.clipboard?.writeText(draftTemplate)}
-              />
-            </EuiToolTip>
-          </div>
+          <EuiResizeObserver onResize={onEditorContainerResize}>
+            {(editorResizeRef) => (
+              <div ref={editorResizeRef} css={editorContainerCss}>
+                <CodeEditor
+                  languageId="liquid"
+                  value={draftTemplate}
+                  onChange={setDraftTemplate}
+                  height={editorHeight}
+                  placeholder={i18n.translate(
+                    'xpack.customContent.editFlyout.templatePlaceholder',
+                    {
+                      defaultMessage:
+                        '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+                    }
+                  )}
+                  options={{
+                    fontSize: 12,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    lineNumbers: 'on',
+                    folding: true,
+                  }}
+                />
+                <EuiToolTip
+                  content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                    defaultMessage: 'Copy template',
+                  })}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    css={copyButtonCss}
+                    iconType="copy"
+                    aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                      defaultMessage: 'Copy template',
+                    })}
+                    onClick={() => navigator.clipboard?.writeText(draftTemplate)}
+                  />
+                </EuiToolTip>
+              </div>
+            )}
+          </EuiResizeObserver>
         </EuiFormRow>
 
         <EuiSpacer size="m" />
 
         {/* ES|QL accordion */}
-        <EsqlPreviewSection
-          esqlQuery={draftEsqlQuery}
-          onEsqlQueryChange={setDraftEsqlQuery}
-          isDataLoading={isDataLoading}
-          esqlData={esqlData}
-          esqlDataError={esqlDataError}
-          onFetchData={handleFetchData}
-        />
+        <EuiResizeObserver onResize={onEsqlSectionResize}>
+          {(resizeRef) => (
+            <div ref={resizeRef}>
+              <EsqlPreviewSection
+                esqlQuery={draftEsqlQuery}
+                onEsqlQueryChange={setDraftEsqlQuery}
+                isDataLoading={isDataLoading}
+                esqlData={esqlData}
+                esqlDataError={esqlDataError}
+                onFetchData={handleFetchData}
+              />
+            </div>
+          )}
+        </EuiResizeObserver>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

@@ -183,7 +183,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             return (
               <EditCustomContentFlyout
-                embeddableId={uuid}
                 esqlQuery={esqlQuery$.getValue()}
                 template={template$.getValue()}
                 timeRange={
