@@ -19,6 +19,7 @@ import {
   type EventActor,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   EventActorType,
   isConversationAccessControlRole,
@@ -142,6 +143,15 @@ export interface ConversationClient {
   /** Read the conversation's timeline, in order. */
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
 }
+
+/**
+ * Caps `title` at the stored bound. HTTP routes already validate it, but server-side callers
+ * (LLM title generation in particular) do not, so enforce it here to cover every write path.
+ */
+const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
+  fields.title === undefined
+    ? fields
+    : { ...fields, title: fields.title.slice(0, CONVERSATION_TITLE_MAX_LENGTH) };
 
 export const createClient = ({
   space,
@@ -357,7 +367,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const attributes = createRequestToEs({
       conversation: {
-        ...conversationWithoutTemplateId,
+        ...withBoundedTitle(conversationWithoutTemplateId),
         access_control: normalizedAccessControl,
         metadata: resolvedMetadata,
         ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
@@ -398,7 +408,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
-      fields: () => fields,
+      fields: () => withBoundedTitle(fields),
     });
 
     return withDeserializedMetadata(result);
