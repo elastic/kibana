@@ -22,6 +22,16 @@
   -webkit-animation-delay: 0s !important;
   animation-delay: 0s !important;
 
+  /**
+   * Detach scroll-driven animations (introduced in EUI v116 for overflow
+   * scroll shadows in EuiSelectable, EuiComboBox, EuiContextMenu).
+   * scroll-driven animations use scroll position as their timeline, so
+   * animation-duration: 0s has no effect on them. Setting animation-timeline
+   * to the default `auto` (time-based) makes the duration-zeroing rule above
+   * apply to them as well.
+   */
+  animation-timeline: auto !important;
+
   -webkit-transition-duration: 0s !important;
   transition-duration: 0s !important;
 
