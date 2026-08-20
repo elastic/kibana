@@ -120,6 +120,7 @@ const PresentationPanelChrome = <
         className={classNames('embPanel', {
           'embPanel--editing': viewMode === 'edit',
         })}
+        hasBorder={false}
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"

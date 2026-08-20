@@ -168,7 +168,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.xxs};
-      border-radius: ${euiTheme.border.radius.small};
+      border-radius: ${euiTheme.border.radius.control};
       padding-inline-end: ${status || showActionsMenu ? euiTheme.size.xxs : 0};
 
       &:hover,

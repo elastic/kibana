@@ -239,12 +239,6 @@ const useTitleStyles = () => {
       }
     `;
 
-    // Applied only when there is no back button, so a lone title lines up with where the
-    // text sits when a back button precedes it.
-    const titleOffsetStyle = css`
-      padding-left: ${euiTheme.size.xs};
-    `;
-
     return {
       titleWrapper,
       titleFrame,
@@ -256,18 +250,16 @@ const useTitleStyles = () => {
       titleSizer,
       titleText,
       placeholderText,
-      titleOffsetStyle,
     };
   }, [euiTheme]);
 };
 
 interface TitleProps {
   title: string | AppHeaderEditableTitle;
-  titleOffset?: boolean;
   size?: 'xs' | 's';
 }
 
-export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' }) => {
+export const Title = React.memo<TitleProps>(({ title, size = 's' }) => {
   const editable = isEditableTitle(title);
   const text = asPlainText(editable ? title.text : title);
   const placeholder = asOptionalPlainText(editable ? title.placeholder : undefined);
@@ -413,7 +405,7 @@ export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' })
   );
 
   return (
-    <div css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}>
+    <div css={styles.titleWrapper}>
       <EuiTitle size={size}>
         <h1>
           {isEditing ? (

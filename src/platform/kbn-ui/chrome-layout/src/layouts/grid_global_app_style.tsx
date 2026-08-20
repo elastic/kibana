@@ -41,13 +41,13 @@ export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) =
   const darkModeBackground = [
     'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))',
     'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))',
-    'linear-gradient(#07101F 0%, #050D1A 50%, #030A16 100%)',
+    'linear-gradient(#07101F 0%, #050D1A 50%, #040A15 100%)',
   ].join(', ');
 
   // Light mode layered background: subtle blue glow at top center, light gradient base
   const lightModeBackground = [
     'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
-    'linear-gradient(#F6F9FC, #F4F7FA)',
+    'linear-gradient(#ECF1F9, #E8EDF6)',
   ].join(', ');
 
   return css`
@@ -78,7 +78,7 @@ const globalTempHackStyles = (
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${appearance === 'framed' && `border-radius: ${_euiTheme.border.radius.medium};`}
+      ${appearance === 'framed' && `border-radius: ${_euiTheme.border.radius.frame};`}
     }
 
     .euiFlyout[class*='right'] {
@@ -86,20 +86,31 @@ const globalTempHackStyles = (
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
       ${appearance === 'framed' &&
       `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
-          border-top-right-radius: ${_euiTheme.border.radius.medium};
-          border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          border-top-right-radius: ${_euiTheme.border.radius.frame};
+          border-bottom-right-radius: ${_euiTheme.border.radius.frame};
+          // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
+          // the framed radius so the shadow doesn't square off at the top/bottom-right.
+          clip-path: inset(
+            0 0 0 -50% round 0 ${_euiTheme.border.radius.frame}
+              ${_euiTheme.border.radius.frame} 0
+          ) !important;
           .euiFlyoutFooter {
-            border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+            border-bottom-right-radius: ${_euiTheme.border.radius.frame};
           }
+        }
+        // Preserve EUI's unclipped shadow when a child flyout is stacked on top.
+        &.euiFlyout--hasChild {
+          clip-path: none !important;
         }`}
     }
 
-    // When overlay is above the header (full-viewport modal style), only border-radius
-    // is overridden; positioning is left to the flyout's reference container.
+    // When overlay is above the header (full-viewport modal style), restore square corners
+    // and EUI's original shadow clip; positioning is left to the flyout's reference container.
     .euiOverlayMask[data-relative-to-header='above']
       + [data-euiportal='true']
       .euiFlyout[class*='right'] {
       border-radius: 0;
+      clip-path: polygon(-50% 0, 100% 0, 100% 100%, -50% 100%) !important;
     }
   }
 
