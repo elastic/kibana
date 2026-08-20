@@ -14,6 +14,7 @@ import { useConversationContext } from '../../../context/conversation/conversati
 // import { SetTypeControl } from './set_type_control';
 import { ConversationSharingButton } from './conversation_sharing_button';
 import { ChatInfoButton } from './chat_info_button';
+import { useConversation } from '../../../hooks/use_conversation';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -30,6 +31,8 @@ export interface ConversationRightActionsProps {
 
 export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
   const { isEmbeddedContext } = useConversationContext();
+  const { conversation } = useConversation();
+  const hasTemplate = Boolean(conversation?.template_id);
 
   return (
     <EuiFlexGroup
@@ -45,9 +48,11 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       <EuiFlexItem grow={false}>
         <ConversationSharingButton />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ChatInfoButton />
-      </EuiFlexItem>
+      {hasTemplate && (
+        <EuiFlexItem grow={false}>
+          <ChatInfoButton />
+        </EuiFlexItem>
+      )}
       {isEmbeddedContext && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={labels.close} disableScreenReaderOutput>
