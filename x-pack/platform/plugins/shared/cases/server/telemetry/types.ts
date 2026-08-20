@@ -126,23 +126,6 @@ export interface AlertCounts {
 export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
   FileAttachmentAggsResult;
 
-export interface BucketsWithMaxOnCase {
-  buckets: Array<
-    {
-      doc_count: number;
-      key: string;
-    } & MaxBucketOnCaseAggregation
-  >;
-}
-
-export interface AttachmentFrameworkAggsResult {
-  externalReferenceTypes: BucketsWithMaxOnCase;
-  persistableReferenceTypes: BucketsWithMaxOnCase;
-}
-
-export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> &
-  AttachmentFrameworkAggsResult;
-
 export type CaseAggregationResult = Record<
   Owner,
   {
@@ -172,17 +155,31 @@ export interface Assignees {
   totalWithAtLeastOne: number;
 }
 
-interface CommonAttachmentStats {
-  average: number;
-  maxOnACase: number;
+/**
+ * Per-type usage counts inside the unified attachment framework. Keyed by the
+ * sanitized unified attachment type name (dots replaced with underscores, e.g.
+ * `security_alert`). Replaces the legacy `persistableAttachments`/
+ * `externalAttachments` arrays and merges both attachment saved objects.
+ */
+export interface AttachmentTypeStats {
   total: number;
+  average: number;
 }
 
-export interface AttachmentStats extends CommonAttachmentStats {
-  type: string;
+export type AttachmentsByType = Record<string, AttachmentTypeStats>;
+
+/**
+ * Legacy (`cases-comments`) vs unified (`cases-attachments`) attachment
+ * counts. Counts are entity-aware (bulk alert/event
+ * attachments count by referenced id, not by document), matching how
+ * `attachmentsByType` totals are computed.
+ */
+export interface BySavedObjectStats {
+  legacy: { total: number };
+  unified: { total: number };
 }
 
-export interface FileAttachmentStats extends CommonAttachmentStats {
+export interface FileAttachmentStats {
   averageSize: number;
   topMimeTypes: Array<{
     name: string;
@@ -192,8 +189,8 @@ export interface FileAttachmentStats extends CommonAttachmentStats {
 
 export interface AttachmentFramework {
   attachmentFramework: {
-    externalAttachments: AttachmentStats[];
-    persistableAttachments: AttachmentStats[];
+    attachmentsByType: AttachmentsByType;
+    bySavedObject: BySavedObjectStats;
     files: FileAttachmentStats;
   };
 }
@@ -308,6 +305,6 @@ export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
 export type AssigneesSchema = MakeSchemaFrom<Assignees>;
 export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['attachmentFramework']>;
-export type AttachmentItemsSchema = MakeSchemaFrom<AttachmentStats>;
+export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;

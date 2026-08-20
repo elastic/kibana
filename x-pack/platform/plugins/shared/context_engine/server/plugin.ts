@@ -175,6 +175,12 @@ export class ContextEnginePlugin
     });
 
     return {
+      getAiIndexService: () => {
+        if (!this.aiIndexService) {
+          throw new Error('AI index service not available — plugin has not started');
+        }
+        return this.aiIndexService;
+      },
       getSignalsService: () => signalsService,
     };
   }
