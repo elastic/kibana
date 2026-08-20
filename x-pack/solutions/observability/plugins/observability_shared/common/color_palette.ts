@@ -6,7 +6,7 @@
  */
 
 import { difference, first } from 'lodash';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services/color/eui_palettes';
 
 export type Color =
   | 'color0'
