@@ -105,6 +105,7 @@ const PORT_LABEL = translate('searchConnectors.nativeConnectors.portLabel', {
 });
 
 const PERSONAL_ACCESS_TOKEN = 'personal_access_token';
+const BASIC_AUTH = 'basic';
 
 const GITHUB_APP = 'github_app';
 
@@ -1804,7 +1805,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: 'changeme',
       },
-      data_center_username: {
+      data_center_auth_method: {
         default_value: null,
         depends_on: [
           {
@@ -1812,12 +1813,51 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'jira_data_center',
           },
         ],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.jira.dataCenterAuthMethodLabel', {
+          defaultMessage: 'Jira Data Center authentication method',
+        }),
+        options: [
+          {
+            label: translate('searchConnectors.nativeConnectors.jira.options.basicAuth', {
+              defaultMessage: 'Basic authentication',
+            }),
+            value: BASIC_AUTH,
+          },
+          {
+            label: translate('searchConnectors.nativeConnectors.jira.options.personalAccessToken', {
+              defaultMessage: 'Personal access token',
+            }),
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+        ],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: BASIC_AUTH,
+      },
+      data_center_username: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'jira_data_center',
+          },
+          {
+            field: 'data_center_auth_method',
+            value: BASIC_AUTH,
+          },
+        ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.jira.dataCenterUsername', {
           defaultMessage: 'Username',
         }),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1833,13 +1873,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             field: 'data_source',
             value: 'jira_data_center',
           },
+          {
+            field: 'data_center_auth_method',
+            value: BASIC_AUTH,
+          },
         ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.jira.dataCenterPasswordLabel', {
           defaultMessage: 'Password',
         }),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -1847,6 +1891,35 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: [],
         validations: [],
         value: 'changeme',
+      },
+      data_center_personal_access_token: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'jira_data_center',
+          },
+          {
+            field: 'data_center_auth_method',
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+        ],
+        display: TEXTBOX,
+        label: translate(
+          'searchConnectors.nativeConnectors.jira.dataCenterPersonalAccessTokenLabel',
+          {
+            defaultMessage: 'Jira Data Center personal access token',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
       },
       account_email: {
         default_value: null,
@@ -1861,7 +1934,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Jira Cloud email address',
         }),
         options: [],
-        order: 6,
+        order: 8,
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
@@ -1887,7 +1960,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Jira Cloud API token',
         }),
         options: [],
-        order: 7,
+        order: 9,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -1904,7 +1977,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Jira host url',
         }),
         options: [],
-        order: 8,
+        order: 10,
         placeholder: 'http://127.0.0.1:8080',
         required: true,
         sensitive: false,
@@ -1922,7 +1995,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Jira project keys',
         }),
         options: [],
-        order: 9,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: ADVANCED_RULES_IGNORED_LABEL,
@@ -1937,7 +2010,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 10,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1957,7 +2030,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 11,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1972,7 +2045,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 12,
+        order: 14,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -1987,7 +2060,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: NUMERIC,
         label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
-        order: 13,
+        order: 15,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -2007,7 +2080,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 14,
+        order: 16,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -2026,7 +2099,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 15,
+        order: 17,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
