@@ -81,7 +81,6 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   return (
     <TemplateFormLayout
       form={form}
-      title={i18n.ADD_TEMPLATE_TITLE}
       initialMetadata={initialMetadata}
       isSaving={isSaving}
       onCreate={handleCreate}

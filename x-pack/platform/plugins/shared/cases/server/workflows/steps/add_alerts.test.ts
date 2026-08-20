@@ -35,11 +35,13 @@ describe('addAlertsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1'],
-          index: ['.alerts-security.alerts-default'],
+          type: 'security.alert',
+          attachmentId: ['alert-1'],
+          metadata: {
+            index: ['.alerts-security.alerts-default'],
+            rule: { id: null, name: null },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: null, name: null },
         },
       ],
     });
@@ -76,11 +78,13 @@ describe('addAlertsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1', 'alert-2'],
-          index: ['.alerts-security.alerts-default', '.alerts-security.alerts-default'],
+          type: 'security.alert',
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: {
+            index: ['.alerts-security.alerts-default', '.alerts-security.alerts-default'],
+            rule: { id: 'rule-1', name: 'Test rule' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-1', name: 'Test rule' },
         },
       ],
     });
@@ -117,18 +121,22 @@ describe('addAlertsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1'],
-          index: ['idx-1'],
+          type: 'security.alert',
+          attachmentId: ['alert-1'],
+          metadata: {
+            index: ['idx-1'],
+            rule: { id: 'rule-a', name: 'A' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-a', name: 'A' },
         },
         {
-          type: 'alert',
-          alertId: ['alert-2'],
-          index: ['idx-2'],
+          type: 'security.alert',
+          attachmentId: ['alert-2'],
+          metadata: {
+            index: ['idx-2'],
+            rule: { id: 'rule-b', name: 'B' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-b', name: 'B' },
         },
       ],
     });
@@ -157,11 +165,13 @@ describe('addAlertsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1', 'alert-2'],
-          index: ['idx-1', 'idx-2'],
+          type: 'security.alert',
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: {
+            index: ['idx-1', 'idx-2'],
+            rule: { id: null, name: 'name only' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: null, name: 'name only' },
         },
       ],
     });

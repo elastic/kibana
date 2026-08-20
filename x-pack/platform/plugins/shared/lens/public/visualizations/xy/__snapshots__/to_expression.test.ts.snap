@@ -9,6 +9,9 @@ Object {
           false,
         ],
         "annotations": Array [],
+        "areaFill": Array [
+          "solid",
+        ],
         "emphasizeFitting": Array [
           true,
         ],

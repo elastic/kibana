@@ -636,7 +636,20 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async fillFilterTermValue(value: string) {
-      await comboBox.set('transformFilterTermValueSelector', value);
+      // The term-value combo box loads its options from Elasticsearch via a 600ms
+      // debounced search; selecting before those async suggestions settle can leave the
+      // typed value uncommitted (the combo box stays invalid and the popover's "Apply"
+      // button disabled). Re-run the selection until the exact value is actually committed.
+      await retry.try(async () => {
+        await comboBox.set('transformFilterTermValueSelector', value);
+        const selectedOptions = await comboBox.getComboBoxSelectedOptions(
+          'transformFilterTermValueSelector'
+        );
+        expect(selectedOptions).to.eql(
+          [value],
+          `Expected transform filter term value to be '${value}' (got '${selectedOptions}')`
+        );
+      });
     },
 
     async fillPercentilesAggPercents(value: number[]) {

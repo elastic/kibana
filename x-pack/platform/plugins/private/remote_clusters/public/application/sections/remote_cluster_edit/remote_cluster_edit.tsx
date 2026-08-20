@@ -8,14 +8,8 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiPageTemplate,
-  EuiPageSection,
-  EuiPageBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiPageSection, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
@@ -147,7 +141,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
 
         {hasDeprecatedProxySetting ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -155,14 +149,13 @@ export const RemoteClusterEdit: React.FC<Props> = ({
                   defaultMessage="Proceed with caution"
                 />
               }
-              color="warning"
-              iconType="question"
-            >
-              <FormattedMessage
-                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
-                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                  defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                />
+              }
+            />
             <EuiSpacer />
           </>
         ) : null}

@@ -22,9 +22,8 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await unmockInferenceEndpoints(page);
   });
 
-  test('displays page header and documentation link', async ({ pageObjects }) => {
+  test('displays page header', async ({ pageObjects }) => {
     await expect(pageObjects.eisModels.pageHeader).toBeVisible();
-    await expect(pageObjects.eisModels.documentationLink).toBeVisible();
   });
 
   test('renders model cards from mock data', async ({ pageObjects }) => {

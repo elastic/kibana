@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
   - '@kbn/licensing-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

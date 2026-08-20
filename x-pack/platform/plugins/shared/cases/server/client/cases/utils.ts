@@ -769,9 +769,13 @@ export const processObservables = (
 /**
  *
  * For cases that have extended fields, populates `extended_fields_labels` with a mapping from
- * storage keys (e.g., `priority_as_keyword`) to user-facing labels (e.g., "Priority").
- * Labels come from the case's template `fieldDefinitions` (when present) merged with global
- * field-library definitions. Template labels win on key collision. Cases without extended
+ * storage keys (e.g., `priority_as_keyword`) to user-facing labels (e.g., "Priority"), and
+ * `extended_fields_controls` with a mapping from the same storage keys to the field's control
+ * type (e.g., `USER_PICKER`) — needed by any consumer that must parse a value (user picker,
+ * checkbox group, toggle) rather than display it verbatim, without having to re-fetch or thread
+ * through full field definitions itself.
+ * Both come from the case's template `fieldDefinitions` (when present) merged with global
+ * field-library definitions. Template entries win on key collision. Cases without extended
  * fields are returned unchanged.
  *
  * @param cases - Array of cases to enrich
@@ -803,34 +807,53 @@ export const enrichCasesWithFieldLabels = (
       field.label ?? field.name,
     ])
   );
+  const globalControlMap = Object.fromEntries(
+    globalFields.map((field) => [getFieldSnakeKey(field.name, field.type), field.control])
+  );
 
   const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  const controlsByTemplateKey = new Map<string, Record<string, string>>();
   for (const so of templateSOs) {
-    const fieldKeyToLabel = Object.fromEntries(
-      (so.attributes.fieldDefinitions ?? []).map((field) => [
-        getFieldSnakeKey(field.name, field.type),
-        field.label,
-      ])
-    );
+    const fieldDefinitions = so.attributes.fieldDefinitions ?? [];
+    const templateKey = `${so.attributes.templateId}:${so.attributes.templateVersion}`;
     labelsByTemplateKey.set(
-      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
-      fieldKeyToLabel
+      templateKey,
+      Object.fromEntries(
+        fieldDefinitions.map((field) => [getFieldSnakeKey(field.name, field.type), field.label])
+      )
+    );
+    controlsByTemplateKey.set(
+      templateKey,
+      Object.fromEntries(
+        fieldDefinitions.map((field) => [getFieldSnakeKey(field.name, field.type), field.control])
+      )
     );
   }
 
   const enrichedCasesById = new Map(
     eligibleCases.flatMap((c) => {
-      const templateLabelMap =
-        c.template?.id != null
-          ? labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`)
-          : undefined;
+      const templateKey = c.template?.id != null ? `${c.template.id}:${c.template.version}` : null;
       const fieldKeyToLabel = {
         ...globalLabelMap,
-        ...(templateLabelMap ?? {}),
+        ...(templateKey != null ? labelsByTemplateKey.get(templateKey) ?? {} : {}),
       };
-      return Object.keys(fieldKeyToLabel).length > 0
-        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
-        : [];
+      if (Object.keys(fieldKeyToLabel).length === 0) {
+        return [];
+      }
+      const fieldKeyToControl = {
+        ...globalControlMap,
+        ...(templateKey != null ? controlsByTemplateKey.get(templateKey) ?? {} : {}),
+      };
+      return [
+        [
+          c.id,
+          {
+            ...c,
+            extended_fields_labels: fieldKeyToLabel,
+            extended_fields_controls: fieldKeyToControl,
+          },
+        ],
+      ];
     })
   );
 

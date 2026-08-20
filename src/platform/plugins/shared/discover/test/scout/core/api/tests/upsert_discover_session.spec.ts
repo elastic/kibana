@@ -9,6 +9,7 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,
@@ -103,14 +104,15 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       id,
     });
 
-    const replacementBody = {
+    const replacementBody: DiscoverSessionApiDataInput = {
       title: 'Replacement session',
+      tags: ['tag-1', 'tag-2'],
       tabs: [
         {
           id: 'replacement',
           label: 'Replacement',
           data_source: {
-            type: 'data_view_reference' as const,
+            type: 'data_view_reference',
             ref_id: 'replacement-data-view',
           },
         },
@@ -130,6 +132,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     expect(response.body.data).toMatchObject({
       title: 'Replacement session',
       description: '',
+      tags: ['tag-1', 'tag-2'],
       tabs: [
         expect.objectContaining({
           id: 'replacement',
@@ -149,6 +152,16 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     const storedSession = await kbnClient.savedObjects.get({ type: 'search', id });
     expect(storedSession.references).toStrictEqual([
       {
+        name: 'tag-ref-tag-1',
+        type: 'tag',
+        id: 'tag-1',
+      },
+      {
+        name: 'tag-ref-tag-2',
+        type: 'tag',
+        id: 'tag-2',
+      },
+      {
         name: 'tab_replacement.kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
         id: 'replacement-data-view',
@@ -166,6 +179,31 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
     expect(repeatedResponse).toHaveStatusCode(200);
     expect(repeatedResponse.body.data).toStrictEqual(response.body.data);
+
+    // PUT fully replaces the session, so omitting tags removes the existing tag references.
+    const responseWithoutTags = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: replacementBody.title,
+        tabs: replacementBody.tabs,
+      },
+      responseType: 'json',
+    });
+
+    expect(responseWithoutTags).toHaveStatusCode(200);
+    expect(responseWithoutTags.body.data.tags).toStrictEqual([]);
+
+    const storedSessionWithoutTags = await kbnClient.savedObjects.get({ type: 'search', id });
+    expect(storedSessionWithoutTags.references).toStrictEqual([
+      {
+        name: 'tab_replacement.kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: 'replacement-data-view',
+      },
+    ]);
   });
 
   apiTest(

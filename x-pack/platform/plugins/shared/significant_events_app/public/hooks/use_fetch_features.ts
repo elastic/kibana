@@ -15,13 +15,7 @@ interface FetchFeaturesResult {
 }
 
 export const useFetchFeatures = () => {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const fetchFeatures = async ({

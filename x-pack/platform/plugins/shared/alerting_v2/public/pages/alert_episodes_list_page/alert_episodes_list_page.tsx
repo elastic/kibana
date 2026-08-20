@@ -96,6 +96,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   }),
 };
 
+// The table fills the space left below the KPIs and the histogram. On short viewports that space
+// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
+// scroll instead.
+const MIN_TABLE_HEIGHT = 400;
+
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
   border-radius: ${euiTheme.border.radius.medium};
@@ -466,6 +471,7 @@ export const AlertEpisodesListPage = () => {
           grow
           css={css`
             min-width: 0;
+            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>

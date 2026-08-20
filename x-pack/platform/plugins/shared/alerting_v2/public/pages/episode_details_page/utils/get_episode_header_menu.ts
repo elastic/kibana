@@ -7,7 +7,7 @@
 
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 export interface EpisodeHeaderMenuArgs {
   actions: EpisodeAction[];
   episode: AlertEpisode | undefined;
