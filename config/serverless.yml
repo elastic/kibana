@@ -285,9 +285,16 @@ xpack.reporting.csv.maxRows: 100000
 # x-pack/platform/plugins/private/page_render_screenshotting/README.md.
 xpack.reporting.export_types.pdf.enabled: true
 xpack.reporting.export_types.png.enabled: true
-# Left disabled/unset until the render service has a stable dev-platform URL — see POC-PLAN.md.
-# xpack.pageRenderScreenshotting.enabled: true
-# xpack.pageRenderScreenshotting.url: http://page-render-service.<namespace>.svc/
+# page-render-service is colocated with serverless Kibana on the
+# serverless-regional clusters (cp-app-*/cp-internal-app-*), so it is reachable
+# over plain in-cluster DNS — no ingress or TLS involved.
+#
+# No trailing slash: the client concatenates the render path directly
+# (`${url}/v1/render-page`), and the service's Fastify router does not set
+# ignoreDuplicateSlashes, so a trailing slash here yields `//v1/render-page`
+# and a 404.
+xpack.pageRenderScreenshotting.enabled: true
+xpack.pageRenderScreenshotting.url: http://page-render-service.page-render-service.svc
 
 # Disabled Platform plugins
 monitoring.enabled: false
