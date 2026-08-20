@@ -61,8 +61,17 @@ const fullUniversePage = (pageSize = 1000) => {
   return agg;
 };
 
-/** The authorization filter `buildAuthzFilter` emits for a given authorized action set. */
-const expectedAuthzFilter = (actions: string[], spaceId = 'default') => ({
+/**
+ * The visibility filter `buildVisibilityFilter` emits. With `actions` (security plugin present)
+ * it carries the `terms_set` privilege clause; without (security absent) it is space-only.
+ */
+const expectedVisibilityFilter = ({
+  actions,
+  spaceId = 'default',
+}: {
+  actions?: string[];
+  spaceId?: string;
+}) => ({
   bool: {
     should: [
       {
@@ -88,14 +97,18 @@ const expectedAuthzFilter = (actions: string[], spaceId = 'default') => ({
                     minimum_should_match: 1,
                   },
                 },
-                {
-                  terms_set: {
-                    [PERM_NAME_FIELD]: {
-                      terms: actions,
-                      minimum_should_match_field: PERM_COUNT_FIELD,
-                    },
-                  },
-                },
+                ...(actions
+                  ? [
+                      {
+                        terms_set: {
+                          [PERM_NAME_FIELD]: {
+                            terms: actions,
+                            minimum_should_match_field: PERM_COUNT_FIELD,
+                          },
+                        },
+                      },
+                    ]
+                  : []),
               ],
             },
           },
@@ -104,6 +117,10 @@ const expectedAuthzFilter = (actions: string[], spaceId = 'default') => ({
     ],
   },
 });
+
+/** The authorization filter emitted when the security plugin is present. */
+const expectedAuthzFilter = (actions: string[], spaceId = 'default') =>
+  expectedVisibilityFilter({ actions, spaceId });
 
 // Column order produced by buildSmlEsqlQuery. The permission name field
 // (perm_kibana) is always present; spaces and other optional
@@ -757,12 +774,37 @@ describe('SmlService', () => {
         request,
       });
 
-      // No security plugin → no enumeration, no authz filter, all rows returned.
+      // No security plugin → no enumeration, no privilege (terms_set) clause — but space
+      // scoping is still pushed: Spaces work without security, so isolation must hold.
       expect(enumerationCallCount(esClient)).toBe(0);
       const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
       expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
-      expect(call.filter).toBeUndefined();
+      expect(call.filter).toEqual(expectedVisibilityFilter({}));
       expect(result.results).toHaveLength(2);
+    });
+
+    it('pushes a space-only visibility filter for the requested space when securityAuthz is absent', async () => {
+      // Regression guard: space isolation must not depend on the security plugin. A
+      // security-disabled multi-space deployment must still only see the requested space.
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [],
+      } as any);
+
+      await smlService.search({
+        query: '*',
+        size: 10,
+        spaceId: 'space-b',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
+      expect(call.filter).toEqual(expectedVisibilityFilter({ spaceId: 'space-b' }));
     });
 
     it('emits empty-terms filter (F3 fail-closed) when corpus has no permission tokens', async () => {
@@ -835,7 +877,7 @@ describe('SmlService', () => {
       return service.start({ logger });
     };
 
-    it('builds a single nested discovery_labels query (with inner_hits) and no filter when securityAuthz is absent', async () => {
+    it('builds a single nested discovery_labels query (with inner_hits) and a space-only filter when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -864,7 +906,7 @@ describe('SmlService', () => {
               },
             },
           ],
-          filter: [],
+          filter: [expectedVisibilityFilter({})],
         },
       });
       expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
@@ -1130,9 +1172,10 @@ describe('SmlService', () => {
 
       const call = docSearchCall(esClient);
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
-      // With no securityAuthz, only the constraints filter is present.
-      expect(filterClauses).toHaveLength(1);
-      expect(filterClauses[0]).toEqual({
+      // With no securityAuthz: the space-only visibility filter plus the constraints filter.
+      expect(filterClauses).toHaveLength(2);
+      expect(filterClauses[0]).toEqual(expectedVisibilityFilter({}));
+      expect(filterClauses[1]).toEqual({
         bool: {
           should: [
             {
@@ -1310,7 +1353,9 @@ describe('SmlService', () => {
       expect(filterClauses[0]).toEqual(expectedAuthzFilter(['saved_object:dashboard/get']));
     });
 
-    it('emits no authz filter when securityAuthz is absent (autocomplete open access)', async () => {
+    it('emits a space-only visibility filter (no terms_set) when securityAuthz is absent', async () => {
+      // Open access applies to PRIVILEGES only — space isolation must hold without the security
+      // plugin, because Spaces are available on Basic with security disabled.
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -1320,7 +1365,7 @@ describe('SmlService', () => {
       await smlService.autocomplete({
         query: 'git',
         size: 10,
-        spaceId: 'default',
+        spaceId: 'space-b',
         esClient: scopedClient,
         request,
       });
@@ -1328,7 +1373,8 @@ describe('SmlService', () => {
       // No enumeration — security plugin absent.
       expect(enumerationCallCount(esClient)).toBe(0);
       const call = docSearchCall(esClient);
-      expect((call.query!.bool!.filter as unknown[]).length).toBe(0);
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      expect(filterClauses).toEqual([expectedVisibilityFilter({ spaceId: 'space-b' })]);
     });
 
     describe('pre-aggregation authz filter', () => {

@@ -395,11 +395,18 @@ const resolveAuthorizedUniverse = async ({
 };
 
 /**
- * The authorization filter, as Query DSL.
+ * The document-visibility filter, as Query DSL. Applied UNCONDITIONALLY — space scoping must not
+ * depend on the security plugin, because Spaces are available (and space isolation expected) on a
+ * Basic license with security disabled.
  *
  * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
  * privilege elements at all (public), OR when at least one element scoped to this requested space
- * (or to the global wildcard) has ALL of its actions covered by what the caller holds.
+ * (or to the global wildcard) matches. What "matches" means depends on `authz`:
+ * - with `authz` (security plugin present), the element must additionally have ALL of its actions
+ *   covered by what the caller holds (the `terms_set` clause);
+ * - without `authz` (security plugin absent — dev / test / security off), space scoping alone
+ *   applies: privilege enforcement is skipped, matching the open-access semantics of every other
+ *   Kibana surface in that configuration.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -409,7 +416,13 @@ const resolveAuthorizedUniverse = async ({
  * clause, because ES|QL's index resolution excludes `nested` fields — they cannot be referenced as
  * columns at all. A Query DSL filter is pushed down to Lucene and does support them.
  */
-const buildAuthzFilter = (authz: AuthorizedUniverse): Record<string, unknown> => ({
+const buildVisibilityFilter = ({
+  spaceId,
+  authz,
+}: {
+  spaceId: string;
+  authz?: AuthorizedUniverse;
+}): Record<string, unknown> => ({
   bool: {
     should: [
       {
@@ -426,15 +439,19 @@ const buildAuthzFilter = (authz: AuthorizedUniverse): Record<string, unknown> =>
           query: {
             bool: {
               filter: [
-                spaceScopeQuery(authz.spaceId),
-                {
-                  terms_set: {
-                    [PERM_NAME_FIELD]: {
-                      terms: authz.authorizedActions,
-                      minimum_should_match_field: PERM_COUNT_FIELD,
-                    },
-                  },
-                },
+                spaceScopeQuery(spaceId),
+                ...(authz
+                  ? [
+                      {
+                        terms_set: {
+                          [PERM_NAME_FIELD]: {
+                            terms: authz.authorizedActions,
+                            minimum_should_match_field: PERM_COUNT_FIELD,
+                          },
+                        },
+                      },
+                    ]
+                  : []),
               ],
             },
           },
@@ -600,7 +617,7 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  * multi-tag documents.
  *
  * Authorization is enforced via a `nested` Query DSL filter pushed into the ES|QL `_query` API's
- * `filter` parameter (not a WHERE clause). The caller passes `buildAuthzFilter(authz)` to the
+ * `filter` parameter (not a WHERE clause). The caller passes `buildVisibilityFilter(...)` to the
  * `esql.query` call. It has to be a pushed-down filter rather than a WHERE clause because ES|QL's
  * index resolution excludes `nested` fields, so `permissions.kibana.privileges.*` cannot be
  * referenced as a column at all. Space scoping lives in the filter's `.space` term.
@@ -836,9 +853,9 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * returns only authorized docs — no overfetch, no JS post-filter. The outer LIMIT is exactly
  * `size`.
  *
- * When the security plugin is absent (dev / test), enumeration is skipped and
- * all docs in the space are returned (open-access parity with the prior
- * behavior).
+ * When the security plugin is absent (dev / test / security off), enumeration is skipped and
+ * privilege enforcement drops out of the pushed filter — but space scoping is still applied, so
+ * only docs visible in the requested space are returned (Spaces work without security).
  *
  * Non-empty queries: two FORK branches (BM25 over all text fields + semantic
  * over all semantic multi-fields), merged by FUSE with RRF — mirrors the old
@@ -894,7 +911,8 @@ const searchSml = async ({
     response = await esClient.asInternalUser.esql.query({
       query: esql,
       ...(params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
-      ...(authz ? { filter: buildAuthzFilter(authz) } : {}),
+      // Always pushed: space scoping must hold even without the security plugin.
+      filter: buildVisibilityFilter({ spaceId, authz }),
     });
   } catch (error) {
     if (isNotFoundError(error) || isEsqlIndexMissingError(error)) {
@@ -1047,8 +1065,9 @@ const buildSmlAutocompleteQuery = (
 /**
  * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
  *
- * When the security plugin is absent (dev / test), the filter is skipped and all docs
- * are returned.
+ * When the security plugin is absent (dev / test), privilege enforcement is
+ * skipped but space scoping is still applied — only docs visible in the requested space are
+ * returned (Spaces work without security).
  */
 const autocompleteSml = async ({
   query,
@@ -1092,11 +1111,10 @@ const autocompleteSml = async ({
   try {
     const smlQuery = buildSmlAutocompleteQuery(query, registeredTypeIds);
 
-    const filterClauses: Array<Record<string, unknown>> = [];
-
-    if (authz) {
-      filterClauses.push(buildAuthzFilter(authz));
-    }
+    // Always applied: space scoping must hold even without the security plugin.
+    const filterClauses: Array<Record<string, unknown>> = [
+      buildVisibilityFilter({ spaceId, authz }),
+    ];
 
     const constraintsFilter = buildConstraintsFilter(constraints);
     if (constraintsFilter) {

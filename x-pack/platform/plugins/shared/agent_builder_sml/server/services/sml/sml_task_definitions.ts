@@ -42,8 +42,10 @@ import type { SmlService } from './types';
  *     — existential across a document's space elements, universal within one —
  *     before allowing attachment resolution.
  *
- * When the security plugin is absent (development/testing), all results are
- * returned unfiltered, following the standard Kibana open-access convention.
+ * When the security plugin is absent (development/testing), privilege enforcement
+ * is skipped following the standard Kibana open-access convention. However,
+ * search/autocomplete still push the space-scoping half of the filter — Spaces are
+ * available without security, so space isolation doesn't have to depend on the plugin.
  *
  * SML type implementers are responsible for returning the correct actions from
  * their `getPermissions` hook (see `SmlTypeDefinition`); the indexer groups them
