@@ -47,6 +47,7 @@ export type {
   ToolHandlerContext,
   ToolHandlerResult,
   BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -110,6 +111,7 @@ export {
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,
   PluginCreateRequest,
@@ -150,6 +152,8 @@ export type {
   PluginsStart,
   RuntimeStart,
   ConversationsStart,
+  ConversationTemplatesSetup,
+  ConversationTemplatesStart,
 } from './plugin_contract';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
