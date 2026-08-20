@@ -73,7 +73,7 @@ export interface ContextEnginePluginStart {
 }
 
 export interface ContextEngineSetupDependencies {
-  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface ContextEngineStartDependencies {

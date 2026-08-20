@@ -31,7 +31,7 @@ export interface ContextEnginePluginStart {
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface ContextEngineStartDependencies {
