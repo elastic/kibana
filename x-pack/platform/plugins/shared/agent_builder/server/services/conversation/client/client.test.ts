@@ -24,14 +24,9 @@ import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
-import type { ConversationTemplatesServiceStart } from '../templates';
-
-const conversationTemplates: jest.Mocked<ConversationTemplatesServiceStart> = {
-  get: jest.fn(),
-  getMany: jest.fn().mockResolvedValue(new Map()),
-  list: jest.fn(),
-};
-const getTemplateMock = conversationTemplates.get;
+jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 const testSpace = 'default';
 
@@ -121,21 +116,18 @@ describe('ConversationClient', () => {
       getIds: jest.fn().mockResolvedValue(['agent-1']),
     };
 
-    conversationTemplates.get.mockReset();
-    conversationTemplates.getMany.mockReset().mockResolvedValue(new Map());
-    conversationTemplates.list.mockReset();
+    getTemplateMock.mockReset();
 
     client = createClient({
       space: testSpace,
       logger: loggerMock.create(),
       esClient: {} as never,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
-      isAdmin: false,
       user: {
         id: 'user-1',
         username: 'test-user',
+        isAdmin: false,
       },
-      conversationTemplates,
     });
   });
 
@@ -429,7 +421,7 @@ describe('ConversationClient', () => {
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
-      await client.create({
+      const result = await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
         agent_id: 'agent-1',
@@ -442,6 +434,11 @@ describe('ConversationClient', () => {
           op_type: 'create',
         })
       );
+      expect(result.permissions).toEqual({
+        rename: true,
+        delete: true,
+        update_access_control: true,
+      });
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -487,7 +484,7 @@ describe('ConversationClient', () => {
           count: { input_type: 'NUMBER', required: false },
         },
       };
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1173,6 +1170,53 @@ describe('ConversationClient', () => {
       },
     } as Document);
 
+  describe('template metadata response conversion', () => {
+    const template = makeTemplate('template-1', {
+      enabled: { input_type: 'TOGGLE', description: 'Enabled' },
+    });
+
+    beforeEach(() => {
+      getTemplateMock.mockReturnValue(template);
+    });
+
+    it('deserializes template metadata when getting a conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.get('conversation-1')).resolves.toMatchObject({
+        metadata: { enabled: true },
+      });
+    });
+
+    it('requests and deserializes template metadata when listing conversations', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.list()).resolves.toMatchObject([{ metadata: { enabled: true } }]);
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['template_id', 'template_version', 'metadata']),
+        })
+      );
+    });
+  });
+
   describe('applyTemplate', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -1180,7 +1224,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a bad-request error when the template id is unknown', async () => {
-      getTemplateMock.mockResolvedValue(undefined);
+      getTemplateMock.mockReturnValue(undefined);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1207,7 +1251,7 @@ describe('ConversationClient', () => {
         },
         2
       );
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1233,7 +1277,7 @@ describe('ConversationClient', () => {
         new_key: { input_type: 'TEXT', description: 'New key', default_value: 'new_value' },
       });
 
-      getTemplateMock.mockImplementation(async (id: string) =>
+      getTemplateMock.mockImplementation((id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
@@ -1262,7 +1306,7 @@ describe('ConversationClient', () => {
         tmpl_b_key: { input_type: 'TEXT', description: 'Template B key', default_value: 'b_val' },
       });
 
-      getTemplateMock.mockImplementation(async (id: string) =>
+      getTemplateMock.mockImplementation((id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
@@ -1301,7 +1345,7 @@ describe('ConversationClient', () => {
       );
 
       // Registry always returns the latest version; existing conversation stores v1's fields.
-      getTemplateMock.mockResolvedValue(templateV2);
+      getTemplateMock.mockReturnValue(templateV2);
       // The conversation currently stores v1's fields
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -1341,7 +1385,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-bool', {
         mfa_enabled: { input_type: 'TOGGLE', description: 'MFA flag', default_value: false },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1361,7 +1405,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-arr', {
         tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['a', 'b'] },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1378,7 +1422,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
-      getTemplateMock.mockResolvedValue(makeTemplate('tmpl-a'));
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a'));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
@@ -1421,7 +1465,7 @@ describe('ConversationClient', () => {
         },
         notified: { input_type: 'TOGGLE', description: 'Notified' },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -1455,7 +1499,7 @@ describe('ConversationClient', () => {
           default_value: 'open',
         },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       // The OCC read (inside writeConversation → readModifyWrite) returns a doc that already
       // has `status: 'closed'` written concurrently.
@@ -1484,7 +1528,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-a', {
         severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
@@ -1499,7 +1543,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
-      getTemplateMock.mockResolvedValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
@@ -1535,7 +1579,7 @@ describe('ConversationClient', () => {
         },
         3
       );
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1566,7 +1610,7 @@ describe('ConversationClient', () => {
         },
         label: { input_type: 'TEXT', description: 'Label', default_value: 'active' },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1590,7 +1634,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-arr', {
         tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['alpha', 'beta'] },
       });
-      getTemplateMock.mockResolvedValue(template);
+      getTemplateMock.mockReturnValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1610,7 +1654,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a bad-request error when the template id is unknown', async () => {
-      getTemplateMock.mockResolvedValue(undefined);
+      getTemplateMock.mockReturnValue(undefined);
 
       await expect(
         client.create({
@@ -1642,7 +1686,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('permissions', () => {
+  describe('access checks', () => {
     const publicConversationOwnedByAnotherUser = () =>
       createConversationDocument({
         userId: 'other-user-id',
@@ -1650,7 +1694,7 @@ describe('ConversationClient', () => {
         accessMode: ConversationAccessControlMode.Public,
       });
 
-    it('grants rename and delete to the owner on get', async () => {
+    it('returns owner permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument()] },
       });
@@ -1668,7 +1712,7 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('denies rename and delete to a participant of a public conversation on get', async () => {
+    it('returns public participant permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
@@ -1682,7 +1726,7 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('resolves permissions per conversation on list', async () => {
+    it('returns per-conversation permissions from list', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -1694,39 +1738,43 @@ describe('ConversationClient', () => {
 
       const results = await client.list();
 
-      expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
-        {
-          id: 'owned',
-          permissions: { rename: true, delete: true, update_access_control: true },
-        },
-        {
-          id: 'participating',
-          permissions: { rename: false, delete: false, update_access_control: false },
-        },
+      expect(results.map(({ permissions }) => permissions)).toEqual([
+        { rename: true, delete: true, update_access_control: true },
+        { rename: false, delete: false, update_access_control: false },
       ]);
+      results.forEach((conversation) => expect(conversation).not.toHaveProperty('rounds'));
+      expect(results.map(({ id }) => id)).toEqual(['owned', 'participating']);
     });
 
-    it('reports the denial that delete then enforces', async () => {
+    it('enforces delete denial for public participants', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
 
-      const { permissions } = await client.get('conversation-1');
+      const result = await client.get('conversation-1');
 
-      expect(permissions.delete).toBe(false);
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
     });
 
-    it('reports the denial that rename then enforces', async () => {
+    it('enforces rename denial for public participants', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
 
-      const { permissions } = await client.get('conversation-1');
+      const result = await client.get('conversation-1');
 
-      expect(permissions.rename).toBe(false);
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');
@@ -1979,12 +2027,11 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: {} as never,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-        isAdmin: true,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
+          isAdmin: true,
         },
-        conversationTemplates,
       });
     });
 
@@ -2011,16 +2058,6 @@ describe('ConversationClient', () => {
       );
 
       expect(updated.title).toBe('renamed by admin');
-    });
-
-    it('reports rename and delete permissions on a public conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
-      });
-
-      const { permissions } = await adminClient.get('conversation-1');
-
-      expect(permissions).toEqual({ rename: true, delete: true, update_access_control: false });
     });
 
     it('cannot rename or delete a private conversation owned by another user', async () => {

@@ -224,7 +224,6 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
-      conversationTemplates: conversationTemplatesStart,
     });
 
     const workspaces = createWorkspaceService({

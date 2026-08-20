@@ -7,6 +7,7 @@
 
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import { validateTemplateDefinition } from './validation';
+import { registerTemplate } from './registry';
 
 export interface ConversationTemplateRegistry {
   register(template: ConversationTemplate): void;
@@ -25,6 +26,7 @@ class ConversationTemplateRegistryImpl implements ConversationTemplateRegistry {
       throw new Error(`Conversation template with id "${template.id}" is already registered`);
     }
     this.templates.set(template.id, template);
+    registerTemplate(template);
   }
 
   async has(id: string): Promise<boolean> {
