@@ -253,7 +253,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await mockAWSPackage(page);
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['waf', 'cloudtrail'],
-      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: { region: 'eu-west-1' } } },
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: { aws_region: 'eu-west-1' } } },
     });
 
     // waf has no override — shows global region.
