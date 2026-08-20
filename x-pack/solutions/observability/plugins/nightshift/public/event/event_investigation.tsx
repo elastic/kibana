@@ -141,7 +141,6 @@ export function EventInvestigation({
           investigation={investigation}
           status={status}
           state={state}
-          error={error}
           conversationId={conversationId}
           initialTab={flyoutTab}
           tabRequestId={tabRequestId}
