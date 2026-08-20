@@ -157,22 +157,21 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage: 'API Journey',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.api.description', {
-      defaultMessage:
-        'Run a multistep API check via Playwright APIRequestContext without launching a browser.',
+      defaultMessage: 'Run a sequence of HTTP requests without launching a browser.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
-    icon: 'apmTrace',
+    icon: 'inputOutput',
     beta: true,
   },
   [FormMonitorType.MULTISTEP]: {
     id: 'syntheticsMonitorTypeMultistep',
     'data-test-subj': 'syntheticsMonitorTypeMultistep',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.label', {
-      defaultMessage: 'Multistep',
+      defaultMessage: 'Browser Journey',
     }),
     value: FormMonitorType.MULTISTEP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.title', {
-      defaultMessage: 'Multistep Browser Journey',
+      defaultMessage: 'Browser Journey',
     }),
     description: i18n.translate(
       'xpack.synthetics.monitorConfig.monitorType.multiStep.description',
@@ -182,7 +181,7 @@ export const MONITOR_TYPE_CONFIG = {
       }
     ),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
-    icon: 'videoPlayer',
+    icon: 'display',
     beta: false,
   },
   [FormMonitorType.SINGLE]: {
@@ -195,7 +194,7 @@ export const MONITOR_TYPE_CONFIG = {
     descriptionTitle: i18n.translate(
       'xpack.synthetics.monitorConfig.monitorType.singlePage.title',
       {
-        defaultMessage: 'Single Page Browser Test',
+        defaultMessage: 'Page load',
       }
     ),
     description: i18n.translate(
@@ -206,61 +205,58 @@ export const MONITOR_TYPE_CONFIG = {
       }
     ),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
-    icon: 'videoPlayer',
+    icon: 'inspect',
     beta: false,
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
     'data-test-subj': 'syntheticsMonitorTypeHTTP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.label', {
-      defaultMessage: 'HTTP Ping',
+      defaultMessage: 'HTTP',
     }),
     value: FormMonitorType.HTTP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.title', {
       defaultMessage: 'HTTP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'A lightweight check of a URL without a browser or script.',
     }),
     link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'globe',
     beta: false,
   },
   [FormMonitorType.TCP]: {
     id: 'syntheticsMonitorTypeTCP',
     'data-test-subj': 'syntheticsMonitorTypeTCP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.label', {
-      defaultMessage: 'TCP Ping',
+      defaultMessage: 'TCP',
     }),
     value: FormMonitorType.TCP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.title', {
       defaultMessage: 'TCP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'Check that a host and port accept TCP connections.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'ip',
     beta: false,
   },
   [FormMonitorType.ICMP]: {
     id: 'syntheticsMonitorTypeICMP',
     'data-test-subj': 'syntheticsMonitorTypeICMP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.label', {
-      defaultMessage: 'ICMP Ping',
+      defaultMessage: 'ICMP',
     }),
     value: FormMonitorType.ICMP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
       defaultMessage: 'ICMP Ping',
     }),
     description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.description', {
-      defaultMessage:
-        'A lightweight API check to validate the availability of a web service or endpoint.',
+      defaultMessage: 'Check that a host responds to ICMP ping.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'wifi',
+    icon: 'bolt',
     beta: false,
   },
 };

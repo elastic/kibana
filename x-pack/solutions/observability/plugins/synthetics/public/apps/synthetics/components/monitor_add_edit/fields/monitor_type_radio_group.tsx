@@ -58,6 +58,13 @@ export const MonitorType = ({
       name={name}
       isSelected={isSelected}
       data-test-subj={dataTestSubj}
+      css={{
+        width: 'auto',
+        minWidth: 96,
+        '.euiKeyPadMenuItem__label': {
+          whiteSpace: 'nowrap',
+        },
+      }}
     >
       <EuiIcon type={icon} aria-hidden={true} />
     </EuiKeyPadMenuItem>
