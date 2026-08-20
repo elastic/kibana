@@ -34,6 +34,7 @@ import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
 import * as observableTypesI18n from '../../observable_types/translations';
+import { WorkflowTags } from '../../configure_cases/workflow_tags';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
@@ -74,6 +75,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -93,6 +95,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
@@ -175,9 +178,21 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
-                {hasMinimumLicensePermissions && showObservableTypesSection && (
-                  <EuiHorizontalRule margin="l" />
-                )}
+                {hasMinimumLicensePermissions && <EuiHorizontalRule margin="l" />}
+
+                <SettingsSection
+                  data-test-subj="cases-redesign-workflow-tags-section"
+                  title={configureCasesI18n.WORKFLOW_TAGS_TITLE}
+                  description={configureCasesI18n.WORKFLOW_TAGS_DESCRIPTION}
+                >
+                  <WorkflowTags
+                    workflowTags={workflowTags}
+                    disabled={isLoadingCaseConfiguration || !permissions.settings}
+                    onChange={onChangeWorkflowTags}
+                  />
+                </SettingsSection>
+
+                {showObservableTypesSection && <EuiHorizontalRule margin="l" />}
 
                 {showObservableTypesSection && (
                   <SettingsSection

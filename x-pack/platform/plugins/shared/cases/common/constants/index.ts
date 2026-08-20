@@ -119,6 +119,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_WORKFLOW_RUN_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
@@ -190,6 +192,8 @@ export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
+export const MAX_WORKFLOW_TAGS_PER_CONFIGURATION = 100 as const;
+export const DEFAULT_CASE_WORKFLOW_TAGS = ['Cases'] as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;
 export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;

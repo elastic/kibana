@@ -1047,6 +1047,10 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .optional(),
     owner: Owner,
     templates: Templates.optional(),
+    /**
+     * Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+     */
+    workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
   })
 );
 export type SetCaseConfigurationRequest = z.infer<typeof SetCaseConfigurationRequest>;
@@ -1111,6 +1115,10 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       )
       .optional(),
     templates: Templates.optional(),
+    /**
+     * Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+     */
+    workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
 
@@ -1912,6 +1920,31 @@ export const PayloadUserComment = lazySchema(() =>
 );
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
 
+export const PayloadWorkflow = lazySchema(() =>
+  z.object({
+    workflow: z.object({
+      id: z.string(),
+      name: z.string(),
+      executionId: z.string(),
+    }),
+    origin: z.object({
+      type: z.enum([
+        'cases.case',
+        'cases.observable',
+        'cases.alert',
+        'cases.alerts',
+        'cases.comment',
+        'cases.attachment',
+      ]),
+      id: z.string(),
+      index: z.string().optional(),
+      typeKey: z.string().optional(),
+      value: z.string().optional(),
+    }),
+  })
+);
+export type PayloadWorkflow = z.infer<typeof PayloadWorkflow>;
+
 export const UserActionsFindResponseProperties = lazySchema(() =>
   z.object({
     action: Actions,
@@ -1939,6 +1972,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,
+      PayloadWorkflow,
     ]),
     version: z.string(),
     /**
@@ -1961,6 +1995,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       'status',
       'tags',
       'title',
+      'workflow',
     ]),
   })
 );

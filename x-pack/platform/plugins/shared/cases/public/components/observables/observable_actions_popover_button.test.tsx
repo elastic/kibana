@@ -18,9 +18,19 @@ import type { Observable } from '../../../common/types/domain/observable/v1';
 import { mockCase } from '../../containers/mock';
 import { usePostObservable } from '../../containers/use_post_observables';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 
 jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
+const mockRunWorkflowPanel = jest.fn((_props: unknown) => (
+  <div data-test-subj="mock-run-workflow-panel" />
+));
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(() => ({ canExecuteWorkflow: false })),
+  useWorkflowsUIEnabledSetting: jest.fn(() => true),
+  RunWorkflowPanel: (props: unknown) => mockRunWorkflowPanel(props),
+}));
 
 describe('ObservableActionsPopoverButton', () => {
   const addObservable = jest.fn().mockResolvedValue({});
@@ -137,6 +147,98 @@ describe('ObservableActionsPopoverButton', () => {
       );
 
       expect(screen.queryByTestId('cases-observables-delete-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('run workflow', () => {
+    it('does not show the run workflow button when canExecuteWorkflow is false', async () => {
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: false } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
+
+      renderWithTestingProviders(
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      );
+
+      await userEvent.click(
+        await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
+      );
+
+      expect(screen.queryByTestId('cases-observables-run-workflow-button')).not.toBeInTheDocument();
+    });
+
+    it('does not show the run workflow button when workflowUI is disabled', async () => {
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
+      jest.mocked(useWorkflowsUIEnabledSetting).mockReturnValue(false);
+
+      renderWithTestingProviders(
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      );
+
+      await userEvent.click(
+        await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
+      );
+
+      expect(screen.queryByTestId('cases-observables-run-workflow-button')).not.toBeInTheDocument();
+
+      // Restore default for subsequent tests
+      jest.mocked(useWorkflowsUIEnabledSetting).mockReturnValue(true);
+    });
+
+    it('does not show the run workflow button when the user has no update permission', async () => {
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
+
+      renderWithTestingProviders(
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />,
+        { wrapperProps: { permissions: buildCasesPermissions({ update: false }) } }
+      );
+
+      await userEvent.click(
+        await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
+      );
+
+      expect(screen.queryByTestId('cases-observables-run-workflow-button')).not.toBeInTheDocument();
+    });
+
+    it('shows the run workflow button and navigates to the workflow sub-panel when canRunWorkflow is true', async () => {
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
+
+      renderWithTestingProviders(
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      );
+
+      await userEvent.click(
+        await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
+      );
+
+      expect(
+        await screen.findByTestId('cases-observables-run-workflow-button')
+      ).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('cases-observables-run-workflow-button'), {
+        pointerEventsCheck: 0,
+      });
+
+      expect(await screen.findByTestId('mock-run-workflow-panel')).toBeInTheDocument();
+      expect(mockRunWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runWorkflow: expect.any(Function),
+        })
+      );
     });
   });
 });

@@ -52,6 +52,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
+    runWorkflowModal,
   } = useCaseViewHeader({ caseData, onStatusChanged, onSeverityChanged, onUpdateField });
 
   const onSyncAlertsChanged = useCallback(
@@ -102,6 +103,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
           anchorElement={settingsAnchor}
         />
       )}
+      {runWorkflowModal}
     </>
   );
 };

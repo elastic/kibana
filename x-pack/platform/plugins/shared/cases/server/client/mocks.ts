@@ -72,9 +72,11 @@ const createCasesEventBusMock = (): CasesEventBus => {
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitObservablesAdded: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
+    onObservablesAdded: jest.fn(),
   };
 };
 
@@ -144,6 +146,8 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     getConnectors: jest.fn(),
     stats: jest.fn(),
     getUsers: jest.fn(),
+    preflightWorkflowExecution: jest.fn(),
+    recordWorkflowExecution: jest.fn(),
   });
 };
 

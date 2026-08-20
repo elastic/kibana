@@ -21,6 +21,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../../../../client/attachmen
 import type { CasesPermissions } from '../../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../../../user_actions/helpers';
 import { builderMap } from '../../../user_actions/builder';
+import type { RenderWorkflowUserActionAction } from '../../../cases_context';
 
 interface UseBuildUserActionsArgs {
   caseUserActions: UserActionUI[];
@@ -39,6 +40,7 @@ interface UseBuildUserActionsArgs {
   euiTheme: EuiThemeComputed<{}>;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export const useBuildUserActions = ({
@@ -58,6 +60,7 @@ export const useBuildUserActions = ({
   euiTheme,
   handleOutlineComment,
   handleDeleteComment,
+  renderWorkflowUserActionAction,
 }: UseBuildUserActionsArgs): EuiCommentProps[] => {
   return useMemo(() => {
     if (!caseUserActions) {
@@ -93,6 +96,7 @@ export const useBuildUserActions = ({
         euiTheme,
         handleOutlineComment,
         handleDeleteComment,
+        renderWorkflowUserActionAction,
       });
       return [...userActions, ...userActionBuilder.build()];
     }, []);
@@ -113,5 +117,6 @@ export const useBuildUserActions = ({
     euiTheme,
     handleOutlineComment,
     handleDeleteComment,
+    renderWorkflowUserActionAction,
   ]);
 };

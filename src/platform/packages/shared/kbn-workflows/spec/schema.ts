@@ -1155,7 +1155,7 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });
 
-export const WorkflowExecutionContextSchema = z.object({
+export const WorkflowRuntimeExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
@@ -1164,7 +1164,7 @@ export const WorkflowExecutionContextSchema = z.object({
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });
-export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+export type WorkflowRuntimeExecutionContext = z.infer<typeof WorkflowRuntimeExecutionContextSchema>;
 
 export const WorkflowDataContextSchema = z.object({
   id: z.string(),
@@ -1228,7 +1228,7 @@ export const WorkflowContextSchema = z.object({
    */
   inputs: z.record(z.string(), z.unknown()).optional(),
   event: AlertEventSchema.optional(),
-  execution: WorkflowExecutionContextSchema,
+  execution: WorkflowRuntimeExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   output: z

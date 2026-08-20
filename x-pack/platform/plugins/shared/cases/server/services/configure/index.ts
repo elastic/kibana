@@ -16,7 +16,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { decodeOrThrow } from '../../common/runtime_types';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, DEFAULT_CASE_WORKFLOW_TAGS } from '../../../common/constants';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,
@@ -242,6 +242,10 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const workflowTags = configuration.attributes.workflowTags
+    ? (configuration.attributes.workflowTags as ConfigurationTransformedAttributes['workflowTags'])
+    : [...DEFAULT_CASE_WORKFLOW_TAGS];
+
   return {
     ...configuration,
     attributes: {
@@ -250,6 +254,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      workflowTags,
     },
   };
 }

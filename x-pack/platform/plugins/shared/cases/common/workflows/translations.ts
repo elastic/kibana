@@ -730,6 +730,16 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+// Observables added trigger
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.observablesAdded.eventSchema.observables',
+  {
+    defaultMessage:
+      'The list of observables added in this operation, including their id, typeKey, value and optional description.',
+  }
+);
+
 export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCases.label', {
   defaultMessage: 'Cases - Push cases',
 });

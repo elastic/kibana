@@ -1618,6 +1618,7 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  workflowTags: baseRequest.workflowTags ?? ['Cases'],
                 },
                 score: 0,
               },
@@ -1644,6 +1645,7 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              workflowTags: baseRequest.workflowTags ?? ['Cases'],
             },
           });
 

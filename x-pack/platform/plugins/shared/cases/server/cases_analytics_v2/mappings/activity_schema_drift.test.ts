@@ -239,6 +239,21 @@ const PER_TYPE_FIXTURES: {
     { observables: { actionType: 'add', count: 1 } },
     { action: 'add' }
   ),
+  workflow: makeUserActionSO(
+    'workflow',
+    {
+      workflow: {
+        id: 'workflow-1',
+        name: 'Investigate case',
+        executionId: 'execution-1',
+      },
+      origin: {
+        type: 'cases.observable',
+        id: 'observable-1',
+      },
+    },
+    { action: 'create' }
+  ),
 
   extended_fields: makeUserActionSO(
     'extended_fields',

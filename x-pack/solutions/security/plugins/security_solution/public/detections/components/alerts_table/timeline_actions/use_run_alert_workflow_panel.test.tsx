@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, renderHook, act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
@@ -16,6 +15,7 @@ import {
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
 } from './use_run_alert_workflow_panel';
+import { AlertWorkflowExecutorProvider } from './alert_workflow_executor';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { AlertTableContextMenuItem } from '../types';
@@ -36,6 +36,14 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
+const mockRunWorkflowPanel = jest.fn((_props: unknown) => (
+  <div>
+    <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+    <button data-test-subj="run-workflow-execute-button" type="button">
+      {'Run workflow'}
+    </button>
+  </div>
+));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -61,6 +69,10 @@ jest.mock('@kbn/workflows-ui', () => ({
       </button>
     </div>
   ),
+  // RunWorkflowPanel now lives in @kbn/workflows-ui.
+  // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
+  // This stub covers panel-level rendering assertions only.
+  RunWorkflowPanel: (props: unknown) => mockRunWorkflowPanel(props),
 }));
 jest.mock('../../../../common/components/loader', () => ({
   Loader: ({ children }: { children: React.ReactNode }) => (
@@ -225,166 +237,44 @@ describe('useRunAlertWorkflowPanel', () => {
       });
       const items = result.current.runWorkflowMenuItem;
       const panels = result.current.runAlertWorkflowPanel;
-      const { getByTestId, getByRole } = renderContextMenu(items, panels);
+      const { getByTestId } = renderContextMenu(items, panels);
 
       await waitFor(() => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
-      expect(getByTestId('execute-alert-workflow-button')).toBeInTheDocument();
-      expect(getByRole('button', { name: i18n.RUN_WORKFLOW_BUTTON })).toBeInTheDocument();
+      expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
     });
   });
 });
 
-describe('AlertWorkflowsPanel', () => {
-  beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
-    useKibanaMock.mockReturnValue(
-      createMockKibana({
-        application: { navigateToApp: jest.fn() },
-        rendering: {},
-      })
-    );
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('requests managed workflows tagged with the rule_action visibility context', () => {
-    const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
-      wrapper: TestProviders,
-    });
-    const panels = result.current.runAlertWorkflowPanel;
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    expect(mockUseWorkflows).toHaveBeenCalledWith(
-      expect.objectContaining({
-        managed: 'all',
-        visibilityContext: ['selector:rule_action'],
-      })
-    );
-  });
-
-  it('execute button is disabled when no workflow is selected', () => {
-    const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
-      wrapper: TestProviders,
-    });
-    const panels = result.current.runAlertWorkflowPanel;
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    const executeButton = screen.getByTestId('execute-alert-workflow-button');
-    expect(executeButton).toBeDisabled();
-  });
-
-  it('calls runWorkflow.mutate with alert payload when workflow is selected and execute is clicked', async () => {
-    const user = userEvent.setup();
-    const closePopoverFn = jest.fn();
-    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
-      onSettled?.();
-    });
-
-    const { result } = renderHook(
-      () =>
-        useRunAlertWorkflowPanel({
-          ...defaultProps,
-          closePopover: closePopoverFn,
-        }),
-      { wrapper: TestProviders }
-    );
-    const panels = result.current.runAlertWorkflowPanel;
-
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    const selectButton = screen.getByTestId('select-workflow-option');
-    await user.click(selectButton);
-
-    const executeButton = screen.getByTestId('execute-alert-workflow-button');
-    expect(executeButton).not.toBeDisabled();
-    await user.click(executeButton);
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      {
-        id: 'test-workflow-id',
-        inputs: {
-          event: {
-            triggerType: 'alert',
-            alertIds: [{ _id: 'alert-123', _index: 'alerts-index' }],
-          },
-        },
-      },
-      expect.objectContaining({
-        onSuccess: expect.any(Function),
-        onError: expect.any(Function),
-        onSettled: expect.any(Function),
-      })
-    );
-    expect(closePopoverFn).toHaveBeenCalled();
-  });
-
-  it('calls onExecute callback when workflow execution is triggered', async () => {
-    const user = userEvent.setup();
-    const onExecuteFn = jest.fn();
-    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
-      onSettled?.();
-    });
+describe('AlertWorkflowsPanel executor', () => {
+  it('uses the executor from the embedding surface', () => {
+    const alertIds = [{ _id: 'alert-123', _index: 'alerts-index' }];
+    const runWorkflow = jest.fn();
 
     render(
-      <TestProviders>
-        <AlertWorkflowsPanel
-          alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
-          onClose={jest.fn()}
-          onExecute={onExecuteFn}
-        />
-      </TestProviders>
+      <AlertWorkflowExecutorProvider runWorkflow={runWorkflow}>
+        <AlertWorkflowsPanel alertIds={alertIds} onClose={jest.fn()} />
+      </AlertWorkflowExecutorProvider>
     );
 
-    await user.click(screen.getByTestId('select-workflow-option'));
-    await user.click(screen.getByTestId('execute-alert-workflow-button'));
-
-    expect(onExecuteFn).toHaveBeenCalledTimes(1);
+    expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ runWorkflow })
+    );
   });
 
-  it('calls addSuccess (workflow success toast) when mutate onSuccess is invoked', async () => {
-    const addSuccessToast = jest.fn();
-    const baseServices = createMockKibana().services;
-    useKibanaMock.mockReturnValue({
-      services: {
-        ...baseServices,
-        notifications: {
-          ...baseServices.notifications,
-          toasts: {
-            ...baseServices.notifications.toasts,
-            addSuccess: addSuccessToast,
-          },
-        },
-      },
-    });
+  it('leaves the executor undefined outside an embedding surface', () => {
+    render(
+      <AlertWorkflowsPanel
+        alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
+        onClose={jest.fn()}
+      />
+    );
 
-    let captureCallbacks: { onSuccess?: (data: { workflowExecutionId: string }) => void } = {};
-    mockMutate.mockImplementation((_vars: unknown, callbacks: typeof captureCallbacks) => {
-      captureCallbacks = callbacks;
-    });
-
-    const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
-      wrapper: TestProviders,
-    });
-    const panels = result.current.runAlertWorkflowPanel;
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    const selectButton = screen.getByTestId('select-workflow-option');
-    await userEvent.click(selectButton);
-    await userEvent.click(screen.getByTestId('execute-alert-workflow-button'));
-
-    expect(captureCallbacks.onSuccess).toBeDefined();
-    act(() => {
-      captureCallbacks.onSuccess?.({ workflowExecutionId: 'exec-456' });
-    });
-
-    expect(addSuccessToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: i18n.WORKFLOW_START_SUCCESS_TOAST,
-      })
+    expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ runWorkflow: undefined })
     );
   });
 });
+// Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:
+//   src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel/run_workflow_panel.test.tsx

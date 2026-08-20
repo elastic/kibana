@@ -137,6 +137,7 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      workflowTags: ['Cases'],
     };
 
     it('has expected attributes in request', () => {
@@ -222,6 +223,7 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      workflowTags: ['Cases'],
     };
 
     it('has expected attributes in request', () => {

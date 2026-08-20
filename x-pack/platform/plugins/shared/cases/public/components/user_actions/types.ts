@@ -22,6 +22,7 @@ import type { OnUpdateFields } from '../case_view/types';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import type { RenderWorkflowUserActionAction } from '../cases_context';
 
 export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
@@ -60,6 +61,7 @@ export interface UserActionBuilderArgs {
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
   euiTheme: EuiThemeComputed<{}>;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {

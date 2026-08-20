@@ -8,10 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import { useCasesWorkflowExecutor } from '@kbn/cases-plugin/public';
 import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
+import type { RunWorkflowExecutorParams } from '@kbn/workflows-ui';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
+import { AlertWorkflowExecutorProvider } from '../../../../detections/components/alerts_table/timeline_actions/alert_workflow_executor';
 import { EaseAlertsTable } from '../../../components/ease/wrapper';
 import { useFetchNotes } from '../../../../notes/hooks/use_fetch_notes';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -19,6 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { NoPrivileges } from '../../../../common/components/no_privileges';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
+import { getCaseAlertWorkflowOrigin } from '../workflow_executor';
 
 export const AlertTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
   const {
@@ -43,6 +47,11 @@ export const AlertTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseDa
     ({ alerts }: AlertsTableOnLoadedProps) => onAlertsTableLoaded(alerts),
     [onAlertsTableLoaded]
   );
+  const resolveOrigin = useCallback(
+    (params: RunWorkflowExecutorParams) => getCaseAlertWorkflowOrigin(caseData.id, params),
+    [caseData.id]
+  );
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin: resolveOrigin });
 
   if (!hasAlertsRead) {
     return (
@@ -67,22 +76,24 @@ export const AlertTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseDa
   }
 
   return (
-    <EuiFlexItem data-test-subj="case-view-alerts">
-      {EASE ? (
-        <EaseAlertsTable
-          id={`case-details-alerts-${caseData.owner}`}
-          onLoaded={onLoaded}
-          query={alertIdsQuery}
-        />
-      ) : (
-        <AlertsTable
-          tableType={TableId.alertsOnCasePage}
-          id={`case-details-alerts-${caseData.owner}`}
-          onLoaded={onLoaded}
-          query={alertIdsQuery}
-        />
-      )}
-    </EuiFlexItem>
+    <AlertWorkflowExecutorProvider runWorkflow={runWorkflow}>
+      <EuiFlexItem data-test-subj="case-view-alerts">
+        {EASE ? (
+          <EaseAlertsTable
+            id={`case-details-alerts-${caseData.owner}`}
+            onLoaded={onLoaded}
+            query={alertIdsQuery}
+          />
+        ) : (
+          <AlertsTable
+            tableType={TableId.alertsOnCasePage}
+            id={`case-details-alerts-${caseData.owner}`}
+            onLoaded={onLoaded}
+            query={alertIdsQuery}
+          />
+        )}
+      </EuiFlexItem>
+    </AlertWorkflowExecutorProvider>
   );
 };
 

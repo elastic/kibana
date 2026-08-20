@@ -31,6 +31,14 @@ properties:
         $ref: 'case_configure_customfields.yaml'
   templates:
     $ref: 'templates.yaml'
+  workflowTags:
+    type: array
+    description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+    maxItems: 100
+    items:
+      type: string
+      minLength: 1
+      maxLength: 256
   version:
     description: >
       The version of the connector.

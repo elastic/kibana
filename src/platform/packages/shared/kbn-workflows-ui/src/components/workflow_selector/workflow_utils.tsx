@@ -17,6 +17,11 @@ import type {
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
 
+export interface WorkflowSelectorVisibility {
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
+}
+
 export interface WorkflowValidationResult {
   severity: 'error' | 'warning';
   message: string;
@@ -38,12 +43,12 @@ export interface WorkflowOption {
   [key: string]: unknown; // Allow additional properties for EuiSelectable
 }
 
-export interface WorkflowSelectorVisibility {
-  selectors?: ManagedWorkflowSelector[];
-  solutions?: ManagedWorkflowSolution[];
-}
-
 export interface WorkflowSelectorConfig {
+  // Server-side managed workflow visibility — filters managed workflows by selector/solution
+  // before they are returned by the server. Only managed workflows tagged with a matching
+  // managedVisibilityContexts value are included. When omitted, no managed workflows are fetched.
+  visibility?: WorkflowSelectorVisibility;
+
   // Filtering
   filterFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
 
@@ -66,7 +71,6 @@ export interface WorkflowSelectorConfig {
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
-  visibility?: WorkflowSelectorVisibility;
 
   // Error Messages
   errorMessages?: {

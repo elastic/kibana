@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
+import { requiresUserSuppliedInputs } from '@kbn/workflows-ui';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 
 describe('requiresUserSuppliedInputs', () => {

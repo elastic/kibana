@@ -42,6 +42,17 @@ import type {
 import { IconDisabledWorkflow } from '../../assets/icons';
 import { useWorkflows, useWorkflowsCapabilities } from '../../hooks';
 
+const getVisibilityContext = (
+  visibility: WorkflowSelectorVisibility | undefined
+): string[] | undefined => {
+  if (!visibility) return undefined;
+  const contexts = [
+    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+  ];
+  return contexts.length === 0 ? undefined : contexts;
+};
+
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;
   onWorkflowChange: (workflowId: string) => void;
@@ -64,25 +75,6 @@ const defaultConfig: WorkflowSelectorConfig = {
   showSelectedInSearch: true,
 };
 
-const getVisibilityContext = (
-  visibility: WorkflowSelectorVisibility | undefined
-): string[] | undefined => {
-  if (!visibility) {
-    return undefined;
-  }
-
-  const visibilityContexts = [
-    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
-    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
-  ];
-
-  if (visibilityContexts.length === 0) {
-    return undefined;
-  }
-
-  return visibilityContexts;
-};
-
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   selectedWorkflowId,
   onWorkflowChange,
@@ -98,12 +90,15 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
   const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
+
   const visibilityContext = useMemo(
     () => getVisibilityContext(finalConfig.visibility),
     [finalConfig.visibility]
   );
 
-  // Fetch workflows using the hook
+  // Include managed workflows only when: (a) the caller declared a visibility context, and
+  // (b) the user has the canReadManagedWorkflow capability. Without a visibility context the
+  // server would return every managed workflow in the space, leaking other solutions' workflows.
   const {
     data: workflowsData,
     isLoading,
@@ -253,10 +248,10 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         if (finalConfig.showSelectedInSearch) {
           setInputValue(changedOption.name);
           setIsSearching(false);
-        } else {
-          setInputValue('');
-          setIsSearching(true);
         }
+        // When showSelectedInSearch is false (list view), leave the search term as-is.
+        // The selected item is already visible — the user just clicked it — and clearing
+        // the search would reset the scroll position to the top, losing the selection context.
       } else {
         onWorkflowChange('');
         setInputValue('');
@@ -322,7 +317,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       return (
         <>
           {search}
-          <div>{list}</div>
+          <div css={{ marginTop: euiTheme.size.xs }}>{list}</div>
           {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
             <EuiPanel
               paddingSize="s"
@@ -345,6 +340,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     },
     [
       euiTheme.colors.backgroundBaseSubdued,
+      euiTheme.size.xs,
       finalConfig.hideViewWorkflowLink,
       workflowManagementLinkProps,
       workflowOptions.length,

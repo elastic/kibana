@@ -105,6 +105,8 @@
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/workflows-ui",
+    "@kbn/deeplinks-workflows",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
@@ -124,6 +126,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/core-http-common",
+    "@kbn/workflows-management-plugin",
   ],
   "exclude": ["target/**/*"]
 }

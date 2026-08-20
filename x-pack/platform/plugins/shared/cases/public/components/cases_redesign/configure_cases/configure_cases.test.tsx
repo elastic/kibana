@@ -112,7 +112,7 @@ describe('ConfigureCasesRedesign', () => {
     );
   });
 
-  it('renders the three settings sections in a single panel', async () => {
+  it('renders the settings sections in a single panel', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
     expect(await screen.findByTestId('cases-redesign-settings-panel')).toBeInTheDocument();
@@ -120,6 +120,8 @@ describe('ConfigureCasesRedesign', () => {
       screen.getByTestId('cases-redesign-external-incident-management-section')
     ).toBeInTheDocument();
     expect(screen.getByTestId('cases-redesign-case-closures-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-redesign-workflow-tags-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-workflow-tags')).toHaveTextContent('Cases');
     expect(screen.getByTestId('cases-redesign-observable-types-section')).toBeInTheDocument();
   });
 

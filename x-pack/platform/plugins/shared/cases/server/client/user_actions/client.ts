@@ -20,6 +20,11 @@ import { getUsers } from './users';
 import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
 import { find } from './find';
 import type { CasesClient } from '../client';
+import type {
+  PreflightWorkflowExecutionParams,
+  RecordWorkflowExecutionParams,
+} from './record_workflow_execution';
+import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -42,6 +47,14 @@ export interface UserActionsSubClient {
    * Retrieves all users participating in a case
    */
   getUsers(params: GetUsersRequest): Promise<GetCaseUsersResponse>;
+  /**
+   * Checks whether a workflow execution can be recorded without writing activity.
+   */
+  preflightWorkflowExecution(params: PreflightWorkflowExecutionParams): Promise<void>;
+  /**
+   * Records a workflow execution in a case's activity.
+   */
+  recordWorkflowExecution(params: RecordWorkflowExecutionParams): Promise<void>;
 }
 
 /**
@@ -57,6 +70,8 @@ export const createUserActionsSubClient = (
     getConnectors: (params) => getConnectors(params, clientArgs),
     stats: (params) => getStats(params, casesClient, clientArgs),
     getUsers: (params) => getUsers(params, casesClient, clientArgs),
+    preflightWorkflowExecution: (params) => preflightWorkflowExecution(params, clientArgs),
+    recordWorkflowExecution: (params) => recordWorkflowExecution(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

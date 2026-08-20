@@ -35,6 +35,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import {
+  DEFAULT_CASE_WORKFLOW_TAGS,
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
 } from '../../../common/constants';
@@ -424,6 +425,8 @@ export async function update(
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
+      workflowTags: patch.attributes.workflowTags ??
+        configuration.attributes.workflowTags ?? [...DEFAULT_CASE_WORKFLOW_TAGS],
       mappings,
       version: patch.version ?? '',
       error,
@@ -567,6 +570,7 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [...DEFAULT_CASE_WORKFLOW_TAGS],
       },
       id: savedObjectID,
     });
@@ -575,6 +579,7 @@ export async function create(
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,
+      workflowTags: post.attributes.workflowTags ?? [...DEFAULT_CASE_WORKFLOW_TAGS],
       mappings,
       version: post.version ?? '',
       error,

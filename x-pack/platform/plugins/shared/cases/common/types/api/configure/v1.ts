@@ -13,12 +13,14 @@ import {
   MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+  MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import {
@@ -116,6 +118,17 @@ export const ObservableTypesConfigurationRt = limitedArraySchema({
   }),
 });
 
+export const WorkflowTagsConfigurationRt = limitedArraySchema({
+  codec: limitedStringSchema({
+    fieldName: `workflow tag`,
+    min: 1,
+    max: MAX_LENGTH_PER_TAG,
+  }),
+  min: 0,
+  max: MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  fieldName: `workflow tags`,
+});
+
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
     /**
@@ -189,6 +202,7 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
 ]);
@@ -215,6 +229,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),

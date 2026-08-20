@@ -72,6 +72,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    workflowTags,
   } = currentConfiguration;
 
   const {
@@ -292,6 +293,31 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ]
   );
 
+  const onChangeWorkflowTags = useCallback(
+    (updatedWorkflowTags: string[]) => {
+      persistCaseConfigure({
+        connector,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        customFields,
+        templates,
+        observableTypes,
+        workflowTags: updatedWorkflowTags,
+      });
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      observableTypes,
+      persistCaseConfigure,
+      templates,
+    ]
+  );
+
   const onCloseObservableTypesFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'observableTypes', visible: false });
     setObservableTypeToEdit(null);
@@ -364,6 +390,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -383,6 +410,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
   };
 };

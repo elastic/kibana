@@ -14,6 +14,7 @@ import {
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 
 /**
@@ -57,6 +58,10 @@ export function registerCasesWorkflowEventBridge(
         );
       }
     }
+  });
+
+  casesEventBus.onObservablesAdded((event) => {
+    void forward(ObservablesAddedTriggerId, event.payload, event.request);
   });
 
   casesEventBus.onAttachmentsAdded((event) => {

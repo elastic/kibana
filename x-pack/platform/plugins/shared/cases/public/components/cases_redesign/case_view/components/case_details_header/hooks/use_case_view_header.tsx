@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../../common/types/domain';
@@ -22,6 +22,8 @@ import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../../common/translations';
 import { useAddCaseToChat } from '../../../../../../agent_builder/use_add_case_to_chat';
+import { useRunCaseWorkflow } from '../../../../../workflows/use_run_case_workflow';
+import { RunCaseWorkflowModal } from '../../../../../workflows/run_case_workflow_modal';
 import {
   REPORTED_BY,
   CREATED_ON,
@@ -56,6 +58,17 @@ export const useCaseViewHeader = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
+
+  const {
+    canRunWorkflow,
+    isModalOpen: isRunWorkflowModalOpen,
+    openModal: openRunWorkflowModal,
+    closeModal: closeRunWorkflowModal,
+    inputs: workflowInputs,
+    runWorkflow,
+    filterWorkflow: workflowFilterWorkflow,
+    sortWorkflow: workflowSortWorkflow,
+  } = useRunCaseWorkflow({ caseData });
 
   const shouldDisableStatusFn = useShouldDisableStatus();
   const isStatusMenuDisabled = useMemo(() => {
@@ -178,6 +191,7 @@ export const useCaseViewHeader = ({
         onOpenSettings,
         onCopyId,
         onOpenDeleteModal,
+        runWorkflow: { canRunWorkflow, onOpen: openRunWorkflowModal },
       }),
     [
       addToChat,
@@ -191,6 +205,8 @@ export const useCaseViewHeader = ({
       onOpenSettings,
       onCopyId,
       onOpenDeleteModal,
+      canRunWorkflow,
+      openRunWorkflowModal,
     ]
   );
 
@@ -202,6 +218,16 @@ export const useCaseViewHeader = ({
       { onSuccess: navigateToAllCases }
     );
   }, [caseData.id, deleteCases, navigateToAllCases]);
+
+  const runWorkflowModal = isRunWorkflowModalOpen ? (
+    <RunCaseWorkflowModal
+      inputs={workflowInputs}
+      runWorkflow={runWorkflow}
+      filterWorkflow={workflowFilterWorkflow}
+      sortWorkflow={workflowSortWorkflow}
+      onClose={closeRunWorkflowModal}
+    />
+  ) : null;
 
   return {
     headerTitle,
@@ -215,5 +241,6 @@ export const useCaseViewHeader = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
+    runWorkflowModal,
   };
 };

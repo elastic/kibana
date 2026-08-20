@@ -368,6 +368,14 @@ paths:
                       $ref: '#/components/schemas/owner'
                     templates:
                       $ref: '#/components/schemas/templates'
+                    workflowTags:
+                      type: array
+                      description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+                      maxItems: 100
+                      items:
+                        type: string
+                        minLength: 1
+                        maxLength: 256
                     updated_at:
                       type: string
                       format: date-time
@@ -553,6 +561,14 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 256
                   updated_at:
                     type: string
                     format: date-time
@@ -740,6 +756,14 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 256
                   updated_at:
                     type: string
                     format: date-time
@@ -2023,6 +2047,7 @@ components:
             - tags
             - title
             - user
+            - workflow
           example: create_case
   schemas:
     assignees:
@@ -3389,6 +3414,14 @@ components:
           $ref: '#/components/schemas/owner'
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
     update_case_configuration_request:
       title: Update case configuration request
       description: |
@@ -3462,6 +3495,14 @@ components:
                   - toggle
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.
@@ -4373,6 +4414,48 @@ components:
               type: string
               enum:
                 - user
+    payload_workflow:
+      type: object
+      required:
+        - workflow
+        - origin
+      properties:
+        workflow:
+          type: object
+          required:
+            - id
+            - name
+            - executionId
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            executionId:
+              type: string
+        origin:
+          type: object
+          required:
+            - type
+            - id
+          properties:
+            type:
+              type: string
+              enum:
+                - cases.case
+                - cases.observable
+                - cases.alert
+                - cases.alerts
+                - cases.comment
+                - cases.attachment
+            id:
+              type: string
+            index:
+              type: string
+            typeKey:
+              type: string
+            value:
+              type: string
     user_actions_find_response_properties:
       type: object
       required:
@@ -4438,6 +4521,7 @@ components:
             - $ref: '#/components/schemas/payload_tags'
             - $ref: '#/components/schemas/payload_title'
             - $ref: '#/components/schemas/payload_user_comment'
+            - $ref: '#/components/schemas/payload_workflow'
         version:
           type: string
           example: WzM1ODg4LDFd
@@ -4461,6 +4545,7 @@ components:
             - status
             - tags
             - title
+            - workflow
           example: create_case
     add_case_file_request:
       title: Add case file request properties

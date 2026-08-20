@@ -82,6 +82,37 @@ export const CASE_CLOSURE_OPTIONS_NEW_INCIDENT = i18n.translate(
   }
 );
 
+export const WORKFLOW_TAGS_TITLE = i18n.translate('xpack.cases.configureCases.workflowTags.title', {
+  defaultMessage: 'Workflow tags',
+});
+
+export const WORKFLOW_TAGS_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.workflowTags.description',
+  {
+    defaultMessage:
+      'Only workflows with any of these exact, case-sensitive tags are shown when selecting a workflow from Cases. Leave empty to show all workflows.',
+  }
+);
+
+export const WORKFLOW_TAGS_LABEL = i18n.translate('xpack.cases.configureCases.workflowTags.label', {
+  defaultMessage: 'Tags',
+});
+
+export const ADD_WORKFLOW_TAG = (searchValue: string) =>
+  i18n.translate('xpack.cases.configureCases.workflowTags.addTag', {
+    defaultMessage: 'Add {searchValue} as a workflow tag',
+    values: { searchValue },
+  });
+
+export const ADD_WORKFLOW_TAG_COMBO_BOX = ADD_WORKFLOW_TAG('{searchValue}');
+
+export const WORKFLOW_TAG_TOO_LONG = i18n.translate(
+  'xpack.cases.configureCases.workflowTags.tooLong',
+  {
+    defaultMessage: 'Workflow tags cannot exceed 256 characters.',
+  }
+);
+
 export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string =>
   i18n.translate('xpack.cases.configureCases.fieldMappingTitle', {
     values: { thirdPartyName },

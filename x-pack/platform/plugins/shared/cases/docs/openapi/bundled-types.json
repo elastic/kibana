@@ -565,6 +565,16 @@
                       "templates": {
                         "$ref": "#/components/schemas/templates"
                       },
+                      "workflowTags": {
+                        "type": "array",
+                        "description": "Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
                       "updated_at": {
                         "type": "string",
                         "format": "date-time",
@@ -824,6 +834,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -1088,6 +1108,16 @@
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
+                    },
+                    "workflowTags": {
+                      "type": "array",
+                      "description": "Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
                     },
                     "updated_at": {
                       "type": "string",
@@ -3067,7 +3097,8 @@
               "status",
               "tags",
               "title",
-              "user"
+              "user",
+              "workflow"
             ],
             "example": "create_case"
           }
@@ -4909,6 +4940,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           }
         }
       },
@@ -5005,6 +5046,16 @@
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
+          },
+          "workflowTags": {
+            "type": "array",
+            "description": "Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
@@ -5184,7 +5235,7 @@
       },
       "template_write_request": {
         "title": "Template write request",
-        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.\n",
+        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).\n",
         "type": "object",
         "required": [
           "owner",
@@ -5202,6 +5253,7 @@
           },
           "definition": {
             "type": "string",
+            "maxLength": 30000,
             "description": "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n",
             "example": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n  - $ref: risk_score\n"
           },
@@ -6228,6 +6280,66 @@
           }
         }
       },
+      "payload_workflow": {
+        "type": "object",
+        "required": [
+          "workflow",
+          "origin"
+        ],
+        "properties": {
+          "workflow": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "executionId"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "executionId": {
+                "type": "string"
+              }
+            }
+          },
+          "origin": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "cases.case",
+                  "cases.observable",
+                  "cases.alert",
+                  "cases.alerts",
+                  "cases.comment",
+                  "cases.attachment"
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "type": "string"
+              },
+              "typeKey": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "user_actions_find_response_properties": {
         "type": "object",
         "required": [
@@ -6331,6 +6443,9 @@
               },
               {
                 "$ref": "#/components/schemas/payload_user_comment"
+              },
+              {
+                "$ref": "#/components/schemas/payload_workflow"
               }
             ]
           },
@@ -6357,7 +6472,8 @@
               "severity",
               "status",
               "tags",
-              "title"
+              "title",
+              "workflow"
             ],
             "example": "create_case"
           }

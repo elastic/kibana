@@ -17,6 +17,8 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,6 +49,7 @@ import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useConfigureCasesController } from './use_configure_cases_controller';
+import { WorkflowTags } from './workflow_tags';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -124,6 +127,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -143,6 +147,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
@@ -451,6 +456,22 @@ export const ConfigureCases: React.FC = React.memo(() => {
               </div>
             </>
           )}
+
+          <EuiSpacer size="xl" />
+
+          <section css={sectionWrapperCss} data-test-subj="cases-workflow-tags-section">
+            <EuiTitle size="s">
+              <h2>{i18n.WORKFLOW_TAGS_TITLE}</h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="m">{i18n.WORKFLOW_TAGS_DESCRIPTION}</EuiText>
+            <EuiSpacer size="m" />
+            <WorkflowTags
+              workflowTags={workflowTags}
+              disabled={isLoadingCaseConfiguration || !permissions.settings}
+              onChange={onChangeWorkflowTags}
+            />
+          </section>
 
           {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>

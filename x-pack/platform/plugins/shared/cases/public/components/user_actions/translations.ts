@@ -152,6 +152,13 @@ export const REMOVED_TEMPLATE_LABEL = i18n.translate(
   { defaultMessage: 'removed applied template' }
 );
 
+export const WORKFLOW_STARTED_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.workflowStartedAriaLabel',
+  {
+    defaultMessage: 'Workflow started',
+  }
+);
+
 export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
   i18n.translate('xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason', {
     values: { count },

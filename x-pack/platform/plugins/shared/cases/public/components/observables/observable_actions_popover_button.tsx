@@ -18,6 +18,13 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
+import { ObservablesAddedTriggerId } from '../../../common/workflows/triggers';
+import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
@@ -27,6 +34,14 @@ import { useDeletePropertyAction } from '../user_actions/property_actions/use_de
 import { type CaseUI } from '../../containers/types';
 import { EditObservableModal } from './edit_observable_modal';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
+import * as workflowI18n from '../workflows/translations';
+import { createCaseWorkflowComparator } from '../workflows/use_run_case_workflow';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
+
+const RUN_OBSERVABLE_WORKFLOW_PANEL_ID = 'run-observable-workflow-panel';
+const RUN_WORKFLOWS_PANEL_WIDTH = 400;
+const OBSERVABLE_TRIGGER_TYPES = new Set<string>([ObservablesAddedTriggerId]);
 
 export const ObservableActionsPopoverButton: React.FC<{
   caseData: CaseUI;
@@ -34,6 +49,12 @@ export const ObservableActionsPopoverButton: React.FC<{
 }> = ({ caseData, observable }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { permissions } = useCasesContext();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowUIEnabled = useWorkflowsUIEnabledSetting();
+  const canRunWorkflow = permissions.update && workflowUIEnabled && canExecuteWorkflow;
+  const {
+    data: { workflowTags },
+  } = useGetCaseConfiguration();
   const [showEditModal, setShowEditModal] = useState(false);
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
@@ -58,10 +79,37 @@ export const ObservableActionsPopoverButton: React.FC<{
   const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const workflowInputs = useMemo(
+    () => ({
+      event: {
+        caseId: caseData.id,
+        owner: caseData.owner,
+        observables: [
+          {
+            id: observable.id,
+            typeKey: observable.typeKey,
+            value: observable.value,
+            description: observable.description ?? null,
+          },
+        ],
+      },
+    }),
+    [caseData.id, caseData.owner, observable]
+  );
+  const workflowOrigin = useMemo(
+    () => ({ type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, id: observable.id }),
+    [observable.id]
+  );
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin: workflowOrigin });
+  const workflowSortWorkflow = useMemo(
+    () => createCaseWorkflowComparator(workflowTags, OBSERVABLE_TRIGGER_TYPES),
+    [workflowTags]
+  );
+
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    const panelsToBuild = [
+    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
         title: i18n.OBSERVABLE_ACTIONS,
@@ -70,6 +118,15 @@ export const ObservableActionsPopoverButton: React.FC<{
     ];
 
     if (permissions.update) {
+      if (canRunWorkflow) {
+        mainPanelItems.push({
+          name: <EuiTextColor>{workflowI18n.RUN_WORKFLOW}</EuiTextColor>,
+          icon: <EuiIcon type="play" size="m" aria-hidden={true} />,
+          panel: RUN_OBSERVABLE_WORKFLOW_PANEL_ID,
+          'data-test-subj': 'cases-observables-run-workflow-button',
+        });
+      }
+
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
         icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
@@ -93,8 +150,33 @@ export const ObservableActionsPopoverButton: React.FC<{
       });
     }
 
+    if (canRunWorkflow) {
+      panelsToBuild.push({
+        id: RUN_OBSERVABLE_WORKFLOW_PANEL_ID,
+        title: workflowI18n.SELECT_WORKFLOW_TITLE,
+        width: RUN_WORKFLOWS_PANEL_WIDTH,
+        content: (
+          <RunWorkflowPanel
+            inputs={workflowInputs}
+            runWorkflow={runWorkflow}
+            sortWorkflow={workflowSortWorkflow}
+            onClose={closePopover}
+          />
+        ),
+      });
+    }
+
     return panelsToBuild;
-  }, [closePopover, isLoading, onDeletionModalOpen, permissions]);
+  }, [
+    canRunWorkflow,
+    closePopover,
+    isLoading,
+    onDeletionModalOpen,
+    permissions,
+    runWorkflow,
+    workflowInputs,
+    workflowSortWorkflow,
+  ]);
 
   return (
     <>

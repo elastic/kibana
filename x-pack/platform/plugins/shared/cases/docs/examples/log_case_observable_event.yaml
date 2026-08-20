@@ -1,0 +1,65 @@
+# Example: Log Case Observable Event
+#
+# Trigger: cases.observablesAdded
+#   Fires automatically whenever one or more observables are added to a case
+#   (via the "Add observable" button, auto-extraction, or the cases.addObservables workflow step).
+#
+# What this workflow does:
+#   1. Logs a one-line summary of the event (case ID, owner, observable count).
+#   2. Loops over each observable and logs its type, value, and description.
+#
+# Loop guard: `on.workflowEvents: avoid-loop`
+#   The cases.addObservables step (used inside workflows) also fires this trigger.
+#   Without this guard, a workflow that adds observables would re-trigger itself.
+#
+# To use this as a template, replace the `console` steps with real actions such as:
+#   - kibana.addCaseComment  — add a note to the case with enrichment results
+#   - http                   — call VirusTotal / Shodan / MISP with the observable value
+#   - kibana.updateCase      — tag or severity-bump the case based on lookup results
+#
+version: '1'
+name: 'Log case observable event'
+description: |
+  Prints every observable added to a case.
+  Use this as a starting point for observable-enrichment workflows.
+enabled: true
+tags:
+  - Example
+  - Cases
+  - Observables
+
+triggers:
+  - type: cases.observablesAdded
+    on:
+      # Remove or adjust this condition to broaden scope.
+      # Supported operators: KQL syntax on any event.* field.
+      condition: 'event.owner: "securitySolution"'
+      # Prevent re-triggering if this workflow later calls cases.addObservables.
+      workflowEvents: avoid-loop
+
+steps:
+  # ── Step 1: log a summary of the trigger event ──────────────────────────────
+  - name: log-event-summary
+    type: console
+    with:
+      message: |
+        cases.observablesAdded fired
+        ─────────────────────────────
+        Case ID : {{ event.caseId }}
+        Owner   : {{ event.owner }}
+        Count   : {{ event.observables | size }} observable(s) added
+
+  # ── Step 2: log each observable individually ────────────────────────────────
+  - name: log-each-observable
+    type: foreach
+    foreach: '{{ event.observables | json }}'
+    steps:
+      - name: log-observable
+        type: console
+        with:
+          message: |
+            Observable
+              id          : {{ foreach.item.id }}
+              typeKey     : {{ foreach.item.typeKey }}
+              value       : {{ foreach.item.value }}
+              description : {{ foreach.item.description | default: "(none)" }}

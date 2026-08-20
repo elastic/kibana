@@ -14,7 +14,6 @@ import type {
   EsWorkflowStepExecution,
   StackFrame,
   WorkflowContext,
-  WorkflowExecutionContext,
 } from '@kbn/workflows';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -564,7 +563,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('should build final workflow context', async () => {
         buildWorkflowContextMock.mockReturnValue({
-          execution: {} as WorkflowExecutionContext,
+          execution: {} as WorkflowContext['execution'],
         } as WorkflowContext);
         await underTest.saveState();
 

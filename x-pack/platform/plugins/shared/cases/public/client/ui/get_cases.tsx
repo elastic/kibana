@@ -29,6 +29,7 @@ export const getCasesLazy = ({
   timelineIntegration,
   features,
   releasePhase,
+  renderWorkflowUserActionAction,
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
@@ -39,6 +40,7 @@ export const getCasesLazy = ({
       basePath,
       features,
       releasePhase,
+      renderWorkflowUserActionAction,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

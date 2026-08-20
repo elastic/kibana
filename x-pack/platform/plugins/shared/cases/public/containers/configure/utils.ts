@@ -6,6 +6,7 @@
  */
 import type { CasesConfigurationUI } from '../types';
 import { ConnectorTypes } from '../../../common';
+import { DEFAULT_CASE_WORKFLOW_TAGS } from '../../../common/constants';
 
 export const initialConfiguration: CasesConfigurationUI = {
   closureType: 'close-by-user',
@@ -22,6 +23,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   id: '',
   owner: '',
   observableTypes: [],
+  workflowTags: [...DEFAULT_CASE_WORKFLOW_TAGS],
 };
 
 export const getConfigurationByOwner = ({

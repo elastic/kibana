@@ -39,7 +39,8 @@ export const useBuilderContext = ({
   handleDeleteComment,
 }: UseBuilderContextArgs) => {
   const { euiTheme } = useEuiTheme();
-  const { unifiedAttachmentTypeRegistry, owner, permissions } = useCasesContext();
+  const { unifiedAttachmentTypeRegistry, owner, permissions, renderWorkflowUserActionAction } =
+    useCasesContext();
 
   return useMemo(
     () => ({
@@ -57,6 +58,7 @@ export const useBuilderContext = ({
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
+      renderWorkflowUserActionAction,
     }),
     [
       owner,
@@ -73,6 +75,7 @@ export const useBuilderContext = ({
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
+      renderWorkflowUserActionAction,
     ]
   );
 };
