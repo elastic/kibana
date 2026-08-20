@@ -16,8 +16,6 @@ import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  THREAT_INTEL_ENRICH_REPORT_DEFAULT_TEMPLATE_VALUES,
-  THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
 } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -56,7 +54,6 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     flakyRuleProbeAfterMinutes: 360,
     flakyRuleExemptSeverityScore: 80,
   },
-  [THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID]: THREAT_INTEL_ENRICH_REPORT_DEFAULT_TEMPLATE_VALUES,
 };
 
 const templateValuesLookup = templateRepresentativeValuesById as Record<
