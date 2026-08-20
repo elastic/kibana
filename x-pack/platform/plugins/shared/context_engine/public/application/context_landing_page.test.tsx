@@ -7,8 +7,9 @@
 
 import { EuiProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
+import { createAppChromeMock } from './test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -53,7 +54,13 @@ const renderWithProviders = (core: CoreStart) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={core}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            history: scopedHistoryMock.create(),
+            appChrome: createAppChromeMock(),
+          }}
+        >
           <QueryClientProvider client={createTestQueryClient()}>
             <MemoryRouter>
               <ContextLandingPage />
@@ -97,8 +104,9 @@ describe('ContextLandingPage', () => {
 
     await screen.findAllByTestId('contextAiIndexCard');
 
-    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
-    expect(createButtons).toHaveLength(1);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    });
     expect(screen.queryByTestId('contextAiIndexCardsEmpty')).not.toBeInTheDocument();
   });
 
