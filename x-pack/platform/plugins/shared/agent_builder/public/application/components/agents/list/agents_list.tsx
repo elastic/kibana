@@ -244,7 +244,7 @@ export const AgentsList: React.FC = () => {
                         color="hollow"
                         iconType="starFilled"
                         tabIndex={0}
-                        data-test-subj={`agentBuilderAgentsListSpaceDefaultBadge-${agent.id}`}
+                        data-test-subj="agentBuilderAgentsListSpaceDefaultBadge"
                       >
                         {spaceDefaultBadgeLabel}
                       </EuiBadge>

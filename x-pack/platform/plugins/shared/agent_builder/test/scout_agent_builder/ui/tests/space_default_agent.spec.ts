@@ -93,9 +93,7 @@ test.describe(
           DEFAULT_AGENT.id,
           `agentBuilderAgentsListSpaceDefault-${DEFAULT_AGENT.id}`
         );
-      const badge = page.testSubj.locator(
-        `agentBuilderAgentsListSpaceDefaultBadge-${DEFAULT_AGENT.id}`
-      );
+      const badge = page.testSubj.locator('agentBuilderAgentsListSpaceDefaultBadge');
 
       await test.step('"Set as space default" shows the Space default badge', async () => {
         await toggleSpaceDefault().click();
