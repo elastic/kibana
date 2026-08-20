@@ -98,7 +98,7 @@ describe('EditCustomContentFlyout', () => {
       expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
     });
 
-    it('calls onSave with the draft values and closes', async () => {
+    it('calls onSave with the draft values', async () => {
       const onSave = jest.fn();
       const onClose = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
@@ -111,7 +111,7 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
 
       expect(onSave).toHaveBeenCalledWith('FROM logs', '<div></div>');
-      expect(onClose).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 

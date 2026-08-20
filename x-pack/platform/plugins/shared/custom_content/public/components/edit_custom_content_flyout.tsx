@@ -101,8 +101,7 @@ export const EditCustomContentFlyout = ({
 
   const handleSave = useCallback(() => {
     onSave(draftEsqlQuery || undefined, draftTemplate || undefined);
-    onClose();
-  }, [draftEsqlQuery, draftTemplate, onSave, onClose]);
+  }, [draftEsqlQuery, draftTemplate, onSave]);
 
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
   const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
