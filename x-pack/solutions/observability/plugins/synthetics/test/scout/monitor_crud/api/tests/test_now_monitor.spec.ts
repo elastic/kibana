@@ -16,6 +16,7 @@ import {
 } from '../../../common/fixtures';
 import { addMonitor, enableSynthetics, testNowMonitor } from '../../../common/fixtures/monitors';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
+import { tags } from '@kbn/scout-oblt';
 
 /**
  * Ported from FTR
@@ -28,7 +29,7 @@ import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 apiTest.describe(
   'RunTestManually',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

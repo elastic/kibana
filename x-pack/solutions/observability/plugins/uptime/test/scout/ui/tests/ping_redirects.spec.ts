@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { makeChecksWithStatus } from '../fixtures/helpers/make_checks';
+import { tags } from '@kbn/scout-oblt';
 
 const testMonitor = {
   id: '0000-intermittent',
@@ -16,7 +17,7 @@ const testMonitor = {
   redirects: ['http://localhost:3000/first', 'https://www.washingtonpost.com/'],
 };
 
-test.describe('MonitorPingRedirects', { tag: '@local-stateful-classic' }, () => {
+test.describe('MonitorPingRedirects', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
     await makeChecksWithStatus(
       esClient,

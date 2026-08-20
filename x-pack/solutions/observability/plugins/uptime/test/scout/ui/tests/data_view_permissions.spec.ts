@@ -7,13 +7,14 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
 const queryParams = {
   dateRangeStart: '2021-11-21T22:06:06.502Z',
   dateRangeEnd: '2021-11-21T22:10:08.203Z',
 };
 
-test.describe('DataViewPermissions', { tag: '@local-stateful-classic' }, () => {
+test.describe('DataViewPermissions', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     try {
       await kbnClient.savedObjects.delete({

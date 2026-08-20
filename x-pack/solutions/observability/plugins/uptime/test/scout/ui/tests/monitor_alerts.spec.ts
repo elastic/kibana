@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';
 const dateRangeEnd = '2019-09-11T19:40:08.078Z';
@@ -16,7 +17,7 @@ const alertThreshold = 'major';
 
 const mlJobId = '0000_intermittent_high_latency_by_geo';
 
-test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
+test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.ml.anomalyDetection.delete({
       jobIds: [mlJobId],

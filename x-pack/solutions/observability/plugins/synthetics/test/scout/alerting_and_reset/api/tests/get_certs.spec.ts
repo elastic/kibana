@@ -7,6 +7,7 @@
 
 import { makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_API_URLS } from '../../../common/fixtures';
 import { addMonitor } from '../../../common/fixtures/monitors';
@@ -66,7 +67,7 @@ const certData = (res: { body: unknown }): CertResultBody =>
 apiTest.describe(
   'getCertificates',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

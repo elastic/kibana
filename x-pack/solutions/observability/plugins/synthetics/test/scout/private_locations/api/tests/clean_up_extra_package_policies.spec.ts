@@ -23,6 +23,7 @@ import {
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
+import { tags } from '@kbn/scout-oblt';
 
 /**
  * Ported from FTR
@@ -34,7 +35,7 @@ import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
  */
 apiTest.describe(
   'CleanUpExtraPackagePolicies',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

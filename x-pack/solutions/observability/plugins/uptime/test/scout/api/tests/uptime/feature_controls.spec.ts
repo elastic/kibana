@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('feature controls', { tag: tags.stateful.classic }, () => {
   const space1Id = 'space_1';
 
   apiTest.beforeAll(async ({ kbnClient }) => {

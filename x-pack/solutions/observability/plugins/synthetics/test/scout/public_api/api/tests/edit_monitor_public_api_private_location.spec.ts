@@ -17,6 +17,7 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
 import {
+import { tags } from '@kbn/scout-oblt';
   addMonitor,
   editMonitor,
   omitMonitorKeys,
@@ -35,7 +36,7 @@ import {
 apiTest.describe(
   'EditMonitorsPublicAPI - Private Location',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     const defaultFields = DEFAULT_FIELDS.http;

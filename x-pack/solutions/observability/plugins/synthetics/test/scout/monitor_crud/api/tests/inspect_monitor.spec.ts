@@ -15,6 +15,7 @@ import { enableSynthetics, inspectMonitor } from '../../../common/fixtures/monit
 import { createParam } from '../../../common/fixtures/params';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { inspectBrowserMonitorFixture } from '../fixtures/data/browser_monitor_fixture';
+import { tags } from '@kbn/scout-oblt';
 
 const LOCAL_PUBLIC_LOCATION = {
   id: 'dev',
@@ -58,7 +59,7 @@ const DECODED_BROWSER_CODE =
  */
 apiTest.describe(
   'inspectSyntheticsMonitor',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

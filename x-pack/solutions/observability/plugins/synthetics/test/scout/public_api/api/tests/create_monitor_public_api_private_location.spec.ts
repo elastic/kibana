@@ -16,6 +16,7 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
 import {
+import { tags } from '@kbn/scout-oblt';
   addMonitor,
   omitMonitorKeys,
   parseMonitorResponse,
@@ -32,7 +33,7 @@ import {
 apiTest.describe(
   'AddNewMonitorsPublicAPI - Private locations',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

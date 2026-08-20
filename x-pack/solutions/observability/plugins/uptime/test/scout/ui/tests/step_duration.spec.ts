@@ -7,13 +7,14 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
 const queryParams = {
   dateRangeStart: '2021-11-21T22:06:06.502Z',
   dateRangeEnd: '2021-11-21T22:10:08.203Z',
 };
 
-test.describe('StepsDuration', { tag: '@local-stateful-classic' }, () => {
+test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
   test('navigates to monitor details and verifies step duration', async ({
     pageObjects,
     browserAuth,

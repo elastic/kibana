@@ -20,6 +20,7 @@ import {
 } from '../../../common/fixtures/fleet';
 import { delay, tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
+import { tags } from '@kbn/scout-oblt';
 
 const MONITOR_WITH_PARAM_A = 'test-monitor-with-paramA';
 const MONITOR_WITH_PARAM_B = 'test-monitor-with-paramB';
@@ -41,7 +42,7 @@ const findPolicyByMonitorName = (policies: PackagePolicy[], monitorName: string)
  */
 apiTest.describe(
   'SyncGlobalParamsForFilteredMonitors',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

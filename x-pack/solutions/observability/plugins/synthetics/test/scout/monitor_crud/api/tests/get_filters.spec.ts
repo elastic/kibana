@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
 import { addMonitor } from '../../../common/fixtures/monitors';
+import { tags } from '@kbn/scout-oblt';
 
 const SYNTHETICS_MONITOR_TYPE = 'synthetics-monitor';
 const LEGACY_SYNTHETICS_MONITOR_TYPE = 'synthetics-monitor-multi-space';
@@ -29,7 +30,7 @@ const byLabel = (a: LabelCount, b: LabelCount) => a.label.localeCompare(b.label)
 apiTest.describe(
   'getMonitorFilters',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

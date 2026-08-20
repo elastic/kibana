@@ -24,6 +24,7 @@ import {
 import { getPackagePolicyForMonitor } from '../../../common/fixtures/fleet';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { browserMonitorFixture } from '../../../common/fixtures/data/browser_monitor';
+import { tags } from '@kbn/scout-oblt';
 
 interface ServiceLocation {
   id: string;
@@ -44,7 +45,7 @@ interface ServiceLocation {
  *
  * `@local-stateful-classic` only: the FTR original was tagged `skipCloud`.
  */
-apiTest.describe('PrivateLocationAddMonitor', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('PrivateLocationAddMonitor', { tag: tags.stateful.classic }, () => {
   let editorHeaders: Record<string, string>;
   let privateLocation: ScoutPrivateLocation;
   let spaceId: string;

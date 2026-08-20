@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('Uptime overview page', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('Uptime overview page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);

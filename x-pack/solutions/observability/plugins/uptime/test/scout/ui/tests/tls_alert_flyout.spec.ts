@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('TlsFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () => {
+test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
   test('opens TLS alert flyout and verifies setting values', async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
     await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');

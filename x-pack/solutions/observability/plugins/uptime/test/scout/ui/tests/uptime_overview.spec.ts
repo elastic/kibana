@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
+test.describe('UptimeOverview', { tag: tags.stateful.classic }, () => {
   test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsViewer();
 

@@ -22,6 +22,7 @@ import {
 import { tryForTime } from '../../../common/fixtures/retry';
 import { browserMonitorFixture } from '../../../common/fixtures/data/browser_monitor';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
+import { tags } from '@kbn/scout-oblt';
 
 const SYNTHETICS_PARAM_SO_TYPE = 'synthetics-param';
 
@@ -47,7 +48,7 @@ const SYNTHETICS_PARAM_SO_TYPE = 'synthetics-param';
  */
 apiTest.describe(
   'SyncGlobalParams',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;

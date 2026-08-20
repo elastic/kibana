@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('Uptime feature controls - spaces', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('Uptime feature controls - spaces', { tag: tags.stateful.classic }, () => {
   test('shows uptime navlink in space with no disabled features', async ({
     browserAuth,
     page,

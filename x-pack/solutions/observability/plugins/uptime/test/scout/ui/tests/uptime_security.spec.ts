@@ -7,8 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('Uptime feature controls - security', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('Uptime feature controls - security', { tag: tags.stateful.classic }, () => {
   test('user with all uptime privileges can access and sees no read-only badge', async ({
     browserAuth,
     page,
