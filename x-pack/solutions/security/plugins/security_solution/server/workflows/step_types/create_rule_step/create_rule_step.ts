@@ -18,12 +18,12 @@ export const createRuleStepDefinition = createServerStepDefinition({
   ...createRuleStepCommonDefinition,
   handler: async (context) => {
     try {
-      const { body } = await context.contextManager.callKibanaApi({
+      const { body } = await context.contextManager.callKibanaApi<CreateRuleOutput>({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_URL,
         body: context.input,
       });
-      return { output: body as CreateRuleOutput };
+      return { output: body };
     } catch (error) {
       throw toApiExecutionError(error, 'create detection rule');
     }
