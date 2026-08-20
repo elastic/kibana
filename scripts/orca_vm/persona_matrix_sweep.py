@@ -45,12 +45,17 @@ from pathlib import Path
 SSH_KEY = os.path.expanduser("~/.ssh/azure_eval_farm")
 SSH_USER = "orcaeval"
 IMAGE = json.load(open(Path(__file__).parent / ".azure-state.json"))["imageId"]
-RG = "orca-eval-farm"
+RG = os.environ.get("SWEEP_RESOURCE_GROUP", "orca-eval-farm")
 # Thinking-model sweeps (selfhost-qwen38 etc.) accumulate huge trace state in
 # the Kibana dev server; D8s_v5 OOM-killed Kibana mid-run on all 3 shards
 # (converse ECONNREFUSED after ~14 examples, 2026-09-05). Use D16s_v5 for
 # selfhost models.
 VM_SIZE = os.environ.get("SWEEP_VM_SIZE", "Standard_D8s_v5")
+# Region and quota family for the pre-launch quota gate. The farm's cores are
+# capped per family per region; D-series v5 sizes bill against the "standard
+# DSv5 family" bucket, which is what filled to 344/350 on 2026-09-06.
+REGION = os.environ.get("SWEEP_REGION", "eastus2")
+QUOTA_FAMILY = os.environ.get("SWEEP_QUOTA_FAMILY", "standardDSv5Family")
 
 # ---------------------------------------------------------------------------
 # Suite profiles.
@@ -480,18 +485,136 @@ def vm_name(model: str, shard: Optional[str] = None) -> str:
     return f"{prefix}-{slug}"[:64].rstrip("-")
 
 
+def use_spot(environ: Optional[Mapping[str, str]] = None) -> bool:
+    """Whether to attempt a Spot create. Default OFF.
+
+    Spot capacity for D8s_v5 in the farm region has been exhausted since
+    2026-09-04; on 2026-09-06, 30 of 60 create attempts paid a failed Spot
+    call plus retry backoff before falling back to Regular. Opt back in with
+    SPOT_VM=1 once capacity returns.
+    """
+    env = os.environ if environ is None else environ
+    return env.get("SPOT_VM", "0") == "1"
+
+
+def park_on_done(environ: Optional[Mapping[str, str]] = None) -> bool:
+    """Whether to deallocate a unit's VM once its golden gate is settled.
+
+    Default ON: idle finished VMs held the cores that starved later units
+    twice on 2026-09-06. PARK_ON_DONE=0 keeps VMs running for debugging.
+    """
+    env = os.environ if environ is None else environ
+    return env.get("PARK_ON_DONE", "1") == "1"
+
+
+def maybe_park_unit(model: str, shard: Optional[str] = None) -> bool:
+    """Deallocate a finished unit's VM, freeing its cores. Returns True if parked.
+
+    Deliberately bundles the PARK_ON_DONE check with the az call so the flag
+    cannot drift away from the action it guards. Never raises: a failed park
+    costs money, but must not fail an otherwise-good sweep.
+    """
+    if not park_on_done():
+        return False
+    try:
+        az("vm", "deallocate", "-g", RG, "-n", vm_name(model, shard), "--no-wait")
+        print(f"[park] {_label(model, shard)}: deallocating (cores freed)", flush=True)
+        return True
+    except Exception as exc:
+        print(f"[park] {_label(model, shard)}: deallocate failed ({exc})", flush=True)
+        return False
+
+
+def cores_per_vm() -> int:
+    """vCPU count for VM_SIZE, parsed from the size name (D8s_v5 -> 8)."""
+    m = re.search(r"_[A-Z]+(\d+)", VM_SIZE)
+    return int(m.group(1)) if m else 8
+
+
+def quota_snapshot() -> tuple[int, int]:
+    """Return (used, limit) regional vCPU cores for the VM family.
+
+    Reads the live usage rather than trusting a VM count: deallocated VMs
+    still exist but consume no cores, so counting `vm list` over-reports.
+    """
+    raw = json.loads(az("vm", "list-usage", "-l", REGION, "-o", "json"))
+    family = QUOTA_FAMILY
+    for entry in raw:
+        if entry.get("name", {}).get("value") == family:
+            return int(entry["currentValue"]), int(entry["limit"])
+    raise RuntimeError(f"quota family {family} not found in {REGION}")
+
+
+def quota_gate(units: int, used: int, limit: int, per_vm: int) -> tuple[bool, str]:
+    """Decide whether `units` VMs fit in the remaining regional quota.
+
+    Pure function so the sweep's failure mode is testable without Azure.
+    Returns (ok, message). A sweep that does not fit must fail BEFORE
+    provisioning: on 2026-09-06 a launch into 344/350 used cores burned
+    ~10h, because `az vm create` reported QuotaExceeded as an unrelated
+    CLI crash ("content for this response was already consumed") and the
+    controller treated each failure as a per-VM skip rather than a stop.
+    """
+    need = units * per_vm
+    free = limit - used
+    if need <= free:
+        return True, (
+            f"quota ok: need {need} cores ({units}x{per_vm}), "
+            f"free {free} of {limit}"
+        )
+    fits = free // per_vm if per_vm else 0
+    return False, (
+        f"QUOTA GATE: need {need} cores ({units}x{per_vm}) but only {free} "
+        f"free of {limit} ({used} in use). At most {fits} unit(s) fit now. "
+        f"Free cores first (--teardown-finished, or delete idle VMs), then "
+        f"relaunch; do not launch into a full quota."
+    )
+
+
+def reusable_pool_vm(model: str, shard: Optional[str] = None) -> Optional[str]:
+    """Return the name of an existing deallocated VM for this unit, if any.
+
+    Warm-pool reuse: `az vm start` on a pre-baked deallocated VM is ~60-90s
+    versus ~6-8min for create + cloud-init. Deallocated VMs hold no vCPU
+    quota, so a parked pool costs disk only. WARM_POOL=0 disables.
+    """
+    if os.environ.get("WARM_POOL", "1") != "1":
+        return None
+    name = vm_name(model, shard)
+    try:
+        state = az("vm", "show", "-g", RG, "-n", name, "-d",
+                   "--query", "powerState", "-o", "tsv").strip()
+    except Exception:
+        return None
+    return name if state == "VM deallocated" else None
+
+
 def provision(model: str, shard: Optional[str] = None) -> str:
     """Create a D8s_v5 VM; return its public IP.
 
-    Priority: Spot when capacity is available, falling back to Regular.
-    2026-09-04: spot capacity for D8s_v5 in the farm region was exhausted
-    (SkuServerAvailableOrAlteredByPlatform surfaced as an az-cli crash that
-    swallowed the error); 16/42 shards were skipped as "prepare failed".
-    SPOT_VM=0 forces Regular; Spot failures auto-fall back to Regular.
+    Reuses a parked (deallocated) VM of the same name when one exists,
+    which skips image provisioning entirely.
+
+    Priority: Regular by default. Spot capacity for D8s_v5 in the farm
+    region has been exhausted since 2026-09-04 (surfacing as an az-cli
+    crash that swallowed the error, costing 16/42 shards), and on
+    2026-09-06 30 of 60 create attempts still paid a failed Spot call
+    before falling back. SPOT_VM=1 opts back in; Spot failures continue
+    to auto-fall back to Regular.
     """
     name = vm_name(model, shard)
+    parked = reusable_pool_vm(model, shard)
+    if parked:
+        print(f"[provision] starting parked VM {parked}", flush=True)
+        az("vm", "start", "-g", RG, "-n", parked)
+        ip = json.loads(az("vm", "show", "-g", RG, "-n", parked, "-d",
+                           "--query", "publicIps", "-o", "json"))
+        if ip:
+            return ip
+        print(f"[provision] parked VM {parked} exposed no IP; creating fresh",
+              flush=True)
     print(f"[provision] {name}", flush=True)
-    use_spot = os.environ.get("SPOT_VM", "1") == "1"
+    spot = use_spot()
 
     def _create(priority: str) -> None:
         args = ["vm", "create", "-g", RG, "-n", name, "--image", IMAGE,
@@ -502,7 +625,7 @@ def provision(model: str, shard: Optional[str] = None) -> str:
             args += ["--eviction-policy", "Deallocate", "--priority", "Spot"]
         az(*args)
 
-    if use_spot:
+    if spot:
         try:
             _create("Spot")
         except (SystemExit, RuntimeError) as e:
@@ -598,6 +721,20 @@ def deploy(ip: str) -> None:
             f"missing): {_gate!r} -- VM would run main's retries=0 converse path"
         )
     scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
+    # Inference-endpoint timeout overlay: the executor's hard-coded 180s
+    # requestTimeout kills thinking-model (selfhost-qwen38) turns; the
+    # overlaid executor honors AGENT_BUILDER_INFERENCE_TIMEOUT_MS (600000
+    # via run_model.sh).
+    INFERENCE_EXECUTOR_REMOTE = (
+        "Projects/kibana/x-pack/platform/plugins/shared/inference/server/"
+        "chat_complete/utils/inference_endpoint_executor.ts"
+    )
+    INFERENCE_EXECUTOR_LOCAL = (
+        KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
+        / "x-pack/platform/plugins/shared/inference/server/chat_complete/"
+        "utils/inference_endpoint_executor.ts"
+    )
+    scp(str(INFERENCE_EXECUTOR_LOCAL), ip, INFERENCE_EXECUTOR_REMOTE)
     scp(str(PATCHED_PROFILES), ip, PROFILES_REMOTE)
     scp(str(PATCHED_SCOUT_TRACING_CONFIG), ip, SCOUT_TRACING_CONFIG_REMOTE)
     if persona_only:
@@ -640,6 +777,7 @@ def deploy(ip: str) -> None:
         f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE}",
         f"grep -q getStatusCode ~/{RETRY_UTILS_REMOTE}",
         f"grep -q 'retries: 8' ~/{TRACE_FACTORY_REMOTE}",
+        "grep -q AGENT_BUILDER_INFERENCE_TIMEOUT_MS ~/Projects/kibana/x-pack/platform/plugins/shared/inference/server/chat_complete/utils/inference_endpoint_executor.ts",
         f"grep -q agentBuilderTracingExporters ~/{PROFILES_REMOTE}",
         f"grep -q agentBuilderTracingExporters ~/{SCOUT_TRACING_CONFIG_REMOTE}",
     ]
@@ -707,6 +845,105 @@ def self_test() -> int:
     )
     # Shell-quoting: a value with a space must not split into two words.
     check("value quoted", "'a b'" in build_env_prefix(m, {"EVAL_CONNECTOR_ID": "a b"}), True)
+
+    # --- quota gate -------------------------------------------------------
+    # The 2026-09-06 incident in one assertion: 23 units x 8 cores against
+    # 344/350 used must REFUSE, not launch and fail per-VM hours later.
+    ok_full, msg_full = quota_gate(23, 344, 350, 8)
+    check("gate refuses full quota", ok_full, False)
+    check("gate names the shortfall", "184 cores" in msg_full, True)
+    check("gate reports what fits", "At most 0 unit(s)" in msg_full, True)
+    # Exactly-fits must pass: an off-by-one here would block valid sweeps.
+    check("gate allows exact fit", quota_gate(2, 334, 350, 8)[0], True)
+    check("gate allows headroom", quota_gate(23, 64, 350, 8)[0], True)
+    # One core short must refuse.
+    check("gate refuses one short", quota_gate(2, 335, 350, 8)[0], False)
+    check("gate zero units ok", quota_gate(0, 350, 350, 8)[0], True)
+
+    saved_size = globals()["VM_SIZE"]
+    try:
+        globals()["VM_SIZE"] = "Standard_D8s_v5"
+        check("cores from size", cores_per_vm(), 8)
+        globals()["VM_SIZE"] = "Standard_D16s_v5"
+        check("cores from larger size", cores_per_vm(), 16)
+    finally:
+        globals()["VM_SIZE"] = saved_size
+
+    # --- spot / park defaults ---------------------------------------------
+    # Spot must default OFF: capacity has been exhausted since 2026-09-04 and
+    # every attempt costs a failed create plus backoff before falling back.
+    check("spot off by default", use_spot({}), False)
+    check("spot opt-in honoured", use_spot({"SPOT_VM": "1"}), True)
+    # Parking must default ON: idle finished VMs caused both quota exhaustions.
+    check("park on by default", park_on_done({}), True)
+    check("park opt-out honoured", park_on_done({"PARK_ON_DONE": "0"}), False)
+
+    # --- spot / park wiring (az verbs, not just flags) ---------------------
+    # Stub az so the self-test asserts what would REALLY be sent to Azure.
+    # Flag-only assertions let a correct default drift away from an unwired
+    # call site; these bind the decision to the command.
+    saved_az = globals()["az"]
+    calls: list = []
+    try:
+        globals()["az"] = lambda *a: calls.append(a) or "[]"
+
+        calls.clear()
+        os.environ["PARK_ON_DONE"] = "1"
+        parked = maybe_park_unit("eis-openai-gpt-5-4")
+        check("park issues deallocate", parked, True)
+        check("park verb is deallocate", calls and calls[0][:2] == ("vm", "deallocate"), True)
+        check("park does not delete", any(c[1] == "delete" for c in calls), False)
+
+        calls.clear()
+        os.environ["PARK_ON_DONE"] = "0"
+        check("park opt-out issues nothing", maybe_park_unit("eis-openai-gpt-5-4"), False)
+        check("park opt-out silent", len(calls), 0)
+        os.environ.pop("PARK_ON_DONE", None)
+
+        # provision(): Spot must not be attempted unless opted in. Asserting on
+        # the create args catches an unwired flag that a default check misses.
+        saved_pool = os.environ.get("WARM_POOL")
+        os.environ["WARM_POOL"] = "0"  # skip the parked-VM lookup
+        try:
+            def _fake_az(*a):
+                calls.append(a)
+                # vm show -d --query publicIps: return an IP to end provision()
+                return '"10.0.0.1"' if a[:2] == ("vm", "show") else "[]"
+
+            globals()["az"] = _fake_az
+            calls.clear()
+            os.environ.pop("SPOT_VM", None)
+            provision("eis-openai-gpt-5-4")
+            creates = [c for c in calls if c[:2] == ("vm", "create")]
+            check("one create by default", len(creates), 1)
+            check("no spot priority by default", any("Spot" in c for c in creates), False)
+
+            calls.clear()
+            os.environ["SPOT_VM"] = "1"
+            provision("eis-openai-gpt-5-4")
+            creates = [c for c in calls if c[:2] == ("vm", "create")]
+            check("spot opt-in sends Spot", any("Spot" in c for c in creates), True)
+            os.environ.pop("SPOT_VM", None)
+        finally:
+            if saved_pool is None:
+                os.environ.pop("WARM_POOL", None)
+            else:
+                os.environ["WARM_POOL"] = saved_pool
+    finally:
+        globals()["az"] = saved_az
+
+    # --- warm pool --------------------------------------------------------
+    # WARM_POOL=0 must short-circuit before any az call, so a sweep can always
+    # force fresh VMs when a parked box is suspect.
+    saved_warm = os.environ.get("WARM_POOL")
+    try:
+        os.environ["WARM_POOL"] = "0"
+        check("warm pool opt-out", reusable_pool_vm("eis-openai-gpt-5-4"), None)
+    finally:
+        if saved_warm is None:
+            os.environ.pop("WARM_POOL", None)
+        else:
+            os.environ["WARM_POOL"] = saved_warm
 
     # --- suite port -------------------------------------------------------
     # Every check below pins a defect that would otherwise cost real VM time or
@@ -1328,6 +1565,22 @@ def main() -> int:
     if _absent:
         print(f"PREFLIGHT FAILED: missing local assets: {_absent}", flush=True)
         return 2
+    # Quota gate: refuse to launch a sweep that cannot fit in the region's
+    # remaining cores. Launching into a full quota does not fail fast -- it
+    # fails per-VM, hours in, with a misleading az-cli error (2026-09-06).
+    # SKIP_QUOTA_GATE=1 bypasses for deliberate over-subscription.
+    if os.environ.get("SKIP_QUOTA_GATE") != "1":
+        try:
+            used, limit = quota_snapshot()
+        except Exception as exc:
+            print(f"[quota] snapshot unavailable ({exc}); proceeding", flush=True)
+        else:
+            # Parked VMs this sweep will reuse are already-provisioned and
+            # consume cores only once started, same as a fresh create.
+            ok, msg = quota_gate(len(units), used, limit, cores_per_vm())
+            print(f"[quota] {msg}", flush=True)
+            if not ok:
+                return 2
     if args.shards > 1:
         print(f"sharding: {args.shards} VMs/model -> {len(units)} VMs total", flush=True)
         # One base per sweep, suffixed per shard in launch(). Computing the
@@ -1431,6 +1684,12 @@ def main() -> int:
                   open(model_dir(model, shard=shard) / "status.json", "w"), indent=2)
         print(f"[done] {_label(model, shard)}: {state} docs={result.get('count', -1)}/{expected_docs}"
               + (f" ({result['error']})" if result.get("error") else ""), flush=True)
+        # Free the unit's cores as soon as its golden gate is settled, rather
+        # than at end-of-sweep. Two quota exhaustions on 2026-09-06 were caused
+        # by finished VMs idling at full cost while later units waited for
+        # capacity. Deallocating (not deleting) also leaves a pre-baked box
+        # that the next sweep starts in ~60-90s via the warm pool.
+        maybe_park_unit(model, shard)
 
 
     # A sweep that skipped or failed every model must not look like a green

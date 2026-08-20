@@ -1,0 +1,177 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
+
+/**
+ * Replay planning for judge-only re-scoring.
+ *
+ * A re-judge changes which model grades an already-recorded trajectory. It does
+ * NOT need the agent, a Kibana, an Elasticsearch, or seeded data -- every input
+ * the judges read (the user question, the agent's messages, the ground truth)
+ * is already durable in the golden score documents.
+ *
+ * Re-running the full sweep to change a judge cost ~68min of wall clock and 25
+ * VMs on 2026-09-06, of which ~83% was VM provisioning and stack boot. Replay
+ * reduces that to the judge's own latency.
+ */
+
+/**
+ * Ground truth for one example, supplied by the caller from the suite's
+ * dataset.
+ *
+ * Golden score documents do NOT carry the reference answer: `example.output`
+ * is empty on every stored document (verified across the whole index). The
+ * suite mirrors its dataset's `output.reference` into `expected.expected` at
+ * run time, so a replay must re-join the dataset by example id. Grading
+ * against a missing reference would score every answer as inaccurate.
+ */
+export type ReferenceLookup = (exampleId: string) => string | undefined;
+
+/** One unit of replayable work: a single (execution, example) trajectory. */
+export interface ReplayCell {
+  executionId: string;
+  exampleId: string;
+  modelId: string;
+  /** The question put to the agent. */
+  question: string;
+  /** Ground-truth answer the correctness judge compares against. */
+  expected: string;
+  /** The agent's final message, i.e. what gets graded. */
+  agentResponse: string;
+  /** Source document's timestamp, retained for provenance. */
+  recordedAt: string;
+}
+
+export interface PlanIssue {
+  executionId: string;
+  exampleId: string;
+  reason: string;
+}
+
+export interface ReplayPlan {
+  cells: ReplayCell[];
+  /** Cells that cannot be replayed, with why. Never silently dropped. */
+  skipped: PlanIssue[];
+}
+
+/** Extract the graded text from a task output's message list. */
+export function lastAgentMessage(output: unknown): string | undefined {
+  const messages = (output as { messages?: Array<{ message?: unknown }> })?.messages;
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return undefined;
+  }
+  const last = messages[messages.length - 1]?.message;
+  if (typeof last === 'string') {
+    return last;
+  }
+  if (last && typeof last === 'object') {
+    const content = (last as { content?: unknown }).content;
+    if (typeof content === 'string') {
+      return content;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Build a replay plan from golden score documents.
+ *
+ * Deduplicates by (executionId, exampleId): a cell carries one trajectory but
+ * many evaluator documents, and re-judging the same trajectory once per
+ * evaluator would multiply judge cost by the evaluator count and write
+ * conflicting analyses for a single cell.
+ *
+ * A document missing the question, the ground truth, or the agent's response
+ * cannot be graded; it is reported in `skipped` rather than being replayed
+ * against empty strings, which would silently manufacture MAJOR_INACCURACIES
+ * verdicts for cells whose data merely failed to load.
+ */
+export function planReplay(
+  docs: EvaluationScoreDocument[],
+  referenceFor: ReferenceLookup
+): ReplayPlan {
+  const cells = new Map<string, ReplayCell>();
+  const skipped: PlanIssue[] = [];
+  const seenSkips = new Set<string>();
+
+  for (const doc of docs) {
+    const executionId = doc.metadata?.execution_id ?? '';
+    const exampleId = doc.example?.id ?? '';
+    const key = `${executionId}::${exampleId}`;
+    if (cells.has(key)) {
+      continue;
+    }
+
+    const question = (doc.example?.input as { question?: unknown })?.question;
+    // Reference comes from the dataset, not the document (see ReferenceLookup).
+    const expected = exampleId ? referenceFor(exampleId) : undefined;
+    const agentResponse = lastAgentMessage(doc.task?.output);
+
+    const missing: string[] = [];
+    if (typeof question !== 'string' || !question) missing.push('question');
+    if (typeof expected !== 'string' || !expected) missing.push('dataset reference');
+    if (!agentResponse) missing.push('agent response');
+
+    if (missing.length > 0) {
+      if (!seenSkips.has(key)) {
+        seenSkips.add(key);
+        skipped.push({
+          executionId,
+          exampleId,
+          reason: `missing ${missing.join(', ')}`,
+        });
+      }
+      continue;
+    }
+
+    cells.set(key, {
+      executionId,
+      exampleId,
+      modelId: doc.task?.model?.id ?? '',
+      question: question as string,
+      expected: expected as string,
+      agentResponse: agentResponse as string,
+      recordedAt: doc['@timestamp'],
+    });
+  }
+
+  // A cell whose first document was incomplete but whose later documents carry
+  // the trajectory is replayable: report it as a cell, not as both a cell and a
+  // skip. Evaluator documents for one cell arrive in no guaranteed order, so
+  // resolving this by document order would make the plan order-dependent.
+  const resolved = new Set(cells.keys());
+  return {
+    cells: [...cells.values()],
+    skipped: skipped.filter((s) => !resolved.has(`${s.executionId}::${s.exampleId}`)),
+  };
+}
+
+/**
+ * Derive the execution id a replay writes under.
+ *
+ * Re-judged scores MUST NOT be written back under the source execution id:
+ * the matrix aggregates by execution, so mixing two judges' verdicts into one
+ * execution produces a cell that is silently an average of disagreeing judges.
+ */
+export function replayExecutionId(sourceExecutionId: string, judgeTag: string): string {
+  if (!judgeTag) {
+    throw new Error('replay requires a judge tag so re-judged scores stay separable');
+  }
+  return `${sourceExecutionId}::rejudge-${judgeTag}`;
+}
+
+/** Estimated cost of a replay, for the pre-flight summary. */
+export function summarizePlan(plan: ReplayPlan): string {
+  const models = new Set(plan.cells.map((c) => c.modelId));
+  const executions = new Set(plan.cells.map((c) => c.executionId));
+  return (
+    `${plan.cells.length} cell(s) across ${models.size} model(s), ` +
+    `${executions.size} execution(s)` +
+    (plan.skipped.length > 0 ? `; ${plan.skipped.length} unreplayable` : '')
+  );
+}
