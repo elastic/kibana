@@ -1,7 +1,8 @@
 {
-  "sha1": "9f129552a643731826247fe0fccfd70246e2862c",
+  "sha1": "863260136a986cb40d490c182d1e6f89092becbb",
   "testChannels": [
-    "ci-on-commit"
+    "ci-on-commit",
+    "ci-batch-3h"
   ],
   "tests": [
     {
@@ -452,6 +453,62 @@
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_sort.spec.ts",
         "line": 32,
         "column": 61
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-ecf928eb89f7cf3",
+      "title": "Saved Objects Management - import references imports a visualization when the saved search it references already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 56,
+        "column": 48
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-ecd850ca4c7e85a",
+      "title": "Saved Objects Management - import references refuses a visualization whose saved search does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 70,
+        "column": 43
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-35d22c5bc77d01f",
+      "title": "Saved Objects Management - import references refuses a saved search whose data view is missing but still imports the visualization bundled with it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 97,
+        "column": 25
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-fadde9599dec0bf",
+      "title": "Saved Objects Management - import references imports objects that bundle their own data view, whether or not it already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 139,
+        "column": 66
       }
     },
     {

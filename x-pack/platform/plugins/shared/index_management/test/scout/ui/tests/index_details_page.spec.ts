@@ -60,14 +60,14 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
     });
 
     await test.step('mappings "Add field" button is enabled', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-mappings');
+      await pageObjects.indexManagement.indexDetailsPage.changeTab('mappings');
       await expect(
         pageObjects.indexManagement.indexDetailsPage.mappingsAddFieldButton()
       ).toBeEnabled();
     });
 
     await test.step('settings "Edit settings" switch is enabled', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-settings');
+      await pageObjects.indexManagement.indexDetailsPage.changeTab('settings');
       await expect(pageObjects.indexManagement.indexDetailsPage.editSettingsSwitch()).toBeEnabled();
     });
   });
