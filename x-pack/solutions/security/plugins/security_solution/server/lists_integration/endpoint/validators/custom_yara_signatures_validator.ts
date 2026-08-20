@@ -11,7 +11,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { YaraValidateResult } from '../../../endpoint/lib/libyara';
@@ -39,6 +39,7 @@ export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
 
 const VALID_META_ARCH_VALUES = ['x86', 'arm64'];
 const VALID_META_SCAN_TYPE_VALUE = 'Memory';
+const VALID_META_OS_VALUES = ['Windows', 'Linux', 'MacOS'];
 
 const validateYaraRuleContentByteLength = (value: string): string | void => {
   const byteLength = Buffer.byteLength(value, 'utf8');
@@ -225,7 +226,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
     let errorCount;
     try {
       // Only errors are rejected on create/update.
-      ({ errors, errorCount } = await this.validateCustomYaraRule(ruleText));
+      ({ errors, errorCount } = await this.validateCustomYaraRule(ruleText, item.osTypes));
     } catch (error) {
       this.logger.error(error);
       throw new EndpointArtifactExceptionValidationError(
@@ -256,7 +257,10 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
   /**
    * Validates a YARA rule in regards of YARA syntax and Custom YARA Signatures specific requirements.
    */
-  private async validateCustomYaraRule(ruleText: string): Promise<YaraValidateResult> {
+  private async validateCustomYaraRule(
+    ruleText: string,
+    osTypes: OsTypeArray
+  ): Promise<YaraValidateResult> {
     const result = await validateYaraRule(ruleText);
 
     // Validate that we have at least one rule
@@ -340,7 +344,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
 
           result.errorCount++;
           result.errors.push({
-            message: `Invalid "meta.arch" value "${rule.meta.arch}" on rule "${rule.identifier}", only "x86", "arm64" or "x86,arm64" are allowed`,
+            message: `Invalid "meta.arch" value "${rule.meta.arch}" on rule "${rule.identifier}", only "x86" and\/or "arm64" are allowed in a comma separated list`,
             line: lineNumber,
             severity: 'error',
           });
@@ -363,6 +367,49 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
           line: lineNumber,
           severity: 'error',
         });
+      }
+    }
+
+    // Validate meta.os field
+    for (const rule of result.rules) {
+      if (rule.meta.os !== undefined) {
+        const values = rule.meta.os.split(',').map((value) => value.trim());
+
+        // Validate values
+        if (values.length > 3 || values.some((value) => !VALID_META_OS_VALUES.includes(value))) {
+          const lineNumberOfRule = getRuleIdentifierLineNumber(rule.identifier);
+          const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber('os', lineNumberOfRule);
+
+          result.errorCount++;
+          result.errors.push({
+            message: `Invalid "meta.os" value "${rule.meta.os}" on rule "${rule.identifier}", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list`,
+            line: lineNumber,
+            severity: 'error',
+          });
+        } else {
+          // Validate that the values are the same as the os_types
+          values.sort();
+          const osValuesFromYaraRule = values.join('-').toLowerCase();
+
+          const osTypesSorted = [...osTypes].sort();
+          const osValuesFromOsTypes = osTypesSorted.join('-');
+
+          if (osValuesFromYaraRule !== osValuesFromOsTypes) {
+            const lineNumberOfRule = getRuleIdentifierLineNumber(rule.identifier);
+            const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber('os', lineNumberOfRule);
+
+            result.errorCount++;
+            result.errors.push({
+              message: `"meta.os" value "${
+                rule.meta.os
+              }" is different from "os_types" value "${osTypes.join(', ')}" on rule "${
+                rule.identifier
+              }", Set meta.os to the same OSes (using "Windows", "Linux" and\/or "MacOS") or drop the meta.os field`,
+              line: lineNumber,
+              severity: 'error',
+            });
+          }
+        }
       }
     }
 

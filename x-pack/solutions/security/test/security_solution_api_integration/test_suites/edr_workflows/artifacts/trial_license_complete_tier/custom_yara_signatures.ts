@@ -6,7 +6,11 @@
  */
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import type { EntryMatch, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntryMatch,
+  ExceptionListItemSchema,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -102,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
-        getBody: (rule?: string) => BodyReturnType;
+        getBody: (rule?: string, osTypes?: OsTypeArray) => BodyReturnType;
       }
 
       beforeEach(async () => {
@@ -126,9 +130,10 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'post',
           info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: (rule?: string) => {
+          getBody: (rule?: string, osTypes?: OsTypeArray) => {
             const body = exceptionsGenerator.generateCustomYaraSignatureForCreate({
               tags: [GLOBAL_ARTIFACT_TAG],
+              ...(osTypes ? { os_types: osTypes } : {}),
             });
 
             if (rule) {
@@ -142,12 +147,13 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'put',
           info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: (rule?: string) => {
+          getBody: (rule?: string, osTypes?: OsTypeArray) => {
             const body = exceptionsGenerator.generateCustomYaraSignatureForUpdate({
               id: customYaraSignatureData.artifact.id,
               item_id: customYaraSignatureData.artifact.item_id,
               tags: [GLOBAL_ARTIFACT_TAG],
               _version: customYaraSignatureData.artifact._version,
+              ...(osTypes ? { os_types: osTypes } : {}),
             });
 
             if (rule) {
@@ -460,27 +466,27 @@ export default function ({ getService }: FtrProviderContext) {
                     )
                     .expect(
                       anErrorMessageWith(
-                        /\[line 2\] Invalid "meta.arch" value "invalid" on rule "rule1", only "x86", "arm64" or "x86,arm64" are allowed/
+                        /\[line 2\] Invalid "meta.arch" value "invalid" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
                     )
                     .expect(
                       anErrorMessageWith(
-                        /\[line 3\] Invalid "meta.arch" value "arm64\/x86" on rule "rule2", only "x86", "arm64" or "x86,arm64" are allowed/
+                        /\[line 3\] Invalid "meta.arch" value "arm64\/x86" on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
                     )
                     .expect(
                       anErrorMessageWith(
-                        /\[line 4\] Invalid "meta.arch" value "x86, arm" on rule "rule3", only "x86", "arm64" or "x86,arm64" are allowed/
+                        /\[line 4\] Invalid "meta.arch" value "x86, arm" on rule "rule3", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
                     )
                     .expect(
                       anErrorMessageWith(
-                        /\[line 5\] Invalid "meta.arch" value "arm64, x99" on rule "rule4", only "x86", "arm64" or "x86,arm64" are allowed/
+                        /\[line 5\] Invalid "meta.arch" value "arm64, x99" on rule "rule4", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
                     )
                     .expect(
                       anErrorMessageWith(
-                        /\[line 6\] Invalid "meta.arch" value "" on rule "rule5", only "x86", "arm64" or "x86,arm64" are allowed/
+                        /\[line 6\] Invalid "meta.arch" value "" on rule "rule5", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
                     );
                 });
@@ -575,6 +581,227 @@ export default function ({ getService }: FtrProviderContext) {
                       )
                     );
                 });
+              });
+
+              describe('meta.os', () => {
+                const matchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "Windows" condition: false }
+                      `,
+                    osTypes: ['windows'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux" condition: true }
+                      rule rule2 { meta: os = " Linux " condition: false }
+                      `,
+                    osTypes: ['linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "MacOS" condition: true }
+                      rule rule2 { meta: os = "MacOS" condition: false }
+                      `,
+                    osTypes: ['macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows,Linux" condition: true }
+                      rule rule2 { meta: os = "  Linux,   Windows" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "MacOS,Windows" condition: true }
+                      rule rule2 { meta: os = "  Windows,   MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,Windows,MacOS" condition: true }
+                      rule rule2 { meta: os = "  Windows,Linux,   MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux', 'macos'],
+                  },
+                ];
+
+                for (const { rules, osTypes } of matchingRulesAndOsTypes) {
+                  it(`accepts rules with valid meta.os as long as it matches the os_types set to ${osTypes.join(
+                    ', '
+                  )}`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .expect(200);
+                  });
+                }
+
+                it('rejects rules with meta.os set to an invalid value', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "invalid" condition: true }
+                      rule rule2 { meta: os = "Windows,Linux,MacOS,Windows" condition: true }
+                      rule rule3 { meta: os = "Windows,CheeseOS" condition: true }
+                      rule rule4 { meta: os = "  Windows,Linux," condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 4 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "invalid" on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value "Windows,Linux,MacOS,Windows" on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.os" value "Windows,CheeseOS" on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 5\] Invalid "meta.os" value "  Windows,Linux," on rule "rule4", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.os fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            os = "Windows"
+                            os = "Linux"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.os" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+
+                const nonMatchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux, Windows" condition: true }
+                      rule rule2 { meta: os = "MacOS" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = " MacOS " condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux" condition: true }
+                      rule rule2 { meta: os = "Windows" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "Linux" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,Windows" condition: true }
+                      rule rule2 { meta: os = "  Windows" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
+                      `,
+                    osTypes: ['windows', 'macos'],
+                  },
+                  {
+                    rules: `
+                      rule rule1 { meta: os = "Linux,MacOS" condition: true }
+                      rule rule2 { meta: os = "  Windows,   MacOS" condition: false }
+                      rule rule3 { meta: os = "Windows, Linux" condition: false }
+                      `,
+                    osTypes: ['windows', 'linux', 'macos'],
+                  },
+                ];
+
+                for (const { rules, osTypes } of nonMatchingRulesAndOsTypes) {
+                  it(`rejects rules with meta.os set to a different value as os_types (${osTypes.join(
+                    ', '
+                  )})`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .expect(400)
+                      .expect(anEndpointArtifactError)
+                      .expect(
+                        anErrorMessageWith(
+                          /Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 2\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule1", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 3\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule2", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      )
+                      .expect(
+                        anErrorMessageWith(
+                          new RegExp(
+                            `\\[line 4\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                              ', '
+                            )}" on rule "rule3", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                          )
+                        )
+                      );
+                  });
+                }
               });
             });
 
