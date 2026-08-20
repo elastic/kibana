@@ -236,6 +236,7 @@ export const Grafana: ConnectorSpec = {
 
     createSilence: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a Grafana silence to mute alerts matching label matchers for a time window, so a workflow can suppress noise during maintenance or auto-remediation.',
       input: GrafanaCreateSilenceInputSchema,
@@ -261,6 +262,7 @@ export const Grafana: ConnectorSpec = {
 
     deleteSilence: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Expire a Grafana silence so matching alerts can fire again, closing the mute-and-restore loop once work completes.',
       input: GrafanaDeleteSilenceInputSchema,
@@ -307,6 +309,7 @@ export const Grafana: ConnectorSpec = {
 
     createAnnotation: {
       isTool: true,
+      scope: 'write',
       description:
         'Post a Grafana dashboard annotation (deploy, remediation ran, incident opened) so operators see workflow context. Pass timeEnd to create a region/range annotation instead of a point-in-time marker.',
       input: GrafanaCreateAnnotationInputSchema,
@@ -330,6 +333,7 @@ export const Grafana: ConnectorSpec = {
 
     updateAnnotation: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing Grafana annotation (text, tags, or time range) — for example, set timeEnd to mark an incident resolved.',
       input: GrafanaUpdateAnnotationInputSchema,
@@ -354,6 +358,7 @@ export const Grafana: ConnectorSpec = {
 
     deleteAnnotation: {
       isTool: true,
+      scope: 'destroy',
       description: 'Delete a Grafana annotation for cleanup or false-positive correction.',
       input: GrafanaDeleteAnnotationInputSchema,
       handler: async (ctx, input: GrafanaDeleteAnnotationInput) => {

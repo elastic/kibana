@@ -404,6 +404,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createIssue: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new issue in a GitHub repository. Returns the created issue including its number, URL, and state.',
       input: CreateIssueInputSchema,
@@ -427,6 +428,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addIssueComment: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a comment to an existing issue or pull request. Returns the created comment including its ID and URL.',
       input: AddIssueCommentInputSchema,
@@ -445,6 +447,7 @@ export const GithubConnector: ConnectorSpec = {
 
     updateIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing issue (title, body, state, assignees, labels, or milestone). At least one field must be provided. To close an issue set state to "closed".',
       input: UpdateIssueInputSchema,
@@ -471,6 +474,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createPullRequest: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new pull request. The head branch must already exist and have commits not in the base branch. Returns the PR including its number and URL.',
       input: CreatePullRequestInputSchema,
@@ -492,6 +496,7 @@ export const GithubConnector: ConnectorSpec = {
 
     mergePullRequest: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Merge an open pull request. Returns the merge commit SHA and a confirmation message. Fails if the PR is not mergeable.',
       input: MergePullRequestInputSchema,
@@ -513,6 +518,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addLabels: {
       isTool: true,
+      scope: 'write',
       description:
         'Add one or more labels to an issue or pull request. Labels are added without removing existing ones. Returns the full updated label list.',
       input: AddLabelsInputSchema,
@@ -531,6 +537,7 @@ export const GithubConnector: ConnectorSpec = {
 
     addAssignee: {
       isTool: true,
+      scope: 'write',
       description:
         'Add one or more assignees to an issue or pull request. Assignees are added without removing existing ones.',
       input: AddAssigneeInputSchema,
@@ -549,6 +556,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createBranch: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new branch (git ref) in a repository. The ref must start with "refs/heads/". Use getCommit or listCommits to find a valid SHA.',
       input: CreateBranchInputSchema,
@@ -567,6 +575,7 @@ export const GithubConnector: ConnectorSpec = {
 
     createOrUpdateFile: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (get it via getFileContents). Returns the commit and file metadata.',
       input: CreateOrUpdateFileInputSchema,
@@ -588,6 +597,7 @@ export const GithubConnector: ConnectorSpec = {
 
     updatePullRequest: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an open pull request (title, body, state, base branch, or maintainer permissions). At least one field must be provided. To close a PR set state to "closed".',
       input: UpdatePullRequestInputSchema,
@@ -613,6 +623,7 @@ export const GithubConnector: ConnectorSpec = {
 
     requestReviewers: {
       isTool: true,
+      scope: 'write',
       description:
         'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR. Note: GitHub rejects requests where a reviewer is the same user as the PR author with a 422 error — do not request the authenticated user as a reviewer on their own PR.',
       input: RequestReviewersInputSchema,
@@ -634,6 +645,7 @@ export const GithubConnector: ConnectorSpec = {
 
     triggerWorkflow: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a workflow_dispatch event for a GitHub Actions workflow. The workflow must have a workflow_dispatch trigger defined in its YAML. Returns nothing on success (HTTP 204).',
       input: TriggerWorkflowInputSchema,

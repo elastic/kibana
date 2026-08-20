@@ -394,6 +394,7 @@ export const Unifi: ConnectorSpec = {
     // ------------------------------------------------------------------
     restartDevice: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Restart an adopted UniFi device. DISRUPTIVE: the device and everything connected through it drops offline for roughly a minute. Only call this when the user has asked for a restart or a diagnosis has established the device is wedged. Confirm the target with getDevice first — an accidental gateway restart takes the whole site down.',
       input: UnifiRestartDeviceInputSchema,
@@ -413,6 +414,7 @@ export const Unifi: ConnectorSpec = {
 
     powerCyclePort: {
       isTool: true,
+      scope: 'destroy',
       description:
         "PoE power-cycle a single switch port, rebooting only the device powered by that port. DISRUPTIVE but narrowly scoped — prefer this over restartDevice when one PoE camera or access point is unresponsive. Call getDevice first to read the switch's `interfaces.ports` and pick the right port number. The port must be actively supplying PoE: a port whose `poe` is null returns 422 'Port does not support PoE', and a port whose `poe.state` is 'DOWN' returns 422 'Port is not supplying power' even though `poe.enabled` is true. Both mean the target is wrong, not that the request failed — pick a port whose `poe.state` is 'UP', and note that a device connected to a non-PoE port is self-powered and cannot be rebooted this way.",
       input: UnifiPowerCyclePortInputSchema,
@@ -432,6 +434,7 @@ export const Unifi: ConnectorSpec = {
 
     authorizeGuestAccess: {
       isTool: true,
+      scope: 'write',
       description:
         "Authorize a guest client on the site's guest network, optionally capping session duration, total data and up/down rate. Use this to grant a visitor access after finding their client with listClients. Omit the optional limits to inherit the site's guest policy defaults.",
       input: UnifiAuthorizeGuestAccessInputSchema,
@@ -459,6 +462,7 @@ export const Unifi: ConnectorSpec = {
 
     unauthorizeGuestAccess: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Revoke a guest client's network authorization and disconnect it. Use this to cut off a visitor or a device that should not be on the guest network. The client can re-authorize through the guest portal unless it is blocked separately.",
       input: UnifiUnauthorizeGuestAccessInputSchema,
@@ -558,6 +562,7 @@ export const Unifi: ConnectorSpec = {
 
     movePtzCameraToPreset: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a PTZ camera to one of its saved preset positions. Only works on cameras with pan/tilt/zoom support; slot "-1" is the home preset and "0" and above are user-configured presets. Use this to point a camera at an area of interest before capturing a snapshot.',
       input: UnifiMovePtzCameraInputSchema,

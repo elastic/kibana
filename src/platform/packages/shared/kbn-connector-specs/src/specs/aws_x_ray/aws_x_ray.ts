@@ -329,6 +329,7 @@ export const AwsXRay: ConnectorSpec = {
 
     startTraceRetrieval: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous retrieval job for traces in the Transaction Search CloudWatch log group over a time range (for deep historical pulls that would time out a blocking call). Returns a retrievalToken; pass it to getRetrievedTracesGraph once the job completes. Retrievals time out after 60 minutes, so segment long time ranges into multiple calls.',
       input: StartTraceRetrievalInputSchema,

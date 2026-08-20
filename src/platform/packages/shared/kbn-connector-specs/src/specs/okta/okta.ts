@@ -333,6 +333,7 @@ export const Okta: ConnectorSpec = {
 
     suspendUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suspend an ACTIVE user so they cannot sign in while preserving the account for investigation. Prefer this for reversible containment; use deactivateUser only for confirmed-malicious accounts. Okta also clears sessions on suspend.',
       input: SuspendUserInputSchema,
@@ -353,6 +354,7 @@ export const Okta: ConnectorSpec = {
 
     unsuspendUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Lift a suspend (SUSPENDED → ACTIVE) after a false positive. Use only on users previously suspended with suspendUser.',
       input: UnsuspendUserInputSchema,
@@ -373,6 +375,7 @@ export const Okta: ConnectorSpec = {
 
     deactivateUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Deactivate a user (DEPROVISIONED) as a full lifecycle containment step beyond suspend. Destructive relative to suspend - prefer suspendUser when investigation may reverse the decision.',
       input: DeactivateUserInputSchema,
@@ -397,6 +400,7 @@ export const Okta: ConnectorSpec = {
 
     activateUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Activate a STAGED or DEPROVISIONED user after investigation clears them. May return an activation token when sendEmail is false.',
       input: ActivateUserInputSchema,
@@ -421,6 +425,7 @@ export const Okta: ConnectorSpec = {
 
     clearUserSessions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Revoke all active Okta IdP sessions for a user so they must re-authenticate. Optionally also revoke OAuth tokens and forget remembered devices. Does not clear sessions created for some web or native apps.',
       input: ClearUserSessionsInputSchema,
@@ -447,6 +452,7 @@ export const Okta: ConnectorSpec = {
 
     resetFactors: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Un-enroll all MFA factors for a user (status stays ACTIVE). Use when a second factor is suspected lost or compromised. Confirm with getUserFactors first when possible.',
       input: ResetFactorsInputSchema,
@@ -486,6 +492,7 @@ export const Okta: ConnectorSpec = {
 
     resetPassword: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Start a password reset (user moves to RECOVERY). sendEmail is required: true emails the reset link; false returns resetPasswordUrl for a custom flow. Optionally revoke sessions.',
       input: ResetPasswordInputSchema,
@@ -513,6 +520,7 @@ export const Okta: ConnectorSpec = {
 
     expirePassword: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Force the user to change their password at next sign-in (PASSWORD_EXPIRED). Set tempPassword true to also generate a temporary password via expire_password_with_temp_password.',
       input: ExpirePasswordInputSchema,
@@ -532,6 +540,7 @@ export const Okta: ConnectorSpec = {
 
     addUserToGroup: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a user to a group (for example a quarantine group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Uses PUT and returns 204 on success.',
       input: AddUserToGroupInputSchema,
@@ -552,6 +561,7 @@ export const Okta: ConnectorSpec = {
 
     removeUserFromGroup: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Remove a user from a group (for example strip a privileged group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Returns 204 on success.',
       input: RemoveUserFromGroupInputSchema,

@@ -1044,6 +1044,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
+      scope: 'write',
       description:
         'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,

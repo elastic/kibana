@@ -409,6 +409,7 @@ export const Snowflake: ConnectorSpec = {
 
     cancelStatement: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel a running SQL statement in Snowflake. Use the statementHandle returned by runQuery. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
       input: CancelStatementInputSchema,

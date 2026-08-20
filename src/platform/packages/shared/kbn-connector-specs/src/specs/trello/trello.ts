@@ -235,6 +235,7 @@ export const Trello: ConnectorSpec = {
 
     createCard: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new card in a list. Returns the created card, including its ID. Use listBoardLists first to find the target list ID.',
       input: CreateCardInputSchema,
@@ -254,6 +255,7 @@ export const Trello: ConnectorSpec = {
 
     updateCard: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Edit a card's fields, move it to another list, or archive/unarchive it. Set idList to move the card, or closed: true to archive it (there is no hard-delete action). Returns the updated card.",
       input: UpdateCardInputSchema,
@@ -277,6 +279,7 @@ export const Trello: ConnectorSpec = {
 
     addComment: {
       isTool: true,
+      scope: 'write',
       description:
         "Post a comment on a card. Use to leave notes or updates on a card's activity feed. Returns the created comment action.",
       input: AddCommentInputSchema,

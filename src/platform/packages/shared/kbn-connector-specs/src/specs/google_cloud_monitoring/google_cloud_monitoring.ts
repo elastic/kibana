@@ -247,6 +247,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     setAlertPolicyEnabled: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mute (enabled: false) or unmute (enabled: true) an alerting policy. This is the core lifecycle primitive Cloud Monitoring exposes in place of an acknowledge-incident call — muting stops the policy from opening new incidents without deleting or otherwise modifying it. Prefer createSnooze instead when you only want to suppress alerts for a bounded maintenance window, since a snooze automatically re-enables itself.',
       input: SetAlertPolicyEnabledInputSchema,
@@ -269,6 +270,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     updateAlertPolicy: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update one or more fields of an existing alerting policy — display name, documentation, notification channels, combiner, conditions, or user labels. Only the fields you provide are changed; call getAlertPolicy first to see the current values, since notificationChannels and conditions are replaced wholesale (not merged) when set. Use this to widen a flapping threshold or fix routing instead of only muting the policy with setAlertPolicyEnabled.',
       input: UpdateAlertPolicyInputSchema,
@@ -328,6 +330,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     createSnooze: {
       isTool: true,
+      scope: 'write',
       description:
         "Suppress alerts matching the given alert policies (and optional label filter) for a fixed time window, without disabling the policy itself — the safe way to quiet paging during a known maintenance window or an active incident. The snooze automatically stops applying after endTime, so there's nothing to remember to undo.",
       input: CreateSnoozeInputSchema,
@@ -388,6 +391,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
     updateSnooze: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Realign an existing snooze so suppression tracks the incident instead of outlasting it: extend or shorten its window (startTime/endTime) or rename it. Set endTime to a time in the past to end an active snooze immediately.',
       input: UpdateSnoozeInputSchema,

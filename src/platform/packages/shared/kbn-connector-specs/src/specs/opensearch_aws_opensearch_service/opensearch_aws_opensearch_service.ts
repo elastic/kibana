@@ -163,6 +163,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     acknowledgeAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge one or more active alerts on a monitor so they stop re-notifying. Use getAlerts first to find the monitor ID and alert IDs. Returns which alert IDs succeeded and which failed (e.g. because they were already COMPLETED, ERROR, or ACKNOWLEDGED).',
       input: AcknowledgeAlertInputSchema,
@@ -201,6 +202,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     executeMonitor: {
       isTool: true,
+      scope: 'write',
       description:
         'Run a monitor immediately instead of waiting for its schedule, evaluating its query and trigger conditions now. Set dryrun to true to see the trigger results without sending any notification actions.',
       input: ExecuteMonitorInputSchema,
@@ -227,6 +229,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     enableMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resume scheduled evaluation of a monitor that was previously disabled, e.g. to restore alerting after a maintenance window. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: MonitorIdInputSchema,
@@ -244,6 +247,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     disableMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suspend scheduled evaluation of a monitor without deleting it, e.g. to silence a known-noisy monitor during a maintenance window. Call enableMonitor afterward to restore it. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: MonitorIdInputSchema,
@@ -361,6 +365,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     acknowledgeDetectorAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge one or more active alerts raised by a Security Analytics detector, closing the loop on a threat detection alongside the Alerting-plugin acknowledgeAlert action. Use getDetectorFindings or the detector alert list to find the detector ID and alert IDs.',
       input: AcknowledgeDetectorAlertInputSchema,
@@ -427,6 +432,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     indexDocument: {
       isTool: true,
+      scope: 'write',
       description:
         'Write a document to an index, giving a workflow a write-back path for enrichment or audit output (e.g. recording triage notes). Provide an explicit "id" to create or fully replace a specific document, or omit it to let OpenSearch generate one.',
       input: IndexDocumentInputSchema,

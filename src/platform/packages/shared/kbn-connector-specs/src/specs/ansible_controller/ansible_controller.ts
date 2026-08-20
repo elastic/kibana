@@ -574,6 +574,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     launchJobTemplate: {
       isTool: true,
+      scope: 'write',
       description:
         'Launch a job template (POST …/launch/). This mutates real infrastructure — confirm template id, inventory/limit, and extra_vars first. Prefer getJobTemplateLaunchOptions beforehand.',
       input: LaunchJobTemplateInputSchema,
@@ -715,6 +716,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     cancelJob: {
       isTool: true,
+      scope: 'destroy',
       description: 'Cancel a running or pending job (POST …/cancel/).',
       input: CancelJobInputSchema,
       handler: async (ctx, input: CancelJobInput) => {

@@ -269,6 +269,7 @@ export const Datadog: ConnectorSpec = {
 
     muteMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mute a Datadog monitor (optionally for a scope or until a timestamp) so notifications are suppressed during maintenance or noise suppression.',
       input: MuteMonitorInputSchema,
@@ -295,6 +296,7 @@ export const Datadog: ConnectorSpec = {
 
     unmuteMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Unmute a previously muted Datadog monitor (optionally for a scope) so notifications resume.',
       input: UnmuteMonitorInputSchema,
@@ -321,6 +323,7 @@ export const Datadog: ConnectorSpec = {
 
     scheduleDowntime: {
       isTool: true,
+      scope: 'write',
       description:
         'Schedule a Datadog downtime for a scope (and optional monitor tags or monitor ID) over a time window so alerting is suppressed during deploys or maintenance.',
       input: ScheduleDowntimeInputSchema,
@@ -354,6 +357,7 @@ export const Datadog: ConnectorSpec = {
 
     cancelDowntime: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel an active or scheduled Datadog downtime by ID so alerting resumes for that scope. Use the downtime ID returned by scheduleDowntime.',
       input: CancelDowntimeInputSchema,
@@ -373,6 +377,7 @@ export const Datadog: ConnectorSpec = {
 
     createIncident: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a Datadog incident (for example when an alert crosses a severity threshold). Returns the new incident including its ID for later updateIncident calls. Requires Datadog Incident Management to be enabled on the account.',
       input: CreateIncidentInputSchema,
@@ -428,6 +433,7 @@ export const Datadog: ConnectorSpec = {
 
     updateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update a Datadog incident (title, severity, customer impact, or state such as resolved). Provide at least one field to change. Use the incident ID from createIncident.',
       input: UpdateIncidentInputSchema,
@@ -477,6 +483,7 @@ export const Datadog: ConnectorSpec = {
 
     postEvent: {
       isTool: true,
+      scope: 'write',
       description:
         'Post an event to the Datadog Events Explorer so workflow actions (remediation ran, ticket opened) appear on Datadog timelines and dashboards.',
       input: PostEventInputSchema,

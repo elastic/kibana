@@ -277,6 +277,7 @@ export const Dynatrace: ConnectorSpec = {
 
     closeProblem: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Close a remediated Dynatrace problem and record a closing comment. Terminal step of an alert-response workflow. If the problem is already closed, returns alreadyClosed: true without error.',
       input: DynatraceCloseProblemInputSchema,
@@ -299,6 +300,7 @@ export const Dynatrace: ConnectorSpec = {
 
     addProblemComment: {
       isTool: true,
+      scope: 'write',
       description:
         'Post a comment on a Dynatrace problem so workflow actions and triage notes land in the Dynatrace audit trail.',
       input: DynatraceAddProblemCommentInputSchema,
@@ -344,6 +346,7 @@ export const Dynatrace: ConnectorSpec = {
 
     ingestEvent: {
       isTool: true,
+      scope: 'write',
       description:
         'Ingest a custom event (deployment, config change, annotation, remediation marker, etc.) onto entities so Davis can correlate it. Use CUSTOM_ANNOTATION / CUSTOM_DEPLOYMENT / CUSTOM_INFO for workflow markers.',
       input: DynatraceIngestEventInputSchema,
@@ -514,6 +517,7 @@ export const Dynatrace: ConnectorSpec = {
 
     createMaintenanceWindow: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a once-off maintenance window via the Settings API (schema builtin:maintenance-windows) to suppress alerting for a DQL-filtered scope during a deploy or planned change.',
       input: DynatraceCreateMaintenanceWindowInputSchema,
@@ -575,6 +579,7 @@ export const Dynatrace: ConnectorSpec = {
 
     deleteMaintenanceWindow: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Delete a maintenance window by Settings object ID, pairing with createMaintenanceWindow to complete the mute/unmute lifecycle after a change.',
       input: DynatraceDeleteMaintenanceWindowInputSchema,

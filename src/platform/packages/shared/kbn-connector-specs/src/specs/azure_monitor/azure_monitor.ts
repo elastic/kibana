@@ -313,6 +313,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/alerts/alerts/change-state
     changeAlertState: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Change the state of an Azure Monitor alert to "New", "Acknowledged", or "Closed". This is the core incident-lifecycle write action — use it once a workflow has gathered enough context (via getAlert/queryMetrics/runLogQuery) to own triage of the alert.',
       input: ChangeAlertStateInputSchema,
@@ -549,6 +550,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/metric-alerts/update
     setMetricAlertRuleEnabled: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Enable or disable a metric alert rule without deleting or otherwise modifying it. Use this to silence a noisy rule during a maintenance window, then re-enable it afterward. Use listMetricAlertRules to discover rule names.',
       input: SetMetricAlertRuleEnabledInputSchema,
@@ -619,6 +621,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/processing-rules/alert-processing-rules/create-or-update
     createOrUpdateAlertProcessingRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Create or fully replace an alert processing rule that adds action groups to, or suppresses all notifications for, alerts matching a scope and optional conditions — the mechanism that mutes or reroutes Azure Monitor alert notifications. Optionally scheduled to a one-off or recurring maintenance window. If a rule with the given name already exists in the resource group, it is completely replaced (not merged) — supply every field you want to keep.',
       input: CreateOrUpdateAlertProcessingRuleInputSchema,
@@ -662,6 +665,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/processing-rules/alert-processing-rules/update
     setAlertProcessingRuleEnabled: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Enable or disable an existing alert processing rule (e.g. turn suppression on for a maintenance window, then off afterward) without recreating it. Use createOrUpdateAlertProcessingRule to discover or set up rule names.',
       input: SetAlertProcessingRuleEnabledInputSchema,
@@ -713,6 +717,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/scheduled-query-rules/update
     setScheduledQueryRuleEnabled: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Enable or disable a scheduled query rule (log search alert) without deleting it. Use this to mute a noisy KQL-based alert during known noise, then re-enable it afterward. Use listScheduledQueryRules to discover rule names.',
       input: SetScheduledQueryRuleEnabledInputSchema,

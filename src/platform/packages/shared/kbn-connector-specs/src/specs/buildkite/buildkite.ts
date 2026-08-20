@@ -180,6 +180,7 @@ export const Buildkite: ConnectorSpec = {
   actions: {
     createBuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a new build on a Buildkite pipeline for a specific commit and branch, with optional message, environment variables, and meta-data. Returns the created build, including its number and state. This is the core action for kicking off CI/CD from a workflow.',
       input: CreateBuildInputSchema,
@@ -241,6 +242,7 @@ export const Buildkite: ConnectorSpec = {
 
     cancelBuild: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel a running or scheduled build on a Buildkite pipeline. Use this to stop a bad or superseded build automatically, for example after detecting a newer commit on the same branch.',
       input: CancelBuildInputSchema,
@@ -258,6 +260,7 @@ export const Buildkite: ConnectorSpec = {
 
     rebuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Rebuild an entire build on a Buildkite pipeline, creating a new build from the same commit, branch, and environment. Use this to re-run everything after a transient infrastructure failure or a pipeline configuration fix. To retry only the jobs that failed instead of the whole build, use retryFailedJobs.',
       input: RebuildInputSchema,
@@ -275,6 +278,7 @@ export const Buildkite: ConnectorSpec = {
 
     retryFailedJobs: {
       isTool: true,
+      scope: 'write',
       description:
         'Retry every failed, broken, or timed-out job in a build, leaving passed jobs alone. This is the standard self-heal action for flaky CI failures. Returns the list of jobs that were retried, plus any that could not be retried. To retry a single job instead, use retryJob; to re-run the whole build, use rebuild.',
       input: RetryFailedJobsInputSchema,
@@ -350,6 +354,7 @@ export const Buildkite: ConnectorSpec = {
 
     unblockJob: {
       isTool: true,
+      scope: 'write',
       description:
         'Unblock a blocked (manual-gate) job so the build proceeds, optionally supplying values for the block step\'s input fields. Use this to automate deploy-gate approval. Find the blocked job\'s id with listJobs (state="blocked").',
       input: UnblockJobInputSchema,
@@ -369,6 +374,7 @@ export const Buildkite: ConnectorSpec = {
 
     retryJob: {
       isTool: true,
+      scope: 'write',
       description:
         'Retry a single failed or timed-out job in a build, leaving every other job untouched. Use this for a targeted retry when only one step failed. Find the job id with listJobs. To retry every failed job in a build at once, use retryFailedJobs instead.',
       input: RetryJobInputSchema,
@@ -407,6 +413,7 @@ export const Buildkite: ConnectorSpec = {
 
     createBuildAnnotation: {
       isTool: true,
+      scope: 'write',
       description:
         'Create or append to an annotation on a build, shown on the build page in the Buildkite UI. Use this to post workflow findings, remediation status, or links back onto the build. Pass the same `context` value with `append: true` to append to an existing annotation instead of creating a new one.',
       input: CreateBuildAnnotationInputSchema,

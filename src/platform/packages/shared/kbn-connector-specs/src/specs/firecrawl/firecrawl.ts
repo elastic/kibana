@@ -159,6 +159,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawl: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous crawl of a website; returns a job ID immediately without waiting for results. Use getCrawlStatus with that ID to check progress and retrieve results. Prefer this over crawlAndWait when the site may be large or the crawl duration is unpredictable.',
       input: CrawlInputSchema,
@@ -175,6 +176,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     crawlAndWait: {
       isTool: true,
+      scope: 'write',
       description:
         'Synchronously crawl a website and block until the crawl is complete or fails; returns final status and results (url, title, and a markdown snippet per page, up to 30 pages). Use for small or well-known sites where the crawl is expected to finish quickly. For large or unpredictably sized sites, use crawl (async) and getCrawlStatus instead.',
       input: CrawlAndWaitInputSchema,

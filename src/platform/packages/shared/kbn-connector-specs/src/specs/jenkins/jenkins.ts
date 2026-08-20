@@ -568,6 +568,7 @@ export const Jenkins: ConnectorSpec = {
 
     triggerBuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a build of an unparameterized Jenkins job. Returns a queue item id and URL — ' +
         'not a build number yet, since Jenkins queues the build first. Pass the queueId to ' +
@@ -584,6 +585,7 @@ export const Jenkins: ConnectorSpec = {
 
     triggerBuildWithParameters: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a build of a parameterized Jenkins job with named build parameters. Use getJob ' +
         'first to see the parameter names and types the job expects. Returns a queue item id and ' +
@@ -662,6 +664,7 @@ export const Jenkins: ConnectorSpec = {
 
     stopBuild: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Abort a running build, letting a workflow halt a bad or runaway pipeline. The build ' +
         'transitions to ABORTED asynchronously — poll getBuild afterwards to confirm it stopped.',
@@ -763,6 +766,7 @@ export const Jenkins: ConnectorSpec = {
 
     disableJob: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Disable a job so no new builds start for it — quarantines a misbehaving pipeline during ' +
         'an incident. Pair with enableJob to recover.',
@@ -778,6 +782,7 @@ export const Jenkins: ConnectorSpec = {
 
     enableJob: {
       isTool: true,
+      scope: 'destroy',
       description: 'Re-enable a previously disabled job so it can run again.',
       input: EnableJobInputSchema,
       handler: async (ctx, input: EnableJobInput) => {
@@ -808,6 +813,7 @@ export const Jenkins: ConnectorSpec = {
 
     quietDown: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Put the whole Jenkins instance in quiet-down mode: no new builds start across any job. ' +
         'A heavy, instance-wide mitigation for freezing all pipelines during an incident — prefer ' +
@@ -821,6 +827,7 @@ export const Jenkins: ConnectorSpec = {
 
     cancelQuietDown: {
       isTool: true,
+      scope: 'destroy',
       description: 'Cancel quiet-down mode so builds can start again across the instance.',
       input: CancelQuietDownInputSchema,
       handler: async (ctx) => {

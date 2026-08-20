@@ -278,6 +278,7 @@ export const CensysConnector: ConnectorSpec = {
 
     rescan: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a host service (IP+port+protocol+transportProtocol) or a web property (hostname-or-IP+port) for a fresh scan. Returns a scan ID; poll scanStatus until the scan completes.',
       input: RescanInputSchema,
@@ -332,6 +333,7 @@ export const CensysConnector: ConnectorSpec = {
 
     censEyeCreateAnalysisJob: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit a Censeye related-infrastructure threat-hunting job for a host, web property, or certificate. Returns a job ID; poll censEyeJobStatus, then call censEyeJobResult to fetch the pivots.',
       input: CensEyeCreateAnalysisJobInputSchema,

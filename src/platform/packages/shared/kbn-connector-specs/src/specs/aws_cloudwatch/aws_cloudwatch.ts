@@ -136,6 +136,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     enableAlarmActions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resume (un-suppress) the notification and auto-scaling actions for one or more alarms, restoring them after a maintenance window. Use listAlarms first to find alarm names.',
       input: AlarmNamesInputSchema,
@@ -150,6 +151,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     disableAlarmActions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suppress the notification and auto-scaling actions for one or more alarms, without deleting the alarm. Use this to silence a known-noisy monitor during a deploy or maintenance window, then call enableAlarmActions to restore it afterward. Use listAlarms first to find alarm names.',
       input: AlarmNamesInputSchema,
@@ -345,6 +347,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     startLogsQuery: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous CloudWatch Logs Insights query over one or more log groups and a time range — the core primitive for pulling the logs behind an alert. Returns a queryId; pass it to getLogsQueryResults to poll for results, since queries run asynchronously and are not complete immediately.',
       input: StartLogsQueryInputSchema,

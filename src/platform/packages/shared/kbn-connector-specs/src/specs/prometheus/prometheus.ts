@@ -302,6 +302,7 @@ export const Prometheus: ConnectorSpec = {
 
     createSilence: {
       isTool: true,
+      scope: 'write',
       description:
         'Create an Alertmanager silence to mute alerts matching label matchers for a time window. Returns the new silence ID. The core action for suppressing noise during a maintenance window or a known incident.',
       input: CreateSilenceInputSchema,
@@ -323,6 +324,7 @@ export const Prometheus: ConnectorSpec = {
 
     expireSilence: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Expire an Alertmanager silence by ID so the alerts it was muting can fire again. Closes the mute-and-restore loop once a maintenance window or incident is resolved.',
       input: ExpireSilenceInputSchema,
@@ -365,6 +367,7 @@ export const Prometheus: ConnectorSpec = {
 
     createAlerts: {
       isTool: true,
+      scope: 'write',
       description:
         'Push one or more synthetic alerts into Alertmanager. The alerts enter normal routing and notification, so a workflow can raise its own alert (e.g. to page on a condition Prometheus itself cannot observe).',
       input: CreateAlertsInputSchema,

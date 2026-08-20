@@ -220,6 +220,7 @@ export const NewRelic: ConnectorSpec = {
   actions: {
     acknowledgeIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge a New Relic AI issue by ID via aiIssuesAckIssue, claiming it and stopping escalation churn. Use listIssues first to find the issueId.',
       input: NewRelicAcknowledgeIssueInputSchema,
@@ -247,6 +248,7 @@ export const NewRelic: ConnectorSpec = {
 
     unacknowledgeIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Reverse the acknowledgment on a New Relic AI issue via aiIssuesUnackIssue, re-opening it for handoff or when remediation failed.',
       input: NewRelicUnacknowledgeIssueInputSchema,
@@ -274,6 +276,7 @@ export const NewRelic: ConnectorSpec = {
 
     resolveIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve and close a New Relic AI issue via aiIssuesResolveIssue. The terminal step of an auto-remediation workflow.',
       input: NewRelicResolveIssueInputSchema,
@@ -430,6 +433,7 @@ export const NewRelic: ConnectorSpec = {
 
     createMutingRule: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a New Relic muting rule via alertsMutingRuleCreate to suppress alert notifications matching a condition, e.g. during a deploy or maintenance window. The core noise-control action.',
       input: NewRelicCreateMutingRuleInputSchema,
@@ -463,6 +467,7 @@ export const NewRelic: ConnectorSpec = {
 
     updateMutingRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing New Relic muting rule via alertsMutingRuleUpdate, e.g. to extend a maintenance window, without deleting and recreating it.',
       input: NewRelicUpdateMutingRuleInputSchema,
@@ -492,6 +497,7 @@ export const NewRelic: ConnectorSpec = {
 
     deleteMutingRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Delete a New Relic muting rule via alertsMutingRuleDelete so alerting resumes when the suppression window closes. Pairs with createMutingRule.',
       input: NewRelicDeleteMutingRuleInputSchema,
@@ -580,6 +586,7 @@ export const NewRelic: ConnectorSpec = {
 
     createDeploymentMarker: {
       isTool: true,
+      scope: 'write',
       description:
         'Record a deployment/change marker on a New Relic entity via changeTrackingCreateEvent, so alerts and dashboards correlate to the deploy. Closes the CI/CD-to-observability loop.',
       input: NewRelicCreateDeploymentMarkerInputSchema,
@@ -711,6 +718,7 @@ export const NewRelic: ConnectorSpec = {
 
     createAlertPolicy: {
       isTool: true,
+      scope: 'write',
       description:
         'Provision a new New Relic alert policy via alertsPolicyCreate, for as-code alerting setup from a workflow.',
       input: NewRelicCreateAlertPolicyInputSchema,
@@ -739,6 +747,7 @@ export const NewRelic: ConnectorSpec = {
 
     createNrqlCondition: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a static NRQL alert condition under a New Relic alert policy via alertsNrqlConditionStaticCreate, completing the as-code condition path.',
       input: NewRelicCreateNrqlConditionInputSchema,
