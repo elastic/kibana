@@ -26,8 +26,6 @@ import {
   identifyFeatures,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-  type SearchSimilarFeaturesArguments,
-  type SimilarFeatureHit,
 } from '@kbn/streams-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -49,6 +47,12 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
+import {
+  createFeatureSimilaritySearch,
+  type FeatureSimilaritySearch,
+} from './agent_builder_feature_similarity_search';
+
+export { findSimilarFeatures } from './feature_similarity_search';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_FEATURE_ALIASES = 10;
@@ -251,36 +255,6 @@ export const applySemanticFeatureAliases = (
   return { features: featuresWithAliases, reuseCount };
 };
 
-export const findSimilarFeatures = async ({
-  kiClient,
-  streamName,
-  args,
-}: {
-  kiClient: Pick<KnowledgeIndicatorClient, 'findFeatures'>;
-  streamName: string;
-  args: SearchSimilarFeaturesArguments;
-}): Promise<SimilarFeatureHit[]> => {
-  // Fetch wide then filter: a 5-hit window shared across types can crowd out same-type hits.
-  const { hits } = await kiClient.findFeatures(
-    streamName,
-    `${args.title} ${args.description}`.trim(),
-    {
-      searchMode: 'semantic',
-      limit: 20,
-    }
-  );
-
-  return hits
-    .filter((feature) => feature.type === args.type)
-    .slice(0, 5)
-    .map((feature) => ({
-      id: feature.id,
-      title: feature.title ?? feature.id,
-      description: feature.description,
-      confidence: feature.confidence,
-    }));
-};
-
 // ---------------------------------------------------------------------------
 // Tuning params type (subset of SignificantEventsTuningConfig)
 // ---------------------------------------------------------------------------
@@ -461,6 +435,7 @@ interface RunInferredIterationOptions {
   signal: AbortSignal;
   tuning: IterationTuningParams;
   iteration: number;
+  featureSimilaritySearch: FeatureSimilaritySearch;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -506,6 +481,7 @@ async function runInferredIteration({
   signal,
   tuning,
   iteration,
+  featureSimilaritySearch,
   additionalTools,
   additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
@@ -582,7 +558,7 @@ async function runInferredIteration({
     knownFeatureIds,
     searchSimilarFeatures: async (args) => {
       semanticVerifyCalls++;
-      const hits = await findSimilarFeatures({ kiClient, streamName, args });
+      const hits = await featureSimilaritySearch(args);
       const recordKey = getTypedFeatureId(args.type, args.candidate_id);
       const searchRecord = searchRecordsByCandidate.get(recordKey) ?? {
         candidateId: args.candidate_id,
@@ -757,6 +733,13 @@ export async function identifyInferredFeatures({
   );
 
   const startedAt = Date.now();
+  const featureSimilaritySearch = createFeatureSimilaritySearch({
+    agentBuilderTools,
+    request,
+    kiClient,
+    streamName,
+    logger,
+  });
 
   const iterationResult = await runInferredIteration({
     samplingEsClient,
@@ -775,6 +758,7 @@ export async function identifyInferredFeatures({
     signal,
     tuning,
     iteration,
+    featureSimilaritySearch,
     additionalTools,
     additionalToolCallbacks,
   });
