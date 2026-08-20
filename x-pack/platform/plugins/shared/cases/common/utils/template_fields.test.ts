@@ -12,8 +12,10 @@ import {
   buildExtendedFieldsDefaults,
   collectNormalizedRefNames,
   excludeRefFieldsToDefinitions,
+  getAuthorableFieldNameViolation,
   getFieldCamelKey,
   getFieldSnakeKey,
+  getFoldedFieldName,
   getV2FieldType,
   getYamlDefaultAsString,
   normalizeFieldDefinitionName,
@@ -59,6 +61,39 @@ describe('template field key utils', () => {
       expect(getFieldCamelKey(name, type)).toBe(
         snakeKey.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
       );
+    });
+  });
+
+  describe('getFoldedFieldName', () => {
+    it('folds hyphen, underscore, and camelCase spellings onto the same form', () => {
+      expect(getFoldedFieldName('my-field')).toBe('myField');
+      expect(getFoldedFieldName('my_field')).toBe('myField');
+      expect(getFoldedFieldName('myField')).toBe('myField');
+    });
+
+    it('names with equal folds produce equal camel read keys for the same type', () => {
+      // The load-bearing claim behind the twin check: if two names fold together, the UI
+      // reads their values through the same camel key.
+      expect(getFieldCamelKey('my-field', 'keyword')).toBe(getFieldCamelKey('my_field', 'keyword'));
+    });
+  });
+
+  describe('getAuthorableFieldNameViolation', () => {
+    it('returns null for a clean snake_case name', () => {
+      expect(getAuthorableFieldNameViolation('risk_score', 'keyword')).toBeNull();
+    });
+
+    it('returns "charset" for a name with characters outside the authoring charset', () => {
+      expect(getAuthorableFieldNameViolation('risk-score', 'keyword')).toBe('charset');
+      expect(getAuthorableFieldNameViolation('bad name', 'keyword')).toBe('charset');
+    });
+
+    it('returns "length" when the derived key exceeds the maximum', () => {
+      expect(getAuthorableFieldNameViolation('a'.repeat(300), 'keyword')).toBe('length');
+    });
+
+    it('reports charset before length when both are violated', () => {
+      expect(getAuthorableFieldNameViolation(`${'a'.repeat(300)}-x`, 'keyword')).toBe('charset');
     });
   });
 
