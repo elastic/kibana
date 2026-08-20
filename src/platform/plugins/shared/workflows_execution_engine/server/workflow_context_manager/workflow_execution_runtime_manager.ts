@@ -425,6 +425,24 @@ export class WorkflowExecutionRuntimeManager {
           traceId: otelTraceId,
           entryTransactionId: getActiveOtelSpanId(),
         });
+
+        // Mirror the APM branches: attach the workflow context labels so the
+        // exported OTEL span stays searchable (trace -> execution direction).
+        // addTransactionLabels writes to the active OTEL span when present.
+        const otelLabels: Record<string, string | number | boolean> = {
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: 'task->steps',
+          triggered_by: 'task_manager',
+        };
+
+        const { triggeredBy } = this.workflowExecution;
+        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+          otelLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(otelLabels);
       } else {
         this.workflowLogger?.logWarn(
           'No active Task Manager transaction or OTEL span found, proceeding without tracing'
