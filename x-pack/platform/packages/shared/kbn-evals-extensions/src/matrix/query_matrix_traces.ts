@@ -226,8 +226,19 @@ export const queryMatrixTraces = async (
   }
 
   for (const exampleId of allExampleIds) {
-    const scores = await evalsClient.getExampleScores(exampleId);
-    exampleScores.set(exampleId, scores);
+    try {
+      exampleScores.set(exampleId, await evalsClient.getExampleScores(exampleId));
+    } catch (error) {
+      // A single example whose combined documents exceed the transport's size
+      // limit must not abort the whole report: scores are already aggregated,
+      // only this example's trace detail is lost.
+      log.warning(
+        `Skipping trace details for example ${exampleId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      exampleScores.set(exampleId, []);
+    }
   }
 
   // 3. For each run, pick the newest complete document per example and merge
