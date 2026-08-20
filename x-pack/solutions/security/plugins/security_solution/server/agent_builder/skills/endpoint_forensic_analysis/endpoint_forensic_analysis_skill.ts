@@ -379,7 +379,8 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               parentCmd &&
               typeof parentCmd === 'string' &&
               parentName &&
-              isNotableExecutable(exe ?? '') &&
+              typeof exe === 'string' &&
+              isNotableExecutable(exe) &&
               !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
             ) {
               iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
