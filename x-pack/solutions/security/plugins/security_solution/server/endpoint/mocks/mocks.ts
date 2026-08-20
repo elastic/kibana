@@ -44,6 +44,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
@@ -159,6 +160,7 @@ export const createMockEndpointAppContextService = (
     getInternalFleetServices: jest.fn(() => fleetServices),
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
+    getRulesClient: jest.fn(async (_req: KibanaRequest) => rulesClientMock.create()),
     getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
     getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),

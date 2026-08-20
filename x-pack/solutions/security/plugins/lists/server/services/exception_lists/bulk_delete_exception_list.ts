@@ -19,14 +19,24 @@ import type { SavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { getErrorMessageExceptionList } from '../../routes/utils/get_error_message_exception_list';
+import type { ExceptionListPreDeleteListBlocker } from '../extension_points';
 
 import { deleteExceptionListItemsByListStreamed } from './delete_exception_list_items_by_list';
 import { transformSavedObjectToExceptionList } from './utils';
+
+/**
+ * Runs registered `exceptionsListPreDeleteList` extension points for a single list and
+ * returns the blockers that refuse its deletion. Throwing fails only the list being processed.
+ */
+export type PreDeleteListHook = (
+  list: ExceptionListSchema
+) => Promise<ExceptionListPreDeleteListBlocker[]>;
 
 interface BulkDeleteExceptionListOptions {
   ids: Id[];
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
+  preDeleteListHook?: PreDeleteListHook;
 }
 
 export interface BulkDeleteExceptionListError {
@@ -49,92 +59,6 @@ export interface BulkDeleteExceptionListResult {
 }
 
 const BULK_DELETE_LIST_CONCURRENCY = 10;
-
-const RULE_SAVED_OBJECT_TYPE = 'alert';
-
-// Detection rules are alerting rules with the security solution consumer. We scope
-// the reference query to this consumer so non-detection alerting rules (which never
-// hold exception-list references in practice) can't leak into the results.
-const SECURITY_SOLUTION_RULE_CONSUMER = 'siem';
-
-// Endpoint artifact lists (trusted apps, blocklists, etc.) are pushed to endpoints
-// via policy and are never referenced by detection rules, so they skip the rule
-// reference check. Note: the plain `endpoint` type is deliberately NOT in this set
-// -- the Elastic Endpoint exceptions list CAN be attached to detection rules, so it
-// must go through the reference check like any other detection list.
-const ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES = new Set([
-  'endpoint_trusted_apps',
-  'endpoint_trusted_devices',
-  'endpoint_events',
-  'endpoint_host_isolation_exceptions',
-  'endpoint_blocklists',
-  'endpoint_custom_yara_signatures',
-]);
-
-interface RuleReference {
-  rule_id: string;
-  id: string;
-  name: string;
-}
-
-const findRuleReferences = async ({
-  lists,
-  savedObjectsClient,
-  savedObjectType,
-}: {
-  lists: ExceptionListSchema[];
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjectType: SavedObjectType;
-}): Promise<Map<string, RuleReference[]>> => {
-  if (lists.length === 0) {
-    return new Map();
-  }
-
-  const hasReference = lists.map((list) => ({
-    id: list.id,
-    type: savedObjectType,
-  }));
-
-  // NOTE: This reference check lives in the lists plugin (rather than delegating to
-  // security_solution's rulesClient/`_find_references`) to avoid a lists -> security_solution
-  // dependency. As a consequence we query the raw `alert` saved object directly and scope
-  // it to the security solution consumer so only detection rules are considered.
-  const { saved_objects: rules } = await savedObjectsClient.find<{
-    name: string;
-    params: { ruleId: string };
-  }>({
-    filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.consumer: ${SECURITY_SOLUTION_RULE_CONSUMER}`,
-    hasReference,
-    hasReferenceOperator: 'OR',
-    perPage: 10000,
-    type: RULE_SAVED_OBJECT_TYPE,
-  });
-
-  const listIdSet = new Set(lists.map((l) => l.id));
-  const listToRules = new Map<string, RuleReference[]>();
-
-  for (const rule of rules) {
-    const ruleRef: RuleReference = {
-      id: rule.id,
-      name: rule.attributes.name,
-      rule_id: rule.attributes.params.ruleId,
-    };
-
-    // A rule can carry the same list id in more than one reference entry; only
-    // record it once per list so the reference count isn't inflated.
-    const seenListIds = new Set<string>();
-    for (const ref of rule.references) {
-      if (ref.type === savedObjectType && listIdSet.has(ref.id) && !seenListIds.has(ref.id)) {
-        seenListIds.add(ref.id);
-        const existing = listToRules.get(ref.id) ?? [];
-        existing.push(ruleRef);
-        listToRules.set(ref.id, existing);
-      }
-    }
-  }
-
-  return listToRules;
-};
 
 const deleteListWithItems = async ({
   list,
@@ -181,10 +105,61 @@ const deleteListWithItems = async ({
   }
 };
 
+const checkAndDeleteList = async ({
+  list,
+  namespaceType,
+  preDeleteListHook,
+  savedObjectsClient,
+  savedObjectType,
+}: {
+  list: ExceptionListSchema;
+  namespaceType: NamespaceType;
+  preDeleteListHook?: PreDeleteListHook;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectType: SavedObjectType;
+}): Promise<{ list: ExceptionListSchema; error?: BulkDeleteExceptionListError }> => {
+  if (preDeleteListHook) {
+    let blockedBy: ExceptionListPreDeleteListBlocker[];
+
+    try {
+      blockedBy = await preDeleteListHook(list);
+    } catch (err) {
+      const { message, statusCode } = transformError(err);
+      return {
+        error: {
+          lists: [{ id: list.id, list_id: list.list_id }],
+          message,
+          status_code: statusCode,
+        },
+        list,
+      };
+    }
+
+    if (blockedBy.length > 0) {
+      return {
+        error: {
+          lists: [{ id: list.id, list_id: list.list_id }],
+          message: `Exception list "${list.name}" cannot be deleted because it is linked to ${
+            blockedBy.length
+          } ${
+            blockedBy.length === 1 ? 'rule' : 'rules'
+          }. Unlink the list from all rules before retrying.`,
+          rule_references: blockedBy,
+          status_code: 409,
+        },
+        list,
+      };
+    }
+  }
+
+  return deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient });
+};
+
 export const bulkDeleteExceptionList = async ({
   ids,
   namespaceType,
   savedObjectsClient,
+  preDeleteListHook,
 }: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
   const uniqueIds = [...new Set(ids)];
   const skippedCount = ids.length - uniqueIds.length;
@@ -229,69 +204,18 @@ export const bulkDeleteExceptionList = async ({
     }
   });
 
-  if (foundLists.length === 0) {
-    return {
-      errors: validationErrors,
-      results: [],
-      success: validationErrors.length === 0,
-      summary: {
-        failed: validationErrors.length,
-        skipped: skippedCount,
-        succeeded: 0,
-        total: uniqueIds.length,
-      },
-    };
-  }
-
-  // Endpoint artifact lists are pushed to endpoints via policy and are never
-  // referenced by detection rules, so they skip the rule reference check. Every
-  // other type (including the plain `endpoint` list, which can be attached to
-  // rules) is checked for rule references before deletion.
-  const endpointArtifactLists: ExceptionListSchema[] = [];
-  const checkableLists: ExceptionListSchema[] = [];
-  for (const list of foundLists) {
-    if (ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES.has(list.type)) {
-      endpointArtifactLists.push(list);
-    } else {
-      checkableLists.push(list);
-    }
-  }
-
-  // Check rule references for all non-endpoint-artifact lists
-  const listToRules = await findRuleReferences({
-    lists: checkableLists,
-    savedObjectType,
-    savedObjectsClient,
-  });
-
-  const referenceErrors: BulkDeleteExceptionListError[] = [];
-  const deletableLists: ExceptionListSchema[] = [...endpointArtifactLists];
-
-  for (const list of checkableLists) {
-    const rules = listToRules.get(list.id);
-    if (rules && rules.length > 0) {
-      referenceErrors.push({
-        lists: [{ id: list.id, list_id: list.list_id }],
-        message: `Exception list "${list.name}" cannot be deleted because it is linked to ${
-          rules.length
-        } ${
-          rules.length === 1 ? 'rule' : 'rules'
-        }. Unlink the list from all rules before retrying.`,
-        rule_references: rules,
-        status_code: 409,
-      });
-    } else {
-      deletableLists.push(list);
-    }
-  }
-
-  // Delete lists that passed both validation and reference checks
   const deleteResults =
-    deletableLists.length > 0
+    foundLists.length > 0
       ? await pMap(
-          deletableLists,
+          foundLists,
           (list) =>
-            deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient }),
+            checkAndDeleteList({
+              list,
+              namespaceType,
+              preDeleteListHook,
+              savedObjectType,
+              savedObjectsClient,
+            }),
           { concurrency: BULK_DELETE_LIST_CONCURRENCY }
         )
       : [];
@@ -307,7 +231,7 @@ export const bulkDeleteExceptionList = async ({
     }
   });
 
-  const allErrors = [...validationErrors, ...referenceErrors, ...deleteErrors];
+  const allErrors = [...validationErrors, ...deleteErrors];
 
   return {
     errors: allErrors,

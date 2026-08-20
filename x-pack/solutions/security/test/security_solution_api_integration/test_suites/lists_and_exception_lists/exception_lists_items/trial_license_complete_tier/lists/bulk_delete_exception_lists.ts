@@ -8,9 +8,14 @@
 import expect from '@kbn/expect';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import {
+  getCreateExceptionListDetectionSchemaMock,
+  getCreateExceptionListMinimalSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 
 import { deleteAllExceptions } from '../../../utils';
@@ -20,6 +25,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const exceptionsApi = getService('exceptionsApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   const createList = (overrides: Record<string, unknown> = {}) =>
@@ -28,6 +34,52 @@ export default ({ getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true')
       .send({ ...getCreateExceptionListMinimalSchemaMock(), ...overrides })
       .expect(200);
+
+  // The minimal mock creates an `endpoint` list. Rule-reference scenarios need a
+  // `detection` list, which is the shared type a user attaches to several rules.
+  const createDetectionList = async (listId: string) => {
+    const { body } = await supertest
+      .post(EXCEPTION_LIST_URL)
+      .set('kbn-xsrf', 'true')
+      .send({ ...getCreateExceptionListDetectionSchemaMock(), list_id: listId })
+      .expect(200);
+    return body;
+  };
+
+  const createRuleReferencingList = async (
+    ruleId: string,
+    name: string,
+    list: { id: string; list_id: string }
+  ) => {
+    const { body } = await detectionsApi
+      .createRule({
+        body: {
+          description: 'Rule used to verify exception list reference checks',
+          // Disabled so the rule never executes; only its references matter here.
+          enabled: false,
+          exceptions_list: [
+            {
+              id: list.id,
+              list_id: list.list_id,
+              namespace_type: 'single' as const,
+              type: ExceptionListTypeEnum.DETECTION,
+            },
+          ],
+          index: ['auditbeat-*'],
+          name,
+          query: 'host.name: *',
+          risk_score: 1,
+          rule_id: ruleId,
+          severity: 'high',
+          type: 'query' as const,
+        },
+      })
+      .expect(200);
+    return body;
+  };
+
+  const getList = (listId: string) =>
+    supertest.get(`${EXCEPTION_LIST_URL}?list_id=${listId}`).set('kbn-xsrf', 'true');
 
   describe('@ess @serverless @serverlessQA bulk_delete_exception_lists', () => {
     describe('bulk delete exception lists', () => {
@@ -207,6 +259,122 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.success).to.eql(true);
         expect(body.errors).to.eql([]);
         expect(body.results).to.have.length(1);
+      });
+
+      // These cover the rule-reference safety gate: a list that one or more detection
+      // rules point at must not be deleted. The gate is the endpoint's headline safety
+      // feature and, before these tests existed, nothing exercised it end to end.
+      describe('rule reference checks', () => {
+        afterEach(async () => {
+          // Rules hold references to the lists, so remove the rules first.
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should block deletion of a detection list referenced by a rule and leave the list intact', async () => {
+          const list = await createDetectionList('referenced-list');
+          const rule = await createRuleReferencingList(
+            'bulk-delete-ref-rule-1',
+            'Rule referencing one list',
+            { id: list.id, list_id: list.list_id }
+          );
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.eql([]);
+          expect(body.errors).to.have.length(1);
+
+          const [error] = body.errors;
+          expect(error.status_code).to.eql(409);
+          expect(error.lists).to.eql([{ id: list.id, list_id: 'referenced-list' }]);
+          expect(error.message).to.contain('linked to 1 rule');
+          expect(error.rule_references).to.eql([
+            {
+              rule_id: 'bulk-delete-ref-rule-1',
+              id: rule.id,
+              name: 'Rule referencing one list',
+            },
+          ]);
+          expect(body.summary).to.eql({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
+
+          // the list must survive the refused delete
+          await getList('referenced-list').expect(200);
+        });
+
+        it('should name every referencing rule when more than one rule points at the list', async () => {
+          const list = await createDetectionList('multi-referenced-list');
+          const ruleA = await createRuleReferencingList('bulk-delete-ref-rule-a', 'Rule A', {
+            id: list.id,
+            list_id: list.list_id,
+          });
+          const ruleB = await createRuleReferencingList('bulk-delete-ref-rule-b', 'Rule B', {
+            id: list.id,
+            list_id: list.list_id,
+          });
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.errors).to.have.length(1);
+
+          const [error] = body.errors;
+          expect(error.status_code).to.eql(409);
+          expect(error.message).to.contain('linked to 2 rules');
+          expect(
+            error.rule_references.map((reference: { id: string }) => reference.id).sort()
+          ).to.eql([ruleA.id, ruleB.id].sort());
+
+          await getList('multi-referenced-list').expect(200);
+        });
+
+        it('should delete an unreferenced detection list while refusing a referenced one in the same request', async () => {
+          const referenced = await createDetectionList('referenced-list');
+          const unreferenced = await createDetectionList('unreferenced-list');
+          await createRuleReferencingList(
+            'bulk-delete-ref-rule-2',
+            'Rule referencing one of two lists',
+            { id: referenced.id, list_id: referenced.list_id }
+          );
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({
+              body: { action: 'delete', ids: [referenced.id, unreferenced.id] },
+            })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.have.length(1);
+          expect(body.results[0].list_id).to.eql('unreferenced-list');
+          expect(body.errors).to.have.length(1);
+          expect(body.errors[0].status_code).to.eql(409);
+          expect(body.errors[0].lists).to.eql([{ id: referenced.id, list_id: 'referenced-list' }]);
+          expect(body.summary).to.eql({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
+
+          await getList('referenced-list').expect(200);
+          await getList('unreferenced-list').expect(404);
+        });
+
+        // Guards against a fix that refuses everything: with no rule in the system the
+        // reference check must find nothing and the delete must still go through.
+        it('should delete a detection list that no rule references', async () => {
+          const list = await createDetectionList('unreferenced-list');
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
+            .expect(200);
+
+          expect(body.success).to.eql(true);
+          expect(body.errors).to.eql([]);
+          expect(body.results).to.have.length(1);
+          expect(body.results[0].list_id).to.eql('unreferenced-list');
+          expect(body.summary).to.eql({ total: 1, succeeded: 1, failed: 0, skipped: 0 });
+
+          await getList('unreferenced-list').expect(404);
+        });
       });
 
       describe('@skipInServerless with read rules and all exceptions role', () => {

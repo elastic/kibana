@@ -28,6 +28,7 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
+  ExceptionListPreDeleteListBlocker,
   ExtensionPointStorageClientInterface,
   ServerExtensionCallbackContext,
 } from '../extension_points';
@@ -76,7 +77,10 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
-import type { BulkDeleteExceptionListResult } from './bulk_delete_exception_list';
+import type {
+  BulkDeleteExceptionListResult,
+  PreDeleteListHook,
+} from './bulk_delete_exception_list';
 import { bulkDeleteExceptionList } from './bulk_delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
@@ -566,9 +570,43 @@ export class ExceptionListClient {
     namespaceType,
   }: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
     const { savedObjectsClient } = this;
+
+    const preDeleteListHook: PreDeleteListHook | undefined = this.enableServerExtensionPoints
+      ? async (list): Promise<ExceptionListPreDeleteListBlocker[]> => {
+          const { blockedBy } = await this.serverExtensionsClient.pipeRun(
+            'exceptionsListPreDeleteList',
+            { blockedBy: [], list, namespaceType },
+            this.getServerExtensionCallbackContext(),
+            (returnedData) => {
+              if (returnedData.list.id !== list.id) {
+                return new Error(
+                  `exceptionsListPreDeleteList extension changed the list being processed from [${list.id}] to [${returnedData.list.id}]`
+                );
+              }
+              if (
+                !Array.isArray(returnedData.blockedBy) ||
+                returnedData.blockedBy.some(
+                  (blocker) =>
+                    typeof blocker.id !== 'string' ||
+                    typeof blocker.rule_id !== 'string' ||
+                    typeof blocker.name !== 'string'
+                )
+              ) {
+                return new Error(
+                  'exceptionsListPreDeleteList extension returned a malformed [blockedBy] value'
+                );
+              }
+              return undefined;
+            }
+          );
+          return blockedBy;
+        }
+      : undefined;
+
     return bulkDeleteExceptionList({
       ids,
       namespaceType,
+      preDeleteListHook,
       savedObjectsClient,
     });
   };
