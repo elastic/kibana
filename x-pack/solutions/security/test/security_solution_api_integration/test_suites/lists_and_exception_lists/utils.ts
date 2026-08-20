@@ -344,6 +344,7 @@ export const waitForListItem = async (
       const { status, body } = await supertest
         .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
         .send();
+
       if (status !== 200) {
         log.debug(
           `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
@@ -372,6 +373,43 @@ export const waitForListItems = async (
   fileName: string
 ): Promise<void> => {
   await Promise.all(itemValues.map((item) => waitForListItem(supertest, log, item, fileName)));
+};
+
+/**
+ * Convenience function for waiting until a list has indexed at least `expectedSize` items.
+ * Unlike {@link waitForListItem}, this polls the list total rather than a specific value, so it
+ * works for types whose stored form differs from the imported string (e.g. geo and range types)
+ * and for large imports whose items are indexed asynchronously after the import request returns.
+ * @param supertest The super test agent
+ * @param log The tooling logger
+ * @param fileName The list id (filename) that was imported
+ * @param expectedSize The minimum number of list items to wait for
+ */
+export const waitForListSize = async (
+  supertest: SuperTest.Agent,
+  log: ToolingLog,
+  fileName: string,
+  expectedSize: number
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const { status, body } = await supertest
+        .get(`${LIST_ITEM_URL}/_find?list_id=${fileName}&per_page=0`)
+        .send();
+
+      if (status !== 200) {
+        log.debug(
+          `Did not get an expected 200 "ok" when waiting for list size (waitForListSize) yet. Retrying. body: ${JSON.stringify(
+            body
+          )}, status: ${JSON.stringify(status)}`
+        );
+        return false;
+      }
+      return typeof body?.total === 'number' && body.total >= expectedSize;
+    },
+    `waitForListSize fileName: "${fileName}" expectedSize: "${expectedSize}"`,
+    log
+  );
 };
 
 /**

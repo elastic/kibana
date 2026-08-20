@@ -226,8 +226,16 @@ export const createOrClauses = async <
   return { orClauses: orClauses.flat(), unprocessableExceptionItems };
 };
 
-const isListTypeProcessable = (type: Type): boolean =>
-  type === 'keyword' || type === 'ip' || type === 'ip_range';
+/**
+ * Whether a value list of this type can be inlined into the exception query via the
+ * "small list" path ({@link buildListClause}). Every value-list type is inlineable
+ * except:
+ *  - `text`: an analyzed field, so exact matching requires a `match` query rather than
+ *    the `terms` clause used here. Handled by the per-document large-list path instead.
+ *  - `binary`: not searchable in Elasticsearch.
+ * Non-inlineable types fall back to the per-document large-list path.
+ */
+const isListTypeProcessable = (type: Type): boolean => type !== 'text' && type !== 'binary';
 
 export const filterOutUnprocessableValueLists = async <
   T extends ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -362,7 +370,10 @@ export const buildExceptionFilter = async <
       },
     },
   };
-  unprocessedExceptions.concat(unprocessableExceptionItems);
+  // `concat` returns a new array without mutating; push so exception items whose small-list clause
+  // could not be built (e.g. a range/geo list larger than the inline limit) fall through to the
+  // per-document large-list path instead of being silently dropped.
+  unprocessedExceptions.push(...unprocessableExceptionItems);
   return { filter: exceptionFilter, unprocessedExceptions };
 };
 
@@ -511,6 +522,42 @@ export const buildIpRangeClauses = (
     };
   });
 
+const buildSmallListBoolFilter = (
+  clauses: estypes.QueryDslQueryContainer[],
+  operator: string
+): BooleanFilter =>
+  // A `bool` with only `must_not` and an explicit `minimum_should_match: 1` matches
+  // zero documents (ES requires one of the nonexistent `should` clauses to match), so
+  // `minimum_should_match` is applied only on the `should` (included) path.
+  operator === 'excluded'
+    ? { bool: { must_not: clauses } }
+    : { bool: { minimum_should_match: 1, should: clauses } };
+
+const parseNumericRangeClause = (value: string, field: string): estypes.QueryDslQueryContainer => {
+  // Numeric range list values use dash-separated notation: "{gte}-{lte}".
+  // The regex handles negative numbers (e.g. "-50--20").
+  const match = value.match(/^(-?[\d.eE+]+)-(-?[\d.eE+]+)$/);
+  if (match) {
+    return { range: { [field]: { gte: match[1], lte: match[2] } } };
+  }
+  // No delimiter: the import serializer stores a single value as { gte: v, lte: v }, so treat a
+  // delimiter-less value the same way rather than emitting an open-ended (undefined lte) range.
+  return { range: { [field]: { gte: value, lte: value } } };
+};
+
+const parseDateRangeClause = (value: string, field: string): estypes.QueryDslQueryContainer => {
+  // Date range list values use comma-separated ISO notation: "{gte},{lte}".
+  const commaIdx = value.indexOf(',');
+  if (commaIdx === -1) {
+    // No delimiter: a single date value is stored/deserialized as gte === lte (see the import
+    // serializer), so match it exactly rather than trimming the last character off `gte`.
+    return { range: { [field]: { gte: value, lte: value } } };
+  }
+  const gte = value.slice(0, commaIdx);
+  const lte = value.slice(commaIdx + 1);
+  return { range: { [field]: { gte, lte } } };
+};
+
 export const buildListClause = async (
   entry: EntryList,
   listClient: ListClient
@@ -537,20 +584,80 @@ export const buildListClause = async (
     if (dashNotationRange.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
       return undefined;
     }
+    if (slashNotationRange.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
     const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
     if (slashNotationRange.length > 0) {
-      rangeClauses.push({
-        terms: {
-          [field]: slashNotationRange,
-        },
+      // `terms` queries against an `ip` field do not support CIDR notation,
+      // but `term` queries do. Emit one `term` clause per CIDR value.
+      slashNotationRange.forEach((cidr) => {
+        rangeClauses.push({
+          term: {
+            [field]: cidr,
+          },
+        });
       });
     }
-    return {
-      bool: {
-        [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
-        minimum_should_match: 1,
-      },
-    };
+    return buildSmallListBoolFilter(rangeClauses, operator);
+  }
+
+  if (['integer_range', 'float_range', 'long_range', 'double_range'].includes(type)) {
+    if (listValues.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
+    return buildSmallListBoolFilter(
+      listValues.map((v) => parseNumericRangeClause(v, field)),
+      operator
+    );
+  }
+
+  if (type === 'date_range') {
+    if (listValues.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
+    return buildSmallListBoolFilter(
+      listValues.map((v) => parseDateRangeClause(v, field)),
+      operator
+    );
+  }
+
+  if (type === 'geo_point') {
+    if (listValues.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
+    // geo_point list values are stored as "lat,lon" strings. ES does not support
+    // terms queries on geo_point fields; emit a geo_distance clause per point.
+    return buildSmallListBoolFilter(
+      listValues.map((value) => ({ geo_distance: { distance: '1m', [field]: value } })),
+      operator
+    );
+  }
+
+  if (type === 'geo_shape') {
+    if (listValues.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
+    // geo_shape list values are stored as WKT strings.
+    return buildSmallListBoolFilter(
+      listValues.map((value) => ({
+        geo_shape: { [field]: { relation: 'intersects' as const, shape: value } },
+      })),
+      operator
+    );
+  }
+
+  if (type === 'shape') {
+    if (listValues.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
+      return undefined;
+    }
+    // Cartesian shape list values are stored as WKT strings.
+    return buildSmallListBoolFilter(
+      listValues.map((value) => ({
+        shape: { [field]: { relation: 'intersects' as const, shape: value } },
+      })),
+      operator
+    );
   }
 
   return {

@@ -575,6 +575,38 @@ describe('build_exceptions_filter', () => {
         }
       `);
     });
+
+    test('it should route a small-list exception whose inline clause cannot be built to unprocessedExceptions', async () => {
+      // integer_range is processable (small-list path) and the list is under the small-list size
+      // limit, but it has more values than buildListClause will inline, so the clause comes back
+      // undefined. Such items must fall through to the per-document large-list path rather than be
+      // silently dropped.
+      const overInlineLimit = Array.from({ length: 201 }, (_, i) => ({ value: `${i}-${i}` }));
+      const rangeListClient = getListClientMock();
+      rangeListClient.findListItem = jest.fn().mockResolvedValue({ total: 201 });
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: overInlineLimit, total: 201 });
+
+      const listEntryItem: EntryList = {
+        ...getEntryListMock(),
+        list: { id: getEntryListMock().list.id, type: 'integer_range' },
+      };
+      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 1,
+        excludeExceptions: true,
+        listClient: rangeListClient,
+        lists: [listExceptionItem],
+        startedAt: new Date(),
+      });
+
+      expect(unprocessedExceptions).toEqual([listExceptionItem]);
+      // No inline clause could be built, so the exception filter should have no should clauses.
+      expect(filter?.query?.bool?.should).toEqual([]);
+    });
   });
 
   describe('createOrClauses', () => {
@@ -1354,11 +1386,275 @@ describe('build_exceptions_filter', () => {
           minimum_should_match: 1,
           should: [
             {
-              terms: {
-                'host.name': ['127.0.0.1'],
+              term: {
+                'host.name': '127.0.0.1',
               },
             },
           ],
+        },
+      });
+    });
+
+    test('it should build range should clauses for integer_range type', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100-200' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'integer_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '100', lte: '200' } } }],
+        },
+      });
+    });
+
+    test('it should match a delimiter-less numeric range value exactly (gte === lte)', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'integer_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '100', lte: '100' } } }],
+        },
+      });
+    });
+
+    test('it should build range should clauses for float_range type', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '99.5-100.5' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'float_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '99.5', lte: '100.5' } } }],
+        },
+      });
+    });
+
+    test('it should build range should clauses for long_range type', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100-200' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'long_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '100', lte: '200' } } }],
+        },
+      });
+    });
+
+    test('it should build range should clauses for double_range type', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '99.5-100.5' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'double_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '99.5', lte: '100.5' } } }],
+        },
+      });
+    });
+
+    test('it should build range should clauses for date_range type', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest.fn().mockResolvedValue({
+        data: [{ value: '2020-01-01T00:00:00.000Z,2021-01-01T00:00:00.000Z' }],
+        total: 1,
+      });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'date_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              range: {
+                'host.name': {
+                  gte: '2020-01-01T00:00:00.000Z',
+                  lte: '2021-01-01T00:00:00.000Z',
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should match a delimiter-less date_range value exactly (gte === lte)', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest.fn().mockResolvedValue({
+        data: [{ value: '2025-04-01T00:00:00.000Z' }],
+        total: 1,
+      });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'date_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              range: {
+                'host.name': {
+                  gte: '2025-04-01T00:00:00.000Z',
+                  lte: '2025-04-01T00:00:00.000Z',
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should build geo_distance should clauses for geo_point type', async () => {
+      const geoListClient = getListClientMock();
+      geoListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '40.7128,-74.006' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'geo_point' } },
+        geoListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ geo_distance: { distance: '1m', 'host.name': '40.7128,-74.006' } }],
+        },
+      });
+    });
+
+    test('it should build geo_shape should clauses for geo_shape type', async () => {
+      const geoListClient = getListClientMock();
+      geoListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: 'POINT (-74.006 40.7128)' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'geo_shape' } },
+        geoListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              geo_shape: {
+                'host.name': { relation: 'intersects', shape: 'POINT (-74.006 40.7128)' },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should build shape should clauses for shape type', async () => {
+      const shapeListClient = getListClientMock();
+      shapeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: 'POINT (100.0 200.0)' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'shape' } },
+        shapeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              shape: {
+                'host.name': { relation: 'intersects', shape: 'POINT (100.0 200.0)' },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should build a must_not clause without minimum_should_match when ip_range operator is "excluded"', async () => {
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'ip_range' },
+        },
+        listClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [
+            {
+              term: {
+                'host.name': '127.0.0.1',
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should build a must_not clause without minimum_should_match when integer_range operator is "excluded"', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100-200' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'integer_range' },
+        },
+        rangeListClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [{ range: { 'host.name': { gte: '100', lte: '200' } } }],
+        },
+      });
+    });
+
+    test('it should build a must_not clause without minimum_should_match when geo_point operator is "excluded"', async () => {
+      const geoListClient = getListClientMock();
+      geoListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '40.7128,-74.006' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'geo_point' },
+        },
+        geoListClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [{ geo_distance: { distance: '1m', 'host.name': '40.7128,-74.006' } }],
         },
       });
     });
@@ -1379,19 +1675,39 @@ describe('build_exceptions_filter', () => {
       expect(unprocessableValueListExceptions).toEqual([]);
     });
 
-    test("it should filter out list types we don't support", async () => {
-      const listEntryItem: EntryList = {
-        ...getEntryListMock(),
-        list: { id: getEntryListMock().list.id, type: 'text' },
-      };
-      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+    test.each(['integer', 'long', 'double', 'boolean', 'date'] as const)(
+      'it should filter in scalar list types we inline into the query (%s)',
+      async (type) => {
+        const listEntryItem: EntryList = {
+          ...getEntryListMock(),
+          list: { id: getEntryListMock().list.id, type },
+        };
+        const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
 
-      const { filteredExceptions, unprocessableValueListExceptions } =
-        await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+        const { filteredExceptions, unprocessableValueListExceptions } =
+          await filterOutUnprocessableValueLists([listExceptionItem], listClient);
 
-      expect(filteredExceptions).toEqual([]);
-      expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
-    });
+        expect(filteredExceptions).toEqual([listExceptionItem]);
+        expect(unprocessableValueListExceptions).toEqual([]);
+      }
+    );
+
+    test.each(['text', 'binary'] as const)(
+      'it should filter out list types we cannot inline into the query (%s)',
+      async (type) => {
+        const listEntryItem: EntryList = {
+          ...getEntryListMock(),
+          list: { id: getEntryListMock().list.id, type },
+        };
+        const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+        const { filteredExceptions, unprocessableValueListExceptions } =
+          await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+
+        expect(filteredExceptions).toEqual([]);
+        expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
+      }
+    );
   });
 
   describe('removeExpiredExceptions', () => {
