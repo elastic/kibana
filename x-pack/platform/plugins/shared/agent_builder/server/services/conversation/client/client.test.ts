@@ -24,9 +24,9 @@ import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
-jest.mock('../templates/registry');
-import { getTemplate } from '../templates/registry';
-const getTemplateMock = getTemplate as jest.MockedFn<typeof getTemplate>;
+jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 const testSpace = 'default';
 
@@ -115,6 +115,8 @@ describe('ConversationClient', () => {
       get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
       getIds: jest.fn().mockResolvedValue(['agent-1']),
     };
+
+    getTemplateMock.mockReset();
 
     client = createClient({
       space: testSpace,
