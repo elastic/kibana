@@ -124,31 +124,6 @@ describe('Fleet debug handlers', () => {
       expect(result).toEqual({ body: searchResult, statusCode: 200 });
       expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents', query: { bool: {} } });
     });
-
-    it('returns 200 when caller has system_indices_superuser role', async () => {
-      // system_indices_superuser is a superset of superuser (cluster:all, indices:*,
-      // applications:*) and is the default identity in local serverless dev clusters.
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const searchResult = { hits: { hits: [] }, took: 0, _shards: {} };
-      esClient.search.mockResolvedValue(searchResult as any);
-
-      const context = {
-        core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
-        fleet: Promise.resolve({
-          internalSoClient: savedObjectsClientMock.create(),
-          spaceId: 'default',
-        }),
-      } as any;
-      const response = createMockResponse();
-
-      const result = await fetchIndexHandler(
-        context,
-        { body: { index: '.fleet-agents' } } as any,
-        response as any
-      );
-
-      expect(result).toEqual({ body: searchResult, statusCode: 200 });
-    });
   });
 
   describe('fetchSavedObjectsHandler', () => {
