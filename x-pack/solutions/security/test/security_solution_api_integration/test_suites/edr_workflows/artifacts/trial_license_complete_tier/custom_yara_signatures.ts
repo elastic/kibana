@@ -17,7 +17,10 @@ import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
-import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '@kbn/security-solution-plugin/server/lists_integration/endpoint/validators/custom_yara_signatures_validator';
+import {
+  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
+  MAXIMUM_RULE_IDENTIFIER_LENGTH,
+} from '@kbn/security-solution-plugin/server/lists_integration/endpoint/validators/custom_yara_signatures_validator';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -286,6 +289,129 @@ export default function ({ getService }: FtrProviderContext) {
                   .expect(
                     anErrorMessageWith(
                       /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: No YARA rules found. Please provide at least one rule/
+                    )
+                  );
+              });
+            });
+
+            describe('Rule identifiers', () => {
+              it('accepts multiple rules with unique identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule2 { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it('rejects rules with duplicate identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                    rule rule1 { condition: true }
+                    rule rule1 { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(/1 error found: \[line 3\] duplicated identifier "rule1"/)
+                  );
+              });
+
+              it(`accepts a rule with ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters long identifier`, async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH - 1)} { condition: true }`)
+                  )
+                  .expect(200);
+              });
+
+              it(`rejects a rule with ${
+                MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+              } characters long identifier`, async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)} { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `1 error found: \\[line 3\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+                        )}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`
+                      )
+                    )
+                  );
+              });
+
+              it('returns "too long identifier" error for multiple rules with too long identifiers', async () => {
+                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                  customYaraSignatureApiCall.path
+                )
+                  .set('kbn-xsrf', 'true')
+                  .send(
+                    customYaraSignatureApiCall.getBody(`
+                      rule rule1 { condition: true }
+
+                      // all identifiers are only 'a's to make sure the correct line number is reported on whole words
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 3)} { condition: true }
+                      rule rule2 { condition: true }
+
+                      // no space after the identifier intentionally
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 2)}{ condition: true }
+                      rule rule3 { condition: true }
+
+                      // line break after identifier intentionally
+                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)}
+                      { condition: true }`)
+                  )
+                  .expect(400)
+                  .expect(anEndpointArtifactError)
+                  .expect(anErrorMessageWith(/3 errors found:/))
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 5\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 3
+                        )}"`
+                      )
+                    )
+                  )
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 9\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 2
+                        )}"`
+                      )
+                    )
+                  )
+                  .expect(
+                    anErrorMessageWith(
+                      new RegExp(
+                        `\\[line 13\\] Too long rule identifier "${'a'.repeat(
+                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
+                        )}"`
+                      )
                     )
                   );
               });

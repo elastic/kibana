@@ -30,6 +30,13 @@ import type { ExceptionItemLikeOptions } from '../types';
  */
 export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
 
+/**
+ * Maximum length of a YARA rule identifier. Kept at 95 characters, because in ManifestManager
+ * we're adding 1 underscore plus 32 unique characters to the identifier to make it unique,
+ * which is 128 characters in total, which equals to the limit by the YARA engine.
+ */
+export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
+
 const validateYaraRuleContentByteLength = (value: string): string | void => {
   const byteLength = Buffer.byteLength(value, 'utf8');
 
@@ -249,6 +256,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
   private async validateCustomYaraRule(ruleText: string): Promise<YaraValidateResult> {
     const result = await validateYaraRule(ruleText);
 
+    // Validate that we have at least one rule
     if (result.errorCount === 0 && result.rules.length === 0) {
       result.errors.push({
         message: 'No YARA rules found. Please provide at least one rule',
@@ -256,6 +264,34 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
         severity: 'error',
       });
       result.errorCount++;
+    }
+
+    // Validate that we don't have any rule identifiers that are too long
+    if (result.rules.length > 0) {
+      const tooLongIdentifiers = result.rules
+        .map(({ identifier }) => identifier)
+        .filter((identifier) => identifier.length > MAXIMUM_RULE_IDENTIFIER_LENGTH);
+
+      if (tooLongIdentifiers.length > 0) {
+        const textLines = ruleText.split('\n');
+
+        for (const identifier of tooLongIdentifiers) {
+          const lineIndex = textLines.findIndex((textLine) =>
+            textLine.match(`rule ${identifier}\\b`)
+          );
+
+          // If not found, -1+1 results 0 which is the 'unknown' line in our error messages.
+          // For other indexes, +1 results in the correct 1-based line number.
+          const lineNumber = lineIndex + 1;
+
+          result.errorCount++;
+          result.errors.push({
+            message: `Too long rule identifier "${identifier}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`,
+            line: lineNumber,
+            severity: 'error',
+          });
+        }
+      }
     }
 
     return result;
