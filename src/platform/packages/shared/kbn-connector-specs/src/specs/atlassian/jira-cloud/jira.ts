@@ -493,7 +493,7 @@ export const JiraConnector: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Create a link between two Jira issues (e.g. "relates to", "blocks", "duplicates"). ' +
+        'Create a link between two Jira issues (e.g. "Relates", "Blocks", "Duplicate"). ' +
         'Use when you need to establish a relationship between tickets.',
       input: LinkIssuesInputSchema,
       handler: async (ctx, input: LinkIssuesInput) => {
