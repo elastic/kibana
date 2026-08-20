@@ -259,6 +259,7 @@ export const JiraConnector: ConnectorSpec = {
 
     createIssue: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new Jira issue. Use when you need to file a bug, task, story, or other issue type. ' +
         'Call getIssueTypes first to discover valid issue types for the project, and ' +
@@ -295,6 +296,7 @@ export const JiraConnector: ConnectorSpec = {
 
     updateIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update fields on an existing Jira issue. Use when you need to change the summary, description, ' +
         'priority, labels, assignee, or issue type. Only the fields you provide are updated; ' +
@@ -335,6 +337,7 @@ export const JiraConnector: ConnectorSpec = {
 
     addComment: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a comment to an existing Jira issue. Use when you need to post an update, note, or ' +
         'remediation detail on a ticket without changing its fields.',
@@ -351,6 +354,7 @@ export const JiraConnector: ConnectorSpec = {
 
     transitionIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a Jira issue to a new status by executing a workflow transition. ' +
         'Call getTransitions first — Jira requires a transition ID, not a status name.',
@@ -422,6 +426,7 @@ export const JiraConnector: ConnectorSpec = {
 
     assignIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Assign a Jira issue to a user, set it to the default assignee, or unassign it. ' +
         'Use searchUsers to resolve a name or email to an accountId before calling this.',
@@ -438,6 +443,7 @@ export const JiraConnector: ConnectorSpec = {
 
     addAttachment: {
       isTool: true,
+      scope: 'write',
       description:
         'Attach a file to a Jira issue. The file must be provided as a base64-encoded string. ' +
         'WARNING: Only call this when you already have the base64-encoded content ready — do not call just to store arbitrary data. ' +
@@ -488,6 +494,7 @@ export const JiraConnector: ConnectorSpec = {
 
     linkIssues: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a link between two Jira issues (e.g. "relates to", "blocks", "duplicates"). ' +
         'Use when you need to establish a relationship between tickets.',
@@ -514,6 +521,7 @@ export const JiraConnector: ConnectorSpec = {
 
     deleteIssue: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a Jira issue. This is irreversible. ' +
         'Set deleteSubtasks to true if the issue has subtasks, otherwise Jira returns a 400.',
@@ -533,6 +541,7 @@ export const JiraConnector: ConnectorSpec = {
 
     addWatcher: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a user as a watcher on a Jira issue so they receive notifications. ' +
         'Use searchUsers to resolve a name or email to an accountId before calling this.',
@@ -551,6 +560,7 @@ export const JiraConnector: ConnectorSpec = {
 
     removeWatcher: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Remove a user from the watcher list of a Jira issue. ' +
         'Use searchUsers to resolve a name or email to an accountId before calling this.',
