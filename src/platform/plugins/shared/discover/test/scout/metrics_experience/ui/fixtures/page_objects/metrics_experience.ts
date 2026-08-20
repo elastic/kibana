@@ -214,10 +214,16 @@ export class MetricsExperiencePage {
 
   /**
    * Returns the decoded `_p` (profile state) segment of a Discover URL, or an
-   * empty string when the URL carries none.
+   * empty string when the URL carries none. Standalone Discover keeps its app
+   * state in the URL fragment (`useHashQuery`), so `_p` is read out of the
+   * hash's query string rather than the top-level search params.
    */
   public getProfileState(url: string): string {
-    const [, raw] = url.match(new RegExp(`${PROFILE_STATE_URL_KEY}=([^&]*)`)) ?? [];
-    return raw ? decodeURIComponent(raw) : '';
+    const { hash } = new URL(url);
+    const queryStart = hash.indexOf('?');
+    if (queryStart === -1) {
+      return '';
+    }
+    return new URLSearchParams(hash.slice(queryStart + 1)).get(PROFILE_STATE_URL_KEY) ?? '';
   }
 }
