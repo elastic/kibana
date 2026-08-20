@@ -863,15 +863,16 @@ export class TaskManagerRunner implements TaskRunner {
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
+    const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+      | TaskTypeGroup
+      | undefined;
 
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
-        const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
-          | TaskTypeGroup
-          | undefined;
+
         try {
           const processedResult = {
             task,
@@ -957,9 +958,7 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
-              taskTypeGroup: this.definitions.get(this.taskType)?.taskTypeGroup as
-                | TaskTypeGroup
-                | undefined,
+              taskTypeGroup,
             }),
             taskTiming
           )
