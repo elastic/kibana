@@ -21,10 +21,8 @@ xpack.features.overrides:
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the VectorDB one.
   discover_v2.category: "enterpriseSearch"
-  ### Stack Alerts feature is moved from Analytics category to the VectorDB one and renamed to simply `Alerts`.
-  stackAlerts:
-    name: "Alerts"
-    category: "enterpriseSearch"
+  ### Stack Rules feature is moved from Analytics category to the VectorDB one.
+  stackAlerts.category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: vectordb
