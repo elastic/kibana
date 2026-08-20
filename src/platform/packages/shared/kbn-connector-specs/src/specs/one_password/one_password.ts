@@ -144,6 +144,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     suspendUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
         {
@@ -173,6 +174,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     reactivateUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
         { defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password' }
