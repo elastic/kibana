@@ -304,6 +304,7 @@ export const NewRelic: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
+      scope: 'read',
       description:
         'List New Relic AI issues (deduplicated, correlated groups of incidents) for an account, filterable by state, priority, entity GUIDs, and time window. Defaults to the last 24 hours if no window is given. Drives triage and enrichment branching in a workflow. Returns nextCursor for pagination.',
       input: NewRelicListIssuesInputSchema,
@@ -372,6 +373,7 @@ export const NewRelic: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
+      scope: 'read',
       description:
         'List the individual New Relic incidents (condition violations) grouped under AI issues for an account, filterable by state, priority, entity GUIDs, and time window. Use for granular per-signal handling. Returns nextCursor for pagination.',
       input: NewRelicListIncidentsInputSchema,
@@ -516,6 +518,7 @@ export const NewRelic: ConnectorSpec = {
 
     listMutingRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List existing New Relic muting rules for an account, so a workflow can check for an existing rule before creating or deleting one (idempotency).',
       input: NewRelicListMutingRulesInputSchema,
@@ -554,6 +557,7 @@ export const NewRelic: ConnectorSpec = {
 
     runNrqlQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run an NRQL query against a New Relic account and return the results. The primary read path for metric, event-count, and health-check enrichment inside a workflow, e.g. "SELECT count(*) FROM Transaction SINCE 1 HOUR AGO".',
       input: NewRelicRunNrqlQueryInputSchema,
@@ -629,6 +633,7 @@ export const NewRelic: ConnectorSpec = {
 
     listAlertPolicies: {
       isTool: true,
+      scope: 'read',
       description:
         'List New Relic alert policies for an account, optionally filtered by a name substring, to resolve policy context or target a muting rule or condition action.',
       input: NewRelicListAlertPoliciesInputSchema,
@@ -673,6 +678,7 @@ export const NewRelic: ConnectorSpec = {
 
     listNrqlConditions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the NRQL alert conditions under a New Relic alert policy, to audit existing conditions or pick one to reference.',
       input: NewRelicListNrqlConditionsInputSchema,

@@ -295,6 +295,7 @@ export const Okta: ConnectorSpec = {
   actions: {
     getUser: {
       isTool: true,
+      scope: 'read',
       description:
         'Resolve a full Okta user record by id, login, or email. Use this first when an alert only has a login or email so write actions can use the canonical user id. Returns profile, status, and credentials metadata.',
       input: GetUserInputSchema,
@@ -314,6 +315,7 @@ export const Okta: ConnectorSpec = {
 
     getUserGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List group memberships for a user. Use for enrichment and to decide whether to add the user to a quarantine group or remove them from a privileged group.',
       input: GetUserGroupsInputSchema,
@@ -473,6 +475,7 @@ export const Okta: ConnectorSpec = {
 
     getUserFactors: {
       isTool: true,
+      scope: 'read',
       description:
         'List enrolled MFA factors for a user so an author can decide whether resetFactors is warranted.',
       input: GetUserFactorsInputSchema,
@@ -581,6 +584,7 @@ export const Okta: ConnectorSpec = {
 
     listUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'List users with pagination only (limit/after). Okta does not allow sortBy on non-search list queries - use searchUsers with a search expression when you need sorting. Returns users plus the raw Link header for the next page when present.',
       input: ListUsersInputSchema,
@@ -608,6 +612,7 @@ export const Okta: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'Find users by keyword (q), advanced search expression, or SCIM filter. Use to resolve identities in bulk from partial alert identifiers. Do not combine search and filter in one call. sortBy/sortOrder require the search parameter (Okta rejects sort on q/filter-only or list queries).',
       input: SearchUsersInputSchema,
@@ -640,6 +645,7 @@ export const Okta: ConnectorSpec = {
 
     getLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Query Okta System Log events (failed logins, suspicious auth, admin actions). Filter with since/until, filter expressions, or keywords. Returns events plus Link header for pagination.',
       input: GetLogsInputSchema,

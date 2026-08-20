@@ -189,6 +189,7 @@ export const Datadog: ConnectorSpec = {
   actions: {
     listMonitors: {
       isTool: true,
+      scope: 'read',
       description:
         'List Datadog monitors and their alert states, optionally filtered by tags, name, or group state. Use this to enumerate alerting rules before acting on a specific monitor.',
       input: ListMonitorsInputSchema,
@@ -216,6 +217,7 @@ export const Datadog: ConnectorSpec = {
 
     getMonitor: {
       isTool: true,
+      scope: 'read',
       description:
         "Retrieve a single Datadog monitor's full definition and current overall state by numeric ID. Use the IDs returned by listMonitors.",
       input: GetMonitorInputSchema,
@@ -240,6 +242,7 @@ export const Datadog: ConnectorSpec = {
 
     getAlertEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Datadog alert-type events over a time range. Use this to triage and enrich a firing monitor with recent alert events from the event stream.',
       input: GetAlertEventsInputSchema,
@@ -508,6 +511,7 @@ export const Datadog: ConnectorSpec = {
 
     queryTimeseries: {
       isTool: true,
+      scope: 'read',
       description:
         'Query Datadog timeseries metrics over a time range. Use this to confirm or enrich an alert with the metric current value before acting.',
       input: QueryTimeseriesInputSchema,
@@ -531,6 +535,7 @@ export const Datadog: ConnectorSpec = {
 
     searchLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Datadog logs over a time range and optional indexes. Use matching log events as evidence during alert triage or incident response. Requires Log Management with at least one valid index on the Datadog account; pass indexes (e.g. ["main"]) when the account does not search all indexes by default.',
       input: SearchLogsInputSchema,

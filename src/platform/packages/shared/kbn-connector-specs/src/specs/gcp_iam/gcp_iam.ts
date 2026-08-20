@@ -269,6 +269,7 @@ Gotchas:
   actions: {
     listServiceAccounts: {
       isTool: true,
+      scope: 'read',
       description:
         'List the service accounts in a Google Cloud project, with email, uniqueId, display name, and whether each is disabled. ' +
         'The orientation tool: use it to find the target of a containment action when you have a project but not an exact account email. ' +
@@ -296,6 +297,7 @@ Gotchas:
 
     getServiceAccount: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one service account by email: name, uniqueId, display name, description, project, OAuth client id, etag, and whether it is disabled. ' +
         'Use it to enrich an identity alert or to check whether a containment step already landed. ' +
@@ -353,6 +355,7 @@ Gotchas:
 
     listServiceAccountKeys: {
       isTool: true,
+      scope: 'read',
       description:
         'List the keys on a service account, with key id, algorithm, origin, type, validity window, and whether each is disabled. ' +
         'Use it during triage to find leaked or stale credentials before cutting one. ' +
@@ -461,6 +464,7 @@ Gotchas:
 
     getIamPolicy: {
       isTool: true,
+      scope: 'read',
       description:
         'Read an IAM allow policy: every role binding with its members, any IAM conditions, and the etag. ' +
         'Targets a project, folder, or organization to see who holds which roles there, or a single service account to see who may impersonate it. ' +
@@ -620,6 +624,7 @@ Gotchas:
 
     testIamPermissions: {
       isTool: true,
+      scope: 'read',
       description:
         'Check which of the given permissions the caller holds on a project, folder, organization, or service account. Only the held subset is returned, so an empty list means none. ' +
         'Use it to confirm a revocation took effect, to verify least privilege, or to check the connector itself can perform an action before attempting it.',
@@ -646,6 +651,7 @@ Gotchas:
 
     getRole: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a role definition, including every permission it includes and its launch stage. ' +
         'Use it before changing a binding to understand what the role actually grants, so a remediation does not over- or under-grant. ' +
@@ -683,6 +689,7 @@ Gotchas:
 
     queryGrantableRoles: {
       isTool: true,
+      scope: 'read',
       description:
         'List the roles that can be granted on a project, folder, or organization. ' +
         'Use it to build a valid binding: a role that is not grantable on the target resource will be rejected by addIamPolicyBinding. ' +

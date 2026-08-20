@@ -175,6 +175,7 @@ export const Rootly: ConnectorSpec = {
 
     getIncident: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Rootly incident by ID, so a workflow can branch on its current state before it acts.',
       input: RootlyGetIncidentInputSchema,
@@ -193,6 +194,7 @@ export const Rootly: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly incidents filtered by status, severity, service, team, free-text search, or creation time window, so a workflow can dedupe and correlate before it acts.',
       input: RootlyListIncidentsInputSchema,
@@ -409,6 +411,7 @@ export const Rootly: ConnectorSpec = {
 
     listActionItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List action items on a Rootly incident (or org-wide if incidentId is omitted), filtered by status or priority.',
       input: RootlyListActionItemsInputSchema,
@@ -458,6 +461,7 @@ export const Rootly: ConnectorSpec = {
 
     listSeverities: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly severity definitions and their resource IDs, so createIncident and updateIncident can set severity by a real ID instead of a guessed string.',
       input: RootlyListSeveritiesInputSchema,
@@ -478,6 +482,7 @@ export const Rootly: ConnectorSpec = {
 
     listServices: {
       isTool: true,
+      scope: 'read',
       description:
         'List the Rootly service catalog, so a workflow can attach the affected service by reference when it opens or updates an incident.',
       input: RootlyListServicesInputSchema,
@@ -501,6 +506,7 @@ export const Rootly: ConnectorSpec = {
 
     listTeams: {
       isTool: true,
+      scope: 'read',
       description: 'List Rootly teams, so a workflow can set incident ownership by reference.',
       input: RootlyListTeamsInputSchema,
       handler: async (ctx, input: RootlyListTeamsInput) => {
@@ -520,6 +526,7 @@ export const Rootly: ConnectorSpec = {
 
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly alerts filtered by status or source, feeding triage and correlation from the monitoring signal before an incident is declared.',
       input: RootlyListAlertsInputSchema,
@@ -544,6 +551,7 @@ export const Rootly: ConnectorSpec = {
 
     getAlert: {
       isTool: true,
+      scope: 'read',
       description: 'Get a single Rootly alert by ID.',
       input: RootlyGetAlertInputSchema,
       handler: async (ctx, input: RootlyGetAlertInput) => {

@@ -569,6 +569,7 @@ Gotchas that matter:
   actions: {
     searchScans: {
       isTool: true,
+      scope: 'read',
       description:
         'Search historical URLScan.io scans with an Elasticsearch query-string query. Returns one row per prior scan: uuid, URL, title, domain, IP, ASN, country, TLS issuer, domain age, and a link to the full result and screenshot. ' +
         'Call this BEFORE submitting a new scan: a recent prior sighting answers the question without spending scan quota, and it is the primary way to check whether an indicator has been seen before. ' +
@@ -608,6 +609,7 @@ Gotchas that matter:
 
     getResult: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the result of a finished scan by uuid. Returns the verdict block (malicious flag, score from -100 to 100, categories, impersonated brands), the page identity (final URL, title, IP, ASN, country, TLS issuer, domain age), scan stats, the full lists of contacted domains, IPs, ASNs and response hashes, and any files the page downloaded. ' +
         'Use it to read a scan submitted earlier by scanUrl, or to re-read one found by searchScans. ' +
@@ -800,6 +802,7 @@ Gotchas that matter:
 
     getScreenshot: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the PNG screenshot of a finished scan, base64-encoded, so it can be attached to a case or shown to an analyst. Returns the base64 data, its byte length, and the public screenshot URL. ' +
         'WARNING: this returns a base64 image payload, typically tens to hundreds of kilobytes. Only call it when you have somewhere to put the image (a case attachment, an Elasticsearch ingest pipeline). Do not call it to "look at" a page, and never include the base64 blob in a chat response. ' +
@@ -845,6 +848,7 @@ Gotchas that matter:
 
     getDom: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the rendered DOM snapshot of a finished scan as text, for phishing and content analysis: credential-harvesting form markup, obfuscated scripts, or an exfiltration endpoint that never appears in the request list. ' +
         'Truncated to 50000 characters by default because a rendered DOM is frequently over a megabyte; the response reports the full length and whether it was truncated, and maxLength raises the cap. ' +
@@ -888,6 +892,7 @@ Gotchas that matter:
 
     getQuota: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the account rate limits and remaining quota, broken out per action (search, retrieve, public, unlisted, private, livescan) and per window (minute, hour, day). Also returns the search-result ceiling, the scan retention period, and which visibility levels this account can query. ' +
         'Call it before a batch of scans or searches so a workflow can throttle or defer instead of hitting a 429 partway through. It is also the cheapest way to confirm the API key is valid and to see which tier it grants.',

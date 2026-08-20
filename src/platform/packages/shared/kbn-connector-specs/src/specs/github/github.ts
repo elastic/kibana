@@ -161,6 +161,7 @@ export const GithubConnector: ConnectorSpec = {
   actions: {
     getMe: {
       isTool: true,
+      scope: 'read',
       description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
       handler: async (ctx) => {
@@ -170,6 +171,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchCode: {
       isTool: true,
+      scope: 'read',
       description: 'Search for code across GitHub repositories.',
       input: SearchCodeInputSchema,
       handler: async (ctx, input: SearchCodeInput) => {
@@ -183,6 +185,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
+      scope: 'read',
       description: 'Search for GitHub repositories.',
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input: SearchRepositoriesInput) => {
@@ -196,6 +199,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchIssues: {
       isTool: true,
+      scope: 'read',
       description: 'Search for issues across GitHub repositories.',
       input: SearchIssuesInputSchema,
       handler: async (ctx, input: SearchIssuesInput) => {
@@ -211,6 +215,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
+      scope: 'read',
       description: 'Search for pull requests across GitHub repositories.',
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input: SearchPullRequestsInput) => {
@@ -226,6 +231,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description: 'Search for GitHub users.',
       input: SearchUsersInputSchema,
       handler: async (ctx, input: SearchUsersInput) => {
@@ -239,6 +245,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
+      scope: 'read',
       description: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       input: ListIssuesInputSchema,
       handler: async (ctx, input: ListIssuesInput) => {
@@ -254,6 +261,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
+      scope: 'read',
       description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input: ListPullRequestsInput) => {
@@ -269,6 +277,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listCommits: {
       isTool: true,
+      scope: 'read',
       description: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) => {
@@ -284,6 +293,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
+      scope: 'read',
       description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       input: ListBranchesInputSchema,
       handler: async (ctx, input: ListBranchesInput) => {
@@ -298,6 +308,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listReleases: {
       isTool: true,
+      scope: 'read',
       description: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       input: ListReleasesInputSchema,
       handler: async (ctx, input: ListReleasesInput) => {
@@ -312,6 +323,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
+      scope: 'read',
       description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       input: ListTagsInputSchema,
       handler: async (ctx, input: ListTagsInput) => {
@@ -326,6 +338,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
+      scope: 'read',
       description: 'Get details of a specific commit.',
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) => {
@@ -339,6 +352,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
+      scope: 'read',
       description: 'Get the latest release of a GitHub repository.',
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input: GetLatestReleaseInput) => {
@@ -348,6 +362,7 @@ export const GithubConnector: ConnectorSpec = {
 
     pullRequestRead: {
       isTool: true,
+      scope: 'read',
       description: 'Read the full details of a specific pull request.',
       input: PullRequestReadInputSchema,
       handler: async (ctx, input: PullRequestReadInput) => {
@@ -362,6 +377,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getFileContents: {
       isTool: true,
+      scope: 'read',
       description: 'Get the contents of a file or directory from a GitHub repository.',
       input: GetFileContentsInputSchema,
       handler: async (ctx, input: GetFileContentsInput) => {
@@ -376,6 +392,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
+      scope: 'read',
       description: 'Get details of a specific issue in a GitHub repository.',
       input: GetIssueInputSchema,
       handler: async (ctx, input: GetIssueInput) => {
@@ -390,6 +407,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssueComments: {
       isTool: true,
+      scope: 'read',
       description: 'Get comments for a specific issue in a GitHub repository.',
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input: GetIssueCommentsInput) => {
@@ -666,6 +684,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       input: ListToolsInputSchema,

@@ -173,6 +173,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-joinedteams
     listJoinedTeams: {
       isTool: true,
+      scope: 'read',
       description:
         "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token or OAuth authorization code), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
@@ -201,6 +202,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list
     listChannels: {
       isTool: true,
+      scope: 'read',
       description:
         'List all channels in a Microsoft Teams team. Use this to discover channel IDs before fetching messages with listChannelMessages. Requires the team ID (obtainable via listJoinedTeams).',
       input: ListChannelsInputSchema,
@@ -222,6 +224,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list-messages
     listChannelMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve recent messages from a Microsoft Teams channel. Returns message content, sender, timestamp, and web URL for each message. Use listJoinedTeams and listChannels first to obtain teamId and channelId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChannelMessagesInputSchema,
@@ -245,6 +248,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list
     listChats: {
       isTool: true,
+      scope: 'read',
       description:
         'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token or OAuth authorization code), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
@@ -271,6 +275,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list-messages
     listChatMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve recent messages from a Microsoft Teams direct message or group chat. Returns message content, sender, timestamp, and web URL. Use listChats first to obtain the chatId. Use the top parameter to control how many messages are returned (max 50).',
       input: ListChatMessagesInputSchema,
@@ -292,6 +297,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,

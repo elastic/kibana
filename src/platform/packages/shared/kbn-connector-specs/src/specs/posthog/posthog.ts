@@ -138,6 +138,7 @@ export const PostHog: ConnectorSpec = {
   actions: {
     listIssues: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog error-tracking issues, filterable by status, assignee, and last-seen time window. The primary read path to find what needs triage.',
       input: PostHogListIssuesInputSchema,
@@ -173,6 +174,7 @@ export const PostHog: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single PostHog error-tracking issue by ID, including status, assignee, volume, first/last seen, and message, so a workflow can branch or enrich on it.',
       input: PostHogGetIssueInputSchema,
@@ -231,6 +233,7 @@ export const PostHog: ConnectorSpec = {
 
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a HogQL (SQL-like) query against PostHog product data and return the result rows. The general-purpose data lever for a decision or enrichment inside a workflow.',
       input: PostHogRunQueryInputSchema,
@@ -285,6 +288,7 @@ export const PostHog: ConnectorSpec = {
 
     getFeatureFlag: {
       isTool: true,
+      scope: 'read',
       description:
         "Get a PostHog feature flag's current active state and rollout configuration by ID, so a workflow can decide whether to change it before calling updateFeatureFlag.",
       input: PostHogGetFeatureFlagInputSchema,
@@ -302,6 +306,7 @@ export const PostHog: ConnectorSpec = {
 
     listFeatureFlags: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog feature flags, optionally filtered by a name/key substring, so a workflow can find the flag to change during a response.',
       input: PostHogListFeatureFlagsInputSchema,
@@ -339,6 +344,7 @@ export const PostHog: ConnectorSpec = {
 
     listSessionRecordings: {
       isTool: true,
+      scope: 'read',
       description:
         'List PostHog session recordings within a time window, optionally scoped to a person, to investigate what users hit around an error.',
       input: PostHogListSessionRecordingsInputSchema,

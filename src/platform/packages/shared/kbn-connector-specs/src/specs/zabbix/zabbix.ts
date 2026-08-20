@@ -212,6 +212,7 @@ export const Zabbix: ConnectorSpec = {
   actions: {
     getProblems: {
       isTool: true,
+      scope: 'read',
       description:
         "List current Zabbix problems (unresolved trigger-generated events), optionally filtered by host, host group, severity, tags, acknowledgement, or suppression state. This is the primary read path for triage. Pass recent: true to also include problems resolved within the server's configured display window — for problems resolved further in the past, use getEvent with known event IDs instead.",
       input: GetProblemsInputSchema,
@@ -240,6 +241,7 @@ export const Zabbix: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch full details for one or more Zabbix events by ID, including already-resolved ones (unlike getProblems, which only returns unresolved or recently-resolved problems). Returns the problem name, host, tags, and full acknowledgement/update history — use this to enrich a decision with complete context.',
       input: GetEventInputSchema,
@@ -392,6 +394,7 @@ export const Zabbix: ConnectorSpec = {
 
     getMaintenances: {
       isTool: true,
+      scope: 'read',
       description:
         'List Zabbix maintenance windows, optionally filtered by host or host group, so a workflow can check what is already scheduled before opening or closing one.',
       input: GetMaintenancesInputSchema,
@@ -411,6 +414,7 @@ export const Zabbix: ConnectorSpec = {
 
     getHosts: {
       isTool: true,
+      scope: 'read',
       description:
         'Resolve Zabbix hosts by ID, host group, name, or monitoring status. Returns host IDs and status, for use as input to getProblems, createMaintenance, disableHost/enableHost, or similar actions that need a host ID.',
       input: GetHostsInputSchema,
@@ -487,6 +491,7 @@ export const Zabbix: ConnectorSpec = {
 
     getItemHistory: {
       isTool: true,
+      scope: 'read',
       description:
         "Fetch recent metric values recorded for a Zabbix item, so an alert workflow can enrich a decision with the underlying trend. Automatically detects the item's value type — Zabbix's history.get otherwise requires the caller to know and pass it explicitly.",
       input: GetItemHistoryInputSchema,

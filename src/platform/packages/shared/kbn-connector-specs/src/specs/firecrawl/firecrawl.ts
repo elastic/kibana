@@ -98,6 +98,7 @@ export const FirecrawlConnector: ConnectorSpec = {
   actions: {
     scrape: {
       isTool: true,
+      scope: 'read',
       description:
         'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
       input: ScrapeInputSchema,
@@ -129,6 +130,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search the web and get full page content from results. Use when you need to find information across the web by keyword or natural-language query.',
       input: SearchInputSchema,
@@ -143,6 +145,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     map: {
       isTool: true,
+      scope: 'read',
       description:
         'Map a website to discover all indexed URLs. Use when you need to list or explore URLs on a site before deciding which pages to scrape or crawl.',
       input: MapInputSchema,
@@ -217,6 +220,7 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     getCrawlStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the current status and results of an existing crawl job. Pass the job ID returned by a previous crawl call. Returns a slimmed result set (url, title, markdownSnippet per page). Poll this until status is "completed" or "failed".',
       input: GetCrawlStatusInputSchema,

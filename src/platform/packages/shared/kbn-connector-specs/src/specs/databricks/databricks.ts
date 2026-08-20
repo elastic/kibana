@@ -175,6 +175,7 @@ export const Databricks: ConnectorSpec = {
     // ── Read-only SQL queries (exposed to AI agents) ──────────────────────────
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Execute a read-only SQL query against the Databricks SQL warehouse. ' +
         'Only SELECT, SHOW, DESCRIBE, DESC, EXPLAIN, and WITH statements are permitted. ' +
@@ -202,6 +203,7 @@ export const Databricks: ConnectorSpec = {
     // ── Async result polling ──────────────────────────────────────────────────
     pollResponse: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll the status and retrieve results for a previously submitted SQL query. ' +
         'Use this when runQuery or executeStatement returns a statement_id instead of immediate results — ' +
@@ -245,6 +247,7 @@ export const Databricks: ConnectorSpec = {
     // ── Jobs REST API ─────────────────────────────────────────────────────────
     listRuns: {
       isTool: true,
+      scope: 'read',
       description:
         'List job runs in the Databricks workspace. Optionally filter by job ID, active-only, or page size. ' +
         'Returns run metadata including run_id, job_id, state, start_time, and task results. ' +
@@ -265,6 +268,7 @@ export const Databricks: ConnectorSpec = {
 
     getRun: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a specific job run by run ID. Returns the full run object including state, ' +
         'tasks, start/end times, and error messages. Use this to check run status or retrieve task details.',
@@ -279,6 +283,7 @@ export const Databricks: ConnectorSpec = {
 
     getRunOutput: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the output of a completed task run (notebook output, logs, return values). ' +
         "Requires a task-level run ID from getRun's tasks[].run_id. " +
@@ -350,6 +355,7 @@ export const Databricks: ConnectorSpec = {
     // ── Clusters REST API ─────────────────────────────────────────────────────
     listClusters: {
       isTool: true,
+      scope: 'read',
       description:
         'List all clusters in the Databricks workspace. Returns cluster metadata including cluster_id, ' +
         'cluster_name, state (RUNNING, TERMINATED, PENDING, etc.), spark_version, and node type. ' +
@@ -392,6 +398,7 @@ export const Databricks: ConnectorSpec = {
     // ── Warehouses REST API ───────────────────────────────────────────────────
     listWarehouses: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SQL warehouses in the Databricks workspace. Returns warehouse metadata including id, ' +
         'name, state (RUNNING, STOPPED, STARTING, etc.), cluster_size, and auto_stop_mins. ' +
@@ -438,6 +445,7 @@ export const Databricks: ConnectorSpec = {
     // ── Alerts REST API ───────────────────────────────────────────────────────
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SQL alerts in the Databricks workspace. Returns alert metadata including id, name, ' +
         'state (OK, TRIGGERED, UNKNOWN), query_id, and condition. ' +
@@ -451,6 +459,7 @@ export const Databricks: ConnectorSpec = {
 
     getAlert: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a specific SQL alert by ID. Returns the full alert definition including ' +
         'the associated query, condition (op, value, empty_result_state), notification schedule, ' +

@@ -179,6 +179,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List OpenSearch Alerting alerts across all monitors, or for a specific monitor, optionally filtered by state or severity. Use this to drive triage — branch on the returned alerts and acknowledge, or dig into the monitor that raised them with getMonitor.',
       input: GetAlertsInputSchema,
@@ -218,6 +219,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getMonitor: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch a monitor\u2019s full definition (schedule, inputs, triggers) and current enabled state by ID. This is the read most branching workflow steps depend on before calling enableMonitor, disableMonitor, updateMonitor, or executeMonitor.',
       input: MonitorIdInputSchema,
@@ -265,6 +267,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     searchMonitors: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for monitors by name, source index, or enabled state. Use this to locate the correct monitor ID before calling getMonitor, executeMonitor, enableMonitor, disableMonitor, updateMonitor, or deleteMonitor. Omit all filters to list monitors.',
       input: SearchMonitorsInputSchema,
@@ -353,6 +356,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     searchDetectors: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for Security Analytics detectors by name or log type. Use this to find a detector ID or type before calling getDetectorFindings or acknowledgeDetectorAlert.',
       input: SearchDetectorsInputSchema,
@@ -383,6 +387,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getDetectorFindings: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve Security Analytics findings (matched Sigma rules or threat-intelligence hits) for a detector or detector type, to enrich an alert triage workflow with detection context. Either detectorId or detectorType is required — use searchDetectors first if you only know the detector name.',
       input: GetDetectorFindingsInputSchema,
@@ -405,6 +410,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     listIndices: {
       isTool: true,
+      scope: 'read',
       description:
         'List indices and their health, status, and document/storage size, optionally filtered by name or pattern. Use this to discover which index to pass to runQuery or indexDocument.',
       input: ListIndicesInputSchema,
@@ -420,6 +426,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a search query against an index using the OpenSearch Query DSL, to gather evidence from cluster data during triage. Pass the full search request body (query, aggregations, sort, size, etc.) in the "query" parameter.',
       input: RunQueryInputSchema,

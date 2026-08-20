@@ -41,6 +41,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
   actions: {
     checkIp: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           ipAddress: z.ipv4().describe('IP address to check'),
@@ -107,6 +108,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getIpInfo: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           ipAddress: z.ipv4().describe('IP address to lookup'),
@@ -136,6 +138,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     bulkCheck: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           network: z.string().describe('Network in CIDR notation'),

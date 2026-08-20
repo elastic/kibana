@@ -227,6 +227,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/alerts/alerts/get-all
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List fired (or resolved) Azure Monitor alerts in the subscription, optionally filtered by time range, severity, monitor condition, state, or target resource. This is the primary triage entry point — call it first to discover alert IDs, then use getAlert/getAlertHistory/changeAlertState with the "id" field\'s final path segment (a GUID).',
       input: ListAlertsInputSchema,
@@ -269,6 +270,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/alerts/alerts/get-by-id
     getAlert: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full essentials (severity, state, monitor condition, target resource, alert rule) of a single Azure Monitor alert by its GUID. Use the alertId from listAlerts.',
       input: GetAlertInputSchema,
@@ -290,6 +292,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/alerts/alerts/get-history
     getAlertHistory: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the change history of a single Azure Monitor alert: monitor condition flips (Fired/Resolved), alert state changes (New/Acknowledged/Closed), and applied alert processing rules. Use the alertId from listAlerts. Useful for audit trails and understanding what already happened to an alert.',
       input: GetAlertHistoryInputSchema,
@@ -343,6 +346,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/alerts-management/alerts/alerts/get-summary
     getAlertSummary: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a summarized count of Azure Monitor alerts grouped by severity, alert state, monitor condition, monitor service, signal type, or alert rule (e.g. how many alerts are Sev0 vs Sev1). Use this to feed dashboards or threshold gates rather than listing and counting every alert individually. At most 2 groupBy fields may be supplied — the Azure API rejects more with a 400 error.',
       input: GetAlertSummaryInputSchema,
@@ -384,6 +388,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/metrics/list
     queryMetrics: {
       isTool: true,
+      scope: 'read',
       description:
         'Query time-series metric values (e.g. CPU percentage, request count) for an Azure resource. Use this to pull the numbers that drove an alert, after identifying the target resource via getAlert. Returns one time series per metric/dimension combination.',
       input: QueryMetricsInputSchema,
@@ -415,6 +420,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/azure/azure-monitor/logs/api/request-format
     runLogQuery: {
       isTool: true,
+      scope: 'read',
       description:
         "Run a KQL (Kusto Query Language) query against a Log Analytics workspace. Use this to enrich or investigate an alert (e.g. correlate with raw log events) from inside a workflow. Requires the connector's service principal to have the Log Analytics Reader role on the target workspace — this action mints a separate, workspace-scoped access token rather than reusing the connector's main ARM token.",
       input: RunLogQueryInputSchema,
@@ -439,6 +445,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/activity-logs/list
     queryActivityLog: {
       isTool: true,
+      scope: 'read',
       description:
         'Query the Azure Monitor Activity Log (control-plane events: resource writes, role assignments, service health) within a time range, optionally scoped to a resource group or a single resource. Use this to correlate a configuration change with an alert.',
       input: QueryActivityLogInputSchema,
@@ -481,6 +488,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/activity-log-alerts/list-by-subscription-id
     listActivityLogAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List Activity Log Alert rules (rules that fire on control-plane events, e.g. "a VM was deleted") in the subscription, along with their enabled state, conditions, and action groups. Use this for review or reporting on which activity-log-based alerting is configured.',
       input: ListActivityLogAlertsInputSchema,
@@ -503,6 +511,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/metric-alerts/list-by-resource-group
     listMetricAlertRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List metric alert rule definitions in the subscription (or a single resource group). Use this to discover rule names before calling getMetricAlertRule or setMetricAlertRuleEnabled — the "read, then quiet" loop for silencing a noisy rule during maintenance.',
       input: ListMetricAlertRulesInputSchema,
@@ -527,6 +536,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/metric-alerts/get
     getMetricAlertRule: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full definition (criteria, scopes, severity, action groups) of a single metric alert rule by name. Use listMetricAlertRules first to discover rule names. Call this before reporting on, or reasoning about, a specific rule.',
       input: GetMetricAlertRuleInputSchema,
@@ -575,6 +585,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/metric-alerts-status/list
     getMetricAlertStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the current fired/resolved status of a metric alert rule, with a per-dimension breakdown (e.g. per target resource). Use listMetricAlertRules first to discover rule names. Use this for a quick health/status check without listing every fired alert.',
       input: GetMetricAlertStatusInputSchema,
@@ -600,6 +611,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/action-groups/list-by-subscription-id
     listActionGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List all action groups (email/SMS/webhook/Automation/Function notification targets) in the subscription. Use this to report on who or what gets notified when an alert fires, or to find an action group ID for createOrUpdateAlertProcessingRule.',
       input: ListActionGroupsInputSchema,
@@ -693,6 +705,7 @@ export const AzureMonitor: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/monitor/scheduled-query-rules/list-by-resource-group
     listScheduledQueryRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List scheduled query rules (KQL-based log search alert rules) in the subscription (or a single resource group). Use this to discover rule names before calling setScheduledQueryRuleEnabled — mirrors the metric-rule "list, then quiet" loop, but for log-based alerts.',
       input: ListScheduledQueryRulesInputSchema,

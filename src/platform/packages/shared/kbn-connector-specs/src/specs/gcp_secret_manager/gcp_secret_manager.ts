@@ -281,6 +281,7 @@ Gotchas:
   actions: {
     listSecrets: {
       isTool: true,
+      scope: 'read',
       description:
         'List the secrets in a Google Cloud project, with id, labels, replication, rotation policy and version aliases. ' +
         'The orientation tool: use it to discover what secrets exist when you have a project but not an exact secret id. ' +
@@ -317,6 +318,7 @@ Gotchas:
 
     getSecret: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one secret container by id: labels, replication policy, rotation schedule, TTL, expiry, version aliases and etag. ' +
         'Use it to inspect configuration before acting, for example to read the current labels or aliases that updateSecret would replace. ' +
@@ -334,6 +336,7 @@ Gotchas:
 
     listSecretVersions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the versions of a secret with each version number and its state (ENABLED, DISABLED or DESTROYED). ' +
         'The triage read a rotation depends on: use it to find which old versions to disable or destroy, and to confirm a lifecycle change landed. ' +
@@ -370,6 +373,7 @@ Gotchas:
 
     getSecretVersion: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the metadata of one secret version: its state, creation time and scheduled destroy time. ' +
         'Use it to check whether a specific version is still ENABLED before relying on it, or to confirm a disable or destroy took effect. ' +
@@ -603,6 +607,7 @@ Gotchas:
 
     getSecretIamPolicy: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the IAM policy attached directly to one secret: every role binding with its members, any IAM conditions, and the etag. ' +
         'Use it in an access audit to see who was granted access to this specific secret, and to get the etag that setSecretIamPolicy needs. ' +

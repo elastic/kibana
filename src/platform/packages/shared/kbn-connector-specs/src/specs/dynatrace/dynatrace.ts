@@ -234,6 +234,7 @@ export const Dynatrace: ConnectorSpec = {
   actions: {
     listProblems: {
       isTool: true,
+      scope: 'read',
       description:
         'List Dynatrace Davis problems, optionally filtered by problemSelector, entitySelector, and time range. Primary read that kicks off an alert-response workflow. Returns the Problems API v2 list envelope (problems, pageSize, nextPageKey, totalCount).',
       input: DynatraceListProblemsInputSchema,
@@ -260,6 +261,7 @@ export const Dynatrace: ConnectorSpec = {
 
     getProblem: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one Dynatrace problem by ID, including root cause, affected entities, evidence, and timeline when requested via fields. Use after listProblems to enrich before acting.',
       input: DynatraceGetProblemInputSchema,
@@ -322,6 +324,7 @@ export const Dynatrace: ConnectorSpec = {
 
     listProblemComments: {
       isTool: true,
+      scope: 'read',
       description:
         "List an existing problem's comment thread for human context before an agent or workflow acts.",
       input: DynatraceListProblemCommentsInputSchema,
@@ -371,6 +374,7 @@ export const Dynatrace: ConnectorSpec = {
 
     listEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List events in the environment, optionally filtered by eventSelector, entitySelector, and time range. Read-side feed to poll or correlate against a problem.',
       input: DynatraceListEventsInputSchema,
@@ -395,6 +399,7 @@ export const Dynatrace: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      scope: 'read',
       description: 'Get one Dynatrace event by ID for enrichment.',
       input: DynatraceGetEventInputSchema,
       handler: async (ctx, input: DynatraceGetEventInput) => {
@@ -409,6 +414,7 @@ export const Dynatrace: ConnectorSpec = {
 
     queryMetrics: {
       isTool: true,
+      scope: 'read',
       description:
         'Query metric data points (CPU, latency, error rate, etc.) for a metricSelector and time range. Evidence a workflow branches on.',
       input: DynatraceQueryMetricsInputSchema,
@@ -432,6 +438,7 @@ export const Dynatrace: ConnectorSpec = {
 
     listMetrics: {
       isTool: true,
+      scope: 'read',
       description:
         'Discover available metric keys and descriptors, optionally filtered by metricSelector or free-text search. Use to pick a selector for queryMetrics.',
       input: DynatraceListMetricsInputSchema,
@@ -455,6 +462,7 @@ export const Dynatrace: ConnectorSpec = {
 
     getMetricDescriptor: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the descriptor for one metric (dimensions, units, default aggregation) by metric ID/key.',
       input: DynatraceGetMetricDescriptorInputSchema,
@@ -472,6 +480,7 @@ export const Dynatrace: ConnectorSpec = {
 
     listEntities: {
       isTool: true,
+      scope: 'read',
       description:
         'Query monitored entities (hosts, services, applications, process groups) via an entitySelector so a workflow can resolve topology a problem touches.',
       input: DynatraceListEntitiesInputSchema,
@@ -496,6 +505,7 @@ export const Dynatrace: ConnectorSpec = {
 
     getEntity: {
       isTool: true,
+      scope: 'read',
       description:
         "Get one entity's properties and relationships by entity ID to enrich an alert with the affected service or host.",
       input: DynatraceGetEntityInputSchema,
@@ -557,6 +567,7 @@ export const Dynatrace: ConnectorSpec = {
 
     listMaintenanceWindows: {
       isTool: true,
+      scope: 'read',
       description:
         'List existing maintenance windows (Settings objects for builtin:maintenance-windows) so a workflow can check current suppression state or find one to tear down.',
       input: DynatraceListMaintenanceWindowsInputSchema,

@@ -82,6 +82,7 @@ export const OnePasswordConnector: ConnectorSpec = {
   actions: {
     listUsers: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
         { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
@@ -118,6 +119,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     getUser: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.getUser.description',
         { defaultMessage: 'Get details for a single user by their UUID' }
