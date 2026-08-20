@@ -7,7 +7,7 @@
 
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { createCasesClientMock } from '../../../client/mocks';
-import type { CasesWorkflowRunService } from '../../../workflows/run_workflow';
+import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createRunWorkflowRoute } from './run_workflow';
 
 describe('run workflow route', () => {

@@ -78,7 +78,7 @@ import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { initUiSettings } from './ui_settings';
-import { CasesWorkflowRunService } from './workflows/run_workflow';
+import { CasesWorkflowRunService } from './workflows/execution/service';
 
 export class CasePlugin
   implements

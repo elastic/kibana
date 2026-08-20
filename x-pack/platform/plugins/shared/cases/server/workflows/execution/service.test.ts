@@ -8,10 +8,10 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { Case } from '../../common/types/domain';
-import { createCasesClientMock } from '../client/mocks';
-import type { CasesRequestHandlerContext } from '../types';
-import { CasesWorkflowRunService } from './run_workflow';
+import type { Case } from '../../../common/types/domain';
+import { createCasesClientMock } from '../../client/mocks';
+import type { CasesRequestHandlerContext } from '../../types';
+import { CasesWorkflowRunService } from './service';
 
 describe('CasesWorkflowRunService', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -71,6 +71,7 @@ describe('CasesWorkflowRunService', () => {
       inputs: { event: { caseId: 'case-1' } },
       waitForCompletion: false,
       metadata: {
+        schemaVersion: 1,
         source: 'cases',
         caseId: 'case-1',
         origin: { type: 'cases.case', id: 'case-1' },

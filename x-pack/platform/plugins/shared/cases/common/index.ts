@@ -21,6 +21,7 @@ export type {
   CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
+  CasesWorkflowExecutionMetadata,
   CaseWorkflowRunOrigin,
   RunCaseWorkflowRequest,
   RunCaseWorkflowResponse,

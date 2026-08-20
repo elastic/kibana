@@ -58,14 +58,16 @@ The service:
 
    ```ts
    {
+     schemaVersion: 1,
      source: 'cases',
      caseId,
      origin,
    }
    ```
 
-   This metadata is an opaque execution annotation. It is not an indexed Cases correlation model;
-   case history comes from Cases user actions.
+   `CasesWorkflowExecutionMetadataSchema` defines and validates this versioned shape. The metadata
+   is an opaque execution annotation, not an indexed Cases correlation model; case history comes
+   from Cases user actions.
 
 7. Records the existing Cases workflow user action directly.
 

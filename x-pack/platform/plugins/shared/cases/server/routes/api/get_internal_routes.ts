@@ -30,7 +30,7 @@ import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_cont
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
-import type { CasesWorkflowRunService } from '../../workflows/run_workflow';
+import type { CasesWorkflowRunService } from '../../workflows/execution/service';
 import { createRunWorkflowRoute } from './internal/run_workflow';
 
 export const getInternalRoutes = (

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { INTERNAL_CASE_WORKFLOW_RUN_URL } from '../../../../common/constants';
+import { MAX_CASE_WORKFLOW_RUN_ID_LENGTH } from '../../../../common/types/api/workflow/v1';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
@@ -16,7 +17,7 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../../common/types/domain/user_action/workflow/constants';
 import type { RunCaseWorkflowRequest } from '../../../../common/types/api';
-import type { CasesWorkflowRunService } from '../../../workflows/run_workflow';
+import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createCasesRoute } from '../create_cases_route';
 
 const MAX_WORKFLOW_INPUTS_BYTES = 1_000_000;
@@ -37,8 +38,11 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     },
     params: {
       params: schema.object({
-        case_id: schema.string({ minLength: 1, maxLength: 1024 }),
-        workflow_id: schema.string({ minLength: 1, maxLength: 1024 }),
+        case_id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+        workflow_id: schema.string({
+          minLength: 1,
+          maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+        }),
       }),
       body: schema.object({
         inputs: schema.recordOf(schema.string({ maxLength: 1024 }), schema.any(), {
@@ -54,7 +58,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
             schema.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
             schema.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
           ]),
-          id: schema.string({ minLength: 1, maxLength: 1024 }),
+          id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
         }),
       }),
     },
