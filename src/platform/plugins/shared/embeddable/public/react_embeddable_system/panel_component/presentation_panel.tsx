@@ -189,6 +189,7 @@ export const PresentationPanel = <
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
+          data-test-subj="embeddablePanelContent"
           {...(isSharedItem && sharingAttirbutes)}
           ref={panelRef}
         >
