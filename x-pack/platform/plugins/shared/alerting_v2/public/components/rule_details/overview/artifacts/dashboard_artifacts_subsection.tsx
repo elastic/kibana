@@ -38,6 +38,9 @@ import { useRule } from '../../rule_context';
 import { ManageDashboardsPopover } from './manage_dashboards_popover';
 import { useDashboardArtifacts } from './use_dashboard_artifacts';
 
+/** Stable empty list so ManageDashboardsPopover does not re-init on every parent render. */
+const EMPTY_ARTIFACTS: RuleArtifactPayload = [];
+
 const getDashboardHref = ({
   dashboardId,
   share,
@@ -344,7 +347,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
           </EuiToolTip>
         }
         dashboard={dashboard}
-        existingArtifacts={rule.artifacts ?? []}
+        existingArtifacts={rule.artifacts ?? EMPTY_ARTIFACTS}
         isSaving={isUpdating}
         onSave={handleManageSave}
       />

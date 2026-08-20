@@ -428,7 +428,11 @@ export function transformRuleSoAttributesToRuleApiResponse(
     // Project to the public artifact contract. Migrated rules may still carry a
     // legacy `value` on disk for model-version rollback; echoing it in the API
     // response makes round-trip updates fail zod `.strict()` validation.
-    artifacts: attrs.artifacts?.map(({ id, type, data }) => ({ id, type, data })),
+    artifacts: attrs.artifacts?.map(({ id: artifactId, type, data }) => ({
+      id: artifactId,
+      type,
+      data,
+    })),
     enabled: attrs.enabled,
     created_by: attrs.createdBy,
     created_at: attrs.createdAt,
