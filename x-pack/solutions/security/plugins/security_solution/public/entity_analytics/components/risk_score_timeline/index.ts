@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { RiskScoreTimeline } from './risk_score_timeline';
+export { RiskScoreTimeline, RiskScoreTimelineChart, intervalToMs } from './risk_score_timeline';
 export type { RiskScoreTimelineProps } from './risk_score_timeline';
