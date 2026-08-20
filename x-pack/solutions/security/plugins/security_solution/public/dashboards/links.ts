@@ -18,6 +18,7 @@ import {
   overviewLinks,
 } from '../overview/links';
 import { IconDashboards } from '../common/icons/dashboards';
+import { detonateLinks } from '../detonate/links';
 
 const subLinks: LinkItem[] = [
   overviewLinks,
@@ -27,6 +28,7 @@ const subLinks: LinkItem[] = [
   vulnerabilityDashboardLink,
   entityAnalyticsLinks,
   ecsDataQualityDashboardLinks,
+  detonateLinks,
 ].map((link) => ({ ...link, sideNavIcon: IconDashboards }));
 
 export const dashboardsLinks: LinkItem = {

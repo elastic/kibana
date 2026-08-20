@@ -24,6 +24,7 @@ export const ALERTS_QUERY_NAMES = {
   COUNT_AI_VALUE_COMPARE: `${APP_UI_ID} aiValue filtered compare`,
   COUNT_AI_VALUE_TOTAL: `${APP_UI_ID} aiValue total`,
   COUNT_AI_VALUE_TOTAL_COMPARE: `${APP_UI_ID} aiValue total compare`,
+  DETONATION_ALERTS: `${APP_UI_ID} fetchAlerts detonation`,
   HISTOGRAM: `${APP_UI_ID} fetchAlerts histogram`,
   PREVALENCE: `${APP_UI_ID} fetchAlerts prevalence`,
   TREE_MAP: `${APP_UI_ID} fetchAlerts treeMap`,

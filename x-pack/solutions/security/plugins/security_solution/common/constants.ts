@@ -110,6 +110,8 @@ export const REPORTS_PATH = '/reports' as const;
 export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
+export const DETONATE_PATH = '/detonate' as const;
+export const DETONATE_DETAIL_PATH = `${DETONATE_PATH}/:taskId` as const;
 
 // TODO: https://github.com/elastic/kibana/issues/242434
 // Investigate possibility of using `detections` instead
