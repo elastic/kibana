@@ -13,7 +13,7 @@ import { MIN_MW_SUPPORTED_AGENT_VERSION } from '../../../../../../common/utils/a
 export const AgentVersionWarningText = () => (
   <FormattedMessage
     id="xpack.synthetics.maintenanceWindowCallout.agentVersionWarningLine"
-    defaultMessage="An agent predates {minVersion} — this maintenance window may not be honored."
+    defaultMessage="One or more agents predate {minVersion} — this maintenance window may not be honored."
     values={{ minVersion: MIN_MW_SUPPORTED_AGENT_VERSION }}
   />
 );
