@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
@@ -20,6 +21,7 @@ import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
+import { getTemplate } from '../../../conversation/templates/registry';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -66,6 +68,45 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {
+  if (value === undefined) return '_not yet set_';
+  if (Array.isArray(value)) return `**[${value.join(', ')}]**`;
+  return `**${value}**`;
+};
+
+const getConversationMetadataSection = (
+  templateId: string | undefined,
+  metadata: Record<string, SerializedMetadataValue> | undefined
+): string => {
+  const template = templateId ? getTemplate(templateId) : undefined;
+  if (!template) return '';
+
+  const fieldEntries = Object.entries(template.fields);
+  if (fieldEntries.length === 0) return '';
+
+  const fieldLines = fieldEntries
+    .map(([fieldName, def]) => {
+      const current = metadata?.[fieldName];
+      const valueStr = renderFieldValue(current);
+      const descStr = def.description ? ` — ${def.description}` : '';
+      const optionsStr =
+        def.input_type === 'SELECT' && def.options ? ` (options: ${def.options.join(' | ')})` : '';
+      return `- \`${fieldName}\` (${def.input_type})${optionsStr}${descStr}: ${valueStr}`;
+    })
+    .join('\n');
+
+  const templateDesc = template.description ? `\n\n${template.description}` : '';
+
+  return `## CONVERSATION METADATA
+
+This conversation uses the **${template.name}** template.${templateDesc}
+
+The list below shows the metadata fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
+
+${fieldLines}
+`;
+};
+
 const getAgentSystemMessage = async ({
   configuration: { instructions: customInstructions },
   outputSchema,
@@ -74,7 +115,12 @@ const getAgentSystemMessage = async ({
   relevantSkillsEnabled,
   capabilities,
   renderers,
+  processedConversation,
 }: ResearchAgentPromptParams): Promise<string> => {
+  const conversationTemplateId = processedConversation.template_id;
+  const conversationMetadata = processedConversation.metadata as
+    | Record<string, SerializedMetadataValue>
+    | undefined;
   const visEnabled = capabilities.visualizations;
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
@@ -141,6 +187,7 @@ ${
     : ''
 }
 
+${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
 ## INSTRUCTIONS
 
 ${customInstructions}
@@ -157,6 +204,14 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 
 ## CONNECTOR DISCOVERY
 This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
+
+## CONNECTOR ACTION HINTS
+
+Sub-actions listed in a connector attachment may carry a bracketed scope tag:
+
+- **[WRITE]** — the action creates or appends external data (e.g. send a message, create a resource). Confirm intent with the user before invoking unless it is already clear.
+- **[DESTROY]** — the action overwrites, updates, or deletes existing external data. Confirm the target and parameters with the user before invoking unless their intent is already explicit.
+- No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING
 
