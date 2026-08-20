@@ -6,6 +6,7 @@
  */
 
 import { DiscoverApp, extendPlaywrightPage, type KibanaUrl, type ScoutPage } from '@kbn/scout';
+import type { PlaywrightPage } from './helpers';
 
 /**
  * Clicks a control that opens Discover in a new tab and returns that tab as a Scout page.
@@ -13,7 +14,7 @@ import { DiscoverApp, extendPlaywrightPage, type KibanaUrl, type ScoutPage } fro
  */
 export async function openDiscoverFromPopup(options: {
   context: {
-    waitForEvent: (event: 'page') => Promise<Parameters<typeof extendPlaywrightPage>[0]['page']>;
+    waitForEvent: (event: 'page') => Promise<PlaywrightPage>;
   };
   kbnUrl: KibanaUrl;
   click: () => Promise<void>;
