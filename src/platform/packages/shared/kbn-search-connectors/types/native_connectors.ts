@@ -453,7 +453,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      data_center_username: {
+      data_center_auth_method: {
         default_value: null,
         depends_on: [
           {
@@ -461,12 +461,57 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'confluence_data_center',
           },
         ],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.confluenceDataCenter.authMethodLabel', {
+          defaultMessage: 'Confluence Data Center authentication method',
+        }),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.confluenceDataCenter.options.basicAuth',
+              {
+                defaultMessage: 'Basic authentication',
+              }
+            ),
+            value: BASIC_AUTH,
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.confluenceDataCenter.options.personalAccessToken',
+              {
+                defaultMessage: 'Personal access token',
+              }
+            ),
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+        ],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: BASIC_AUTH,
+      },
+      data_center_username: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'confluence_data_center',
+          },
+          {
+            field: 'data_center_auth_method',
+            value: BASIC_AUTH,
+          },
+        ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.confluenceDataCenter.usernameLabel', {
           defaultMessage: 'Username',
         }),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -482,13 +527,46 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             field: 'data_source',
             value: 'confluence_data_center',
           },
+          {
+            field: 'data_center_auth_method',
+            value: BASIC_AUTH,
+          },
         ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.confluenceDataCenter.passwordLabel', {
           defaultMessage: 'Password',
         }),
         options: [],
-        order: 5,
+        order: 6,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      data_center_personal_access_token: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'confluence_data_center',
+          },
+          {
+            field: 'data_center_auth_method',
+            value: PERSONAL_ACCESS_TOKEN,
+          },
+        ],
+        display: TEXTBOX,
+        label: translate(
+          'searchConnectors.nativeConnectors.confluenceDataCenter.personalAccessTokenLabel',
+          {
+            defaultMessage: 'Confluence Data Center personal access token',
+          }
+        ),
+        options: [],
+        order: 7,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -510,7 +588,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Confluence Cloud account email',
         }),
         options: [],
-        order: 6,
+        order: 8,
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
@@ -533,7 +611,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Confluence Cloud API token',
         }),
         options: [],
-        order: 7,
+        order: 9,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -550,7 +628,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Confluence URL label',
         }),
         options: [],
-        order: 8,
+        order: 10,
         placeholder: 'http://127.0.0.1:5000',
         required: true,
         sensitive: false,
@@ -568,7 +646,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Confluence space keys',
         }),
         options: [],
-        order: 9,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: ADVANCED_RULES_IGNORED_LABEL,
@@ -585,7 +663,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Enable indexing labels',
         }),
         options: [],
-        order: 10,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.confluence.indexLabelsTooltip', {
@@ -603,7 +681,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 11,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -623,7 +701,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 12,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -638,7 +716,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 13,
+        order: 15,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -653,7 +731,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: NUMERIC,
         label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
-        order: 14,
+        order: 16,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -678,7 +756,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 15,
+        order: 17,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -697,7 +775,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 16,
+        order: 18,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
