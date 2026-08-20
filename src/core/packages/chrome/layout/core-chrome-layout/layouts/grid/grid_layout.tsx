@@ -52,7 +52,7 @@ const layoutConfigs: {
     appearance: 'framed',
     headerHeight: 48,
     bannerHeight: 32,
-    /** App-level header controls fold into the Chrome Next / AppHeader surface. */
+    /** Start at 0; ChromeAppHeaderRenderer measures and updates this when the slot is used. */
     applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,

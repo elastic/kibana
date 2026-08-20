@@ -25,10 +25,6 @@ describe('Feedback Plugin', () => {
 
   const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
-  const enableChromeNext = () => {
-    Object.defineProperty(coreStartMock.chrome.next, 'isEnabled', { value: true });
-  };
-
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
     cloudStartMock = cloudMock.createStart();
@@ -66,7 +62,6 @@ describe('Feedback Plugin', () => {
   describe('Chrome Next', () => {
     beforeEach(() => {
       enableFeedback();
-      enableChromeNext();
     });
 
     it('registers the feedback handler only once opt-in resolves to true', () => {
@@ -93,16 +88,6 @@ describe('Feedback Plugin', () => {
       isOptedIn$.next(false);
       expect(unregister).toHaveBeenCalled();
     });
-  });
-
-  it('does not register the feedback handler when Chrome Next is disabled', () => {
-    enableFeedback();
-    Object.defineProperty(coreStartMock.chrome.next, 'isEnabled', { value: false });
-
-    startPlugin();
-    isOptedIn$.next(true);
-
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
   });
 
   describe('setContext', () => {

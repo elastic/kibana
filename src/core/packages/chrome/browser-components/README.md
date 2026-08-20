@@ -27,7 +27,6 @@ src/
 | `ChromelessHeader` | Chromeless loading bar; self-hydrates from context |
 | `HeaderTopBanner` | Top banner; self-hydrates from context |
 | `Sidebar` | Sidebar wrapper |
-| `useHasAppMenu` | Whether an app menu (legacy or new) is active |
 | `HeaderBreadcrumbsBadges` | Breadcrumb badge renderer, used by `browser-internal` state |
 
 ## Context architecture

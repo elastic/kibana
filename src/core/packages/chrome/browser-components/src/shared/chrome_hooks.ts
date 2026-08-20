@@ -263,17 +263,6 @@ export function useHasAppMenuConfig(): boolean {
 }
 
 /**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
- */
-export function useHasAppMenu(): boolean {
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasLegacyActionMenu || hasAppMenuConfig;
-}
-
-/**
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */

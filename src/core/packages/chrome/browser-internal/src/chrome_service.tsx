@@ -116,8 +116,6 @@ export class ChromeService {
       kibanaVersion: this.params.kibanaVersion,
       headerBanner$: state.headerBanner.$,
       isVisible$: state.visibility.isVisible$,
-      chromeStyle$: state.style.chromeStyle.$,
-      actionMenu$: application.currentActionMenu$,
       stop$: this.stop$,
     });
     handleEuiFullScreenChanges({

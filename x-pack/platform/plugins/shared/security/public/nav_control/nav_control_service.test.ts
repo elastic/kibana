@@ -168,6 +168,7 @@ describe('SecurityNavControlService', () => {
   it('should not register Chrome Next user menu when next.isEnabled is false', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
+    Object.defineProperty(coreStart.chrome.next, 'isEnabled', { value: false });
     const navControlService = new SecurityNavControlService();
 
     navControlService.setup({

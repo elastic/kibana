@@ -195,20 +195,18 @@ export class FeedbackPlugin implements Plugin {
     const { isOptedIn$ } = telemetry.telemetryService;
     const checkTelemetryOptIn = () => firstValueFrom(isOptedIn$);
 
-    if (core.chrome.next.isEnabled) {
-      let unregisterFeedbackHandler: (() => void) | undefined;
+    let unregisterFeedbackHandler: (() => void) | undefined;
 
-      this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
-        unregisterFeedbackHandler?.();
-        unregisterFeedbackHandler = undefined;
+    this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
+      unregisterFeedbackHandler?.();
+      unregisterFeedbackHandler = undefined;
 
-        if (optIn) {
-          unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
-            openFeedbackModal(core, deps);
-          });
-        }
-      });
-    }
+      if (optIn) {
+        unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
+          openFeedbackModal(core, deps);
+        });
+      }
+    });
 
     core.chrome.navControls.registerRight({
       order: 1001,

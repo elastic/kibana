@@ -49,7 +49,6 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   HeaderTopBanner: () => <div>Banner!</div>,
   ChromelessHeader: () => <div>Chromeless!</div>,
   Sidebar: () => <div>Sidebar!</div>,
-  useHasAppMenu: () => false,
   useHasInlineAppHeader: () => false,
   useHasChromeAppHeaderContent: () => false,
 }));

@@ -16,5 +16,5 @@ export { ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/pro
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
-export { useHasAppMenu, useHasInlineAppHeader } from './src/shared/chrome_hooks';
+export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
 export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';
