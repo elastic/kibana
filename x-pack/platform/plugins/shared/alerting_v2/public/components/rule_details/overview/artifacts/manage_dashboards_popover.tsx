@@ -98,6 +98,13 @@ export const ManageDashboardsPopover = ({
     [euiTheme.base]
   );
 
+  const popoverTitleStyles = useMemo(
+    () => css`
+      border-bottom: none;
+    `,
+    []
+  );
+
   const searchPaddingStyles = useMemo(
     () => css`
       padding: 0 ${euiTheme.size.m} ${euiTheme.size.s};
@@ -311,7 +318,7 @@ export const ManageDashboardsPopover = ({
       aria-labelledby={popoverTitleId}
       data-test-subj="ruleDashboardArtifactsManagePopover"
     >
-      <EuiPopoverTitle paddingSize="m" id={popoverTitleId}>
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId} css={popoverTitleStyles}>
         {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.managePopoverTitle', {
           defaultMessage: 'Attach related dashboards',
         })}

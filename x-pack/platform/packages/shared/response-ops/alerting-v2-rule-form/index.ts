@@ -104,13 +104,7 @@ export type {
   MissingDashboard,
   ResolveDashboardsResult,
 } from './form/field_groups/search_related_dashboards';
-export { RelatedDashboardsComboBox } from './form/field_groups/related_dashboards_combo_box';
-export type { RelatedDashboardsComboBoxProps } from './form/field_groups/related_dashboards_combo_box';
-export { MissingDashboardsCallout } from './form/field_groups/missing_dashboards_callout';
-export {
-  buildDashboardArtifactsFromSelection,
-  partitionArtifactsByDashboardType,
-} from './form/field_groups/dashboard_artifact_selection';
+export { partitionArtifactsByDashboardType } from './form/field_groups/dashboard_artifact_selection';
 export { mapArtifacts, resolveArtifactId } from './form/utils/artifact_mappers';
 export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
 export { getRunbookContent, getDashboardId } from './form';
