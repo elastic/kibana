@@ -39424,7 +39424,6 @@
     "xpack.searchInferenceEndpoints.actions.copyIDSuccess": "已复制推理终端 ID {inferenceId}",
     "xpack.searchInferenceEndpoints.actions.deleteEndpoint": "删除终端",
     "xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint": "删除终端",
-    "xpack.searchInferenceEndpoints.actions.viewEndpooint": "查看终端",
     "xpack.searchInferenceEndpoints.addConnectorButtonLabel": "添加终端",
     "xpack.searchInferenceEndpoints.addEndpointModal.cancelButton": "取消",
     "xpack.searchInferenceEndpoints.addEndpointModal.closeButton": "关闭",

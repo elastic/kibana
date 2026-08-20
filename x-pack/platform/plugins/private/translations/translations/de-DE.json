@@ -39299,7 +39299,6 @@
     "xpack.searchInferenceEndpoints.actions.copyIDSuccess": "Inference-Endpoint-ID {inferenceId} kopiert",
     "xpack.searchInferenceEndpoints.actions.deleteEndpoint": "Endpoint löschen",
     "xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint": "Endpoint löschen",
-    "xpack.searchInferenceEndpoints.actions.viewEndpooint": "Endpoint anzeigen",
     "xpack.searchInferenceEndpoints.addConnectorButtonLabel": "Endpoint hinzufügen",
     "xpack.searchInferenceEndpoints.addEndpointModal.cancelButton": "Abbrechen",
     "xpack.searchInferenceEndpoints.addEndpointModal.closeButton": "Schließen",

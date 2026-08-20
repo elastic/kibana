@@ -39200,7 +39200,6 @@
     "xpack.searchInferenceEndpoints.actions.copyIDSuccess": "Identifiant du point de terminaison d'inférence {inferenceId} copié",
     "xpack.searchInferenceEndpoints.actions.deleteEndpoint": "Supprimer le point de terminaison",
     "xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint": "Supprimer le point de terminaison",
-    "xpack.searchInferenceEndpoints.actions.viewEndpooint": "Voir le point de terminaison",
     "xpack.searchInferenceEndpoints.addConnectorButtonLabel": "Ajouter un point de terminaison",
     "xpack.searchInferenceEndpoints.addEndpointModal.cancelButton": "Annuler",
     "xpack.searchInferenceEndpoints.addEndpointModal.closeButton": "Fermer",
