@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common/domain/entity_index';
+import { getLatestEntitiesAlias } from '@kbn/entity-store/common/domain/entity_index';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import {
   buildRawIdentifiersEsqlQuery,
@@ -29,7 +29,7 @@ export function buildAdministersConfigs(
       name: 'Active Directory Entity Analytics',
       // Step 1 actor discovery reads the entity index (actors are entity docs,
       // users or hosts), not raw logs.
-      indexPattern: getLatestEntityIndexPattern,
+      indexPattern: getLatestEntitiesAlias,
       targetEntityType: 'host',
       relationshipKey: RELATIONSHIP_KEY,
       // Discover actors by entity.id (present on every entity). Without this the

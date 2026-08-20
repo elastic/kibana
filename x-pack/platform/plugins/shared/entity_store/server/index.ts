@@ -45,8 +45,17 @@ export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
-export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';
+export {
+  getLatestEntitiesIndexName,
+  getLatestEntitiesAlias,
+  getEntitiesAlias,
+  ENTITY_LATEST,
+} from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
+export {
+  resolveLatestEntitiesIndexName,
+  resolveHistorySnapshotIndexPatterns,
+} from './domain/asset_manager/resolve_entity_store_indices';
 export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_builder_commons';
 export { getFieldValue } from '../common/domain/euid/commons';
 export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
