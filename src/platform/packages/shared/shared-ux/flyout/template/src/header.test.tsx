@@ -9,11 +9,16 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
-const renderTemplate = (ui: React.ReactElement) => render(ui);
+const WithErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <KibanaErrorBoundaryProvider>{children}</KibanaErrorBoundaryProvider>
+);
+
+const renderTemplate = (ui: React.ReactElement) => render(ui, { wrapper: WithErrorBoundary });
 
 describe('FlyoutTemplate header title icon and description', () => {
   it('renders the header title as an H3', () => {
