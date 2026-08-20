@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -164,11 +165,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+      getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -191,6 +192,7 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
@@ -220,8 +222,15 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
@@ -231,7 +240,9 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -265,6 +276,7 @@ export class AgentBuilderPlugin
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -289,10 +301,8 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-          };
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
     };

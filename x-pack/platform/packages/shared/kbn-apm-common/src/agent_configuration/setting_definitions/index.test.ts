@@ -223,6 +223,22 @@ describe('filterByAgent', () => {
       );
     });
 
+    it('opentelemetry/java/opentelemetry-javaagent', () => {
+      expect(getSettingKeysForAgent('opentelemetry/java/opentelemetry-javaagent')).toEqual(
+        expect.arrayContaining([
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'infer_spans',
+          'logging_level',
+          'opamp_polling_interval',
+          'sampling_rate',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
+        ])
+      );
+    });
+
     it('opentelemetry/nodejs/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
         expect.arrayContaining([
@@ -287,9 +303,8 @@ describe('settingDefinitions', () => {
             'includeAgents',
             'label',
             'validation',
-            'zodValidation',
           ]),
-          validationName: def.validation.name,
+          validationType: def.validation.def.type,
         };
       })
     ).toMatchSnapshot();

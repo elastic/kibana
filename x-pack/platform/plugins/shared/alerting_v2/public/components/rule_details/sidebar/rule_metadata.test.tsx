@@ -27,11 +27,11 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule' },
-  createdBy: ALICE_UID,
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: BOB_UID,
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  metadata: { name: 'Test Signal Rule', version: 1 },
+  created_by: ALICE_UID,
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: BOB_UID,
+  updated_at: '2026-03-04T12:00:00.000Z',
   time_field: '',
   schedule: {
     every: '',
@@ -101,7 +101,7 @@ describe('RuleMetadata', () => {
   });
 
   it('renders placeholder when user fields are missing', () => {
-    renderMetadata({ ...baseRule, createdBy: null, updatedBy: null });
+    renderMetadata({ ...baseRule, created_by: null, updated_by: null });
     const placeholders = screen.getAllByText('-');
     expect(placeholders).toHaveLength(2);
   });

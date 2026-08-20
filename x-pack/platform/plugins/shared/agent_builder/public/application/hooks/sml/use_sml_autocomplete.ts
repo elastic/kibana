@@ -10,10 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -37,11 +34,8 @@ export interface UseSmlAutocompleteOptions {
 }
 
 /**
- * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which returns
- * per-row `matched_discovery_labels` (with `kind` for UI badging, and
- * `highlighted` when ES is able to produce a snippet).
- *
- * For full retrieval (LLM tool, content search), see `useSmlSearch`.
+ * Typeahead hook for the @ menu, backed by POST `/sml/_autocomplete`. Debounces
+ * keystrokes and keeps the previous results while the next request is in flight.
  */
 export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOptions) => {
   const { services } = useKibana();
@@ -63,6 +57,8 @@ export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOp
       }),
     staleTime: SML_AUTOCOMPLETE_STALE_TIME_MS,
     cacheTime: SML_AUTOCOMPLETE_CACHE_TIME_MS,
+    // Avoids `results` flashing empty on every debounce tick mid-keystroke.
+    keepPreviousData: true,
   });
 
   useEffect(() => {

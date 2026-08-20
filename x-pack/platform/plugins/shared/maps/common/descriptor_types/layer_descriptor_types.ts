@@ -53,7 +53,7 @@ export type TileError = {
   error?: ErrorCause;
 };
 
-interface RuntimeLayerState {
+export interface RuntimeLayerState {
   __dataRequests?: DataRequestDescriptor[];
   __isPreviewLayer?: boolean;
   __trackedLayerDescriptor?:
@@ -69,6 +69,7 @@ interface RuntimeLayerState {
 
 export type VectorLayerDescriptor = Omit<StoredVectorLayer, 'joins'> & {
   joins?: JoinDescriptor[];
+  [key: string]: unknown;
 } & RuntimeLayerState;
 
 export type HeatmapLayerDescriptor = StoredHeatmapLayer & RuntimeLayerState;

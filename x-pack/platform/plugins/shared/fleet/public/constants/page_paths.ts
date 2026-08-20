@@ -56,7 +56,8 @@ export type DynamicPage =
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
-  | 'settings_edit_fleet_proxy';
+  | 'settings_edit_fleet_proxy'
+  | 'integration_collection';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -97,9 +98,6 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  // TODO: Move this to the integrations app
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -125,6 +123,8 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
+  add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
+  integration_collection: '/collection/:groupId',
 };
 
 export const pagePathGetters: {
@@ -266,9 +266,9 @@ export const pagePathGetters: {
       ...(prerelease ? { prerelease } : {}),
     });
     return [
-      FLEET_BASE_PATH,
+      INTEGRATIONS_BASE_PATH,
       // prettier-ignore
-      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+      `/detail/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [
@@ -343,4 +343,5 @@ export const pagePathGetters: {
     FLEET_ROUTING_PATHS.settings_create_download_sources,
   ],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
+  integration_collection: ({ groupId }) => [INTEGRATIONS_BASE_PATH, `/collection/${groupId}`],
 };

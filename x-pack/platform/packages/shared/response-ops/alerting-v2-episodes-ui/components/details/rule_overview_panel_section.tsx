@@ -50,12 +50,11 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
       />
     );
   }
-
   if (isEpisodeError || isRuleError(ruleState)) {
     return (
       <EuiEmptyPrompt
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"
-        iconType="alert"
+        iconType="warning"
         color="danger"
         titleSize="xs"
         title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE}</h3>}

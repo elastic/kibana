@@ -10,6 +10,8 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
+import type { RegistryConnectionErrorType } from '../../common/types';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -49,10 +51,23 @@ export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta>
 }
 
 export class RegistryError extends FleetError {}
-export class RegistryConnectionError extends RegistryError {}
+export class RegistryConnectionError extends RegistryError {
+  constructor(
+    message?: string,
+    attributes?: { type: RegistryConnectionErrorType; reason?: string }
+  ) {
+    super(message);
+    if (attributes) {
+      this.attributes = attributes;
+    }
+  }
+}
 export class RegistryResponseError extends RegistryError {
   constructor(message?: string, public readonly status?: number) {
     super(message);
+    if (status) {
+      this.attributes = { type: 'http', reason: String(status) };
+    }
   }
 }
 
@@ -72,6 +87,24 @@ export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
+export class PackageAssetsVerificationError extends FleetError<
+  Array<{ id: string; type: string }>
+> {
+  constructor(missingAssets: Array<{ id: string; type: string }>) {
+    super(
+      `Package installation verification failed: ${
+        missingAssets.length
+      } asset(s) are missing from Elasticsearch: ${missingAssets
+        .map((a) => `${a.type}/${a.id}`)
+        .join(', ')}`,
+      missingAssets
+    );
+    this.attributes = {
+      type: 'package_assets_verification_failed',
+      missing_assets: missingAssets,
+    };
+  }
+}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
@@ -148,6 +181,37 @@ export class CloudConnectorDeleteError extends FleetError {
 export class CloudConnectorUpdateError extends FleetError {
   constructor(message: string) {
     super(`Error updating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class IacProvisionerConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating IaC Provisioner configuration in Fleet, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner rejected the render request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.blueprint_not_found`) so the
+ * route can decide whether the caller may fall back to the static template.
+ */
+export class IacProvisionerRenderError extends FleetError {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly errorCodes: string[] = []
+  ) {
+    super(`Error rendering IaC template, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner could not be reached or returned a 5xx — a retryable
+ * availability problem rather than a contract rejection.
+ */
+export class IacProvisionerUnavailableError extends FleetError {
+  constructor(message: string, public readonly statusCode?: number) {
+    super(`IaC Provisioner unavailable, ${message}`);
   }
 }
 

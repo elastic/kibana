@@ -94,18 +94,18 @@ export const NO_CUSTOM_FIELD_SET = i18n.translate('xpack.cases.caseView.noCustom
   defaultMessage: 'No value is added',
 });
 
-export const DELETE_FIELD_TITLE = (fieldName: string) =>
+export const DELETE_FIELD_TITLE = (name: string) =>
   i18n.translate('xpack.cases.customFields.deleteField', {
-    values: { fieldName },
-    defaultMessage: 'Delete field "{fieldName}"?',
+    values: { name },
+    defaultMessage: 'Delete "{name}"?',
   });
 
-export const DELETE_FIELD_DESCRIPTION = i18n.translate(
-  'xpack.cases.customFields.deleteFieldDescription',
-  {
-    defaultMessage: 'The field will be removed from all cases and data will be lost.',
-  }
-);
+export const DELETE_FIELD_DESCRIPTION = (name: string) =>
+  i18n.translate('xpack.cases.customFields.deleteFieldDescription', {
+    values: { name },
+    defaultMessage:
+      '"{name}" will no longer appear in new cases. Existing cases keep their current values.',
+  });
 
 export const DELETE = i18n.translate('xpack.cases.customFields.fieldOptions.Delete', {
   defaultMessage: 'Delete',

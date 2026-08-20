@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiBreakpointSize, UseEuiTheme } from '@elastic/eui';
 
 export type ScrollContainer = HTMLElement;
 
@@ -53,3 +53,9 @@ export declare function getHighContrastSeparator(
   euiThemeContext: UseEuiTheme,
   options?: HighContrastSeparatorOptions
 ): string;
+
+export declare function useCurrentChromeApplicationBreakpoint(): EuiBreakpointSize | undefined;
+export declare function useIsWithinChromeApplicationBreakpoints(
+  breakpoints: EuiBreakpointSize[],
+  isResponsive?: boolean
+): boolean;

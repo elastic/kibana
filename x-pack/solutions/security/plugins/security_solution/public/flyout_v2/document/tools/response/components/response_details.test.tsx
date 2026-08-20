@@ -72,6 +72,13 @@ const defaultContextValue = {
   hit: buildDataTableRecord(rawEventData as EsHitRecord),
 };
 
+const previewContextValue = {
+  hit: buildDataTableRecord({
+    ...rawEventData,
+    _index: '.preview.alerts-security.alerts-default',
+  } as EsHitRecord),
+};
+
 const contextWithResponseActions = {
   ...defaultContextValue,
   hit: buildDataTableRecord({
@@ -140,7 +147,7 @@ describe('<ResponseDetails />', () => {
   });
 
   it('should render preview message if flyout is in preview', () => {
-    const wrapper = renderResponseDetails({ ...defaultContextValue, isRulePreview: true });
+    const wrapper = renderResponseDetails(previewContextValue);
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });

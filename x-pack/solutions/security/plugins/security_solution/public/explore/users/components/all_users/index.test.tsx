@@ -14,7 +14,7 @@ import { usersModel } from '../../store';
 import { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
 import { fireEvent, render } from '@testing-library/react';
-import { UserPanelKey } from '../../../../flyout/entity_details/shared/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
@@ -22,16 +22,29 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
+const mockOpenUserFlyout = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openFlyout: mockOpenFlyout })),
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => true,
+}));
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openUserFlyout: mockOpenUserFlyout,
+    openHostFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
 }));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
 
   beforeEach(() => {
+    mockOpenUserFlyout.mockClear();
     mockOpenFlyout.mockClear();
   });
 
@@ -190,17 +203,12 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: UserPanelKey,
-          params: {
-            userName,
-            entityId,
-            contextID: 'allUsers',
-            scopeId: 'allUsers',
-            isPreviewMode: false,
-          },
-        },
+      expect(mockOpenUserFlyout).toHaveBeenCalledWith({
+        userName,
+        entityId,
+        contextID: 'allUsers',
+        scopeId: 'allUsers',
+        origin: FLYOUT_ORIGIN.USERS_TABLE,
       });
     });
 
@@ -233,6 +241,7 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
+      expect(mockOpenUserFlyout).not.toHaveBeenCalled();
       expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });

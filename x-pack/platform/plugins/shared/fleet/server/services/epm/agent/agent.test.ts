@@ -276,6 +276,29 @@ text_var: {{escape_string text_var}}
       });
     });
 
+    it('should preserve double quotes inside escape_string values without corrupting surrounding YAML', () => {
+      // Regression: https://github.com/elastic/kibana/issues/279388
+      // escape_string wraps single-line values in YAML single quotes: 'user"name'
+      // The newline-collapse regex was incorrectly treating the `"` inside the
+      // single-quoted scalar as a double-quote delimiter, matching across lines
+      // and collapsing subsequent YAML keys onto one line.
+      const template = `
+username: {{escape_string username}}
+password: {{escape_string password}}
+interval: 24h
+`;
+      const vars = {
+        username: { type: 'text', value: 'user"name' },
+        password: { type: 'password', value: 'p@ss"word' },
+      };
+      const output = compileTemplate(vars, getMockedMetaVariable(), template);
+      expect(output).toEqual({
+        username: 'user"name',
+        password: 'p@ss"word',
+        interval: '24h',
+      });
+    });
+
     it('should respect new lines and literal escapes', () => {
       const vars = {
         text_var: {
@@ -648,6 +671,16 @@ type: {{_meta.stream.data_stream.type}}
       dataset: 'dataset.name',
       type: 'logs',
     });
+  });
+
+  it('should fold single newlines to a space in double-quoted YAML scalars', () => {
+    // Regression: https://github.com/elastic/sdh-beats/issues/7456
+    // Multi-line double-quoted SQL in stream templates (e.g. Oracle tablespace) had
+    // tokens concatenated because a single \n was deleted instead of folded to a space.
+    const template = `sql: "SUM(bytes) AS TOTAL_BYTES\nFROM details"\n`;
+
+    const output = compileTemplate({}, getMockedMetaVariable(), template);
+    expect(output).toEqual({ sql: 'SUM(bytes) AS TOTAL_BYTES FROM details' });
   });
 });
 

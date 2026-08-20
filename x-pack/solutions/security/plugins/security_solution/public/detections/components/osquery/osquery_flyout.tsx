@@ -65,7 +65,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout size="m" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
+      <EuiFlyout size="m" session="never" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2 id={osqueryFlyoutTitleId}>{ACTION_OSQUERY}</h2>

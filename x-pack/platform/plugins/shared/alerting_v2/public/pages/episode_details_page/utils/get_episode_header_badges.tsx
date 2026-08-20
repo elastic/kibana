@@ -24,14 +24,17 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
+import { FlappingBadge } from '@kbn/alerting-v2-episodes-ui/components/flapping/flapping_badge';
+import { FLAPPING_BADGE_LABEL } from '@kbn/alerting-v2-episodes-ui/components/flapping/translations';
+import { isEpisodeSnoozed } from '@kbn/alerting-v2-episodes-ui/utils/is_episode_snoozed';
 import * as i18n from '../translations';
 
 export interface EpisodeHeaderBadgesArgs {
   status: AlertEpisodeStatus | undefined;
   severity: string | undefined | null;
-  tags: string[];
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
 }
 
 type AppHeaderBadgeColor = NonNullable<AppHeaderBadge['color']>;
@@ -122,12 +125,16 @@ const renderFilledBadge =
       </EuiBadge>
     );
 
+const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
+
+// The app header caps badges at three, so status/severity/action badges
+// would otherwise be crowded out by a variable number of tag badges.
 export const getEpisodeHeaderBadges = ({
   status,
   severity,
-  tags,
   episodeAction,
   groupAction,
+  isFlapping = false,
 }: EpisodeHeaderBadgesArgs): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [];
   const effectiveStatus = getEffectiveStatus(status, groupAction);
@@ -137,6 +144,17 @@ export const getEpisodeHeaderBadges = ({
       label: getStatusBadgeLabel(effectiveStatus),
       color: getStatusBadgeColor(effectiveStatus),
       'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+    });
+  }
+
+  if (isFlapping) {
+    badges.push({
+      label: FLAPPING_BADGE_LABEL,
+      color: 'hollow',
+      'data-test-subj': 'alertingV2EpisodeDetailsHeaderFlappingBadge',
+      // Shared FlappingBadge owns the popover; render it via custom badge so AppHeader
+      // does not wrap it in a plain EuiBadge.
+      renderCustomBadge: renderFlappingBadge,
     });
   }
 
@@ -154,7 +172,7 @@ export const getEpisodeHeaderBadges = ({
     });
   }
 
-  if (groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
+  if (groupAction && isEpisodeSnoozed(groupAction.lastSnoozeAction, groupAction.snoozeExpiry)) {
     const snoozeTooltip = getSnoozeTooltip(groupAction);
     badges.push({
       label: i18n.SNOOZED_BADGE_LABEL,
@@ -181,14 +199,6 @@ export const getEpisodeHeaderBadges = ({
         severityColor,
         `alertingV2EpisodeSeverityBadge-${normalized}`
       ),
-    });
-  }
-
-  for (const tag of tags) {
-    badges.push({
-      label: tag,
-      color: 'hollow',
-      'data-test-subj': `alertingV2EpisodeDetailsHeaderTagBadge-${tag}`,
     });
   }
 

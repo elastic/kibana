@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RULES_BUCKET_SIZE,
-  buildChangePointHistogramBounds,
+  METRIC_SERIES_RUNTIME_MAPPINGS,
+  buildChangePointHistogramWindow,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
-import { ALERTS_READER_V1, ALERTS_READER_V2 } from './alerts_reader';
-import { getRuleDetectionSchedule } from '../rules/schedule';
+import { ALERTS_READER_V2 } from './alerts_reader';
 
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
-const LOOKBACK = 'now-30m';
-const BUCKET_INTERVAL = '30s';
-const WINDOW_INTERVAL = '5m';
+const LOOKBACK = 'now-40m';
+const BUCKET_INTERVAL = '1m';
 
 const makeQueryLink = (
-  overrides: { rule_id?: string; stream_name?: string; title?: string } = {}
+  overrides: {
+    rule_id?: string;
+    stream_name?: string;
+    title?: string;
+    severity_score?: number;
+  } = {}
 ): QueryLink => ({
   query: {
     id: 'q1',
@@ -30,7 +34,7 @@ const makeQueryLink = (
     title: overrides.title ?? 'Test rule',
     description: 'desc',
     esql: { query: 'FROM logs | WHERE body.text:"error"' },
-    severity_score: 60,
+    severity_score: overrides.severity_score ?? 60,
   },
   stream_name: overrides.stream_name ?? 'logs.test',
   rule_backed: true,
@@ -39,274 +43,70 @@ const makeQueryLink = (
 
 function createEsClient() {
   const search = jest.fn();
-  const count = jest.fn();
   return {
     search,
-    count,
-    client: { search, count } as unknown as ElasticsearchClient,
+    client: { search } as unknown as TracedElasticsearchClient,
   };
 }
-
-describe('SignificantEventsAlertsReaderV1', () => {
-  const reader = ALERTS_READER_V1;
-
-  it('builds the occurrences ES|QL request scoped by rule uuid', () => {
-    const request = reader.buildOccurrencesEsqlRequest({
-      ruleIds: [RULE_UUID],
-      value: 30,
-      esqlUnit: 'minutes',
-      limit: 100,
-      spaceId: SPACE_ID,
-    });
-
-    expect(request.query).toContain(`kibana.alert.rule.uuid IN ("${RULE_UUID}")`);
-    expect(request.query).not.toContain('space_id');
-  });
-
-  it('counts alerts with a document count query', async () => {
-    const { client, count } = createEsClient();
-    count.mockResolvedValue({ count: 17 });
-
-    const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
-
-    expect(result).toBe(17);
-    expect(count).toHaveBeenCalledWith({
-      index: '.alerts-streams.alerts-default',
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [SPACE_ID, '*'] } },
-            { range: { '@timestamp': { gte: LOOKBACK } } },
-          ],
-        },
-      },
-    });
-  });
-
-  it('scopes countAlerts to a single rule when ruleUuid is provided', async () => {
-    const { client, count } = createEsClient();
-    count.mockResolvedValue({ count: 3 });
-
-    await reader.countAlerts(client, {
-      lookback: LOOKBACK,
-      spaceId: SPACE_ID,
-      ruleUuid: RULE_UUID,
-    });
-
-    expect(count).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: expect.arrayContaining([{ term: { 'kibana.alert.rule.uuid': RULE_UUID } }]),
-          },
-        },
-      })
-    );
-  });
-
-  it('enriches change-point buckets from ES metadata when present', async () => {
-    const { client, search } = createEsClient();
-    search.mockResolvedValue({
-      took: 42,
-      aggregations: {
-        by_rule: {
-          buckets: [
-            {
-              key: RULE_UUID,
-              doc_count: 100,
-              rule_name: {
-                top: [{ metrics: { 'kibana.alert.rule.name': 'From Elasticsearch' } }],
-              },
-              stream: { buckets: [{ key: 'logs.from-es' }] },
-              change_points: { type: { mean_shift: { p_value: 0.01 } } },
-              last_5m: { doc_count: 5 },
-              last_floor_window: { doc_count: 8 },
-            },
-          ],
-        },
-      },
-    });
-
-    const result = await reader.runChangePointScan(
-      client,
-      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
-      [makeQueryLink()]
-    );
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: '.alerts-streams.alerts-default',
-        aggs: {
-          by_rule: {
-            terms: { field: 'kibana.alert.rule.uuid', size: RULES_BUCKET_SIZE },
-            aggs: {
-              rule_name: {
-                top_metrics: {
-                  metrics: [{ field: 'kibana.alert.rule.name' }],
-                  sort: { '@timestamp': 'desc' },
-                  size: 1,
-                },
-              },
-              stream: {
-                terms: { field: 'kibana.alert.rule.tags', exclude: 'streams', size: 1 },
-              },
-              ...buildChangePointTimeSeriesAggs(BUCKET_INTERVAL, {
-                useDistinctSignalCount: false,
-                includeFloorWindow: true,
-                extendedBounds: buildChangePointHistogramBounds(LOOKBACK, BUCKET_INTERVAL),
-              }),
-            },
-          },
-        },
-      })
-    );
-    expect(result.took).toBe(42);
-    expect(result.by_rule.buckets).toEqual([
-      {
-        key: RULE_UUID,
-        doc_count: 100,
-        rule_name: {
-          top: [{ metrics: { 'kibana.alert.rule.name': 'From Elasticsearch' } }],
-        },
-        stream: { buckets: [{ key: 'logs.from-es' }] },
-        change_points: { type: { mean_shift: { p_value: 0.01 } } },
-        last_5m: { doc_count: 5 },
-        last_floor_window: { doc_count: 8 },
-        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
-      },
-    ]);
-  });
-
-  it('falls back to query link metadata when change-point buckets lack rule metadata', async () => {
-    const { client, search } = createEsClient();
-    search.mockResolvedValue({
-      aggregations: {
-        by_rule: {
-          buckets: [{ key: RULE_UUID, doc_count: 12 }],
-        },
-      },
-    });
-
-    const result = await reader.runChangePointScan(
-      client,
-      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
-      [makeQueryLink({ title: 'Linked rule title' })]
-    );
-
-    expect(result.by_rule.buckets[0]).toEqual(
-      expect.objectContaining({
-        doc_count: 12,
-        rule_name: {
-          top: [{ metrics: { 'kibana.alert.rule.name': 'Linked rule title' } }],
-        },
-        stream: { buckets: [{ key: 'logs.test' }] },
-        change_points: { type: {} },
-        last_5m: { doc_count: 0 },
-        last_floor_window: { doc_count: 0 },
-        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
-      })
-    );
-  });
-
-  it('returns rule activity aggregations without normalizing bucket counts', async () => {
-    const { client, search } = createEsClient();
-    const aggregations = {
-      activity_windows: {
-        buckets: [{ key: 1_700_000_000_000, doc_count: 9 }],
-      },
-      peak: { value: 9 },
-    };
-    search.mockResolvedValue({ aggregations });
-
-    const result = await reader.runRuleActivity(client, {
-      ruleUuid: RULE_UUID,
-      lookback: LOOKBACK,
-      windowInterval: WINDOW_INTERVAL,
-      spaceId: SPACE_ID,
-    });
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggs: {
-          activity_windows: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: WINDOW_INTERVAL,
-              min_doc_count: 0,
-            },
-          },
-          peak: {
-            max_bucket: { buckets_path: 'activity_windows._count' },
-          },
-        },
-      })
-    );
-    expect(result.aggregations).toEqual(aggregations);
-  });
-
-  it('returns alert window aggregations as doc_count filters', async () => {
-    const { client, search } = createEsClient();
-    const aggregations = {
-      current_window: { doc_count: 4 },
-      reference_window: { doc_count: 2 },
-    };
-    search.mockResolvedValue({ aggregations });
-
-    const result = await reader.runRuleAlertWindows(client, {
-      ruleUuid: RULE_UUID,
-      currentLookback: 'now-5m',
-      referenceLookbackGte: 'now-10m',
-      referenceLookbackLt: 'now-5m',
-      spaceId: SPACE_ID,
-    });
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggs: {
-          current_window: {
-            filter: { range: { '@timestamp': { gte: 'now-5m' } } },
-          },
-          reference_window: {
-            filter: {
-              range: { '@timestamp': { gte: 'now-10m', lt: 'now-5m' } },
-            },
-          },
-        },
-      })
-    );
-    expect(result.aggregations).toEqual(aggregations);
-  });
-});
 
 describe('SignificantEventsAlertsReaderV2', () => {
   const reader = ALERTS_READER_V2;
 
-  it('scopes the occurrences ES|QL request by type == "signal" and space_id', () => {
+  it('scopes the occurrences ES|QL request and aggregates MAX then SUM via FIELD_EXTRACT', () => {
     const request = reader.buildOccurrencesEsqlRequest({
       ruleIds: [RULE_UUID],
-      value: 30,
+      value: 5,
       esqlUnit: 'minutes',
       limit: 100,
       spaceId: SPACE_ID,
+      rangeFromIso: '2026-01-01T00:00:00.000Z',
+      rangeToIso: '2026-01-01T01:00:00.000Z',
     });
 
     expect(request.query).toContain('type == "signal"');
     expect(request.query).toContain(`space_id == "${SPACE_ID}"`);
     expect(request.query).toContain(`rule.id IN ("${RULE_UUID}")`);
+    expect(request.query).toContain(
+      'EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))'
+    );
+    expect(request.query).toContain(
+      'EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))'
+    );
+    expect(request.query).toContain(
+      'bucket >= TO_DATETIME("2026-01-01T00:00:00.000Z") AND bucket <= TO_DATETIME("2026-01-01T01:00:00.000Z")'
+    );
+    expect(request.query).toContain('MAX(metric_value)');
+    expect(request.query).toContain('SUM(minute_value)');
+    expect(request.query).not.toContain('data.bucket');
+    expect(request.query).not.toContain('COUNT_DISTINCT');
+    expect(request.query).not.toContain('group_hash');
   });
 
-  it('counts alerts with a distinct group_hash cardinality aggregation', async () => {
+  it('rejects occurrences requests that omit the source-bucket range', () => {
+    expect(() =>
+      reader.buildOccurrencesEsqlRequest({
+        ruleIds: [RULE_UUID],
+        value: 5,
+        esqlUnit: 'minutes',
+        limit: 100,
+        spaceId: SPACE_ID,
+      } as Parameters<typeof reader.buildOccurrencesEsqlRequest>[0])
+    ).toThrow(/rangeFromIso and rangeToIso/);
+  });
+
+  it('counts alerts with terminate_after for the idle gate', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ aggregations: { signal_count: { value: 21 } } });
+    search.mockResolvedValue({ hits: { total: { value: 1 } } });
 
     const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
 
-    expect(result).toBe(21);
-    expect(search).toHaveBeenCalledWith({
+    expect(result).toBe(1);
+    expect(search).toHaveBeenCalledWith('significant_events_alerts_v2_count_alerts', {
       index: '.rule-events',
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: 1,
+      terminate_after: 1,
       query: {
         bool: {
           filter: [
@@ -316,17 +116,12 @@ describe('SignificantEventsAlertsReaderV2', () => {
           ],
         },
       },
-      aggs: {
-        signal_count: {
-          cardinality: { field: 'group_hash' },
-        },
-      },
     });
   });
 
   it('scopes countAlerts to a single rule when ruleUuid is provided', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ aggregations: { signal_count: { value: 0 } } });
+    search.mockResolvedValue({ hits: { total: 0 } });
 
     await reader.countAlerts(client, {
       lookback: LOOKBACK,
@@ -335,6 +130,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_count_alerts',
       expect.objectContaining({
         query: {
           bool: {
@@ -345,7 +141,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     );
   });
 
-  it('normalizes change-point buckets to distinct signal counts and query link metadata', async () => {
+  it('normalizes change-point buckets with query link metadata', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({
       took: 17,
@@ -355,10 +151,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
             {
               key: RULE_UUID,
               doc_count: 100,
-              signal_count: { value: 42 },
               change_points: { type: { mean_shift: { p_value: 0.02 } } },
-              last_5m: { signal_count: { value: 5 } },
-              last_floor_window: { doc_count: 10, signal_count: { value: 8 } },
             },
           ],
         },
@@ -371,20 +164,33 @@ describe('SignificantEventsAlertsReaderV2', () => {
       [makeQueryLink({ title: 'Linked rule title' })]
     );
 
+    const { hardBounds, seriesMax, writeTimeLookback } = buildChangePointHistogramWindow(
+      LOOKBACK,
+      BUCKET_INTERVAL
+    );
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_change_point_scan',
       expect.objectContaining({
         index: '.rule-events',
+        track_total_hits: false,
+        runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'signal' } },
+              { term: { space_id: SPACE_ID } },
+              { range: { '@timestamp': { gte: writeTimeLookback } } },
+            ],
+          },
+        },
         aggs: {
           by_rule: {
             terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
             aggs: {
-              signal_count: {
-                cardinality: { field: 'group_hash' },
-              },
-              ...buildChangePointTimeSeriesAggs(BUCKET_INTERVAL, {
-                useDistinctSignalCount: true,
-                includeFloorWindow: true,
-                extendedBounds: buildChangePointHistogramBounds(LOOKBACK, BUCKET_INTERVAL),
+              ...buildChangePointTimeSeriesAggs({
+                bucketInterval: BUCKET_INTERVAL,
+                hardBounds,
+                seriesMax,
               }),
             },
           },
@@ -395,158 +201,50 @@ describe('SignificantEventsAlertsReaderV2', () => {
     expect(result.by_rule.buckets).toEqual([
       {
         key: RULE_UUID,
-        doc_count: 42,
+        severity_score: 60,
+        doc_count: 100,
         rule_name: {
           top: [{ metrics: { 'kibana.alert.rule.name': 'Linked rule title' } }],
         },
         stream: { buckets: [{ key: 'logs.test' }] },
         change_points: { type: { mean_shift: { p_value: 0.02 } } },
-        last_5m: { doc_count: 5 },
-        last_floor_window: { doc_count: 8 },
-        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       },
     ]);
   });
 
-  it('filters change-point scans to the provided rule IDs and recent activity window', async () => {
+  // A rule without history for the whole window gets a series under
+  // change_point's floor. `indeterminable` must not reach the workflow, which
+  // reads the single key of `change_points.type` and would write it as a
+  // transition with a bogus p_value of 0.
+  it('drops an indeterminable verdict to the empty type', async () => {
     const { client, search } = createEsClient();
-    search.mockResolvedValue({ aggregations: { by_rule: { buckets: [] } } });
-
-    await reader.runChangePointScan(
-      client,
-      {
-        lookback: 'now-110m',
-        bucketInterval: '5m',
-        recentActivityMinutes: 10,
-        ruleIds: [RULE_UUID],
-        spaceId: SPACE_ID,
+    search.mockResolvedValue({
+      aggregations: {
+        by_rule: {
+          buckets: [
+            {
+              key: RULE_UUID,
+              doc_count: 66,
+              change_points: {
+                type: {
+                  indeterminable: {
+                    reason:
+                      'not enough buckets to calculate change_point. Requires at least [22]; found [11]',
+                  },
+                },
+              },
+            },
+          ],
+        },
       },
+    });
+
+    const result = await reader.runChangePointScan(
+      client,
+      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
       [makeQueryLink()]
     );
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: [
-              { term: { type: 'signal' } },
-              { term: { space_id: SPACE_ID } },
-              { range: { '@timestamp': { gte: 'now-110m' } } },
-              { terms: { 'rule.id': [RULE_UUID] } },
-            ],
-          },
-        },
-        aggs: expect.objectContaining({
-          by_rule: expect.objectContaining({
-            aggs: expect.objectContaining({
-              last_5m: {
-                filter: { range: { '@timestamp': { gte: 'now-10m' } } },
-                aggs: { signal_count: { cardinality: { field: 'group_hash' } } },
-              },
-            }),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('normalizes rule activity windows to doc_count from signal_count', async () => {
-    const { client, search } = createEsClient();
-    search.mockResolvedValue({
-      aggregations: {
-        activity_windows: {
-          buckets: [
-            { key: 1_700_000_000_000, doc_count: 100, signal_count: { value: 9 } },
-            { key: 1_700_000_300_000, doc_count: 50, signal_count: { value: 3 } },
-          ],
-        },
-        peak: { value: 9 },
-      },
-    });
-
-    const result = await reader.runRuleActivity(client, {
-      ruleUuid: RULE_UUID,
-      lookback: LOOKBACK,
-      windowInterval: WINDOW_INTERVAL,
-      spaceId: SPACE_ID,
-    });
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggs: {
-          activity_windows: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: WINDOW_INTERVAL,
-              min_doc_count: 0,
-            },
-            aggs: {
-              signal_count: {
-                cardinality: { field: 'group_hash' },
-              },
-            },
-          },
-          peak: {
-            max_bucket: { buckets_path: 'activity_windows>signal_count' },
-          },
-        },
-      })
-    );
-    expect(result.aggregations).toEqual({
-      activity_windows: {
-        buckets: [
-          { key: 1_700_000_000_000, doc_count: 9 },
-          { key: 1_700_000_300_000, doc_count: 3 },
-        ],
-      },
-      peak: { value: 9 },
-    });
-  });
-
-  it('normalizes alert window aggregations to doc_count from signal_count', async () => {
-    const { client, search } = createEsClient();
-    search.mockResolvedValue({
-      aggregations: {
-        current_window: { doc_count: 100, signal_count: { value: 4 } },
-        reference_window: { doc_count: 80, signal_count: { value: 2 } },
-      },
-    });
-
-    const result = await reader.runRuleAlertWindows(client, {
-      ruleUuid: RULE_UUID,
-      currentLookback: 'now-5m',
-      referenceLookbackGte: 'now-10m',
-      referenceLookbackLt: 'now-5m',
-      spaceId: SPACE_ID,
-    });
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggs: {
-          current_window: {
-            filter: { range: { '@timestamp': { gte: 'now-5m' } } },
-            aggs: {
-              signal_count: {
-                cardinality: { field: 'group_hash' },
-              },
-            },
-          },
-          reference_window: {
-            filter: {
-              range: { '@timestamp': { gte: 'now-10m', lt: 'now-5m' } },
-            },
-            aggs: {
-              signal_count: {
-                cardinality: { field: 'group_hash' },
-              },
-            },
-          },
-        },
-      })
-    );
-    expect(result.aggregations).toEqual({
-      current_window: { doc_count: 4 },
-      reference_window: { doc_count: 2 },
-    });
+    expect(result.by_rule.buckets[0].change_points).toEqual({ type: {} });
   });
 });

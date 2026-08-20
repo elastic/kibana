@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DashboardMigrationResultPanel } from './migration_result_panel';
@@ -81,11 +80,14 @@ describe('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
-    // Freeze the relative-time reference so `.fromNow()` output is stable.
-    // last_updated_at is 2024-01-01T01:00:00Z, so a fixed "now" two years
-    // later keeps "2 years ago" deterministic regardless of the real date.
-    jest.spyOn(moment, 'now').mockReturnValue(new Date('2026-01-01T01:00:00Z').getTime());
+    // Pin time so moment().fromNow() on last_updated_at (2024-01-01T01:00:00Z) is stable
+    jest.useFakeTimers({ now: new Date('2026-01-02T01:00:00Z') });
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders panel with title, badge, and button', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument());

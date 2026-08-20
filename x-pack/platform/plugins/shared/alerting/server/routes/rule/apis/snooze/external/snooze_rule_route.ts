@@ -8,6 +8,10 @@
 import Boom from '@hapi/boom';
 import { v4 } from 'uuid';
 import type { IRouter } from '@kbn/core/server';
+import {
+  transformCustomScheduleToRRule,
+  transformRRuleToCustomSchedule,
+} from '@kbn/response-ops-schedule-schema';
 import { validateInternalRuleType } from '../../../../lib/validate_internal_rule_type';
 import {
   type SnoozeParamsV1,
@@ -23,10 +27,6 @@ import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
-import {
-  transformCustomScheduleToRRule,
-  transformRRuleToCustomSchedule,
-} from '../../../../../../common/routes/schedule';
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

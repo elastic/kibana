@@ -20,6 +20,10 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import {
+  removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
@@ -702,13 +706,7 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
-              },
-            ],
+            filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
           },
         },
         index: AGENTS_INDEX,
@@ -716,7 +714,14 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
+    );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
       const versionCounts: Record<string, number> = {};

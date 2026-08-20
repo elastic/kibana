@@ -5,67 +5,48 @@
  * 2.0.
  */
 
-import React from 'react';
-import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import { type RouteComponentProps } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import { AppHeader } from '@kbn/app-header';
 import { RulesContainer } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
-import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
+import { getBenchmarkCisName } from '../../../common/utils/helpers';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
+  const { application } = useKibana().services;
+
+  const pageTitle = i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+    defaultMessage: '{benchmarkName} {benchmarkVersion} - Rules',
+    values: {
+      benchmarkName: getBenchmarkCisName(params.benchmarkId),
+      benchmarkVersion: params.benchmarkVersion,
+    },
+  });
+
+  const backTarget = useMemo(
+    () => ({
+      href: application.getUrlForApp('securitySolutionUI', {
+        path: cloudPosturePages.benchmarks.path,
+      }),
+      label: i18n.translate('xpack.csp.rules.rulesPageHeader.backToBenchmarksLabel', {
+        defaultMessage: 'Benchmarks',
+      }),
+    }),
+    [application]
+  );
 
   return (
     <CloudPosturePage query={benchmarksInfo}>
-      <EuiPageHeader
-        alignItems={'bottom'}
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem css={{ width: 'fit-content' }}>
-              <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-                <EuiButtonEmpty iconType="chevronSingleLeft">
-                  <FormattedMessage
-                    id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
-                    defaultMessage="Benchmarks"
-                  />
-                </EuiButtonEmpty>
-              </Link>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false} css={{ marginBottom: 6 }}>
-                  <CISBenchmarkIcon
-                    type={params.benchmarkId}
-                    name={getBenchmarkApplicableTo(params.benchmarkId)}
-                    size={'l'}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <CloudPosturePageTitle
-                    title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                      defaultMessage: '{benchmarkName} {benchmarkVersion} - Rules',
-                      values: {
-                        benchmarkName: getBenchmarkCisName(params.benchmarkId),
-                        benchmarkVersion: params.benchmarkVersion,
-                      },
-                    })}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <AppHeader title={pageTitle} back={backTarget} spacing="bleed" />
       <EuiSpacer />
       <RulesContainer />
       {SpyRoute && (

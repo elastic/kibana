@@ -52,16 +52,18 @@ describe('Slack', () => {
     expect(Slack.metadata.displayName).toBe('Slack (v2)');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
+    expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
-  it('should use oauth_authorization_code auth type', () => {
+  it('should support expected auth types', () => {
     expect(Slack.auth).toBeDefined();
     expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
     const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
       typeof t === 'string' ? t : t.type
     );
     expect(types).toContain('oauth_authorization_code');
-    expect(types).not.toContain('bearer');
+    expect(types).toContain('ears');
+    expect(types).toContain('bearer');
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {
@@ -199,6 +201,17 @@ describe('Slack', () => {
       await expect(
         Slack.actions.searchMessages.handler(mockContext, { query: 'test' })
       ).rejects.toThrow('Slack searchMessages error: invalid_auth');
+    });
+
+    it('should throw a descriptive error when called with bot token auth', async () => {
+      const botTokenContext = {
+        ...mockContext,
+        secrets: { authType: 'bearer', token: 'xoxb-fake' },
+      } as unknown as ActionContext;
+
+      await expect(
+        Slack.actions.searchMessages.handler(botTokenContext, { query: 'test' })
+      ).rejects.toThrow('getConversationHistory');
     });
   });
 
@@ -1491,6 +1504,8 @@ describe('Slack', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = Slack.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -1504,17 +1519,13 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/auth.test');
-      expect(result.ok).toBe(true);
-      expect(result.message).toContain('My Team');
+      expect(result).toEqual({});
     });
 
-    it('should return failure when Slack API returns error', async () => {
+    it('should throw when Slack API returns error', async () => {
       const mockResponse = {
         data: {
           ok: false,
@@ -1523,25 +1534,13 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('invalid_auth');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should return failure on network error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -9,12 +9,11 @@ import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
-  ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import type { CasesPermissions } from '../../../common/ui/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
 export { AttachmentActionType };
@@ -36,7 +35,7 @@ interface ButtonAttachmentAction extends BaseAttachmentAction {
 
 interface CustomAttachmentAction extends BaseAttachmentAction {
   type: AttachmentActionType.CUSTOM;
-  render: () => JSX.Element;
+  render: () => JSX.Element | null;
 }
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
@@ -60,22 +59,13 @@ export interface AttachmentTabViewObject<Props = {}> {
 export interface CommonAttachmentViewProps {
   savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+  permissions: CasesPermissions;
 }
 
 /** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
 export interface CommonAttachmentTabViewProps {
   caseData: CaseUI;
   searchTerm?: string;
-}
-
-export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  externalReferenceId: ExternalReferenceAttachmentPayload['externalReferenceId'];
-  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
-}
-
-export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
-  persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
 export interface RowContext {
@@ -135,21 +125,17 @@ export interface AttachmentType<Props> {
   getAttachmentTabViewObject?: (
     props?: CommonAttachmentTabViewProps
   ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
-  schemaValidator?: (data: unknown) => void;
 }
 
 interface UnifiedAttachmentSchema {
-  /** Full-payload zod schema. Preferred over `schemaValidator`. */
-  schema?: z.ZodType;
+  /** Full-payload zod schema used for validation and renderer prop narrowing. */
+  schema: z.ZodType;
   /**
    * Schema exposed to workflow authors. When unset, workflow steps fall back to
    * `schema` if it is a Zod object; when `false`, the type is excluded.
    */
   workflowSchema?: z.ZodObject | false;
 }
-
-export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
-export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 
 type UnifiedAttachmentRegistration<Props> = AttachmentType<Props> & UnifiedAttachmentSchema;
 export type UnifiedReferenceAttachmentType<
@@ -174,11 +160,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentType
-  ) => void;
   registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
 }

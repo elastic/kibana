@@ -515,6 +515,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         method: 'get',
         responseType: 'stream',
         responseSchema: DownloadActionResultsResponseSchema,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       },
       connectorUsageCollector
     );

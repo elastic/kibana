@@ -14,7 +14,8 @@ import type { ObservedEntityData } from '../../../shared/components/observed_ent
 import { basicUserFields } from '../fields/basic_user_fields';
 
 export const useObservedUserFields = (
-  userData: ObservedEntityData<UserItem>
+  userData: ObservedEntityData<UserItem>,
+  hideAnomalies: boolean = false
 ): EntityTableRows<ObservedEntityData<UserItem>> => {
   const mlCapabilities = useMlCapabilities();
 
@@ -23,6 +24,6 @@ export const useObservedUserFields = (
       return [];
     }
 
-    return [...basicUserFields, ...getAnomaliesFields(mlCapabilities)];
-  }, [userData, mlCapabilities]);
+    return [...basicUserFields, ...(hideAnomalies ? [] : getAnomaliesFields(mlCapabilities))];
+  }, [userData, hideAnomalies, mlCapabilities]);
 };

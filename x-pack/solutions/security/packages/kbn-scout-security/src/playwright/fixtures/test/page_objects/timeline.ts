@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const TIMELINES_URL = 'security/timelines';
 const TIMELINE_TEMPLATES_URL = 'security/timelines/template';
@@ -31,6 +32,10 @@ export class TimelinePage {
   readonly kqlTextarea: Locator;
   readonly saveButtonTooltipAnchor: Locator;
   readonly timelineRows: Locator;
+  readonly batchActionsButton: Locator;
+  readonly superTimelineBadge: Locator;
+  readonly viewSuperTimelineAction: Locator;
+  readonly addToFavoritesButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.panel = this.page.testSubj.locator('timeline-modal-header-panel');
@@ -59,6 +64,21 @@ export class TimelinePage {
       'span:has([data-test-subj="timeline-modal-save-timeline"])'
     );
     this.timelineRows = this.timelinesTable.locator('tbody').getByRole('row');
+    this.batchActionsButton = this.page.testSubj.locator('batchActions');
+    this.superTimelineBadge = this.page.testSubj.locator('timeline-modal-super-timeline-badge');
+    this.viewSuperTimelineAction = this.page.testSubj.locator('view-super-timeline-action');
+    // Scope to the modal header panel so the bottom-bar favorites button (which is
+    // always rendered outside the modal) does not cause false negatives. Match both
+    // star variants so not.toBeVisible() is conclusive regardless of favorited state.
+    this.addToFavoritesButton = this.panel.locator(
+      '[data-test-subj="timeline-favorite-empty-star"], [data-test-subj="timeline-favorite-filled-star"]'
+    );
+  }
+
+  /** Select a timeline row's checkbox by its title text. */
+  async selectTimelineByTitle(title: string) {
+    const row = this.timelineRows.filter({ hasText: title });
+    await row.getByRole('checkbox').click();
   }
 
   async navigateToTimelines() {
@@ -126,6 +146,11 @@ export class TimelinePage {
 
   async selectCustomTemplates() {
     await this.timelinesTable.waitFor({ timeout: 30_000 });
+    // Wait for the mount-time prepackaged-template install and its refetch to settle
+    // (the table leaves its "Loading..." state) before switching tabs. Otherwise that
+    // late refetch lands after the custom-tab refetch and repaints the table, detaching
+    // the row actions clicked next (flaky #258015).
+    await expect(this.timelinesTable).not.toContainText('Loading', { timeout: 30_000 });
     await this.customTemplatesTab.click();
   }
 
@@ -134,6 +159,7 @@ export class TimelinePage {
       .locator('tbody')
       .getByRole('row')
       .filter({ hasText: templateTitle });
+    await expect(templateRow).toBeVisible({ timeout: 30_000 });
     await templateRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.createFromTemplateButton.click();
   }

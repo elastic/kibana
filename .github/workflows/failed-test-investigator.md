@@ -40,18 +40,21 @@ env:
   # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
+imports:
+  - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
+
 engine:
   id: claude
   version: '2.1.165'
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -70,31 +73,10 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
     - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
-steps:
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
-    env:
-      BK_VERSION: 3.44.0
-      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
-    run: |
-      set -euo pipefail
-      tmp="$(mktemp -d)"
-      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
-      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
-      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
-      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
-      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
-      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
-      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
-      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
-        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
-        exit 1
-      fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 safe-outputs:
   noop:
@@ -107,26 +89,44 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed:
-      - failure:ai-fixable
+      # classification labels, max one per issue
       - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
+      # optional labels
+      - failure:ai-fixable
+      - failure:fix-did-not-hold
       - failure:insufficient-data
-    max: 3
+      # fix-request label that triggers the Flaky Test Fixer workflow
+      - ai:fix-flaky
+    max: 5
     target: *issue_number
+    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
+    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
-  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
-  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
+  # max=5 covers a full stale verdict: up to four investigator labels (a classification,
+  # `failure:ai-fixable`, `failure:fix-did-not-hold`, and `failure:insufficient-data`)
+  # plus a lingering `ai:fix-flaky`.
   remove-labels:
     allowed:
       - failure:*
       - ai:fix-flaky
-    max: 4
+    max: 5
     target: *issue_number
+  # Lets the agent close the issue when the verdict is that there is nothing to
+  # fix in the repository (see "Close the issue when there is nothing to fix").
+  # Closing is safe: the failed test reporter reopens the issue automatically if
+  # the test fails again.
+  close-issue:
+    max: 1
+    target: *issue_number
+    required-labels: [failed-test]
+    state-reason: not_planned
 
 strict: false
 timeout-minutes: 35
@@ -147,9 +147,11 @@ This run is killed at a hard timeout and posts a single, write-once comment that
 
 Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
 
-Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
+
+Before classifying a UI failure as test-side, read the application code that renders the awaited element and confirm the state the test waits for is actually reachable.
 
 ## Environment constraints
 
@@ -175,6 +177,12 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
+### Fix guardrails
+
+Every fix you propose is held to the same guardrails as the fixer and verifier workflows that act on it:
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+
 ## Labels
 
 ### Classification label
@@ -191,6 +199,19 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### Automatic fix request
+
+When you add `failure:ai-fixable`, also add `ai:fix-flaky` to automatically request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. **Skip** the `ai:fix-flaky` label when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository — you already check for one when writing the tip block below; don't request a duplicate.
+
+### "Previous fix didn't hold" label
+
+Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
+
+- a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+
+Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
+
 ### "Insufficient data" label
 
 Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
@@ -202,7 +223,24 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker. Clear a lingering `ai:fix-flaky` only when your fresh verdict is **not** fixable; when it is, keep (or add) it per "Automatic fix request". If the existing labels already match your verdict, leave them as they are.
+
+## Close the issue when there is clearly nothing to fix
+
+When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
+
+- the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
+- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
+- you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
+
+Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a tip block right after (and outside) the `<details>` block:
+
+```markdown
+> [!TIP]
+> Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
+```
+
+When in doubt, leave the issue open.
 
 ## Attribution
 
@@ -222,18 +260,18 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a tip block about the automatically requested fix or an auto-close (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available — i.e. you added `failure:ai-fixable` and requested a fix via `ai:fix-flaky` (see "Automatic fix request").
 
 ```markdown
 > [!TIP]
-> Add the `ai:fix-flaky` label and an agent will **open a fix PR** (usually within 15–20 minutes).
+> Marked "AI-fixable": fix PR incoming within ~20-30 min.
 ```
 
-If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
+If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the tip block instead of the automatic-request sentence.
 
 ### 1. Visible header (required)
 
@@ -293,6 +331,8 @@ State only _what to change_ — the "why" belongs in Root cause & evidence, so d
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
 
+**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
+
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
@@ -318,12 +358,13 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
 
 #### Additional context (optional)
 
 Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis. Scope each rule-out to the evidence layer it actually covers — e.g. server logs can't rule out a client-side rendering bug.
 - **Verification:** the one command or step that reproduces the failure or confirms the fix.
 - **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 

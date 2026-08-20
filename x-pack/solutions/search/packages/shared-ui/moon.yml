@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-shared-ui'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-shared-ui'
   description: Moon project for @kbn/search-shared-ui
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/packages/shared-ui
 dependsOn:
   - '@kbn/i18n'
@@ -24,13 +24,10 @@ tags:
   - prod
   - group-search
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

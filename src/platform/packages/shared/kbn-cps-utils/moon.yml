@@ -22,6 +22,9 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/es-query'
   - '@kbn/css-utils'
+  - '@kbn/ui-callout'
+  - '@kbn/zod'
+  - '@kbn/calculate-width-from-char-count'
 tags:
   - shared-browser
   - package

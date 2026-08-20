@@ -89,6 +89,7 @@ import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout'
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
+import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 // export needs for testing
 export const onResize = (
@@ -100,12 +101,12 @@ export const onResize = (
 };
 
 function DiscoverDocumentsComponent({
-  viewModeToggle,
+  renderViewModeToggle,
   dataView,
   onAddFilter,
   onFieldEdited,
 }: {
-  viewModeToggle: React.ReactElement | undefined;
+  renderViewModeToggle: RenderViewModeToggle;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
@@ -448,7 +449,7 @@ function DiscoverDocumentsComponent({
     () =>
       getRenderCustomToolbarWithElements({
         saveToDashboardButton,
-        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
+        leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
         bottomSection: (
           <>
             {callouts}
@@ -456,7 +457,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
+    [renderViewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
   );
 
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
@@ -489,7 +490,7 @@ function DiscoverDocumentsComponent({
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -506,8 +507,8 @@ function DiscoverDocumentsComponent({
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
-      isApproximate,
-      viewModeToggle,
+      esqlApproximation,
+      renderViewModeToggle,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -534,7 +535,7 @@ function DiscoverDocumentsComponent({
     expandedDocOwner$,
     getExpandedDocSetter,
     getRenderDocumentViewMetaSetter,
-    isApproximate,
+    esqlApproximation,
     latestCascadedDocumentsDataGridsUiState,
     latestDataCascadeUiState,
     onUpdateESQLQuery,
@@ -544,7 +545,7 @@ function DiscoverDocumentsComponent({
     setCascadedDocumentsDataGridUiState,
     setDataCascadeUiState,
     setSelectedCascadeGroups,
-    viewModeToggle,
+    renderViewModeToggle,
   ]);
 
   const flyoutColumnsMeta = useMemo(() => {

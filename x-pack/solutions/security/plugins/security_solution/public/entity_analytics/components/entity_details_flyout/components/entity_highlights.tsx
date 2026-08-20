@@ -23,16 +23,19 @@ import {
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { EntitySummaryStalenessReason } from '@kbn/entity-store/common';
 import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common/entity_summary';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -42,9 +45,11 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
+import { useInferenceConnectorAccess } from '../hooks/use_inference_connector_access';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
@@ -91,6 +96,15 @@ export const EntityHighlightsAccordion: React.FC<{
     return cName;
   }, [aiConnectors, connectorId]);
 
+  const {
+    canUseSelectedConnector,
+    isCheckingPrivileges: isCheckingInferencePrivileges,
+    missingInferencePrivilege,
+  } = useInferenceConnectorAccess({
+    connectors: aiConnectors,
+    selectedConnectorId: connectorId,
+  });
+
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
   const { hasConnectorsReadPrivilege, hasAssistantPrivilege } = useAssistantAvailability();
   const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
@@ -110,8 +124,10 @@ export const EntityHighlightsAccordion: React.FC<{
   // loads on flyout open and does not regenerate on close / click-away.
   const {
     summary: storedSummary,
+    canRead: canReadPersistedSummary,
     refetch: refetchPersistedSummary,
     isLoading: isPersistedSummaryLoading,
+    isFetching: isPersistedSummaryFetching,
   } = useFetchPersistedAiSummary({
     entityType,
     entityIdentifier,
@@ -129,7 +145,7 @@ export const EntityHighlightsAccordion: React.FC<{
 
   const {
     fetchEntityHighlights,
-    isChatLoading,
+    isGeneratingSummary,
     result: assistantResult,
     error,
     generationBaseline,
@@ -142,6 +158,8 @@ export const EntityHighlightsAccordion: React.FC<{
     entitySnapshot,
     refetchEntityRecord,
     refetchPersistedSummary,
+    // Persist only when the user can read the metadata index, otherwise keep it in-session only
+    persistSummary: canReadPersistedSummary,
   });
 
   // Staleness check — compare stored snapshot against current entity signals.
@@ -170,6 +188,39 @@ export const EntityHighlightsAccordion: React.FC<{
     return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
   }, [storedSummary, entitySnapshot, generationBaseline]);
 
+  // Dismiss state — stored per-entity per-space so dismiss is local to this browser session
+  // and does not affect other users. The stored value is the risk score at dismissal time;
+  // if the score changes again the callout re-appears automatically.
+  const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
+    spaceId ?? 'default'
+  }.${entityType}.${entityIdentifier}`;
+  const [dismissedAtScore, setDismissedAtScore, removeDismissedAtScore] =
+    useLocalStorage<number>(staleDismissKey);
+
+  const riskScoreReason = useMemo(
+    () => stalenessReasons.find((r) => r.signal === 'risk_score'),
+    [stalenessReasons]
+  );
+  const isStalenessCalloutDismissed =
+    dismissedAtScore !== undefined && riskScoreReason?.currentScore === dismissedAtScore;
+
+  const onDismissStalenessCallout = useCallback(() => {
+    if (riskScoreReason !== undefined) {
+      setDismissedAtScore(riskScoreReason.currentScore);
+    }
+  }, [riskScoreReason, setDismissedAtScore]);
+
+  // Generating a new summary invalidates any prior staleness dismissal, which was tied to the
+  // previous summary's risk score. Clearing it prevents the callout from staying hidden if the
+  // score later returns to the previously dismissed-at value (dismiss at Y → regenerate at Z →
+  // score returns to Y would otherwise be wrongly treated as still-dismissed).
+  const onGenerateSummary = useCallback(() => {
+    removeDismissedAtScore();
+    fetchEntityHighlights();
+  }, [removeDismissedAtScore, fetchEntityHighlights]);
+
+  const activeStalenessReasons = isStalenessCalloutDismissed ? [] : stalenessReasons;
+
   const onAddConnectorClick = useCallback(() => {
     setIsConnectorModalVisible(true);
   }, []);
@@ -196,39 +247,45 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = useMemo(() => {
+  const canGenerate = useMemo(() => {
     // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
     // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
     if (!assistantContext) {
-      return true;
-    }
-
-    if (!hasEntityHighlightsLicense) {
-      return true;
+      return false;
     }
 
     // if user does not have access to connectors, we cannot invoke the inference action
     if (!hasConnectorsReadPrivilege) {
-      return true;
+      return false;
     }
 
-    // if user does not have access to assistant or agent builder, disable entity highlights
-    return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
+    // the user must have access to assistant or agent builder to be able to generate a summary
+    return hasAssistantPrivilege || hasAgentBuilderPrivilege;
   }, [
     assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,
-    hasEntityHighlightsLicense,
   ]);
+
+  const canGenerateWithSelectedConnector = canGenerate && canUseSelectedConnector;
 
   const isLoading = useMemo(
     () =>
-      isChatLoading ||
-      isAnonymizationFieldsLoading ||
-      isLoadingConnectors ||
+      isGeneratingSummary ||
+      isPersistedSummaryLoading ||
+      // Connector / anonymization loading only matters for generation, not for
+      // displaying an already-persisted summary to a read-only user.
+      (canGenerate &&
+        (isAnonymizationFieldsLoading || isLoadingConnectors || isCheckingInferencePrivileges)),
+    [
+      canGenerate,
+      isAnonymizationFieldsLoading,
+      isGeneratingSummary,
+      isLoadingConnectors,
       isPersistedSummaryLoading,
-    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors, isPersistedSummaryLoading]
+      isCheckingInferencePrivileges,
+    ]
   );
 
   const [dismissedError, setDismissedError] = useState<Error | null>(null);
@@ -237,7 +294,33 @@ export const EntityHighlightsAccordion: React.FC<{
     [dismissedError, error]
   );
 
-  if (disabled) {
+  const hasAssistantResult = assistantResult != null;
+  // First paint with nothing to show yet — replace the body with a skeleton.
+  const isLoadingInitialSummary = !hasAssistantResult && isPersistedSummaryLoading;
+  // Content is already on screen; keep it mounted and show a thin progress bar
+  // while the persisted summary refetches in the background
+  const isSummaryRefreshing =
+    hasAssistantResult && isPersistedSummaryFetching && !isGeneratingSummary;
+
+  const hasReadablePersistedSummary =
+    canReadPersistedSummary && (storedSummary != null || hasAssistantResult);
+
+  // Shown if the user has access to generate a summary
+  // and there is no summary yet, no error, and nothing is loading
+  const showSummaryEmptyState =
+    canGenerate &&
+    !hasAssistantResult &&
+    !storedSummary &&
+    !isLoadingInitialSummary &&
+    !isGeneratingSummary &&
+    !showErrorBanner;
+
+  if (!hasEntityHighlightsLicense) {
+    return null;
+  }
+
+  // hide section if user cannot generate a summary and there is no stored summary
+  if (!canGenerate && (isPersistedSummaryLoading || !hasReadablePersistedSummary)) {
     return null;
   }
 
@@ -259,6 +342,7 @@ export const EntityHighlightsAccordion: React.FC<{
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
+          canGenerate &&
           (aiConnectors?.length ?? 0) > 0 && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -308,8 +392,8 @@ export const EntityHighlightsAccordion: React.FC<{
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                onClick={fetchEntityHighlights}
-                isDisabled={!connectorId || isLoading}
+                onClick={onGenerateSummary}
+                isDisabled={!connectorId || isLoading || !canGenerateWithSelectedConnector}
                 data-test-subj="entity-highlights-error-regenerate"
               >
                 <FormattedMessage
@@ -321,18 +405,23 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiSpacer size="m" />
           </>
         )}
-        {assistantResult && !isLoading && (
+
+        {hasAssistantResult && !isGeneratingSummary && (
           <EntityHighlightsResult
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
-            stalenessReasons={stalenessReasons}
-            onRefresh={fetchEntityHighlights}
+            authorProfileUid={assistantResult?.authorProfileUid}
+            stalenessReasons={activeStalenessReasons}
+            onRefresh={onGenerateSummary}
+            onDismiss={onDismissStalenessCallout}
+            canRegenerate={canGenerateWithSelectedConnector}
+            isRefreshing={isSummaryRefreshing}
           />
         )}
 
-        {isChatLoading && (
+        {isGeneratingSummary && (
           <EuiPanel hasBorder={true}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
@@ -345,29 +434,37 @@ export const EntityHighlightsAccordion: React.FC<{
           </EuiPanel>
         )}
 
-        {!assistantResult && !storedSummary && !isLoading && !showErrorBanner && (
+        {isLoadingInitialSummary && (
+          <EuiPanel hasBorder={true}>
+            <EuiSkeletonText
+              lines={2}
+              size="xs"
+              contentAriaLabel={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.highlights.loadingPersistedAriaLabel',
+                { defaultMessage: 'Entity summary' }
+              )}
+            />
+          </EuiPanel>
+        )}
+
+        {showSummaryEmptyState && (
           <EuiPanel hasBorder={true}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" textAlign="left">
-                  {!connectorId ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
-                      defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
-                      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-                    />
-                  )}
+                  {getEntitySummaryEmptyStateDescription({
+                    connectorId,
+                    connectorName,
+                    connectors: aiConnectors,
+                    missingInferencePrivilege,
+                  })}
                 </EuiText>
               </EuiFlexItem>
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
                   <AiButton
-                    onClick={fetchEntityHighlights}
-                    isDisabled={!connectorId}
+                    onClick={onGenerateSummary}
+                    isDisabled={!connectorId || !canGenerateWithSelectedConnector}
                     size="s"
                     iconType="sparkles"
                   >
@@ -408,5 +505,63 @@ export const EntityHighlightsAccordion: React.FC<{
       </EuiAccordion>
       <EuiHorizontalRule />
     </>
+  );
+};
+
+const getEntitySummaryEmptyStateDescription = ({
+  connectorId,
+  connectorName,
+  connectors,
+  missingInferencePrivilege,
+}: {
+  connectorId: string;
+  connectorName: string;
+  connectors?: Array<{ actionTypeId?: string }>;
+  missingInferencePrivilege: boolean;
+}): React.ReactElement => {
+  if (!connectorId) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+        defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+      />
+    );
+  }
+
+  if (missingInferencePrivilege) {
+    const hasAlternativeNonInferenceConnector = (connectors ?? []).some(
+      (connector) => connector.actionTypeId !== InferenceConnectorType.Inference
+    );
+
+    if (hasAlternativeNonInferenceConnector) {
+      return (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilegeWithAlternative"
+          defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it, or switch to a different AI connector."
+          values={{
+            connectorName: <strong>{connectorName}</strong>,
+            privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+          }}
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilege"
+        defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it."
+        values={{
+          connectorName: <strong>{connectorName}</strong>,
+          privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+        }}
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+    />
   );
 };

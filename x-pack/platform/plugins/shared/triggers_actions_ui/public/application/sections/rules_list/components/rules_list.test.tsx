@@ -187,6 +187,11 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
+// Each test re-mounts the full RulesList and awaits multiple findBy* queries; the global
+// RTL asyncUtilTimeout (4500 ms) alone can exceed Jest's default 5000 ms budget under worker
+// contention. Raise the file-wide budget so every render-heavy test has headroom.
+jest.setTimeout(15_000);
+
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
@@ -241,7 +246,10 @@ describe('Update Api Key', () => {
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
     expect(screen.queryByText('Update API key')).toBeInTheDocument();
-  });
+    // Mounting the full RulesList and awaiting two findBy* queries can exceed the
+    // default 5000 ms Jest budget under worker contention (the global RTL
+    // asyncUtilTimeout alone is 4500 ms), so give this render-heavy test more headroom.
+  }, 15000);
 });
 
 describe('rules_list component empty', () => {
@@ -983,7 +991,7 @@ describe('internally managed rule', () => {
     expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
     expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
 
-    userEvent.click(await screen.findByTestId('selectActionButton'));
+    await userEvent.click(await screen.findByTestId('selectActionButton'));
     expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
     expect(screen.queryByTestId('snoozeButton')).toBeNull();
     expect(screen.queryByTestId('disableButton')).toBeNull();

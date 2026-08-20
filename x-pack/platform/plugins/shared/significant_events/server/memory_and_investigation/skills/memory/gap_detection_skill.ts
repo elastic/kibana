@@ -20,6 +20,7 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
     id: 'streams-gap-detection',
     name: 'streams-gap-detection',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => {
@@ -30,7 +31,7 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
         'platform_sig_events_memory_write',
       ];
       const memoryTools = createMemoryTools(options)
-        .map(({ tags, id, ...rest }) => ({
+        .map(({ id, ...rest }) => ({
           ...rest,
           id: id.replaceAll('.', '_'),
         }))

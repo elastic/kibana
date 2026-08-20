@@ -16,6 +16,11 @@ import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../flyout_v2/shared/constants/flyout_titles';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -34,6 +39,12 @@ export interface AlertEventProps {
   rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
+  /**
+   * Whether the alert originates from a linked/remote (CPS) project. When true,
+   * the rule cannot be resolved from the local project, so the rule name is
+   * rendered as plain text instead of a clickable link that opens the rule flyout.
+   */
+  isRemoteAlert?: boolean;
 }
 
 export const AlertEvent: React.FC<AlertEventProps> = ({
@@ -41,6 +52,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   totalAlerts,
   savedObjectId,
   rule,
+  isRemoteAlert = false,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
@@ -78,12 +90,16 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
       if (enableNewFlyout) {
-        openRuleFlyout({ ruleId: resolvedRuleId });
+        openRuleFlyout({
+          ruleId: resolvedRuleId,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+          title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
+        });
       } else {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
       }
     }
-  }, [openFlyout, canReadRules, resolvedRuleId, enableNewFlyout, openRuleFlyout]);
+  }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
   if (loadingAlertData) {
     return <EuiLoadingSpinner size="m" />;
@@ -102,7 +118,10 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
         label: resolvedRuleName,
         fallbackLabel: i18n.UNKNOWN_RULE,
         dataTestSubj: `alert-rule-link-${savedObjectId}`,
-        onClick: onRuleClick,
+        // Linked/remote (CPS) alerts reference a rule that only exists on the
+        // linked project and cannot be resolved locally, so omit the click
+        // handler to render the rule name as plain text instead of a broken link.
+        onClick: isRemoteAlert ? undefined : onRuleClick,
       }}
       dataTestSubj={`alerts-user-action-${savedObjectId}`}
     />

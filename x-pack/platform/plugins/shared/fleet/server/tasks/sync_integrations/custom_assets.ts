@@ -42,7 +42,7 @@ export const findIntegration = (assetName: string, integrations: IntegrationsDat
 export function getComponentTemplate(
   esClient: ElasticsearchClient,
   name: string,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<ClusterGetComponentTemplateResponse> {
   return esClient.cluster.getComponentTemplate(
     {
@@ -50,7 +50,7 @@ export function getComponentTemplate(
     },
     {
       ignore: [404],
-      signal: abortController.signal,
+      signal,
     }
   );
 }
@@ -58,7 +58,7 @@ export function getComponentTemplate(
 export function getPipeline(
   esClient: ElasticsearchClient,
   name: string,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<IngestGetPipelineResponse> {
   return esClient.ingest.getPipeline(
     {
@@ -66,7 +66,7 @@ export function getPipeline(
     },
     {
       ignore: [404],
-      signal: abortController.signal,
+      signal,
     }
   );
 }
@@ -75,14 +75,10 @@ export const getCustomAssets = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   integrations: IntegrationsData[],
-  abortController: AbortController,
+  signal: AbortSignal,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
 ): Promise<CustomAssetsData[]> => {
-  const customTemplates = await getComponentTemplate(
-    esClient,
-    CUSTOM_ASSETS_PREFIX,
-    abortController
-  );
+  const customTemplates = await getComponentTemplate(esClient, CUSTOM_ASSETS_PREFIX, signal);
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
     (acc: CustomAssetsData[], template) => {
@@ -101,7 +97,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const ingestPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+  const ingestPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, signal);
 
   const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
     (acc: CustomAssetsData[], pipeline) => {
@@ -120,7 +116,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const customPipelineFromVars = await getPipelinesFromVars(esClient, soClient, abortController);
+  const customPipelineFromVars = await getPipelinesFromVars(esClient, soClient, signal);
 
   const updatedAssets = [
     ...customAssetsComponentTemplates,
@@ -136,7 +132,7 @@ export const getCustomAssets = async (
 export async function getPipelinesFromVars(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<CustomAssetsData[]> {
   const packagePolicies = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
@@ -150,7 +146,7 @@ export async function getPipelinesFromVars(
         if (stream.vars?.pipeline && stream.vars.pipeline.value) {
           const pipelineName = stream.vars.pipeline.value;
           // find pipeline definition for the matching var value
-          const pipelineDef = await getPipeline(esClient, pipelineName, abortController);
+          const pipelineDef = await getPipeline(esClient, pipelineName, signal);
 
           if (pipelineDef[pipelineName]) {
             customPipelineFromVars.push({
@@ -205,10 +201,10 @@ function updateDeletedAssets(
 async function updateComponentTemplate(
   customAsset: CustomAssetsData,
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   logger: Logger
 ) {
-  const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
+  const customTemplates = await getComponentTemplate(esClient, customAsset.name, signal);
   const existingTemplate = customTemplates.component_templates?.find(
     (template) => template.name === customAsset.name
   );
@@ -222,7 +218,7 @@ async function updateComponentTemplate(
               name: customAsset.name,
             },
             {
-              signal: abortController.signal,
+              signal,
             }
           ),
         { logger }
@@ -251,7 +247,7 @@ async function updateComponentTemplate(
             template: customAsset.template,
           },
           {
-            signal: abortController.signal,
+            signal,
           }
         ),
       { logger }
@@ -262,10 +258,10 @@ async function updateComponentTemplate(
 async function updateIngestPipeline(
   customAsset: CustomAssetsData,
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   logger: Logger
 ) {
-  const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
+  const ingestPipelines = await getPipeline(esClient, customAsset.name, signal);
   const existingPipeline = ingestPipelines[customAsset.name];
 
   if (customAsset.is_deleted) {
@@ -278,7 +274,7 @@ async function updateIngestPipeline(
               id: customAsset.name,
             },
             {
-              signal: abortController.signal,
+              signal,
             }
           ),
         { logger }
@@ -330,7 +326,7 @@ async function updateIngestPipeline(
             ...customAssetPipelineWithoutTimestamps,
           },
           {
-            signal: abortController.signal,
+            signal,
           }
         ),
       { logger }
@@ -341,12 +337,12 @@ async function updateIngestPipeline(
 export async function installCustomAsset(
   customAsset: CustomAssetsData,
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   logger: Logger
 ) {
   if (customAsset.type === 'component_template') {
-    return updateComponentTemplate(customAsset, esClient, abortController, logger);
+    return updateComponentTemplate(customAsset, esClient, signal, logger);
   } else if (customAsset.type === 'ingest_pipeline') {
-    return updateIngestPipeline(customAsset, esClient, abortController, logger);
+    return updateIngestPipeline(customAsset, esClient, signal, logger);
   }
 }

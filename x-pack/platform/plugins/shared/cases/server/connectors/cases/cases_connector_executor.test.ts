@@ -17,6 +17,8 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
   MAX_SUFFIX_LENGTH,
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -46,6 +48,7 @@ import {
 } from './test_helpers';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CasesConnectorRunParams } from './types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
@@ -68,6 +71,7 @@ describe('CasesConnectorExecutor', () => {
   const getCasesClient = jest.fn();
   const casesClientMock = createCasesClientMock();
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const actionsClient = actionsClientMock.create();
 
   let connectorExecutor: CasesConnectorExecutor;
   let oracleIdCounter = 0;
@@ -125,14 +129,22 @@ describe('CasesConnectorExecutor', () => {
       fieldDefinitions: [],
       total: 0,
     });
+    casesClientMock.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 10000,
+      total: 0,
+    });
 
     getCasesClient.mockReturnValue(casesClientMock);
+    actionsClient.get.mockRejectedValue(new Error('not found'));
 
     connectorExecutor = new CasesConnectorExecutor({
       logger: mockLogger,
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
+      actionsClient,
       spaceId: 'default',
       isTemplatesEnabled: true,
     });
@@ -341,6 +353,9 @@ describe('CasesConnectorExecutor', () => {
                       "title": "Test rule - Grouping by B & 0.0.0.3 (Auto-created)",
                     },
                   ],
+                },
+                Object {
+                  "relaxRequiredFields": true,
                 },
               ],
             ]
@@ -1280,7 +1295,312 @@ fields: []
             expect(createdCase.severity).toBe('medium');
             expect(createdCase.category).toBe('Phishing');
             expect(createdCase.connector.type).toBe('.none');
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toBeUndefined();
             expect(createdCase.customFields).toEqual([]);
+          });
+
+          it('applies the template connector, settings, and assignees from the v2 definition', async () => {
+            const v2TemplateWithConnectorSettingsAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+connector:
+  type: .jira
+  id: jira-1
+  fields:
+    issueType: "10001"
+    priority: "High"
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: true
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithConnectorSettingsAssignees);
+            actionsClient.get.mockResolvedValue({ name: 'My Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+            expect(createdCase.connector).toEqual({
+              id: 'jira-1',
+              type: '.jira',
+              name: 'My Jira',
+              fields: {
+                issueType: '10001',
+                priority: 'High',
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+            expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
+          });
+
+          it('skips template assignees without a Platinum license so case creation still succeeds', async () => {
+            const v2TemplateWithAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithAssignees);
+
+            const connectorExecutorWithoutPlatinum = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              actionsClient,
+              spaceId: 'default',
+              isTemplatesEnabled: true,
+              isAtLeastPlatinum: async () => false,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithoutPlatinum.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toBeUndefined();
+          });
+
+          it('drops empty-uid template assignees', async () => {
+            const v2TemplateWithEmptyUid = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+  - uid: ""
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithEmptyUid);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+          });
+
+          it('merges partial template settings over defaults so syncAlerts is always set', async () => {
+            const v2TemplateWithPartialSettings = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+settings:
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithPartialSettings);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: true,
+            });
+          });
+
+          it('falls back to .none when the template connector cannot be resolved', async () => {
+            const v2TemplateWithDeletedConnector = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+connector:
+  type: .jira
+  id: deleted-connector
+  fields: null
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithDeletedConnector);
+            // actionsClient.get rejects by default (see beforeEach).
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            });
+            expect(mockLogger.warn).toHaveBeenCalledWith(
+              expect.stringContaining('Dropping template connector default "deleted-connector"')
+            );
+          });
+
+          it('applies connector, settings, and assignees when bridging a legacy template key to v2', async () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'Migrated Template',
+              owner: params.owner,
+              legacyKey: 'legacy-template-key',
+              templateVersion: 2,
+              definition: `
+name: "Migrated Template"
+connector:
+  type: .jira
+  id: jira-legacy-1
+  fields:
+    issueType: "10001"
+    priority: null
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: false
+assignees:
+  - uid: legacy-assignee
+fields: []
+`,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+              fieldSearchMatches: false,
+            };
+            casesClientMock.templates.getAllTemplates.mockResolvedValue({
+              templates: [migratedV2Template],
+              page: 1,
+              perPage: 10000,
+              total: 1,
+            });
+            actionsClient.get.mockResolvedValue({ name: 'Legacy Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'legacy-template-key',
+              templateVersion: null,
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'jira-legacy-1',
+              type: '.jira',
+              name: 'Legacy Jira',
+              fields: {
+                issueType: '10001',
+                priority: null,
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'legacy-assignee' }]);
+            expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 2 });
           });
 
           it('does not use the v2 template name as the title, letting the Oracle-generated title win', async () => {
@@ -1349,6 +1669,7 @@ fields: []
               casesOracleService: new CasesOracleServiceMock(),
               casesService: new CasesServiceMock(),
               casesClient: casesClientMock,
+              actionsClient,
               spaceId: 'default',
               isTemplatesEnabled: false,
             });
@@ -1386,6 +1707,7 @@ fields: []
               casesOracleService: new CasesOracleServiceMock(),
               casesService: new CasesServiceMock(),
               casesClient: casesClientMock,
+              actionsClient,
               spaceId: 'default',
               isTemplatesEnabled: false,
             });
@@ -1631,6 +1953,153 @@ metadata:
             expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
           });
 
+          describe('linked-field representation provenance', () => {
+            // A legacy required field linked (via legacyKey) to a global definition whose Field
+            // Library default legitimately diverged from the legacy configuration default.
+            const linkedLegacyField = {
+              key: 'req-text-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Required text',
+              required: true,
+              defaultValue: 'legacy',
+            };
+            const unlinkedLegacyField = {
+              key: 'unlinked-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Unlinked required text',
+              required: true,
+              defaultValue: 'unlinked-default',
+            };
+            const linkedGlobalDefinition = {
+              fieldDefinitionId: 'fd-priority',
+              name: 'priority',
+              owner: params.owner,
+              isGlobal: true,
+              legacyKey: 'req-text-key',
+              definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+metadata:
+  default: "field-library"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [linkedLegacyField, unlinkedLegacyField],
+                  templates: [],
+                },
+              ]);
+            });
+
+            it('sends only the v2 value for a linked field whose v1/v2 defaults diverge (no dual-input conflict)', async () => {
+              // REGRESSION (the bug this guards): the connector generated BOTH the required
+              // legacy default ("legacy") and the linked Field Library default ("field-library")
+              // as explicit values. Pairing rejected the whole bulk request as a dual-input
+              // conflict, so alert rules created no cases.
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // The linked legacy key is dropped from raw customFields (pairing derives v1 from
+              // the v2 value); the unlinked required field keeps its legacy fallback.
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+
+            it('keeps the required legacy fallback when the linked definition has no v2 value', async () => {
+              const linkedDefinitionWithoutDefault = {
+                ...linkedGlobalDefinition,
+                definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+`,
+              };
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedDefinitionWithoutDefault],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // No v2 value was generated for the linked field — its required legacy fallback
+              // must remain (pairing then derives the v2 side from it).
+              expect(createdCase.customFields).toEqual([
+                { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'legacy' },
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+
+            it('applies the same filtering on the createNewCasesOutOfClosedCases path', async () => {
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+                errors: [],
+              });
+              mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                reopenClosedCases: false,
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+          });
+
           it('uses v2 template when creating cases from closed cases (createNewCasesOutOfClosedCases path)', async () => {
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
@@ -1657,6 +2126,169 @@ metadata:
 
             expect(createdCase.description).toBe('Created from v2 template');
             expect(createdCase.severity).toBe('medium');
+          });
+
+          describe('Legacy template key bridge (v1 -> v2)', () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'TestTemplateOne',
+              owner: params.owner,
+              templateVersion: 3,
+              deletedAt: null,
+              legacyKey: 'legacy-template-key',
+              fieldSearchMatches: false,
+              definition: `
+name: "TestTemplateOne"
+description: "Migrated from v1"
+severity: medium
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "bridged value"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [],
+                  templates: [
+                    { key: 'legacy-template-key', name: 'TestTemplateOne', caseFields: null },
+                  ],
+                },
+              ]);
+
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('bridges a stored legacy template key to the migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [migratedV2Template],
+                page: 1,
+                perPage: 10000,
+                total: 1,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              // Legacy keys are bridged by name via getAllTemplates, not the id+version getTemplate lookup.
+              expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.description).toBe('Migrated from v1');
+              expect(createdCase.severity).toBe('medium');
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                my_text_as_keyword: 'bridged value',
+              });
+            });
+
+            it('resolves the correct migrated template by legacyKey when two v1 templates shared a name', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [
+                  {
+                    ...migratedV2Template,
+                    templateId: 'migrated-v2-id-other',
+                    legacyKey: 'some-other-key',
+                    definition: `
+name: "TestTemplateOne"
+description: "Wrong sibling"
+fields: []
+`,
+                  },
+                  migratedV2Template,
+                ],
+                page: 1,
+                perPage: 10000,
+                total: 2,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase.description).toBe('Migrated from v1');
+            });
+
+            it('falls back to the v1 path when the legacy key has no migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [],
+                page: 1,
+                perPage: 10000,
+                total: 0,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toBeUndefined();
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+          });
+        });
+
+        describe('Owner default settings', () => {
+          const mockCaseNotFound = () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+          };
+
+          it('turns syncAlerts and extractObservables on for Security when no template is selected', async () => {
+            mockCaseNotFound();
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('keeps syncAlerts and extractObservables off for Observability when no template is selected', async () => {
+            mockCaseNotFound();
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
           });
         });
 
@@ -1791,6 +2423,12 @@ metadata:
               { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
             ]);
 
+            // The connector is an automated caller: required-field enforcement must be relaxed
+            // on this create path too, not only on upsertCases.
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][1]).toEqual({
+              relaxRequiredFields: true,
+            });
+
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
               Object {
                 "cases": Array [
@@ -1885,14 +2523,16 @@ metadata:
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1919,14 +2559,16 @@ metadata:
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1991,11 +2633,13 @@ metadata:
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2004,11 +2648,10 @@ metadata:
             caseId: 'mock-id-2',
             attachments: [
               {
-                alertId: ['alert-id-1'],
-                index: ['alert-index-1'],
+                attachmentId: ['alert-id-1'],
+                metadata: { index: ['alert-index-1'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2017,11 +2660,10 @@ metadata:
             caseId: 'mock-id-3',
             attachments: [
               {
-                alertId: ['alert-id-3'],
-                index: ['alert-index-3'],
+                attachmentId: ['alert-id-3'],
+                metadata: { index: ['alert-index-3'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2312,14 +2954,16 @@ metadata:
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: alerts.map((alert) => alert._id),
+                metadata: {
+                  index: alerts.map((alert) => alert._index),
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2389,14 +3033,16 @@ metadata:
             caseId: 'mock-id-3',
             attachments: [
               {
-                type: 'alert',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-4', 'alert-id-5'],
+                metadata: {
+                  index: ['alert-index-4', 'alert-index-5'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                alertId: ['alert-id-4', 'alert-id-5'],
-                index: ['alert-index-4', 'alert-index-5'],
                 owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2442,6 +3088,7 @@ metadata:
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
+        actionsClient,
         spaceId: 'default',
       });
     });
@@ -2501,14 +3148,16 @@ metadata:
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: alerts.map((alert) => alert._id),
+              metadata: {
+                index: alerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -2738,14 +3387,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2754,14 +3405,16 @@ metadata:
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2850,14 +3503,16 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2866,14 +3521,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2931,14 +3588,16 @@ metadata:
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2947,14 +3606,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3007,14 +3668,16 @@ metadata:
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3023,14 +3686,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3061,14 +3726,16 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3077,14 +3744,16 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3093,14 +3762,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3109,14 +3780,16 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3125,14 +3798,16 @@ metadata:
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3141,14 +3816,16 @@ metadata:
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3227,11 +3904,13 @@ metadata:
           caseId: 'mock-id-1',
           attachments: [
             {
-              type: 'alert',
-              alertId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
-              index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
-              rule: { id: 'rule-test-id', name: 'Test rule' },
+              attachmentId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
+              metadata: {
+                index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+              },
               owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3307,14 +3986,16 @@ metadata:
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: allAlerts.map((alert) => alert._id),
-              index: allAlerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: allAlerts.map((alert) => alert._id),
+              metadata: {
+                index: allAlerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3394,11 +4075,10 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3407,11 +4087,10 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3420,11 +4099,10 @@ metadata:
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3494,11 +4172,10 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3507,11 +4184,10 @@ metadata:
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3520,11 +4196,10 @@ metadata:
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3590,11 +4265,10 @@ metadata:
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3776,6 +4450,9 @@ metadata:
                     },
                   ],
                 },
+                Object {
+                  "relaxRequiredFields": true,
+                },
               ],
             ]
           `);
@@ -3946,8 +4623,8 @@ metadata:
             casesOracleService: new CasesOracleServiceMock(),
             casesService: new CasesServiceMock(),
             casesClient: casesClientMock,
+            actionsClient,
             spaceId: 'default',
-            isCasesAttachmentsEnabled: true,
           });
 
           await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
@@ -3991,16 +4668,18 @@ metadata:
             caseId: 'mock-id-1',
             attachments: [
               {
-                comment: 'comment-1',
+                data: { content: 'comment-1' },
                 owner: 'securitySolution',
-                type: 'user',
+                type: 'comment',
               },
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -4027,11 +4706,13 @@ metadata:
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });

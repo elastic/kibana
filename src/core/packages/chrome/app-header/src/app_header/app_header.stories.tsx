@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import type {
@@ -19,19 +19,20 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderPadding } from '../types';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppHeaderBack, AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
+import { AppHeaderLoadingView, type AppHeaderLoadingMenu } from './app_header_loading';
 
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
-  padding: 'none' | 's' | 'm' | 'bleed-l';
+  spacing: AppHeaderSpacing;
   width: number;
   showBack: boolean;
   showTabs: boolean;
   showBadges: boolean;
-  showMetadata: boolean;
+  secondaryContent: 'description' | 'metadata' | 'none';
   showFavorite: boolean;
   showMenu: boolean;
 }
@@ -69,7 +70,7 @@ const tabs: AppHeaderTab[] = [
   {
     id: 'insights',
     label: 'Insights',
-    badge: { iconType: 'beaker', tooltip: 'Beta feature' },
+    badge: { iconType: 'flask', tooltip: 'Beta feature' },
     onClick: action('tab-insights'),
   },
   { id: 'settings', label: 'Settings', onClick: action('tab-settings') },
@@ -88,6 +89,11 @@ const metadata: AppHeaderMetadataItems = [
   { type: 'button', label: 'View details', onClick: action('view-details-clicked') },
 ];
 
+const description = {
+  text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+  learnMoreUrl: 'https://www.elastic.co/docs',
+};
+
 // Six items so the menu overflows the visible limit into the "More" popover.
 const menu: AppMenuConfig = {
   items: Array.from({ length: 6 }, (_, index) => ({
@@ -102,12 +108,12 @@ const menu: AppMenuConfig = {
 const ComposedHeader = ({
   title: initialTitle,
   editable,
-  padding,
+  spacing,
   width,
   showBack,
   showTabs,
   showBadges,
-  showMetadata,
+  secondaryContent,
   showFavorite,
   showMenu,
 }: ComposedHeaderStoryProps) => {
@@ -121,8 +127,12 @@ const ComposedHeader = ({
       setTitle(nextTitle);
     },
   };
-
-  const paddingProp: AppHeaderPadding = padding === 'bleed-l' ? { bleed: 'l' } : padding;
+  const secondaryContentProps =
+    secondaryContent === 'description'
+      ? { description }
+      : secondaryContent === 'metadata'
+      ? { metadata }
+      : {};
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -136,21 +146,18 @@ const ComposedHeader = ({
           back={showBack ? { href: '/app/management', label: 'Stack Management' } : undefined}
           tabs={showTabs ? tabs : undefined}
           badges={showBadges ? badges : undefined}
-          metadata={showMetadata ? metadata : undefined}
+          {...secondaryContentProps}
           menu={showMenu ? menu : undefined}
           favorite={
-            showFavorite ? (
-              <EuiToolTip content="Favorite" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label="Favorite"
-                  iconType="starEmpty"
-                  onClick={action('favorite')}
-                />
-              </EuiToolTip>
-            ) : undefined
+            showFavorite
+              ? {
+                  status: 'unfavorited',
+                  onToggle: action('favorite'),
+                }
+              : undefined
           }
           sticky={false}
-          padding={paddingProp}
+          spacing={spacing}
         />
       </div>
     </ChromeServiceProvider>
@@ -172,27 +179,32 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       description: {
         component:
           'The composed Chrome Next app header. Toggle the regions (back navigation, tabs, ' +
-          'badges, metadata, app menu, favorite) to see how they lay out together. For ' +
+          'badges, description or metadata, app menu, favorite) to see how they lay out together. For ' +
           'title-specific states see the "App Header Editable Title" story.',
       },
     },
   },
   argTypes: {
-    padding: {
+    spacing: {
       control: 'inline-radio',
-      options: ['none', 's', 'm', 'bleed-l'],
-      description: "Horizontal padding. `bleed-l` cancels a padded container (`{ bleed: 'l' }`).",
+      options: ['standard', 'compact', 'flush', 'bleed', 'largeBleed'],
+      description:
+        'Outer spacing. Standard uses a 16px symmetric gutter; bleed matches the same 16px inside a padded parent and largeBleed a 24px one.',
+    },
+    secondaryContent: {
+      control: 'inline-radio',
+      options: ['description', 'metadata', 'none'],
     },
   },
   args: {
     title: 'System Shells via Services',
     editable: true,
-    padding: 'm',
+    spacing: 'standard',
     width: 900,
     showBack: true,
     showTabs: true,
     showBadges: true,
-    showMetadata: true,
+    secondaryContent: 'metadata',
     showFavorite: true,
     showMenu: true,
   },
@@ -204,12 +216,18 @@ type Story = StoryObj<ComposedHeaderStoryProps>;
 
 export const FullHeader: Story = {};
 
+export const FullHeaderWithDescription: Story = {
+  args: {
+    secondaryContent: 'description',
+  },
+};
+
 export const TitleOnly: Story = {
   args: {
     showBack: false,
     showTabs: false,
     showBadges: false,
-    showMetadata: false,
+    secondaryContent: 'none',
     showFavorite: false,
     showMenu: false,
   },
@@ -224,5 +242,231 @@ export const WithoutTabs: Story = {
 export const NonEditableTitle: Story = {
   args: {
     editable: false,
+  },
+};
+
+const LoadingHeader = ({
+  menuSkeleton,
+  back,
+}: {
+  menuSkeleton?: AppHeaderLoadingMenu;
+  back?: AppHeaderBack;
+}) => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <div
+        css={css`
+          width: 900px;
+        `}
+      >
+        <AppHeaderLoadingView menu={menuSkeleton} back={back} sticky={false} />
+      </div>
+    </ChromeServiceProvider>
+  );
+};
+
+export const Loading: Story = {
+  render: () => <LoadingHeader />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default `AppHeaderLoading`: title skeleton plus overflow and primary-action placeholders.',
+      },
+    },
+  },
+};
+
+export const LoadingCustomMenu: Story = {
+  render: () => <LoadingHeader menuSkeleton={{ buttonCount: 2, hasPrimary: false }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Customized menu skeleton (`buttonCount: 2`, no primary) for headers that will not look ' +
+          'like the default overflow + primary layout.',
+      },
+    },
+  },
+};
+
+export const LoadingWithBack: Story = {
+  render: () => <LoadingHeader back={{ href: '/app/management', label: 'Stack Management' }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`AppHeaderLoading` with a back button. The title and menu stay skeletoned; only the ' +
+          'known back target renders.',
+      },
+    },
+  },
+};
+
+const defaultLoadedMenu: AppMenuConfig = {
+  items: [
+    {
+      id: 'settings',
+      order: 0,
+      label: 'Settings',
+      iconType: 'gear',
+      overflow: true,
+      run: action('settings'),
+    },
+  ],
+  primaryActionItem: {
+    id: 'save',
+    label: 'Save',
+    iconType: 'save',
+    run: action('save'),
+  },
+};
+
+const twoIconMenu: AppMenuConfig = {
+  items: [
+    {
+      id: 'settings',
+      order: 0,
+      label: 'Settings',
+      iconType: 'gear',
+      run: action('settings'),
+    },
+    {
+      id: 'share',
+      order: 1,
+      label: 'Share',
+      iconType: 'share',
+      run: action('share'),
+    },
+  ],
+};
+
+const comparisonBack: AppHeaderBack = { href: '/app/management', label: 'Stack Management' };
+
+const loadingSwapCases: Array<{
+  name: string;
+  note?: string;
+  loading: {
+    back?: AppHeaderBack;
+    menu?: AppHeaderLoadingMenu;
+    spacing?: AppHeaderSpacing;
+  };
+  loaded: ComponentProps<typeof AppHeaderView>;
+}> = [
+  {
+    name: 'Default (title + overflow + primary)',
+    loading: {},
+    loaded: { title: 'System Shells via Services', menu: defaultLoadedMenu, sticky: false },
+  },
+  {
+    name: 'With back',
+    loading: { back: comparisonBack },
+    loaded: {
+      title: 'System Shells via Services',
+      back: comparisonBack,
+      menu: defaultLoadedMenu,
+      sticky: false,
+    },
+  },
+  {
+    name: 'Title only',
+    loading: { menu: { buttonCount: 0, hasPrimary: false } },
+    loaded: { title: 'System Shells via Services', sticky: false },
+  },
+  {
+    name: 'Custom menu (2 icons, no primary)',
+    loading: { menu: { buttonCount: 2, hasPrimary: false } },
+    loaded: { title: 'System Shells via Services', menu: twoIconMenu, sticky: false },
+  },
+  {
+    name: 'Compact spacing',
+    loading: { spacing: 'compact' },
+    loaded: {
+      title: 'System Shells via Services',
+      menu: defaultLoadedMenu,
+      spacing: 'compact',
+      sticky: false,
+    },
+  },
+  {
+    name: 'Multi-row (tabs + metadata) — expected height shift',
+    note: 'AppHeaderLoading only skeletons the primary row. Tabs and metadata add a second row.',
+    loading: {},
+    loaded: {
+      title: 'System Shells via Services',
+      menu: defaultLoadedMenu,
+      tabs,
+      metadata,
+      sticky: false,
+    },
+  },
+];
+
+const comparisonGrid = css`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 900px;
+`;
+
+const comparisonPair = css`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+`;
+
+const comparisonLabel = css`
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+`;
+
+const comparisonNote = css`
+  font-size: 12px;
+  opacity: 0.7;
+  margin: 0 0 8px;
+`;
+
+const LoadingToLoadedComparison = () => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <div css={comparisonGrid}>
+        {loadingSwapCases.map((swapCase) => (
+          <section key={swapCase.name}>
+            <div css={comparisonLabel}>{swapCase.name}</div>
+            {swapCase.note ? <p css={comparisonNote}>{swapCase.note}</p> : null}
+            <div css={comparisonPair}>
+              <div>
+                <div css={comparisonLabel}>Loading</div>
+                <AppHeaderLoadingView {...swapCase.loading} sticky={false} />
+              </div>
+              <div>
+                <div css={comparisonLabel}>Loaded</div>
+                <AppHeaderView {...swapCase.loaded} />
+              </div>
+            </div>
+          </section>
+        ))}
+      </div>
+    </ChromeServiceProvider>
+  );
+};
+
+export const LoadingToLoaded: Story = {
+  render: () => <LoadingToLoadedComparison />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Side-by-side loading vs loaded for typical single-row combinations. Height and the ' +
+          'trailing menu width should match closely; title width is a fixed skeleton. Multi-row ' +
+          'headers (tabs, description, metadata) are not fully supported and will shift height.',
+      },
+    },
   },
 };
