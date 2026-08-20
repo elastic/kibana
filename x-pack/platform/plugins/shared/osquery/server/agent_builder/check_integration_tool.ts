@@ -19,7 +19,6 @@ import {
   buildOsqueryPolicyKuery,
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
-import { escapeKueryValue } from './resolve_agent_ids_tool';
 import { EXECUTABLE_AGENT_STATUSES } from './agent_statuses';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
@@ -56,11 +55,15 @@ interface IntegrationStatus {
 }
 
 /**
- * KQL wildcards are not escapes: `escapeKueryValue` quotes the literal but a
- * `*` inside it still expands. Escape wildcard metacharacters for exact-match
- * lookups.
+ * Complete KQL literal escaping for exact-match lookups: backslashes and
+ * quotes first (so they cannot break out of the quoted literal), then
+ * wildcard metacharacters (so `*`/`?` cannot expand inside it).
  */
-const escapeKueryWildcards = (value: string): string => value.replace(/([*?])/g, '\\$1');
+const escapeKueryExact = (value: string): string =>
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/([*?])/g, '\\$1');
 
 const toolResult = (data: IntegrationStatus) => ({
   results: [
@@ -194,9 +197,9 @@ export const checkIntegrationTool = (
       // count: "can THIS host run Osquery", i.e. is it enrolled in a policy
       // that carries the integration.
       if (agentId) {
-        // escapeKueryValue does not escape KQL wildcards, so the kuery can
-        // match more than the requested agent — verify exact identity below.
-        const escapedAgentId = escapeKueryWildcards(escapeKueryValue(agentId));
+        // escapeKueryExact covers backslash, quote, and wildcard metachars;
+        // exact identity is still verified below as defense in depth.
+        const escapedAgentId = escapeKueryExact(agentId);
         const { agents } = await scopedAgentClient.listAgents({
           kuery: `agent.id:"${escapedAgentId}" and (${policyKuery})`,
           perPage: 1,
