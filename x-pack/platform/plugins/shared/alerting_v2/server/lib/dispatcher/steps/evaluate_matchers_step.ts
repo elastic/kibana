@@ -8,8 +8,8 @@
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -27,14 +27,16 @@ import { createMatcherContext } from './utils/matcher_context';
 export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const {
       dispatchable = [],
       rules = new Map<RuleId, Rule>(),
       policies = new Map<ActionPolicyId, ActionPolicy>(),
     } = state;
 
-    const logger = state.logger.withLabels({ step: this.name });
     const matched = this.evaluateMatchers(dispatchable, rules, policies, logger);
 
     return { type: 'continue', data: { matched } };

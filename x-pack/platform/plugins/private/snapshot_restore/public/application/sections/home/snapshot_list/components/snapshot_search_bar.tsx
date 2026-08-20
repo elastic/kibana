@@ -14,7 +14,8 @@ import type { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/
 import type { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui/src/components/search_bar/search_bar';
 import type { Query } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { SnapshotDeleteProvider } from '../../../../components';
 import type { SnapshotDetails } from '../../../../../../common/types';
 import type { SnapshotListParams } from '../../../../lib';
@@ -207,12 +208,10 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       <EuiSpacer />
       {error ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount={false}
             data-test-subj="snapshotListSearchError"
-            iconType="warning"
             role="alert"
-            color="danger"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.searchBar.invalidSearchMessage"
