@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type {
@@ -28,6 +28,27 @@ const readCollapsed = (): boolean => {
   } catch {
     return false;
   }
+};
+
+
+const WatchesSubnavContext = React.createContext<{
+  expand: () => void;
+  isCollapsed: boolean;
+}>({ expand: () => undefined, isCollapsed: false });
+
+export const WatchesSubnavExpandControl: React.FC = () => {
+  const { expand, isCollapsed } = React.useContext(WatchesSubnavContext);
+  if (!isCollapsed) {
+    return null;
+  }
+  return (
+    <EuiButtonIcon
+      iconType="menuRight"
+      aria-label={i18n.SUBNAV_EXPAND}
+      onClick={expand}
+      data-test-subj="pndWatchesSubnavExpand"
+    />
+  );
 };
 
 interface WatchesSectionLayoutProps {
@@ -87,6 +108,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   );
 
   return (
+    <WatchesSubnavContext.Provider value={{ expand: () => setCollapsed(false), isCollapsed }}>
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="pndWatchesSectionLayout">
       {!isCollapsed ? (
         /**
@@ -135,5 +157,6 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
         {children}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
+    </WatchesSubnavContext.Provider>
   );
 };
