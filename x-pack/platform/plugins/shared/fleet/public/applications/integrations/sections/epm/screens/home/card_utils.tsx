@@ -44,6 +44,17 @@ export interface CollectionStateRef {
   title: string;
 }
 
+/** View-model for one collection method shown inside the chooser flyout. */
+export interface CollectionVariant {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactElement;
+  href?: string;
+  onClick?: React.MouseEventHandler;
+  'data-test-subj'?: string;
+}
+
 export interface IntegrationCardItem {
   categories: string[];
   description: string;

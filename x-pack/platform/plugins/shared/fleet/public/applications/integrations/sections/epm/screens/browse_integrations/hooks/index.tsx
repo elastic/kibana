@@ -45,8 +45,12 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    allCards: originalFilteredCards,
+    allCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+
+  // Alias for internal use; allCards is returned for callers that need the full unfiltered set
+  // (e.g. to resolve a collection card that may have been filtered out of the current view).
+  const originalFilteredCards = allCards;
 
   const urlFilters = useUrlFilters();
 
@@ -188,6 +192,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
     availableSubCategories,
     onCategoryChange,
     onSortChange,
