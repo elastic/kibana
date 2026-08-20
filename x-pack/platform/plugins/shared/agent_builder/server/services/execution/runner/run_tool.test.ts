@@ -497,6 +497,40 @@ describe('runInternalTool - confirmation policy', () => {
       expect(toolHandler).not.toHaveBeenCalled();
     });
 
+    it('passes toolParams and toolHandlerContext to getConfirmation', async () => {
+      const getConfirmation = jest.fn().mockResolvedValue({
+        title: 'Confirm',
+        message: 'Proceed?',
+      });
+      tool.confirmation = { askUser: 'always', getConfirmation };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-789',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(getConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolParams: { foo: 'bar' },
+          context: expect.objectContaining({
+            attachments: runnerDeps.attachmentStateManager,
+            request: runnerDeps.request,
+            spaceId: expect.any(String),
+          }),
+        })
+      );
+    });
+
     it('should execute tool when confirmation status is accepted', async () => {
       tool.confirmation = { askUser: 'once' };
       runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
