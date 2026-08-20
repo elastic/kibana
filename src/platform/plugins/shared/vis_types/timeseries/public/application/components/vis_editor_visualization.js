@@ -173,7 +173,7 @@ class VisEditorVisualizationUI extends Component {
   }
 
   render() {
-    const { dirty, autoApply, onToggleAutoApply, onCommit } = this.props;
+    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
     const style = { height: this.state.height };
 
     if (this.state.dragging) {
@@ -250,6 +250,9 @@ class VisEditorVisualizationUI extends Component {
           style={style}
           className="tvbEditorVisualization"
           css={editorVisualizationStyle}
+          data-shared-items-container
+          data-title={title}
+          data-description={description}
           ref={this._visEl}
         />
         <div className="tvbEditor--hideForReporting">
