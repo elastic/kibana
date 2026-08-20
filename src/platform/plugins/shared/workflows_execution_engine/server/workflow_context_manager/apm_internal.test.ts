@@ -11,7 +11,7 @@ import { context, INVALID_TRACEID, trace, TraceFlags } from '@opentelemetry/api'
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type agent from 'elastic-apm-node';
-import { getTraceId } from './apm_internal';
+import { getActiveOtelTraceId, getTraceId } from './apm_internal';
 
 // Minimal non-recording span carrying a real trace id, built from `@opentelemetry/api`
 // primitives so the test does not depend on an SDK tracer provider.
@@ -66,26 +66,28 @@ describe('getTraceId', () => {
       } as unknown as agent.Transaction;
 
       await context.with(trace.setSpan(context.active(), span), async () => {
-        expect(getTraceId(transaction)).toBe('apm-wins');
+        expect(getTraceId(transaction) ?? getActiveOtelTraceId()).toBe('apm-wins');
       });
     });
   });
 
   describe('EDOT / OTEL-only (no APM agent)', () => {
-    // Under EDOT-only instrumentation every APM lookup returns undefined, so without this
-    // fallback the engine persists no trace id even though spans are exported normally.
-    it('falls back to the active OTEL span context', async () => {
+    // Under EDOT-only instrumentation every APM lookup returns undefined, so without the
+    // caller-side OTEL fallback the engine persists no trace id even though spans are
+    // exported normally. `getTraceId` itself stays transaction-only.
+    it('returns undefined for an APM-less transaction even when an OTEL span is active', async () => {
       const span = spanWithTraceId(OTEL_TRACE_ID);
 
       expect(OTEL_TRACE_ID).not.toBe(INVALID_TRACEID);
 
       await context.with(trace.setSpan(context.active(), span), async () => {
-        expect(getTraceId(apmlessTransaction)).toBe(OTEL_TRACE_ID);
+        expect(getTraceId(apmlessTransaction)).toBeUndefined();
+        expect(getTraceId(apmlessTransaction) ?? getActiveOtelTraceId()).toBe(OTEL_TRACE_ID);
       });
     });
 
     it('returns undefined when neither APM nor an OTEL span is active', () => {
-      expect(getTraceId(apmlessTransaction)).toBeUndefined();
+      expect(getTraceId(apmlessTransaction) ?? getActiveOtelTraceId()).toBeUndefined();
     });
 
     it('rejects the all-zero INVALID_TRACEID rather than persisting it', async () => {
@@ -93,7 +95,7 @@ describe('getTraceId', () => {
       const span = spanWithTraceId('00000000000000000000000000000000');
 
       await context.with(trace.setSpan(context.active(), span), async () => {
-        expect(getTraceId(apmlessTransaction)).toBeUndefined();
+        expect(getTraceId(apmlessTransaction) ?? getActiveOtelTraceId()).toBeUndefined();
       });
     });
   });

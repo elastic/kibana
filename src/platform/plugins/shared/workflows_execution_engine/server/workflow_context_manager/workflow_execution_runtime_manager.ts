@@ -345,8 +345,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the workflow transaction
-        const realTraceId = getTraceId(workflowTransaction);
+        // Capture trace ID from the workflow transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(workflowTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -391,8 +392,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the task transaction
-        const realTraceId = getTraceId(existingTransaction);
+        // Capture trace ID from the task transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(existingTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {

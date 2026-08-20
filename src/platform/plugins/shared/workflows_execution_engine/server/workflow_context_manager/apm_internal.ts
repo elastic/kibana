@@ -38,13 +38,10 @@ export function getAlertingRuleId(transaction: agent.Transaction | null): string
 /**
  * Resolves the trace ID for a transaction. Tries the documented `ids` field
  * first, then the private `traceId` / `trace.id` shapes that older builds of
- * `elastic-apm-node` expose, and finally the active OTEL span context.
- *
- * The OTEL fallback covers EDOT-only instrumentation, where there is no APM
- * agent and every APM-shaped lookup returns undefined even though spans are
- * exported normally. Mirrors the `apm ?? trace.getActiveSpan()` precedent in
- * core. APM is tried first, so behaviour is unchanged where the legacy agent
- * is active.
+ * `elastic-apm-node` expose. Returns `undefined` when the transaction carries
+ * no APM-shaped trace id — the caller decides whether to fall back to the
+ * active OTEL span context (`getActiveOtelTraceId`), which may hold a trace id
+ * unrelated to this transaction.
  */
 export function getTraceId(transaction: agent.Transaction): string | undefined {
   const fromIds = transaction.ids?.['trace.id'];
@@ -53,8 +50,7 @@ export function getTraceId(transaction: agent.Transaction): string | undefined {
   if (typeof t.traceId === 'string') return t.traceId;
   if (typeof t.trace?.id === 'string') return t.trace.id;
 
-  // EDOT / OTEL-only path.
-  return getActiveOtelTraceId();
+  return undefined;
 }
 
 /**
