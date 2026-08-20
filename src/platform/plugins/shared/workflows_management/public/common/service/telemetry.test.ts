@@ -1626,8 +1626,7 @@ describe('WorkflowsBaseTelemetry', () => {
       expect(mockClient.reportEvent).toHaveBeenCalledWith(
         WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked,
         expect.objectContaining({
-          eventName:
-            workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked],
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked],
           workflowId: 'wf-1',
           origin: 'table_actions',
         })
