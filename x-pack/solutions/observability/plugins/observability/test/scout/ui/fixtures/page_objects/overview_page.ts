@@ -18,17 +18,6 @@ const DATE_WITH_DATA = {
 } as const;
 
 /**
- * Time window a month before the generated alerts (mirrors `DATE_WITHOUT_DATA`).
- * Note the overview "no data" prompt is driven by whether any Observability
- * rules/indices exist, not by the selected range, so this is only used to mirror
- * the FTR navigation.
- */
-const DATE_WITHOUT_DATA = {
-  rangeFrom: '2021-09-18T13:36:22.109Z',
-  rangeTo: '2021-09-20T13:36:22.109Z',
-} as const;
-
-/**
  * Drives the Observability overview page (`/app/observability/overview`).
  *
  * Ported from the FTR `observability.overview.common` service
@@ -36,15 +25,11 @@ const DATE_WITHOUT_DATA = {
  * Page objects only drive the UI and return state; assertions live in the specs.
  */
 export class OverviewPage {
-  public readonly noDataPrompt: Locator;
-  public readonly addDataButton: Locator;
   public readonly alertsSection: Locator;
   public readonly alertsTable: Locator;
   public readonly alertsDataGrid: EuiDataGridObject;
 
   constructor(private readonly page: ScoutPage) {
-    this.noDataPrompt = this.page.testSubj.locator('obltOverviewNoDataPrompt');
-    this.addDataButton = this.page.testSubj.locator('o11yOverviewPageAddDataButton');
     this.alertsSection = this.page.testSubj.locator('accordion-Alerts');
     this.alertsTable = this.page.testSubj.locator(SUBJ.TABLE_LOADED);
     this.alertsDataGrid = this.page.components.dataGrid(SUBJ.TABLE_LOADED);
@@ -53,11 +38,6 @@ export class OverviewPage {
   /** Navigates to the overview using the time window that contains alerts. */
   async gotoWithAlerts() {
     await this.page.gotoApp('observability/overview', { params: { ...DATE_WITH_DATA } });
-  }
-
-  /** Navigates to the overview using a time window before any alerts exist. */
-  async gotoWithoutAlerts() {
-    await this.page.gotoApp('observability/overview', { params: { ...DATE_WITHOUT_DATA } });
   }
 
   /** Waits for the alerts accordion (open by default) to render its table. */
@@ -70,10 +50,5 @@ export class OverviewPage {
   /** Returns the number of alert rows rendered in the overview alerts table. */
   async getAlertsRowCount(): Promise<number> {
     return this.alertsDataGrid.rows.count();
-  }
-
-  /** Clicks the empty-state "Add data" CTA that links to onboarding. */
-  async clickAddData() {
-    await this.addDataButton.click();
   }
 }
