@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import {
   apiTest,
@@ -15,7 +16,6 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
 import {
-import { tags } from '@kbn/scout-oblt';
   addMonitor,
   editMonitor,
   omitMonitorKeys,

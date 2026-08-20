@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { LOCATION_REQUIRED_ERROR } from '../../../../../server/routes/monitor_cruds/monitor_validation';
 import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
@@ -17,7 +18,6 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
 import {
-import { tags } from '@kbn/scout-oblt';
   addMonitor,
   editMonitor,
   omitMonitorKeys,
