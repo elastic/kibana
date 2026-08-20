@@ -195,6 +195,20 @@ await esClient.indices.create({ index: indexName });
 await esClient.indices.delete({ index: indexName });
 ```
 
+❌ **Don't:** clean up by deleting the pointer. Wiping the saved objects removes the *record* of the rule, but the API key it owns stays alive:
+
+```ts
+// afterAll — the rule documents are gone, but their API keys are now orphaned
+await kbnClient.savedObjects.clean({ types: ['alert'] });
+```
+
+✔️ **Do:** tear down through the API that owns the resource, so its own deletion logic releases everything it created:
+
+```ts
+// afterAll — deleting the rule also queues its API key for invalidation
+await apiServices.alerting.rules.delete(ruleId);
+```
+
 :::::
 
 :::::{tip}
