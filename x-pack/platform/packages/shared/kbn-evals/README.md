@@ -7,7 +7,7 @@
 This package follows the strategic direction outlined in the "Future of @kbn/evals" vision document. Contributors should be aware of these principles:
 
 - **Trace-first evaluators**: New evaluators should derive signals from OTel traces stored in Elasticsearch when possible. Use `createTraceBasedEvaluator` for non-functional metrics. For evaluators that currently operate on in-memory output, design interfaces that also accept `traceId` references for future API-based evaluation.
-- **Elastic-native path**: Build on ES/Kibana/OTel capabilities rather than introducing new external dependencies. Phoenix usage should remain behind `KBN_EVALS_EXECUTOR=phoenix` and not expand.
+- **Elastic-native path**: Build on ES/Kibana/OTel capabilities rather than introducing new external dependencies.
 - **Shared evaluation layer**: This package provides primitives (evaluator factories, data model, persistence, reporting). Solution-specific evaluators, datasets, and reporting belong in solution-owned evaluation suites, not here.
 - **Code-defined datasets**: Evaluation datasets should be defined in code, versioned, and reviewed alongside suites. Ad-hoc datasets must be explicitly decoupled from CI-contributing datasets.
 - **Ownership**: Framework is owned by the Observability AI team. General-purpose evaluators discovered in solution suites should be contributed upstream.
@@ -98,8 +98,7 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 | Fixture                     | Description                                                                                                                                                                                              |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
-| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
-| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
+| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments via the in-Kibana executor.                                                                                               |
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
 | `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
@@ -986,47 +985,3 @@ To do this, you need to create (or override) a configuration file at `.scout/ser
 Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
 
 > **Note:** Running the Scout server with `node scripts/scout.js start-server --arch stateful --domain classic` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
-
-## Executor selection (Phoenix vs in-Kibana)
-
-By default, evals run using the **in-Kibana executor** (no Phoenix dataset/experiment API required).
-
-If you want to run using the **Phoenix-backed executor**, set:
-
-```bash
-KBN_EVALS_EXECUTOR=phoenix
-```
-
-When using `KBN_EVALS_EXECUTOR=phoenix`, the eval runner (Playwright worker process) needs Phoenix API settings.
-The simplest way to provide them locally (e.g. when running `node scripts/phoenix`) is via environment variables:
-
-```bash
-PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
-```
-
-If your Phoenix instance requires auth, also set:
-
-```bash
-PHOENIX_API_KEY=... PHOENIX_BASE_URL=... KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
-```
-
-#### Dataset upsert fallback (Phoenix-only)
-
-Some Phoenix environments intermittently fail the GraphQL dataset upsert used to keep datasets in sync. As a fallback, `@kbn/evals` can **delete and recreate** the dataset via Phoenix REST APIs.
-
-Because deleting a dataset **wipes all past experiments** on that dataset, this fallback is **disabled by default**. To explicitly allow it, set:
-
-```bash
-KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true
-```
-
-Alternatively, you can configure a Phoenix exporter in `kibana.dev.yml` so `@kbn/evals` can read Phoenix API settings via `getPhoenixConfig()`.
-
-```yaml
-telemetry.tracing.exporters:
-  - phoenix:
-      base_url: 'https://<my-phoenix-host>'
-      public_url: 'https://<my-phoenix-host>'
-      project_name: '<my-name>'
-      api_key: '<my-api-key>'
-```

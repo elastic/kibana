@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -18,6 +20,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { createRawKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
@@ -179,7 +182,7 @@ function getProps({
   } as any);
 
   const { fatalErrors } = coreMock.createSetup();
-  const { http, docLinks, notifications, rendering } = coreMock.createStart();
+  const { http, docLinks, notifications, overlays, rendering } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
       if (!spacesEnabled) {
@@ -215,6 +218,8 @@ function getProps({
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),
+    overlays,
+    navigateToUrl: jest.fn(),
     spacesApiUi,
     buildFlavor,
     userProfile: userProfileMock,
@@ -979,11 +984,168 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
   });
+
+  describe('unsaved changes', () => {
+    const role: Role = {
+      name: 'my custom role',
+      description: 'a role',
+      metadata: {},
+      elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+      kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+    };
+
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement.
+    const renderEditRolePage = async ({ existingRole = true } = {}) => {
+      const history = new CoreScopedHistory(
+        createMemoryHistory({
+          initialEntries: [existingRole ? '/mock/edit/my_role' : '/mock/edit'],
+        }),
+        '/mock'
+      );
+      const props = {
+        ...getProps({ action: 'edit', role: existingRole ? role : undefined }),
+        history,
+      };
+      props.overlays.openConfirm.mockResolvedValue(false);
+
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
+
+      await waitForRender();
+
+      return {
+        history,
+        openConfirm: props.overlays.openConfirm,
+        navigateToUrl: props.navigateToUrl,
+        rolesAPIClient: props.rolesAPIClient,
+      };
+    };
+
+    const editDescription = (value: string) =>
+      fireEvent.change(screen.getByTestId('roleFormDescriptionInput'), { target: { value } });
+
+    it('does not prompt when leaving an untouched role', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('does not prompt when leaving an untouched create form', async () => {
+      // the create form pre-populates an empty index privilege, which is not a user change
+      const { history, openConfirm } = await renderEditRolePage({ existingRole: false });
+
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('prompts when leaving a create form with unsaved changes', async () => {
+      const { history, openConfirm } = await renderEditRolePage({ existingRole: false });
+
+      fireEvent.change(screen.getByTestId('roleFormNameInput'), {
+        target: { value: 'my_new_role' },
+      });
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      expect(history.location.pathname).toBe('/edit');
+    });
+
+    it('prompts when leaving a role with unsaved changes', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(history.location.pathname).toBe('/edit/my_role');
+    });
+
+    it('does not prompt when the change has been reverted', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      editDescription('a role');
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('does not prompt after the role has been saved', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormSaveButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('prompts again when saving the role failed', async () => {
+      const { history, openConfirm, rolesAPIClient } = await renderEditRolePage();
+      rolesAPIClient.saveRole.mockRejectedValue(new Error('could not save'));
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormSaveButton'));
+      await waitForRender();
+
+      // the role was never saved, so those changes are still worth warning about
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      expect(history.location.pathname).toBe('/edit/my_role');
+    });
+
+    it('does not prompt when the form is cancelled', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormCancelButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('navigates away when the user confirms the prompt', async () => {
+      const { history, openConfirm, navigateToUrl } = await renderEditRolePage();
+      openConfirm.mockResolvedValue(true);
+
+      editDescription('a different role');
+      history.push('/');
+
+      // on confirm the prompt unblocks and navigates itself, to the base-path-prepended target
+      await waitFor(() => {
+        expect(navigateToUrl).toHaveBeenCalledWith('/mock/', expect.anything());
+      });
+    });
+  });
 });
 
-async function waitForRender(wrapper: ReactWrapper<any>) {
+async function waitForRender(wrapper?: ReactWrapper<any>) {
   await act(async () => {
     await nextTick();
-    wrapper.update();
+    wrapper?.update();
   });
 }

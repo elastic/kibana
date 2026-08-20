@@ -88,4 +88,47 @@ describe('<CustomCriblForm />', () => {
       },
     });
   });
+
+  it('rejects invalid dataId input without rewriting it', async () => {
+    (getFleetManagedIndexTemplates as jest.Mock).mockReturnValue({
+      indexTemplates: datastreamOpts,
+      permissionsError: false,
+      generalError: false,
+    });
+
+    const { getByLabelText, getByTestId } = render(
+      <WrappedComponent newPolicy={mockPackagePolicy} />
+    );
+    const dataId = getByLabelText('Cribl _dataId field');
+
+    await waitFor(() => {
+      expect(dataId).toBeInTheDocument();
+    });
+
+    const invalidDataId = `evil' || true || '`;
+    await userEvent.type(dataId, invalidDataId);
+
+    const datastreamComboBox = getByTestId('comboBoxSearchInput');
+    await userEvent.type(datastreamComboBox, datastreamOpts[0]);
+
+    const datastreamComboBoxOpts = getByTestId('comboBoxOptionsList');
+    await waitFor(() => {
+      expect(datastreamComboBoxOpts).toBeInTheDocument();
+    });
+
+    const ourOption = within(datastreamComboBoxOpts).getByRole('option');
+    ourOption.click();
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      isValid: false,
+      updatedPolicy: {
+        ...mockPackagePolicy,
+        vars: {
+          route_entries: {
+            value: `[{"dataId":"${invalidDataId}","datastream":"logs-destination1.cloud"}]`,
+          },
+        },
+      },
+    });
+  });
 });

@@ -25,25 +25,10 @@ const ENV_DOCS = [
     example: 'EVALUATION_REPETITIONS=3',
   },
   {
-    name: 'KBN_EVALS_EXECUTOR',
-    description: 'Switch to the Phoenix-backed executor.',
-    example: 'KBN_EVALS_EXECUTOR=phoenix',
-  },
-  {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
     example: 'KBN_EVALS_SKIP_CONNECTOR_SETUP=true',
-  },
-  {
-    name: 'PHOENIX_BASE_URL',
-    description: 'Phoenix base URL used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_BASE_URL=http://localhost:6006',
-  },
-  {
-    name: 'PHOENIX_API_KEY',
-    description: 'Phoenix API key used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_API_KEY=...',
   },
   {
     name: 'TRACING_ES_URL',

@@ -1007,11 +1007,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return p;
     });
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
@@ -1024,7 +1027,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { id, ...pkgPolicyWithoutId } = packagePolicy;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1049,8 +1053,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
+        let secretReferences: SecretReference[] | undefined;
+        if (secretStorageEnabled) {
+          const secretsRes = await extractAndWriteSecrets({
+            packagePolicy: { ...pkgPolicyWithoutId, inputs },
+            packageInfo: pkgInfo,
+            esClient,
+          });
+
+          pkgPolicyWithoutId = secretsRes.packagePolicy;
+          secretReferences = secretsRes.secretReferences;
+          inputs = pkgPolicyWithoutId.inputs as PackagePolicyInput[];
+        }
+
         inputs = pkgInfo
-          ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
+          ? await _compilePackagePolicyInputs(
+              pkgInfo,
+              pkgPolicyWithoutId.vars || {},
+              inputs,
+              assetsMap
+            )
           : inputs;
 
         const elasticsearch = pkgInfo?.elasticsearch;
@@ -1076,6 +1098,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             latest_revision: true,
             revision: 1,
             created_at: isoDate,
@@ -1521,7 +1544,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-    }
+    },
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1552,7 +1576,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         'packagePolicyUpdate',
         packagePolicyUpdateWithId,
         soClient,
-        esClient
+        esClient,
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -2528,6 +2553,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             .flatMap((r) => r.policy_ids!)
         ),
       ];
+
+      // Delete agentless agent policies for successfully deleted package policies.
+      // agentPolicyService.delete() handles the agentless deployment teardown internally.
+      const agentlessPoliciesToDelete = agentlessAgentPolicies.filter((id) =>
+        uniquePolicyIdsR.includes(id)
+      );
+      for (const agentPolicyId of agentlessPoliciesToDelete) {
+        try {
+          await agentPolicyService.delete(soClient, esClient, agentPolicyId, {
+            force: options?.force,
+            user: options?.user,
+          });
+        } catch (error) {
+          logger.error(
+            `An error occurred deleting agentless agent policy ${agentPolicyId}: ${error}`
+          );
+        }
+      }
+
       uniquePolicyIdsR = without(uniquePolicyIdsR, ...agentlessAgentPolicies);
 
       const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
@@ -3496,7 +3540,8 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           force?: boolean | undefined;
           skipUniqueNameVerification?: boolean | undefined;
         }
-      | undefined
+      | undefined,
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -3504,7 +3549,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(
