@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DebugState } from '@elastic/charts';
 import {
   extendPlaywrightPage,
   KibanaCodeEditorWrapper,
@@ -222,6 +223,110 @@ export async function buildMetricVisualization({ visualize, lens }: VisualizeAnd
     operation: 'average',
     field: 'bytes',
   });
+}
+
+/**
+ * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
+ * The Lens-editor equivalent (`lens.workspace.getCurrentChartDebugState`) scopes its
+ * locators under `lnsWorkspace`, which does not exist on dashboards. Requires
+ * `enableElasticChartDebug` (or equivalent init script) before navigation.
+ */
+export async function getDashboardChartDebugState(
+  page: ScoutPage,
+  chartTestSubj: string
+): Promise<DebugState> {
+  const chart = page.testSubj.locator(chartTestSubj);
+  // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
+  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+    state: 'attached',
+  });
+  const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+  if (!debugJson) {
+    throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+  }
+  return JSON.parse(debugJson) as DebugState;
+}
+
+/**
+ * Builds a fresh Lens Metric visualization with only a primary "Average of bytes" dimension.
+ * Mirrors FTR lens group13 `createNewLens`. Unlike {@link buildMetricVisualization} it adds
+ * no secondary dimension — inline-editing suites add that later through the flyout.
+ */
+export async function buildBytesMetricVisualization({ visualize, lens }: VisualizeAndLens) {
+  await visualize.goto();
+  await visualize.openNewVisualizationWizard();
+  await visualize.clickVisType('lens');
+
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
+  await lens.waitForVisualization('mtrVis');
+}
+
+/**
+ * Saves the currently open *saved* Lens visualization as a new copy and adds it to a new
+ * dashboard. Re-saving an existing saved visualization disables the add-to-dashboard radios
+ * until "Save as new visualization" is checked (FTR passed `saveAsNew: true` for the same
+ * reason), which the shared `lens_app.save()` does not support.
+ */
+export async function saveLensAsNewCopyToNewDashboard(
+  { lens }: Pick<LensPageObjects, 'lens'>,
+  page: ScoutPage,
+  title: string
+) {
+  await lens.saveButton.click();
+  await lens.saveModal.waitFor({ state: 'visible' });
+
+  await lens.setEuiSwitch('saveAsNewCheckbox', true);
+  await lens.savedObjectTitleInput.fill(title);
+  // Radio is enabled only after save-as-new is on; `check` auto-waits for enabled.
+  await page.locator('#new-dashboard-option').check();
+  // A copy of a library visualization defaults to "Add to library" checked, which would
+  // create a by-reference panel; uncheck for a by-value panel (FTR `saveToLibrary: false`).
+  await page.locator('#add-to-library-checkbox').uncheck();
+
+  await lens.confirmSaveButton.click();
+  await lens.saveModal.waitFor({ state: 'hidden' });
+}
+
+/**
+ * Creates an XY histogram (average of `bytes` over `@timestamp`, broken down by `ip`)
+ * starting from the current dashboard (edit mode) and returns to it.
+ * Replaces FTR `lens.createAndAddLensFromDashboard`.
+ */
+export async function createXyLensPanelFromDashboard(
+  { dashboard, lens }: DashboardAndLens,
+  page: ScoutPage,
+  options?: { useAdHocDataView?: boolean }
+) {
+  await dashboard.addNewLensPanel();
+  await lens.waitForLensApp();
+
+  if (options?.useAdHocDataView) {
+    await createAdHocDataViewFromLens(page, '*stash*');
+  }
+
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await lens.configureDimension({
+    dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+    operation: 'terms',
+    field: 'ip',
+  });
+
+  await lens.saveAndReturn();
+  await dashboard.waitForRenderComplete();
 }
 
 interface LogstashSpaceSetupContext {
