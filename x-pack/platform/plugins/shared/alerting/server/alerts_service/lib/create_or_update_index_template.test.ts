@@ -283,22 +283,20 @@ describe('createOrUpdateIndexTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
   });
 
-  it(`should log and throw when fetching the existing template fails`, async () => {
-    clusterClient.indices.getIndexTemplate.mockRejectedValue(new Error('fetch error'));
+  it(`should PUT when the installed template cannot be read`, async () => {
+    clusterClient.indices.getIndexTemplate.mockRejectedValue(new Error('security_exception'));
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
 
-    await expect(() =>
-      createOrUpdateIndexTemplate({
-        logger,
-        esClient: clusterClient,
-        template: IndexTemplate(),
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"fetch error"`);
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
 
-    expect(logger.error).toHaveBeenCalledWith(
-      `Error fetching existing index template .alerts-test.alerts-default-index-template - fetch error`,
-      expect.any(Error)
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed index template .alerts-test.alerts-default-index-template; will install (security_exception)`
     );
-    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
   it(`should retry on transient ES errors`, async () => {

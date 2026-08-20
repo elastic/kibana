@@ -140,10 +140,11 @@ const getExistingIndexTemplate = async (
       contentHash: existingTemplate.index_template?._meta?.[RESOURCE_CONTENT_HASH_META_FIELD],
     };
   } catch (err) {
-    if (err?.statusCode === 404) {
-      return undefined;
-    }
-    throw err;
+    // Any failure reading the installed template (404, permissions, exhausted
+    // retries) leaves the installed content unknown, which falls through to the
+    // PUT. The check must never block an install that would otherwise succeed.
+    logger.debug(`Could not read installed index template ${name}; will install (${err.message})`);
+    return undefined;
   }
 };
 
