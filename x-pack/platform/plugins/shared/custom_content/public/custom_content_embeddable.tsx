@@ -163,6 +163,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             ) => {
               const { agentBuilder } = getServices();
               if (!agentBuilder) return;
+              hasSaved = true;
               previewHtml$.next(null);
               closeFlyout();
               agentBuilder.openChat({

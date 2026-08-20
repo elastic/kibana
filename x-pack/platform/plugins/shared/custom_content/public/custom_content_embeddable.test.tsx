@@ -360,6 +360,30 @@ describe('customContentEmbeddableFactory', () => {
 
       expect(openChat).toHaveBeenCalled();
     });
+
+    it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
+      const removePanel = jest.fn();
+      const openChat = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await renderFlyoutContent();
+
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
+      await act(async () => mockFlyoutOnClose);
+
+      expect(openChat).toHaveBeenCalled();
+      expect(removePanel).not.toHaveBeenCalled();
+    });
   });
 
   describe('agent event subscription', () => {
