@@ -175,6 +175,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
 
     updateDoc: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Apply one or more batch updates to a Google Doc using the Google Docs batchUpdate API. ' +
         'Supports replacing text, formatting runs, managing bullet lists, inserting tables, images, ' +
