@@ -224,10 +224,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             isDisabled={!isReady}
             data-test-subj="servicesStep-continueButton"
           >
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.continueButton"
-              defaultMessage="Continue"
-            />
+            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

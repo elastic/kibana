@@ -24,7 +24,6 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
-  updateConversation,
   type Document as ConversationDocument,
 } from './converters';
 
@@ -62,6 +61,8 @@ describe('conversation model converters', () => {
     const documentBase = (): ConversationDocument => {
       return {
         _id: 'conv_id',
+        _seq_no: 1,
+        _primary_term: 1,
         _source: {
           agent_id: 'agent_id',
           title: 'conv_title',
@@ -838,6 +839,8 @@ describe('conversation model converters', () => {
 
       const roundTripped = fromEs({
         _id: conversation.id,
+        _seq_no: 1,
+        _primary_term: 1,
         _source: toEs(conversation, 'space'),
       });
 
@@ -864,51 +867,6 @@ describe('conversation model converters', () => {
         id: 'U123',
         full_name: 'Jane Doe',
         username: 'jane',
-      });
-    });
-  });
-
-  describe('updateConversation', () => {
-    it('preserves access control entries when updating a conversation', () => {
-      const conversation: Conversation = {
-        id: 'conv_id',
-        agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
-        title: 'conv_title',
-        created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [],
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            {
-              type: 'user',
-              id: 'alice-profile-id',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-06-29T00:00:00.000Z',
-            },
-          ],
-        },
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: { id: 'conv_id', title: 'new_title' },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      expect(updated.title).toEqual('new_title');
-      expect(updated.access_control).toEqual({
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [
-          {
-            type: 'user',
-            id: 'alice-profile-id',
-            role: ConversationAccessControlRole.Member,
-            added_at: '2026-06-29T00:00:00.000Z',
-          },
-        ],
       });
     });
   });
@@ -1060,6 +1018,8 @@ describe('conversation model converters', () => {
       it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
             title: 'Template conv',
@@ -1085,6 +1045,8 @@ describe('conversation model converters', () => {
       it('omits metadata, template_id, and template_version when absent from the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-no-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
             title: 'No template',
