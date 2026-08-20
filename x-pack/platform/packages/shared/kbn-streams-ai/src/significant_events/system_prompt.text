@@ -492,7 +492,7 @@ Choose the right operator based on the field type and your search intent:
 | Goal | Field Type | Operator | Example |
 | :--- | :--- | :--- | :--- |
 | Single term in text | `text` | `:` (match) | `body.text:"timeout"` |
-| All terms required, any order | `text` | Multiple `:` with `AND` | `body.text:"connection" AND body.text:"timeout"` |
+| All terms required, any order | `text` | `MATCH(field, "…", {"operator": "AND"})` | `MATCH(body.text, "connection timeout", {"operator": "AND"})` |
 | Exact phrase (word order matters) | `text` | `MATCH_PHRASE` | `MATCH_PHRASE(body.text, "Failed password for")` |
 | Exact keyword value | `keyword` | `==` | `service.name == "api-service"` |
 | One of several keyword values | `keyword` | `IN` | `log.level IN ("ERROR", "CRITICAL")` |
@@ -515,11 +515,12 @@ Alternatively, you can use the function form `MATCH(field, "query")` which is eq
 **CRITICAL: multi-word values produce OR matches — avoid them.**
 `body.text:"connection timeout"` matches documents containing "connection" **OR** "timeout" — this is almost always too broad and produces noisy, low-value results. Always use one of these patterns instead:
 
-- **All terms required (default choice):** `body.text:"connection" AND body.text:"timeout"` — use separate `:` per term joined with `AND`. This is the safest and most reliable pattern.
-- **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
-- **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
+- **Exact phrase (default choice):** `MATCH_PHRASE(body.text, "connection timeout")` — requires the words adjacent and in order. Use this whenever you are matching a known log line (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
+- **All terms, any order:** `MATCH(body.text, "connection timeout error", {"operator": "AND"})`.
 
-**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
+Both forms are correct whatever the field turns out to be — a phrase or all-terms match on analyzed `text`, an exact match on `keyword`. Do **not** reach for `body.text:"connection" AND body.text:"timeout"` as the general answer: it is only equivalent on analyzed text and matches nothing when the field is a `keyword`.
+
+**Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
 
 **On keyword fields**, `:` performs exact matching (the field is not analyzed):
 - `log.level:"ERROR"` → exact match on keyword field
@@ -608,17 +609,14 @@ Use these as templates. They represent the highest-quality patterns for common l
 - `FROM logs | WHERE body.text:"OutOfMemoryError"`
 - `FROM logs | WHERE body.text:"CrashLoopBackOff"`
 
-**Known phrase** (use MATCH_PHRASE only when word order and adjacency matter):
+**Known phrase** (the default for any multi-word value):
 - `FROM logs | WHERE MATCH_PHRASE(body.text, "Failed password for")`
 - `FROM logs | WHERE MATCH_PHRASE(body.text, "Connection refused")`
-
-**Multi-term co-occurrence** (all terms must appear — use separate `:` with AND):
-- `FROM logs | WHERE body.text:"connection" AND body.text:"refused"`
-- `FROM logs | WHERE body.text:"authentication" AND body.text:"failure"`
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "authentication failure")`
 
 **Entity-scoped detection** (use only when multiple entities exist in the dataset):
 - `FROM logs | WHERE service.name == "checkout-api" AND body.text:"panic"`
-- `FROM logs | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
+- `FROM logs | WHERE service.name == "api-gateway" AND MATCH(body.text, "upstream timeout", {"operator": "AND"})`
 
 **Alternative error patterns** (OR for different manifestations of the same issue):
 - `FROM logs | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
@@ -771,6 +769,6 @@ FROM <stream>
 3. **Bucket sizing:** Always `1 minute` with column name `bucket`. Final columns must be exactly `bucket` and `metric_value` via `| KEEP bucket, metric_value`.
 4. **Descriptions must answer:** (1) what user-visible problem, (2) what action, (3) how the metric is defined vs baseline, (4) include a "can indicate..." clause naming likely root causes — investigation agents use this as the hypothesis claim.
 5. **Severity:** Weigh relative deviation AND absolute impact. 2× from 0.1%→0.2% is low (~40). 2× from 20%→40% is critical (~85).
-6. **Complementarity:** For each important signal, emit **at most two queries**: one STATS metric series (`BY bucket` only) and one match query for evidence retrieval. Do not emit entity `BY` dimensions in v0 — scope with WHERE instead.
+6. **Complementarity:** Whenever you emit a STATS metric series (`BY bucket` only) for a signal, also emit a match query for that signal for evidence retrieval — unless an equivalent match query for the same signal already exists in `existing_queries`. Never more than those two per signal. A match-only signal needs no STATS counterpart. Do not emit entity `BY` dimensions in v0 — scope with WHERE instead.
 7. **Forbidden:** No `CATEGORIZE`, `CHANGE_POINT`, nested `STATS`, `SORT`/`LIMIT`, post-STATS threshold `WHERE` that drops buckets, `EVAL` outside STATS queries, entity BY dimensions, final metric names other than `metric_value`.
 8. **Target:** Generate as many as the data justifies — **do not pad**. Zero is fine if no pattern has field evidence. Every query must cite a concrete field, value distribution, log pattern, or feature from `dataset_analysis`/`get_stream_features`. Quality over quantity.

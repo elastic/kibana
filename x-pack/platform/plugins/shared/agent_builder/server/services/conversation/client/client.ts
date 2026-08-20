@@ -10,7 +10,7 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
-  type UserIdAndName,
+  type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -19,11 +19,13 @@ import {
   type EventActor,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
+  createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createInternalError,
@@ -44,7 +46,6 @@ import type {
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
-  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
@@ -76,8 +77,8 @@ import {
   toEs,
   createRequestToEs,
   updateConversation,
+  withPermissions,
   type Document,
-  type VersionedDocument,
 } from './converters';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
@@ -115,7 +116,7 @@ export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
-  create(conversation: ConversationCreateRequest): Promise<Conversation>;
+  create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
@@ -142,19 +143,26 @@ export interface ConversationClient {
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
 }
 
+/**
+ * Caps `title` at the stored bound. HTTP routes already validate it, but server-side callers
+ * (LLM title generation in particular) do not, so enforce it here to cover every write path.
+ */
+const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
+  fields.title === undefined
+    ? fields
+    : { ...fields, title: fields.title.slice(0, CONVERSATION_TITLE_MAX_LENGTH) };
+
 export const createClient = ({
   space,
   logger,
   esClient,
   user,
-  isAdmin,
   agentRegistry,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
-  user: UserIdAndName;
-  isAdmin: boolean;
+  user: CurrentUser;
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -162,7 +170,6 @@ export const createClient = ({
     storage,
     esClient,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
@@ -173,8 +180,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly esClient: ElasticsearchClient;
-  private readonly user: UserIdAndName;
-  private readonly isAdmin: boolean;
+  private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
@@ -182,15 +188,13 @@ class ConversationClientImpl implements ConversationClient {
     storage,
     esClient,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
-    user: UserIdAndName;
-    isAdmin: boolean;
+    user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
@@ -198,7 +202,6 @@ class ConversationClientImpl implements ConversationClient {
     this.storage = storage;
     this.esClient = esClient;
     this.user = user;
-    this.isAdmin = isAdmin;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
@@ -232,6 +235,10 @@ class ConversationClientImpl implements ConversationClient {
         'read_only',
         'access_control',
         'origin',
+        'workspace_id',
+        'template_id',
+        'template_version',
+        'metadata',
       ],
       query: {
         bool: {
@@ -293,7 +300,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<Conversation> {
+  async create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
@@ -331,9 +338,21 @@ class ConversationClientImpl implements ConversationClient {
       resolvedTemplateVersion = template.version;
     }
 
+    const normalizedAccessControl = conversationWithoutTemplateId.access_control
+      ? {
+          access_mode: conversationWithoutTemplateId.access_control.access_mode,
+          entries: validateAccessControlEntries({
+            entries: conversationWithoutTemplateId.access_control.entries,
+            ownerId: this.user.id,
+            addedAtById: new Map(),
+          }),
+        }
+      : undefined;
+
     const attributes = createRequestToEs({
       conversation: {
-        ...conversationWithoutTemplateId,
+        ...withBoundedTitle(conversationWithoutTemplateId),
+        access_control: normalizedAccessControl,
         metadata: resolvedMetadata,
         ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
         ...(resolvedTemplateVersion !== undefined
@@ -353,7 +372,7 @@ class ConversationClientImpl implements ConversationClient {
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
-        throw createConversationNotFoundError({ conversationId: id });
+        throw createConversationAlreadyExistsError({ conversationId: id });
       }
 
       throw error;
@@ -373,7 +392,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
-      fields: () => fields,
+      fields: () => withBoundedTitle(fields),
     });
 
     return withDeserializedMetadata(result);
@@ -623,30 +642,20 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEs(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
+    return withDeserializedMetadata(
+      withPermissions({ conversation: fromEs(document), user: this.user })
+    );
   }
 
   private toResponseConversationWithoutRounds(
     document: Document
   ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEsWithoutRounds(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
+    return withDeserializedMetadata(
+      withPermissions({ conversation: fromEsWithoutRounds(document), user: this.user })
+    );
   }
 
-  private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
+  private async getDocument(conversationId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -661,17 +670,15 @@ class ConversationClientImpl implements ConversationClient {
 
     const hit = response.hits.hits[0];
 
-    if (!hit) {
+    if (!hit || !hit._id || !hit._source) {
       return undefined;
     }
 
-    const { _seq_no: seqNo, _primary_term: primaryTerm } = hit;
-
-    if (seqNo === undefined || primaryTerm === undefined) {
+    if (hit._seq_no === undefined || hit._primary_term === undefined) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return { ...(hit as Document), _seq_no: seqNo, _primary_term: primaryTerm };
+    return hit as Document;
   }
 
   /**
@@ -686,7 +693,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-  }): Promise<VersionedDocument> {
+  }): Promise<Document> {
     const document = await this.getDocument(conversationId);
 
     if (!document) {
@@ -694,7 +701,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = document._source!;
+    const conversation = fromEsWithoutRounds(document);
 
     switch (access) {
       case 'converse':
@@ -721,19 +728,11 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'rename':
-        allowed = hasConversationRenameAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationRenameAccess({ conversation, user: this.user });
         break;
 
       case 'delete':
-        allowed = hasConversationDeleteAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
         break;
 
       case 'updateAccessControl':
@@ -750,8 +749,7 @@ class ConversationClientImpl implements ConversationClient {
 
   /**
    * Read-modify-write against the stored conversation, retrying on conflict.
-   * `fields` is replayed per attempt against the freshly read conversation, so
-   * it must be free of side effects.
+   * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
    */
   private async writeConversation({
     conversationId,
@@ -860,68 +858,68 @@ class ConversationClientImpl implements ConversationClient {
 
     return {
       access_mode: accessMode,
-      entries: this.validateAccessControlEntries({ entries, ownerId, addedAtById }),
+      entries: validateAccessControlEntries({ entries, ownerId, addedAtById }),
     };
   }
+}
 
-  /**
-   * Validates each requested entry and stamps `added_at`, carrying it over for members already
-   * listed in `addedAtById` so re-sharing does not reset when they were added. An entry naming
-   * the owner is dropped, since owner access is keyed off document ownership, not entries.
-   */
-  private validateAccessControlEntries({
-    entries,
-    ownerId,
-    addedAtById,
-  }: {
-    entries: UpdateConversationAccessControlRequestBody['entries'];
-    ownerId: string | undefined;
-    addedAtById: Map<string, string>;
-  }): ConversationAccessControlEntry[] {
-    const now = new Date().toISOString();
-    const seen = new Set<string>();
-    const normalizedEntries: ConversationAccessControlEntry[] = [];
+/**
+ * Validates each requested entry and stamps `added_at`, carrying it over from `addedAtById`
+ * for members already listed so re-sharing does not reset when they were added. An entry
+ * naming the owner is dropped, since owner access is keyed off document ownership, not entries.
+ */
+export const validateAccessControlEntries = ({
+  entries,
+  ownerId,
+  addedAtById,
+}: {
+  entries: UpdateConversationAccessControlRequestBody['entries'];
+  ownerId: string | undefined;
+  addedAtById: Map<string, string>;
+}): ConversationAccessControlEntry[] => {
+  const now = new Date().toISOString();
+  const seen = new Set<string>();
+  const normalizedEntries: ConversationAccessControlEntry[] = [];
 
-    for (const entry of entries) {
-      if (!entry || entry.type !== 'user') {
-        throw createBadRequestError('Each ACL entry requires a type of "user"');
-      }
-
-      if (typeof entry.id !== 'string' || entry.id.length === 0) {
-        throw createBadRequestError('Each ACL entry requires a non-empty id');
-      }
-
-      if (entry.id.length > CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
-        throw createBadRequestError(
-          `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
-        );
-      }
-
-      if (!isConversationAccessControlRole(entry.role)) {
-        throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
-      }
-
-      // Owner access is keyed off document ownership, so an owner entry would be inert.
-      if (ownerId !== undefined && entry.id === ownerId) {
-        continue;
-      }
-
-      const key = `${entry.type}:${entry.id}`;
-
-      if (seen.has(key)) {
-        throw createBadRequestError(`Duplicate ACL entry for ${entry.type} "${entry.id}"`);
-      }
-
-      seen.add(key);
-
-      normalizedEntries.push({
-        type: entry.type,
-        id: entry.id,
-        role: entry.role,
-        added_at: addedAtById.get(key) ?? now,
-      });
+  for (const entry of entries) {
+    if (!entry || entry.type !== 'user') {
+      throw createBadRequestError('Each ACL entry requires a type of "user"');
     }
 
-    return normalizedEntries;
+    if (typeof entry.id !== 'string' || entry.id.length === 0) {
+      throw createBadRequestError('Each ACL entry requires a non-empty id');
+    }
+
+    if (entry.id.length > CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+      throw createBadRequestError(
+        `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
+      );
+    }
+
+    if (!isConversationAccessControlRole(entry.role)) {
+      throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+    }
+
+    // Owner access is keyed off document ownership, so an owner entry would be inert.
+    if (ownerId !== undefined && entry.id === ownerId) {
+      continue;
+    }
+
+    const key = `${entry.type}:${entry.id}`;
+
+    if (seen.has(key)) {
+      throw createBadRequestError(`Duplicate ACL entry for ${entry.type} "${entry.id}"`);
+    }
+
+    seen.add(key);
+
+    normalizedEntries.push({
+      type: entry.type,
+      id: entry.id,
+      role: entry.role,
+      added_at: addedAtById.get(key) ?? now,
+    });
   }
-}
+
+  return normalizedEntries;
+};

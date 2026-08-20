@@ -9,7 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
 import type { Error } from '../../../shared_imports';
@@ -233,11 +234,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
       {isManagedRepository ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="m"
-            color="warning"
-            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"

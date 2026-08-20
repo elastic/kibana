@@ -1,13 +1,13 @@
 {
-  "sha1": "e1869ae0a4737d6520cf8b6823eee5034e16becb",
+  "sha1": "ea01f67b5f1552a0ef6fd2c388843e1ff29de790",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
     {
-      "id": "1880b7c8ee4aaac-e395ce97cca539e",
-      "title": "Automated email resolution integration tests Basic email matching \u2014 two entities with same email",
+      "id": "1f74745923a4dea-e395ce97cca539e",
+      "title": "Automated email resolution integration tests Basic email matching — two entities with same email",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -22,8 +22,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-2925171d96b5532",
-      "title": "Automated email resolution integration tests Namespace priority \u2014 AD entity selected as target over Okta and Entra",
+      "id": "1f74745923a4dea-2925171d96b5532",
+      "title": "Automated email resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -38,8 +38,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-a99ccef61b945a2",
-      "title": "Automated email resolution integration tests Alphabetical fallback \u2014 unknown namespaces use entity ID tiebreaker",
+      "id": "1f74745923a4dea-a99ccef61b945a2",
+      "title": "Automated email resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -54,8 +54,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-c07a229a984ea45",
-      "title": "Automated email resolution integration tests Extend existing group \u2014 new entity with matching email joins pre-existing resolution group",
+      "id": "1f74745923a4dea-c07a229a984ea45",
+      "title": "Automated email resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -70,8 +70,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-5571f3104035a1d",
-      "title": "Automated email resolution integration tests Incremental pickup \u2014 watermark advances; second run processes only new entities",
+      "id": "1f74745923a4dea-5571f3104035a1d",
+      "title": "Automated email resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -82,12 +82,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
         "line": 200,
-        "column": 29
+        "column": 26
       }
     },
     {
-      "id": "1880b7c8ee4aaac-a84792155c15c5b",
-      "title": "Automated email resolution integration tests Multi-value email excluded \u2014 entity with array user.email is not matched",
+      "id": "1f74745923a4dea-a84792155c15c5b",
+      "title": "Automated email resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -102,8 +102,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-d8f28015196c6d3",
-      "title": "Automated email resolution integration tests Ambiguous buckets skipped \u2014 multiple existing targets for same email",
+      "id": "1f74745923a4dea-d8f28015196c6d3",
+      "title": "Automated email resolution integration tests Ambiguous buckets skipped — multiple existing targets for same email",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -118,8 +118,8 @@
       }
     },
     {
-      "id": "1880b7c8ee4aaac-bfb4b3b43243881",
-      "title": "Automated email resolution integration tests Manual override preserved \u2014 manually linked entity not re-resolved; new entity extends group",
+      "id": "1f74745923a4dea-bfb4b3b43243881",
+      "title": "Automated email resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -130,11 +130,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
         "line": 330,
-        "column": 32
+        "column": 18
       }
     },
     {
-      "id": "1880b7c8ee4aaac-b01d67b7c6944c4",
+      "id": "1f74745923a4dea-b01d67b7c6944c4",
       "title": "Automated email resolution integration tests Manually unlinked entity not re-resolved after new activity updates timestamp",
       "expectedStatus": "passed",
       "tags": [
@@ -146,11 +146,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
         "line": 409,
-        "column": 32
+        "column": 24
       }
     },
     {
-      "id": "1bd068121035cad-77ddb42cb90a9b5",
+      "id": "ee8a3313f445d8e-77ddb42cb90a9b5",
       "title": "Entity Store CRUD API tests Should create an entity",
       "expectedStatus": "passed",
       "tags": [
@@ -166,7 +166,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-211888d56b14658",
+      "id": "ee8a3313f445d8e-211888d56b14658",
       "title": "Entity Store CRUD API tests Should receive a conflict (409) if an entity already exists",
       "expectedStatus": "passed",
       "tags": [
@@ -178,11 +178,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 67,
-        "column": 19
+        "column": 12
       }
     },
     {
-      "id": "1bd068121035cad-a279d998dad719d",
+      "id": "ee8a3313f445d8e-a279d998dad719d",
       "title": "Entity Store CRUD API tests Should use generated EUID on create when entity.id is not supplied",
       "expectedStatus": "passed",
       "tags": [
@@ -194,11 +194,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 84,
-        "column": 27
+        "column": 21
       }
     },
     {
-      "id": "1bd068121035cad-12e211e64cbdae9",
+      "id": "ee8a3313f445d8e-12e211e64cbdae9",
       "title": "Entity Store CRUD API tests Should reject create when supplied entity.id does not match generated EUID",
       "expectedStatus": "passed",
       "tags": [
@@ -210,11 +210,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 107,
-        "column": 28
+        "column": 22
       }
     },
     {
-      "id": "1bd068121035cad-5a3fd48c7069839",
+      "id": "ee8a3313f445d8e-5a3fd48c7069839",
       "title": "Entity Store CRUD API tests Should require a force flag for restricted fields",
       "expectedStatus": "passed",
       "tags": [
@@ -230,7 +230,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-060293f49b8f6c7",
+      "id": "ee8a3313f445d8e-060293f49b8f6c7",
       "title": "Entity Store CRUD API tests Should update an entity by ID",
       "expectedStatus": "passed",
       "tags": [
@@ -242,11 +242,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 156,
-        "column": 19
+        "column": 12
       }
     },
     {
-      "id": "1bd068121035cad-5a1c4ccc343acf0",
+      "id": "ee8a3313f445d8e-5a1c4ccc343acf0",
       "title": "Entity Store CRUD API tests Should update an entity by ID only (no identity fields)",
       "expectedStatus": "passed",
       "tags": [
@@ -258,11 +258,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 205,
-        "column": 26
+        "column": 20
       }
     },
     {
-      "id": "1bd068121035cad-95b1d29ad2d7073",
+      "id": "ee8a3313f445d8e-95b1d29ad2d7073",
       "title": "Entity Store CRUD API tests Should update an entity by identity fields only (no entity.id)",
       "expectedStatus": "passed",
       "tags": [
@@ -278,7 +278,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-ac7e8696390ea6b",
+      "id": "ee8a3313f445d8e-ac7e8696390ea6b",
       "title": "Entity Store CRUD API tests Should perform a bulk update",
       "expectedStatus": "passed",
       "tags": [
@@ -294,7 +294,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-fb6dc2aed16acdb",
+      "id": "ee8a3313f445d8e-fb6dc2aed16acdb",
       "title": "Entity Store CRUD API tests Should create an entity from a flat document",
       "expectedStatus": "passed",
       "tags": [
@@ -310,7 +310,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-2bb2a545c116f8d",
+      "id": "ee8a3313f445d8e-2bb2a545c116f8d",
       "title": "Entity Store CRUD API tests Should update an entity from a flat document",
       "expectedStatus": "passed",
       "tags": [
@@ -326,7 +326,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-8eec670a36e5e42",
+      "id": "ee8a3313f445d8e-8eec670a36e5e42",
       "title": "Entity Store CRUD API tests Should replace values (not merge into arrays) when updating twice with flat documents",
       "expectedStatus": "passed",
       "tags": [
@@ -342,7 +342,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-af6fe243706382c",
+      "id": "ee8a3313f445d8e-af6fe243706382c",
       "title": "Entity Store CRUD API tests Should delete an entity",
       "expectedStatus": "passed",
       "tags": [
@@ -354,11 +354,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 435,
-        "column": 28
+        "column": 22
       }
     },
     {
-      "id": "1bd068121035cad-78cb99fb14e2cf6",
+      "id": "ee8a3313f445d8e-78cb99fb14e2cf6",
       "title": "Entity Store CRUD API tests Should list entities without params",
       "expectedStatus": "passed",
       "tags": [
@@ -374,7 +374,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-5a734ea915b2d2c",
+      "id": "ee8a3313f445d8e-5a734ea915b2d2c",
       "title": "Entity Store CRUD API tests Should list entities with a DSL filter",
       "expectedStatus": "passed",
       "tags": [
@@ -386,11 +386,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 516,
-        "column": 32
+        "column": 23
       }
     },
     {
-      "id": "1bd068121035cad-29df6f3037c6167",
+      "id": "ee8a3313f445d8e-29df6f3037c6167",
       "title": "Entity Store CRUD API tests Should list entities with size param",
       "expectedStatus": "passed",
       "tags": [
@@ -402,11 +402,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 559,
-        "column": 30
+        "column": 16
       }
     },
     {
-      "id": "1bd068121035cad-9bbcf61d0b65cb6",
+      "id": "ee8a3313f445d8e-9bbcf61d0b65cb6",
       "title": "Entity Store CRUD API tests Should paginate with searchAfter",
       "expectedStatus": "passed",
       "tags": [
@@ -422,7 +422,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-54b87e6f5c885a1",
+      "id": "ee8a3313f445d8e-54b87e6f5c885a1",
       "title": "Entity Store CRUD API tests Should return specific fields when fields param is provided",
       "expectedStatus": "passed",
       "tags": [
@@ -434,11 +434,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 610,
-        "column": 32
+        "column": 18
       }
     },
     {
-      "id": "1bd068121035cad-3c845fefd5f065b",
+      "id": "ee8a3313f445d8e-3c845fefd5f065b",
       "title": "Entity Store CRUD API tests Should not include fields in response when fields param is omitted",
       "expectedStatus": "passed",
       "tags": [
@@ -450,11 +450,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 627,
-        "column": 31
+        "column": 22
       }
     },
     {
-      "id": "1bd068121035cad-e74b533da688344",
+      "id": "ee8a3313f445d8e-e74b533da688344",
       "title": "Entity Store CRUD API tests Should return multiple fields when multiple fields are requested",
       "expectedStatus": "passed",
       "tags": [
@@ -466,11 +466,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 645,
-        "column": 30
+        "column": 24
       }
     },
     {
-      "id": "1bd068121035cad-665b1667211494d",
+      "id": "ee8a3313f445d8e-665b1667211494d",
       "title": "Entity Store CRUD API tests Should return empty fields entry when requested field does not exist on the entity",
       "expectedStatus": "passed",
       "tags": [
@@ -486,7 +486,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-aec6e82a8a95398",
+      "id": "ee8a3313f445d8e-aec6e82a8a95398",
       "title": "Entity Store CRUD API tests Should return 400 for invalid kql",
       "expectedStatus": "passed",
       "tags": [
@@ -502,7 +502,7 @@
       }
     },
     {
-      "id": "1bd068121035cad-027c137184141b1",
+      "id": "ee8a3313f445d8e-027c137184141b1",
       "title": "Entity Store CRUD API tests Should return 400 for invalid searchAfter JSON",
       "expectedStatus": "passed",
       "tags": [
@@ -518,7 +518,7 @@
       }
     },
     {
-      "id": "9e9f70f400fac19-fb5d89006e5f2aa",
+      "id": "19c1c7c5e6ccaf3-fb5d89006e5f2aa",
       "title": "Entity Store History Snapshot history snapshot: copies latest to history index and resets behaviors on latest",
       "expectedStatus": "passed",
       "tags": [
@@ -534,7 +534,7 @@
       }
     },
     {
-      "id": "e26348cce6a1520-272fcc149650c56",
+      "id": "7fe7312af904b17-272fcc149650c56",
       "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate to the seed target, then preserves link when disabled",
       "expectedStatus": "passed",
       "tags": [
@@ -545,12 +545,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 108,
+        "line": 105,
         "column": 46
       }
     },
     {
-      "id": "e26348cce6a1520-5b9bf4cbeeb86ac",
+      "id": "7fe7312af904b17-5b9bf4cbeeb86ac",
       "title": "Related user alias resolution integration tests does not link when related user value has no candidate",
       "expectedStatus": "passed",
       "tags": [
@@ -561,12 +561,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 207,
+        "line": 201,
         "column": 19
       }
     },
     {
-      "id": "e26348cce6a1520-d34261d1940580b",
+      "id": "7fe7312af904b17-d34261d1940580b",
       "title": "Related user alias resolution integration tests cascades candidate aliases to the seed target",
       "expectedStatus": "passed",
       "tags": [
@@ -577,12 +577,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 240,
+        "line": 234,
         "column": 10
       }
     },
     {
-      "id": "129e3cbf5c1b42c-ac5435a64b2e2ab",
+      "id": "5b394a157338cea-ac5435a64b2e2ab",
       "title": "Entity Store Resolution API tests Link: should link entities to a target",
       "expectedStatus": "passed",
       "tags": [
@@ -598,7 +598,7 @@
       }
     },
     {
-      "id": "129e3cbf5c1b42c-d540075aa7f17dc",
+      "id": "5b394a157338cea-d540075aa7f17dc",
       "title": "Entity Store Resolution API tests Link: should skip already-linked entities",
       "expectedStatus": "passed",
       "tags": [
@@ -610,11 +610,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 86,
-        "column": 29
+        "column": 23
       }
     },
     {
-      "id": "129e3cbf5c1b42c-d601e83594ce6b8",
+      "id": "5b394a157338cea-d601e83594ce6b8",
       "title": "Entity Store Resolution API tests Group: should return resolution group from target",
       "expectedStatus": "passed",
       "tags": [
@@ -630,7 +630,7 @@
       }
     },
     {
-      "id": "129e3cbf5c1b42c-af2b38dc38eb7be",
+      "id": "5b394a157338cea-af2b38dc38eb7be",
       "title": "Entity Store Resolution API tests Group: should return same group from alias",
       "expectedStatus": "passed",
       "tags": [
@@ -642,11 +642,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 153,
-        "column": 31
+        "column": 22
       }
     },
     {
-      "id": "129e3cbf5c1b42c-32988f03f9377cd",
+      "id": "5b394a157338cea-32988f03f9377cd",
       "title": "Entity Store Resolution API tests Group: should return standalone entity",
       "expectedStatus": "passed",
       "tags": [
@@ -658,11 +658,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 180,
-        "column": 28
+        "column": 22
       }
     },
     {
-      "id": "129e3cbf5c1b42c-17655c41267b0c3",
+      "id": "5b394a157338cea-17655c41267b0c3",
       "title": "Entity Store Resolution API tests Unlink: should unlink alias entities",
       "expectedStatus": "passed",
       "tags": [
@@ -678,7 +678,7 @@
       }
     },
     {
-      "id": "129e3cbf5c1b42c-86d3f3e1e605e28",
+      "id": "5b394a157338cea-86d3f3e1e605e28",
       "title": "Entity Store Resolution API tests Unlink: should skip non-alias entities",
       "expectedStatus": "passed",
       "tags": [
@@ -690,11 +690,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 243,
-        "column": 27
+        "column": 21
       }
     },
     {
-      "id": "129e3cbf5c1b42c-f49556f23277ecb",
+      "id": "5b394a157338cea-f49556f23277ecb",
       "title": "Entity Store Resolution API tests Link: should return 400 for self-link",
       "expectedStatus": "passed",
       "tags": [
@@ -706,11 +706,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 260,
-        "column": 34
+        "column": 26
       }
     },
     {
-      "id": "129e3cbf5c1b42c-3c3759b1065556f",
+      "id": "5b394a157338cea-3c3759b1065556f",
       "title": "Entity Store Resolution API tests Link: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
@@ -726,7 +726,7 @@
       }
     },
     {
-      "id": "129e3cbf5c1b42c-aa054f480907c53",
+      "id": "5b394a157338cea-aa054f480907c53",
       "title": "Entity Store Resolution API tests Link: should return 400 for chain resolution",
       "expectedStatus": "passed",
       "tags": [
@@ -738,11 +738,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 279,
-        "column": 32
+        "column": 24
       }
     },
     {
-      "id": "129e3cbf5c1b42c-0d7581a3d7d0f60",
+      "id": "5b394a157338cea-0d7581a3d7d0f60",
       "title": "Entity Store Resolution API tests Link: should return 400 when linking entity that has aliases",
       "expectedStatus": "passed",
       "tags": [
@@ -754,11 +754,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
         "line": 311,
-        "column": 32
+        "column": 24
       }
     },
     {
-      "id": "129e3cbf5c1b42c-a0ccc9eedf16023",
+      "id": "5b394a157338cea-a0ccc9eedf16023",
       "title": "Entity Store Resolution API tests Unlink: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
@@ -774,7 +774,7 @@
       }
     },
     {
-      "id": "129e3cbf5c1b42c-34c8169d17da7a9",
+      "id": "5b394a157338cea-34c8169d17da7a9",
       "title": "Entity Store Resolution API tests Group: should return 404 for non-existent entity",
       "expectedStatus": "passed",
       "tags": [
