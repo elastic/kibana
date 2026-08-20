@@ -134,7 +134,7 @@ export function runFtrCli() {
     },
     {
       log: {
-        defaultLevel: 'debug',
+        defaultLevel: 'warning',
       },
       flags: {
         string: [
