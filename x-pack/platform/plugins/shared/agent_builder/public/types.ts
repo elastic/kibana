@@ -35,6 +35,7 @@ export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ConversationSidebarRef,
+  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,

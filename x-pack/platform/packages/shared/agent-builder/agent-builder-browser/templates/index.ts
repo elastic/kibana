@@ -6,6 +6,7 @@
  */
 
 export type {
+  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,
