@@ -9,13 +9,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { RuleApiResponse } from '../services/rules_api';
-import { FocusedRuleService } from '../services/focused_rule_service';
-import { registerRuleAutoAttach, type IdGenerator } from './rule_auto_attach';
+import { registerRuleAutoAttach } from './rule_auto_attach';
 
 const createRule = (overrides?: Partial<RuleApiResponse>): RuleApiResponse =>
   ({
@@ -33,48 +31,12 @@ const createRule = (overrides?: Partial<RuleApiResponse>): RuleApiResponse =>
     ...overrides,
   } as RuleApiResponse);
 
-const createVersionedAttachment = (id: string): VersionedAttachment => ({
-  id,
-  type: RULE_ATTACHMENT_TYPE,
-  versions: [
-    {
-      version: 1,
-      data: createRule(),
-      created_at: '2026-01-01T00:00:00.000Z',
-      content_hash: 'hash',
-    },
-  ],
-  current_version: 1,
-});
-
-const createRoundCompleteEvent = (attachmentId: string): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {} as never,
-    attachments: [createVersionedAttachment(attachmentId)],
-  },
-});
-
-const createIdGenerator = (): IdGenerator => {
-  let current = 'draft-id-1';
-
-  return {
-    get current() {
-      return current;
-    },
-    next: jest.fn(() => {
-      current = current === 'draft-id-1' ? 'draft-id-2' : 'draft-id-3';
-      return current;
-    }),
-  };
-};
-
 describe('registerRuleAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
-  let focusedRuleService: FocusedRuleService;
+  let focusedRule$: BehaviorSubject<RuleApiResponse | undefined>;
   let addAttachment: jest.Mock;
-  let draftAttachmentId: IdGenerator;
+  let removeAttachment: jest.Mock;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
@@ -82,9 +44,9 @@ describe('registerRuleAutoAttach', () => {
     jest.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
-    focusedRuleService = new FocusedRuleService();
+    focusedRule$ = new BehaviorSubject<RuleApiResponse | undefined>(undefined);
     addAttachment = jest.fn();
-    draftAttachmentId = createIdGenerator();
+    removeAttachment = jest.fn();
     chatEventsByConversationId = new Map();
 
     const chrome = {
@@ -95,6 +57,7 @@ describe('registerRuleAutoAttach', () => {
 
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -113,8 +76,7 @@ describe('registerRuleAutoAttach', () => {
     cleanup = registerRuleAutoAttach({
       agentBuilder,
       chrome,
-      focusedRuleService,
-      draftAttachmentId,
+      focusedRule$,
     });
   });
 
@@ -124,23 +86,23 @@ describe('registerRuleAutoAttach', () => {
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
-    focusedRuleService.setFocusedRule(createRule());
+    focusedRule$.next(createRule());
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('attaches the focused rule to a new conversation draft when chat is open', () => {
+  it('attaches the focused rule with a deterministic id', () => {
     const rule = createRule();
 
-    focusedRuleService.setFocusedRule(rule);
+    focusedRule$.next(rule);
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
-      id: 'draft-id-1',
+      id: 'rule:rule-1',
       type: RULE_ATTACHMENT_TYPE,
       origin: 'rule-1',
       data: rule,
@@ -148,7 +110,7 @@ describe('registerRuleAutoAttach', () => {
   });
 
   it('attaches the focused rule when an existing conversation becomes active', () => {
-    focusedRuleService.setFocusedRule(createRule());
+    focusedRule$.next(createRule());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
@@ -156,24 +118,18 @@ describe('registerRuleAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'rule-1' }));
   });
 
-  it('restages the focused rule with a new draft id after the conversation is persisted', () => {
+  it('does not restage after the conversation is persisted', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-1' }));
+    focusedRule$.next(createRule({ id: 'rule-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'rule-1' })
-    );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'rule-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledTimes(1);
   });
 
   it('attaches when navigating to a rule while an existing conversation is open', () => {
@@ -183,7 +139,7 @@ describe('registerRuleAutoAttach', () => {
 
     expect(addAttachment).not.toHaveBeenCalled();
 
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-1' }));
+    focusedRule$.next(createRule({ id: 'rule-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'rule-1' }));
@@ -192,72 +148,52 @@ describe('registerRuleAutoAttach', () => {
   it('attaches a different focused rule after the conversation has started', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-1' }));
+    focusedRule$.next(createRule({ id: 'rule-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'rule-1' })
+      expect.objectContaining({ id: 'rule:rule-1', origin: 'rule-1' })
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'rule-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledTimes(1);
 
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-2' }));
+    focusedRule$.next(createRule({ id: 'rule-2' }));
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledTimes(3);
+    expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'rule-2' })
+      expect.objectContaining({ id: 'rule:rule-2', origin: 'rule-2' })
     );
   });
 
-  it('updates the same draft attachment when the focused rule changes before send', () => {
+  it('uses deterministic ids based on rule id', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-1' }));
+    focusedRule$.next(createRule({ id: 'rule-1' }));
     jest.runOnlyPendingTimers();
-    focusedRuleService.setFocusedRule(createRule({ id: 'rule-2' }));
+    focusedRule$.next(createRule({ id: 'rule-2' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'rule-1' })
+      expect.objectContaining({ id: 'rule:rule-1', origin: 'rule-1' })
     );
     expect(addAttachment).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'rule-2' })
+      expect.objectContaining({ id: 'rule:rule-2', origin: 'rule-2' })
     );
-  });
-
-  it('rotates the draft id after it is created in a completed round', () => {
-    focusedRuleService.setFocusedRule(createRule());
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    chatEventsByConversationId.get('conversation-1')?.next(createRoundCompleteEvent('draft-id-1'));
-
-    currentAppId$.next(null);
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-3' }));
   });
 
   it('unsubscribes on cleanup', () => {
     cleanup();
 
-    focusedRuleService.setFocusedRule(createRule());
+    focusedRule$.next(createRule());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();

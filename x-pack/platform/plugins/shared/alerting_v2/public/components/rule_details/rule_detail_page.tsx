@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { FocusedRuleService } from '../../services/focused_rule_service';
+import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
@@ -175,14 +175,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { euiTheme } = useEuiTheme();
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const focusedRuleService = useService(FocusedRuleService);
-
-  React.useEffect(() => {
-    focusedRuleService.setFocusedRule(rule);
-    return () => {
-      focusedRuleService.clearFocusedRule(rule.id);
-    };
-  }, [rule, focusedRuleService]);
+  useRuleAutoAttach(rule);
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');

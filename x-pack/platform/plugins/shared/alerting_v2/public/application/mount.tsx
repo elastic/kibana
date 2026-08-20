@@ -30,7 +30,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -38,7 +37,6 @@ import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
-import { FocusedRuleService } from '../services/focused_rule_service';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -59,27 +57,6 @@ export const mountAlertingV2App = async ({
 
   const queryClient = new QueryClient();
 
-  let cleanupRuleAutoAttach: (() => void) | undefined;
-  let stopped = false;
-  const agentBuilderToken = PluginStart('agentBuilder');
-  if (container.isBound(agentBuilderToken)) {
-    const agentBuilder = container.get(agentBuilderToken) as AgentBuilderPluginStart;
-    const focusedRuleService = container.get(FocusedRuleService);
-    // Async so attachment auto-attach stays off the critical mount path.
-    void import('../agent_builder/rule_auto_attach').then(({ registerRuleAutoAttach }) => {
-      const cleanup = registerRuleAutoAttach({
-        agentBuilder,
-        chrome: coreStart.chrome,
-        focusedRuleService,
-      });
-      if (stopped) {
-        cleanup();
-        return;
-      }
-      cleanupRuleAutoAttach = cleanup;
-    });
-  }
-
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Context.Provider value={container}>
@@ -97,12 +74,7 @@ export const mountAlertingV2App = async ({
     element
   );
 
-  return () => {
-    stopped = true;
-    cleanupRuleAutoAttach?.();
-    cleanupRuleAutoAttach = undefined;
-    ReactDOM.unmountComponentAtNode(element);
-  };
+  return () => ReactDOM.unmountComponentAtNode(element);
 };
 
 export const mountRuleLibraryApp = async ({

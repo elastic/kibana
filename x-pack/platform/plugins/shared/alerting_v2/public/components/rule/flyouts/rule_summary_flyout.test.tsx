@@ -10,25 +10,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
-const mockFocusedRuleService = {
-  setFocusedRule: jest.fn(),
-  clearFocusedRule: jest.fn(),
-  getFocusedRule: jest.fn(),
-  focusedRule$: { subscribe: jest.fn() },
-};
+jest.mock('../../../agent_builder/use_rule_auto_attach', () => ({
+  useRuleAutoAttach: jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
-  const { FocusedRuleService: ActualFocusedRuleService } = jest.requireActual(
-    '../../../services/focused_rule_service'
-  );
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
-      }
-      if (token === ActualFocusedRuleService) {
-        return mockFocusedRuleService;
       }
       return {};
     },
@@ -96,6 +88,8 @@ const baseRule = {
   enabled: true,
   metadata: { name: 'My Rule' },
 } as RuleApiResponse;
+
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummaryFlyout>> = {}) => {
   const props = {
@@ -229,19 +223,11 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
   });
 
-  describe('Agent Builder focus', () => {
-    it('sets the focused rule when the flyout renders', () => {
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
       renderFlyout();
 
-      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenCalledWith(baseRule);
-    });
-
-    it('clears the focused rule on unmount with the rule id', () => {
-      const { unmount } = renderFlyout();
-
-      unmount();
-
-      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
     });
   });
 });

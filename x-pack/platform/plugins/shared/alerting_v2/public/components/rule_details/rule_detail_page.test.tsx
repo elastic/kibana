@@ -17,6 +17,7 @@ import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
 import { paths } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -26,27 +27,15 @@ jest.mock('react-router-dom', () => ({
 
 let mockCanWriteRules = true;
 
-const mockFocusedRuleService = {
-  setFocusedRule: jest.fn(),
-  clearFocusedRule: jest.fn(),
-  getFocusedRule: jest.fn(),
-  focusedRule$: { subscribe: jest.fn() },
-};
+jest.mock('../../agent_builder/use_rule_auto_attach', () => ({
+  useRuleAutoAttach: jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
-  const { FocusedRuleService: ActualFocusedRuleService } = jest.requireActual(
-    '../../services/focused_rule_service'
-  );
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => p } };
-      }
-      if (token === ActualFocusedRuleService) {
-        return mockFocusedRuleService;
       }
       if (typeof token === 'function') {
         // UserCapabilities service token
@@ -161,6 +150,8 @@ const baseRule: RuleApiResponse = {
   updated_by: 'bob@example.com',
   updated_at: '2026-03-04T12:00:00.000Z',
 };
+
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
@@ -429,22 +420,14 @@ describe('RuleDetailPage', () => {
     expect(menuAfterToggle).toBe(menuBeforeToggle);
   });
 
-  describe('Agent Builder focus', () => {
-    it('sets the focused rule when the page renders', () => {
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
       renderPage(baseRule);
 
-      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenCalledWith(baseRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
     });
 
-    it('clears the focused rule on unmount with the rule id', () => {
-      const { unmount } = renderPage(baseRule);
-
-      unmount();
-
-      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
-    });
-
-    it('re-sets focus when the rule id changes', () => {
+    it('passes the new rule to useRuleAutoAttach when the rule id changes', () => {
       const { rerender } = render(
         <MemoryRouter>
           <I18nProvider>
@@ -457,7 +440,11 @@ describe('RuleDetailPage', () => {
         </MemoryRouter>
       );
 
-      const nextRule = { ...baseRule, id: 'rule-2', metadata: { ...baseRule.metadata, name: 'Next' } };
+      const nextRule = {
+        ...baseRule,
+        id: 'rule-2',
+        metadata: { ...baseRule.metadata, name: 'Next' },
+      };
 
       rerender(
         <MemoryRouter>
@@ -471,8 +458,7 @@ describe('RuleDetailPage', () => {
         </MemoryRouter>
       );
 
-      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
-      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenLastCalledWith(nextRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenLastCalledWith(nextRule);
     });
   });
 });
