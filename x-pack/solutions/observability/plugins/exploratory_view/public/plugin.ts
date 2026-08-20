@@ -144,7 +144,11 @@ export class Plugin
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(
-        { ...coreStart, ...pluginsStart },
+        {
+          ...coreStart,
+          ...pluginsStart,
+          security: { ...coreStart.security, ...pluginsStart.security },
+        },
         this.analyticsService
       ),
     };
