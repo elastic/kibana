@@ -89,7 +89,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-8
-    depends_on: dispatch-tests
+    depends_on:
+      - dispatch-ftr-tests
+      - dispatch-scout-tests
     timeout_in_minutes: 20
     retry:
       automatic:
