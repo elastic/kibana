@@ -8,7 +8,7 @@ import qs from 'query-string';
 import type { ReactElement } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-export const UX_DEFAULT_RANGE_FROM = 'now-24h';
+export const UX_DEFAULT_RANGE_FROM = 'now-7d';
 export const UX_DEFAULT_RANGE_TO = 'now';
 
 export function useDateRangeRedirect() {
@@ -37,7 +37,7 @@ export function useDateRangeRedirect() {
   };
 }
 
-/** Write last-24h onto the URL before the shared date picker inherits Kibana's 15m default. */
+/** Write last-7d onto the URL before the shared date picker inherits Kibana's 15m default. */
 export function UxDefaultDateRange({ children }: { children: ReactElement }) {
   const { isDateRangeSet, redirect } = useDateRangeRedirect();
   if (!isDateRangeSet) {

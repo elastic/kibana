@@ -24,14 +24,14 @@ const renderWithHistory = (search: string) => {
 };
 
 describe('UxDefaultDateRange', () => {
-  it('writes last 24 hours when the URL has no range', () => {
+  it('writes last 7 days when the URL has no range', () => {
     const { history } = renderWithHistory('');
-    expect(history.location.search).toBe('?rangeFrom=now-24h&rangeTo=now');
+    expect(history.location.search).toBe('?rangeFrom=now-7d&rangeTo=now');
   });
 
   it('leaves an existing range alone', () => {
-    const { history, getByText } = renderWithHistory('?rangeFrom=now-7d&rangeTo=now');
-    expect(history.location.search).toBe('?rangeFrom=now-7d&rangeTo=now');
+    const { history, getByText } = renderWithHistory('?rangeFrom=now-24h&rangeTo=now');
+    expect(history.location.search).toBe('?rangeFrom=now-24h&rangeTo=now');
     expect(getByText('ready')).toBeInTheDocument();
   });
 });
