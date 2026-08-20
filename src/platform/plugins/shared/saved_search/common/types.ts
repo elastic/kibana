@@ -25,6 +25,7 @@ import type {
 } from '../server';
 import type { VIEW_MODE } from '.';
 
+/** Tab-type specific state persisted with a Discover session tab. */
 export type DiscoverSessionTabTypeState = NonNullable<DiscoverSessionTabAttributes['tabTypeState']>;
 
 export interface DiscoverGridSettings extends SerializableRecord {
