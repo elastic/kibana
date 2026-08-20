@@ -13,6 +13,8 @@ import {
   DEFAULT_COLOR_STEPS,
   LEGACY_COMPLIMENTARY_PALETTE,
   COMPLEMENTARY_PALETTE,
+  getOtherAssignment,
+  getOtherBucketAssignment,
 } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
@@ -28,6 +30,7 @@ import type {
   ColorMappingType,
   NoColorType,
   StaticColorType,
+  ThemeColorType,
   UnassignedColorType,
 } from '../../schema/color';
 export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
@@ -371,6 +374,16 @@ function fromColorLensStateToAPI(
   };
 }
 
+function fromThemeColorLensStateToAPI(color: ColorMapping.ThemeColor): ThemeColorType {
+  return {
+    type: 'theme',
+    color: {
+      LIGHT: fromColorLensStateToAPI(color.color.LIGHT),
+      DARK: fromColorLensStateToAPI(color.color.DARK),
+    },
+  };
+}
+
 function mapSerializedValueToAPI(value: unknown): SerializableValueType {
   if (value !== null && typeof value === 'object' && 'type' in value) {
     const typed = value as { type: string };
@@ -463,7 +476,12 @@ export function fromColorMappingLensStateToAPI(
     return;
   }
 
-  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
+  const unassigned = fromUnassignedColorLensStateToAPI(
+    getOtherAssignment(colorMapping.specialAssignments)?.assignment.color
+  );
+
+  const other = getOtherBucketAssignment(colorMapping.specialAssignments)?.assignment.color;
+
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -475,6 +493,14 @@ export function fromColorMappingLensStateToAPI(
         };
       }),
       ...(unassigned ? { unassigned } : {}),
+      ...(other
+        ? {
+            other:
+              other.type === 'theme'
+                ? fromThemeColorLensStateToAPI(other)
+                : fromColorLensStateToAPI(other),
+          }
+        : {}),
     } satisfies ColorMappingCategoricalType;
   }
 
@@ -509,6 +535,15 @@ function fromColorDefAPIToLensState(
     type: 'categorical',
     paletteId: (color.palette as KbnPaletteId) ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
     colorIndex: color.index,
+  };
+}
+function fromThemeColorDefAPIToLensState(color: ThemeColorType): ColorMapping.ThemeColor {
+  return {
+    type: 'theme',
+    color: {
+      LIGHT: fromColorDefAPIToLensState(color.color.LIGHT),
+      DARK: fromColorDefAPIToLensState(color.color.DARK),
+    },
   };
 }
 
@@ -568,11 +603,26 @@ export function fromColorMappingAPIToLensState(
     };
   }
 
+  const other = colorMapping.other
+    ? {
+        rules: [
+          {
+            type: 'others_bucket' as const,
+          },
+        ],
+        color:
+          colorMapping.other.type === 'theme'
+            ? fromThemeColorDefAPIToLensState(colorMapping.other)
+            : fromColorDefAPIToLensState(colorMapping.other),
+        touched: false,
+      }
+    : undefined;
+
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [
         {
-          type: 'other',
+          type: 'other' as const,
         },
       ],
       color: colorMapping.unassigned
@@ -580,6 +630,7 @@ export function fromColorMappingAPIToLensState(
         : { type: 'loop' },
       touched: false,
     },
+    ...(other ? [other] : []),
   ];
   const assignments = fromAPIMappingToAssignments(colorMapping);
   const colorMode: ColorMapping.Config['colorMode'] =
