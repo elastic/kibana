@@ -9,21 +9,28 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
-import { saveFailureStoreChanges } from '../fixtures/data_quality_helpers';
+import {
+  getQualityIssueRow,
+  openDegradedFieldFlyout,
+  saveFailureStoreChanges,
+  waitForFailedDocsCard,
+  waitForQualityIssuesTable,
+} from '../fixtures/data_quality_helpers';
 
 const TEST_STREAM = 'logs-nginx-default';
+const FORKED_STREAM = 'logs.otel.nginx';
+const DEGRADED_FIELD = 'log.level';
 
-// Failing: See https://github.com/elastic/kibana/issues/267204
-test.describe.skip(
+test.describe(
   'Stream data quality',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, esClient, logsSynthtraceEsClient }) => {
       const currentTime = Date.now();
       const generateLogs = generateLogsData(logsSynthtraceEsClient);
 
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
+      await apiServices.streams.forkStream('logs.otel', FORKED_STREAM, {
         field: 'service.name',
         eq: 'nginx',
       });
@@ -46,17 +53,26 @@ test.describe.skip(
         isMalformed: true,
       });
 
-      // Add a processor that always fails to create failed docs
-      await apiServices.streams.updateStreamProcessors(TEST_STREAM, {
-        steps: [
-          {
-            action: 'rename',
-            from: 'non_existent_field',
-            to: 'renamed_field',
-            ignore_missing: false,
-            override: false,
+      // Add a processor that always fails to create failed docs, and enable the failure store so
+      // those docs are stored instead of dropped: classic streams inherit it from the index
+      // template, which enables it on stateful but not on serverless
+      const { stream } = await apiServices.streams.getStreamDefinition(TEST_STREAM);
+      await apiServices.streams.updateStream(TEST_STREAM, {
+        ingest: {
+          ...stream.ingest,
+          processing: {
+            steps: [
+              {
+                action: 'rename',
+                from: 'non_existent_field',
+                to: 'renamed_field',
+                ignore_missing: false,
+                override: false,
+              },
+            ],
           },
-        ],
+          failure_store: { lifecycle: { enabled: {} } },
+        },
       });
 
       // Add 1 failed doc
@@ -66,6 +82,29 @@ test.describe.skip(
         endTime: new Date(currentTime).toISOString(),
         docsPerMinute: 1,
       });
+
+      // The failure store is a separate index that the synthtrace refresh doesn't cover and that
+      // refreshes on its own interval (30s on serverless), so refresh it until the failed document
+      // is searchable for the UI
+      const failureStoreIndex = `${TEST_STREAM}::failures`;
+      await expect
+        .poll(
+          async () => {
+            await esClient.indices.refresh({
+              index: failureStoreIndex,
+              allow_no_indices: true,
+              ignore_unavailable: true,
+            });
+            const { count } = await esClient.count({
+              index: failureStoreIndex,
+              allow_no_indices: true,
+              ignore_unavailable: true,
+            });
+            return count;
+          },
+          { timeout: 60_000 }
+        )
+        .toBeGreaterThan(0);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -74,8 +113,9 @@ test.describe.skip(
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs.otel');
+      // Delete only the fork this suite created, so unrelated children of the shared
+      // `logs.otel` root are left untouched
+      await apiServices.streams.deleteStream(FORKED_STREAM);
       // Clean up the test stream
       await apiServices.streams.deleteStream(TEST_STREAM);
       // Clean up synthetic logs
@@ -87,12 +127,10 @@ test.describe.skip(
       await expect(
         page.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
       ).toBeVisible();
-      await expect(
-        page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')
-      ).toBeVisible();
+      const failedDocsCard = await waitForFailedDocsCard(page);
 
-      // Edit failure store button should not be visible for wired streams
-      await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+      // Edit failure store button should be visible for wired streams
+      await failedDocsCard.click();
       await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).toBeVisible();
 
       // Quality issues table should be visible
@@ -104,6 +142,7 @@ test.describe.skip(
     }) => {
       // Go to Main page
       await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.expectStreamsTableVisible();
       const mainTimeRange = {
         from: 'Sep 20, 2023 @ 00:00:00.000',
         to: 'Sep 20, 2023 @ 00:30:00.000',
@@ -112,7 +151,7 @@ test.describe.skip(
       await pageObjects.datePicker.setAbsoluteRange(mainTimeRange);
 
       // Go to Data Quality tab
-      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
+      await pageObjects.streams.clickStreamNameLink(FORKED_STREAM);
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(mainTimeRange);
     });
@@ -200,7 +239,7 @@ test.describe.skip(
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Navigate to a different stream and verify time persists
-      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
+      await pageObjects.streams.clickStreamNameLink(FORKED_STREAM);
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
     });
@@ -212,13 +251,14 @@ test.describe.skip(
       await expect(page.getByTestId('datasetQualityDetailsLinkToDiscover')).toBeVisible();
 
       // Click to show failed docs chart
-      await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+      const failedDocsCard = await waitForFailedDocsCard(page);
+      await failedDocsCard.click();
+      await expect(failedDocsCard).toHaveAttribute('aria-pressed', 'true');
     });
 
     test('should show degraded fields table with data', async ({ page }) => {
       // Quality issues table should be visible
-      const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
-      await expect(degradedFieldTable).toBeVisible();
+      const degradedFieldTable = await waitForQualityIssuesTable(page, DEGRADED_FIELD);
 
       // Should show table headers (scope to the table to avoid ambiguity)
       await expect(degradedFieldTable.getByRole('columnheader', { name: 'Field' })).toBeVisible();
@@ -231,58 +271,33 @@ test.describe.skip(
       ).toBeVisible();
 
       // Verify there is at least one degraded field row
-      const degradedFieldRows = degradedFieldTable.locator('tbody tr');
+      const degradedFieldRows = degradedFieldTable.getByTestId(
+        'datasetQualityDetailsDegradedTableRow'
+      );
       expect(await degradedFieldRows.count()).toBeGreaterThan(0);
 
       // Verify the log.level field is present (from malformed data)
-      await expect(
-        degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' })
-      ).toBeVisible();
+      await expect(getQualityIssueRow(degradedFieldTable, DEGRADED_FIELD)).toBeVisible();
     });
 
     test('should open and close degraded field flyout', async ({ page, pageObjects }) => {
-      // Wait for degraded fields table to be visible
-      const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
-      await expect(degradedFieldTable).toBeVisible();
-
-      // Get the row for log.level field (which we created as malformed)
-      const logLevelRow = degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' });
-      await expect(logLevelRow).toBeVisible();
-
-      // Click on the expand button for log.level
-      await logLevelRow.locator('button[aria-label="Expand"]').click();
-
-      // Flyout should be visible
-      await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
+      // Expand the row of the log.level field (which we created as malformed)
+      const flyout = await openDegradedFieldFlyout(page, DEGRADED_FIELD);
 
       // Verify flyout shows the field name
-      await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toContainText(
-        'log.level'
-      );
+      await expect(flyout).toContainText(DEGRADED_FIELD);
 
       // Close the flyout
       await pageObjects.streams.closeFlyout();
 
       // Flyout should be hidden
-      await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeHidden();
+      await expect(flyout).toBeHidden();
     });
 
     test('should navigate to Discover from degraded field flyout', async ({ page }) => {
-      // Wait for degraded fields table to be visible
-      const degradedFieldTable = page.getByTestId('datasetQualityDetailsDegradedFieldTable');
-      await expect(degradedFieldTable).toBeVisible();
-
-      // Get the row for log.level field (which we created as malformed)
-      const logLevelRow = degradedFieldTable.getByRole('row').filter({ hasText: 'log.level' });
-      await expect(logLevelRow).toBeVisible();
-
-      // Click on the expand button for log.level
-      await logLevelRow.locator('button[aria-label="Expand"]').click();
-
-      // Flyout should be visible and show the degraded field name
-      const flyout = page.getByTestId('datasetQualityDetailsDegradedFieldFlyout');
-      await expect(flyout).toBeVisible();
-      await expect(flyout).toContainText('log.level');
+      // Expand the row of the log.level field (which we created as malformed)
+      const flyout = await openDegradedFieldFlyout(page, DEGRADED_FIELD);
+      await expect(flyout).toContainText(DEGRADED_FIELD);
 
       // Click the link to Discover in the flyout
       await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
@@ -294,7 +309,8 @@ test.describe.skip(
 
     test('should edit failure store for wired streams', async ({ page }) => {
       // Open failed documents panel
-      await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
+      const failedDocsCard = await waitForFailedDocsCard(page);
+      await failedDocsCard.click();
 
       // Click the edit button to open the failure store modal
       await page.getByTestId('datasetQualityDetailsEditFailureStore').click();
