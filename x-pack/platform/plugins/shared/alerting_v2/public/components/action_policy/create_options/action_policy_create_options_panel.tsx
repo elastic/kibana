@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateOptionItem } from '../../create_options';
 import { CreateOptionsPanel } from '../../create_options';
 import type { AgentBuilderSkillsRequirements } from '../../../hooks/use_are_agent_builder_skills_available';
-import rulesListEmptyIllustration from '../../../assets/illustration-results-128.svg';
+import actionPolicyEmptyIllustration from '../../../assets/centralized_action_policies.svg';
 
 export type ActionPolicyCreateOption = CreateOptionItem;
 
@@ -79,7 +79,7 @@ export const ActionPolicyCreateOptionsPanel: React.FC<ActionPolicyCreateOptionsP
     icon={
       <EuiImage
         size="fullWidth"
-        src={rulesListEmptyIllustration}
+        src={actionPolicyEmptyIllustration}
         alt=""
         data-test-subj="actionPoliciesListEmptyIllustration"
       />
