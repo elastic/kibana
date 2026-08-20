@@ -540,28 +540,27 @@ export const getAgentVersionMatchingCurrentStack = async (
       }
 
       const { versions } = (await response.json()) as { versions: string[] };
-      return map(
-        versions.filter(isValidArtifactVersion),
-        (version) => version.split('-SNAPSHOT')[0]
-      );
+      return versions.filter(isValidArtifactVersion);
     },
     { maxTimeout: 10000 }
   );
 
-  let version =
-    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
-    kbnStatus.version.number;
+  const useSnapshot =
+    kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX');
+  const suffix = useSnapshot ? '-SNAPSHOT' : '';
+  const matchingAgentVersions = agentVersions.filter(
+    (version) => version.endsWith('-SNAPSHOT') === useSnapshot
+  );
+  const version = semver.maxSatisfying(
+    map(matchingAgentVersions, (agentVersion) => agentVersion.split('-SNAPSHOT')[0]),
+    `<=${kbnStatus.version.number}`
+  );
 
-  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
-  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
-  if (
-    kbnStatus.version.build_snapshot ||
-    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
-  ) {
-    version += '-SNAPSHOT';
+  if (!version) {
+    throw new Error(`Unable to find an Agent version compatible with ${kbnStatus.version.number}`);
   }
 
-  return version;
+  return `${version}${suffix}`;
 };
 
 // Generates a file name using system arch and an agent version.
