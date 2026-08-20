@@ -56,21 +56,21 @@ export const durationFormatSchema = z
           title: 'Output format',
           description: 'The unit to convert the field value into for display.',
         }),
-      output_precision: z.number().default(2).optional().meta({
+      output_precision: z.number().default(2).nullish().meta({
         title: 'Output precision',
         description: 'The number of decimal places to display in the duration value.',
       }),
-      show_suffix: z.boolean().optional().meta({
+      show_suffix: z.boolean().nullish().meta({
         title: 'Show suffix',
         description:
           'When true, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false or not provided, no suffix is shown.',
       }),
-      use_short_suffix: z.boolean().default(false).optional().meta({
+      use_short_suffix: z.boolean().default(false).nullish().meta({
         title: 'Use short suffix',
         description:
           'When true, the formatted duration uses short suffixes (such as "s", "ms", or "h"). When false or not provided, full suffixes are used.',
       }),
-      include_space_with_suffix: z.boolean().default(true).optional().meta({
+      include_space_with_suffix: z.boolean().default(true).nullish().meta({
         title: 'Include space with suffix',
         description:
           'When true or not provided, the formatted duration includes a space between the value and suffix. When false, no space is included.',

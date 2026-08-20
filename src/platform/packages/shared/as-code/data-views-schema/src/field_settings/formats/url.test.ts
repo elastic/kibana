@@ -73,6 +73,26 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid when UrlFormat defaults are null', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+        params: {
+          type: 'a',
+          url_template: null,
+          label_template: 'View Monitor',
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'url',
+        params: {
+          type: 'a',
+          url_template: null,
+          label_template: 'View Monitor',
+        },
+      });
+    });
+
     it('returns an error for invalid params', () => {
       const result = formatSchema.safeParse({
         type: 'url',

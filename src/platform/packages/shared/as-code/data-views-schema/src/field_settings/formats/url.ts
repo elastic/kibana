@@ -10,12 +10,12 @@
 import { z } from '@kbn/zod';
 
 const baseSubtypeOptionsSchema = z.object({
-  url_template: z.string().optional().meta({
+  url_template: z.string().nullish().meta({
     title: 'URL template',
     description:
       'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:\'{{risonValue}}\'). For example: "https://example.com/{{value}}".',
   }),
-  label_template: z.string().optional().meta({
+  label_template: z.string().nullish().meta({
     title: 'Label template',
     description:
       'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".',
@@ -31,7 +31,7 @@ export const urlFormatSchema = z
           title: 'Link',
           description: 'Displays the field value as a hyperlink.',
         }),
-        open_link_in_current_tab: z.boolean().optional().meta({
+        open_link_in_current_tab: z.boolean().nullish().meta({
           title: 'Open link in current tab',
           description:
             'When true, the URL opens in the current tab. When false or not provided, the URL opens in a new tab.',
@@ -42,12 +42,12 @@ export const urlFormatSchema = z
           title: 'Image',
           description: 'Displays the field value as an image.',
         }),
-        width: z.number().optional().meta({
+        width: z.number().nullish().meta({
           title: 'Width',
           description:
             'The width of the image. If not provided, the image will be displayed at the original width.',
         }),
-        height: z.number().optional().meta({
+        height: z.number().nullish().meta({
           title: 'Height',
           description:
             'The height of the image. If not provided, the image will be displayed at the original height.',

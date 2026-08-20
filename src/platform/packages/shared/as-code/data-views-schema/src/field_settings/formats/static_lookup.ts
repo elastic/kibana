@@ -18,7 +18,7 @@ export const staticLookupFormatSchema = z
         description:
           'The lookup entries to use for the static lookup. The key refers to the field value, and the value refers to the new value to display.',
       }),
-      unknown_key_value: z.string().optional().meta({
+      unknown_key_value: z.string().nullish().meta({
         title: 'Unknown key value',
         description:
           'The value to display for unknown key values. If not provided, the field value will be displayed.',
