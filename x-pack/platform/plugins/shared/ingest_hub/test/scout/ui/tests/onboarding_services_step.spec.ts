@@ -113,11 +113,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await expect(page.testSubj.locator('servicesStep-continueButton')).toBeEnabled();
   });
 
-  // TODO: dynamodb, rds, and all other metrics-only services have showInUI:false until
-  // they gain agentless or ECF deployment methods. The Databases category is therefore
-  // hidden in all signal-filter modes, making this test unwritable with the current
-  // static entries. Re-enable once a metrics service is promoted to showInUI:true.
-  test.skip('signal-type filter hides categories with no matching services', async ({
+  test('signal-type filter hides categories with no matching services', async ({
     browserAuth,
     page,
   }) => {
