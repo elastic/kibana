@@ -90791,6 +90791,11 @@ components:
                 properties:
                   description:
                     type: string
+                  engine:
+                    enum:
+                      - v1
+                      - v2
+                    type: string
                   service:
                     type: string
                   title:
