@@ -285,8 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '{',
             '  "query": {',
             '    # match every document',
-            '    "match_all": {',
-            '    }',
+            '    "match_all": {}',
             '  }',
             '}',
           ].join('\n')

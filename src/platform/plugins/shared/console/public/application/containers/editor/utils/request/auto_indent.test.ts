@@ -216,8 +216,7 @@ describe('getAutoIndentedRequests', () => {
         'GET _search // test comment',
         '{',
         '  "query": {',
-        '    "match_all": {',
-        '    }',
+        '    "match_all": {}',
         '  }, // comment',
         '  "size": 10',
         '}',
@@ -359,6 +358,25 @@ describe('getAutoIndentedRequests', () => {
     expect(formattedData).toContain('/* two */');
     expect(formattedData).toMatch(/\n  "a": 1/);
     expect(formattedData).toMatch(/\n  "b": 2/);
+  });
+
+  it('auto-indents chained line comments across CRLF lines without reporting a fallback', () => {
+    const unformatted = ['GET _search', '{', '"a": 1 // first', '# second', '// third', '}'].join(
+      '\r\n'
+    );
+
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: `GET _search\n${['{', '  "a": 1 // first', '  # second', '  // third', '}'].join(
+        '\r\n'
+      )}`,
+      hasCommentFallback: false,
+    });
   });
 
   it('auto-indents request body with comments and triple-quote strings', () => {
@@ -821,5 +839,197 @@ describe('getAutoIndentedRequests', () => {
     ];
 
     expect(formattedData).toBe(expectedResultLines.join('\n'));
+  });
+
+  it('correctly auto-indents a request containing an empty array followed by line and multi-line comments', () => {
+    const unformatted = [
+      'PUT _ingest/pipeline/test',
+      '{',
+      '              "processors": [',
+      '{',
+      '      "append": {',
+      '             "field": "",',
+      '                 "value": [] //hello',
+      '                  /*',
+      '        multi-line',
+      '',
+      '        */',
+      '      }',
+      '    }',
+      '  ]',
+      '}',
+    ].join('\n');
+
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 15, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: [
+        'PUT _ingest/pipeline/test',
+        '{',
+        '  "processors": [',
+        '    {',
+        '      "append": {',
+        '        "field": "",',
+        '        "value": [] //hello',
+        '        /*',
+        '        multi-line',
+        '',
+        '        */',
+        '      }',
+        '    }',
+        '  ]',
+        '}',
+      ].join('\n'),
+      hasCommentFallback: false,
+    });
+  });
+
+  it('keeps a line comment standalone after an empty array', () => {
+    const unformatted = [
+      'PUT _ingest/pipeline/test',
+      '{',
+      '  "processors": [',
+      '    {',
+      '      "append": {',
+      '        "field": "",',
+      '        "value": [',
+      '        ] ',
+      '        // hello',
+      '        /*',
+      '        multi-line',
+      '',
+      '               */',
+      '      }',
+      '    }',
+      '  ]',
+      '}',
+    ].join('\n');
+
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 17, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: [
+        'PUT _ingest/pipeline/test',
+        '{',
+        '  "processors": [',
+        '    {',
+        '      "append": {',
+        '        "field": "",',
+        '        "value": []',
+        '        // hello',
+        '        /*',
+        '        multi-line',
+        '',
+        '               */',
+        '      }',
+        '    }',
+        '  ]',
+        '}',
+      ].join('\n'),
+      hasCommentFallback: false,
+    });
+  });
+
+  it('keeps a block comment standalone after an empty array', () => {
+    const unformatted = [
+      'PUT _ingest/pipeline/test',
+      '{',
+      '  "processors": [',
+      '    {',
+      '      "append": {',
+      '        "field": "",',
+      '        "value": [',
+      '        ]',
+      '        /*',
+      '        multi-line',
+      '',
+      '               */',
+      '      }',
+      '    }',
+      '  ]',
+      '}',
+    ].join('\n');
+
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 16, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: [
+        'PUT _ingest/pipeline/test',
+        '{',
+        '  "processors": [',
+        '    {',
+        '      "append": {',
+        '        "field": "",',
+        '        "value": []',
+        '        /*',
+        '        multi-line',
+        '',
+        '               */',
+        '      }',
+        '    }',
+        '  ]',
+        '}',
+      ].join('\n'),
+      hasCommentFallback: false,
+    });
+  });
+
+  it('correctly auto-indents a request containing an empty array followed by multiple line comments with empty comment lines', () => {
+    const unformatted = [
+      'PUT _ingest/pipeline/test',
+      '{',
+      '              "processors": [',
+      '{',
+      '      "append": {',
+      '             "field": "",',
+      '                 "value": [] //hello',
+      '                  //',
+      '        // multi-line',
+      '',
+      '        //',
+      '      }',
+      '    }',
+      '  ]',
+      '}',
+    ].join('\n');
+
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 16, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: [
+        'PUT _ingest/pipeline/test',
+        '{',
+        '  "processors": [',
+        '    {',
+        '      "append": {',
+        '        "field": "",',
+        '        "value": [] //hello',
+        '        //',
+        '        // multi-line',
+        '',
+        '        //',
+        '      }',
+        '    }',
+        '  ]',
+        '}',
+      ].join('\n'),
+      hasCommentFallback: false,
+    });
   });
 });
