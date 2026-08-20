@@ -78,7 +78,7 @@ describe('ProjectScopeColumn', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('uses origin routing when project routing is not configured', async () => {
+  it('renders only the origin routing project when project routing is not configured', async () => {
     renderProjectScopeColumn(cpsManager);
 
     const button = screen.getByTestId('transformListProjectScopeButton');
@@ -86,9 +86,8 @@ describe('ProjectScopeColumn', () => {
 
     await userEvent.click(button);
 
-    await waitFor(() => {
-      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
-    });
+    expect(screen.getByText('Origin project')).toBeInTheDocument();
+    expect(screen.queryByText('Linked project')).not.toBeInTheDocument();
   });
 
   it('displays selected project count for custom project routing', async () => {
