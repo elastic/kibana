@@ -155,7 +155,9 @@ Using the imported reviewer instructions:
 
 ## Critical checks
 
-Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Use short, fix-oriented finding titles rather than repeating the checklist heading verbatim. When the linked best practice is useful to cite, include it in the body of the finding. Format each Critical-check finding title as:
+Use short, fix-oriented finding titles for **all** review comments instead of repeating the checklist heading verbatim. When the linked best practice is useful to cite, include it in the body of the finding.
+
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as:
 
 ```md
 #### ⚠️ <short fix-oriented title>
