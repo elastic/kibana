@@ -1215,6 +1215,27 @@ apiTest.describe(
         alice,
         mockAgent(privateAgentId, AgentAccessControlMode.Private)
       );
+      await createConversationAs({
+        apiClient,
+        user: alice,
+        agentId: publicAgentId,
+        input: 'Alice user profile probe',
+        title: 'Alice User Profile Probe',
+      });
+      await createConversationAs({
+        apiClient,
+        user: bob,
+        agentId: publicAgentId,
+        input: 'Bob user profile probe',
+        title: 'Bob User Profile Probe',
+      });
+      await createConversationAs({
+        apiClient,
+        user: eve,
+        agentId: publicAgentId,
+        input: 'Eve user profile probe',
+        title: 'Eve User Profile Probe',
+      });
       await setAgentAccessControlAs(apiClient, alice, privateAgentId, [
         { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
       ]);
