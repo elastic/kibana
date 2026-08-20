@@ -69,11 +69,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
 };
 
 /**
- * Answers "does this conversation carry a stored events projection?". Monotonic
- * and future-proof: a v1 document read by future v2 code is still events-native
- * (it has a stored projection), so this is the correct read/write gate. Use
- * `CONVERSATION_SCHEMA_VERSION` directly (equality) only when the current
- * projection format matters — never as the has-events gate.
+ * Answers "does this conversation carry a stored events projection?".
  */
 export const isEventsNativeVersion = (v: number | undefined): v is number =>
   typeof v === 'number' && v >= 1;
@@ -81,9 +77,7 @@ export const isEventsNativeVersion = (v: number | undefined): v is number =>
 /**
  * Discriminates the ids produced by `roundToEvents` (see rounds_to_events.ts)
  * from any additive event that lives on the timeline but has no round shape
- * (e.g. future `execution_failed` / `execution_aborted`). The reconcile step
- * uses this to regenerate round-derived events on every write while preserving
- * additive ones.
+ * - think errors, background agent completions, etc.
  */
 const isRoundDerivedEventId = (id: string): boolean =>
   id.endsWith('::user_message') ||
@@ -91,11 +85,7 @@ const isRoundDerivedEventId = (id: string): boolean =>
   id.endsWith('::execution_terminated');
 
 /**
- * Rebuilds the stored `events` projection on write for an events-native
- * conversation: round-derived events come from a fresh `roundsToEvents` call
- * against the current rounds (so stale/regenerated rounds drop cleanly), and
- * any additive events already on `merged.events` are preserved (so future
- * error events aren't clobbered by a recompute).
+ * Rebuilds the stored `events` projection on write for an events-native conversation.
  */
 const reconcileEvents = (merged: Conversation) => {
   const roundDerived = roundsToEvents(merged);
@@ -263,17 +253,11 @@ export const fromEs = (document: Document): Conversation => {
   const storedEvents = document._source!.events;
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  // `schema_version` must land on the domain object (not just the response),
-  // because the OCC writer's `get` uses `fromEs` and `toEs` gates on it: without
-  // this, every update would look legacy and never persist events.
   const withVersion = (conversation: Conversation): Conversation =>
     isEventsNative ? { ...conversation, schema_version: storedSchemaVersion } : conversation;
 
   // Serve stored events only when the doc is events-native AND has a non-empty
-  // stored projection. The "v1 but empty/absent events" case (e.g. a rolling
-  // upgrade wrote through an older node that stripped the field) falls back to
-  // derive-from-rounds — a stored projection is never assumed to exist just
-  // because the version says so. Legacy docs continue to derive as today.
+  // stored projection.
   const withEvents = (conversation: Conversation): Conversation => ({
     ...conversation,
     events:
@@ -335,10 +319,6 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
 };
 
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
-  // Events-native docs persist the reconciled projection + version alongside
-  // rounds in the same OCC write; legacy docs (no schema_version) stay rounds-
-  // only. `updateConversation` is responsible for regenerating `events` on
-  // every write, so this converter only decides whether to emit them.
   const isEventsNative = isEventsNativeVersion(conversation.schema_version);
   return {
     agent_id: conversation.agent_id,
@@ -390,10 +370,6 @@ export const updateConversation = ({
   space: string;
   updateDate: Date;
 }) => {
-  // Defensive strip of system-managed fields from the caller-supplied update.
-  // `events` and `schema_version` are never accepted from a payload — they are
-  // regenerated from the stored conversation below — so this keeps the write
-  // path immune even if a route schema is later widened.
   const {
     events: _ignoredEvents,
     schema_version: _ignoredSchemaVersion,
@@ -403,10 +379,6 @@ export const updateConversation = ({
     schema_version?: Conversation['schema_version'];
   };
 
-  // `conversation` here comes from `fromEs`, so it already carries the stored
-  // `events` (round-derived + any additive events) and `schema_version` for
-  // events-native docs. We copy those from the stored conversation only,
-  // never from the update payload.
   const merged: Conversation = {
     ...conversation,
     ...safeUpdate,
@@ -415,16 +387,10 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
-  // Legacy conversations stay rounds-only (reconcile is skipped and `toEs`
-  // omits `events`/`schema_version`), so they are never accidentally migrated.
   if (!isEventsNativeVersion(merged.schema_version)) {
     return merged;
   }
 
-  // Events-native writes always re-stamp at the current format version so
-  // older-format docs self-heal on their next write ("provenance instead of
-  // migration"), and reconcile the projection: fresh round-derived events
-  // replace stale ones, additive events (errors, later) are preserved.
   return {
     ...merged,
     schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -445,12 +411,6 @@ export const createRequestToEs = ({
 }): ConversationProperties => {
   const createdAt = creationDate.toISOString();
 
-  // `createRequestToEs` is the single promoter to events-native: it stamps
-  // `schema_version` at the current format and derives `events` itself from
-  // the caller's rounds rather than trusting an array off the request. That
-  // gives each field exactly one writer and means `create()` needs no change.
-  // `roundsToEvents` needs a `Conversation`, so build a minimal in-memory
-  // shape (the ids/actors it reads all come from these fields).
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
