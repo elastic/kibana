@@ -41,8 +41,7 @@ spaceTest.describe(
       await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
     });
 
-    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
-      await apiServices.sampleData.remove(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('enableESQL');
       await scoutSpace.savedObjects.cleanStandardList();
     });

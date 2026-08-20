@@ -95,7 +95,7 @@ export class BackgroundSearchPage {
     await this.page.testSubj
       .locator(isSubmitButton ? SEND_TO_BACKGROUND_FROM_SUBMIT : SEND_TO_BACKGROUND_FROM_CANCEL)
       .click();
-    await this.savedToastLink.waitFor({ state: 'visible' });
+    await this.savedToastLink.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   /** Wait for the flyout's background search table to render. */

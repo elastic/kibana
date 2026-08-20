@@ -64,8 +64,7 @@ spaceTest.describe(
       }
     });
 
-    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
-      await apiServices.sampleData.remove(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'enableESQL', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
