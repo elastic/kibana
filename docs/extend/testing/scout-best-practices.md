@@ -166,12 +166,12 @@ expect(mockNavigateToApp).toHaveBeenCalledWith('observabilityOnboarding');
 
 ## Don't leak state into the next suite [dont-leak-state-into-the-next-suite]
 
-The same logic applies in reverse: whatever your suite creates or changes doesn't disappear when the suite finishes. Saved objects, indices, data streams, settings, and feature flags are still there for the suites that run after you on the same servers.
+Scout configs share servers. Anything your suite creates or changes can affect the suites that run after it.
 
-- **Namespace what you create.** A fixed literal name (`my-test-index`) is shared with everything else running against the deployment: other specs and parallel workers in your own suite, and any leftovers from an earlier suite. Whoever tears the name down first deletes everyone's data, and stale leftovers under it can satisfy or break your assertions. Build resource names (indices, pipelines, saved objects) from a unique value such as a UUID, generated per run — or per worker, for suites that run tests in parallel.
-- **Own your time window.** A time filter doesn't isolate you: if two suites ingest data into the same date range, each one's time-bounded queries see the other's documents. When your test data uses fixed timestamps, pick a range unique to your suite instead of reusing a "convenient" round date that other suites likely picked too.
-- **Delete the resource, not just the record of it.** Some objects only *point at* a real resource that lives elsewhere: a rule owns an API key, a workflow spawns executions, a saved object may reference an ingest pipeline or an enrollment token. Deleting the pointer — for example, wiping the saved objects with `savedObjects.clean({ types: [...] })` — doesn't release what it points at: the API key stays valid, the execution keeps running. These orphans are invisible to the next test run and accumulate — including in shared services outside the cluster — until a quota or limit breaks unrelated tests, with no local reproduction. Tear down through the API that owns the resource (e.g. delete the rule via its HTTP API so it invalidates its own key) rather than deleting its records from Elasticsearch.
-- **Revert behavior, not just data.** Settings, feature flags, and index/component templates change how the cluster *behaves* for everything that runs after you — a leaked template can silently reject or reshape another suite's documents at ingest time. Revert them in teardown; symmetrically, don't assume cluster defaults are still in effect when your suite starts.
+- **Namespace what you create.** Fixed names (`my-test-index`) are shared with other specs and parallel workers. Generate resource names from a unique value such as a UUID, per run — or per worker for parallel suites.
+- **Own your time window.** Fixed timestamps are shared state too. If two suites ingest into the same date range, each suite's time-bounded queries see the other's documents. Pick a suite-unique range.
+- **Delete the resource, not just the record of it.** Deleting a saved object that points at an API key, task, execution, or pipeline doesn't release the underlying resource. Tear down through the API that owns it.
+- **Revert behavior-changing state.** Undo settings, feature flags, and index/component templates in teardown. They change how the cluster behaves for whatever runs next.
 
 Clean up in the right place:
 
