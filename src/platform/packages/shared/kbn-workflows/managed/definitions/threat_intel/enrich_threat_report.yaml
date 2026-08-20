@@ -3,10 +3,13 @@ version: "1"
 # Driver `size: 50` caps wall clock and inference load. Each item runs several
 # LLM steps sequentially; partial drain per pass is intentional.
 # Scoped to `workflow.spaceId` plus global (`*`) report rows via `space_id`.
-# The inference endpoint consts below are placeholders replaced at install time
-# from client.install({ values }), and persisted as managedTemplateValues so
-# per-space overrides survive definition upgrades. They are not runtime
-# templating: by the time this workflow executes the ids are already inlined.
+# The double-underscore inference endpoint placeholders on the LLM steps below are
+# replaced by literal string substitution at install time from
+# client.install({ values }), before this yaml is ever parsed. They are not runtime
+# templating and are never valid endpoint ids themselves. Any edit to this file
+# needs a `version` bump in the definition: the definition hash is computed from
+# the yamlTemplate function source, not from this file, so yaml-only changes do
+# not trigger an upgrade of already-installed workflows.
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
@@ -17,9 +20,6 @@ settings:
     key: "threat-intel-enrich-{{ workflow.spaceId }}"
     strategy: drop
     max: 1
-consts:
-  enrich_inference_endpoint: "__ENRICH_INFERENCE_ENDPOINT__"
-  diamond_inference_endpoint: "__DIAMOND_INFERENCE_ENDPOINT__"
 triggers:
   - type: scheduled
     with:
@@ -109,7 +109,7 @@ steps:
             html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
-            inference_endpoint_id: "{{ consts.enrich_inference_endpoint }}"
+            inference_endpoint_id: "__ENRICH_INFERENCE_ENDPOINT__"
         on-failure:
           continue: true
 
@@ -152,7 +152,7 @@ steps:
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             report_id: "{{ foreach.item._id }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
-            inference_endpoint_id: "{{ consts.enrich_inference_endpoint }}"
+            inference_endpoint_id: "__ENRICH_INFERENCE_ENDPOINT__"
         on-failure:
           continue: true
 
@@ -170,7 +170,7 @@ steps:
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
             categories: "${{ steps.enrich_taxonomy.output.categories }}"
             ioc_count: "${{ steps.extract_iocs.output.count | default: 0 }}"
-            inference_endpoint_id: "{{ consts.enrich_inference_endpoint }}"
+            inference_endpoint_id: "__ENRICH_INFERENCE_ENDPOINT__"
         on-failure:
           continue: true
 
@@ -211,7 +211,7 @@ steps:
           body:
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             report_id: "{{ foreach.item._id }}"
-            inference_endpoint_id: "{{ consts.diamond_inference_endpoint }}"
+            inference_endpoint_id: "__DIAMOND_INFERENCE_ENDPOINT__"
         on-failure:
           continue: true
 
