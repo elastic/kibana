@@ -39,6 +39,10 @@ export const createNavigationTree = async (
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
 
   return {
     body: [
@@ -50,6 +54,7 @@ export const createNavigationTree = async (
         renderAs: 'home',
       },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
