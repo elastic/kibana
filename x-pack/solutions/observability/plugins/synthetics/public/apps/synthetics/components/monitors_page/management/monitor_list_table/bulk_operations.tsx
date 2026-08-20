@@ -90,7 +90,7 @@ export const BulkOperations = ({
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           isDisabled={true}
         >
@@ -276,11 +276,14 @@ export const BulkOperations = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.synthetics.bulkOperations.popoverAriaLabel', {
+        defaultMessage: 'Bulk actions for the selected monitors',
+      })}
       button={
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >

@@ -42,22 +42,21 @@ import {
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
   getPrimaryRecommendation,
-  mapBlindSpots,
-  type InvestigationRecommendation,
+  type RecommendationItem,
 } from './investigation_presentation';
 
 const INLINE_BLIND_SPOT_LIMIT = 4;
 const tryNextRowActionClassName = 'nightshiftInvestigationTryNextRowAction';
 
 const recommendationChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.recommendationChatTooltip',
+  'xpack.nightshift.investigation.recommendationChatTooltip',
   {
     defaultMessage: 'Ask agent about this recommendation',
   }
 );
 
 const completedStatusLabel = i18n.translate(
-  'xpack.observability.nightshift.investigation.summaryCompleteStatusLabel',
+  'xpack.nightshift.investigation.summaryCompleteStatusLabel',
   {
     defaultMessage: 'Complete',
   }
@@ -125,7 +124,7 @@ function TryNextPanel({
   recommendation,
   onShowMoreRecommendations,
 }: {
-  recommendation: InvestigationRecommendation;
+  recommendation: RecommendationItem;
   onShowMoreRecommendations?: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -142,7 +141,7 @@ function TryNextPanel({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>
-              {i18n.translate('xpack.observability.nightshift.investigation.tryNextTitle', {
+              {i18n.translate('xpack.nightshift.investigation.tryNextTitle', {
                 defaultMessage: 'Try next',
               })}
             </h4>
@@ -160,7 +159,7 @@ function TryNextPanel({
                 element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_SUMMARY,
               })}
             >
-              {i18n.translate('xpack.observability.nightshift.investigation.moreRecommendations', {
+              {i18n.translate('xpack.nightshift.investigation.moreRecommendations', {
                 defaultMessage: 'More recommendations',
               })}
             </EuiButtonEmpty>
@@ -263,7 +262,7 @@ export function InvestigationSummaryCard({
   const conclusionBody = getConclusionBody(state?.conclusion);
   const primaryRecommendation = status === 'complete' ? getPrimaryRecommendation(state) : undefined;
   const blindSpots =
-    status === 'complete' ? mapBlindSpots(state?.gaps_found).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
+    status === 'complete' ? (state?.blind_spots ?? []).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
 
   return (
     <>

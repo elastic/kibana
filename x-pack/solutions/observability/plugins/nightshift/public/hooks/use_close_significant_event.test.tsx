@@ -19,7 +19,7 @@ import { useCloseSignificantEvent } from './use_close_significant_event';
 jest.mock('./use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
-const httpPost = jest.fn();
+const significantEventsFetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
 
@@ -38,7 +38,7 @@ const event: SignificantEvent = {
 describe('useCloseSignificantEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    httpPost.mockResolvedValue({
+    significantEventsFetch.mockResolvedValue({
       event_uuid: 'event-1-v2',
       updated: 1,
       ignored: 0,
@@ -46,9 +46,11 @@ describe('useCloseSignificantEvent', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        http: { post: httpPost },
         notifications: {
           toasts: { addError, addSuccess },
+        },
+        significantEvents: {
+          significantEventsRepositoryClient: { fetch: significantEventsFetch },
         },
       },
     });
@@ -76,9 +78,13 @@ describe('useCloseSignificantEvent', () => {
 
     await waitFor(() => expect(addSuccess).toHaveBeenCalled());
 
-    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/events/event-1-v1/update', {
-      body: JSON.stringify({ status: 'closed' }),
-    });
+    expect(significantEventsFetch).toHaveBeenCalledWith(
+      'POST /internal/significant_events/events/{id}/update',
+      {
+        params: { path: { id: 'event-1-v1' }, body: { status: 'closed' } },
+        signal: null,
+      }
+    );
     expect(
       queryClient.getQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY
@@ -94,7 +100,7 @@ describe('useCloseSignificantEvent', () => {
   });
 
   it('surfaces close failures as toast errors', async () => {
-    httpPost.mockRejectedValueOnce(new Error('close failed'));
+    significantEventsFetch.mockRejectedValueOnce(new Error('close failed'));
     const queryClient = new QueryClient({
       defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
     });

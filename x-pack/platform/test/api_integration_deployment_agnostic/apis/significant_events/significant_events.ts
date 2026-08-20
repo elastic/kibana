@@ -34,8 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/282874
-  describe.skip('Significant Events', function () {
+  describe('Significant Events', function () {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -320,8 +319,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(pauseSummary.state).to.eql('paused');
         expect((await getMaintenanceStatus(apiClient)).state).to.eql('paused');
 
-        // Pausing again while paused returns the recorded summary without erroring.
-        expect(await pauseMaintenance(apiClient)).to.eql(pauseSummary);
+        // Re-pausing re-sweeps: assert the deterministic state/counts, not the live-recomputed partialFailures.
+        const rePauseSummary = await pauseMaintenance(apiClient);
+        expect(rePauseSummary.state).to.eql('paused');
+        expect(rePauseSummary.workflowsDisabled).to.eql(pauseSummary.workflowsDisabled);
+        expect(rePauseSummary.rulesDisabled).to.eql(pauseSummary.rulesDisabled);
+        expect(rePauseSummary.executionsCancelled).to.eql(pauseSummary.executionsCancelled);
 
         const resumeSummary = await resumeMaintenance(apiClient);
         expect(resumeSummary.state).to.eql('enabled');

@@ -8,13 +8,14 @@
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
+  ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  ActionPolicy,
-  ActionPolicyId,
 } from '../types';
 
 @injectable()
@@ -26,7 +27,10 @@ export class FetchPoliciesStep implements DispatcherStep {
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
   ) {}
 
-  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    _state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
     });
@@ -50,7 +54,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         groupingMode: doc.attributes.groupingMode ?? undefined,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
-        apiKey: doc.attributes.auth.apiKey,
+        apiKey: doc.attributes.apiKey,
       });
     }
 

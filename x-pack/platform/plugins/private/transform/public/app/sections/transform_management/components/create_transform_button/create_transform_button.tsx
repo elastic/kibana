@@ -17,6 +17,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +41,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
 }) => {
   const capabilities = useTransformCapabilities();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const disabled =
     !capabilities.canCreateTransform ||
@@ -139,6 +141,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={createTransformButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -146,7 +149,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
       data-test-subj="transformCreatePopover"
     >
       <>
-        <EuiPopoverTitle paddingSize="m">
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">
           {i18n.translate('xpack.transform.transformList.createTransformTypePopoverTitle', {
             defaultMessage: 'Select transform type',
           })}

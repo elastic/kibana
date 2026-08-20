@@ -17,6 +17,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -66,6 +67,7 @@ interface SaveTimelineModalProps {
 export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
   ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
+    const modalTitleId = useGeneratedHtmlId();
 
     const dispatch = useDispatch();
     const { isSaving, description, status, title, timelineType } = useSelector((state: State) =>
@@ -207,6 +209,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     return (
       <EuiModal
+        aria-labelledby={modalTitleId}
         data-test-subj="save-timeline-modal"
         maxWidth={NOTES_PANEL_WIDTH}
         onClose={closeSaveTimeline}
@@ -214,7 +217,9 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
         )}
-        <EuiModalHeader data-test-subj="save-timeline-modal-header">{modalHeader}</EuiModalHeader>
+        <EuiModalHeader data-test-subj="save-timeline-modal-header" id={modalTitleId}>
+          {modalHeader}
+        </EuiModalHeader>
 
         <EuiModalBody>
           {showWarning && (

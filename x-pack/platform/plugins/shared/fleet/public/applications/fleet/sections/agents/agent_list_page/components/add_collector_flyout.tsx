@@ -7,7 +7,6 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { dump } from 'js-yaml';
 import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlyout,
@@ -21,11 +20,10 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiFlyoutFooter,
-  EuiCallOut,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -35,6 +33,7 @@ import {
   EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -51,6 +50,7 @@ import {
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
+import { useYaml } from '../../../../../../services';
 
 import { useManagedOtlp } from './use_managed_otlp';
 
@@ -150,6 +150,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
+  const yaml = useYaml();
   const { cloud, docLinks, application } = useStartServices();
   // api_keys.save maps to manage_own_api_key, which is necessary but not sufficient —
   // the server also requires apm event:write. In the rare case where a user has
@@ -245,6 +246,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   };
 
   const opampConfig = useMemo(() => {
+    if (!yaml) {
+      return '';
+    }
+
     const nonIdentifyingAttrs: Record<string, any> = {
       'elastic.collector.group_name': groupDisplayName,
       'elastic.collector.group': collectorGroup,
@@ -344,8 +349,15 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
         },
       },
     };
-    return dump(config, { lineWidth: -1, quotingType: '"', forceQuotes: true, noRefs: true });
+    return yaml.stringify(config, {
+      lineWidth: 0,
+      singleQuote: false,
+      defaultStringType: 'QUOTE_DOUBLE',
+      defaultKeyType: 'PLAIN',
+      aliasDuplicateObjects: false,
+    });
   }, [
+    yaml,
     groupDisplayName,
     collectorGroup,
     serviceName,
@@ -564,7 +576,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               </p>
             </EuiText>
           )}
-          {token && defaultFleetServerHost && isFormValid ? (
+          {token && defaultFleetServerHost && isFormValid && yaml ? (
             <>
               <EuiText>
                 <p>
@@ -664,17 +676,22 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                 {opampConfig}
               </EuiCodeBlock>
             </>
-          ) : loading ? (
-            <EuiCallOut
+          ) : loading || !yaml ? (
+            <KbnInfoCallout
               announceOnMount
               size="m"
-              color="primary"
-              iconType={EuiLoadingSpinner}
               title={
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
-                  defaultMessage="Preparing OpAMP configuration..."
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
+                      defaultMessage="Preparing OpAMP configuration..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             />
           ) : null}

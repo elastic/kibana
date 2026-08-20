@@ -1,5 +1,5 @@
 {
-  "sha1": "1413d583ef34868b6332590d4c560ff9c8ab3073",
+  "sha1": "19d8252285b7a6297f831fd5ea0d95e0bd9e90e2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -21,8 +21,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 53,
-        "column": 5
+        "line": 57,
+        "column": 66
       }
     },
     {
@@ -41,8 +41,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 89,
-        "column": 5
+        "line": 100,
+        "column": 18
       }
     },
     {
@@ -61,8 +61,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 108,
-        "column": 17
+        "line": 117,
+        "column": 22
       }
     },
     {
@@ -81,8 +81,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/create_discover_session.spec.ts",
-        "line": 119,
-        "column": 15
+        "line": 129,
+        "column": 81
       }
     },
     {
@@ -293,7 +293,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/get_discover_session.spec.ts",
-        "line": 86,
+        "line": 87,
         "column": 12
       }
     },
@@ -313,13 +313,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/get_discover_session.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 7
       }
     },
     {
-      "id": "3fda587e45f462d-c27798434372751",
-      "title": "GET /api/discover_sessions/{id} returns 500 when the output transform fails to validate the stored Discover session",
+      "id": "3fda587e45f462d-4ef1bcc58b3e093",
+      "title": "GET /api/discover_sessions/{id} returns warnings and preserves valid controls when a stored control is invalid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -333,7 +333,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/get_discover_session.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 14
       }
     },
@@ -358,6 +358,26 @@
       }
     },
     {
+      "id": "3b0baea7624dbb0-548a799f2c813e5",
+      "title": "GET /api/discover_sessions filters summaries by tag ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
       "id": "3b0baea7624dbb0-803871dd4b2ac3e",
       "title": "GET /api/discover_sessions paginates beyond the first page",
       "expectedStatus": "passed",
@@ -373,8 +393,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 66,
-        "column": 14
+        "line": 112,
+        "column": 7
       }
     },
     {
@@ -393,8 +413,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 131,
+        "column": 17
       }
     },
     {
@@ -413,8 +433,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 102,
-        "column": 9
+        "line": 149,
+        "column": 17
       }
     },
     {
@@ -433,8 +453,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 115,
-        "column": 85
+        "line": 161,
+        "column": 12
       }
     },
     {
@@ -453,8 +473,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 184,
+        "column": 97
       }
     },
     {
@@ -473,8 +493,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/search_discover_sessions.spec.ts",
-        "line": 151,
-        "column": 5
+        "line": 196,
+        "column": 81
       }
     },
     {
@@ -493,7 +513,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 11
       }
     },
@@ -513,7 +533,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 93,
+        "line": 94,
         "column": 18
       }
     },
@@ -533,8 +553,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 215,
+        "column": 11
       }
     },
     {
@@ -553,8 +573,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 225,
-        "column": 4
+        "line": 271,
+        "column": 13
       }
     },
     {
@@ -573,8 +593,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/api/tests/upsert_discover_session.spec.ts",
-        "line": 241,
-        "column": 5
+        "line": 289,
+        "column": 15
       }
     }
   ]
