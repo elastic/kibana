@@ -22,9 +22,6 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
-// Per-spec model config, independent of shards. `files` are spec paths relative to the suite config
-// directory; `models` (optional) is the model-group list those specs run against, falling back to
-// `weeklyEisModelGroups` then the requested `EVAL_MODEL_GROUPS`. Only used in per-spec mode.
 export interface EvalsSuiteSpec {
   files: string[];
   models?: string[];
@@ -182,13 +179,11 @@ function buildEvalsYaml({
   resolveModelGroups,
   evaluationConnectorId,
   hasEisJudge,
-  perSpecModels,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
-  perSpecModels: boolean;
 }): string {
   const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
@@ -209,10 +204,6 @@ function buildEvalsYaml({
       const includeEisModelsEnv = includeEisModels
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
-      // Per-spec resolution runs each spec against its own model list (with fallback); the model
-      // groups above stay the connector-provisioning universe. Off for explicit `models:<group>`,
-      // which run that set against every spec.
-      const perSpecModelsEnv = perSpecModels ? `          EVAL_PER_SPEC_MODELS: '1'` : null;
       const evalServerConfigSetEnv = suite.serverConfigSet
         ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
@@ -227,7 +218,6 @@ function buildEvalsYaml({
         `          EVAL_FANOUT: '1'`,
         ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
-        ...(perSpecModelsEnv ? [perSpecModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         ...(evalServerConfigSetEnv ? [evalServerConfigSetEnv] : []),
         `        timeout_in_minutes: 60`,
@@ -265,7 +255,6 @@ interface EvalSelection {
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
-  perSpecModels: boolean;
 }
 
 /**
@@ -343,10 +332,6 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const hasEisJudge =
     !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
 
-  // Per-spec resolution only for the weekly-eis default; an explicit `models:<group>` selection
-  // overrides per-spec config and runs that exact set against every spec.
-  const perSpecModels = useWeeklyEisModels && explicitModelGroups.length === 0;
-
   if (selectedEvalSuites.length === 0) {
     return null;
   }
@@ -367,7 +352,6 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
-    perSpecModels,
   };
 }
 
@@ -388,7 +372,6 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     resolveModelGroups: selection.resolveModelGroups,
     evaluationConnectorId: selection.evaluationConnectorId,
     hasEisJudge: selection.hasEisJudge,
-    perSpecModels: selection.perSpecModels,
   });
 }
 

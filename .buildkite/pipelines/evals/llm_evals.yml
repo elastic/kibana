@@ -1,11 +1,6 @@
 env:
   KBN_EVALS: '1'
   KBN_EVALS_WEEKLY: '1'
-  # Weekly runs resolve each spec against its own model list when the suite defines per-spec `specs`
-  # model overrides (see evals.suites.json); the per-suite EVAL_MODEL_GROUPS below stays the
-  # connector-provisioning universe. No-op for suites without `specs` overrides. Keep model lists here
-  # in sync with that file.
-  EVAL_PER_SPEC_MODELS: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh

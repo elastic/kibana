@@ -44,17 +44,17 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)     |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK) |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
-| `--grep <pattern>`  | Filter tests by name                             |
-| `--repetitions <n>` | Repeat each example N times                      |
+| Flag                | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
+| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
+| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
+| `--grep <pattern>`  | Filter tests by name                                                   |
+| `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
-| `--skip-init`       | Skip config and connector setup                  |
-| `--dry-run`         | Print configuration and exit                     |
+| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
+| `--skip-init`       | Skip config and connector setup                                        |
+| `--dry-run`         | Print configuration and exit                                           |
 
 #### EIS connector setup
 
@@ -212,12 +212,22 @@ come from `specs`, its CI step from `shards`, and either can be absent.
 ```jsonc
 {
   "id": "significant-events",
-  "weeklyEisModelGroups": [ /* suite fallback + provisioning universe */ ],
-  "specs": [
-    { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"] },
-    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
+  "weeklyEisModelGroups": [
+    /* suite fallback + provisioning universe */
   ],
-  "shards": [ /* optional; batching only, purely about CI step timeouts */ ]
+  "specs": [
+    {
+      "files": ["evals/discovery/discovery.spec.ts"],
+      "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"]
+    },
+    {
+      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
+      "models": ["eis/openai-gpt-5.4-mini"]
+    }
+  ],
+  "shards": [
+    /* optional; batching only, purely about CI step timeouts */
+  ]
 }
 ```
 

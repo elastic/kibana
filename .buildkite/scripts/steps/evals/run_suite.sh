@@ -167,18 +167,16 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One row per fanout step: "connectorId<TAB>shardId<TAB>specFiles". In per-spec mode a connector
-    # only appears for the specs that requested it; otherwise it's the connector x shard cross product.
+    # One row per fanout step: "connectorId<TAB>shardId<TAB>specFiles". Empty shard id is `-`.
+    # Weekly runs apply specs[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
         node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_fanout_matrix.js
     )"
 
     if [[ -z "${FANOUT_MATRIX:-}" ]]; then
-      echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
-      if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
-        export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
-      fi
+      echo "No connectors matched EVAL_MODEL_GROUPS in KIBANA_TESTING_AI_CONNECTORS" >&2
+      exit 1
     else
       echo "--- Uploading eval connector fanout steps"
 
@@ -231,10 +229,14 @@ EOF
 
       fanout_step_keys=()
       fanout_connector_ids=()
-      # Each matrix row is one step: connector id, shard id (may be empty), and the shard's spec
-      # files for that connector (space-joined; empty for an unsharded suite).
+      # Each matrix row is one step: connector id, shard id (`-` when unsharded), and spec files
+      # (space-joined; empty for an unsharded whole-suite step).
       while IFS=$'\t' read -r connector_id shard_id shard_spec_file_args; do
         [[ -z "$connector_id" ]] && continue
+        # `-` is the unsharded placeholder from get_fanout_matrix.js (avoids collapsed TSV tabs).
+        if [[ "$shard_id" == "-" ]]; then
+          shard_id=""
+        fi
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
         fanout_connector_ids+=("$connector_id")
 
@@ -411,7 +413,6 @@ EOF
         EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-        EVAL_PER_SPEC_MODELS: "${EVAL_PER_SPEC_MODELS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const { buildFanoutMatrix, formatFanoutMatrix } = require('./get_fanout_matrix');
+const { buildFanoutMatrix, formatFanoutMatrix, EMPTY_SHARD_ID } = require('./get_fanout_matrix');
 
 const CONNECTORS = {
   'eis-a': { config: { providerConfig: { model_id: 'a' } } },
@@ -34,11 +34,10 @@ const run = (overrides) =>
     requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
     perSpec: true,
     grepOverride: false,
-    specUniverse: [DISCOVERY, QUERY_GEN],
     ...overrides,
   });
 
-describe('buildFanoutMatrix - per-spec mode', () => {
+describe('buildFanoutMatrix - weekly per-spec filter loop', () => {
   it('runs each spec only against the connectors its model list resolves to', () => {
     expect(run()).toEqual([
       { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
@@ -47,19 +46,17 @@ describe('buildFanoutMatrix - per-spec mode', () => {
     ]);
   });
 
-  it('falls back to the suite weekly list for a spec with no `specs` override', () => {
+  it('uses the full weekly list for a shard spec with no specs[] entry', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
       suiteInfo: {
         shards: [{ id: 's2', specFiles: [OTHER] }],
-        // An override elsewhere turns on per-spec mode; OTHER has none, so it uses the weekly list.
         specs: [{ files: [DISCOVERY], models: ['eis/a'] }],
         weeklyEisModelGroups: ['eis/a', 'eis/b', 'eis/c'],
       },
       requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
       perSpec: true,
       grepOverride: false,
-      specUniverse: [OTHER],
     });
 
     expect(rows).toEqual([
@@ -69,19 +66,35 @@ describe('buildFanoutMatrix - per-spec mode', () => {
     ]);
   });
 
-  it('falls back to the requested universe when neither spec nor suite defines groups', () => {
+  it('ignores a specs[] file that is not in any shard when shards exist', () => {
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {
+        shards: [{ id: 's1', specFiles: [QUERY_GEN] }],
+        specs: [
+          { files: [DISCOVERY], models: ['eis/b'] },
+          { files: [QUERY_GEN], models: ['eis/a'] },
+        ],
+        weeklyEisModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+      },
+      requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+      perSpec: true,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([{ connectorId: 'eis-a', shardId: 's1', specFiles: [QUERY_GEN] }]);
+  });
+
+  it('falls back to the requested universe when a shard spec has neither override nor weekly list', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
       suiteInfo: {
         shards: [{ id: 's1', specFiles: [DISCOVERY, QUERY_GEN] }],
-        // DISCOVERY's override turns on per-spec mode; QUERY_GEN has neither an override nor a weekly
-        // list, so it falls back to the requested groups.
         specs: [{ files: [DISCOVERY], models: ['eis/a'] }],
       },
       requestedModelGroups: ['eis/a', 'eis/b'],
       perSpec: true,
       grepOverride: false,
-      specUniverse: [DISCOVERY, QUERY_GEN],
     });
 
     expect(rows).toEqual([
@@ -90,7 +103,7 @@ describe('buildFanoutMatrix - per-spec mode', () => {
     ]);
   });
 
-  it('groups specs by (shard, connector) so shards stay batching boundaries', () => {
+  it('keeps shards as batching boundaries', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
       suiteInfo: {
@@ -108,7 +121,6 @@ describe('buildFanoutMatrix - per-spec mode', () => {
       requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
       perSpec: true,
       grepOverride: false,
-      specUniverse: [DISCOVERY, QUERY_GEN, EXTRACTION],
     });
 
     expect(rows).toEqual([
@@ -120,7 +132,7 @@ describe('buildFanoutMatrix - per-spec mode', () => {
     ]);
   });
 
-  it('resolves per-spec models without shards, one step per connector', () => {
+  it('uses specs[].files as one virtual batch when there are no shards', () => {
     const GROK = 'evals/pattern_extraction/grok_pattern_extraction.spec.ts';
     const DISSECT = 'evals/pattern_extraction/dissect_pattern_extraction.spec.ts';
     const PARTITIONING = 'evals/partitioning/partitioning.spec.ts';
@@ -137,45 +149,50 @@ describe('buildFanoutMatrix - per-spec mode', () => {
       requestedModelGroups: ['eis/a', 'eis/b'],
       perSpec: true,
       grepOverride: false,
-      // OTHER has no override, so it falls back to the weekly list.
-      specUniverse: [GROK, DISSECT, PARTITIONING, OTHER],
     });
 
     expect(rows).toEqual([
-      { connectorId: 'eis-a', shardId: '', specFiles: [GROK, DISSECT, PARTITIONING, OTHER] },
-      { connectorId: 'eis-b', shardId: '', specFiles: [PARTITIONING, OTHER] },
+      { connectorId: 'eis-a', shardId: '', specFiles: [GROK, DISSECT, PARTITIONING] },
+      { connectorId: 'eis-b', shardId: '', specFiles: [PARTITIONING] },
     ]);
   });
 });
 
-describe('buildFanoutMatrix - specs that resolve to no connector', () => {
-  it('warns and drops a spec whose models match no connector, keeping the rest', () => {
-    const warn = jest.fn();
-    const rows = buildFanoutMatrix({
-      connectors: CONNECTORS,
-      suiteInfo: {
-        shards: [{ id: 's1', specFiles: [DISCOVERY, QUERY_GEN] }],
-        specs: [
-          { files: [DISCOVERY], models: ['eis/a'] },
-          { files: [QUERY_GEN], models: ['eis/not-provisioned'] },
-        ],
-        weeklyEisModelGroups: ['eis/a', 'eis/b', 'eis/c'],
-      },
-      requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
-      perSpec: true,
-      grepOverride: false,
-      specUniverse: [DISCOVERY, QUERY_GEN],
-      warn,
-    });
+describe('buildFanoutMatrix - fail-fast', () => {
+  it('throws when a listed spec model matches no connector', () => {
+    expect(() =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {
+          shards: [{ id: 's1', specFiles: [DISCOVERY, QUERY_GEN] }],
+          specs: [
+            { files: [DISCOVERY], models: ['eis/a'] },
+            { files: [QUERY_GEN], models: ['eis/not-provisioned'] },
+          ],
+          weeklyEisModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+        },
+        requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+        perSpec: true,
+        grepOverride: false,
+      })
+    ).toThrow(/eis\/not-provisioned/);
+  });
 
-    expect(rows).toEqual([{ connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] }]);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining(QUERY_GEN));
+  it('throws when EVAL_MODEL_GROUPS matches no connector', () => {
+    expect(() =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {},
+        requestedModelGroups: ['eis/does-not-exist'],
+        perSpec: false,
+        grepOverride: false,
+      })
+    ).toThrow(/does-not-exist/);
   });
 });
 
 describe('buildFanoutMatrix - override / no-config parity', () => {
-  it('runs every requested connector against every spec when perSpec is off', () => {
+  it('runs every requested connector against every spec when not weekly (PR / on-demand)', () => {
     expect(run({ perSpec: false })).toEqual([
       { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
       { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
@@ -190,7 +207,6 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
       requestedModelGroups: ['eis/a', 'eis/b'],
       perSpec: true,
       grepOverride: false,
-      specUniverse: [DISCOVERY],
     });
 
     expect(rows).toEqual([
@@ -245,8 +261,8 @@ describe('formatFanoutMatrix', () => {
     );
   });
 
-  it('leaves shard and spec fields empty for an unsharded step', () => {
+  it('writes - for an empty shard id so bash does not collapse TSV tabs', () => {
     const rows = [{ connectorId: 'eis-a', shardId: '', specFiles: [] }];
-    expect(formatFanoutMatrix(rows)).toBe('eis-a\t\t');
+    expect(formatFanoutMatrix(rows)).toBe(`eis-a\t${EMPTY_SHARD_ID}\t`);
   });
 });
