@@ -201,5 +201,33 @@ test.describe(
         await expect(pageObjects.composeDiscover.createRuleSplitDropdownButton).toBeHidden();
       });
     });
+
+    test('builder-to-esql: rule without builder_type opens in ES|QL mode', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create a rule without builder_type', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'esql-only-rule' },
+          })
+        );
+        ruleId = created.id;
+      });
+
+      await test.step('open rule for editing', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+      });
+
+      await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+      });
+    });
   }
 );

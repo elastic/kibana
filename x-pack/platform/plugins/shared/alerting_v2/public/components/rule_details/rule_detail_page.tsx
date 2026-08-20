@@ -82,7 +82,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
-  const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
@@ -315,6 +315,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         />
       )}
       {flyout}
+      {confirmationModal}
       {changeHistoryModal}
     </KibanaPageTemplate>
   );
