@@ -82,10 +82,6 @@ export class RebalancePrivateLocationShardsTask {
       (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
       DEFAULT_REBALANCE_SCHEDULE;
     const schedule = { interval };
-    // On abort, persist the last successful full run's state rather than a
-    // partial `healthySince` rebuild (keys are per-location; merging mid-loop
-    // would either drop unprocessed locations or resurrect dropped agents).
-    const abortedResult = { state: taskInstance.state, schedule };
 
     try {
       signal.throwIfAborted();
@@ -181,8 +177,9 @@ export class RebalancePrivateLocationShardsTask {
         schedule,
       };
     } catch (error) {
+      // TM discards run() result on abort; returning state would be a no-op.
       if (signal.aborted) {
-        return abortedResult;
+        throw error;
       }
       logger.error(
         `[RebalancePrivateLocationShardsTask] Rebalance of private location shards failed: ${error.message}`

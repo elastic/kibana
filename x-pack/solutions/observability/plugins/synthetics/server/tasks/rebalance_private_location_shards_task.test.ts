@@ -280,16 +280,15 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(result.state).toEqual({ keep: 1 });
     });
 
-    it('returns the prior state without work when the task signal is already aborted', async () => {
+    it('throws without work when the task signal is already aborted', async () => {
       const abortController = new AbortController();
       abortController.abort();
       const getLocations = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
 
-      const result = await run({ keep: 1 }, abortController.signal);
+      await expect(run({ keep: 1 }, abortController.signal)).rejects.toThrow();
 
       expect(getLocations).not.toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1 });
     });
 
     it('stops after the current location when the task is cancelled and does not treat abort as a location failure', async () => {
@@ -308,12 +307,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
         return { total: 0, moved: 0 };
       });
 
-      const result = await run({ keep: 1 }, abortController.signal);
+      await expect(run({ keep: 1 }, abortController.signal)).rejects.toThrow();
 
       expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
       expect(getAgentInfo).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1 });
     });
 
     it('passes the task signal into agent listing, the liveness query, and rebalance writes', async () => {
