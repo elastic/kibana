@@ -189,7 +189,20 @@ await esClient.indices.create({ index: indexName });
 ✔️ **Do:** make the name unique per run (or per worker, in parallel suites), and derive cleanup from the same value:
 
 ```ts
-const indexName = `my-plugin-test-index-${randomUUID()}`;
+// Option A: random suffix (simple and strong uniqueness)
+const indexNameA = `my-plugin-test-index-${randomUUID()}`;
+
+// Option B: Scout run id (stable within one test run, useful for traceability)
+const runId = process.env.TEST_RUN_ID ?? randomUUID();
+const indexNameB = `my-plugin-test-index-${runId}`;
+
+// Option C: run id + worker index (parallel-safe and traceable)
+const indexNameC = `my-plugin-test-index-${runId}-${testInfo.parallelIndex}`;
+
+// Option D: space-scoped + worker-scoped suffix (useful for space-scoped suites)
+const indexNameD = `my-plugin-test-index-${scoutSpace.id}-${testInfo.parallelIndex}`;
+
+const indexName = indexNameC; // pick one pattern and use it consistently
 await esClient.indices.create({ index: indexName });
 // afterAll
 await esClient.indices.delete({ index: indexName });
