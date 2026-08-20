@@ -357,7 +357,7 @@ export const Buildkite: ConnectorSpec = {
 
     unblockJob: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Unblock a blocked (manual-gate) job so the build proceeds, optionally supplying values for the block step\'s input fields. Use this to automate deploy-gate approval. Find the blocked job\'s id with listJobs (state="blocked").',
       input: UnblockJobInputSchema,
@@ -531,7 +531,7 @@ export const Buildkite: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      scope: 'read',
+      scope: 'destroy',
       description:
         'Call any tool on the Buildkite MCP server directly by name. Use this as an escape hatch for tools not yet exposed as a named action — for example, downloading an artifact\'s content with "get_artifact", or searching job logs with "search_logs". The organization slug is filled in automatically for tools that accept it (most do; a few org-independent tools like "access_token" or "current_user" do not). Use listTools first to discover available tool names and their parameters.',
       input: CallToolInputSchema,

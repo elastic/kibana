@@ -646,7 +646,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     syncApplication: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Trigger a sync of an Argo CD application to reconcile the live cluster state with Git. ' +
         'prune defaults to false (does not delete resources removed from Git). Prefer dryRun: true ' +

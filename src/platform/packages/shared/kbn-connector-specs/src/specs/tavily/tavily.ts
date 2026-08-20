@@ -154,7 +154,7 @@ export const TavilyConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      scope: 'read',
+      scope: 'destroy',
       description:
         'Call any tool on the Tavily MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,

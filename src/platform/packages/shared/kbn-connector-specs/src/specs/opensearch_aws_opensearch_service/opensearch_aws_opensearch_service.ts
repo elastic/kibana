@@ -439,7 +439,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     indexDocument: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Write a document to an index, giving a workflow a write-back path for enrichment or audit output (e.g. recording triage notes). Provide an explicit "id" to create or fully replace a specific document, or omit it to let OpenSearch generate one.',
       input: IndexDocumentInputSchema,
