@@ -270,11 +270,15 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     higherIsBetter: evaluator.higherIsBetter,
                     result,
                     evaluatorTraceId,
+                    kind: evaluator.kind,
+                    // Read after `evaluate` so evaluators that learn their model from
+                    // the `_evaluate` response have it by now.
+                    model: evaluator.getModel?.(),
                   };
                 })
               );
 
-              for (const { evaluatorName, higherIsBetter, result, evaluatorTraceId } of results) {
+              for (const { evaluatorName, higherIsBetter, result, evaluatorTraceId, kind, model } of results) {
                 const evalRun = {
                   name: evaluatorName,
                   result,
@@ -282,6 +286,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
                   higherIsBetter,
+                  kind,
+                  ...(model && { model }),
                 };
                 evaluationRuns.push(evalRun);
 

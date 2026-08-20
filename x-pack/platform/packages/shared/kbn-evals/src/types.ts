@@ -8,7 +8,7 @@
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { DatasetMaturity } from '@kbn/evals-common';
+import type { DatasetMaturity, Model as ScoreModel } from '@kbn/evals-common';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
@@ -109,6 +109,12 @@ export interface Evaluator<
    * Whether a higher score is an improvement.
    */
   higherIsBetter: boolean;
+  /**
+   * Model this evaluator judges with, used to attribute its scores. Read after
+   * `evaluate` resolves because evaluators backed by `POST /_evaluate` only learn
+   * their model from the response. Undefined for CODE evaluators.
+   */
+  getModel?: () => ScoreModel | undefined;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -180,6 +186,9 @@ export interface EvaluationRun {
   traceId?: string | null;
   exampleId?: string;
   higherIsBetter: boolean;
+  kind?: EvaluatorKind;
+  /** Model the evaluator judged with; absent for CODE evaluators. */
+  model?: ScoreModel;
 }
 
 export interface DatasetRunResult {

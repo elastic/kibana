@@ -12,6 +12,7 @@ import {
   EVALS_EVALUATE_URL,
   EvaluateResponse,
   type EvaluateRequestBodyInput,
+  type Model,
 } from '@kbn/evals-common';
 import type { Evaluator, EvaluatorKind, EvaluatorParams, Example, TaskOutput } from '../types';
 
@@ -106,6 +107,11 @@ export class EvaluatorApiClient {
     };
 
     return configs.flatMap((config) => {
+      // The judge model comes back with the first response for this config and is the
+      // same for every example, since it is derived from the config's own connector, so
+      // the examples evaluating in parallel all write the same value here.
+      let resolvedModel: Model | undefined;
+
       const outputs: ScoreSelector[] = config.subScores
         ? config.subScores.map(({ key, evaluatorName }) => ({
             name: evaluatorName,
@@ -124,6 +130,7 @@ export class EvaluatorApiClient {
         name,
         kind: config.kind,
         higherIsBetter: config.higherIsBetter,
+        getModel: () => resolvedModel,
         evaluate: async (params) => {
           try {
             const result = await evaluateForTrace(params);
@@ -131,6 +138,7 @@ export class EvaluatorApiClient {
             if (!item) {
               throw new Error(`No evaluation result returned for "${config.name}"`);
             }
+            resolvedModel = item.evaluator.model ?? resolvedModel;
             if (item.status === 'error') {
               throw new Error(item.error?.message ?? `Evaluator "${config.name}" failed`);
             }

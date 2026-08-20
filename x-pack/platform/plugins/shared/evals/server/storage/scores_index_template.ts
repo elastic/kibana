@@ -85,6 +85,7 @@ const evaluationsDataStreamMappings = {
         metadata: { type: 'flattened' },
         trace_id: { type: 'keyword' },
         higher_is_better: { type: 'boolean' },
+        kind: { type: 'keyword' },
         model: {
           type: 'object',
           properties: {

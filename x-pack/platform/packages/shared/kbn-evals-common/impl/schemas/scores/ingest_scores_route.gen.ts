@@ -70,6 +70,14 @@ export const IngestScoresRequestBody = lazySchema(() =>
              * Whether a higher score is an improvement.
              */
             higher_is_better: z.boolean().optional(),
+            /**
+             * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
+             */
+            model: Model.optional(),
+            /**
+             * Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.
+             */
+            kind: z.enum(['llm', 'code']).optional(),
           }),
         })
       )

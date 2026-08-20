@@ -116,7 +116,11 @@ export const EvaluatorInfo = lazySchema(() =>
      * Whether a higher score is an improvement.
      */
     higher_is_better: z.boolean().optional(),
-    model: Model,
+    model: Model.optional(),
+    /**
+     * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
+     */
+    kind: z.enum(['llm', 'code']).optional(),
   })
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
@@ -177,6 +181,10 @@ export const EvaluatorStats = lazySchema(() =>
      * Number of unique examples evaluated in this dataset
      */
     example_count: z.number().int().min(0).optional().default(0),
+    /**
+     * Model this evaluator judged with. Absent for code evaluators, which invoke no model.
+     */
+    evaluator_model: Model.optional(),
     stats: z.object({
       mean: z.number(),
       median: z.number(),

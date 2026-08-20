@@ -422,12 +422,12 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "alert",
-                  "description": "Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
+                  "description": "Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.",
                   "type": "string",
                 },
                 Object {
                   "const": "signal",
-                  "description": "Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.",
+                  "description": "Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.",
                   "type": "string",
                 },
               ],
