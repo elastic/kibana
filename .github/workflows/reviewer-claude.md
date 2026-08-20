@@ -130,8 +130,6 @@ jobs:
             if (
               context.eventName !== 'pull_request_target' ||
               context.payload.action !== 'opened' ||
-              context.payload.repository?.fork ||
-              context.payload.sender?.type === 'Bot' ||
               payloadLabels.includes('reviewer:skip-ai') ||
               !Number.isInteger(prNumber) ||
               prNumber % 10 !== 0
@@ -141,20 +139,6 @@ jobs:
 
             try {
               const { owner, repo } = context.repo;
-              const { data: currentPullRequest } = await github.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: prNumber,
-              });
-              const currentLabels = currentPullRequest.labels.map((label) =>
-                typeof label === 'string' ? label : label.name
-              );
-              if (currentLabels.includes('reviewer:libra')) {
-                core.info('reviewer:libra is already present; keeping the PR routed to Libra.');
-                core.setOutput('diverted', 'true');
-                return;
-              }
-
               const events = await github.paginate(github.rest.issues.listEventsForTimeline, {
                 owner,
                 repo,
