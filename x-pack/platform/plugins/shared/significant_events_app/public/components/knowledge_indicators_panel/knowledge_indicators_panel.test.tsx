@@ -14,6 +14,7 @@ import { createMockWiredStreamDefinition } from './mocks';
 const mockUseStreamFeatures = jest.fn();
 const mockUseFetchDiscoveryQueries = jest.fn();
 const mockUseSignificantEventsAppRouter = jest.fn();
+const mockUseIsCpsMultiProject = jest.fn();
 
 jest.mock('../../hooks/use_stream_features', () => ({
   useStreamFeatures: (...args: unknown[]) => mockUseStreamFeatures(...args),
@@ -31,6 +32,10 @@ jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => mockUseSignificantEventsAppRouter(),
 }));
 
+jest.mock('../../hooks/use_is_cps_multi_project', () => ({
+  useIsCpsMultiProject: () => mockUseIsCpsMultiProject(),
+}));
+
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('KnowledgeIndicatorsPanel', () => {
@@ -40,6 +45,7 @@ describe('KnowledgeIndicatorsPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSignificantEventsAppRouter.mockReturnValue({ link });
+    mockUseIsCpsMultiProject.mockReturnValue(false);
     mockUseStreamFeatures.mockReturnValue({
       features: [{ id: 'feature-1' }, { id: 'feature-2' }],
       featuresLoading: false,
@@ -198,5 +204,25 @@ describe('KnowledgeIndicatorsPanel', () => {
         .getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
         .querySelector('[data-test-subj="knowledgeIndicatorsCountLoading"]')
     ).toBeInTheDocument();
+  });
+
+  it('does not show provenance copy outside a multi-project CPS deployment', () => {
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
+
+    expect(
+      screen.queryByTestId('significantEventsAppKnowledgeIndicatorsProvenance')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows provenance copy in a multi-project CPS deployment', () => {
+    mockUseIsCpsMultiProject.mockReturnValue(true);
+
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
+
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsProvenance')
+    ).toHaveTextContent(
+      'Generated from data across all projects linked through cross-project search.'
+    );
   });
 });

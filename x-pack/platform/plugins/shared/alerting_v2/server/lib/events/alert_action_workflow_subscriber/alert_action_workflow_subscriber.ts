@@ -106,7 +106,7 @@ export class AlertActionWorkflowSubscriber {
         labels: {
           event_type: trigger.eventType,
           space_id: event.spaceId,
-          episode_id: event.episodeId,
+          episode_id: event.episodeId ?? undefined,
           ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
         },
       });
