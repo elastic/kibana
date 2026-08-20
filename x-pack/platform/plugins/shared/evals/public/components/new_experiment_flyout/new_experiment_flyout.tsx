@@ -39,13 +39,12 @@ import { EXPERIMENT_LIMITS } from '../../../common/experiments/run_experiment';
 import { useDatasets } from '../../hooks/use_evals_api';
 import {
   useAgentBuilderAgents,
-  useEvaluators,
-  useModelConnectors,
   useExperimentTemplates,
   useRunExperiment,
   useSaveExperimentWorkflow,
   usePreviewExperiment,
 } from '../../hooks/use_experiments_api';
+import { useEvaluators, useModelConnectors } from '../../hooks/use_evaluators_api';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { WorkflowYamlPreview } from '../workflow_yaml_preview';
 import { SavedWorkflowSuccess } from './saved_workflow_success';

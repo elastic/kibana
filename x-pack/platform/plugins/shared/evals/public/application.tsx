@@ -57,6 +57,11 @@ const RunOverviewPage = React.lazy(async () => {
   return { default: mod.RunOverviewPage };
 });
 
+const EvaluatorsPage = React.lazy(async () => {
+  const mod = await import('./pages/evaluators');
+  return { default: mod.EvaluatorsPage };
+});
+
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
 });
@@ -67,6 +72,10 @@ const experimentsTabLabel = i18n.translate('xpack.evals.navigation.experiments',
 
 const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
+});
+
+const evaluatorsTabLabel = i18n.translate('xpack.evals.navigation.evaluators', {
+  defaultMessage: 'Evaluators',
 });
 
 const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
@@ -81,6 +90,7 @@ const ROOT_PATH = '/' as const;
 const COMPARE_PATH = '/compare' as const;
 const RUNS_PATH = '/runs' as const;
 const DATASETS_PATH = '/datasets' as const;
+const EVALUATORS_PATH = '/evaluators' as const;
 const TRACING_PATH = '/tracing' as const;
 const REMOTES_PATH = '/remotes' as const;
 const experimentDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.experimentDetail', {
@@ -153,6 +163,10 @@ const getBreadcrumbs = ({
     return [{ text: datasetsTabLabel }];
   }
 
+  if (pathname === EVALUATORS_PATH) {
+    return [{ text: evaluatorsTabLabel }];
+  }
+
   if (pathname === REMOTES_PATH) {
     return [{ text: remotesTabLabel }];
   }
@@ -186,8 +200,10 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
+  const isEvaluatorsSelected = pathname.startsWith(EVALUATORS_PATH);
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
-  const isExperimentsSelected = !isTracingSelected && !isDatasetsSelected && !isRemotesSelected;
+  const isExperimentsSelected =
+    !isTracingSelected && !isDatasetsSelected && !isEvaluatorsSelected && !isRemotesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -197,6 +213,9 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push(DATASETS_PATH)}>
           {datasetsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push(EVALUATORS_PATH)}>
+          {evaluatorsTabLabel}
         </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
@@ -245,6 +264,7 @@ export const EvalsApp: React.FC<{
             <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
             <Route exact path={RUNS_PATH} component={RunOverviewPage} />
             <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+            <Route exact path={EVALUATORS_PATH} component={EvaluatorsPage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route exact path={REMOTES_PATH} component={RemotesListPage} />
             <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
