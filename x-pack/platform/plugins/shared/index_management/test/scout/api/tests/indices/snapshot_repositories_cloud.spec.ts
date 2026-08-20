@@ -43,7 +43,7 @@ apiTest.describe('Snapshot repositories API (Cloud)', { tag: ['@cloud-stateful-c
 
     expect(response).toHaveStatusCode(200);
     expect(Object.keys(response.body).sort()).toStrictEqual(RESPONSE_KEYS_WITHOUT_DEFAULT);
-    expect(typeof response.body.canCreateRepository).toBe('boolean');
+    expect(response.body.canCreateRepository).toBe(true);
     expect(response.body.hasDefaultRepository).toBe(false);
     expect(response.body.hasRepositories).toBe(true);
   });
@@ -59,7 +59,7 @@ apiTest.describe('Snapshot repositories API (Cloud)', { tag: ['@cloud-stateful-c
     expect(response).toHaveStatusCode(200);
     expect(response.body.hasDefaultRepository).toBe(true);
     expect(response.body.defaultRepository).toBe(CLOUD_REPOSITORY_NAME);
-    expect(typeof response.body.canCreateRepository).toBe('boolean');
+    expect(response.body.canCreateRepository).toBe(true);
     expect(response.body.hasRepositories).toBe(true);
   });
 });

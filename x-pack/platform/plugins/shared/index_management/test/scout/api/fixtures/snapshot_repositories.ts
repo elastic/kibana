@@ -30,8 +30,8 @@ export const createLocalRepository = async (esClient: EsClient) => {
   });
 };
 
-export const deleteLocalRepository = async (esClient: EsClient) => {
-  await esClient.snapshot.deleteRepository({ name: LOCAL_REPOSITORY_NAME }, { ignore: [404] });
+export const deleteAllRepositories = async (esClient: EsClient) => {
+  await esClient.snapshot.deleteRepository({ name: '*' }, { ignore: [404] });
 };
 
 export const setDefaultRepository = async (esClient: EsClient, name: string) => {

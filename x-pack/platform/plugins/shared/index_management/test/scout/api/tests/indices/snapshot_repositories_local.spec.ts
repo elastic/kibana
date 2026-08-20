@@ -11,7 +11,7 @@ import {
   apiTest,
   clearDefaultRepository,
   createLocalRepository,
-  deleteLocalRepository,
+  deleteAllRepositories,
   LOCAL_REPOSITORY_NAME,
   RESPONSE_KEYS_WITHOUT_DEFAULT,
   setDefaultRepository,
@@ -31,12 +31,12 @@ apiTest.describe('Snapshot repositories API (local)', { tag: ['@local-stateful-c
 
   apiTest.beforeEach(async ({ esClient }) => {
     await clearDefaultRepository(esClient);
-    await deleteLocalRepository(esClient);
+    await deleteAllRepositories(esClient);
   });
 
   apiTest.afterEach(async ({ esClient }) => {
     await clearDefaultRepository(esClient);
-    await deleteLocalRepository(esClient);
+    await deleteAllRepositories(esClient);
   });
 
   apiTest('reports no default repository when none is configured', async ({ apiClient }) => {
@@ -47,7 +47,7 @@ apiTest.describe('Snapshot repositories API (local)', { tag: ['@local-stateful-c
 
     expect(response).toHaveStatusCode(200);
     expect(Object.keys(response.body).sort()).toStrictEqual(RESPONSE_KEYS_WITHOUT_DEFAULT);
-    expect(typeof response.body.canCreateRepository).toBe('boolean');
+    expect(response.body.canCreateRepository).toBe(true);
     expect(response.body.hasDefaultRepository).toBe(false);
     expect(response.body.hasRepositories).toBe(false);
   });
@@ -64,7 +64,7 @@ apiTest.describe('Snapshot repositories API (local)', { tag: ['@local-stateful-c
     expect(response).toHaveStatusCode(200);
     expect(response.body.hasDefaultRepository).toBe(true);
     expect(response.body.defaultRepository).toBe(LOCAL_REPOSITORY_NAME);
-    expect(typeof response.body.canCreateRepository).toBe('boolean');
+    expect(response.body.canCreateRepository).toBe(true);
     expect(response.body.hasRepositories).toBe(true);
   });
 });

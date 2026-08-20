@@ -32,6 +32,6 @@ export {
   RESPONSE_KEYS_WITHOUT_DEFAULT,
   clearDefaultRepository,
   createLocalRepository,
-  deleteLocalRepository,
+  deleteAllRepositories,
   setDefaultRepository,
 } from './snapshot_repositories';
