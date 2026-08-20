@@ -21,3 +21,4 @@ export {
 // ported and published.
 export { EuiSelectableObject } from './selectable_object';
 export { EuiBasicTableObject } from './basic_table_object';
+export { EuiDraggableObject } from './draggable_object';

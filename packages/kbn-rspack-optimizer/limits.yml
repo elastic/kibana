@@ -31,12 +31,13 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1962
+  contextEngine: 7385
+  contextEngineAgentBuilder: 4999
   controls: 4166
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 1591
+  customContent: 2128
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -132,12 +133,13 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
+  nightshiftInvestigations: 5000
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
-  observabilityAIAssistantApp: 6377
+  observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
   observabilityOnboarding: 7685
@@ -185,9 +187,9 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 336241
+  shared-core: 336543
   shared-misc: 114567
-  shared-packages: 5007950
+  shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3153
