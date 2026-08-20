@@ -12,11 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UseInvestigationStateResult } from '@kbn/investigation-output';
 import { EventFlyout } from './event_flyout';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  clearRememberedInvestigationTerminalFailuresForTests,
-  getRememberedInvestigationTerminalFailure,
-} from './significant_event_status';
+import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -26,12 +22,18 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
-const mockUseInvestigationState = jest.fn<UseInvestigationStateResult, []>();
+const mockUseInvestigationState = jest.fn<UseInvestigationStateResult, [unknown]>();
 
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-  useInvestigationState: () => mockUseInvestigationState(),
+  useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
 }));
+
+jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
+  useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
+}));
+
+let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
@@ -134,6 +136,7 @@ const mockEvent: SignificantEvent = {
 describe('EventFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockInvestigationRunStatuses = undefined;
     mockUseInvestigationState.mockReturnValue({
       status: 'complete',
       state: undefined,
@@ -142,8 +145,6 @@ describe('EventFlyout', () => {
     });
     window.history.pushState({}, '', '/app/observability/nightshift');
   });
-
-  afterEach(clearRememberedInvestigationTerminalFailuresForTests);
 
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EventFlyout>> = {}) =>
     render(
@@ -272,12 +273,9 @@ describe('EventFlyout', () => {
     expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
   });
 
-  it.each([
-    ['failed', 'Investigation failed'],
-    ['unavailable', 'Investigation unavailable'],
-  ] as const)(
-    'marks an already-completed %s investigation, withholds the details button, and remembers the failure for the list',
-    (status, label) => {
+  it.each(['failed', 'unavailable'] as const)(
+    'marks an already-completed %s investigation and withholds the details button',
+    (status) => {
       mockUseInvestigationState.mockReturnValue({
         status,
         state: undefined,
@@ -298,17 +296,48 @@ describe('EventFlyout', () => {
         },
       });
 
-      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(label);
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation failed'
+      );
       expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
-        label
+        'Investigation failed'
       );
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
       ).not.toBeInTheDocument();
-      expect(getRememberedInvestigationTerminalFailure('exec-1')).toBe(status);
     }
   );
+
+  it('stops following a run with no completed_at once the API reports it failed', () => {
+    mockInvestigationRunStatuses = { 'exec-1': 'failed' };
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'exec-1', isRunning: false })
+    );
+  });
+
+  it('still follows a run the API reports as pending', () => {
+    mockInvestigationRunStatuses = { 'exec-1': 'pending' };
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'exec-1', isRunning: true })
+    );
+  });
 
   it('calls onClose when flyout is closed', () => {
     const onClose = jest.fn();

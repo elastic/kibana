@@ -13,11 +13,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './app';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_fetch_investigation_statuses');
 jest.mock('../hooks/use_fetch_stream_features');
 jest.mock('../hooks/use_close_significant_event');
 jest.mock('../hooks/use_kibana');
@@ -36,6 +38,7 @@ jest.mock('../event/event_flyout', () => ({
 }));
 
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseFetchInvestigationStatuses = useFetchInvestigationStatuses as jest.Mock;
 const mockUseFetchStreamFeatures = useFetchStreamFeatures as jest.Mock;
 const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -109,6 +112,7 @@ function setEvents({
     isLoading,
     refetch: jest.fn(),
   });
+  mockUseFetchInvestigationStatuses.mockReturnValue({ data: undefined });
   mockUseFetchStreamFeatures.mockReturnValue({
     features: featuresForEvents(events),
     isInitialLoading: false,

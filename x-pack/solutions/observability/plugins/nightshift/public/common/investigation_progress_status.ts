@@ -7,6 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
+import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
+
+const RUN_STATUS_TO_INVESTIGATION_STATUS: Record<InvestigationRunStatus, InvestigationStatus> = {
+  pending: 'running',
+  complete: 'complete',
+  failed: 'failed',
+};
+
+/** Adapts the three states the API reports onto the richer status the badges render. */
+export const toInvestigationStatus = (status: InvestigationRunStatus): InvestigationStatus =>
+  RUN_STATUS_TO_INVESTIGATION_STATUS[status];
 
 export const getInvestigationProgressStatusLabel = (isInvestigated: boolean): string =>
   isInvestigated
@@ -30,13 +41,12 @@ export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus)
   }
 
   switch (status) {
+    // `unavailable` means the result could not be read rather than that the run itself broke, but
+    // both leave the user with no investigation, so they share one label.
     case 'failed':
+    case 'unavailable':
       return i18n.translate('xpack.nightshift.investigation.statusFailed', {
         defaultMessage: 'Investigation failed',
-      });
-    case 'unavailable':
-      return i18n.translate('xpack.nightshift.investigation.statusUnavailable', {
-        defaultMessage: 'Investigation unavailable',
       });
     case 'loading':
       return i18n.translate('xpack.nightshift.investigation.statusLoading', {

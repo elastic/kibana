@@ -42,11 +42,9 @@ import { useFormatTimestamp } from '../common/format_timestamp';
 import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
-import {
-  isNeedsActionStatus,
-  rememberInvestigationTerminalFailure,
-} from './significant_event_status';
+import { isNeedsActionStatus } from './significant_event_status';
 import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
@@ -66,6 +64,16 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
 
+  const investigationExecutionIds = useMemo(
+    () => (latestInvestigation ? [latestInvestigation.workflow_execution_id] : []),
+    [latestInvestigation]
+  );
+  const { data: investigationRunStatuses } =
+    useFetchInvestigationStatuses(investigationExecutionIds);
+  const latestRunStatus = latestInvestigation
+    ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
+    : undefined;
+
   const {
     conversationId,
     error: investigationError,
@@ -74,30 +82,26 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   } = useInvestigationState({
     http,
     workflowExecutionId: latestInvestigation?.workflow_execution_id,
-    isRunning: latestInvestigation != null && latestInvestigation.completed_at == null,
+    /**
+     * A workflow that dies before its terminal step never stamps `completed_at`, so the event doc
+     * alone would report a dead run as running forever. Prefer the API's view of the execution and
+     * only fall back to the timestamp until it answers.
+     */
+    isRunning:
+      latestRunStatus != null
+        ? latestRunStatus === 'pending'
+        : latestInvestigation != null && latestInvestigation.completed_at == null,
   });
 
   useEffect(() => {
-    if (latestInvestigation == null) {
+    if (latestInvestigation == null || latestInvestigation.completed_at != null) {
       return;
     }
 
-    const isTerminalFailure = isInvestigationTerminalFailure(investigationStatus);
-
-    // The event doc records only start/completion, never the outcome, so remember a failure
-    // here — the list badge has no other way to tell it apart from a successful run.
-    if (isTerminalFailure) {
-      rememberInvestigationTerminalFailure(
-        latestInvestigation.workflow_execution_id,
-        investigationStatus
-      );
-    }
-
-    if (latestInvestigation.completed_at != null) {
-      return;
-    }
-
-    if (isTerminalFailure || isInvestigationInvestigated(investigationStatus)) {
+    if (
+      isInvestigationInvestigated(investigationStatus) ||
+      isInvestigationTerminalFailure(investigationStatus)
+    ) {
       markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
     }
   }, [event.event_uuid, investigationStatus, latestInvestigation, queryClient]);

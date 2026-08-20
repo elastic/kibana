@@ -11,10 +11,6 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SignificantEventItem } from './significant_event_item';
-import {
-  clearRememberedInvestigationTerminalFailuresForTests,
-  rememberInvestigationTerminalFailure,
-} from '../event/significant_event_status';
 
 const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
@@ -185,8 +181,6 @@ describe('SignificantEventItem', () => {
   });
 
   describe('investigation marker', () => {
-    afterEach(clearRememberedInvestigationTerminalFailuresForTests);
-
     it('leaves an event without investigations unlabeled', () => {
       renderItem();
 
@@ -194,21 +188,33 @@ describe('SignificantEventItem', () => {
       expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
     });
 
-    it('marks a completed investigation as investigated', () => {
+    it('falls back to completed_at while the status is still being fetched', () => {
       renderItem({ event: investigatedEvent });
 
       expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
       expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
     });
 
-    it.each([
-      ['failed', 'Investigation failed'],
-      ['unavailable', 'Investigation unavailable'],
-    ] as const)('marks a %s investigation with the failure label', (status, label) => {
-      rememberInvestigationTerminalFailure('exec-1', status);
-      renderItem({ event: investigatedEvent });
+    it('marks a complete run as investigated', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'complete' });
 
-      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(label);
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a failed run with the failure label even though the run completed', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'failed' });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation failed'
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a pending run as investigating', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'pending' });
+
+      expect(screen.getByTestId('nightshiftInvestigatingStatusDots')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     });
   });
