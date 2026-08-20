@@ -28,6 +28,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
@@ -137,18 +138,33 @@ export const useColumns = (
   const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
     () => cpsManager?.hasLinkedProjects() ?? false
   );
+  const [originProjectId, setOriginProjectId] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     let isMounted = true;
     setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
+    setOriginProjectId(undefined);
 
     if (!cpsManager) {
       return;
     }
 
-    cpsManager.whenReady().then(() => {
+    cpsManager.whenReady().then(async () => {
+      const nextHasLinkedProjects = cpsManager.hasLinkedProjects();
+      let nextOriginProjectId: string | undefined;
+
+      if (nextHasLinkedProjects) {
+        try {
+          const projects = await cpsManager.fetchProjects(PROJECT_ROUTING.ORIGIN);
+          nextOriginProjectId = projects?.origin?._id;
+        } catch {
+          nextOriginProjectId = undefined;
+        }
+      }
+
       if (isMounted) {
-        setHasLinkedProjects(cpsManager.hasLinkedProjects());
+        setHasLinkedProjects(nextHasLinkedProjects);
+        setOriginProjectId(nextOriginProjectId);
       }
     });
 
@@ -309,7 +325,7 @@ export const useColumns = (
             }),
             'data-test-subj': 'transformListColumnProjectScope',
             sortable: (item: TransformListRow) =>
-              getProjectScopeSortValue(item.config.source.project_routing),
+              getProjectScopeSortValue(item.config.source.project_routing, originProjectId),
             truncateText: true,
             render(item: TransformListRow) {
               return (
