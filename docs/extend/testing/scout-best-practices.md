@@ -120,7 +120,7 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ## Expect a shared test environment [expect-a-shared-test-environment]
 
-Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors) — and on Cloud, other test runs (including another run of your own suite) can execute against the same deployment **at the same time**.
+Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors) — and because they're long-lived, whatever earlier test runs left behind is still there too.
 
 Any assertion over a list has to tolerate entries your test didn't create:
 
@@ -148,9 +148,9 @@ await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1'
 
 ## Don't leak state into the next suite [dont-leak-state-into-the-next-suite]
 
-The same logic applies in reverse: whatever your suite creates or changes outlives it. Saved objects, indices, data streams, settings, and feature flags persist into the suites that run after you on the same servers — and on long-lived Cloud deployments, across entire test runs.
+The same logic applies in reverse: whatever your suite creates or changes doesn't disappear when the suite finishes. Saved objects, indices, data streams, settings, and feature flags are still there for the suites that run after you on the same servers — and on long-lived Cloud deployments, for every later run.
 
-- **Namespace what you create.** A fixed literal name (`my-test-index`) is shared with every past, future, and concurrent run of your suite: another run's teardown can delete it out from under you mid-test, and its leftovers can satisfy or break your assertions. Build resource names (indices, pipelines, saved objects) from a per-run unique value such as a UUID.
+- **Namespace what you create.** A fixed literal name (`my-test-index`) is shared with every other user of the deployment: other specs and parallel workers in your own suite, and leftovers from previous runs. Whoever tears the name down first deletes everyone's data, and stale leftovers under it can satisfy or break your assertions. Build resource names (indices, pipelines, saved objects) from a unique value such as a UUID, generated per run — or per worker, for suites that run tests in parallel.
 - **Own your time window.** A time filter doesn't isolate you: if two suites ingest data into the same date range, each one's time-bounded queries see the other's documents. When your test data uses fixed timestamps, pick a range unique to your suite instead of reusing a "convenient" round date that other suites likely picked too.
 - **Delete the resource, not just the record of it.** Deleting the object that *tracks* a resource (a saved object referencing an API key, a task, an execution) leaves the resource itself alive. Orphans accumulate invisibly on long-lived deployments until a quota or limit breaks unrelated tests, with no local reproduction. Tear down the underlying resource through the API that actually releases it.
 - **Revert behavior, not just data.** Settings, feature flags, and index/component templates change how the cluster *behaves* for everything that runs after you — a leaked template can silently reject or reshape another suite's documents at ingest time. Revert them in teardown; symmetrically, don't assume cluster defaults are still in effect when your suite starts.
