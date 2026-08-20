@@ -6,12 +6,14 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ContextEngineAnalyticsService } from '../telemetry';
 
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
@@ -20,6 +22,14 @@ export interface KiStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+}
+
+/** The AI index attributes KI steps need: the write target and whether the index is managed. */
+export interface ResolvedAiIndex {
+  dest: AiIndexDest;
+  managed: boolean;
 }
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */
@@ -49,13 +59,13 @@ export const assertContextEngineEnabled = async (
 };
 
 /** Resolves an AI index id to its backing store, failing the step when the id is unknown. */
-export const resolveAiIndexDest = async (
+export const resolveAiIndex = async (
   getAiIndexService: () => AiIndexService,
   aiIndexId: string
-): Promise<AiIndexDest> => {
+): Promise<ResolvedAiIndex> => {
   try {
-    const { dest } = await getAiIndexService().get(aiIndexId);
-    return dest;
+    const { dest, managed } = await getAiIndexService().get(aiIndexId);
+    return { dest, managed };
   } catch (error) {
     if (error instanceof AiIndexNotFoundError) {
       throw new ExecutionError({
@@ -73,15 +83,15 @@ export const resolveAiIndexDest = async (
  * when it does not exist yet with the index dest derived from the id (the UI
  * create flow's default).
  */
-export const resolveOrCreateAiIndexDest = async (
+export const resolveOrCreateAiIndex = async (
   getAiIndexService: () => AiIndexService,
   aiIndexId: string
-): Promise<AiIndexDest> => {
+): Promise<ResolvedAiIndex> => {
   const service = getAiIndexService();
 
   try {
-    const { dest } = await service.get(aiIndexId);
-    return dest;
+    const { dest, managed } = await service.get(aiIndexId);
+    return { dest, managed };
   } catch (error) {
     if (!(error instanceof AiIndexNotFoundError)) {
       throw error;
@@ -102,13 +112,13 @@ export const resolveOrCreateAiIndexDest = async (
   } catch (error) {
     if (error instanceof AiIndexAlreadyExistsError) {
       // Lost a concurrent creation race; the AI index exists now.
-      const { dest: existingDest } = await service.get(aiIndexId);
-      return existingDest;
+      const { dest: existingDest, managed } = await service.get(aiIndexId);
+      return { dest: existingDest, managed };
     }
     throw error;
   }
 
-  return dest;
+  return { dest, managed: false };
 };
 
 /** Fails the step when the dest is an index pattern, which cannot be a write target. */

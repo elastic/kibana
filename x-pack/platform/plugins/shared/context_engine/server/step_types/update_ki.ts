@@ -8,63 +8,101 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import { errorTypeForTelemetry } from '../telemetry';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiBackingIndex,
   kiNotFoundError,
-  resolveAiIndexDest,
+  resolveAiIndex,
 } from './helpers';
 
 export const getUpdateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  analyticsService,
+  logger,
 }: KiStepDependencies) =>
   createServerStepDefinition({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
-      await assertKiWritePrivilege(checkWritePrivilege, request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      let managed: boolean | undefined;
+      try {
+        await assertKiWritePrivilege(checkWritePrivilege, request);
 
-      const dest = await resolveAiIndexDest(getAiIndexService, aiIndexId);
-      const esClient = context.contextManager.getScopedEsClient();
+        const { dest, managed: resolvedManaged } = await resolveAiIndex(
+          getAiIndexService,
+          aiIndexId
+        );
+        managed = resolvedManaged;
+        const esClient = context.contextManager.getScopedEsClient();
 
-      const backingIndex = await findKiBackingIndex({
-        esClient,
-        aiIndexId,
-        destValue: dest.value,
-        kiId,
-        abortSignal: context.abortSignal,
-      });
-
-      const response = await esClient
-        .update(
-          {
-            index: backingIndex,
-            id: kiId,
-            doc: ki,
-            refresh: 'wait_for',
-          },
-          { signal: context.abortSignal }
-        )
-        .catch((error) => {
-          // The KI may have been removed concurrently.
-          if (isResponseError(error) && error.statusCode === 404) {
-            throw kiNotFoundError(aiIndexId, kiId);
-          }
-          throw error;
+        const backingIndex = await findKiBackingIndex({
+          esClient,
+          aiIndexId,
+          destValue: dest.value,
+          kiId,
+          abortSignal: context.abortSignal,
         });
 
-      return {
-        output: {
-          id: kiId,
-          result: response.result === 'noop' ? ('noop' as const) : ('updated' as const),
-        },
-      };
+        const response = await esClient
+          .update(
+            {
+              index: backingIndex,
+              id: kiId,
+              doc: ki,
+              refresh: 'wait_for',
+            },
+            { signal: context.abortSignal }
+          )
+          .catch((error) => {
+            // The KI may have been removed concurrently.
+            if (isResponseError(error) && error.statusCode === 404) {
+              throw kiNotFoundError(aiIndexId, kiId);
+            }
+            throw error;
+          });
+
+        analyticsService.reportKiWrite({
+          action: 'update',
+          aiIndexId,
+          managed,
+          outcome: 'success',
+        });
+        logger.debug(
+          `KI '${kiId}' updated in AI index '${analyticsService.aiIndexIdForTelemetry(
+            aiIndexId,
+            managed
+          )}'`
+        );
+        return {
+          output: {
+            id: kiId,
+            result: response.result === 'noop' ? ('noop' as const) : ('updated' as const),
+          },
+        };
+      } catch (error) {
+        const errorType = errorTypeForTelemetry(error);
+        analyticsService.reportKiWrite({
+          action: 'update',
+          aiIndexId,
+          managed,
+          outcome: 'failure',
+          errorType,
+        });
+        logger.debug(
+          `KI update failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+            aiIndexId,
+            managed
+          )}': ${errorType}`
+        );
+        throw error;
+      }
     },
   });

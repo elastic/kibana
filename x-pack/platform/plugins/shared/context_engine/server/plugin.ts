@@ -33,6 +33,7 @@ import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { registerStepDefinitions } from './step_types';
+import { ContextEngineAnalyticsService } from './telemetry';
 
 export class ContextEnginePlugin
   implements
@@ -49,6 +50,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private analyticsService?: ContextEngineAnalyticsService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -95,6 +97,13 @@ export class ContextEnginePlugin
       logger: this.logger.get('signal_generator'),
     });
 
+    this.analyticsService = new ContextEngineAnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry')
+    );
+    this.analyticsService.registerContextEngineEventTypes();
+    const analyticsService = this.analyticsService;
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
@@ -112,6 +121,8 @@ export class ContextEnginePlugin
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
+      analyticsService,
+      logger: this.logger.get('ki_steps'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');
@@ -160,6 +171,14 @@ export class ContextEnginePlugin
     const aiIndexLogger = this.logger.get('ai_indices');
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
+    const esClient = this.esClient;
+
+    // The cluster uuid salts hashed AI index ids in EBT payloads; the service
+    // fetches it now and retries on reported events until it succeeds.
+    this.analyticsService?.setClusterUuidFetcher(async () => {
+      const { cluster_uuid: clusterUuid } = await esClient.info();
+      return clusterUuid;
+    });
 
     this.aiIndexService = new AiIndexService({
       esClient: this.esClient,
