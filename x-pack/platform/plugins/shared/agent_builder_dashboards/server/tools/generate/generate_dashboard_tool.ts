@@ -17,6 +17,7 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
@@ -98,13 +99,12 @@ Use custom content only as a last resort:
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
 **Creating a custom content panel:**
-- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` on create — the embeddable generates a visually consistent HTML template using EUI color tokens for the active theme.
+- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
 - Optionally set \`config.esqlQuery\` when the panel needs live data.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
-- Always carry over \`prompt\`, \`template\`, and \`esqlQuery\` from the existing panel config — only modify the fields the user is changing.
-- Modify \`template\` in place (targeted edits, not a full rewrite) so the changes are consistent with the existing EUI color scheme. Omit \`template\` only if the user wants a full regeneration from the updated prompt.`;
+- Supply only \`prompt\` and/or \`esqlQuery\` — omit fields that should stay unchanged. The server regenerates the template from the merged prompt and query. Do not supply \`template\`.`;
 
 /**
  * Kibana dashboard generation tool.
@@ -120,9 +120,9 @@ Use custom content only as a last resort:
  */
 export const generateDashboardTool = ({
   customContentEnabled = true,
-}: { customContentEnabled?: boolean } = {}): BuiltinSkillBoundedTool<
-  typeof generateDashboardSchema
-> => {
+}: {
+  customContentEnabled?: boolean;
+} = {}): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
@@ -166,6 +166,9 @@ Use operations[] to:
             events,
             esClient,
           }),
+          resolveCustomContentTemplate: customContentEnabled
+            ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
+            : undefined,
         });
 
         // Data-aware default time range computation

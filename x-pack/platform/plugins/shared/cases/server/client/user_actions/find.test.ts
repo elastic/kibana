@@ -367,6 +367,211 @@ describe('findUserActions', () => {
       );
 
       expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: { summary: 'incident summary text' },
+      });
+    });
+
+    it('projects only matching fields from a multi-field extended_fields update', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          payload: {
+            extended_fields: {
+              my_field: 'xyzaua',
+              label: 'option_1',
+              escalation: 'true',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'xyzaua' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: { my_field: 'xyzaua' },
+      });
+    });
+
+    it('keeps every matching field when several values contain the term', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          payload: {
+            extended_fields: {
+              summary: 'outage root cause',
+              notes: 'root cause analysis',
+              priority: 'high',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'root cause' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: {
+          summary: 'outage root cause',
+          notes: 'root cause analysis',
+        },
+      });
+    });
+
+    it('keeps the full extended_fields map when search matches the author', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          created_by: {
+            username: 'otheruser',
+            full_name: 'Other User',
+            email: 'other@test.com',
+          },
+          payload: {
+            extended_fields: {
+              my_field: 'xyzaua',
+              label: 'option_1',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'otheruser' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: {
+          my_field: 'xyzaua',
+          label: 'option_1',
+        },
+      });
+    });
+
+    it('projects extended_fields case-insensitively', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          payload: {
+            extended_fields: {
+              summary: 'Incident Summary',
+              priority: 'high',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'incident summary' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: { summary: 'Incident Summary' },
+      });
+    });
+
+    it('does not keep a field whose key looks like the search term', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          payload: {
+            extended_fields: {
+              xyzaua_as_keyword: 'unrelated value',
+              other_as_keyword: 'xyzaua',
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'xyzaua' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: { other_as_keyword: 'xyzaua' },
+      });
+    });
+
+    it('omits non-string extended_fields values from a value-hit projection', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'extended_fields',
+          payload: {
+            extended_fields: {
+              summary: 'match me',
+              nested: { ignored: 'match me' },
+              count: 42,
+            },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'match me' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        extended_fields: { summary: 'match me' },
+      });
+    });
+
+    it('does not project comment or title payloads', async () => {
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'Hello' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+      expect(result.userActions[0].payload).toEqual({
+        comment: { type: 'user', comment: 'Hello world', owner: 'securitySolution' },
+      });
+    });
+
+    it('does not project extended_fields when search is not provided', async () => {
+      const fullPayload = {
+        extended_fields: {
+          my_field: 'xyzaua',
+          label: 'option_1',
+        },
+      };
+      clientArgs.services.userActionService.finder.find = jest.fn().mockResolvedValue({
+        saved_objects: [
+          createMockUserActionSO({
+            type: 'extended_fields',
+            payload: fullPayload,
+          }),
+        ],
+        page: 1,
+        per_page: 20,
+        total: 1,
+      });
+
+      const result = await find({ caseId: 'test-case', params: {} }, client, clientArgs);
+
+      expect(result.userActions[0].payload).toEqual(fullPayload);
+      expect(clientArgs.services.userActionService.finder.findAll).not.toHaveBeenCalled();
     });
 
     it('matches custom field values in create_case payload', async () => {

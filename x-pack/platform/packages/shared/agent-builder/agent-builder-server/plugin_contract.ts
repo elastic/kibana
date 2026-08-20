@@ -7,12 +7,8 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  AgentCreateRequest,
-  Conversation,
-  ConversationWithoutRounds,
-  ConversationListOptions,
-} from '@kbn/agent-builder-common';
+import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -64,6 +60,26 @@ export interface AttachmentsSetup {
    * Register an attachment type to be available in agentBuilder.
    */
   registerType(attachmentType: AttachmentTypeDefinition): void;
+}
+
+/**
+ * AgentBuilder conversation-templates service's setup contract.
+ */
+export interface ConversationTemplatesSetup {
+  /**
+   * Register a conversation template.
+   */
+  register(template: ConversationTemplate): void;
+}
+
+/**
+ * AgentBuilder conversation-templates service's start contract.
+ */
+export interface ConversationTemplatesStart {
+  /** Look up a template by id. Resolves to undefined when unknown. */
+  get(id: string): Promise<ConversationTemplate | undefined>;
+  /** List every registered template. Order is not guaranteed. */
+  list(): Promise<ConversationTemplate[]>;
 }
 
 export interface RenderersSetup {
@@ -196,27 +212,13 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
- */
-export interface ReadOnlyConversationClient {
-  /**
-   * Retrieve a single conversation by its ID, including all rounds.
-   */
-  get(conversationId: string): Promise<Conversation>;
-  /**
-   * List conversations for the current user, optionally filtered by agent ID.
-   */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
-}
-
-/**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**
@@ -243,6 +245,10 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Conversation templates setup contract, which can be used to register templates.
+   */
+  conversationTemplates: ConversationTemplatesSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */
@@ -299,4 +305,8 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * Conversation templates service, to look up registered templates.
+   */
+  conversationTemplates: ConversationTemplatesStart;
 }

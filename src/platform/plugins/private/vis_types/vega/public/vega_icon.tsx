@@ -8,13 +8,22 @@
  */
 import React from 'react';
 import type { IconType } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { vegaVisType } from './vega_type';
+export const vegaTitleInWizard = i18n.translate('visTypeVega.type.vegaTitleInWizard', {
+  defaultMessage: 'Vega',
+  description: 'Vega is a product name and should not be translated',
+});
 
 export const VegaIcon: IconType = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 303 251" fill="currentColor" {...props}>
-    <title>{vegaVisType.titleInWizard}</title>
+    <title>{vegaTitleInWizard}</title>
     <path d="M.707.5h84l41.5 115.5-30 114.5 81.5-230h84.5l39.5 84h-58.5l19-84-88 250h-85L.707.5Z" />
     <path d="m262.207.5-88 250h-85L.707.5h84l41.5 115.5-30 114.5 81.5-230h84.5Zm0 0-19 84h58.5l-39.5-84Z" />
   </svg>
+);
+
+export const VegaPanelIcon: IconType = (props) => (
+  <EuiIcon type={VegaIcon} title={vegaTitleInWizard} size="m" {...props} />
 );

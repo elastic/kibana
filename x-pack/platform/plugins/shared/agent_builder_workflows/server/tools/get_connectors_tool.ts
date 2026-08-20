@@ -20,6 +20,13 @@ export function registerGetConnectorsTool(
   agentBuilder.tools.register({
     id: workflowTools.getConnectors,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Connectors',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get connector instances configured in the user's environment.
 
 **When to use:** To find connector IDs needed for the \`connector-id\` field in workflow steps (e.g., which Slack or Jira connectors are available).

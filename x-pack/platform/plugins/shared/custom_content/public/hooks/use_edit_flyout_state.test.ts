@@ -17,12 +17,13 @@ import type { HttpStart } from '@kbn/core/public';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
-import { prepareHtml } from '../utils/prepare_html';
+import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
-const mockPrepareHtml = prepareHtml as jest.MockedFunction<typeof prepareHtml>;
+const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
+const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
 
 const mockHttp = {} as unknown as HttpStart;
 const mockSearch = jest.fn();
@@ -36,16 +37,20 @@ beforeEach(() => {
   });
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<p>filled</p>');
-  mockPrepareHtml.mockReturnValue('<html>prepared</html>');
+  mockSanitizeHtml.mockImplementation((h) => h);
+  mockApplyHtmlTheme.mockReturnValue('<html>prepared</html>');
 });
 
 const mockOnRunPreview = jest.fn();
+
+const mockEuiTheme = {} as any;
 
 const baseParams = {
   esqlQuery: 'FROM logs | LIMIT 10',
   template: 'hello',
   timeRange: undefined,
   colorMode: 'LIGHT' as const,
+  euiTheme: mockEuiTheme,
   isApproximate: false,
   projectRouting: undefined,
   query: undefined,
@@ -68,6 +73,7 @@ describe('useEditFlyoutState', () => {
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
+          euiTheme: mockEuiTheme,
           isApproximate: false,
           projectRouting: undefined,
           query: undefined,
@@ -136,6 +142,7 @@ describe('useEditFlyoutState', () => {
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
+          euiTheme: mockEuiTheme,
           isApproximate: false,
           projectRouting: undefined,
           query: undefined,
@@ -164,7 +171,8 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
-      expect(mockPrepareHtml).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>');
+      expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
@@ -215,7 +223,8 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
       expect(mockFillTemplate).not.toHaveBeenCalled();
-      expect(mockPrepareHtml).toHaveBeenCalledWith('hello', 'LIGHT');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('hello');
+      expect(mockApplyHtmlTheme).toHaveBeenCalledWith('hello', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
@@ -250,7 +259,7 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledTimes(1);
     });
 
-    it('does not apply RENDER_SUCCESS or call onRunPreview when the draft changed mid-flight', async () => {
+    it('does not set hasPreviewedCurrentDraft or call onRunPreview when the draft changed mid-flight', async () => {
       let resolveRender!: () => void;
       mockFetchEsqlData.mockReturnValue(
         new Promise((resolve) => {
@@ -265,18 +274,15 @@ describe('useEditFlyoutState', () => {
       });
       expect(result.current.isRenderLoading).toBe(true);
 
-      // User edits the draft while the fetch is in flight
       act(() => {
         result.current.setDraftEsqlQuery('FROM logs | LIMIT 5');
       });
       expect(result.current.hasPreviewedCurrentDraft).toBe(false);
 
-      // In-flight render for old draft resolves
       await act(async () => {
         resolveRender();
       });
 
-      // Loading cleared, but stale result must not be applied
       expect(result.current.isRenderLoading).toBe(false);
       expect(result.current.hasPreviewedCurrentDraft).toBe(false);
       expect(mockOnRunPreview).not.toHaveBeenCalled();
