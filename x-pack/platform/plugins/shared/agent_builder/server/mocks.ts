@@ -40,6 +40,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
+    conversationTemplates: {
+      register: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
@@ -84,6 +87,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         update: jest.fn(),
         delete: jest.fn(),
       }),
+    },
+    conversationTemplates: {
+      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 };

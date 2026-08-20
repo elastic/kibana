@@ -1,5 +1,5 @@
 {
-  "sha1": "4b5d26a2d9d794f2731e7290e6e92a1f0bd12b49",
+  "sha1": "429fdb656cabb7fd382b0c8862e55c88d6b63f4e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1603,8 +1603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 38,
-        "column": 46
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -1617,8 +1617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 46,
+        "column": 27
       }
     },
     {
@@ -1631,8 +1631,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 47,
-        "column": 50
+        "line": 51,
+        "column": 5
       }
     },
     {
@@ -1645,7 +1645,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 57,
+        "line": 54,
         "column": 12
       }
     },
@@ -1659,8 +1659,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 66,
-        "column": 75
+        "line": 61,
+        "column": 47
       }
     },
     {
@@ -1673,8 +1673,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 67,
-        "column": 21
+        "line": 62,
+        "column": 27
       }
     },
     {
@@ -1687,8 +1687,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 74,
-        "column": 5
+        "line": 67,
+        "column": 12
       }
     },
     {
