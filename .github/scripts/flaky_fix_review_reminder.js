@@ -265,7 +265,7 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
   }
 
   core.info(
-     `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${dryRun ? ' (dry run)' : ''}`
+    `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${dryRun ? ' (dry run)' : ''}`
   );
 };
 
