@@ -68,9 +68,11 @@ export const resolveAiIndex = async (
     return { dest, managed };
   } catch (error) {
     if (error instanceof AiIndexNotFoundError) {
+      // Ids are kept out of ExecutionError messages: the workflows engine ships
+      // the message in its own EBT events, while `details` stays local.
       throw new ExecutionError({
         type: 'NotFoundError',
-        message: `AI index '${aiIndexId}' not found`,
+        message: 'AI index not found',
         details: { aiIndexId },
       });
     }
@@ -102,7 +104,7 @@ export const resolveOrCreateAiIndex = async (
   if (idError !== undefined || dest === undefined) {
     throw new ExecutionError({
       type: 'ValidationError',
-      message: `Cannot create AI index '${aiIndexId}': ${idError}`,
+      message: `Cannot create the AI index: ${idError}`,
       details: { aiIndexId },
     });
   }
@@ -126,7 +128,8 @@ export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void =
   if (isIndexPattern(dest.value)) {
     throw new ExecutionError({
       type: 'ValidationError',
-      message: `Cannot create a KI in AI index '${aiIndexId}': dest '${dest.value}' is an index pattern, not a single write target`,
+      message:
+        'Cannot create a KI in the AI index: its dest is an index pattern, not a single write target',
       details: { aiIndexId, destValue: dest.value },
     });
   }
@@ -136,7 +139,7 @@ export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void =
 export const kiNotFoundError = (aiIndexId: string, kiId: string): ExecutionError =>
   new ExecutionError({
     type: 'NotFoundError',
-    message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
+    message: 'KI not found in the AI index',
     details: { aiIndexId, kiId },
   });
 
@@ -176,9 +179,7 @@ export const findKiBackingIndex = async ({
     const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
     throw new ExecutionError({
       type: 'ValidationError',
-      message: `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices (${indices.join(
-        ', '
-      )})`,
+      message: 'KI is ambiguous in the AI index: it exists in multiple backing indices',
       details: { aiIndexId, kiId, indices },
     });
   }
