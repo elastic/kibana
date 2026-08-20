@@ -9,6 +9,7 @@ import { SYSTEM_SECURITY_WATCH_FLOOR_ID, WATCHES_SEED, WATCH_SETTINGS_SEED } fro
 import { MockWatchStore } from './watch_store_mock';
 
 const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
+const SPACE = 'default';
 
 describe('MockWatchStore', () => {
   let store: MockWatchStore;
@@ -26,169 +27,186 @@ describe('MockWatchStore', () => {
     });
 
     it('leaves lastRun null when the seed has never run', () => {
-      expect(store.listSkills().find(({ id }) => id === 'virustotal-lookup')?.lastRun).toBeNull();
+      expect(
+        store.listSkills(SPACE).find(({ id }) => id === 'virustotal-lookup')?.lastRun
+      ).toBeNull();
       expect(store.listWorkers().find(({ id }) => id === 'host-context')?.lastRun).toBeNull();
     });
 
     it('does not mutate the shared seed constants', () => {
-      store.setWatchEnabled(FLOOR, false);
+      store.setWatchEnabled(FLOOR, false, SPACE);
       store.setWorkerEnabled('threat-intel-enrichment', false);
 
       expect(WATCHES_SEED.find(({ id }) => id === FLOOR)?.enabled).toBe(true);
       store.reset();
-      expect(store.getWatch(FLOOR)?.enabled).toBe(true);
+      expect(store.getWatch(FLOOR, SPACE)?.enabled).toBe(true);
     });
 
     it('reseeds after a reset', () => {
-      store.setWatchEnabled(FLOOR, false);
-      expect(store.getWatch(FLOOR)?.enabled).toBe(false);
+      store.setWatchEnabled(FLOOR, false, SPACE);
+      expect(store.getWatch(FLOOR, SPACE)?.enabled).toBe(false);
 
       store.reset();
-      expect(store.getWatch(FLOOR)?.enabled).toBe(true);
+      expect(store.getWatch(FLOOR, SPACE)?.enabled).toBe(true);
     });
   });
 
   describe('watches', () => {
     it('lists every seeded watch', () => {
-      expect(store.listWatches()).toHaveLength(Object.keys(WATCH_SETTINGS_SEED).length);
+      expect(store.listWatches(SPACE)).toHaveLength(Object.keys(WATCH_SETTINGS_SEED).length);
     });
 
     it('toggles enabled and reflects it in subsequent reads', () => {
-      expect(store.setWatchEnabled(FLOOR, false)).toBeDefined();
-      expect(store.getWatch(FLOOR)?.enabled).toBe(false);
-      expect(store.listWatches().find(({ id }) => id === FLOOR)?.enabled).toBe(false);
+      expect(store.setWatchEnabled(FLOOR, false, SPACE)).toBeDefined();
+      expect(store.getWatch(FLOOR, SPACE)?.enabled).toBe(false);
+      expect(store.listWatches(SPACE).find(({ id }) => id === FLOOR)?.enabled).toBe(false);
     });
 
     it('returns undefined for an unknown watch', () => {
-      expect(store.setWatchEnabled('nope', false)).toBeUndefined();
-      expect(store.getWatch('nope')).toBeUndefined();
+      expect(store.setWatchEnabled('nope', false, SPACE)).toBeUndefined();
+      expect(store.getWatch('nope', SPACE)).toBeUndefined();
     });
   });
 
   describe('autonomy', () => {
     it('accepts any level on the shared scale', () => {
-      expect(store.setWatchAutonomy(FLOOR, 'supervised')).toBeDefined();
-      expect(store.getWatchSettings(FLOOR)?.autonomy).toBe('supervised');
+      expect(store.setWatchAutonomy(FLOOR, 'supervised', SPACE)).toBeDefined();
+      expect(store.getWatchSettings(FLOOR, SPACE)?.autonomy).toBe('supervised');
     });
 
     it('returns undefined for a watch with no settings', () => {
-      expect(store.setWatchAutonomy('nope', 'supervised')).toBeUndefined();
+      expect(store.setWatchAutonomy('nope', 'supervised', SPACE)).toBeUndefined();
     });
   });
 
   describe('triggers', () => {
     it('accepts a schedule the watch offers', () => {
-      expect(store.setWatchTriggers(FLOOR, { scheduleId: 'hourly' })).toBeDefined();
-      expect(store.getWatchSettings(FLOOR)?.triggers?.schedule.selectedId).toBe('hourly');
+      expect(store.setWatchTriggers(FLOOR, { scheduleId: 'hourly' }, SPACE)).toBeDefined();
+      expect(store.getWatchSettings(FLOOR, SPACE)?.triggers?.schedule.selectedId).toBe('hourly');
     });
 
     it('rejects an unknown schedule without touching the stored value', () => {
-      const before = store.getWatchSettings(FLOOR)?.triggers?.schedule.selectedId;
+      const before = store.getWatchSettings(FLOOR, SPACE)?.triggers?.schedule.selectedId;
 
-      expect(store.setWatchTriggers(FLOOR, { scheduleId: 'every-century' })).toBeUndefined();
-      expect(store.getWatchSettings(FLOOR)?.triggers?.schedule.selectedId).toBe(before);
+      expect(store.setWatchTriggers(FLOOR, { scheduleId: 'every-century' }, SPACE)).toBeUndefined();
+      expect(store.getWatchSettings(FLOOR, SPACE)?.triggers?.schedule.selectedId).toBe(before);
     });
 
     it('rejects a patch for a watch with no triggers section', () => {
-      const settings = store.getWatchSettings(FLOOR)!;
+      const settings = store.getWatchSettings(FLOOR, SPACE)!;
       delete settings.triggers;
 
-      expect(store.setWatchTriggers(FLOOR, { allowManualRun: false })).toBeUndefined();
+      expect(store.setWatchTriggers(FLOOR, { allowManualRun: false }, SPACE)).toBeUndefined();
     });
   });
 
   describe('scope and routing', () => {
     it('accepts offered ids across several selects at once', () => {
       expect(
-        store.setWatchScopeRouting(FLOOR, {
-          dataSources: 'alerts-only',
-          assigneeQueue: 'threat-hunting',
-        })
+        store.setWatchScopeRouting(
+          FLOOR,
+          {
+            dataSources: 'alerts-only',
+            assigneeQueue: 'threat-hunting',
+          },
+          SPACE
+        )
       ).toBeDefined();
 
-      const { scopeRouting } = store.getWatchSettings(FLOOR)!;
+      const { scopeRouting } = store.getWatchSettings(FLOOR, SPACE)!;
       expect(scopeRouting?.dataSources.selectedId).toBe('alerts-only');
       expect(scopeRouting?.assigneeQueue.selectedId).toBe('threat-hunting');
     });
 
     it('rejects an unknown id', () => {
-      expect(store.setWatchScopeRouting(FLOOR, { escalationContact: 'the-void' })).toBeUndefined();
+      expect(
+        store.setWatchScopeRouting(FLOOR, { escalationContact: 'the-void' }, SPACE)
+      ).toBeUndefined();
     });
   });
 
   describe('approval gates', () => {
     it('refuses to weaken a locked gate', () => {
       expect(
-        store.setWatchApprovalGate(FLOOR, 'host-isolation', { requirement: 'in-scope' })
+        store.setWatchApprovalGate(FLOOR, 'host-isolation', { requirement: 'in-scope' }, SPACE)
       ).toBeUndefined();
 
       const gate = store
-        .getWatchSettings(FLOOR)
+        .getWatchSettings(FLOOR, SPACE)
         ?.approvalGates?.find(({ id }) => id === 'host-isolation');
       expect(gate?.requirement).toBe('always');
     });
 
     it('allows changing the requirement of an unlocked gate', () => {
       expect(
-        store.setWatchApprovalGate(FLOOR, 'hunt-execution', { requirement: 'always' })
+        store.setWatchApprovalGate(FLOOR, 'hunt-execution', { requirement: 'always' }, SPACE)
       ).toBeDefined();
 
       const gate = store
-        .getWatchSettings(FLOOR)
+        .getWatchSettings(FLOOR, SPACE)
         ?.approvalGates?.find(({ id }) => id === 'hunt-execution');
       expect(gate?.requirement).toBe('always');
     });
 
     it('accepts an approver role the gate offers and rejects one it does not', () => {
       expect(
-        store.setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'soc-lead' })
+        store.setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'soc-lead' }, SPACE)
       ).toBeDefined();
       expect(
-        store.setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'the-intern' })
+        store.setWatchApprovalGate(FLOOR, 'host-isolation', { approverRoleId: 'the-intern' }, SPACE)
       ).toBeUndefined();
     });
 
     it('rejects an approver role on a gate that takes none', () => {
       expect(
-        store.setWatchApprovalGate(FLOOR, 'evidence-only-investigation', {
-          approverRoleId: 'soc-lead',
-        })
+        store.setWatchApprovalGate(
+          FLOOR,
+          'evidence-only-investigation',
+          {
+            approverRoleId: 'soc-lead',
+          },
+          SPACE
+        )
       ).toBeUndefined();
     });
 
     it('returns undefined for an unknown gate', () => {
-      expect(store.setWatchApprovalGate(FLOOR, 'nope', { requirement: 'always' })).toBeUndefined();
+      expect(
+        store.setWatchApprovalGate(FLOOR, 'nope', { requirement: 'always' }, SPACE)
+      ).toBeUndefined();
     });
   });
 
   describe('global flags versus per-watch attachments', () => {
     it('toggles the global skill flag', () => {
-      expect(store.setSkillEnabled('alert-triage', false)).toBeDefined();
-      expect(store.listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(false);
+      expect(store.setSkillEnabled('alert-triage', false, SPACE)).toBeDefined();
+      expect(store.listSkills(SPACE).find(({ id }) => id === 'alert-triage')?.enabled).toBe(false);
     });
 
     it('toggles a per-watch skill flag independently of the global skill flag', () => {
-      expect(store.setWatchSkillEnabled(FLOOR, 'alert-triage', false)).toBeDefined();
+      expect(store.setWatchSkillEnabled(FLOOR, 'alert-triage', false, SPACE)).toBeDefined();
       // Global flag unchanged
-      expect(store.listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(true);
+      expect(store.listSkills(SPACE).find(({ id }) => id === 'alert-triage')?.enabled).toBe(true);
       // Per-watch override stored in settings.skills (WatchSkillAttachment format)
       expect(
-        store.getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')
-          ?.enabled
+        store
+          .getWatchSettings(FLOOR, SPACE)
+          ?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(false);
     });
 
     it('rejects a per-watch skill toggle for a skill not attached to the watch', () => {
-      expect(store.setWatchSkillEnabled('nope', 'alert-triage', false)).toBeUndefined();
+      expect(store.setWatchSkillEnabled('nope', 'alert-triage', false, SPACE)).toBeUndefined();
     });
 
     it('toggles a worker attachment without touching the global worker flag', () => {
-      expect(store.setWatchWorkerEnabled(FLOOR, 'host-context', true)).toBeDefined();
+      expect(store.setWatchWorkerEnabled(FLOOR, 'host-context', true, SPACE)).toBeDefined();
 
       expect(store.listWorkers().find(({ id }) => id === 'host-context')?.enabled).toBe(false);
       expect(
-        store.getWatchSettings(FLOOR)?.workers?.find(({ workerId }) => workerId === 'host-context')
-          ?.enabled
+        store
+          .getWatchSettings(FLOOR, SPACE)
+          ?.workers?.find(({ workerId }) => workerId === 'host-context')?.enabled
       ).toBe(true);
     });
 
@@ -197,16 +215,16 @@ describe('MockWatchStore', () => {
       expect(store.setWorkerEnabled('containment', false)).toBeDefined();
 
       expect(store.listWorkers().find(({ id }) => id === 'containment')?.enabled).toBe(false);
-      expect(store.listSkills().find(({ id }) => id === 'containment')?.enabled).toBe(true);
+      expect(store.listSkills(SPACE).find(({ id }) => id === 'containment')?.enabled).toBe(true);
     });
 
     it('rejects toggling a worker the watch does not attach', () => {
-      expect(store.setWatchWorkerEnabled(FLOOR, 'rule-tuning', false)).toBeUndefined();
+      expect(store.setWatchWorkerEnabled(FLOOR, 'rule-tuning', false, SPACE)).toBeUndefined();
     });
 
     it('returns undefined for unknown global ids', () => {
       expect(store.setWorkerEnabled('nope', false)).toBeUndefined();
-      expect(store.setSkillEnabled('nope', false)).toBeUndefined();
+      expect(store.setSkillEnabled('nope', false, SPACE)).toBeUndefined();
     });
   });
 });

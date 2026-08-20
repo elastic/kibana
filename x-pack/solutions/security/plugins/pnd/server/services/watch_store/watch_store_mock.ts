@@ -12,6 +12,9 @@
  * writes survive across calls within the same service instance but reset when the service is
  * re-created. That is the intended behaviour for a UX reference implementation — see
  * https://github.com/elastic/security-team/issues/18717 for the real persistence work.
+ *
+ * Mock data is global (not space-scoped). The spaceId parameter on all interface methods is
+ * accepted for interface compatibility but ignored — all spaces see the same seed data.
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -105,16 +108,16 @@ export class MockWatchStore implements IWatchStore {
   /* Watches                                                                    */
   /* -------------------------------------------------------------------------- */
 
-  listWatches(): Watch[] {
+  listWatches(_spaceId: string): Watch[] {
     return this.getState().watches;
   }
 
-  getWatch(watchId: string): Watch | undefined {
+  getWatch(watchId: string, _spaceId: string): Watch | undefined {
     return this.getState().watches.find((watch) => watch.id === watchId);
   }
 
-  setWatchEnabled(watchId: string, enabled: boolean): Watch | undefined {
-    const watch = this.getWatch(watchId);
+  setWatchEnabled(watchId: string, enabled: boolean, spaceId: string): Watch | undefined {
+    const watch = this.getWatch(watchId, spaceId);
     if (!watch) {
       return undefined;
     }
@@ -126,12 +129,16 @@ export class MockWatchStore implements IWatchStore {
   /* Per-watch settings                                                         */
   /* -------------------------------------------------------------------------- */
 
-  getWatchSettings(watchId: string): WatchSettings | undefined {
+  getWatchSettings(watchId: string, _spaceId: string): WatchSettings | undefined {
     return this.getState().settingsByWatchId.get(watchId);
   }
 
-  setWatchAutonomy(watchId: string, level: WatchAutonomyLevel): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+  setWatchAutonomy(
+    watchId: string,
+    level: WatchAutonomyLevel,
+    spaceId: string
+  ): WatchSettings | undefined {
+    const settings = this.getWatchSettings(watchId, spaceId);
     if (!settings) return undefined;
     settings.autonomy = level;
     return settings;
@@ -139,9 +146,10 @@ export class MockWatchStore implements IWatchStore {
 
   setWatchTriggers(
     watchId: string,
-    { scheduleId, allowManualRun }: WatchTriggersPatch
+    { scheduleId, allowManualRun }: WatchTriggersPatch,
+    spaceId: string
   ): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+    const settings = this.getWatchSettings(watchId, spaceId);
     if (!settings?.triggers) return undefined;
     if (scheduleId != null) {
       // Reject ids the watch does not offer rather than storing an unresolvable value.
@@ -156,8 +164,12 @@ export class MockWatchStore implements IWatchStore {
     return settings;
   }
 
-  setWatchScopeRouting(watchId: string, patch: WatchScopeRoutingPatch): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+  setWatchScopeRouting(
+    watchId: string,
+    patch: WatchScopeRoutingPatch,
+    spaceId: string
+  ): WatchSettings | undefined {
+    const settings = this.getWatchSettings(watchId, spaceId);
     if (!settings?.scopeRouting) {
       return undefined;
     }
@@ -184,9 +196,10 @@ export class MockWatchStore implements IWatchStore {
   setWatchApprovalGate(
     watchId: string,
     gateId: string,
-    patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
+    patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>,
+    spaceId: string
   ): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+    const settings = this.getWatchSettings(watchId, spaceId);
     const gate = settings?.approvalGates?.find(({ id }) => id === gateId);
     if (!settings || !gate) {
       return undefined;
@@ -216,9 +229,10 @@ export class MockWatchStore implements IWatchStore {
   setWatchWorkerEnabled(
     watchId: string,
     workerId: string,
-    enabled: boolean
+    enabled: boolean,
+    spaceId: string
   ): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+    const settings = this.getWatchSettings(watchId, spaceId);
     const attachment = settings?.workers?.find((candidate) => candidate.workerId === workerId);
     if (!settings || !attachment) {
       return undefined;
@@ -230,9 +244,10 @@ export class MockWatchStore implements IWatchStore {
   setWatchSkillEnabled(
     watchId: string,
     skillId: string,
-    enabled: boolean
+    enabled: boolean,
+    spaceId: string
   ): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+    const settings = this.getWatchSettings(watchId, spaceId);
     const attachment = settings?.skills?.find((candidate) => candidate.skillId === skillId);
     if (!settings || !attachment) {
       return undefined;
@@ -245,15 +260,11 @@ export class MockWatchStore implements IWatchStore {
   /* Skill catalog                                                               */
   /* -------------------------------------------------------------------------- */
 
-  projectSkillsForWatch(_watch: Watch): WatchSkill[] {
-    return [];
-  }
-
-  listSkills(): WatchSkill[] {
+  listSkills(_spaceId: string): WatchSkill[] {
     return this.getState().skills;
   }
 
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
+  setSkillEnabled(skillId: string, enabled: boolean, _spaceId: string): WatchSkill | undefined {
     const skill = this.getState().skills.find((candidate) => candidate.id === skillId);
     if (!skill) {
       return undefined;

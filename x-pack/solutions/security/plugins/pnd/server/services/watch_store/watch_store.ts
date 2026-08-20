@@ -8,9 +8,13 @@
 /**
  * In-memory watch store for live (non-mock) mode.
  *
- * Populated by calling refresh() with a KibanaRequest and spaceId. Fetches watches from the
- * Workflows API, projects them via project_watch, and builds the global skill catalog. State
- * resets when Kibana restarts; there is no persistence yet.
+ * State is keyed by spaceId — each space has its own watch list, skill catalog, and settings.
+ * Data is cached for CACHE_TTL_MS (5 min) so routine list/get calls within a short window share
+ * one Workflows API round-trip. ensurePopulated() re-fetches once the TTL expires, so newly
+ * created watches and workflow changes appear within that window without a restart.
+ *
+ * In-memory mutations (e.g. setSkillEnabled) survive a cache refresh because refresh() merges
+ * existing catalog state into the newly projected result.
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
@@ -38,10 +42,11 @@ import type {
 } from './types';
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export class WatchStore implements IWatchStore {
-  private state: WatchStoreState | undefined;
-  private isPopulated = false;
+  private readonly stateBySpace = new Map<string, WatchStoreState>();
+  private readonly fetchedAtBySpace = new Map<string, number>();
   private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
 
   constructor(
@@ -50,7 +55,6 @@ export class WatchStore implements IWatchStore {
     private readonly agentBuilder?: AgentBuilderPluginStart,
     agentTypes: readonly AgentTypeDefinition[] = []
   ) {
-    this.state = { watches: [], skills: [], settingsByWatchId: new Map() };
     this.agentTypeMap = new Map(agentTypes.map((t) => [t.id, t]));
   }
 
@@ -80,15 +84,15 @@ export class WatchStore implements IWatchStore {
       .map((item) => projectWorkflowToWatch(item, agents))
       .sort(compareWatchesForDisplay);
 
+    const existing = this.stateBySpace.get(spaceId);
     const settings = new Map<string, WatchSettings>();
     for (const watch of watches) {
-      const existing = this.state?.settingsByWatchId.get(watch.id);
-      const entry: WatchSettings = existing ?? { watchId: watch.id, autonomy: 'manual' };
+      const prev = existing?.settingsByWatchId.get(watch.id);
+      const entry: WatchSettings = prev ?? { watchId: watch.id, autonomy: 'manual' };
       const skillAttachments = watch.callables
         .filter((c) => c.kind === 'skill')
         .map(
-          (c) =>
-            existing?.skills?.find((s) => s.skillId === c.id) ?? { skillId: c.id, enabled: true }
+          (c) => prev?.skills?.find((s) => s.skillId === c.id) ?? { skillId: c.id, enabled: true }
         );
       if (skillAttachments.length > 0) {
         entry.skills = skillAttachments;
@@ -96,18 +100,19 @@ export class WatchStore implements IWatchStore {
       settings.set(watch.id, entry);
     }
 
-    this.state = {
+    this.stateBySpace.set(spaceId, {
       watches,
-      skills: this.buildSkillsFromWatches(watches, this.listSkills()),
+      skills: this.buildSkillsFromWatches(watches, this.listSkills(spaceId)),
       settingsByWatchId: settings,
-    };
-    this.isPopulated = true;
+    });
+    this.fetchedAtBySpace.set(spaceId, Date.now());
 
     return watches;
   }
 
   async ensurePopulated(request: KibanaRequest, spaceId: string): Promise<void> {
-    if (this.isPopulated) return;
+    const fetchedAt = this.fetchedAtBySpace.get(spaceId) ?? 0;
+    if (Date.now() - fetchedAt < CACHE_TTL_MS) return;
     await this.refresh(request, spaceId);
   }
 
@@ -136,16 +141,16 @@ export class WatchStore implements IWatchStore {
   /* Watches                                                                    */
   /* -------------------------------------------------------------------------- */
 
-  listWatches(): Watch[] {
-    return this.state?.watches ?? [];
+  listWatches(spaceId: string): Watch[] {
+    return this.stateBySpace.get(spaceId)?.watches ?? [];
   }
 
-  getWatch(watchId: string): Watch | undefined {
-    return this.listWatches().find((w) => w.id === watchId);
+  getWatch(watchId: string, spaceId: string): Watch | undefined {
+    return this.listWatches(spaceId).find((w) => w.id === watchId);
   }
 
-  setWatchEnabled(watchId: string, enabled: boolean): Watch | undefined {
-    const watch = this.getWatch(watchId);
+  setWatchEnabled(watchId: string, enabled: boolean, spaceId: string): Watch | undefined {
+    const watch = this.getWatch(watchId, spaceId);
     if (!watch) {
       return undefined;
     }
@@ -157,23 +162,32 @@ export class WatchStore implements IWatchStore {
   /* Per-watch settings — not supported in live mode; service gates on useMockData */
   /* -------------------------------------------------------------------------- */
 
-  getWatchSettings(watchId: string): WatchSettings | undefined {
-    return this.state?.settingsByWatchId.get(watchId);
+  getWatchSettings(watchId: string, spaceId: string): WatchSettings | undefined {
+    return this.stateBySpace.get(spaceId)?.settingsByWatchId.get(watchId);
   }
 
-  setWatchAutonomy(_watchId: string, _level: WatchAutonomyLevel): WatchSettings | undefined {
+  setWatchAutonomy(
+    _watchId: string,
+    _level: WatchAutonomyLevel,
+    _spaceId: string
+  ): WatchSettings | undefined {
     // not supported for live data
     return undefined;
   }
 
-  setWatchTriggers(_watchId: string, _patch: WatchTriggersPatch): WatchSettings | undefined {
+  setWatchTriggers(
+    _watchId: string,
+    _patch: WatchTriggersPatch,
+    _spaceId: string
+  ): WatchSettings | undefined {
     // not supported for live data
     return undefined;
   }
 
   setWatchScopeRouting(
     _watchId: string,
-    _patch: WatchScopeRoutingPatch
+    _patch: WatchScopeRoutingPatch,
+    _spaceId: string
   ): WatchSettings | undefined {
     // not supported for live data
     return undefined;
@@ -182,7 +196,8 @@ export class WatchStore implements IWatchStore {
   setWatchApprovalGate(
     _watchId: string,
     _gateId: string,
-    _patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
+    _patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>,
+    _spaceId: string
   ): WatchSettings | undefined {
     // not supported for live data
     return undefined;
@@ -191,7 +206,8 @@ export class WatchStore implements IWatchStore {
   setWatchWorkerEnabled(
     _watchId: string,
     _workerId: string,
-    _enabled: boolean
+    _enabled: boolean,
+    _spaceId: string
   ): WatchSettings | undefined {
     // not supported for live data
     return undefined;
@@ -200,9 +216,10 @@ export class WatchStore implements IWatchStore {
   setWatchSkillEnabled(
     watchId: string,
     skillId: string,
-    enabled: boolean
+    enabled: boolean,
+    spaceId: string
   ): WatchSettings | undefined {
-    const settings = this.getWatchSettings(watchId);
+    const settings = this.getWatchSettings(watchId, spaceId);
     const attachment = settings?.skills?.find((candidate) => candidate.skillId === skillId);
 
     if (!settings || !attachment) {
@@ -216,16 +233,12 @@ export class WatchStore implements IWatchStore {
   /* Skill catalog                                                               */
   /* -------------------------------------------------------------------------- */
 
-  projectSkillsForWatch(watch: Watch): WatchSkill[] {
-    return this.buildSkillsFromWatches([watch], this.listSkills());
+  listSkills(spaceId: string): WatchSkill[] {
+    return this.stateBySpace.get(spaceId)?.skills ?? [];
   }
 
-  listSkills(): WatchSkill[] {
-    return this.state?.skills ?? [];
-  }
-
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
-    const skill = this.listSkills().find((candidate) => candidate.id === skillId);
+  setSkillEnabled(skillId: string, enabled: boolean, spaceId: string): WatchSkill | undefined {
+    const skill = this.listSkills(spaceId).find((candidate) => candidate.id === skillId);
     if (!skill) {
       return undefined;
     }
@@ -238,12 +251,12 @@ export class WatchStore implements IWatchStore {
   /* -------------------------------------------------------------------------- */
 
   listWorkers(): WatchWorker[] {
-    // not supportedfor live data
+    // not supported for live data
     return [];
   }
 
   setWorkerEnabled(_workerId: string, _enabled: boolean): WatchWorker | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 }

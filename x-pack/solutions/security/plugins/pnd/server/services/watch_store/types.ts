@@ -28,37 +28,50 @@ export type WatchScopeRoutingPatch = Partial<
 export interface IWatchStore {
   /** Unconditionally re-fetches/re-seeds, updates in-memory state, and returns the watch list. */
   refresh(request: KibanaRequest, spaceId: string): Promise<Watch[]>;
-  /** No-op when already populated; otherwise delegates to refresh. */
+  /** No-op when data for this space is fresh; otherwise delegates to refresh. */
   ensurePopulated(request: KibanaRequest, spaceId: string): Promise<void>;
 
-  listWatches(): Watch[];
-  getWatch(watchId: string): Watch | undefined;
-  setWatchEnabled(watchId: string, enabled: boolean): Watch | undefined;
+  listWatches(spaceId: string): Watch[];
+  getWatch(watchId: string, spaceId: string): Watch | undefined;
+  setWatchEnabled(watchId: string, enabled: boolean, spaceId: string): Watch | undefined;
 
-  getWatchSettings(watchId: string): WatchSettings | undefined;
-  setWatchAutonomy(watchId: string, level: WatchAutonomyLevel): WatchSettings | undefined;
-  setWatchTriggers(watchId: string, patch: WatchTriggersPatch): WatchSettings | undefined;
-  setWatchScopeRouting(watchId: string, patch: WatchScopeRoutingPatch): WatchSettings | undefined;
+  getWatchSettings(watchId: string, spaceId: string): WatchSettings | undefined;
+  setWatchAutonomy(
+    watchId: string,
+    level: WatchAutonomyLevel,
+    spaceId: string
+  ): WatchSettings | undefined;
+  setWatchTriggers(
+    watchId: string,
+    patch: WatchTriggersPatch,
+    spaceId: string
+  ): WatchSettings | undefined;
+  setWatchScopeRouting(
+    watchId: string,
+    patch: WatchScopeRoutingPatch,
+    spaceId: string
+  ): WatchSettings | undefined;
   setWatchApprovalGate(
     watchId: string,
     gateId: string,
-    patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
+    patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>,
+    spaceId: string
   ): WatchSettings | undefined;
   setWatchWorkerEnabled(
     watchId: string,
     workerId: string,
-    enabled: boolean
+    enabled: boolean,
+    spaceId: string
   ): WatchSettings | undefined;
   setWatchSkillEnabled(
     watchId: string,
     skillId: string,
-    enabled: boolean
+    enabled: boolean,
+    spaceId: string
   ): WatchSettings | undefined;
 
-  /** Projects WatchSkill[] for a single watch, merged with the existing skill catalog. */
-  projectSkillsForWatch(watch: Watch): WatchSkill[];
-  listSkills(): WatchSkill[];
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined;
+  listSkills(spaceId: string): WatchSkill[];
+  setSkillEnabled(skillId: string, enabled: boolean, spaceId: string): WatchSkill | undefined;
 
   /** Worker catalog — populated in mock mode only; live returns empty. */
   listWorkers(): WatchWorker[];

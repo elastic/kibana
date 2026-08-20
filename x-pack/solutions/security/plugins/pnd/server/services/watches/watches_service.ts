@@ -132,12 +132,12 @@ export class WatchesService {
     await this.prepareSpace(spaceId);
 
     if (this.useMockData) {
-      const watches = await this.withWorkflowEnablement(this.store.listWatches(), spaceId);
+      const watches = await this.withWorkflowEnablement(this.store.listWatches(spaceId), spaceId);
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
     }
 
     await this.store.ensurePopulated(request, spaceId);
-    return ListWatchesResponse.parse({ watches: this.store.listWatches() });
+    return ListWatchesResponse.parse({ watches: this.store.listWatches(spaceId) });
   }
 
   async get(
@@ -148,12 +148,15 @@ export class WatchesService {
     await this.prepareSpace(spaceId);
 
     if (this.useMockData) {
-      const stored = this.store.getWatch(watchId);
+      const stored = this.store.getWatch(watchId, spaceId);
       if (!stored) {
         return undefined;
       }
       const [watch] = await this.withWorkflowEnablement([stored], spaceId);
-      return GetWatchResponse.parse({ watch, settings: this.store.getWatchSettings(watchId) });
+      return GetWatchResponse.parse({
+        watch,
+        settings: this.store.getWatchSettings(watchId, spaceId),
+      });
     }
 
     await this.store.ensurePopulated(request, spaceId);
@@ -230,7 +233,10 @@ export class WatchesService {
         ...watch,
         recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
       };
-      const settings = this.store.getWatchSettings(watchId) ?? { watchId, autonomy: 'manual' };
+      const settings = this.store.getWatchSettings(watchId, spaceId) ?? {
+        watchId,
+        autonomy: 'manual',
+      };
       return GetWatchResponse.parse({ watch: enrichedWatch, settings });
     } catch (error) {
       this.logger.debug(
@@ -239,7 +245,10 @@ export class WatchesService {
         }`
       );
       const fallbackWatch = projectWorkflowToWatch(listItem, agents);
-      const settings = this.store.getWatchSettings(watchId) ?? { watchId, autonomy: 'manual' };
+      const settings = this.store.getWatchSettings(watchId, spaceId) ?? {
+        watchId,
+        autonomy: 'manual',
+      };
       return GetWatchResponse.parse({ watch: fallbackWatch, settings });
     }
   }
@@ -307,29 +316,35 @@ export class WatchesService {
     // reach it: a body carrying both would otherwise disable the workflow and then return 400 for the
     // invalid setting, telling the caller that nothing had changed.
     if (touchesSettings) {
-      if (!this.store.getWatchSettings(watchId)) {
+      if (!this.store.getWatchSettings(watchId, spaceId)) {
         return { outcome: 'not-found' };
       }
 
-      if (autonomyLevel != null && !this.store.setWatchAutonomy(watchId, autonomyLevel)) {
+      if (autonomyLevel != null && !this.store.setWatchAutonomy(watchId, autonomyLevel, spaceId)) {
         return { outcome: 'rejected', what: 'autonomy level' };
       }
-      if (triggers && !this.store.setWatchTriggers(watchId, triggers)) {
+      if (triggers && !this.store.setWatchTriggers(watchId, triggers, spaceId)) {
         return { outcome: 'rejected', what: 'trigger settings' };
       }
-      if (scopeRouting && !this.store.setWatchScopeRouting(watchId, scopeRouting)) {
+      if (scopeRouting && !this.store.setWatchScopeRouting(watchId, scopeRouting, spaceId)) {
         return { outcome: 'rejected', what: 'scope and routing settings' };
       }
       if (approvalGate) {
         const { gateId, ...gatePatch } = approvalGate;
-        if (!this.store.setWatchApprovalGate(watchId, gateId, gatePatch)) {
+        if (!this.store.setWatchApprovalGate(watchId, gateId, gatePatch, spaceId)) {
           return { outcome: 'rejected', what: `approval gate "${gateId}"` };
         }
       }
-      if (worker && !this.store.setWatchWorkerEnabled(watchId, worker.workerId, worker.enabled)) {
+      if (
+        worker &&
+        !this.store.setWatchWorkerEnabled(watchId, worker.workerId, worker.enabled, spaceId)
+      ) {
         return { outcome: 'rejected', what: `worker "${worker.workerId}"` };
       }
-      if (skill && !this.store.setWatchSkillEnabled(watchId, skill.skillId, skill.enabled)) {
+      if (
+        skill &&
+        !this.store.setWatchSkillEnabled(watchId, skill.skillId, skill.enabled, spaceId)
+      ) {
         return { outcome: 'rejected', what: `skill "${skill.skillId}"` };
       }
     }
@@ -355,12 +370,12 @@ export class WatchesService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<'applied' | 'not-found'> {
-    if (this.useMockData && !this.store.getWatch(watchId)) {
+    if (this.useMockData && !this.store.getWatch(watchId, spaceId)) {
       return 'not-found';
     }
 
     if (!this.management) {
-      return this.store.setWatchEnabled(watchId, enabled) ? 'applied' : 'not-found';
+      return this.store.setWatchEnabled(watchId, enabled, spaceId) ? 'applied' : 'not-found';
     }
 
     try {
@@ -378,7 +393,7 @@ export class WatchesService {
     }
 
     // Keep the store in step so a mock-mode read agrees even if the workflow write failed.
-    this.store.setWatchEnabled(watchId, enabled);
+    this.store.setWatchEnabled(watchId, enabled, spaceId);
     return 'applied';
   }
 
@@ -392,11 +407,11 @@ export class WatchesService {
 
   async listSkills(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
     if (this.useMockData) {
-      return this.store.listSkills();
+      return this.store.listSkills(spaceId);
     }
     await this.prepareSpace(spaceId);
     await this.store.ensurePopulated(request, spaceId);
-    return this.store.listSkills();
+    return this.store.listSkills(spaceId);
   }
 
   setWorkerEnabled(workerId: string, enabled: boolean): WatchWorker | undefined {
@@ -412,7 +427,7 @@ export class WatchesService {
     if (!this.useMockData) {
       await this.store.ensurePopulated(request, spaceId);
     }
-    return this.store.setSkillEnabled(skillId, enabled);
+    return this.store.setSkillEnabled(skillId, enabled, spaceId);
   }
 
   /* ---------------------------------------------------------------------- */

@@ -56,19 +56,19 @@ describe('WatchStore', () => {
 
   describe('initial state (before refresh)', () => {
     it('listWatches returns empty', () => {
-      expect(liveStore.listWatches()).toEqual([]);
+      expect(liveStore.listWatches(SPACE)).toEqual([]);
     });
 
     it('listSkills returns empty', () => {
-      expect(liveStore.listSkills()).toEqual([]);
+      expect(liveStore.listSkills(SPACE)).toEqual([]);
     });
 
     it('getWatch returns undefined', () => {
-      expect(liveStore.getWatch('any')).toBeUndefined();
+      expect(liveStore.getWatch('any', SPACE)).toBeUndefined();
     });
 
     it('getWatchSettings returns undefined', () => {
-      expect(liveStore.getWatchSettings('any')).toBeUndefined();
+      expect(liveStore.getWatchSettings('any', SPACE)).toBeUndefined();
     });
 
     it('listWorkers returns empty', () => {
@@ -89,8 +89,8 @@ describe('WatchStore', () => {
     it('populates watches from results tagged with WATCH_TAG', async () => {
       getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
-      expect(liveStore.listWatches()).toHaveLength(1);
-      expect(liveStore.getWatch('watch-a')).toBeDefined();
+      expect(liveStore.listWatches(SPACE)).toHaveLength(1);
+      expect(liveStore.getWatch('watch-a', SPACE)).toBeDefined();
     });
 
     it('excludes results that do not carry the watch tag', async () => {
@@ -98,13 +98,13 @@ describe('WatchStore', () => {
         results: [makeWorkflowDto('watch-a', { tags: [] })],
       });
       await liveStore.refresh(request, SPACE);
-      expect(liveStore.listWatches()).toHaveLength(0);
+      expect(liveStore.listWatches(SPACE)).toHaveLength(0);
     });
 
     it('initializes default settings for every fetched watch', async () => {
       getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
-      expect(liveStore.getWatchSettings('watch-a')).toMatchObject({
+      expect(liveStore.getWatchSettings('watch-a', SPACE)).toMatchObject({
         watchId: 'watch-a',
         autonomy: 'manual',
       });
@@ -121,25 +121,38 @@ describe('WatchStore', () => {
       getWorkflows.mockResolvedValue({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
 
-      const settingsBefore = liveStore.getWatchSettings('watch-a')!;
+      const settingsBefore = liveStore.getWatchSettings('watch-a', SPACE)!;
       settingsBefore.autonomy = 'supervised';
 
       await liveStore.refresh(request, SPACE);
-      expect(liveStore.getWatchSettings('watch-a')).toBe(settingsBefore);
-      expect(liveStore.getWatchSettings('watch-a')?.autonomy).toBe('supervised');
+      expect(liveStore.getWatchSettings('watch-a', SPACE)).toBe(settingsBefore);
+      expect(liveStore.getWatchSettings('watch-a', SPACE)?.autonomy).toBe('supervised');
     });
   });
 
   describe('ensurePopulated()', () => {
-    it('calls refresh when the store has no skills', async () => {
+    it('calls refresh when the store has no data for the space', async () => {
       await liveStore.ensurePopulated(request, SPACE);
       expect(getWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('does not re-fetch when already populated, even when watches have no skill callables', async () => {
+    it('does not re-fetch when data for the space is still fresh', async () => {
       await liveStore.ensurePopulated(request, SPACE);
       await liveStore.ensurePopulated(request, SPACE);
       expect(getWorkflows).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetches separately for each space — different spaces do not share state', async () => {
+      getWorkflows
+        .mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] })
+        .mockResolvedValueOnce({ results: [makeWorkflowDto('watch-b')] });
+
+      await liveStore.ensurePopulated(request, 'space-a');
+      await liveStore.ensurePopulated(request, 'space-b');
+
+      expect(liveStore.listWatches('space-a').map((w) => w.id)).toEqual(['watch-a']);
+      expect(liveStore.listWatches('space-b').map((w) => w.id)).toEqual(['watch-b']);
+      expect(getWorkflows).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -148,35 +161,35 @@ describe('WatchStore', () => {
       getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
 
-      const result = liveStore.setWatchEnabled('watch-a', false);
+      const result = liveStore.setWatchEnabled('watch-a', false, SPACE);
       expect(result).toBeDefined();
-      expect(liveStore.getWatch('watch-a')?.enabled).toBe(false);
+      expect(liveStore.getWatch('watch-a', SPACE)?.enabled).toBe(false);
     });
 
     it('returns undefined for an unknown watch', () => {
-      expect(liveStore.setWatchEnabled('nope', false)).toBeUndefined();
+      expect(liveStore.setWatchEnabled('nope', false, SPACE)).toBeUndefined();
     });
   });
 
   describe('settings setters — not supported in live mode', () => {
     it('setWatchAutonomy returns undefined', () => {
-      expect(liveStore.setWatchAutonomy('any', 'assisted')).toBeUndefined();
+      expect(liveStore.setWatchAutonomy('any', 'assisted', SPACE)).toBeUndefined();
     });
 
     it('setWatchTriggers returns undefined', () => {
-      expect(liveStore.setWatchTriggers('any', {})).toBeUndefined();
+      expect(liveStore.setWatchTriggers('any', {}, SPACE)).toBeUndefined();
     });
 
     it('setWatchScopeRouting returns undefined', () => {
-      expect(liveStore.setWatchScopeRouting('any', {})).toBeUndefined();
+      expect(liveStore.setWatchScopeRouting('any', {}, SPACE)).toBeUndefined();
     });
 
     it('setWatchApprovalGate returns undefined', () => {
-      expect(liveStore.setWatchApprovalGate('any', 'gate', {})).toBeUndefined();
+      expect(liveStore.setWatchApprovalGate('any', 'gate', {}, SPACE)).toBeUndefined();
     });
 
     it('setWatchWorkerEnabled returns undefined', () => {
-      expect(liveStore.setWatchWorkerEnabled('any', 'worker', true)).toBeUndefined();
+      expect(liveStore.setWatchWorkerEnabled('any', 'worker', true, SPACE)).toBeUndefined();
     });
 
     it('setWorkerEnabled returns undefined', () => {
@@ -202,11 +215,11 @@ describe('WatchStore', () => {
       });
       await storeWithAgent.refresh(request, SPACE);
 
-      const result = storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false);
+      const result = storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false, SPACE);
       expect(result).toBeDefined();
       expect(
         storeWithAgent
-          .getWatchSettings('watch-a')
+          .getWatchSettings('watch-a', SPACE)
           ?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(false);
     });
@@ -216,12 +229,12 @@ describe('WatchStore', () => {
         results: [makeWorkflowDto('watch-a', { agentId: 'test-agent' })],
       });
       await storeWithAgent.refresh(request, SPACE);
-      storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false);
+      storeWithAgent.setWatchSkillEnabled('watch-a', 'alert-triage', false, SPACE);
 
       await storeWithAgent.refresh(request, SPACE);
       expect(
         storeWithAgent
-          .getWatchSettings('watch-a')
+          .getWatchSettings('watch-a', SPACE)
           ?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(false);
     });
@@ -233,7 +246,7 @@ describe('WatchStore', () => {
       await storeWithAgent.refresh(request, SPACE);
 
       expect(
-        storeWithAgent.setWatchSkillEnabled('watch-a', 'unknown-skill', false)
+        storeWithAgent.setWatchSkillEnabled('watch-a', 'unknown-skill', false, SPACE)
       ).toBeUndefined();
     });
 
@@ -241,7 +254,9 @@ describe('WatchStore', () => {
       getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
 
-      expect(liveStore.setWatchSkillEnabled('watch-a', 'alert-triage', false)).toBeUndefined();
+      expect(
+        liveStore.setWatchSkillEnabled('watch-a', 'alert-triage', false, SPACE)
+      ).toBeUndefined();
     });
   });
 
@@ -249,11 +264,11 @@ describe('WatchStore', () => {
     it('listSkills returns empty when watches have no skill callables', async () => {
       getWorkflows.mockResolvedValueOnce({ results: [makeWorkflowDto('watch-a')] });
       await liveStore.refresh(request, SPACE);
-      expect(liveStore.listSkills()).toEqual([]);
+      expect(liveStore.listSkills(SPACE)).toEqual([]);
     });
 
     it('setSkillEnabled returns undefined when there are no skills', () => {
-      expect(liveStore.setSkillEnabled('nope', false)).toBeUndefined();
+      expect(liveStore.setSkillEnabled('nope', false, SPACE)).toBeUndefined();
     });
   });
 });
