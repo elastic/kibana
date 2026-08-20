@@ -439,6 +439,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
+src/platform/packages/private/kbn-saved-search-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/response-ops
@@ -458,8 +459,10 @@ src/platform/packages/private/kbn-workflow-yaml-validate-cli @elastic/workflows-
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/as-code/dashboard-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/data-views-schema @elastic/kibana-data-discovery
 src/platform/packages/shared/as-code/data-views-transforms @elastic/kibana-data-discovery
+src/platform/packages/shared/as-code/discover-schema @elastic/kibana-data-discovery
 src/platform/packages/shared/as-code/export-flyout-component @elastic/kibana-presentation @elastic/kibana-data-discovery
 src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
