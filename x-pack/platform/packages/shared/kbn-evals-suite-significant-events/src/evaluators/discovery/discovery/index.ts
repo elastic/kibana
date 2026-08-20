@@ -21,15 +21,19 @@ import {
   createSignalEvidenceConsistencyEvaluator,
 } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
+import { topologyCorrectnessEvaluator } from './grouping/topology_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
   continuationRoutingEvaluator,
   continuationStabilityEvaluator,
+  continuationTopologyStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
+import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
+import { severityExactEvaluator } from './severity/severity_exact';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -40,11 +44,13 @@ export const createDiscoveryEvaluators = (
 ): DiscoveryEvaluator[] => {
   const codeEvaluators: DiscoveryEvaluator[] = [
     groupingCorrectnessEvaluator,
+    topologyCorrectnessEvaluator,
     evidenceCollectionEvaluator,
     createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
+    severityExactEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -76,5 +82,7 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
   selectEvaluators([
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
+    continuationSeverityStabilityEvaluator,
+    continuationTopologyStabilityEvaluator,
     continuationTrajectoryEvaluator,
   ]);

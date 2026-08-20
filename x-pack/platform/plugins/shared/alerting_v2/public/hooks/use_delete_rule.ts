@@ -28,7 +28,7 @@ export const useDeleteRule = () => {
       );
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
       queryClient.invalidateQueries(ruleKeys.details());
     },
     onError: () => {

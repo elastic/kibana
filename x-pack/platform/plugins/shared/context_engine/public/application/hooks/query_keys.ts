@@ -16,4 +16,9 @@ export const contextEngineQueryKeys = {
     list: () => ['context_engine', 'connectors', 'list'] as const,
     types: () => ['context_engine', 'connectors', 'types'] as const,
   },
+  signals: {
+    groups: () => ['context_engine', 'signals', 'groups'] as const,
+    byTag: (tag: string, from: number, size: number) =>
+      ['context_engine', 'signals', 'by_tag', tag, from, size] as const,
+  },
 };

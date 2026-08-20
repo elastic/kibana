@@ -177,6 +177,12 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
+### Fix guardrails
+
+Every fix you propose is held to the same guardrails as the fixer and verifier workflows that act on it:
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+
 ## Labels
 
 ### Classification label
