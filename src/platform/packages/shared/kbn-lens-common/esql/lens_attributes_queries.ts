@@ -68,6 +68,12 @@ const viewDatasourceStates = (
   attributes?.state?.datasourceStates as LooseDatasourceStates | undefined;
 
 /**
+ * True when the document has at least one text-based (ES|QL) layer.
+ */
+export const hasTextBasedLayers = (attributes: MinimalLensAttributes | undefined): boolean =>
+  Object.keys(viewDatasourceStates(attributes)?.textBased?.layers ?? {}).length > 0;
+
+/**
  * Structural check for text-based (ES|QL) documents: based on the `textBased`
  * datasource state, not the (legacy, deprecated) aggregate value in
  * `state.query`. Some legacy form-based documents carry an empty `textBased`
@@ -85,9 +91,8 @@ export const isTextBasedAttributes = (attributes: MinimalLensAttributes | undefi
   if (!datasourceStates || !('textBased' in datasourceStates)) {
     return false;
   }
-  const hasTextBasedLayers = Object.keys(datasourceStates.textBased?.layers ?? {}).length > 0;
   const hasFormBasedLayers = Object.keys(datasourceStates.formBased?.layers ?? {}).length > 0;
-  return hasTextBasedLayers || !hasFormBasedLayers;
+  return hasTextBasedLayers(attributes) || !hasFormBasedLayers;
 };
 
 /**
@@ -125,7 +130,7 @@ export const getRepresentativeQuery = (
  * Canonical "no chart filter" value for the `state.query` slot and the
  * editor query seed. Treat as immutable.
  */
-export const EMPTY_KQL_QUERY: Query = { query: '', language: 'kuery' };
+export const EMPTY_KQL_QUERY: Readonly<Query> = { query: '', language: 'kuery' };
 
 /**
  * Read guard for legacy dual-written documents: any aggregate (ES|QL) value

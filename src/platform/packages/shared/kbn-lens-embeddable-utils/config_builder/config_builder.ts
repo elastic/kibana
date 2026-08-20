@@ -8,6 +8,7 @@
  */
 
 import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
@@ -299,13 +300,12 @@ export class LensConfigBuilder {
 
     // ES|QL documents carry their queries on the text-based layers and
     // get no top-level slot unless the API provides a KQL/Lucene filter.
-    const hasTextBasedLayers =
-      Object.keys(attributes.state.datasourceStates?.textBased?.layers ?? {}).length > 0;
-    const querySlot = query
-      ? { query }
-      : hasTextBasedLayers
-      ? {}
-      : { query: { language: 'kuery', query: '' } };
+    let querySlot: { query?: LensAttributes['state']['query'] } = {};
+    if (query) {
+      querySlot = { query };
+    } else if (!hasTextBasedLayers(attributes)) {
+      querySlot = { query: { language: 'kuery', query: '' } };
+    }
 
     return {
       // @TODO investigate why it complains about missing type

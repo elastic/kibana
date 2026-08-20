@@ -439,6 +439,7 @@ export {
 } from './esql/trendline_query';
 export {
   isTextBasedAttributes,
+  hasTextBasedLayers,
   getTextBasedLayerQueries,
   getRepresentativeQuery,
   getChartScopedFilterQuery,

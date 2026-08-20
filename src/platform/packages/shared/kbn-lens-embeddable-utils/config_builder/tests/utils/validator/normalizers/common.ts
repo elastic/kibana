@@ -19,6 +19,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
@@ -363,8 +364,7 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
  * — normalize both to an absent slot for comparison.
  */
 function normalizeESQLQuery(attributes: LensAttributes) {
-  const isTextBased =
-    Object.keys(attributes.state.datasourceStates?.textBased?.layers ?? {}).length > 0;
+  const isTextBased = hasTextBasedLayers(attributes);
   const query: unknown = attributes.state.query;
   if (!query || typeof query !== 'object') {
     return;
