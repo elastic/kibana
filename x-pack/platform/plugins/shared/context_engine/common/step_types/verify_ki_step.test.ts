@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { MAX_KI_ATTRIBUTES, MAX_KI_ATTRIBUTES_SIZE, VerifyKiInputSchema } from './verify_ki_step';
+import { MAX_KI_ATTRIBUTES, MAX_KI_ATTRIBUTE_VALUE_LENGTH } from './ki';
+import { VerifyKiInputSchema } from './verify_ki_step';
 
 describe('VerifyKiInputSchema', () => {
   it('accepts a KI with esql attributes', () => {
@@ -26,9 +27,9 @@ describe('VerifyKiInputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects attributes that serialize above the size cap', () => {
+  it('rejects attribute values above the length cap', () => {
     const result = VerifyKiInputSchema.safeParse({
-      ki: { attributes: { esql: 'x'.repeat(MAX_KI_ATTRIBUTES_SIZE + 1) } },
+      ki: { attributes: { esql: 'x'.repeat(MAX_KI_ATTRIBUTE_VALUE_LENGTH + 1) } },
     });
 
     expect(result.success).toBe(false);

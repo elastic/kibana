@@ -9,31 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { kiPartialFieldsSchema } from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
-export const MAX_KI_ATTRIBUTES = 100;
-export const MAX_KI_ATTRIBUTES_SIZE = 100_000;
-
-const KnowledgeIndicatorSchema = z.object({
-  type: z.string().max(256).optional(),
-  title: z.string().max(1024).optional(),
-  description: z.string().max(10_000).optional(),
-  content: z.string().max(100_000).optional(),
-  tags: z.array(z.string().max(256)).max(100).optional(),
-  attributes: z
-    .record(z.string().max(256), z.unknown())
-    .refine((attributes) => Object.keys(attributes).length <= MAX_KI_ATTRIBUTES, {
-      message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
-    })
-    .refine((attributes) => JSON.stringify(attributes).length <= MAX_KI_ATTRIBUTES_SIZE, {
-      message: `attributes must serialize to at most ${MAX_KI_ATTRIBUTES_SIZE} characters`,
-    })
-    .optional(),
-});
-
 export const VerifyKiInputSchema = z.object({
-  ki: KnowledgeIndicatorSchema,
+  ki: kiPartialFieldsSchema,
 });
 
 export const VerifyKiOutputSchema = z.object({
