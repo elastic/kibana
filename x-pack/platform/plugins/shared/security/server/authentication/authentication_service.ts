@@ -44,7 +44,11 @@ import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
-import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import {
+  ROUTE_TAG_ACCEPT_UIAM_OAUTH,
+  ROUTE_TAG_AUTH_FLOW,
+  ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX,
+} from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -230,7 +234,12 @@ export class AuthenticationService {
         const baseUrl =
           http.basePath.publicBaseUrl ??
           `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
-        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+        const resourceMetadataPathTag = request.route.options.tags.find((t) =>
+          t.startsWith(ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX)
+        );
+        const resourceMetadataUrl = resourceMetadataPathTag
+          ? `${baseUrl}${resourceMetadataPathTag.slice(ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX.length)}`
+          : `${baseUrl}/.well-known/oauth-protected-resource`;
 
         return toolkit.render({
           body: JSON.stringify({

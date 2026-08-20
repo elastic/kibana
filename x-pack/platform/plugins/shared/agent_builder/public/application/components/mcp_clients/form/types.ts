@@ -54,4 +54,5 @@ export interface McpClientFormData {
   clientLogo: ClientLogo;
   redirect: RedirectUriConfig;
   isConfidential: boolean;
+  isA2A: boolean;
 }

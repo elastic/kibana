@@ -13,6 +13,8 @@ import type { AgentCard } from '@a2a-js/sdk';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 
 import type { InternalStartServices } from '../../services';
+import { getDefaultAgentCreateRequest } from '../../services/agents/default_agent_definition';
+import { A2A_SERVER_PATH } from '../../routes/a2a';
 import { createAgentCard } from './create_agent_card';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
 import { KibanaTaskStore } from './kibana_task_store';
@@ -117,6 +119,68 @@ export class KibanaA2AAdapter {
       this.logger.error(`A2A: Failed to serve agent card for ${agentId}: ${error}`);
       return res.customError({
         statusCode: statusCodeForError(error),
+        body: { message: `Failed to serve agent card: ${describeError(error)}` },
+      });
+    }
+  }
+
+  /**
+   * Serve the default agent card without requiring authentication.
+   * Uses the static agent definition so no ES calls are made — safe for unauthenticated discovery.
+   */
+  async handleDefaultAgentCardRequest(
+    req: KibanaRequest,
+    res: KibanaResponseFactory
+  ): Promise<IKibanaResponse> {
+    try {
+      const { id, name, description } = getDefaultAgentCreateRequest();
+      const baseUrl = await this.getBaseUrl(req);
+      const agentCard: AgentCard = {
+        name,
+        description,
+        url: `${baseUrl}${A2A_SERVER_PATH}/${id}`,
+        provider: { organization: 'Elastic', url: 'https://elastic.co' },
+        version: '0.1.0',
+        protocolVersion: '0.3.0',
+        capabilities: { streaming: false, pushNotifications: false, stateTransitionHistory: false },
+        securitySchemes: {
+          apiKey: {
+            type: 'apiKey',
+            name: 'Authorization',
+            in: 'header',
+            description: 'Elastic API key (Authorization: ApiKey <encoded>)',
+          },
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            description: `OAuth 2.0 Bearer token. To discover the authorization server, fetch ${baseUrl}${A2A_SERVER_PATH}/.well-known/oauth-protected-resource`,
+          },
+        },
+        defaultInputModes: ['text/plain'],
+        defaultOutputModes: ['text/plain'],
+        skills: [
+          {
+            id: 'rag-chatbot',
+            name: 'rag-chatbot',
+            description:
+              'Answers questions using retrieval-augmented generation over your Elastic data.',
+            tags: ['chat'],
+            examples: [],
+            inputModes: ['text/plain'],
+            outputModes: ['text/plain'],
+          },
+        ],
+        supportsAuthenticatedExtendedCard: false,
+      };
+
+      return res.ok({
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
+        body: agentCard,
+      });
+    } catch (error) {
+      this.logger.error(`A2A: Failed to serve default agent card: ${error}`);
+      return res.customError({
+        statusCode: 500,
         body: { message: `Failed to serve agent card: ${describeError(error)}` },
       });
     }

@@ -68,7 +68,7 @@ export async function createAgentCard({
       bearerAuth: {
         type: 'http',
         scheme: 'bearer',
-        description: `OAuth 2.0 Bearer token. To discover the authorization server, fetch ${baseUrl}/.well-known/oauth-protected-resource`,
+        description: `OAuth 2.0 Bearer token. To discover the authorization server, fetch ${baseUrl}${A2A_SERVER_PATH}/.well-known/oauth-protected-resource`,
       },
     },
     defaultInputModes: ['text/plain'],
