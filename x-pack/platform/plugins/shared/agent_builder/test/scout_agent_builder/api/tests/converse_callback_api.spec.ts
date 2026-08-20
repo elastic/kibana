@@ -43,6 +43,7 @@ import {
   INTERNAL_AGENT_BUILDER,
   API_AGENT_BUILDER,
   ELASTIC_API_VERSION,
+  CHAT_CONVERSATIONS_INDEX,
 } from '../fixtures/constants';
 import { getConversation } from '../fixtures/converse_http';
 
@@ -161,7 +162,7 @@ apiTest.describe(
     const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
       (requests[0].body as ChatCallbackEventResponse).execution_id;
 
-    apiTest('delivers completed response to callback URL', async ({ apiClient }) => {
+    apiTest('delivers completed response to callback URL', async ({ apiClient, esClient }) => {
       const mockedLlmResponse = 'Callback LLM response';
       const mockedLlmTitle = 'Callback Conversation Title';
       await setupAgentDirectAnswer({
@@ -223,6 +224,15 @@ apiTest.describe(
       expect(conversationId.length).toBeGreaterThan(0);
 
       conversationIds.add(conversationId);
+
+      const storedConversation = await esClient.get({
+        index: CHAT_CONVERSATIONS_INDEX,
+        id: conversationId,
+      });
+      const source = storedConversation._source as { user_id?: string } | undefined;
+
+      expect(typeof source?.user_id).toBe('string');
+      expect(source?.user_id?.length).toBeGreaterThan(0);
     });
 
     apiTest(

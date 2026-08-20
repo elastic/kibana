@@ -101,6 +101,9 @@ const getApiKeyOwnerProfileUid = async ({
   }
 };
 
+/**
+ * Resolves the API key creator profile uid from the request authorization header.
+ */
 const resolveApiKeyOwnerProfileUid = async ({
   request,
   esClient,
@@ -112,6 +115,9 @@ const resolveApiKeyOwnerProfileUid = async ({
   return id ? getApiKeyOwnerProfileUid({ id, esClient }) : undefined;
 };
 
+/**
+ * Resolves a stable user id from the authenticated ES principal when request auth is incomplete.
+ */
 const resolveStableUserIdFromAuthenticate = async ({
   username,
   esClient,
@@ -162,17 +168,20 @@ export const getUserFromRequest = async ({
   const isAdmin = await isAdminFromRequest({ esClient });
 
   if (authUser?.username) {
-    const stableUserId = await toStableUserId({
+    let stableUserId = await toStableUserId({
       authUser,
       resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
     });
 
-    const fallbackStableUserId =
-      stableUserId ??
-      (await resolveStableUserIdFromAuthenticate({ username: authUser.username, esClient }));
+    if (stableUserId === undefined) {
+      stableUserId = await resolveStableUserIdFromAuthenticate({
+        username: authUser.username,
+        esClient,
+      });
+    }
 
     return {
-      id: fallbackStableUserId,
+      id: stableUserId,
       username: authUser.username,
       isAdmin,
     };
