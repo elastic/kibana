@@ -112,12 +112,16 @@ async function distributeScoutTestsOnLanes() {
       loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
     });
 
+  const bk = new BuildkiteClient();
+
   if (steps.length === 0) {
-    // Stop early. No test steps to upload. ✨
+    bk.setAnnotation(
+      'scout-not-dispatched',
+      'warning',
+      'No Scout test steps were dispatched for this build.'
+    );
     return;
   }
-
-  const bk = new BuildkiteClient();
 
   const lanesGroupStepDependencies: string[] = [];
 
@@ -151,6 +155,7 @@ async function distributeScoutTestsOnLanes() {
       steps,
     },
   ]);
+  bk.setMetadata('test-steps-dispatched:scout', 'true');
 }
 
 export const scoutTestDistributionStrategies: Record<string, () => Promise<void>> = {
