@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerFrameHeader } from './header';
+export {
+  ProjectPickerFrameHeader,
+  type HeaderContextMenuItemProps,
+  ProjectPickerFrameHeaderActions,
+} from './header';
