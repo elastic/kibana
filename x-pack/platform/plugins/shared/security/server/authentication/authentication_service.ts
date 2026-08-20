@@ -238,7 +238,9 @@ export class AuthenticationService {
           t.startsWith(ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX)
         );
         const resourceMetadataUrl = resourceMetadataPathTag
-          ? `${baseUrl}${resourceMetadataPathTag.slice(ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX.length)}`
+          ? `${baseUrl}${resourceMetadataPathTag.slice(
+              ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX.length
+            )}`
           : `${baseUrl}/.well-known/oauth-protected-resource`;
 
         return toolkit.render({
