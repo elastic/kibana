@@ -79,10 +79,81 @@ const getToolsFromAgentSource = (source: AgentProperties): ToolSelection[] => {
   return source.configuration?.tools ?? source.config?.tools ?? [];
 };
 
+interface MigrationClient<TDoc> {
+  search: (req: StorageClientSearchRequest) => Promise<{
+    hits: { hits: Array<{ _id: string; _source?: TDoc; sort?: SortResults }> };
+  }>;
+  bulk: (req: {
+    operations: Array<{ index: { _id: string; document: TDoc } }>;
+    refresh: 'wait_for';
+    throwOnFail: boolean;
+  }) => Promise<unknown>;
+}
+
+/**
+ * Paginates through all documents in a storage index via search_after and bulk-indexes
+ * any that need updating. The `processHits` callback receives one page of hits and returns
+ * the bulk operations to apply (empty array = nothing to update for that page).
+ */
+const paginatedMigration = async <TDoc>({
+  client,
+  label,
+  logger,
+  processHits,
+}: {
+  client: MigrationClient<TDoc>;
+  label: string;
+  logger: Logger;
+  processHits: (
+    hits: Array<{ _id: string; _source?: TDoc }>,
+    now: Date
+  ) => Array<{ index: { _id: string; document: TDoc } }>;
+}): Promise<void> => {
+  const now = new Date();
+  let totalUpdated = 0;
+  let searchAfter: SortResults | undefined;
+
+  do {
+    const searchRequest: StorageClientSearchRequest = {
+      track_total_hits: false,
+      size: PAGE_SIZE,
+      sort: [{ _id: 'asc' }],
+      ...(searchAfter && { search_after: searchAfter }),
+    };
+    const response = await client.search(searchRequest);
+
+    const hits = response.hits.hits;
+    if (hits.length === 0) break;
+
+    const bulkOperations = processHits(hits, now);
+
+    if (bulkOperations.length > 0) {
+      try {
+        await client.bulk({
+          operations: bulkOperations,
+          refresh: 'wait_for',
+          throwOnFail: true,
+        });
+        totalUpdated += bulkOperations.length;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error(`${label} tool ID migration: bulk update failed. ${message}`);
+      }
+    }
+
+    searchAfter = hits[hits.length - 1].sort as SortResults | undefined;
+
+    if (hits.length < PAGE_SIZE) break;
+  } while (true);
+
+  if (totalUpdated > 0) {
+    logger.info(`${label} tool ID migration: updated ${totalUpdated} document(s).`);
+  }
+};
+
 /**
  * Scans all agents in .chat-agents and replaces old tool IDs with new ones.
  * Operates across all spaces (no space filter). Fire-and-forget safe.
- * Uses search_after pagination so every agent is visited regardless of total count.
  */
 export const migrateAgentToolIds = async ({
   storage,
@@ -92,80 +163,47 @@ export const migrateAgentToolIds = async ({
   logger: Logger;
 }): Promise<void> => {
   const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
-  const client = storage.getClient();
-  const now = new Date();
-  let totalUpdated = 0;
-  let searchAfter: SortResults | undefined;
 
-  do {
-    const searchRequest: StorageClientSearchRequest = {
-      track_total_hits: false,
-      size: PAGE_SIZE,
-      sort: [{ _id: 'asc' }],
-      ...(searchAfter && { search_after: searchAfter }),
-    };
-    const response = await client.search(searchRequest);
+  await paginatedMigration<AgentProperties>({
+    client: storage.getClient() as MigrationClient<AgentProperties>,
+    label: 'Agent',
+    logger,
+    processHits: (hits, now) => {
+      const ops: Array<{ index: { _id: string; document: AgentProperties } }> = [];
+      for (const hit of hits) {
+        const source = hit._source;
+        if (!source) continue;
 
-    const hits = response.hits.hits;
-    if (hits.length === 0) break;
+        const currentTools = getToolsFromAgentSource(source);
+        if (!currentTools.some((sel) => (sel.tool_ids ?? []).some((id) => oldIdSet.has(id)))) {
+          continue;
+        }
 
-    const bulkOperations: Array<{ index: { _id: string; document: AgentProperties } }> = [];
+        let newTools = currentTools;
+        for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
+          newTools = replaceToolIdsInToolSelection(newTools, oldId, newIds);
+        }
 
-    for (const hit of hits) {
-      const source = hit._source;
-      if (!source) continue;
-
-      const currentTools = getToolsFromAgentSource(source);
-      const hasOldIds = currentTools.some((sel) =>
-        (sel.tool_ids ?? []).some((id) => oldIdSet.has(id))
-      );
-      if (!hasOldIds) continue;
-
-      let newTools = currentTools;
-      for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
-        newTools = replaceToolIdsInToolSelection(newTools, oldId, newIds);
-      }
-
-      const updated = updateRequestToEs({
-        agentId: source.id ?? hit._id,
-        currentProps: source,
-        update: { configuration: { tools: newTools } },
-        updateDate: now,
-      });
-      bulkOperations.push({
-        index: { _id: String(hit._id), document: updated },
-      });
-    }
-
-    if (bulkOperations.length > 0) {
-      try {
-        await client.bulk({
-          operations: bulkOperations,
-          refresh: 'wait_for',
-          throwOnFail: true,
+        ops.push({
+          index: {
+            _id: String(hit._id),
+            document: updateRequestToEs({
+              agentId: source.id ?? hit._id,
+              currentProps: source,
+              update: { configuration: { tools: newTools } },
+              updateDate: now,
+            }),
+          },
         });
-        totalUpdated += bulkOperations.length;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(`Agent tool ID migration: bulk update failed. ${message}`);
       }
-    }
-
-    const lastHit = hits[hits.length - 1];
-    searchAfter = lastHit.sort as SortResults | undefined;
-
-    if (hits.length < PAGE_SIZE) break;
-  } while (true);
-
-  if (totalUpdated > 0) {
-    logger.info(`Agent tool ID migration: updated ${totalUpdated} agent(s).`);
-  }
+      return ops;
+    },
+  });
 };
 
 /**
  * Scans all skills in .kibana_ai_infra-skills and replaces old tool IDs with new ones.
  * Operates across all spaces (no space filter). Fire-and-forget safe.
- * Uses search_after pagination so every skill is visited regardless of total count.
  */
 export const migrateSkillToolIds = async ({
   storage,
@@ -175,71 +213,35 @@ export const migrateSkillToolIds = async ({
   logger: Logger;
 }): Promise<void> => {
   const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
-  const client = storage.getClient();
-  const now = new Date();
-  let totalUpdated = 0;
-  let searchAfter: SortResults | undefined;
 
-  do {
-    const searchRequest: StorageClientSearchRequest = {
-      track_total_hits: false,
-      size: PAGE_SIZE,
-      sort: [{ _id: 'asc' }],
-      ...(searchAfter && { search_after: searchAfter }),
-    };
-    const response = await client.search(searchRequest);
+  await paginatedMigration<SkillProperties>({
+    client: storage.getClient() as MigrationClient<SkillProperties>,
+    label: 'Skill',
+    logger,
+    processHits: (hits, now) => {
+      const ops: Array<{ index: { _id: string; document: SkillProperties } }> = [];
+      for (const hit of hits) {
+        const source = hit._source;
+        if (!source) continue;
 
-    const hits = response.hits.hits;
-    if (hits.length === 0) break;
+        const currentToolIds = source.tool_ids ?? [];
+        if (!currentToolIds.some((id) => oldIdSet.has(id))) continue;
 
-    const bulkOperations: Array<{ index: { _id: string; document: SkillProperties } }> = [];
+        let newToolIds = currentToolIds;
+        for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
+          newToolIds = replaceToolIdsInArray(newToolIds, oldId, newIds);
+        }
 
-    for (const hit of hits) {
-      const source = hit._source;
-      if (!source) continue;
-
-      const currentToolIds = source.tool_ids ?? [];
-      const hasOldIds = currentToolIds.some((id) => oldIdSet.has(id));
-      if (!hasOldIds) continue;
-
-      let newToolIds = currentToolIds;
-      for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
-        newToolIds = replaceToolIdsInArray(newToolIds, oldId, newIds);
-      }
-
-      const updated: SkillProperties = {
-        ...source,
-        tool_ids: newToolIds,
-        updated_at: now.toISOString(),
-      };
-      bulkOperations.push({
-        index: { _id: String(hit._id), document: updated },
-      });
-    }
-
-    if (bulkOperations.length > 0) {
-      try {
-        await client.bulk({
-          operations: bulkOperations,
-          refresh: 'wait_for',
-          throwOnFail: true,
+        ops.push({
+          index: {
+            _id: String(hit._id),
+            document: { ...source, tool_ids: newToolIds, updated_at: now.toISOString() },
+          },
         });
-        totalUpdated += bulkOperations.length;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(`Skill tool ID migration: bulk update failed. ${message}`);
       }
-    }
-
-    const lastHit = hits[hits.length - 1];
-    searchAfter = lastHit.sort as SortResults | undefined;
-
-    if (hits.length < PAGE_SIZE) break;
-  } while (true);
-
-  if (totalUpdated > 0) {
-    logger.info(`Skill tool ID migration: updated ${totalUpdated} skill(s).`);
-  }
+      return ops;
+    },
+  });
 };
 
 /**
