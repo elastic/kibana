@@ -88,20 +88,23 @@ export const getUpdateKiStepDefinition = ({
           },
         };
       } catch (error) {
-        const errorType = errorTypeForTelemetry(error);
-        analyticsService.reportKiWrite({
-          action: 'update',
-          aiIndexId,
-          managed,
-          outcome: 'failure',
-          errorType,
-        });
-        logger.debug(
-          `KI update failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+        // A cancelled run is not a write failure; skip reporting.
+        if (!context.abortSignal.aborted) {
+          const errorType = errorTypeForTelemetry(error);
+          analyticsService.reportKiWrite({
+            action: 'update',
             aiIndexId,
-            managed
-          )}': ${errorType}`
-        );
+            managed,
+            outcome: 'failure',
+            errorType,
+          });
+          logger.debug(
+            `KI update failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+              aiIndexId,
+              managed
+            )}': ${errorType}`
+          );
+        }
         throw error;
       }
     },

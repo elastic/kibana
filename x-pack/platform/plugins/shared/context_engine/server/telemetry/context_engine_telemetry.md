@@ -28,6 +28,8 @@ All reporting is gated on the `contextEngine:enabled` advanced setting. KI workf
 
 The AI index HTTP routes are not instrumented. Their ECS audit events in `server/routes/audit_events.ts` remain the record of AI index reads and writes.
 
+A cancelled workflow run (aborted signal) does not report a failure event; cancellations are not write failures.
+
 ## Event fields
 
 | Field | Description |

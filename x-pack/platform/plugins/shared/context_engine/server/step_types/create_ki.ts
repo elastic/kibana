@@ -67,20 +67,23 @@ export const getCreateKiStepDefinition = ({
         );
         return { output: { id: response._id } };
       } catch (error) {
-        const errorType = errorTypeForTelemetry(error);
-        analyticsService.reportKiWrite({
-          action: 'create',
-          aiIndexId,
-          managed,
-          outcome: 'failure',
-          errorType,
-        });
-        logger.debug(
-          `KI create failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+        // A cancelled run is not a write failure; skip reporting.
+        if (!context.abortSignal.aborted) {
+          const errorType = errorTypeForTelemetry(error);
+          analyticsService.reportKiWrite({
+            action: 'create',
             aiIndexId,
-            managed
-          )}': ${errorType}`
-        );
+            managed,
+            outcome: 'failure',
+            errorType,
+          });
+          logger.debug(
+            `KI create failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+              aiIndexId,
+              managed
+            )}': ${errorType}`
+          );
+        }
         throw error;
       }
     },

@@ -303,6 +303,33 @@ describe('getCreateKiStepDefinition', () => {
     });
   });
 
+  it('does not report a failure event when the run was cancelled', async () => {
+    const abortController = new AbortController();
+    const esClient = {
+      index: jest.fn().mockImplementation(() => {
+        abortController.abort();
+        return Promise.reject(new Error('Request aborted'));
+      }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput },
+      esClient,
+      abortController,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...telemetry,
+    });
+    await expect(handler(context)).rejects.toThrow('Request aborted');
+
+    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
+  });
+
   it('propagates unexpected AI index service errors unwrapped', async () => {
     const cause = new Error('ES connection refused');
     const context = createMockStepContext({

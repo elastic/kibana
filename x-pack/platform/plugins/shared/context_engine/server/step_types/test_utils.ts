@@ -15,11 +15,12 @@ import type { ContextEngineAnalyticsService } from '../telemetry';
 export const createMockStepContext = ({
   input,
   esClient,
+  abortController = new AbortController(),
 }: {
   input: unknown;
   esClient: unknown;
+  abortController?: AbortController;
 }): StepHandlerContext => {
-  const abortController = new AbortController();
   return {
     input,
     rawInput: {},

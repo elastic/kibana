@@ -82,20 +82,23 @@ export const getDeleteKiStepDefinition = ({
         );
         return { output: { id: kiId } };
       } catch (error) {
-        const errorType = errorTypeForTelemetry(error);
-        analyticsService.reportKiWrite({
-          action: 'delete',
-          aiIndexId,
-          managed,
-          outcome: 'failure',
-          errorType,
-        });
-        logger.debug(
-          `KI delete failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+        // A cancelled run is not a write failure; skip reporting.
+        if (!context.abortSignal.aborted) {
+          const errorType = errorTypeForTelemetry(error);
+          analyticsService.reportKiWrite({
+            action: 'delete',
             aiIndexId,
-            managed
-          )}': ${errorType}`
-        );
+            managed,
+            outcome: 'failure',
+            errorType,
+          });
+          logger.debug(
+            `KI delete failed in AI index '${analyticsService.aiIndexIdForTelemetry(
+              aiIndexId,
+              managed
+            )}': ${errorType}`
+          );
+        }
         throw error;
       }
     },
