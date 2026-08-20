@@ -62,6 +62,9 @@ const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects
         const separatorIndex = clause.indexOf(':');
         const tag = clause.slice(0, separatorIndex) as keyof CPSProject;
         const value = clause.slice(separatorIndex + 1);
+        if (value === '*') {
+          return project[tag] != null && project[tag] !== '';
+        }
         return project[tag] === value;
       })
     );
@@ -184,7 +187,7 @@ describe('ProjectPickerFlyoutContent', () => {
 
     await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onApplyChanges).toHaveBeenCalledWith('_id:* AND NOT _id:linked1');
+    expect(onApplyChanges).toHaveBeenCalledWith('_alias:* AND (_id:* AND NOT _id:linked1)');
   });
 
   it('applies selected projects as explicit ids in snapshot mode', async () => {

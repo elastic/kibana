@@ -549,11 +549,9 @@ describe('ManageSpacePage', () => {
 
     await updateSolutionView('oblt');
 
-    // deselect linked project
+    // deselect origin project
     await userEvent.click(
-      screen.getByTestId(
-        `projectPickerListItemSwitch-${mockProjectRoutingFetchResult.linkedProjects[0]._id}`
-      )
+      screen.getByTestId(`projectPickerListItemSwitch-${mockProjectRoutingFetchResult.origin._id}`)
     );
 
     await userEvent.click(screen.getByTestId('save-space-button'));
@@ -568,7 +566,7 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
-      projectRouting: '_id:* AND NOT _id:badce1234567890',
+      projectRouting: `_alias:* AND (_id:* AND NOT _id:${mockProjectRoutingFetchResult.origin._id})`,
     });
   }, 10000);
 

@@ -193,15 +193,15 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      await user.click(await getProjectSwitchButton(linkedProject._id));
+      await user.click(await getProjectSwitchButton(originProject._id));
 
       expect(mockOnChange).toHaveBeenLastCalledWith({
         id: 'test-space',
         name: 'Test Space',
-        projectRouting: '_id:* AND NOT _id:badce1234567890',
+        projectRouting: `_alias:* AND (_id:* AND NOT _id:${originProject._id})`,
       });
 
-      await user.click(await getProjectSwitchButton(linkedProject._id));
+      await user.click(await getProjectSwitchButton(originProject._id));
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();

@@ -114,11 +114,8 @@ test.describe(
         await pageObjects.spaces.saveSpace();
         await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-        // The new picker doesn't necessarily persist the legacy `PROJECT_ROUTING.ALL`
-        // (`_alias:*`) string verbatim; the "section is now hidden" step below is the real
-        // assertion that resetting to all-projects was recognized as non-custom routing.
         const space = await apiServices.spaces.get(spaceId);
-        expect(space.projectRouting).not.toBe(PROJECT_ROUTING.ORIGIN);
+        expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
       });
 
       await test.step('reload edit page and confirm the section is now hidden', async () => {
