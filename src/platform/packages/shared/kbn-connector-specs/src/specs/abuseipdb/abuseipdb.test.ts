@@ -65,6 +65,12 @@ describe('AbuseIPDBConnector', () => {
     });
 
     it('should accept IPv6 addresses', async () => {
+      expect(
+        AbuseIPDBConnector.actions.checkIp.input.safeParse({
+          ipAddress: '2001:4860:4860::8888',
+        }).success
+      ).toBe(true);
+
       mockClient.get.mockResolvedValue({
         data: {
           data: {
@@ -179,6 +185,15 @@ describe('AbuseIPDBConnector', () => {
         })
       ).toThrow();
     });
+
+    it('should accept IPv6 addresses at the schema boundary', () => {
+      expect(
+        AbuseIPDBConnector.actions.reportIp.input.safeParse({
+          ip: '2001:4860:4860::8888',
+          categories: [18],
+        }).success
+      ).toBe(true);
+    });
   });
 
   describe('getIpInfo action', () => {
@@ -225,6 +240,14 @@ describe('AbuseIPDBConnector', () => {
         totalReports: 0,
         lastReportedAt: null,
       });
+    });
+
+    it('should accept IPv6 addresses at the schema boundary', () => {
+      expect(
+        AbuseIPDBConnector.actions.getIpInfo.input.safeParse({
+          ipAddress: '2001:4860:4860::8888',
+        }).success
+      ).toBe(true);
     });
   });
 

@@ -27,26 +27,30 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The AbuseIPDB connector has the following actions:
 
 Check IP
-:   Get details about an IP address including abuse confidence score, total reports, and last reported date. Unknown or clean addresses return score `0` as data (the step does not fail).  
-    - **IP Address** (required): IPv4 or IPv6 address to check.  
-    - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 90).
+:   Get details about an IP address including abuse confidence score and total reports. Unknown or clean addresses return score `0` as data (the step does not fail).  
+    - **IP Address** (required): IPv4 address to check.  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` IPv6 addresses are also accepted.  
+    - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 90).  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` Output includes the last reported date when available.
 
 Report IP
 :   Report an IP address to AbuseIPDB.  
-    - **IP** (required): IPv4 or IPv6 address to report.  
+    - **IP** (required): IPv4 address to report.  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` IPv6 addresses are also accepted.  
     - **Categories** (required): Array of abuse category IDs (1-30 entries).  
     - **Comment** (optional): Additional details about the observed activity (max 1024 characters).  
 
 Get IP Info
 :   Get detailed (verbose) information about an IP address including geolocation, allowlist status (`isWhitelisted`), and domain.  
-    - **IP Address** (required): IPv4 or IPv6 address to look up.  
+    - **IP Address** (required): IPv4 address to look up.  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` IPv6 addresses are also accepted.  
 
 Bulk Check
 :   Check multiple IPs in a network range using CIDR notation.  
     - **Network** (required): Network in CIDR notation.  
     - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 30).  
 
-Get Blacklist
+Get Blacklist {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Fetch the most-reported IPs from the AbuseIPDB `/blacklist` endpoint for blocklist generation or enrichment. Prefer a high confidence minimum (75-100) for deny-list use.  
     - **Confidence Minimum** (optional): Minimum abuse confidence score (25-100, default 100).  
     - **Limit** (optional): Maximum number of IPs to return (1-10000, default 10). Defaults low so workflow execution outputs stay small; raise explicitly for larger feeds. AbuseIPDB may truncate further based on subscription tier.  
