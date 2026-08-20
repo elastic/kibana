@@ -1,5 +1,5 @@
 {
-  "sha1": "7f7c88c543f781067ada4683cb40dd8777ce5017",
+  "sha1": "dd9ff587667a91a769754d26157d39494517d94d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -25,6 +25,186 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "52e4fc2b94ddcef-218624042fcb827",
+      "title": "Discover — adhoc data views (filtering and context navigation) supports query and filtering on ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
+        "line": 25,
+        "column": 25
+      }
+    },
+    {
+      "id": "52e4fc2b94ddcef-0e0c64bca40c173",
+      "title": "Discover — adhoc data views (filtering and context navigation) preserves runtime field column in saved search after navigating through context view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
+        "line": 68,
+        "column": 76
+      }
+    },
+    {
+      "id": "52e4fc2b94ddcef-e3d567b4e7c5385",
+      "title": "Discover — adhoc data views (filtering and context navigation) shows toast notifications for invalid filter references after data view update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views_filtering.spec.ts",
+        "line": 129,
+        "column": 58
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-6887902c498aa19",
+      "title": "Discover — adhoc data views adding a runtime field to an ad hoc data view changes the data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 21,
+        "column": 23
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-186b09b91081dde",
+      "title": "Discover — adhoc data views navigates to surrounding docs view and back, preserving the ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 43,
+        "column": 32
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-9578b8099abb25f",
+      "title": "Discover — adhoc data views navigates to single doc view and back, preserving the ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 88,
+        "column": 30
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-f777cab5329cbe5",
+      "title": "Discover — adhoc data views saving preserves the data view ID but saving as copy generates a new data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 130,
+        "column": 27
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-cf18d9511b65110",
+      "title": "Discover — adhoc data views search results differ between original and updated runtime field definitions on dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 168,
+        "column": 13
+      }
+    },
+    {
+      "id": "fec911b06c6ece5-5a46192fddb9883",
+      "title": "Discover — adhoc data views editing a runtime field via the column menu changes the data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
+        "line": 229,
+        "column": 18
       }
     },
     {
@@ -93,16 +273,16 @@
       }
     },
     {
-      "id": "4710c4af03427d2-9e7e3b25088cb7c",
-      "title": "Discover cascade layout - data fetching keeps an expanded row fetch active when switching tabs quickly",
+      "id": "cfc2dcf8d973ae8-2b4166ef777e0d2",
+      "title": "Discover cascade layout - row data fetching keeps a row fetch alive when switching away from its tab while it is in flight",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 107,
-        "column": 19
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_row_fetching.spec.ts",
+        "line": 37,
+        "column": 66
       }
     },
     {
@@ -114,7 +294,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_interactions.spec.ts",
-        "line": 36,
+        "line": 35,
         "column": 66
       }
     },
@@ -142,6 +322,58 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
         "line": 55,
         "column": 13
+      }
+    },
+    {
+      "id": "20a367a0558ac1a-264b247fec447c7",
+      "title": "Discover — encoded URL params in context page navigates correctly to surrounding documents with encoded data view and doc IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/context_encoded_url_params.spec.ts",
+        "line": 42,
+        "column": 68
+      }
+    },
+    {
+      "id": "91e8011459799dd-e4e876c3687b1c5",
+      "title": "Discover — data view creation creates an ad hoc data view from the search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 87,
+        "column": 73
+      }
+    },
+    {
+      "id": "91e8011459799dd-f16b2132f27d39e",
+      "title": "Discover — data view creation creates a saved data view from the search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 91,
+        "column": 28
+      }
+    },
+    {
+      "id": "14a43e9326e9a09-70038015c6f11c0",
+      "title": "Discover — data view flyout edits data view index pattern and time field from search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 80,
+        "column": 7
       }
     },
     {
@@ -236,6 +468,19 @@
       }
     },
     {
+      "id": "56feab8327fe396-66ebdde963487a2",
+      "title": "Discover — nested date as time field shows an error callout when the time field is a nested date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/date_nested.spec.ts",
+        "line": 26,
+        "column": 66
+      }
+    },
+    {
       "id": "478c3baf483d35a-f5bf8287919c203",
       "title": "Discover default columns should render default columns",
       "expectedStatus": "passed",
@@ -311,6 +556,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_route.spec.ts",
         "line": 44,
         "column": 31
+      }
+    },
+    {
+      "id": "6a93bc07c518793-22b42454d304fb7",
+      "title": "Discover — document comparison (data view mode) allows comparing results and toggling comparison settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/helpers/document_comparison_shared.ts",
+        "line": 41,
+        "column": 68
+      }
+    },
+    {
+      "id": "6a93bc07c518793-8e54d7aeddeef60",
+      "title": "Discover — document comparison (ES|QL mode) allows comparing results and toggling comparison settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/helpers/document_comparison_shared.ts",
+        "line": 41,
+        "column": 68
       }
     },
     {
@@ -471,8 +742,8 @@
       }
     },
     {
-      "id": "bd30a08bd26a48f-c5c5a049bc79180",
-      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "id": "bd30a08bd26a48f-7dd6b07417dee5c",
+      "title": "Discover field data shows top-level object keys and supports source-column URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -494,6 +765,58 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
         "line": 73,
         "column": 12
+      }
+    },
+    {
+      "id": "e86b98d7378e82e-72c2ea2c5ad0791",
+      "title": "Discover — field list mapped fields without values does not show mapped fields that have no values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_list_mapped_only_fields.spec.ts",
+        "line": 28,
+        "column": 52
+      }
+    },
+    {
+      "id": "e86b98d7378e82e-e75dfecd17eb42a",
+      "title": "Discover — field list mapped fields without values does not show a mapped field that has no values after re-query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_list_mapped_only_fields.spec.ts",
+        "line": 42,
+        "column": 32
+      }
+    },
+    {
+      "id": "7e1b358f46b3d6c-26704489fe5d0db",
+      "title": "Discover — field list new fields in background handling adds newly ingested fields to the available fields section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_list_new_fields.spec.ts",
+        "line": 28,
+        "column": 52
+      }
+    },
+    {
+      "id": "7e1b358f46b3d6c-87bfd466d47b37a",
+      "title": "Discover — field list new fields in background handling detects new field after indexing a document with it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_list_new_fields.spec.ts",
+        "line": 42,
+        "column": 32
       }
     },
     {
@@ -796,6 +1119,71 @@
       }
     },
     {
+      "id": "f501e176fe8675e-c89219305126537",
+      "title": "Discover panels toggle - data view mode panels can be toggled in a time-based data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_data_view.spec.ts",
+        "line": 35,
+        "column": 25
+      }
+    },
+    {
+      "id": "665d2b2cb718277-7417e33d6ca8583",
+      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with a histogram chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
+        "line": 41,
+        "column": 25
+      }
+    },
+    {
+      "id": "665d2b2cb718277-11a2688beae6a2d",
+      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with an aggs chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
+        "line": 88,
+        "column": 11
+      }
+    },
+    {
+      "id": "368c4713a048546-06d11166ed91f94",
+      "title": "Discover panels toggle - no time field only the sidebar can be toggled in a data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
+        "line": 40,
+        "column": 25
+      }
+    },
+    {
+      "id": "368c4713a048546-7bcaa5245c3fb17",
+      "title": "Discover panels toggle - no time field only the sidebar can be toggled in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
+        "line": 56,
+        "column": 9
+      }
+    },
+    {
       "id": "b9d2cfb478c121f-3b92bd636ef1c43",
       "title": "preserve url goes back to last opened url",
       "expectedStatus": "passed",
@@ -850,8 +1238,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 41,
-        "column": 20
+        "line": 52,
+        "column": 27
       }
     },
     {
@@ -870,8 +1258,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 54,
-        "column": 22
+        "line": 56,
+        "column": 7
       }
     },
     {
@@ -890,8 +1278,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 60,
-        "column": 17
+        "line": 64,
+        "column": 22
       }
     },
     {
@@ -910,8 +1298,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 78,
+        "column": 27
       }
     },
     {
@@ -930,8 +1318,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 93,
+        "column": 27
       }
     },
     {
@@ -950,8 +1338,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 88,
-        "column": 29
+        "line": 100,
+        "column": 31
       }
     },
     {
@@ -970,8 +1358,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 102,
-        "column": 29
+        "line": 118,
+        "column": 31
       }
     },
     {
@@ -990,8 +1378,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 139,
-        "column": 27
+        "line": 160,
+        "column": 43
       }
     },
     {
@@ -1010,8 +1398,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 149,
-        "column": 29
+        "line": 174,
+        "column": 27
       }
     },
     {
@@ -1030,8 +1418,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 161,
-        "column": 16
+        "line": 192,
+        "column": 19
       }
     },
     {
@@ -1050,8 +1438,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 173,
-        "column": 29
+        "line": 205,
+        "column": 10
       }
     },
     {
@@ -1070,8 +1458,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 182,
-        "column": 29
+        "line": 216,
+        "column": 31
       }
     },
     {
@@ -1090,8 +1478,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 188,
-        "column": 13
+        "line": 225,
+        "column": 23
       }
     },
     {
@@ -1103,8 +1491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 47,
-        "column": 27
+        "line": 53,
+        "column": 80
       }
     },
     {
@@ -1116,8 +1504,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 56,
-        "column": 51
+        "line": 59,
+        "column": 15
       }
     },
     {
@@ -1129,8 +1517,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 63,
-        "column": 33
+        "line": 65,
+        "column": 7
       }
     },
     {
@@ -1142,8 +1530,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 75,
-        "column": 33
+        "line": 80,
+        "column": 27
       }
     },
     {
@@ -1155,8 +1543,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 88,
-        "column": 9
+        "line": 94,
+        "column": 27
       }
     },
     {
@@ -1168,8 +1556,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 97,
-        "column": 17
+        "line": 101,
+        "column": 29
       }
     },
     {
@@ -1194,8 +1582,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 24,
-        "column": 29
+        "line": 27,
+        "column": 49
       }
     },
     {
@@ -1207,8 +1595,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 34,
-        "column": 18
+        "line": 37,
+        "column": 63
       }
     },
     {
@@ -1220,8 +1608,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 44,
-        "column": 20
+        "line": 48,
+        "column": 28
       }
     },
     {
@@ -1233,8 +1621,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 52,
-        "column": 86
+        "line": 55,
+        "column": 29
       }
     },
     {
@@ -1337,7 +1725,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 64
       }
     },
@@ -1350,7 +1738,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 51
       }
     },
@@ -1363,7 +1751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 24
       }
     },
@@ -1376,8 +1764,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 60,
+        "line": 59,
         "column": 41
+      }
+    },
+    {
+      "id": "3085731bee89644-4958fe723a12a8b",
+      "title": "Discover shared links should round-trip selected columns via share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 74,
+        "column": 50
       }
     },
     {
@@ -1500,7 +1901,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 60,
+        "line": 65,
         "column": 5
       }
     },
@@ -1520,7 +1921,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 69,
+        "line": 74,
         "column": 20
       }
     },
@@ -1540,7 +1941,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 79,
+        "line": 84,
         "column": 25
       }
     },
@@ -1560,8 +1961,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 92,
-        "column": 32
+        "line": 97,
+        "column": 25
       }
     },
     {
@@ -1580,8 +1981,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 98,
-        "column": 25
+        "line": 101,
+        "column": 20
       }
     },
     {
@@ -1600,8 +2001,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 144,
-        "column": 20
+        "line": 151,
+        "column": 22
       }
     },
     {
@@ -1620,8 +2021,60 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 191,
-        "column": 29
+        "line": 200,
+        "column": 32
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-2c572bea1c06da2",
+      "title": "Discover unsaved changes modal on leaving the app shows the modal when the session is saved and has unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-420c02780ee6674",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is saved and has no unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-fa5beec73fad908",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is not saved and has unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 35,
+        "column": 27
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-4a2bbbc6c6d38bd",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is not saved and has no unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 45,
+        "column": 6
       }
     },
     {
@@ -1705,8 +2158,8 @@
       }
     },
     {
-      "id": "285c753247d9434-a83f4d0b439c1d5",
-      "title": "Discover view mode toggle should show Documents tab",
+      "id": "285c753247d9434-cf9ab630580432b",
+      "title": "Discover view mode toggle should show Documents selected",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1727,7 +2180,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
         "line": 24,
-        "column": 31
+        "column": 56
       }
     },
     {
@@ -1739,7 +2192,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 18
       }
     },
@@ -1752,7 +2205,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 23
       }
     }

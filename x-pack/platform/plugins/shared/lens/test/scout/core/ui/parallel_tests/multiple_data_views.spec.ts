@@ -74,7 +74,9 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
       const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
-        await openEmptyLensEditor(pageObjects);
+        await openEmptyLensEditor(pageObjects, {
+          timeRange: testData.MULTIPLE_DATA_VIEWS_TIME_RANGE,
+        });
 
         // defaultIndex already points at the long-window DV; wait for it to resolve instead of
         // opening the switcher (search + `*` titles races under parallel CI load).
@@ -86,7 +88,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
 
         // Flights layer — switch data panel first so the new layer inherits flights,
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
-        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
+        await lens.dragDrop.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
         await lens.layers.activateLayerTab(1);
         await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });

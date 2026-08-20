@@ -29,6 +29,31 @@ components:
         How curated the dataset is, from raw captures through cleaned data to
         "golden" reference datasets. Absent when a dataset has no maturity set.
 
+    SpaceIds:
+      type: array
+      minItems: 1
+      maxItems: 100
+      items:
+        type: string
+        minLength: 1
+        maxLength: 256
+      description: >-
+        Spaces the dataset is assigned to. Each id must name an existing space
+        the caller can manage evaluations in; wildcards are not accepted, so
+        every space is listed. Defaults to the space the request was made in,
+        taken from the URL's `/s/` prefix and the default space without one.
+        Absent in a response means the default space.
+
+    RedactedSpaceIds:
+      type: array
+      maxItems: 100
+      items:
+        type: string
+        maxLength: 256
+      description: >-
+        Spaces the dataset is assigned to, with each id the caller cannot access
+        replaced by `?`, so the entries still count the spaces.
+
     DatasetFacetBucket:
       type: object
       properties:
@@ -150,6 +175,10 @@ components:
           type: object
           additionalProperties: true
           nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
         dataset:
           type: object
           properties:
@@ -213,9 +242,16 @@ components:
           nullable: true
         model:
           $ref: '#/components/schemas/Model'
+        kind:
+          type: string
+          enum:
+            - llm
+            - code
+          description: >-
+            Whether the evaluator invoked a model. Absent on documents written
+            before per-evaluator attribution was introduced.
       required:
         - name
-        - model
 
     ScoreMetadata:
       type: object
@@ -264,6 +300,11 @@ components:
           minimum: 0
           default: 0
           description: Number of unique examples evaluated in this dataset
+        evaluator_model:
+          $ref: '#/components/schemas/Model'
+          description: >-
+            Model this evaluator judged with. Absent for code evaluators, which
+            invoke no model.
         stats:
           type: object
           properties:

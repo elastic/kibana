@@ -40,6 +40,18 @@ export type DatasetMaturity = z.infer<typeof DatasetMaturity>;
 export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
 export const DatasetMaturityEnum = DatasetMaturity.enum;
 
+/**
+ * Spaces the dataset is assigned to. Each id must name an existing space the caller can manage evaluations in; wildcards are not accepted, so every space is listed. Defaults to the space the request was made in, taken from the URL's `/s/` prefix and the default space without one. Absent in a response means the default space.
+ */
+export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
+export type SpaceIds = z.infer<typeof SpaceIds>;
+
+/**
+ * Spaces the dataset is assigned to, with each id the caller cannot access replaced by `?`, so the entries still count the spaces.
+ */
+export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
+export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;
+
 export const DatasetFacetBucket = lazySchema(() =>
   z.object({
     value: z.string().max(64),
@@ -73,6 +85,7 @@ export const ExampleInfo = lazySchema(() =>
     id: z.string().max(1024),
     index: z.number().int(),
     input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     dataset: z.object({
       id: z.string().max(1024),
       name: z.string().max(256),
@@ -99,7 +112,11 @@ export const EvaluatorInfo = lazySchema(() =>
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
-    model: Model,
+    model: Model.optional(),
+    /**
+     * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
+     */
+    kind: z.enum(['llm', 'code']).optional(),
   })
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
@@ -160,6 +177,10 @@ export const EvaluatorStats = lazySchema(() =>
      * Number of unique examples evaluated in this dataset
      */
     example_count: z.number().int().min(0).optional().default(0),
+    /**
+     * Model this evaluator judged with. Absent for code evaluators, which invoke no model.
+     */
+    evaluator_model: Model.optional(),
     stats: z.object({
       mean: z.number(),
       median: z.number(),
