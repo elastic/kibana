@@ -35,7 +35,7 @@ You can test connectors when creating or editing the connector in {{kib}}. The t
 
 #### Search messages
 
-Search for messages using Gmail search syntax. Available as an agent tool.
+Search for messages using Gmail search syntax.
 
 `query`
 :   (Optional) Gmail search query using operators such as `from:`, `to:`, `subject:`, `is:unread`, `after:YYYY/MM/DD`, `newer_than:Nd`. Prefer narrow queries to keep responses small.
@@ -48,7 +48,7 @@ Search for messages using Gmail search syntax. Available as an agent tool.
 
 #### List messages
 
-List message IDs, optionally filtered by label. Available as an agent tool.
+List message IDs, optionally filtered by label.
 
 `maxResults`
 :   (Optional) Number of message IDs to return. Default 10, capped at 100.
@@ -61,7 +61,7 @@ List message IDs, optionally filtered by label. Available as an agent tool.
 
 #### Get message
 
-Retrieve a single message by ID. Available as an agent tool.
+Retrieve a single message by ID.
 
 `messageId`
 :   (Required) Gmail message ID from `searchMessages` or `listMessages`.
@@ -71,7 +71,7 @@ Retrieve a single message by ID. Available as an agent tool.
 
 #### Get attachment
 
-Retrieve an attachment by message ID and attachment ID. Call `getMessage` with `format: "full"` first to get attachment IDs from `payload.parts[].body.attachmentId`. Available as an agent tool.
+Retrieve an attachment by message ID and attachment ID. Call `getMessage` with `format: "full"` first to get attachment IDs from `payload.parts[].body.attachmentId`.
 
 `messageId`
 :   (Required) Gmail message ID.
@@ -83,25 +83,25 @@ Retrieve an attachment by message ID and attachment ID. Call `getMessage` with `
 
 #### List labels
 
-List all Gmail labels (system and user-created) with their IDs and names. Call this before `modifyLabels` to resolve a label name (for example, "Quarantine") to its ID. Available as an agent tool.
+List all Gmail labels (system and user-created) with their IDs and names. Call this before `modifyLabels` to resolve a label name (for example, "Quarantine") to its ID.
 
 #### Mark as read
 
-Remove the `UNREAD` label from a message. Reversible with `markAsUnread`. Available as an agent tool. Requires OAuth 2.0 authorization code auth.
+Remove the `UNREAD` label from a message. Reversible with `markAsUnread`. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.
 
 #### Mark as unread
 
-Add the `UNREAD` label to a message. Reversible with `markAsRead`. Available as an agent tool. Requires OAuth 2.0 authorization code auth.
+Add the `UNREAD` label to a message. Reversible with `markAsRead`. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.
 
 #### Modify labels
 
-Add or remove labels on a message. The quarantine primitive: pass the quarantine label ID in `addLabelIds` and `["INBOX"]` in `removeLabelIds` to move a message out of the inbox. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Add or remove labels on a message. The quarantine primitive: pass the quarantine label ID in `addLabelIds` and `["INBOX"]` in `removeLabelIds` to move a message out of the inbox. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.
@@ -116,14 +116,14 @@ Add or remove labels on a message. The quarantine primitive: pass the quarantine
 
 #### Trash message
 
-Move a message to Trash. Reversible with `untrashMessage` within 30 days. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Move a message to Trash. Reversible with `untrashMessage` within 30 days. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.
 
 #### Untrash message
 
-Restore a message from Trash. Rolls back a `trashMessage` call. Only effective within 30 days of trashing. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Restore a message from Trash. Rolls back a `trashMessage` call. Only effective within 30 days of trashing. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.

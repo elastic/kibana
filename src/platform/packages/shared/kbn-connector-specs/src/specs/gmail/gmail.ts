@@ -360,12 +360,11 @@ export const GmailConnector: ConnectorSpec = {
     },
 
     modifyLabels: {
-      // Deliberately not a tool: mailbox mutation, workflow steps only.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
-        'Add and/or remove Gmail labels on a message. This is the quarantine primitive: pass the quarantine label ID in addLabelIds and ["INBOX"] in removeLabelIds to move a message out of the inbox. Call listLabels first to resolve a label name to its ID. Roll back by swapping addLabelIds and removeLabelIds. At least one of addLabelIds or removeLabelIds is required. Not available with Elastic managed authentication.',
+        'Add or remove Gmail labels on a message. This is the quarantine primitive: pass the quarantine label ID in addLabelIds and ["INBOX"] in removeLabelIds to move a message out of the inbox. Call listLabels first to resolve a label name to its ID. Roll back by swapping addLabelIds and removeLabelIds. At least one of addLabelIds or removeLabelIds is required. Not available with Elastic managed authentication.',
       input: ModifyLabelsInputSchema,
       output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
@@ -409,10 +408,9 @@ export const GmailConnector: ConnectorSpec = {
     // ===== Quarantine and rollback actions =====
 
     trashMessage: {
-      // Deliberately not a tool: reversible but destructive mailbox mutation,
-      // workflow steps only. Gmail permanently purges trashed mail after 30 days.
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
-      isTool: false,
+      // Gmail permanently purges trashed mail after 30 days.
+      isTool: true,
       scope: 'destroy',
       description:
         'Move a Gmail message to Trash. Reversible with untrashMessage within 30 days; after that Gmail permanently deletes trashed mail. Distinct from a permanent delete, which is not supported by this connector. Not available with Elastic managed authentication.',
@@ -425,11 +423,8 @@ export const GmailConnector: ConnectorSpec = {
     },
 
     untrashMessage: {
-      // Deliberately not a tool: symmetric with trashMessage; marking even the
-      // rollback action workflow-only follows the Sublime Security precedent for
-      // mailbox-mutation connectors (sublime_security.ts restoreMessageGroups).
       // Requires OAuth 2.0 authorization code auth with gmail.modify scope.
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
         'Restore a Gmail message from Trash. Rolls back a trashMessage call. Only effective within 30 days — Gmail permanently removes trashed mail after that period. Not available with Elastic managed authentication.',
@@ -620,7 +615,7 @@ export const GmailConnector: ConnectorSpec = {
     '',
     '### Notes',
     '',
-    '- `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage` are workflow steps only (not agent tools) because they mutate the mailbox or send outbound mail.',
+    "- `sendMessage` and `replyMessage` are workflow steps only (not agent tools) — outbound email is irreversible, leaves the organisation, and carries the user's identity to third parties.",
     '- Permanent deletion is not supported — use `trashMessage` (reversible within 30 days).',
     '- `sendMessage` supports plain-text (`bodyType: "text"`) and HTML (`bodyType: "html"`) bodies, bare addr-spec recipients, and optional Cc/Bcc. No attachments in v1.',
     "- `replyMessage` automatically threads the reply using the original message's `Message-ID`, `References`, and `threadId`. Pass `to` explicitly to override the default reply-to address.",

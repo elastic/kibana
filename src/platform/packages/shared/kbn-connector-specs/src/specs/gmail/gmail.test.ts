@@ -181,15 +181,15 @@ describe('actions wiring', () => {
     }
   });
 
-  it('write/mutating/compose actions are NOT tools', () => {
-    for (const name of [
-      'modifyLabels',
-      'trashMessage',
-      'untrashMessage',
-      'sendMessage',
-      'replyMessage',
-    ]) {
+  it('outbound-email actions are NOT tools', () => {
+    for (const name of ['sendMessage', 'replyMessage']) {
       expect(GmailConnector.actions[name].isTool).toBeFalsy();
+    }
+  });
+
+  it('mutating mailbox actions are tools', () => {
+    for (const name of ['modifyLabels', 'trashMessage', 'untrashMessage']) {
+      expect(GmailConnector.actions[name].isTool).toBeTruthy();
     }
   });
 });
