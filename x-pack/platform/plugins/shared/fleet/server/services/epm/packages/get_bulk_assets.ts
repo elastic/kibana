@@ -6,18 +6,16 @@
  */
 
 import type {
+  SavedObject,
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   SavedObjectsType,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type {
-  AssetSOObject,
-  GetBulkAssetsResponse,
-  KibanaSavedObjectType,
-} from '../../../../common';
+import type { AssetSOObject, GetBulkAssetsResponse } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
+import { KibanaSavedObjectType } from '../../../../common/types';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
@@ -63,6 +61,46 @@ const getAppLinkForESAssetType = (type: string, id: string): string =>
   Object.values(ElasticsearchAssetType).includes(type as ElasticsearchAssetType)
     ? getKibanaLinkForESAsset(type as ElasticsearchAssetType, id)
     : '';
+
+type BulkAssetItem = GetBulkAssetsResponse['items'][number];
+
+const toAssetType = (
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  soType: SavedObjectsType | undefined,
+  appLink: string
+): BulkAssetItem => {
+  let attributes: BulkAssetItem['attributes'] = {
+    title: soType?.management?.getTitle?.(obj) ?? obj.attributes?.title ?? obj.attributes?.name,
+    description: obj.attributes?.description,
+  };
+
+  switch (obj.type) {
+    case KibanaSavedObjectType.alertingRuleTemplate: {
+      const engine =
+        obj.attributes?.engine === 'v1' || obj.attributes?.engine === 'v2'
+          ? obj.attributes.engine
+          : undefined;
+      const ruleMetadata = obj.attributes?.rule?.metadata;
+      attributes = {
+        ...attributes,
+        title: ruleMetadata?.name ?? attributes.title,
+        description: ruleMetadata?.description ?? attributes.description,
+        ...(engine && { engine }),
+      };
+      break;
+    }
+    default:
+      break;
+  }
+
+  return {
+    id: obj.id,
+    type: obj.type as BulkAssetItem['type'],
+    updatedAt: obj.updated_at,
+    attributes,
+    appLink,
+  };
+};
 
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
@@ -117,28 +155,7 @@ export async function getBulkAssets(
         appLink = getAppLinkForESAssetType(obj.type, obj.id);
       }
 
-      const title =
-        types[obj.type]?.management?.getTitle?.(obj) ??
-        obj.attributes?.title ??
-        obj.attributes?.name;
-      const engine =
-        obj.attributes?.engine === 'v1' || obj.attributes?.engine === 'v2'
-          ? obj.attributes.engine
-          : undefined;
-      const description =
-        obj.attributes?.description ?? obj.attributes?.rule?.metadata?.description;
-
-      return {
-        id: obj.id,
-        type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-        updatedAt: obj.updated_at,
-        attributes: {
-          title,
-          description,
-          ...(engine && { engine }),
-        },
-        appLink,
-      };
+      return toAssetType(obj, types[obj.type], appLink);
     });
   return res;
 }
