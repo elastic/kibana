@@ -84,16 +84,18 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     await expect(fleetHome.getFleetServerMissingPrivilegesPrompt()).toBeVisible();
   });
 
-  test('Integrations are visible and can be added', async ({ browserAuth, pageObjects }) => {
+  test('Integrations are visible and can be added', async ({
+    browserAuth,
+    pageObjects,
+    apiServices,
+  }) => {
     await browserAuth.loginAsPrivilegedUser();
     const { integrationHome } = pageObjects;
 
-    await integrationHome.navigateTo();
-    await integrationHome.waitForPageToLoad();
-
-    // Scroll to and click the Apache integration
-    await integrationHome.scrollToIntegration('apache');
-    await integrationHome.clickIntegrationCard('apache');
+    // Navigate straight to the Apache detail page; browsing the full registry catalog is
+    // nondeterministic on Cloud (card may be absent or the list slow to render).
+    const { data } = await apiServices.fleet.integration.getPackage('apache');
+    await integrationHome.navigateToDetailPage(`apache-${data.item.version}`);
 
     // Verify the Add Integration button is NOT disabled (enabled)
     await expect(integrationHome.getAddIntegrationPolicyButton()).toBeEnabled();
