@@ -264,7 +264,8 @@ export const taskDefinitionSchema = schema.object(
 
     /**
      * Used to group tasks for metrics calculated within task_manager.
-     * If value is not set, metrics will be ignored for the specific task type
+     * If value is defined, metrics will be included in the alerting/actions grouping metrics.
+     * If not set, metrics will only be calculated for the specific task type.
      */
     taskTypeGroup: schema.maybe(
       schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
