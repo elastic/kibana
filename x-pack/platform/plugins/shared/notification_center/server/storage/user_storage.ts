@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
+import { notificationIdSchema } from '../../common/notification_schema';
 
 /**
  * Register the user storage keys needed for Notification Center.
@@ -18,10 +19,9 @@ import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
  */
 export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
-/** Per-id read overrides keyed by `notification_id`; each entry records the read
- * direction and when it was set, deviating from the `readAllBefore` marker.
- * Bounded by `MAX_OVERRIDES` (schema ceiling, enforced on write); `markAllRead`
- * clears the record entirely.
+/** Per-id read overrides keyed by `notification_id`.
+ * One entry for the read state of any given notification a user has manually marked.
+ * Size limited by `MAX_OVERRIDES`. `markAllRead` resets the overrides entirely.
  */
 export const OVERRIDES_KEY = 'notificationCenter:overrides';
 
@@ -33,13 +33,13 @@ export const MAX_OVERRIDES = 500;
 
 export const readAllBeforeSchema = z.iso.datetime();
 
-/** One per-id read override: the direction and the instant it was set. */
+/** An override for one ID */
 export const readOverrideSchema = z
   .object({ read: z.boolean(), markedAt: z.iso.datetime() })
   .strict();
 
 export const overridesSchema = z
-  .record(z.string(), readOverrideSchema)
+  .record(notificationIdSchema, readOverrideSchema)
   .refine((overrides) => Object.keys(overrides).length <= MAX_OVERRIDES, {
     message: `Cannot exceed ${MAX_OVERRIDES} read overrides`,
   });

@@ -116,6 +116,17 @@ describe('notification center user storage', () => {
       ).toBe(false);
     });
 
+    it('rejects a key that is not a valid notification id', () => {
+      expect(
+        overridesSchema.safeParse({ '': readOverride('2026-07-09T12:00:00.000Z') }).success
+      ).toBe(false);
+      expect(
+        overridesSchema.safeParse({
+          ['x'.repeat(513)]: readOverride('2026-07-09T12:00:00.000Z'),
+        }).success
+      ).toBe(false);
+    });
+
     it('rejects a record past the safety ceiling', () => {
       const overCeiling = Object.fromEntries(
         Array.from({ length: MAX_OVERRIDES + 1 }, (_, i) => [

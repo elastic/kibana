@@ -13,8 +13,9 @@ import {
   type ReadOverrides,
 } from '../storage/user_storage';
 
-/** Keep the newest MAX_OVERRIDES entries, dropping the oldest by `markedAt`, so the write
- * stays within the schema ceiling. */
+/** Keep the newest MAX_OVERRIDES entries, dropping the oldest by `markedAt`
+ * Ensures the overrides object size stays within limits.
+ */
 const boundOverrides = (overrides: ReadOverrides): ReadOverrides => {
   const entries = Object.entries(overrides);
   if (entries.length <= MAX_OVERRIDES) {
