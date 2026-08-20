@@ -48,9 +48,8 @@ import { assignShard, balanceShardsByCost } from './assign_shards';
  */
 
 /** A private location is scalable when it opts into condition-based sharding. */
-export const isConditionShardedLocation = (location: {
-  agentConditionSharding?: boolean;
-}): boolean => Boolean(location.agentConditionSharding);
+export const isConditionShardedLocation = (location: { isAgentSharding?: boolean }): boolean =>
+  Boolean(location.isAgentSharding);
 
 // Elastic Agent EQL single-quoted string literals have NO escape sequences (see
 // elastic-agent `internal/pkg/eql/Eql.g4`: `STEXT: '\'' ~[\r\n']* '\''`), so a

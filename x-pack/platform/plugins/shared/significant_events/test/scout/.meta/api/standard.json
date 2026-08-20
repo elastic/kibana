@@ -1,5 +1,5 @@
 {
-  "sha1": "6c8f8228b72f3c6de48a2c53b70c59e80af65c3e",
+  "sha1": "931db3fd3b67105de22259faf9f3aaab76b711b6",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
+        "line": 16,
+        "column": 27
       }
     },
     {

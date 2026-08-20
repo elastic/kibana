@@ -33,6 +33,7 @@ Table of Contents
     - [actionsClient.execute(options)](#actionsclientexecuteoptions)
       - [Example](#example-2)
 - [Command Line Utility](#command-line-utility)
+- [Logging](#Logging)
 
 ## Terminology
 
@@ -304,3 +305,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "version": "WzMsMV0="
 }
 ```
+
+# Logging
+
+For logging and editorial guidance see the [logging guidelines](../../../../../docs/extend/contributing/codebase/logging.md).

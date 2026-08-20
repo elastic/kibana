@@ -25,6 +25,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-query",
     "@kbn/fleet-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/ui-callout"
   ]
 }
