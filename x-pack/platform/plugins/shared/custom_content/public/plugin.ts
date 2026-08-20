@@ -9,6 +9,9 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
@@ -16,6 +19,7 @@ import {
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
+import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -23,6 +27,7 @@ interface SetupDeps {
 
 interface StartDeps {
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
   agentBuilder?: AgentBuilderPluginStart;
 }
 
@@ -34,10 +39,16 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
     });
   }
 
-  start(core: CoreStart, { data, agentBuilder }: StartDeps) {
+  start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
     // Temporary kill-switch — remove once the feature is approved to ship.
     if (!core.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false)) return;
     setServices(core, data.search.search, data.dataViews, agentBuilder);
+
+    uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_CONTENT_ACTION_ID, async () => {
+      const { getAddCustomContentAction } = await import('./actions/add_custom_content_action');
+      return getAddCustomContentAction();
+    });
+    uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CUSTOM_CONTENT_ACTION_ID);
 
     if (agentBuilder) {
       agentBuilder.attachments.addAttachmentType(
