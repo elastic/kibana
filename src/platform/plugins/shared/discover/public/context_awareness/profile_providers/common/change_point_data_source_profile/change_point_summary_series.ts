@@ -31,6 +31,8 @@ import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { Observable, of } from 'rxjs';
 
+import { downsampleSparklinePoints } from './downsample_sparkline_points';
+
 type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
 
 export interface ChangePointSeriesPoint {
@@ -158,8 +160,9 @@ export const partitionLineRows = (
     }
   }
 
-  for (const points of seriesByEntity.values()) {
+  for (const [key, points] of seriesByEntity) {
     points.sort((a, b) => a.x - b.x);
+    seriesByEntity.set(key, downsampleSparklinePoints(points));
   }
 
   return seriesByEntity;

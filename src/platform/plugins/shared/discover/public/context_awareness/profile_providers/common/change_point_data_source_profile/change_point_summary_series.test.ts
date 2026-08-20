@@ -23,6 +23,7 @@ import {
   partitionLineRows,
   type ChangePointSummarySeriesState,
 } from './change_point_summary_series';
+import { SPARKLINE_MAX_POINTS } from './downsample_sparkline_points';
 
 jest.mock('@kbn/data-plugin/public', () => {
   const actual = jest.requireActual('@kbn/data-plugin/public');
@@ -159,6 +160,24 @@ describe('change_point_summary_series pure helpers', () => {
       );
 
       expect(series.get('')).toEqual([{ x: Date.parse('2023-11-15T00:00:00.000Z'), y: 14 }]);
+    });
+
+    it('caps a long entity series at SPARKLINE_MAX_POINTS', () => {
+      const start = Date.parse('2023-01-01T00:00:00.000Z');
+      const rows = Array.from({ length: 500 }, (_, i) => ({
+        bucket: new Date(start + i * 60_000).toISOString(),
+        avg_bytes: i,
+      }));
+
+      const series = partitionLineRows(rows, 'bucket', 'avg_bytes', []);
+      const points = series.get('') ?? [];
+
+      expect(points).toHaveLength(SPARKLINE_MAX_POINTS);
+      expect(points[0]).toEqual({ x: start, y: 0 });
+      expect(points[points.length - 1]).toEqual({
+        x: start + 499 * 60_000,
+        y: 499,
+      });
     });
   });
 
