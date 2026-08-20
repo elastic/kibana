@@ -194,10 +194,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
     }
 
     const skillPredicate = acceptedSkills
-      .flatMap((skillName) => [
-        `attributes.gen_ai.tool.call.arguments LIKE "*\\\"skill\\\":\\\"${skillName}\\\"*"`,
-        `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`,
-      ])
+      .map((skillName) => `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`)
       .join(' OR ');
 
     const query = `FROM traces-*
