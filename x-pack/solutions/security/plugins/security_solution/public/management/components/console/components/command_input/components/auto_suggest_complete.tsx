@@ -62,6 +62,7 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
       // If we don't know the command yet, then let's see if we can suggest one now
       if (!enteredCommand) {
         const commandNameSuggestion = commandDefinitions
+        const commandNameSuggestion = [...commandDefinitions]
           .sort((a, b) => a.name.localeCompare(b.name))
           .find(
             (command) =>

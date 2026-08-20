@@ -59,7 +59,9 @@ export const CommandSelector = memo<CommandSelectorProps>(
           });
         }
       } else {
-        for (const commandDefinition of commandDefinitions.sort((a, b) =>
+        for (const commandDefinition of [...commandDefinitions].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )) {
           a.name.localeCompare(b.name)
         )) {
           options.push(
