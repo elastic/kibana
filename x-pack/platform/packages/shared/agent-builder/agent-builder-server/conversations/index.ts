@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type { ConversationCreatePublicRequest, ConversationPublicClient } from './types';
+export type {
+  ConversationCreatePublicRequest,
+  ConversationListResult,
+  ConversationPublicClient,
+} from './types';

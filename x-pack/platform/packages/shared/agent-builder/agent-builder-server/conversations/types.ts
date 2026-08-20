@@ -12,6 +12,12 @@ import type {
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
 
+/** Paginated result returned by {@link ConversationPublicClient.list}. */
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
+
 /**
  * Input for pre-creating an empty conversation without starting an execution.
  */
@@ -37,7 +43,7 @@ export interface ConversationPublicClient {
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */
