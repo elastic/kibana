@@ -65,7 +65,7 @@ const getChartSpecificRules = (chartType: SupportedChartType): string[] => {
       ];
     case SupportedChartType.Metric:
       return [
-        '- Metric placement: set `apply_color_to: "value"`; do not color the background unless the user asks.',
+        '- Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
         '- For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
         '- Metric charts use 3 bands; prefer "Status", "Negative", "Positive", or "Temperature" when thresholds have semantic meaning.',
         '- For bounded adverse metrics like error rate %, higher values are worse; use a status/adverse palette with thresholds in the same percent scale as the metric output.',

@@ -13,7 +13,7 @@ import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import globby from 'globby';
+import { globby } from 'globby';
 import normalize from 'normalize-path';
 import { getBuildkiteMetadata } from './buildkite_metadata';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
