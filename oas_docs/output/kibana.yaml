@@ -59595,9 +59595,9 @@ components:
           properties:
             criteria:
               type: array
-              minItems: 2
-              maxItems: 2
               items:
+                minItems: 2
+                maxItems: 2
                 type: array
                 items:
                   type: object
