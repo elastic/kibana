@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { context, trace, TraceFlags } from '@opentelemetry/api';
+import type { Span, SpanContext } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
 import type {
@@ -37,6 +40,16 @@ jest.mock('../build_workflow_context', () => {
 const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
   typeof buildWorkflowContext
 >;
+
+// Minimal non-recording span carrying a real trace id (same approach as apm_internal.test.ts).
+const spanWithTraceId = (traceId: string): Span => {
+  const spanContext: SpanContext = {
+    traceId,
+    spanId: '0000000000000042',
+    traceFlags: TraceFlags.SAMPLED,
+  };
+  return trace.wrapSpanContext(spanContext);
+};
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecutionCursor: WorkflowExecutionCursorTestHarness;
@@ -264,6 +277,49 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowLogger.logInfo).toHaveBeenCalledWith('Workflow execution started', {
         event: { action: 'workflow-start', category: ['workflow'] },
         tags: ['workflow', 'execution', 'start'],
+      });
+    });
+
+    describe('OTEL trace fallback (EDOT / no APM transaction)', () => {
+      const contextManager = new AsyncLocalStorageContextManager();
+
+      beforeAll(() => {
+        contextManager.enable();
+        context.setGlobalContextManager(contextManager);
+        Object.defineProperty(agent, 'currentTransaction', {
+          configurable: true,
+          enumerable: true,
+          get: () => null,
+        });
+      });
+
+      afterAll(() => {
+        Reflect.deleteProperty(agent, 'currentTransaction');
+        contextManager.disable();
+        context.disable();
+      });
+
+      it('persists the active OTEL span trace id on the execution', async () => {
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        await context.with(trace.setSpan(context.active(), span), async () => {
+          await underTest.start();
+        });
+
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+          traceId: '0af7651916cd43dd8448eb211c80319c',
+        });
+      });
+
+      it('does not persist a trace id when no OTEL span is active either', async () => {
+        await underTest.start();
+
+        expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
+          traceId: expect.anything(),
+        });
+        expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
       });
     });
 
