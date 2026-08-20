@@ -11,6 +11,7 @@ import {
   createLogstashLensEditorSuiteSetup,
   openDiscoverFromPopup,
   spaceTest,
+  testData,
 } from '../../fixtures';
 
 /*
@@ -42,7 +43,7 @@ spaceTest.describe(
       async ({ page, pageObjects, context, kbnUrl, scoutSpace, apiServices }) => {
         spaceTest.setTimeout(120_000);
         const { dashboard } = pageObjects;
-        const openInDiscoverAction = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
+        const openInDiscoverAction = testData.DATA_TEST_SUBJECTS.OPEN_IN_DISCOVER_ACTION;
 
         await spaceTest.step('open a dashboard that already has an ES|QL stats panel', async () => {
           const dashboardId = await apiServices.dashboard.create(

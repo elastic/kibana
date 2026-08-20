@@ -45,7 +45,7 @@ spaceTest.describe(
         spaceTest.setTimeout(120_000);
         const { visualize, lens, dashboard, queryBar, filterBar } = pageObjects;
         const panelTitle = 'Embedded Visualization';
-        const openInDiscoverAction = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
+        const openInDiscoverAction = testData.DATA_TEST_SUBJECTS.OPEN_IN_DISCOVER_ACTION;
         let dashboardId: string;
 
         await spaceTest.step('save the visualization to a new dashboard', async () => {
