@@ -25,6 +25,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/cps-common'
   - '@kbn/core-security-server'
+  - '@kbn/cloud-plugin'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

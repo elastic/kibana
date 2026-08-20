@@ -1,5 +1,5 @@
 {
-  "sha1": "951898e9004174fc7e15fa75d4e11a5a08080423",
+  "sha1": "429fdb656cabb7fd382b0c8862e55c88d6b63f4e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -410,7 +410,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 5
       }
     },
@@ -424,7 +424,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 21
       }
     },
@@ -438,7 +438,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 52
       }
     },
@@ -1603,8 +1603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 38,
-        "column": 46
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -1617,8 +1617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 46,
+        "column": 27
       }
     },
     {
@@ -1631,8 +1631,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 47,
-        "column": 50
+        "line": 51,
+        "column": 5
       }
     },
     {
@@ -1645,7 +1645,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 57,
+        "line": 54,
         "column": 12
       }
     },
@@ -1659,8 +1659,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 66,
-        "column": 75
+        "line": 61,
+        "column": 47
       }
     },
     {
@@ -1673,8 +1673,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 67,
-        "column": 21
+        "line": 62,
+        "column": 27
       }
     },
     {
@@ -1687,8 +1687,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 74,
-        "column": 5
+        "line": 67,
+        "column": 12
       }
     },
     {
