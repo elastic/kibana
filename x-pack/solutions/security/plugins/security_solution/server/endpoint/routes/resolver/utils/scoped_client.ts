@@ -5,23 +5,51 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
+export interface ResolverClusterClientResult {
+  client: IScopedClusterClient;
+  cpsRead: boolean;
+}
+
 /**
- * Origin-only when CPS is off (byte-for-byte the HTTP-layer client). Space-routed current-user
- * client when platform CPS is on, so entity/tree/related-events searches leave the origin project.
+ * Bound once at route registration and handed to the resolver handlers, so the handlers stay
+ * unaware of how the CPS decision and the project-routed client are wired together.
  */
-export async function getResolverClusterClient(
+export type GetResolverClusterClient = (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest
-): Promise<{ client: IScopedClusterClient; cpsRead: boolean }> {
-  const originClient = (await context.core).elasticsearch.client;
-  const endpointService = (await context.securitySolution).getEndpointService();
-  const cpsRead = endpointService.isPlatformCpsRead(request);
+) => Promise<ResolverClusterClientResult>;
+
+interface GetResolverClusterClientDeps {
+  context: SecuritySolutionRequestHandlerContext;
+  request: KibanaRequest;
+  /** Resolves the deployment-wide cluster client from start services, lazily per request. */
+  getClusterClient: () => Promise<IClusterClient>;
+  /** `true` when the deployment has Cross-Project Search on; drives Analyzer's cross-project reads. */
+  platformCpsEnabled: boolean;
+}
+
+/**
+ * Origin-only when platform CPS is off (byte-for-byte the HTTP-layer client). Space-routed
+ * current-user client when platform CPS is on, so entity/tree/related-events searches leave the
+ * origin project.
+ */
+export async function getResolverClusterClient({
+  context,
+  request,
+  getClusterClient,
+  platformCpsEnabled,
+}: GetResolverClusterClientDeps): Promise<ResolverClusterClientResult> {
+  if (!platformCpsEnabled) {
+    return { client: (await context.core).elasticsearch.client, cpsRead: false };
+  }
+
+  const clusterClient = await getClusterClient();
 
   return {
-    client: cpsRead ? endpointService.getResolverScopedClusterClient(request) : originClient,
-    cpsRead,
+    client: clusterClient.asScoped(request, { projectRouting: 'space' }),
+    cpsRead: true,
   };
 }

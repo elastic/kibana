@@ -17,13 +17,14 @@ import type { validateTree } from '../../../../../common/endpoint/schema/resolve
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
-import { getResolverClusterClient } from '../utils/scoped_client';
+import type { GetResolverClusterClient } from '../utils/scoped_client';
 import { stripRemoteIndexPatterns } from '../../../utils/cps_read_routing';
 import { reportAnalyzerCrossProjectRender } from '../utils/cross_project_telemetry';
 
 export function handleTree(
   getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>,
-  getLicensing: () => Promise<LicensingPluginStart>
+  getLicensing: () => Promise<LicensingPluginStart>,
+  getResolverClient: GetResolverClusterClient
 ): RequestHandler<
   unknown,
   unknown,
@@ -31,7 +32,7 @@ export function handleTree(
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    const { client, cpsRead } = await getResolverClusterClient(context, req);
+    const { client, cpsRead } = await getResolverClient(context, req);
     const licensing = await getLicensing();
     const license = await firstValueFrom(licensing.license$);
     const hasAccessToInsightsRelatedByProcessAncestry = license.hasAtLeast('platinum');

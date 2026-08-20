@@ -9,7 +9,6 @@ import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
   IClusterClient,
-  IScopedClusterClient,
   KibanaRequest,
   LoggerFactory,
   SavedObjectsClientContract,
@@ -119,11 +118,6 @@ export interface EndpointAppContextServiceStartContract {
   dataStart: DataPluginStart;
   /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
   cpsEnabled: boolean;
-  /**
-   * CPS enabled on the deployment, independent of the Defend experimental flag. Analyzer rides
-   * this so its cross-project reads activate wherever CPS itself is on.
-   */
-  platformCpsEnabled: boolean;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
@@ -361,43 +355,6 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.cpsEnabled;
-  }
-
-  /** `true` when the deployment has Cross-Project Search, regardless of Defend's experimental flag */
-  public isPlatformCpsEnabled(): boolean {
-    if (this.startDependencies == null) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    return this.startDependencies.platformCpsEnabled;
-  }
-
-  /**
-   * `true` when this Analyzer/resolver read should fan out. Same request-identity rule as
-   * {@link isCpsRead}, but gated on platform CPS rather than the Defend flag.
-   */
-  public isPlatformCpsRead(request?: KibanaRequest): boolean {
-    if (!this.isPlatformCpsEnabled()) {
-      return false;
-    }
-
-    return request != null;
-  }
-
-  /**
-   * Request-scoped current-user client for Analyzer reads. Adds space project routing when
-   * platform CPS is on; otherwise matches the origin-only client the HTTP layer already built.
-   */
-  public getResolverScopedClusterClient(request: KibanaRequest): IScopedClusterClient {
-    if (!this.startDependencies?.clusterClient) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    if (!this.isPlatformCpsRead(request)) {
-      return this.startDependencies.clusterClient.asScoped(request);
-    }
-
-    return this.startDependencies.clusterClient.asScoped(request, { projectRouting: 'space' });
   }
 
   /**

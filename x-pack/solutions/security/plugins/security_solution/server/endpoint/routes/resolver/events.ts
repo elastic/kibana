@@ -14,7 +14,7 @@ import type { validateEvents } from '../../../../common/endpoint/schema/resolver
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
-import { getResolverClusterClient } from './utils/scoped_client';
+import type { GetResolverClusterClient } from './utils/scoped_client';
 import { stripRemoteIndexPatterns } from '../../utils/cps_read_routing';
 
 /**
@@ -35,7 +35,8 @@ function createEvents(
  * requested.
  */
 export function handleEvents(
-  getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>
+  getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>,
+  getResolverClient: GetResolverClusterClient
 ): RequestHandler<
   unknown,
   TypeOf<typeof validateEvents.query>,
@@ -47,7 +48,7 @@ export function handleEvents(
       query: { limit, afterEvent },
       body,
     } = req;
-    const { client, cpsRead } = await getResolverClusterClient(context, req);
+    const { client, cpsRead } = await getResolverClient(context, req);
     const ruleRegistry = await getRuleRegistry();
     const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
     const shouldExcludeColdAndFrozenTiers = await (

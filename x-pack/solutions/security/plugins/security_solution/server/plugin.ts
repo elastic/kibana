@@ -676,7 +676,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -959,7 +960,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       clusterClient: core.elasticsearch.client,
       dataStart: plugins.data,
       cpsEnabled: this.defendCpsEnabled,
-      platformCpsEnabled: this.platformCpsEnabled,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
