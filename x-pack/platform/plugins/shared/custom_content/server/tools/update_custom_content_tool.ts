@@ -82,7 +82,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
             {
               tool_result_id: getToolResultId(),
               type: ToolResultType.error,
-              data: { message: `Template generation failed: ${err.message}` },
+              data: { message: `Template generation failed: ${err instanceof Error ? err.message : String(err)}` },
             },
           ],
         };

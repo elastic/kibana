@@ -42,8 +42,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -212,6 +211,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
             parentApi.removePanel(uuid);
           }
+          isRetained = false;
           previewHtml$.next(null);
         });
       },
