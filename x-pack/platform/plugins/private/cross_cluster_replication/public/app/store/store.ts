@@ -17,7 +17,9 @@ declare global {
   }
 }
 
-export function createCrossClusterReplicationStore(): Store<CcrState, CcrAction> {
+export type CcrStore = Store<CcrState, CcrAction>;
+
+export function createCrossClusterReplicationStore(): CcrStore {
   const middleware: StoreEnhancer = applyMiddleware(thunk);
   const devtools =
     typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__

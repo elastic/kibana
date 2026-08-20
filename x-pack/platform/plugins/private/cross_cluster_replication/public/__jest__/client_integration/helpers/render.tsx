@@ -10,14 +10,14 @@ import { render, type RenderResult } from '@testing-library/react';
 import * as userEventLib from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
 import { Provider } from 'react-redux-v7';
-import type { Store } from 'redux-v4';
 import type { RouteComponentProps } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Routes, Route } from '@kbn/shared-ux-router';
+import type { CcrStore } from '../../../app/store';
 
 export interface CcrRenderResult extends RenderResult {
   user: UserEvent;
-  store?: Store;
+  store?: CcrStore;
 }
 
 type CcrRouteProps = RouteComponentProps;
@@ -32,7 +32,7 @@ export interface OnRouterPayload {
 }
 
 export interface RenderWithRouterOptions<ExtraProps extends object = {}> {
-  store?: Store;
+  store?: CcrStore;
   onRouter?: (router: OnRouterPayload) => void;
   initialEntries?: string[];
   routePath?: string;
