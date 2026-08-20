@@ -52319,7 +52319,6 @@
     "xpack.snapshotRestore.home.repositoriesTabTitle": "レポジトリ",
     "xpack.snapshotRestore.home.restoreTabTitle": "ステータスの復元",
     "xpack.snapshotRestore.home.snapshotRestoreDescription": "レポジトリを使用して Elasticsearch のインデックスとクラスターのバックアップを保管します。",
-    "xpack.snapshotRestore.home.snapshotRestoreDocsLinkText": "スナップショットと復元ドキュメント",
     "xpack.snapshotRestore.home.snapshotRestoreTitle": "スナップショットリポジドリ",
     "xpack.snapshotRestore.home.snapshotsTabTitle": "スナップショット",
     "xpack.snapshotRestore.indicesList.allIndicesValue": "すべてのインデックス",

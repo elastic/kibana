@@ -52146,7 +52146,6 @@
     "xpack.snapshotRestore.home.repositoriesTabTitle": "Repositories",
     "xpack.snapshotRestore.home.restoreTabTitle": "Status wiederherstellen",
     "xpack.snapshotRestore.home.snapshotRestoreDescription": "Verwenden Sie Repositories, um Backups Ihrer Elasticsearch-Indizes und -Cluster zu speichern und wiederherzustellen.",
-    "xpack.snapshotRestore.home.snapshotRestoreDocsLinkText": "Snapshot- und Wiederherstellungsdokumentation",
     "xpack.snapshotRestore.home.snapshotRestoreTitle": "Snapshot und Wiederherstellung",
     "xpack.snapshotRestore.home.snapshotsTabTitle": "Snapshots",
     "xpack.snapshotRestore.indicesList.allIndicesValue": "Alle Indizes",
