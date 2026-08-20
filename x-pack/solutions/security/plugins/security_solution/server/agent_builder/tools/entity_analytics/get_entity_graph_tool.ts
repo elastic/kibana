@@ -60,6 +60,13 @@ This tool resolves the entity, then stores a \`security.entity_graph\` attachmen
 When the id/name resolves to multiple candidate entities, no attachment is stored, no \`renderTag\` is returned, and you must NOT emit a render tag — instead ask the user to supply the exact entity id (EUID) from the returned candidates. This tool renders a compact preview; the full interactive graph investigation lives in the Security UI and is reachable from the preview's "Open full graph" affordance.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'graph'],
+    annotations: {
+      title: 'Get Entity Graph',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
