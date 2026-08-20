@@ -57,13 +57,10 @@ describe('transformWorkpadIn', () => {
       },
     ]);
 
-    expect(mockTransformIn).toHaveBeenCalledWith(
-      {
-        savedObjectId: 'test-id',
-        title: 'Test lens embeddable',
-      },
-      true
-    );
+    expect(mockTransformIn).toHaveBeenCalledWith({
+      savedObjectId: 'test-id',
+      title: 'Test lens embeddable',
+    });
   });
 
   it('logs warnings when transformation fails and returns the original embeddable config and no references', () => {

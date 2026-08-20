@@ -450,6 +450,18 @@ export interface RoundModelUsageStats {
   model?: string;
 }
 
+/** Placeholder title assigned to a new conversation */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a client-supplied conversation title */
+export const CONVERSATION_TITLE_MAX_LENGTH = 500;
+
+/**
+ * Defensive cap on the length of a conversation id accepted from a request.
+ * Conversation ids are UUIDs, so this should be more than enough.
+ */
+export const CONVERSATION_ID_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */

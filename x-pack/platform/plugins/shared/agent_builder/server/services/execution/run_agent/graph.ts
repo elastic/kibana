@@ -9,6 +9,7 @@ import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
@@ -57,6 +58,8 @@ export const createAgentGraph = ({
   promptFactory,
   backgroundExecutionService,
   roundId,
+  sessionId,
+  cacheControl,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -70,6 +73,9 @@ export const createAgentGraph = ({
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
   roundId: string;
+  /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
+  sessionId?: string;
+  cacheControl?: ChatCompleteCacheControl;
 }) => {
   const init = async () => {
     return {};
@@ -108,6 +114,8 @@ export const createAgentGraph = ({
   const researchAgent = async (state: StateType) => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
+      sessionId,
+      cacheControl,
     });
 
     if (state.mainActions.length === 0 && state.errorCount === 0) {
