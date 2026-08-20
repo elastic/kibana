@@ -105,6 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('special character handling', () => {
+      before(async () => {
+        // TODO: Navigation to Data View Management is different in Serverless
+        await PageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-dataViews');
+      });
+
       it('should handle special charaters in template input', async () => {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
