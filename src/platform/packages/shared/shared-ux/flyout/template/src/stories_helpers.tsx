@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import { action } from '@storybook/addon-actions';
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FlyoutTemplateProps } from './types';
 import { FlyoutTemplate } from './flyout_template';
@@ -30,13 +29,13 @@ export interface SharedStoryArgs {
 }
 
 export const LEADING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['leadingActions'] = [
-  { iconType: 'documents', onClick: action('back'), 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
-  { iconType: 'document', onClick: action('back'), 'aria-label': 'View document', toolTipContent: 'View document' },
+  { iconType: 'documents', onClick: () => {}, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
+  { iconType: 'document', onClick: () => {}, 'aria-label': 'View document', toolTipContent: 'View document' },
 ]; // prettier-ignore
 
 export const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['trailingActions'] = [
-  { iconType: 'share', onClick: action('share'), 'aria-label': 'Share', toolTipContent: 'Share' },
-  { iconType: 'gear', onClick: action('settings'), 'aria-label': 'Settings', toolTipContent: 'Settings' },
+  { iconType: 'share', onClick: () => {}, 'aria-label': 'Share', toolTipContent: 'Share' },
+  { iconType: 'gear', onClick: () => {}, 'aria-label': 'Settings', toolTipContent: 'Settings' },
 ]; // prettier-ignore
 
 /** Maps shared story args to `FlyoutTemplate` props. Pagination is handled per-story via useState. */
@@ -155,9 +154,9 @@ export const footerZone = (args: SharedStoryArgs) =>
     <FlyoutTemplate.Footer>
       <FlyoutTemplate.Footer.SecondaryAction
         label="Discard"
-        onClick={action('discard')}
+        onClick={() => {}}
         {...(args.secondaryActionIcon ? { iconType: 'trash' } : {})}
       />
-      <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={action('save')} />
+      <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={() => {}} />
     </FlyoutTemplate.Footer>
   ) : null;
