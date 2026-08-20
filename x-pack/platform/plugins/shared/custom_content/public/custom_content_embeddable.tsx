@@ -134,7 +134,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }),
       onEdit: async ({ isNewPanel, returnFocus } = {}) => {
         const { core } = getServices();
-        openLazyFlyout({
+        let hasSaved = false;
+        const flyoutRef = openLazyFlyout({
           core,
           parentApi,
           returnFocus,
@@ -147,16 +148,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               newEsqlQuery: string | undefined,
               newTemplate: string | undefined
             ) => {
-              previewHtml$.next(null);
+              hasSaved = true;
               applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
               closeFlyout();
             };
 
             const handleClose = () => {
-              if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-                parentApi.removePanel(uuid);
-              }
-              previewHtml$.next(null);
               closeFlyout();
             };
 
@@ -208,6 +205,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             size: 600,
             minWidth: 320,
           },
+        });
+        flyoutRef.onClose.then(() => {
+          if (!hasSaved && isNewPanel && apiIsPresentationContainer(parentApi)) {
+            parentApi.removePanel(uuid);
+          }
+          previewHtml$.next(null);
         });
       },
       isEditingEnabled: () => true,
