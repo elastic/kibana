@@ -13,7 +13,7 @@ import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('logs-*'),
-  parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
+  getTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@elastic/esql', () => ({
@@ -28,7 +28,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
   })),
 }));
 
-const { parseTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
+const { getTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
 const { Parser } = jest.requireMock('@elastic/esql');
 
 function buildMocks() {
@@ -91,7 +91,7 @@ describe('registerGetTimeFieldRoute', () => {
       expect(response.badRequest).toHaveBeenCalledWith(
         expect.objectContaining({ body: expect.stringContaining('nesting depth') })
       );
-      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
+      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
       expect(Parser.parse).not.toHaveBeenCalled();
     });
 
@@ -104,7 +104,7 @@ describe('registerGetTimeFieldRoute', () => {
       await handler(requestHandlerContext, { body: { query } }, response);
 
       expect(response.badRequest).toHaveBeenCalled();
-      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
+      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
     });
 
     it('allows a query exactly at the nesting limit (depth 50)', async () => {
@@ -137,7 +137,7 @@ describe('registerGetTimeFieldRoute', () => {
       await handler(requestHandlerContext, { body: { query } }, response);
 
       expect(response.badRequest).toHaveBeenCalled();
-      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
+      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
       expect(Parser.parse).not.toHaveBeenCalled();
     });
   });
