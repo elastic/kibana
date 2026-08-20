@@ -143,4 +143,81 @@ describe('InferenceFeatureRegistry', () => {
       expect(registry.getAll()).toEqual([]);
     });
   });
+
+  describe('updateRecommendedEndpoints', () => {
+    it('returns ok and mutates recommendedEndpoints for a registered feature', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature' }));
+
+      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', 'ep-2']);
+
+      expect(result).toEqual({ ok: true });
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['ep-1', 'ep-2']);
+    });
+
+    it('replaces endpoints on successive calls (does not append)', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['old'] }));
+
+      registry.updateRecommendedEndpoints('my_feature', ['new-1', 'new-2']);
+      registry.updateRecommendedEndpoints('my_feature', ['final']);
+
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['final']);
+    });
+
+    it('does not mutate other fields on the feature', () => {
+      const feature = createValidFeature({ featureId: 'my_feature', featureName: 'Keep Me' });
+      registry.register(feature);
+
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1']);
+
+      const updated = registry.get('my_feature');
+      expect(updated?.featureName).toBe('Keep Me');
+      expect(updated?.featureDescription).toBe(feature.featureDescription);
+    });
+
+    it('returns error and does not update for an unknown featureId', () => {
+      const result = registry.updateRecommendedEndpoints('unknown', ['ep-1']);
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('"unknown"') });
+      expect(mockLogger.get().error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update recommended endpoints')
+      );
+    });
+
+    it('returns error and does not update when endpoints array is empty', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+
+      const result = registry.updateRecommendedEndpoints('my_feature', []);
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('not be empty') });
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('returns error and does not update when endpoints contain an empty string', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+
+      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '']);
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('empty strings') });
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('returns error and does not update when endpoints contain a whitespace-only string', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+
+      const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   ']);
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('empty strings') });
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('logs a debug message on success', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature' }));
+
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1']);
+
+      expect(mockLogger.get().debug).toHaveBeenCalledWith(
+        expect.stringContaining('"my_feature"')
+      );
+    });
+  });
 });
