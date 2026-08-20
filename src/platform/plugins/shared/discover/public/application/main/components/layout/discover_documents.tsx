@@ -436,8 +436,7 @@ function DiscoverDocumentsComponent({
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers(cellRendererParams);
+    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
