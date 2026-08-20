@@ -15,6 +15,7 @@ import type {
   OpenPointInTimeResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { Cluster } from '../../../common/types_old';
@@ -63,6 +64,11 @@ export const getClustersQuery = (
           top_hits: {
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' } }],
+            // Restrict to only the fields consumed by getClustersFromAggs to avoid
+            // fetching full finding documents (which can be large) for every cluster.
+            _source: {
+              includes: ['@timestamp', 'rule.benchmark', 'cloud', 'orchestrator.cluster'],
+            },
           },
         },
         ...failedFindingsAggQuery,
@@ -128,6 +134,16 @@ export const getClusters = async (
 
     return getClustersFromAggs(clusters);
   } catch (err) {
+    if (isMaximumResponseSizeExceededError(err)) {
+      // The top_hits payload exceeded elasticsearch.maxResponseSize. This is a data-volume
+      // issue, not a code bug — log at warn to avoid re-paging on-call engineers.
+      logger.warn(`Benchmarks cluster query exceeded max response size: ${err.message}`);
+      const sizeError = new Error(
+        'Too many cluster findings to load. Try reducing the number of monitored accounts or contact support.'
+      ) as Error & { statusCode: number };
+      sizeError.statusCode = 413;
+      throw sizeError;
+    }
     logger.error(`Failed to fetch cluster stats ${err.message}`);
     logger.error(err);
     throw err;

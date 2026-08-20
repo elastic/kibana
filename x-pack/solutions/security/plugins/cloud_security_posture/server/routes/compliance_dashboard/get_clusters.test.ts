@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ClusterBucket } from './get_clusters';
-import { getClustersFromAggs } from './get_clusters';
+import { getClusters, getClustersFromAggs, getClustersQuery } from './get_clusters';
 
 const mockClusterBuckets: ClusterBucket[] = [
   {
@@ -69,6 +70,51 @@ const mockClusterBuckets: ClusterBucket[] = [
     },
   },
 ];
+
+describe('getClustersQuery', () => {
+  it('restricts top_hits _source to only the fields consumed by getClustersFromAggs', () => {
+    const query = getClustersQuery({}, 'pit-id', {});
+    const topHits = (query.aggs as any)?.aggs_by_asset_identifier?.aggs?.latestFindingTopHit
+      ?.top_hits;
+    expect(topHits?._source).toEqual({
+      includes: ['@timestamp', 'rule.benchmark', 'cloud', 'orchestrator.cluster'],
+    });
+  });
+});
+
+describe('getClusters', () => {
+  const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+  const pit = { id: 'pit-0' };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('throws a 413 with an actionable message when ES exceeds max response size', async () => {
+    // isMaximumResponseSizeExceededError checks for RequestAbortedError with 'content length'
+    const sizeError = new errors.RequestAbortedError('Response content length exceeded');
+    const esClient = { search: jest.fn().mockRejectedValue(sizeError) };
+
+    await expect(
+      getClusters(esClient as any, {}, pit, {}, logger as any)
+    ).rejects.toMatchObject({ statusCode: 413 });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('max response size'));
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs at error and re-throws for unexpected errors', async () => {
+    const unexpectedError = new Error('unexpected ES error');
+    const esClient = { search: jest.fn().mockRejectedValue(unexpectedError) };
+
+    await expect(
+      getClusters(esClient as any, {}, pit, {}, logger as any)
+    ).rejects.toThrow('unexpected ES error');
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
 
 describe('getClustersFromAggs', () => {
   it('should return value matching ComplianceDashboardData["clusters"]', async () => {
