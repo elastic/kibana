@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WatchAutonomyLevel, WatchSettings } from '@kbn/pnd-common';
+import { WatchAutonomyLevel } from '@kbn/pnd-common';
 import {
   PND_WATCH_FLOOR_WORKFLOW_ID,
   type ManagedWorkflowTemplateValuesForId,
@@ -18,7 +18,7 @@ export type WatchFloorTemplateValues = ManagedWorkflowTemplateValuesForId<
 
 const WATCH_FLOOR_SETTINGS_VERSION = 1;
 
-const parseWatchFloorValues = (raw: Record<string, unknown>): WatchFloorTemplateValues => {
+const parseWatchFloorValues = (raw: Record<string, unknown>) => {
   const { settingsVersion, autonomyLevel } = raw;
   if (settingsVersion !== undefined && settingsVersion !== WATCH_FLOOR_SETTINGS_VERSION) {
     throw new Error(`Unsupported Watch Floor settings version: ${String(settingsVersion)}`);
@@ -30,7 +30,7 @@ const parseWatchFloorValues = (raw: Record<string, unknown>): WatchFloorTemplate
   return {
     settingsVersion: WATCH_FLOOR_SETTINGS_VERSION,
     autonomyLevel: parsedAutonomyLevel.data,
-  };
+  } satisfies WatchFloorTemplateValues;
 };
 
 export const watchFloorSettings = {
@@ -66,9 +66,9 @@ export const watchFloorSettings = {
   },
   toSettings: (raw) => {
     const values = parseWatchFloorValues(raw);
-    return WatchSettings.parse({
+    return {
       watchId: PND_WATCH_FLOOR_WORKFLOW_ID,
       autonomy: values.autonomyLevel,
-    });
+    };
   },
 } satisfies WatchSettingsRegistration;
