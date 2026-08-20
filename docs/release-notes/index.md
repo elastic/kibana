@@ -236,7 +236,8 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix autocomplete suggesting continuation columns after `TS_INFO` and `METRICS_INFO`, which replace the table with metadata rows [#280524]({{kib-pull}}280524).
 
 **Machine learning and {{infer}}**:
-* Fix prompts containing special tokens such as `<|endoftext|>` causing the Kibana AI Agent to error or crash [#281546]({{kib-pull}}281546).
+% Reverted before 9.5.1 shipped (#282883, backported as #283157); the fix re-lands as #283177, already documented in 9.5.2.
+% * Fix prompts containing special tokens such as `<|endoftext|>` causing the Kibana AI Agent to error or crash [#281546]({{kib-pull}}281546).
 * Strengthen trained model ID checks so the infer, update, and stop APIs can't be used to access a different model's deployment [#280511]({{kib-pull}}280511).
 
 **Workflows**:
