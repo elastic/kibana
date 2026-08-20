@@ -452,5 +452,60 @@ In most cases, the underlying problem is either duplicating some functionality o
 With the decoupled container module configuration, it should be easier to detect that.
 But if there is no other option to get away from the services composition, deferred dependency injection via the `onActivation` hook is an acceptable option since it does not break the Inversion of Control principle.
 
+### Registries and Extensions
+In some cases, like HTTP routing or task handling, there is a need to register a handler during the setup stage that can be invoked later.
+That could be achieved in two ways:
+1. By using `OnSetup` hook that resolves all the handlers (e.g. `Route`) and calls a register function.
+  ```ts
+  import { ContainerModule } from 'inversify';
+  import { createToken, OnSetup } from '@kbn/core-di';
+  import { Router } from '@kbn/core-di-server';
+  import type { RouteDefinition } from './definition';
+
+  export const Route = createToken<RouteDefinition>('Route');
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(OnSetup)
+      .toResolvedValue((router) => (container) => {
+        container.getAll(Route).forEach((route) => router.register(route));
+      }, [Router])
+      .inSingletonScope();
+  });
+  ```
+
+2. By using an extended `KibanaContainerModule` that provides an API layer encapsulating the complexity:
+  ```ts
+  import { createToken, KibanaContainerModule, OnSetup } from '@kbn/core-di';
+  import { Router } from '@kbn/core-di-server';
+  import type { RouteDefinition } from './definition';
+
+  export const Route = createToken<RouteDefinition>('Route');
+
+  export const module = new KibanaContainerModule(({ onSetup }) => {
+    onSetup(Route, Router, (_, route, router) => {
+      router.register(route);
+    });
+  });
+  ```
+
+`KibanaContainerModule` provides two additional hooks `onSetup` and `onStart` that can be used to register services of a specific type with a specific handler.
+Basically, they are similar to the [`onActivation`](https://inversify.io/docs/api/container-module/#onactivation) hook, but they are executed only once during the setup or start stage, respectively.
+Additionally, they support inline dependency injection, so the handler can receive any dependencies it needs:
+```ts
+onSetup(Task, TaskManager, Logger, (_, task, taskManager, logger) => {
+  logger.debug(`Registering task handler for ${task.name}.`);
+  taskManager.register(task);
+});
+```
+
+Beware, the services exposed during the start stage will not be available during the setup stage.
+So the `onSetup` hook may fail if it depends on the services registered in the start stage.
+```ts
+// fails because `CoreStart('injection')` is not available yet
+onSetup(Task, TaskManager, CoreStart('injection'), (task, taskManager, injection) => {
+  // ...
+});
+```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
