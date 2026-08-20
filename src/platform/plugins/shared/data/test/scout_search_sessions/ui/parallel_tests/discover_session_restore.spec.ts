@@ -14,7 +14,6 @@
  * which is not present on Elastic Cloud.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
@@ -23,21 +22,6 @@ import {
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
 } from '../fixtures';
-
-/** How many searches the single background search row groups. */
-const getSearchesCount = async (page: ScoutPage): Promise<number> => {
-  const text = await page.testSubj.locator('sessionManagementNumSearchesCol').innerText();
-  return Number(text.trim());
-};
-
-/** The app URL the single background search row restores into. */
-const getRestoreUrl = async (page: ScoutPage): Promise<string> => {
-  const href = await page.testSubj.locator('sessionManagementNameLink').getAttribute('href');
-  if (!href) {
-    throw new Error('Background search row has no restore URL');
-  }
-  return href;
-};
 
 spaceTest.describe('Discover background search restore', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -95,8 +79,9 @@ spaceTest.describe('Discover background search restore', { tag: '@local-stateful
       await pageObjects.backgroundSearchManagement.goTo();
       await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
 
-      const searchesCountBeforeRestore = await getSearchesCount(page);
-      const restoreUrl = await getRestoreUrl(page);
+      const searchesCountBeforeRestore =
+        await pageObjects.backgroundSearchManagement.getRowSearchesCount();
+      const restoreUrl = await pageObjects.backgroundSearchManagement.getRowRestoreUrl();
 
       await spaceTest.step('restore it by loading Discover from scratch', async () => {
         // Loading the restore URL directly (rather than clicking "View") makes Discover issue
@@ -109,7 +94,9 @@ spaceTest.describe('Discover background search restore', { tag: '@local-stateful
 
       await spaceTest.step('the search count is unchanged', async () => {
         await pageObjects.backgroundSearchManagement.goTo();
-        expect(await getSearchesCount(page)).toBe(searchesCountBeforeRestore);
+        expect(await pageObjects.backgroundSearchManagement.getRowSearchesCount()).toBe(
+          searchesCountBeforeRestore
+        );
       });
     }
   );

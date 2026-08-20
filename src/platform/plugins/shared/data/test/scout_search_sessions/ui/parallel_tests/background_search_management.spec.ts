@@ -80,17 +80,9 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       });
 
       await spaceTest.step('submit query and save as a background search', async () => {
-        const submitBtn = page.testSubj.locator('querySubmitButton');
-        await submitBtn.click();
-
-        // Click the "Send to background" button appears while the search is running to create a background search
-        const bgSubmitBtn = page.testSubj.locator('querySubmitButton-secondary-button');
-        await bgSubmitBtn.click();
-
-        await page.testSubj
-          .locator('backgroundSearchToastLink')
-          .waitFor({ state: 'visible', timeout: 20_000 });
-
+        // Dashboards do not put the split button into the loading state, so the secondary
+        // action hangs off the submit button rather than the cancel button.
+        await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
         await pageObjects.dashboard.waitForRenderComplete();
       });
 

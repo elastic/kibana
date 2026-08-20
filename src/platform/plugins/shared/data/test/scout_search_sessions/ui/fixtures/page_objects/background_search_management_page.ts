@@ -53,6 +53,21 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('sessionManagementExpiresCol').innerText();
   }
 
+  /** How many searches the background search row groups. */
+  async getRowSearchesCount(): Promise<number> {
+    const text = await this.table.getByTestId('sessionManagementNumSearchesCol').innerText();
+    return Number(text.trim());
+  }
+
+  /** The app URL the background search row restores into. */
+  async getRowRestoreUrl(): Promise<string> {
+    const href = await this.table.getByTestId('sessionManagementNameLink').getAttribute('href');
+    if (!href) {
+      throw new Error('Background search row has no restore URL');
+    }
+    return href;
+  }
+
   async renameRow(newName: string) {
     await this.table.getByTestId('sessionManagementActionsCol').click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
