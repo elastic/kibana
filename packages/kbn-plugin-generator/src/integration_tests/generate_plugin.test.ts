@@ -85,6 +85,73 @@ it('sets a default owner.name when generating with --yes', async () => {
   expect(manifest.owner.name).toEqual('Plugin Author');
 });
 
+it('generates a classic plugin without UI', async () => {
+  await execa(process.execPath, ['scripts/generate_plugin.js', '--name=bar', '-y', '--no-ui'], {
+    cwd: REPO_ROOT,
+    buffer: true,
+  });
+
+  const paths = await globby('**/*', {
+    cwd: GENERATED_DIR,
+    absolute: true,
+    dot: true,
+    onlyFiles: true,
+    ignore: ['**/.git'],
+  });
+
+  expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/plugins/bar/.eslintrc.js,
+      <absolute path>/plugins/bar/.gitignore,
+      <absolute path>/plugins/bar/.i18nrc.json,
+      <absolute path>/plugins/bar/common/index.ts,
+      <absolute path>/plugins/bar/kibana.json,
+      <absolute path>/plugins/bar/package.json,
+      <absolute path>/plugins/bar/README.md,
+      <absolute path>/plugins/bar/server/index.ts,
+      <absolute path>/plugins/bar/server/plugin.ts,
+      <absolute path>/plugins/bar/server/routes/index.ts,
+      <absolute path>/plugins/bar/server/types.ts,
+      <absolute path>/plugins/bar/translations/ja-JP.json,
+      <absolute path>/plugins/bar/tsconfig.json,
+    ]
+  `);
+});
+
+it('generates a classic plugin without server plugin', async () => {
+  await execa(process.execPath, ['scripts/generate_plugin.js', '--name=baz', '-y', '--no-server'], {
+    cwd: REPO_ROOT,
+    buffer: true,
+  });
+
+  const paths = await globby('**/*', {
+    cwd: GENERATED_DIR,
+    absolute: true,
+    dot: true,
+    onlyFiles: true,
+    ignore: ['**/.git'],
+  });
+
+  expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/plugins/baz/.eslintrc.js,
+      <absolute path>/plugins/baz/.gitignore,
+      <absolute path>/plugins/baz/.i18nrc.json,
+      <absolute path>/plugins/baz/common/index.ts,
+      <absolute path>/plugins/baz/kibana.json,
+      <absolute path>/plugins/baz/package.json,
+      <absolute path>/plugins/baz/public/application.tsx,
+      <absolute path>/plugins/baz/public/components/app.tsx,
+      <absolute path>/plugins/baz/public/index.ts,
+      <absolute path>/plugins/baz/public/plugin.ts,
+      <absolute path>/plugins/baz/public/types.ts,
+      <absolute path>/plugins/baz/README.md,
+      <absolute path>/plugins/baz/translations/ja-JP.json,
+      <absolute path>/plugins/baz/tsconfig.json,
+    ]
+  `);
+});
+
 it('generates a DI plugin with --di', async () => {
   await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo', '--di'], {
     cwd: REPO_ROOT,
