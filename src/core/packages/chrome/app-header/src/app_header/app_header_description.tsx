@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { asPlainText } from './as_plain_text';
 import type { AppHeaderDescription as AppHeaderDescriptionConfig } from '../types';
 
 const learnMoreLinkText = i18n.translate('core.ui.chrome.appHeader.description.learnMoreLinkText', {
@@ -21,7 +22,7 @@ export const AppHeaderDescription = React.memo<{
   description: AppHeaderDescriptionConfig;
 }>(({ description }) => {
   const { euiTheme } = useEuiTheme();
-  const text = typeof description === 'string' ? description : description.text;
+  const text = asPlainText(typeof description === 'string' ? description : description.text);
   const learnMoreUrl = typeof description === 'string' ? undefined : description.learnMoreUrl;
 
   return (
