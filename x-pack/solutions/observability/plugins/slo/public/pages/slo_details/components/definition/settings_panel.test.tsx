@@ -113,7 +113,7 @@ describe('SettingsPanel project scope', () => {
       <SettingsPanel
         slo={sloWithSettings({
           ...slo.settings,
-          projectRoutings: '_id:p1 AND _id:p2',
+          projectRoutings: '_id:p1 OR _id:p2',
         })}
       />
     );

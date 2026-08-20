@@ -14,7 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/observability_logs_essentials.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-import { isSecurityTestEndpointsPluginPath } from './utils';
+import { withoutSecurityTestEndpoints } from './utils';
 
 // Same CPS local wiring as the `observability_complete` variant, but on the
 // `logs_essentials` tier, which is NOT eligible for cross-project search. Use
@@ -37,11 +37,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      // The inherited UIAM config adds securityTestEndpoints for API tests. CPS local
-      // manual/UI testing does not use it, and loading its browser plugin can break boot.
-      ...uiamConfig.kbnTestServer.serverArgs.filter(
-        (arg) => !isSecurityTestEndpointsPluginPath(arg)
-      ),
+      ...withoutSecurityTestEndpoints(uiamConfig.kbnTestServer.serverArgs),
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
     ],

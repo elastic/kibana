@@ -6,28 +6,9 @@
  */
 
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
-import { createSLO } from '../fixtures/slo';
 import { getSloProjectRouting } from './get_slo_project_routing';
 
 const SUBSET_ROUTING = '_id:p1 AND _id:p2';
-
-const sloWith = (
-  settings: {
-    projectRoutings?: string | null;
-    preventCrossProjectSearch?: boolean;
-  } = {}
-) => {
-  const slo = createSLO();
-  return {
-    ...slo,
-    settings: {
-      syncDelay: slo.settings.syncDelay,
-      frequency: slo.settings.frequency,
-      preventInitialBackfill: slo.settings.preventInitialBackfill,
-      ...settings,
-    },
-  };
-};
 
 const GATED_OFF: Array<{
   name: string;
@@ -91,9 +72,7 @@ const PRECEDENCE_CASES: Array<{
 describe('getSloProjectRouting', () => {
   describe.each(GATED_OFF)('when $name', ({ isServerless, isCpsAvailable }) => {
     it.each(PRECEDENCE_CASES)('returns undefined for $name', ({ settings }) => {
-      expect(
-        getSloProjectRouting(sloWith({ ...settings }), { isServerless, isCpsAvailable })
-      ).toBeUndefined();
+      expect(getSloProjectRouting(settings, { isServerless, isCpsAvailable })).toBeUndefined();
     });
   });
 
@@ -101,7 +80,7 @@ describe('getSloProjectRouting', () => {
     const flags = { isServerless: true, isCpsAvailable: true };
 
     it.each(PRECEDENCE_CASES)('returns $expected for $name', ({ settings, expected }) => {
-      expect(getSloProjectRouting(sloWith({ ...settings }), flags)).toBe(expected);
+      expect(getSloProjectRouting(settings, flags)).toBe(expected);
     });
   });
 });

@@ -83,13 +83,13 @@ export function DataPreviewChart({
     isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(
-    isIndicatorSectionValid,
+  } = useDebouncedGetPreviewData({
+    isIndicatorValid: isIndicatorSectionValid,
     indicator,
     range,
     groupBy,
-    projectRoutings
-  );
+    projectRoutings,
+  });
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&

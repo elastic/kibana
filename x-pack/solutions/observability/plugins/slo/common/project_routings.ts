@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+/**
+ * Values mirror `@kbn/cps-server-utils` (server-only) and `@kbn/cps-common` (private to the
+ * platform group); declared here so browser and server code can share one definition.
+ */
 export const LOCAL_PROJECT_ROUTING = '_alias:_origin';
 export const ALL_PROJECT_ROUTING = '_alias:*';
 
-// Folds null / blank / LOCAL into LOCAL; passes any other defined value through.
+// Only for routings the caller knows are set: `undefined` means "never configured", which
+// callers must keep distinct from an explicit origin-only routing.
 export const normalizeDefinedRouting = (r: string | null): string =>
   r === null || r.trim().length === 0 || r === LOCAL_PROJECT_ROUTING ? LOCAL_PROJECT_ROUTING : r;
 

@@ -24,7 +24,6 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { toEsProjectRouting } from '../../common/project_routings';
 import type { APMTransactionDurationIndicator, Groupings } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
 import { typedSearch } from '../utils/queries';
@@ -34,6 +33,7 @@ import {
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getSloProjectRouting } from './utils';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 
 interface Options {
@@ -893,10 +893,10 @@ export class GetPreviewData {
         groupings: params.groupings,
         interval: `${bucketSize}m`,
         groupBy: params.groupBy?.filter((value) => value !== ALL_VALUE),
-        projectRouting:
-          this.isServerless && this.isCpsAvailable
-            ? toEsProjectRouting(params.projectRoutings, undefined)
-            : undefined,
+        projectRouting: getSloProjectRouting(
+          { projectRoutings: params.projectRoutings },
+          { isServerless: this.isServerless, isCpsAvailable: this.isCpsAvailable }
+        ),
       };
 
       const type = params.indicator.type;

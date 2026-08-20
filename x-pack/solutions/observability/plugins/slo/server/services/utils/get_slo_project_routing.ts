@@ -9,7 +9,7 @@ import { toEsProjectRouting } from '../../../common/project_routings';
 import type { SLODefinition } from '../../domain/models';
 
 export const getSloProjectRouting = (
-  slo: SLODefinition,
+  settings: Pick<SLODefinition['settings'], 'projectRoutings' | 'preventCrossProjectSearch'>,
   {
     isServerless,
     isCpsAvailable,
@@ -22,5 +22,5 @@ export const getSloProjectRouting = (
     return undefined;
   }
 
-  return toEsProjectRouting(slo.settings.projectRoutings, slo.settings.preventCrossProjectSearch);
+  return toEsProjectRouting(settings.projectRoutings, settings.preventCrossProjectSearch);
 };

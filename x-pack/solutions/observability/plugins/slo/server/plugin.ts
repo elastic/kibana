@@ -215,9 +215,7 @@ export class SLOPlugin
               pluginsStart.alerting.getRulesClientWithRequest(request),
               pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
               pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-              this.isCpsEnabled
-                ? (plugins.cps?.isTierEligible() ?? Promise.resolve(false))
-                : Promise.resolve(false),
+              this.isCpsEnabled ? plugins.cps?.isTierEligible() ?? false : false,
             ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);

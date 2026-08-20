@@ -7,12 +7,7 @@
 
 import { EuiButton, EuiFormRow, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
 import type { CPSProject } from '@kbn/cps-utils';
-import {
-  PROJECT_ROUTING,
-  ProjectScopePicker,
-  projectRoutingCodec,
-  useFetchProjects,
-} from '@kbn/cps-utils';
+import { ProjectScopePicker, projectRoutingCodec, useFetchProjects } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -110,7 +105,7 @@ const getSelectedProjectCount = ({
   originProjectId?: string;
   projectRouting: string;
 }): number => {
-  if (projectRouting === PROJECT_ROUTING.ALL) {
+  if (projectRouting === ALL_PROJECT_ROUTING) {
     return availableProjects.length;
   }
 
@@ -121,13 +116,13 @@ const getSelectedProjectCount = ({
   const { excludedProjectIds, selectedProjectIds } = projectRoutingCodec.decode(projectRouting);
 
   if (selectedProjectIds.length > 0) {
-    return selectedProjectIds.filter((projectId) =>
-      availableProjects.some((project) => project._id === projectId)
-    ).length;
+    const availableProjectIds = new Set(availableProjects.map((project) => project._id));
+    return selectedProjectIds.filter((projectId) => availableProjectIds.has(projectId)).length;
   }
 
   if (excludedProjectIds.length > 0) {
-    return availableProjects.filter((project) => !excludedProjectIds.includes(project._id)).length;
+    const excluded = new Set(excludedProjectIds);
+    return availableProjects.filter((project) => !excluded.has(project._id)).length;
   }
 
   return availableProjects.length;
@@ -142,7 +137,7 @@ const getProjectScopeButtonLabel = ({
   originProjectId?: string;
   projectRouting: string;
 }): string => {
-  if (projectRouting === PROJECT_ROUTING.ALL) {
+  if (projectRouting === ALL_PROJECT_ROUTING) {
     return allProjectsButtonLabel;
   }
 
@@ -179,7 +174,7 @@ export function ProjectRoutingsSelector() {
 
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
-    PROJECT_ROUTING.ALL
+    ALL_PROJECT_ROUTING
   );
   const availableProjects = useMemo(
     () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
@@ -187,6 +182,23 @@ export function ProjectRoutingsSelector() {
   );
   const isGateOpen = Boolean(isServerless && cps?.isTierEligible && cpsManager);
   const originProjectId = originProject?._id;
+
+  const pickerProjectRouting = useMemo(
+    () => toPickerInput(projectRoutings, originProjectId),
+    [originProjectId, projectRoutings]
+  );
+
+  const buttonLabel = useMemo(
+    () =>
+      isLoading
+        ? loadingButtonLabel
+        : getProjectScopeButtonLabel({
+            availableProjects,
+            originProjectId,
+            projectRouting: pickerProjectRouting,
+          }),
+    [availableProjects, isLoading, originProjectId, pickerProjectRouting]
+  );
 
   useEffect(() => {
     if (!isGateOpen || linkedProjects.length === 0 || projectRoutings !== undefined) {
@@ -215,15 +227,6 @@ export function ProjectRoutingsSelector() {
   if (!isLoading && !error && linkedProjects.length === 0) {
     return null;
   }
-
-  const pickerProjectRouting = toPickerInput(projectRoutings, originProjectId);
-  const buttonLabel = isLoading
-    ? loadingButtonLabel
-    : getProjectScopeButtonLabel({
-        availableProjects,
-        originProjectId,
-        projectRouting: pickerProjectRouting,
-      });
 
   return (
     <>
@@ -259,7 +262,7 @@ export function ProjectRoutingsSelector() {
           ) : (
             <ProjectScopePicker
               availableProjects={availableProjects}
-              isReadOnly={false}
+              fetchProjectsByRouting={fetchProjects}
               onProjectRoutingChange={handleProjectRoutingChange}
               originProjectId={originProjectId}
               projectRouting={pickerProjectRouting}

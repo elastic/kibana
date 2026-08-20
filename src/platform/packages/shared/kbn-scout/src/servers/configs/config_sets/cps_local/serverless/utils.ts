@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const isSecurityTestEndpointsPluginPath = (arg: string): boolean =>
+const isSecurityTestEndpointsPluginPath = (arg: string): boolean =>
   arg.startsWith('--plugin-path=') &&
   arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+
+/**
+ * The inherited UIAM config adds securityTestEndpoints for API tests. CPS local
+ * manual/UI testing does not use it, and loading its browser plugin can break boot.
+ */
+export const withoutSecurityTestEndpoints = (serverArgs: string[]): string[] =>
+  serverArgs.filter((arg) => !isSecurityTestEndpointsPluginPath(arg));

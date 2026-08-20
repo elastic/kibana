@@ -33,23 +33,23 @@ const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
   'boundedProjectRoutingSchema',
   t.string.is,
   (input, context): Either<t.Errors, string> => {
-    if (typeof input === 'string') {
-      if (input.trim().length === 0) {
-        return t.failure(input, context, 'Invalid projectRoutings, must not be empty');
-      }
-
-      if (input.length > MAX_PROJECT_ROUTINGS_LENGTH) {
-        return t.failure(
-          input,
-          context,
-          `Invalid projectRoutings, must be at most ${MAX_PROJECT_ROUTINGS_LENGTH} characters`
-        );
-      }
-
-      return t.success(input);
-    } else {
+    if (typeof input !== 'string') {
       return t.failure(input, context);
     }
+
+    if (input.trim().length === 0) {
+      return t.failure(input, context, 'Invalid projectRoutings, must not be empty');
+    }
+
+    if (input.length > MAX_PROJECT_ROUTINGS_LENGTH) {
+      return t.failure(
+        input,
+        context,
+        `Invalid projectRoutings, must be at most ${MAX_PROJECT_ROUTINGS_LENGTH} characters`
+      );
+    }
+
+    return t.success(input);
   },
   t.identity
 );
