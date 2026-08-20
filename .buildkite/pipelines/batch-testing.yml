@@ -14,6 +14,20 @@ steps:
 
   - wait
 
+  - label: 'Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    key: build
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    timeout_in_minutes: 20
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - group: 'Dispatch tests'
     key: dispatch-tests
     steps:
@@ -73,29 +87,6 @@ steps:
           automatic:
             - exit_status: '*'
               limit: 1
-
-  - wait
-
-  - label: 'Build Kibana Distribution'
-    command: |
-      FTR=$(buildkite-agent meta-data get 'test-steps-dispatched:ftr' --default 'false')
-      SCOUT=$(buildkite-agent meta-data get 'test-steps-dispatched:scout' --default 'false')
-      if [[ "$FTR" != 'true' && "$SCOUT" != 'true' ]]; then
-        echo 'No FTR or Scout tests were dispatched. No need for a Kibana distribution to be built.'
-        exit 0
-      fi
-      .buildkite/scripts/steps/build_kibana.sh
-    key: build
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-8
-    timeout_in_minutes: 20
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - wait: ~
     continue_on_failure: true
