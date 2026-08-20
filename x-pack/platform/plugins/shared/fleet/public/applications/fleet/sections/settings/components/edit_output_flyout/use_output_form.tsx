@@ -181,13 +181,10 @@ export function extractDefaultDynamicKafkaTopics(
   if (!o?.topics || o.topics?.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
     return [];
   }
-  const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
-  const parsed = matched?.length ? matched[2] : '';
-
   return [
     {
-      label: parsed,
-      value: parsed,
+      label: o.topics[0].topic,
+      value: o.topics[0].topic,
     },
   ];
 }
@@ -892,7 +889,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 ? {
                     topics: [
                       {
-                        topic: `%{[${kafkaDynamicTopicInput.value}]}`,
+                        topic: kafkaDynamicTopicInput.value,
                       },
                     ],
                   }

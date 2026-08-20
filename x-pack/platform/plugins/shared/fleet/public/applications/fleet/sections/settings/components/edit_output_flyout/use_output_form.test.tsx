@@ -58,8 +58,8 @@ describe('use_output_form', () => {
 
       expect(res).toEqual([
         {
-          label: 'default.dataset',
-          value: 'default.dataset',
+          label: '%{[default.dataset]}',
+          value: '%{[default.dataset]}',
         },
       ]);
     });
@@ -75,8 +75,8 @@ describe('use_output_form', () => {
 
       expect(res).toEqual([
         {
-          label: '@timestamp',
-          value: '@timestamp',
+          label: '%{[@timestamp]}',
+          value: '%{[@timestamp]}',
         },
       ]);
     });
@@ -92,8 +92,8 @@ describe('use_output_form', () => {
 
       expect(res).toEqual([
         {
-          label: 'something',
-          value: 'something',
+          label: '%{[something]}',
+          value: '%{[something]}',
         },
       ]);
     });
