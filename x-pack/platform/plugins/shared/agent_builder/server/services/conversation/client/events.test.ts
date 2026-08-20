@@ -11,7 +11,6 @@ import type { TimelineEvent, TimelineEventInput } from '@kbn/agent-builder-commo
 import { EventActorType, TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
-import { createInMemoryConversationTemplates } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 
 let uuidCounter = 0;
@@ -79,7 +78,6 @@ describe('ConversationClient timeline events', () => {
       esClient: esClient as unknown as ElasticsearchClient,
       user: { ...user, isAdmin: false },
       agentRegistry: agentRegistry as unknown as AgentRegistry,
-      conversationTemplates: createInMemoryConversationTemplates(),
     });
   });
 

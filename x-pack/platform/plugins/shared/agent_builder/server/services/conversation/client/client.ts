@@ -115,7 +115,7 @@ export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
-  create(conversation: ConversationCreateRequest): Promise<Conversation>;
+  create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
@@ -290,7 +290,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<Conversation> {
+  async create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
