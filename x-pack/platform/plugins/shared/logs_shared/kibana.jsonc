@@ -24,7 +24,7 @@
       "embeddable",
       "savedSearch"
     ],
-    "optionalPlugins": ["cloud", "observabilityAIAssistant", "ml"],
+    "optionalPlugins": ["observabilityAIAssistant", "ml"],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]
   }

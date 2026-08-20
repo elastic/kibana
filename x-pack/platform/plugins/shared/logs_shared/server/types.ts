@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
@@ -34,7 +33,6 @@ export interface LogsSharedPluginStart {
 }
 
 export interface LogsSharedServerPluginSetupDeps {
-  cloud?: CloudSetup;
   share: SharePluginSetup;
   data: DataPluginSetup;
 }
