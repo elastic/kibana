@@ -55,7 +55,7 @@ export function handleTree(
       shouldExcludeColdAndFrozenTiers,
     });
     const nodes = Array.isArray(body) ? body : body.statsNodes;
-    reportAnalyzerCrossProjectRender((await context.securitySolution).getEndpointService(), nodes);
+    reportAnalyzerCrossProjectRender((await context.securitySolution).getAnalytics(), nodes);
     return res.ok({
       body,
     });

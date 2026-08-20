@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ResolverNode } from '../../../../../common/endpoint/types';
 import { isFannedInHit } from '../../../utils/cps_read_routing';
 import { ANALYZER_CROSS_PROJECT_RENDER_EVENT } from '../../../../lib/telemetry/event_based/events';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 
 const ORIGIN_PROJECT = '_origin';
 
@@ -38,7 +38,7 @@ export function countProjectsInResolverNodes(nodes: ResolverNode[]): {
 }
 
 export function reportAnalyzerCrossProjectRender(
-  endpointService: EndpointAppContextService,
+  analytics: AnalyticsServiceSetup,
   nodes: ResolverNode[]
 ): void {
   const { projectCount, hasLinkedProjectNodes } = countProjectsInResolverNodes(nodes);
@@ -47,11 +47,9 @@ export function reportAnalyzerCrossProjectRender(
   }
 
   try {
-    endpointService
-      .getTelemetryService()
-      .reportEvent(ANALYZER_CROSS_PROJECT_RENDER_EVENT.eventType, {
-        projectCount,
-      });
+    analytics.reportEvent(ANALYZER_CROSS_PROJECT_RENDER_EVENT.eventType, {
+      projectCount,
+    });
   } catch {
     // Telemetry must never fail a resolver response.
   }

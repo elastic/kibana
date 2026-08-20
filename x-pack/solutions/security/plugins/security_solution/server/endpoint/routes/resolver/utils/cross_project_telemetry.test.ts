@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { ResolverNode } from '../../../../../common/endpoint/types';
-import { countProjectsInResolverNodes } from './cross_project_telemetry';
+import { ANALYZER_CROSS_PROJECT_RENDER_EVENT } from '../../../../lib/telemetry/event_based/events';
+import {
+  countProjectsInResolverNodes,
+  reportAnalyzerCrossProjectRender,
+} from './cross_project_telemetry';
 
 const node = (index?: string): ResolverNode => ({
   id: 'entity-1',
@@ -34,5 +39,47 @@ describe('countProjectsInResolverNodes', () => {
       projectCount: 3,
       hasLinkedProjectNodes: true,
     });
+  });
+});
+
+describe('reportAnalyzerCrossProjectRender', () => {
+  let analytics: jest.Mocked<Pick<AnalyticsServiceSetup, 'reportEvent'>>;
+
+  beforeEach(() => {
+    analytics = { reportEvent: jest.fn() };
+  });
+
+  it('reports the project count when linked-project nodes are present', () => {
+    reportAnalyzerCrossProjectRender(analytics as unknown as AnalyticsServiceSetup, [
+      node('logs-endpoint.events-default'),
+      node('linked-a:logs-endpoint.events-default'),
+    ]);
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      ANALYZER_CROSS_PROJECT_RENDER_EVENT.eventType,
+      { projectCount: 2 }
+    );
+  });
+
+  it('does not report when the tree is origin-only', () => {
+    reportAnalyzerCrossProjectRender(analytics as unknown as AnalyticsServiceSetup, [
+      node('logs-endpoint.events-default'),
+      node(),
+    ]);
+
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('never throws when telemetry reporting fails', () => {
+    analytics.reportEvent.mockImplementation(() => {
+      throw new Error('boom');
+    });
+
+    expect(() =>
+      reportAnalyzerCrossProjectRender(analytics as unknown as AnalyticsServiceSetup, [
+        node('logs-endpoint.events-default'),
+        node('linked-a:logs-endpoint.events-default'),
+      ])
+    ).not.toThrow();
   });
 });
