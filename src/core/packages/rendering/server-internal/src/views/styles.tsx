@@ -40,7 +40,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
   if (theme === 'borealis') {
     return {
       light: {
-        pageBackground: '#EAEDF5', // colors.body
+        pageBackground: '#ECF1F9', // colors.body (shade15)
         welcomeText: '#5A6D8C', // colors.subduedText
         progress: '#ECF1F9', // colors.lightestShade
         progressBefore: '#0B64DD', // colors.primary

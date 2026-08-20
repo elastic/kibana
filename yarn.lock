@@ -1938,13 +1938,13 @@
 
 "@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-8.0.0.tgz":
   version "8.0.0"
-  resolved "file:./elastic-eui-theme-borealis-8.0.0.tgz#40cd831177095f5462ab10583a7ce044601ff0ef"
+  resolved "file:./elastic-eui-theme-borealis-8.0.0.tgz#e719737775cfb81582aade00ba538aea4c2591c0"
   dependencies:
     chroma-js "^2.4.2"
 
 "@elastic/eui-theme-common@file:./elastic-eui-theme-common-10.0.0.tgz":
   version "10.0.0"
-  resolved "file:./elastic-eui-theme-common-10.0.0.tgz#cd46c4c9266607be5077e6cfbb0e5d3d7ebcd2a2"
+  resolved "file:./elastic-eui-theme-common-10.0.0.tgz#45c8ea794996d102d775974a3a51aa0ae4333dcc"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
@@ -1952,7 +1952,7 @@
 
 "@elastic/eui@file:./elastic-eui-119.0.0.tgz":
   version "119.0.0"
-  resolved "file:./elastic-eui-119.0.0.tgz#93dceb7c4b82ad8adacf5ad6d44f101efed65ff9"
+  resolved "file:./elastic-eui-119.0.0.tgz#6bb79163defd515ea6f20f09620ac25193706d8d"
   dependencies:
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"

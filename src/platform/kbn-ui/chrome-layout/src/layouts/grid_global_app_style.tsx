@@ -47,7 +47,7 @@ export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) =
   // Light mode layered background: subtle blue glow at top center, light gradient base
   const lightModeBackground = [
     'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
-    'linear-gradient(#EAEDF5, #E8ECF4)',
+    'linear-gradient(#ECF1F9, #E8EDF6)',
   ].join(', ');
 
   return css`
