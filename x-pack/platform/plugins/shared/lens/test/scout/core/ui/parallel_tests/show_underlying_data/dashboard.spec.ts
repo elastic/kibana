@@ -6,12 +6,22 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { ScoutPage } from '@kbn/scout';
 import {
   createLogstashLensEditorSuiteSetup,
   openDiscoverFromPopup,
   spaceTest,
   testData,
 } from '../../fixtures';
+
+/**
+ * Waits until the dashboard URL is `#/view/{id}` (e.g. after first save from `#/create`)
+ * and returns that saved dashboard id.
+ */
+async function waitForDashboardIdFromUrl(page: ScoutPage): Promise<string> {
+  await expect(page).toHaveURL(/#\/view\/[^/?]+/);
+  return page.url().split('#/view/')[1].split(/[/?]/)[0];
+}
 
 spaceTest.describe(
   'Lens show underlying data from dashboard',
@@ -36,6 +46,7 @@ spaceTest.describe(
         const { visualize, lens, dashboard, queryBar, filterBar } = pageObjects;
         const panelTitle = 'Embedded Visualization';
         const openInDiscoverAction = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
+        let dashboardId: string;
 
         await spaceTest.step('save the visualization to a new dashboard', async () => {
           await visualize.goto();
@@ -50,6 +61,7 @@ spaceTest.describe(
           });
           await dashboard.waitForRenderComplete();
           await dashboard.saveDashboard(`Open in Discover Testing ${scoutSpace.id}-${Date.now()}`);
+          dashboardId = await waitForDashboardIdFromUrl(page);
         });
 
         await spaceTest.step('add a Lucene query and filter on the Lens panel', async () => {
@@ -74,9 +86,14 @@ spaceTest.describe(
             value: 'cdn.theacademyofperformingartsandscience.org',
           });
           await expect(page.testSubj.locator('~filter-key-host.raw')).toBeVisible();
-          await dashboard.saveChangesToExistingDashboard();
-          await dashboard.waitForRenderComplete();
-          await expect(page.testSubj.locator('dashboardUnsavedChangesBadge')).toBeHidden();
+          await expect(dashboard.unsavedChangesIndicator).toBeVisible();
+          await dashboard.clickQuickSave();
+          await expect(dashboard.unsavedChangesIndicator).toBeHidden();
+        });
+
+        await spaceTest.step('reload the saved dashboard in view mode', async () => {
+          await dashboard.openDashboardWithId(dashboardId);
+          await dashboard.waitForPanelsToLoad(1);
         });
 
         await spaceTest.step('open Discover from the panel and assert merged context', async () => {

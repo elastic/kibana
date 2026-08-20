@@ -54,6 +54,8 @@ export class DashboardApp {
   private readonly confirmSaveButton;
   private readonly quickSaveSecondaryButton;
   private readonly interactiveSaveMenuItem;
+  /** Unsaved-changes badge on the save split button. */
+  public readonly unsavedChangesIndicator;
 
   // Library flyout
   private readonly savedObjectsFinderTable;
@@ -111,6 +113,9 @@ export class DashboardApp {
       'dashboardQuickSaveMenuItem-secondary-button'
     );
     this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
+    this.unsavedChangesIndicator = this.page.testSubj.locator(
+      'split-button-notification-indicator'
+    );
 
     // Library flyout
     this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');

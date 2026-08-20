@@ -21,7 +21,6 @@ import {
  * https://github.com/elastic/kibana/issues/285093
  * - Full editor string equality (`from logs* | stats maxB = max(bytes)`), not only fragments
  * - Dashboard KQL/Lucene + translatable filters injected as ES|QL WHERE; Discover filter bar empty
- * - Click Open in Discover from view mode after leaving edit (FTR did that)
  */
 spaceTest.describe(
   'Lens show underlying data from ES|QL dashboard panel',
@@ -73,9 +72,14 @@ spaceTest.describe(
             scoutSpace.id
           );
 
-          await dashboard.openDashboardWithId(dashboardId);
+          await dashboard.openDashboardWithIdInEditMode(dashboardId);
           await dashboard.waitForPanelsToLoad(1);
           await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+        });
+
+        await spaceTest.step('switch the dashboard to view mode', async () => {
+          await dashboard.clickCancelOutOfEditMode();
+          await dashboard.waitForRenderComplete();
         });
 
         await spaceTest.step(
