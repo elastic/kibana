@@ -66,6 +66,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.get_entity_graph`,
+  `${internalNamespaces.security}.get_entity_risk_score_history`,
+  `${internalNamespaces.security}.entity_relationship_history`,
   `${internalNamespaces.security}.list_watchlists`,
   `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
@@ -102,6 +104,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Custom content panels
   'custom_content_update_panel',
+
+  // Platform – Context Engine
+  `${internalNamespaces.platformContextEngine}.save_automation`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -294,6 +299,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'workflow.yaml',
   'workflow.yaml.diff',
 
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
+
   // Platform – Cases
   'case',
   'cases',
@@ -309,6 +317,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity',
   'security.entity_analytics_dashboard',
   'security.entity_graph',
+  'security.entity_risk_score_history',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled

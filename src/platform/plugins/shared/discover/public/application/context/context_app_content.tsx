@@ -29,7 +29,12 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { DataLoadingState, getDataGridDensity, getRowHeight } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  getDataGridDensity,
+  getRenderCustomToolbarWithElements,
+  getRowHeight,
+} from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
@@ -205,6 +210,29 @@ export function ContextAppContent({
     timeRange,
   });
 
+  const predecessorsActionBar = useMemo(
+    () => (
+      <ActionBarMemoized
+        key="predecessorsActionBar"
+        type={SurrDocType.PREDECESSORS}
+        defaultStepSize={defaultStepSize}
+        docCount={predecessorCount}
+        onChangeCount={onChangeCount}
+        isLoading={arePredecessorsLoading}
+        isDisabled={isAnchorLoading}
+      />
+    ),
+    [defaultStepSize, predecessorCount, onChangeCount, arePredecessorsLoading, isAnchorLoading]
+  );
+
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: predecessorsActionBar,
+      }),
+    [predecessorsActionBar]
+  );
+
   return (
     <Fragment>
       {(showInterceptedWarning || showPredecessorsWarning) && (
@@ -224,17 +252,7 @@ export function ContextAppContent({
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
-            externalAdditionalControls={
-              <ActionBarMemoized
-                key="predecessorsActionBar"
-                type={SurrDocType.PREDECESSORS}
-                defaultStepSize={defaultStepSize}
-                docCount={predecessorCount}
-                onChangeCount={onChangeCount}
-                isLoading={arePredecessorsLoading}
-                isDisabled={isAnchorLoading}
-              />
-            }
+            renderCustomToolbar={renderCustomToolbar}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"

@@ -45,7 +45,8 @@
     "@kbn/licensing-types",
     "@kbn/core-chrome-layout-constants",
     "@kbn/code-editor-mock",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",
