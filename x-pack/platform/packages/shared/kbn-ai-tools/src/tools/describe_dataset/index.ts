@@ -43,7 +43,14 @@ export async function describeDataset({
       kql,
       requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     }),
-    runEsqlPopulationCount({ esClient, index, start, end, kql }),
+    runEsqlPopulationCount({
+      esClient,
+      index,
+      start,
+      end,
+      kql,
+      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+    }),
   ]);
 
   const schema = columns.map((column) => {
@@ -68,18 +75,23 @@ async function runEsqlPopulationCount({
   start,
   end,
   kql,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
   kql?: string;
+  signal?: AbortSignal;
 }): Promise<number> {
-  const response = (await esClient.esql.query({
-    query: buildCountQuery({ index, kql }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  const response = (await esClient.esql.query(
+    {
+      query: buildCountQuery({ index, kql }),
+      filter: { bool: { filter: dateRangeQuery(start, end) } },
+      drop_null_columns: true,
+    },
+    { signal }
+  )) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 
   return typeof total === 'number' ? total : 0;

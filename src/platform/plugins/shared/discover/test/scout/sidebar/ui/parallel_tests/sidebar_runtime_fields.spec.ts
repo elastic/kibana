@@ -158,17 +158,17 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
 
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
       await unifiedFieldList.clickFieldListItemAdd(newField);
       await discover.waitUntilSearchingHasFinished();
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(true);
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
 
       await discover.deleteRuntimeField(newField);
       await unifiedFieldList.searchField(newField);
       await expect(unifiedFieldList.getAvailableField(newField)).toBeHidden();
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
     }
   );
 });

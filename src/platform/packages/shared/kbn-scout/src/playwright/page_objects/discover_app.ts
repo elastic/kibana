@@ -869,7 +869,14 @@ export class DiscoverApp {
    * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
    */
   async getBreakdownFieldValue(): Promise<string> {
-    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await this.page.testSubj.innerText(
+      'unifiedHistogramBreakdownSelectorButton'
+    );
+
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -1120,6 +1127,12 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
     const queryMode = await this.getCurrentQueryMode();
     expect(queryMode).toBe('classic');
+  }
+
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {

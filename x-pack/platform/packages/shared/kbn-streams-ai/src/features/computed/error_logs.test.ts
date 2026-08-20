@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { esql } from '@elastic/esql';
 import { errorLogsGenerator } from './error_logs';
 
 jest.mock('@kbn/ai-tools', () => ({
@@ -26,7 +27,7 @@ describe('errorLogsGenerator', () => {
     jest.clearAllMocks();
   });
 
-  it('uses an ES|QL MATCH_PHRASE filter with unmappedFields=NULLIFY', async () => {
+  it('wires the error filter through to the sampling helper', async () => {
     getSampleDocumentsEsqlMock.mockResolvedValueOnce({
       hits: [
         {
@@ -56,17 +57,25 @@ describe('errorLogsGenerator', () => {
         start: 100,
         end: 200,
         sampleSize: 5,
-        unmappedFields: 'NULLIFY',
-        // Composer-built expression; deep-equality matchers fail here so just
-        // assert it is present. The query-string assertion lives in
-        // get_sample_documents.test.ts; this test guarantees the generator
-        // wires the whereCondition through.
         whereCondition: expect.anything(),
       })
     );
     expect(result).toEqual({
       samples: [{ 'log.level': 'error', message: 'exception thrown' }],
     });
+  });
+
+  it('filters with a single QSTR predicate so union-typed log.level stays pushable', async () => {
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({ hits: [], total: 0 });
+
+    await errorLogsGenerator.generate({ stream, start: 100, end: 200, esClient, logger });
+
+    const { whereCondition } = getSampleDocumentsEsqlMock.mock.calls[0][0];
+    if (!whereCondition) throw new Error('expected whereCondition to be defined');
+    const printed = esql.from('logs-*').where`${whereCondition}`.print('basic');
+    expect(printed).toContain(
+      'QSTR("log.level:error OR message:error OR message:exception OR body.text:error OR body.text:exception")'
+    );
   });
 
   it('keeps only message + minimal context fields, dropping raw-document metadata', async () => {

@@ -15,7 +15,9 @@ import type { ConversationProperties } from '../client/storage';
 import {
   getConversationPermissions,
   hasConversationConverseAccess,
+  hasConversationDeleteAccess,
   hasConversationOwnerAccess,
+  hasConversationRenameAccess,
   isConversationMember,
   isConversationOwner,
 } from './authorization';
@@ -218,12 +220,69 @@ describe('conversation access control', () => {
     });
   });
 
+  describe('admin management of public conversations', () => {
+    const publicConversation = conversation({
+      access_control: { access_mode: ConversationAccessControlMode.Public },
+    });
+    const privateConversation = conversation();
+
+    it('allows an admin to rename and delete a public conversation they do not own', () => {
+      expect(
+        hasConversationRenameAccess({ conversation: publicConversation, user, isAdmin: true })
+      ).toBe(true);
+      expect(
+        hasConversationDeleteAccess({ conversation: publicConversation, user, isAdmin: true })
+      ).toBe(true);
+    });
+
+    it('denies an admin rename and delete on a private conversation they do not own', () => {
+      expect(
+        hasConversationRenameAccess({ conversation: privateConversation, user, isAdmin: true })
+      ).toBe(false);
+      expect(
+        hasConversationDeleteAccess({ conversation: privateConversation, user, isAdmin: true })
+      ).toBe(false);
+    });
+
+    it('does not grant an admin owner or converse access beyond what the access mode allows', () => {
+      expect(hasConversationOwnerAccess({ conversation: publicConversation, user })).toBe(false);
+      expect(hasConversationConverseAccess({ conversation: privateConversation, user })).toBe(
+        false
+      );
+    });
+
+    it('still denies a non-admin non-owner rename and delete on a public conversation', () => {
+      expect(
+        hasConversationRenameAccess({ conversation: publicConversation, user, isAdmin: false })
+      ).toBe(false);
+      expect(
+        hasConversationDeleteAccess({ conversation: publicConversation, user, isAdmin: false })
+      ).toBe(false);
+    });
+
+    it.each([
+      ['public', ConversationAccessControlMode.Public],
+      ['private', ConversationAccessControlMode.Private],
+    ])('leaves the owner of a %s conversation unaffected by isAdmin', (_label, accessMode) => {
+      const owned = conversation({
+        user_id: user.id,
+        access_control: { access_mode: accessMode },
+      });
+
+      for (const isAdmin of [true, false]) {
+        expect(hasConversationRenameAccess({ conversation: owned, user, isAdmin })).toBe(true);
+        expect(hasConversationDeleteAccess({ conversation: owned, user, isAdmin })).toBe(true);
+      }
+    });
+  });
+
   describe('getConversationPermissions', () => {
     it('grants rename and delete to the owner matched by profile id', () => {
       expect(
         getConversationPermissions({
           conversation: conversation({ user_id: user.id, user_name: 'old-alice' }),
           user,
+          isAdmin: false,
         })
       ).toEqual({ rename: true, delete: true, update_access_control: true });
     });
@@ -233,6 +292,7 @@ describe('conversation access control', () => {
         getConversationPermissions({
           conversation: conversation({ user_id: undefined, user_name: user.username }),
           user,
+          isAdmin: false,
         })
       ).toEqual({ rename: true, delete: true, update_access_control: true });
     });
@@ -244,7 +304,26 @@ describe('conversation access control', () => {
             access_control: { access_mode: ConversationAccessControlMode.Public },
           }),
           user,
+          isAdmin: false,
         })
+      ).toEqual({ rename: false, delete: false, update_access_control: false });
+    });
+
+    it('grants rename and delete to an admin on a public conversation they do not own', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({
+            access_control: { access_mode: ConversationAccessControlMode.Public },
+          }),
+          user,
+          isAdmin: true,
+        })
+      ).toEqual({ rename: true, delete: true, update_access_control: false });
+    });
+
+    it('denies rename and delete to an admin on a private conversation they do not own', () => {
+      expect(
+        getConversationPermissions({ conversation: conversation(), user, isAdmin: true })
       ).toEqual({ rename: false, delete: false, update_access_control: false });
     });
 
@@ -257,6 +336,7 @@ describe('conversation access control', () => {
             access_control: { access_mode: ConversationAccessControlMode.Public },
           }),
           user,
+          isAdmin: false,
         })
       ).toEqual({ rename: false, delete: false, update_access_control: false });
     });
@@ -278,12 +358,37 @@ describe('conversation access control', () => {
             },
           }),
           user,
+          isAdmin: false,
+        })
+      ).toEqual({ rename: false, delete: false, update_access_control: false });
+    });
+
+    it('denies managing access control to an admin on a private conversation shared with them as a member', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({
+            access_control: {
+              access_mode: ConversationAccessControlMode.Private,
+              entries: [
+                {
+                  type: 'user',
+                  id: userId,
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-06-29T00:00:00.000Z',
+                },
+              ],
+            },
+          }),
+          user,
+          isAdmin: true,
         })
       ).toEqual({ rename: false, delete: false, update_access_control: false });
     });
 
     it('denies rename and delete to a non-owner of a private conversation', () => {
-      expect(getConversationPermissions({ conversation: conversation(), user })).toEqual({
+      expect(
+        getConversationPermissions({ conversation: conversation(), user, isAdmin: false })
+      ).toEqual({
         rename: false,
         delete: false,
         update_access_control: false,
