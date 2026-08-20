@@ -15,15 +15,6 @@ import {
   prefetchPreviousStatusesByQuery,
 } from './prefetch_previous_statuses';
 
-const makeFoundDoc = (id: string, status: string, index = 'test-index') => ({
-  _id: id,
-  _index: index,
-  found: true as const,
-  _source: { [ALERT_WORKFLOW_STATUS]: status },
-});
-
-const makeNotFoundDoc = (id: string) => ({ _id: id, found: false as const });
-
 const makeSearchResponse = (
   hits: Array<{ _id: string; status: string; _index?: string }>,
   total: number,
@@ -77,7 +68,7 @@ describe('prefetchPreviousStatusesByIds', () => {
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.mget.mockResolvedValue({ docs: [] } as any);
+    esClient.search.mockResolvedValue(makeSearchResponse([], 0) as any);
   });
 
   afterEach(() => {
@@ -85,7 +76,7 @@ describe('prefetchPreviousStatusesByIds', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns empty previousStatuses and empty idToIndex when no docs are found', async () => {
+  it('returns empty previousStatuses and empty idToIndex when no hits are returned', async () => {
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
       esClient,
       'index',
@@ -96,13 +87,16 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('returns previous statuses and idToIndex for found docs', async () => {
-    esClient.mget.mockResolvedValue({
-      docs: [
-        makeFoundDoc('id1', 'acknowledged', '.alerts-security.alerts-default'),
-        makeFoundDoc('id2', 'closed', '.alerts-security.alerts-default'),
-      ],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    esClient.search.mockResolvedValue(
+      makeSearchResponse(
+        [
+          { _id: 'id1', status: 'acknowledged', _index: '.alerts-security.alerts-default' },
+          { _id: 'id2', status: 'closed', _index: '.alerts-security.alerts-default' },
+        ],
+        2
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ) as any
+    );
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
       'id1',
@@ -121,9 +115,12 @@ describe('prefetchPreviousStatusesByIds', () => {
     );
   });
 
-  it('omits id from idToIndex when doc._index is absent, but still includes it in previousStatuses', async () => {
-    esClient.mget.mockResolvedValue({
-      docs: [{ _id: 'id1', found: true as const, _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+  it('omits id from idToIndex when hit._index is absent, but still includes it in previousStatuses', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
@@ -135,11 +132,11 @@ describe('prefetchPreviousStatusesByIds', () => {
     expect(idToIndex.size).toBe(0);
   });
 
-  it('skips docs where found is false', async () => {
-    esClient.mget.mockResolvedValue({
-      docs: [makeFoundDoc('id1', 'open'), makeNotFoundDoc('id2')],
+  it('only processes docs returned as search hits (not-found docs are simply absent)', async () => {
+    esClient.search.mockResolvedValue(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      makeSearchResponse([{ _id: 'id1', status: 'open' }], 1) as any
+    );
 
     const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', [
       'id1',
@@ -150,15 +147,11 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('omits the previousStatus entry when source status is not a valid WorkflowStatus', async () => {
-    esClient.mget.mockResolvedValue({
-      docs: [
-        {
-          _id: 'id1',
-          _index: 'test-index',
-          found: true,
-          _source: { [ALERT_WORKFLOW_STATUS]: null },
-        },
-      ],
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
+      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
@@ -167,32 +160,43 @@ describe('prefetchPreviousStatusesByIds', () => {
     expect(previousStatuses).toEqual([]);
   });
 
-  it('calls mget with a string index as-is', async () => {
+  it('calls search with a string index as-is and a terms._id query', async () => {
     await prefetchPreviousStatusesByIds(esClient, 'my-index', ['id1']);
 
-    expect(esClient.mget).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'my-index', ids: ['id1'] })
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'my-index',
+        query: { terms: { _id: ['id1'] } },
+      })
     );
   });
 
-  it('joins an array index with commas before calling mget', async () => {
+  it('joins an array index with commas before calling search', async () => {
     await prefetchPreviousStatusesByIds(esClient, ['index-a', 'index-b'], ['id1']);
 
-    expect(esClient.mget).toHaveBeenCalledWith(
+    expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'index-a,index-b' })
+    );
+  });
+
+  it('passes ignore_unavailable: true to search', async () => {
+    await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ ignore_unavailable: true })
     );
   });
 
   it('includes ALERT_WORKFLOW_STATUS in _source_includes', async () => {
     await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
-    expect(esClient.mget).toHaveBeenCalledWith(
+    expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({ _source_includes: [ALERT_WORKFLOW_STATUS] })
     );
   });
 
-  it('propagates mget errors to the caller', async () => {
-    esClient.mget.mockRejectedValue(new Error('ES error'));
+  it('propagates search errors to the caller', async () => {
+    esClient.search.mockRejectedValue(new Error('ES error'));
 
     await expect(prefetchPreviousStatusesByIds(esClient, 'index', ['id1'])).rejects.toThrow(
       'ES error'

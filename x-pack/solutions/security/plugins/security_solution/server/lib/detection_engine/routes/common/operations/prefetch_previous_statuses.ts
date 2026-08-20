@@ -35,21 +35,25 @@ export const prefetchPreviousStatusesByIds = async (
   index: string | string[],
   ids: string[]
 ): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
-  const mgetResponse = await esClient.mget({
+  // Use search (not mget) so ignore_unavailable: true tolerates missing indices
+  // (e.g. the adhoc attack-discovery index may not exist yet).
+  const searchResponse = await esClient.search({
     index: resolveIndex(index),
-    ids,
+    query: { terms: { _id: ids } },
     _source_includes: [ALERT_WORKFLOW_STATUS],
+    size: ids.length,
+    ignore_unavailable: true,
   });
   const previousStatuses: PreviousStatus[] = [];
   const idToIndex = new Map<string, string>();
-  for (const doc of mgetResponse.docs) {
-    if ('found' in doc && doc.found && doc._id != null) {
-      const ps = extractWorkflowStatus(doc._source);
+  for (const hit of searchResponse.hits.hits) {
+    if (hit._id != null) {
+      const ps = extractWorkflowStatus(hit._source);
       if (ps !== undefined) {
-        previousStatuses.push({ id: doc._id, previousStatus: ps });
+        previousStatuses.push({ id: hit._id, previousStatus: ps });
       }
-      if (doc._index != null) {
-        idToIndex.set(doc._id, doc._index);
+      if (hit._index != null) {
+        idToIndex.set(hit._id, hit._index);
       }
     }
   }
