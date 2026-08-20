@@ -53,7 +53,7 @@ export interface IWatchStore {
     watchId: string,
     skillId: string,
     enabled: boolean
-  ): WatchSettings | WatchSkill | undefined;
+  ): WatchSettings | undefined;
 
   /** Projects WatchSkill[] for a single watch, merged with the existing skill catalog. */
   projectSkillsForWatch(watch: Watch): WatchSkill[];

@@ -96,9 +96,15 @@ export class WatchesService {
     } = {}
   ) {
     this.agentTypeMap = new Map((options.agentTypes ?? []).map((t) => [t.id, t]));
-    this.store = useMockData
-      ? new MockWatchStore()
-      : new WatchStore(management!, logger, options.agentBuilder, options.agentTypes);
+    if (!useMockData && !management) {
+      logger.warn(
+        'WatchesService: Workflows Management is unavailable — falling back to mock data'
+      );
+    }
+    this.store =
+      useMockData || !management
+        ? new MockWatchStore()
+        : new WatchStore(management, logger, options.agentBuilder, options.agentTypes);
   }
 
   private requireManagement(): WatchWorkflowsManagementClient {
@@ -397,7 +403,15 @@ export class WatchesService {
     return this.store.setWorkerEnabled(workerId, enabled);
   }
 
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
+  async setSkillEnabled(
+    skillId: string,
+    enabled: boolean,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<WatchSkill | undefined> {
+    if (!this.useMockData) {
+      await this.store.ensurePopulated(request, spaceId);
+    }
     return this.store.setSkillEnabled(skillId, enabled);
   }
 

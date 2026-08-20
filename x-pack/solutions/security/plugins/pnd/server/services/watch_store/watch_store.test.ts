@@ -136,12 +136,10 @@ describe('WatchStore', () => {
       expect(getWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('calls refresh again when skills remain empty after the first fetch', async () => {
-      // Watches without skill callables keep listSkills() at [], so ensurePopulated always
-      // re-fetches.  The guard only prevents repeated fetches when skills were actually built.
+    it('does not re-fetch when already populated, even when watches have no skill callables', async () => {
       await liveStore.ensurePopulated(request, SPACE);
       await liveStore.ensurePopulated(request, SPACE);
-      expect(getWorkflows).toHaveBeenCalledTimes(2);
+      expect(getWorkflows).toHaveBeenCalledTimes(1);
     });
   });
 

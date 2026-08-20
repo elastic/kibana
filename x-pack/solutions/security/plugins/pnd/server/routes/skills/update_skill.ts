@@ -29,6 +29,7 @@ export const registerUpdateSkillRoute = ({
   router,
   logger,
   getWatchesService,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -54,7 +55,12 @@ export const registerUpdateSkillRoute = ({
       async (_context, request, response) => {
         try {
           const { skillId } = request.params;
-          const skill = getWatchesService().setSkillEnabled(skillId, request.body.enabled);
+          const skill = await getWatchesService().setSkillEnabled(
+            skillId,
+            request.body.enabled,
+            request,
+            getSpaceId(request)
+          );
           if (!skill) {
             return response.notFound({
               body: { message: `Skill "${skillId}" not found` },

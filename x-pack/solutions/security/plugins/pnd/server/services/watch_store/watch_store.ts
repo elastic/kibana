@@ -41,6 +41,7 @@ const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('wa
 
 export class WatchStore implements IWatchStore {
   private state: WatchStoreState | undefined;
+  private isPopulated = false;
   private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
 
   constructor(
@@ -100,12 +101,13 @@ export class WatchStore implements IWatchStore {
       skills: this.buildSkillsFromWatches(watches, this.listSkills()),
       settingsByWatchId: settings,
     };
+    this.isPopulated = true;
 
     return watches;
   }
 
   async ensurePopulated(request: KibanaRequest, spaceId: string): Promise<void> {
-    if (this.listSkills().length > 0) return;
+    if (this.isPopulated) return;
     await this.refresh(request, spaceId);
   }
 
@@ -160,12 +162,12 @@ export class WatchStore implements IWatchStore {
   }
 
   setWatchAutonomy(_watchId: string, _level: WatchAutonomyLevel): WatchSettings | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 
   setWatchTriggers(_watchId: string, _patch: WatchTriggersPatch): WatchSettings | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 
@@ -173,7 +175,7 @@ export class WatchStore implements IWatchStore {
     _watchId: string,
     _patch: WatchScopeRoutingPatch
   ): WatchSettings | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 
@@ -182,7 +184,7 @@ export class WatchStore implements IWatchStore {
     _gateId: string,
     _patch: Partial<Pick<WatchApprovalGate, 'requirement' | 'approverRoleId'>>
   ): WatchSettings | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 
@@ -191,7 +193,7 @@ export class WatchStore implements IWatchStore {
     _workerId: string,
     _enabled: boolean
   ): WatchSettings | undefined {
-    // not supportedfor live data
+    // not supported for live data
     return undefined;
   }
 

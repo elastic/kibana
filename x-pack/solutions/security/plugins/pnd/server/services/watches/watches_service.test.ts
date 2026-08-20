@@ -282,8 +282,8 @@ describe('WatchesService', () => {
         request
       );
       // Flip the global flag both ways; the stored per-watch override must not move.
-      service.setSkillEnabled('alert-triage', false);
-      service.setSkillEnabled('alert-triage', true);
+      await service.setSkillEnabled('alert-triage', false, request, SPACE);
+      await service.setSkillEnabled('alert-triage', true, request, SPACE);
 
       const detail = await service.get(FLOOR, SPACE, request);
       expect(detail?.settings?.skills?.find((s) => s.skillId === 'alert-triage')?.enabled).toBe(
@@ -314,14 +314,14 @@ describe('WatchesService', () => {
       expect(service.setWorkerEnabled('nope', false)).toBeUndefined();
     });
 
-    it('setSkillEnabled returns undefined for an unknown skill id in mock mode', () => {
+    it('setSkillEnabled returns undefined for an unknown skill id in mock mode', async () => {
       const service = createService(undefined);
-      expect(service.setSkillEnabled('nope', false)).toBeUndefined();
+      expect(await service.setSkillEnabled('nope', false, request, SPACE)).toBeUndefined();
     });
 
-    it('setSkillEnabled returns undefined for an unknown skill id in non-mock mode when cache is empty', () => {
+    it('setSkillEnabled returns undefined for an unknown skill id in non-mock mode when cache is empty', async () => {
       const service = createService(createFakeClient().client, false);
-      expect(service.setSkillEnabled('nope', false)).toBeUndefined();
+      expect(await service.setSkillEnabled('nope', false, request, SPACE)).toBeUndefined();
     });
   });
 
@@ -494,7 +494,7 @@ describe('WatchesService', () => {
       );
 
       await service.listSkills(request, SPACE);
-      const updated = service.setSkillEnabled('skill-a', false);
+      const updated = await service.setSkillEnabled('skill-a', false, request, SPACE);
 
       expect(updated?.id).toBe('skill-a');
       expect(updated?.enabled).toBe(false);
@@ -513,7 +513,7 @@ describe('WatchesService', () => {
 
       await service.listSkills(request, SPACE);
 
-      expect(service.setSkillEnabled('no-such-skill', false)).toBeUndefined();
+      expect(await service.setSkillEnabled('no-such-skill', false, request, SPACE)).toBeUndefined();
     });
 
     it('non-mock mode — global skill toggle does not create a per-watch override', async () => {
@@ -525,13 +525,13 @@ describe('WatchesService', () => {
       );
 
       await service.listSkills(request, SPACE);
-      service.setSkillEnabled('skill-a', false);
+      await service.setSkillEnabled('skill-a', false, request, SPACE);
       expect(
         (await service.listSkills(request, SPACE)).find((s) => s.id === 'skill-a')?.enabled
       ).toBe(false);
 
       // Restoring the global flag propagates immediately — no per-watch override is stuck.
-      service.setSkillEnabled('skill-a', true);
+      await service.setSkillEnabled('skill-a', true, request, SPACE);
       expect(
         (await service.listSkills(request, SPACE)).find((s) => s.id === 'skill-a')?.enabled
       ).toBe(true);
@@ -554,7 +554,7 @@ describe('WatchesService', () => {
       const service = createServiceWithOptions(client, { agentBuilder, agentTypes }, false);
 
       await service.listSkills(request, SPACE);
-      service.setSkillEnabled('skill-a', false);
+      await service.setSkillEnabled('skill-a', false, request, SPACE);
 
       // list() calls ensurePopulated(), which skips the refresh since skills are already cached.
       // The setSkillEnabled mutation persists directly on the cached skill entry.
@@ -761,17 +761,14 @@ describe('WatchesService', () => {
         expect(client.getWorkflows).toHaveBeenCalledTimes(1);
       });
 
-      it('re-fetches on every call when watches have no skill callables', async () => {
-        // Bug: WatchStore.ensurePopulated() guards on listSkills().length > 0.
-        // When watches have no skill callables the skills catalog stays empty and
-        // ensurePopulated() calls refresh() on every list() invocation.
+      it('does not re-fetch when already populated, even when watches have no skill callables', async () => {
         const client = makeLiveClient([makeTaggedItem('watch-1')]);
         const service = createService(client, false);
 
         await service.list(request, SPACE);
         await service.list(request, SPACE);
 
-        expect(client.getWorkflows).toHaveBeenCalledTimes(2);
+        expect(client.getWorkflows).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -863,8 +860,8 @@ describe('WatchesService', () => {
           SPACE,
           request
         );
-        service.setSkillEnabled('alert-triage', false);
-        service.setSkillEnabled('alert-triage', true);
+        await service.setSkillEnabled('alert-triage', false, request, SPACE);
+        await service.setSkillEnabled('alert-triage', true, request, SPACE);
 
         const detail = await service.get(FLOOR, SPACE, request);
         expect(detail?.settings?.skills?.find((s) => s.skillId === 'alert-triage')?.enabled).toBe(
@@ -935,7 +932,7 @@ describe('WatchesService', () => {
         const service = createServiceWithOptions(client, { agentBuilder }, false);
 
         await service.listSkills(request, SPACE); // populate cache
-        service.setSkillEnabled('skill-a', false);
+        await service.setSkillEnabled('skill-a', false, request, SPACE);
 
         const skills = await service.listSkills(request, SPACE);
         expect(skills.find((s) => s.id === 'skill-a')?.enabled).toBe(false);
