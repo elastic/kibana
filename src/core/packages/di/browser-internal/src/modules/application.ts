@@ -9,24 +9,22 @@
 
 import { isPromise } from '@kbn/std';
 import type { App, AppUnmount } from '@kbn/core-application-browser';
-import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
-import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
-import { Global } from '@kbn/core-di-internal';
+import { type KibanaContainerModuleLoadOptions, Scope } from '@kbn/core-di';
+import { Application, ApplicationParameters, CoreSetup } from '@kbn/core-di-browser';
 
 export function loadApplication({ onSetup }: KibanaContainerModuleLoadOptions) {
   onSetup(Application, CoreSetup('application'), ({ inject }, application, definition) => {
     application.register({
       ...definition,
-      mount: inject(CoreStart('injection'), (injection, params) => {
-        const scope = injection.fork();
-        scope.bind(ApplicationParameters).toConstantValue(params);
-        scope.bind(Global).toConstantValue(ApplicationParameters);
+      mount: inject(Scope, (scope, params) => {
+        scope.expose(ApplicationParameters).toConstantValue(params);
+
         const unmount = scope.get(definition, { autobind: true }).mount();
         const wrap = (callback: AppUnmount) => () => {
           try {
             return callback();
           } finally {
-            scope.unbindAllAsync();
+            scope.dispose();
           }
         };
 
