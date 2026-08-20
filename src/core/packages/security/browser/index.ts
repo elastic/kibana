@@ -9,7 +9,9 @@
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
 export type { CoreAuthenticationService } from './src/authc';
+export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  ServiceAccountsServiceContract,
 } from './src/api_provider';

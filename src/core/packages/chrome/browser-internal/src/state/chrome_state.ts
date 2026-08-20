@@ -24,7 +24,7 @@ import type {
   ChromeUserBanner,
   ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 import {
   createState,
