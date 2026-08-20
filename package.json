@@ -2160,7 +2160,7 @@
     "jest-runtime": "29.7.0",
     "jest-snapshot": "29.7.0",
     "jest-styled-components": "7.0.3",
-    "json-schema-typed": "8.0.1",
+    "json-schema-typed": "8.0.2",
     "keyv": "5.3.4",
     "knip": "6.14.1",
     "license-checker": "25.0.1",
