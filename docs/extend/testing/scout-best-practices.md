@@ -120,13 +120,14 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ## Expect a shared test environment [expect-a-shared-test-environment]
 
-Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Also, Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors).
+Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors) — and on Cloud, other test runs (including another run of your own suite) can execute against the same deployment **at the same time**.
 
 Any assertion over a list has to tolerate entries your test didn't create:
 
 - **Narrow the query to your test data.** Filter by a term only your test data matches, then assert on the filtered results. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
 - **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
 - **Assert containment, not totality.** `toContainText('my-fixture')` passes even when the deployment has other data; `toHaveCount(4)` does not.
+- **Never assert that data is absent.** "No data" behavior — empty prompts, onboarding redirects, zero-count states — requires that *nothing on the whole deployment* matches the underlying check. No amount of cleanup can guarantee that in a shared environment: the matching document may belong to another suite, or arrive mid-test. These tests fail rarely, unpredictably, and only in CI. Cover empty-state branches with a unit test that mocks the data check, and keep the Scout test for the data-present path.
 
 :::::{dropdown} Examples
 ❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your test data past global search's cap of 40 results per provider:
@@ -145,12 +146,22 @@ await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1'
 
 :::::
 
-:::::{tip}
-The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites.
+## Don't leak state into the next suite [dont-leak-state-into-the-next-suite]
+
+The same logic applies in reverse: whatever your suite creates or changes outlives it. Saved objects, indices, data streams, settings, and feature flags persist into the suites that run after you on the same servers — and on long-lived Cloud deployments, across entire test runs.
+
+- **Namespace what you create.** A fixed literal name (`my-test-index`) is shared with every past, future, and concurrent run of your suite: another run's teardown can delete it out from under you mid-test, and its leftovers can satisfy or break your assertions. Build resource names (indices, pipelines, saved objects) from a per-run unique value such as a UUID.
+- **Own your time window.** A time filter doesn't isolate you: if two suites ingest data into the same date range, each one's time-bounded queries see the other's documents. When your test data uses fixed timestamps, pick a range unique to your suite instead of reusing a "convenient" round date that other suites likely picked too.
+- **Delete the resource, not just the record of it.** Deleting the object that *tracks* a resource (a saved object referencing an API key, a task, an execution) leaves the resource itself alive. Orphans accumulate invisibly on long-lived deployments until a quota or limit breaks unrelated tests, with no local reproduction. Tear down the underlying resource through the API that actually releases it.
+- **Revert behavior, not just data.** Settings, feature flags, and index/component templates change how the cluster *behaves* for everything that runs after you — a leaked template can silently reject or reshape another suite's documents at ingest time. Revert them in teardown; symmetrically, don't assume cluster defaults are still in effect when your suite starts.
+
+Clean up in the right place:
 
 - **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
+- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers finish.
 
+:::::{tip}
+If your suite passes locally and alone but fails in CI, suspect this whole class first: check what state the failing assertion actually depends on, and which other suite (or earlier run) could have created or deleted it.
 :::::
 
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
