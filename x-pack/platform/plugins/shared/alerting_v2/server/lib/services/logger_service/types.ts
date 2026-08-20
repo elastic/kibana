@@ -26,8 +26,8 @@ export type AlertingLabels = Partial<{
   workflow_id: string;
   execution_id: string;
   task_id: string;
-  /** Agent Builder skill id (e.g. rule-management). Low-cardinality. */
   skill_id: string;
+  attachment_type: string;
   event_type: string;
   step: string;
   subsystem: string;
