@@ -9,7 +9,7 @@
 
 import { useLayoutEffect, useState } from 'react';
 import { type EuiBreakpointSize, useEuiTheme } from '@elastic/eui';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 
 const BREAKPOINTS: readonly EuiBreakpointSize[] = ['xs', 's', 'm', 'l', 'xl'];
 

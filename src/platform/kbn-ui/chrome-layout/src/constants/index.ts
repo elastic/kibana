@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { layoutVar, layoutVarName } from './src/css_variables';
+export { layoutVar, layoutVarName } from './css_variables';
 export type {
   LayoutVarName,
   CSSVarName,
@@ -15,8 +15,8 @@ export type {
   LayoutProperty,
   ApplicationComponent,
   ApplicationVarName,
-} from './src/css_variables';
-export { layoutLevels } from './src/levels';
+} from './css_variables';
+export { layoutLevels } from './levels';
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 

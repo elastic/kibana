@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 
 export type ScrollContainer = HTMLElement;
 

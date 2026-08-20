@@ -19,15 +19,15 @@ export {
   getScrollDimensions,
   scrollBy,
   isAtBottomOfPage,
-} from './src/scroll';
+} from './scroll';
 
 export {
   type HighContrastSeparatorOptions,
   getHighContrastBorder,
   getHighContrastSeparator,
-} from './src/high_contrast';
+} from './high_contrast';
 
 export {
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
-} from './src/application_breakpoints';
+} from './application_breakpoints';
