@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableConversationRightActions } from './embeddable_conversation_actions';
 import { EmbeddableConversationTitle } from './embeddable_conversation_title';
@@ -39,6 +39,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
   const currentAgent = agents.find((a) => a.id === agentId);
   const templateDisplay = useConversationTemplateDisplay();
   const templateName = templateDisplay?.name;
+  const templateIcon = templateDisplay?.icon;
 
   return (
     <div
@@ -78,13 +79,22 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
             size="xs"
             color="subdued"
             css={css`
+              display: flex;
+              align-items: center;
+              gap: ${euiTheme.size.xs};
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
             `}
           >
             {currentAgent.name}
-            {templateName && ` / ${templateName}`}
+            {templateName && (
+              <>
+                {'/'}
+                {templateIcon && <EuiIcon type={templateIcon} size="s" aria-hidden={true} />}
+                {templateName}
+              </>
+            )}
           </EuiText>
         )}
       </div>

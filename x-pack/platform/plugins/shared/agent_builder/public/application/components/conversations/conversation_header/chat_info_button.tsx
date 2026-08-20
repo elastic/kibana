@@ -30,7 +30,7 @@ export const ChatInfoButton: React.FC = () => {
       <EuiButtonEmpty
         size="s"
         color="text"
-        iconType="info"
+        iconType={isFlyoutOpen ? 'transitionLeftIn' : 'transitionLeftOut'}
         onClick={() => setIsFlyoutOpen(true)}
         aria-label={labels.chatInfo}
         data-test-subj="agentBuilderChatInfoButton"
