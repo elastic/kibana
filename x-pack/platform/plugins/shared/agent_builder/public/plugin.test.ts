@@ -35,6 +35,12 @@ jest.mock('./services', () => ({
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
+  ConversationTemplatesService: jest.fn(() => ({
+    registerTab: jest.fn(),
+    getTab: jest.fn(),
+    registerTemplateUIDefinition: jest.fn(),
+    getTemplateUIDefinition: jest.fn(),
+  })),
   DocLinksService: jest.fn(),
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
@@ -49,6 +55,10 @@ jest.mock('./services', () => ({
 
 jest.mock('./services/attachments', () => ({
   createPublicAttachmentContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_templates', () => ({
+  createPublicConversationTemplatesContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/renderers', () => ({

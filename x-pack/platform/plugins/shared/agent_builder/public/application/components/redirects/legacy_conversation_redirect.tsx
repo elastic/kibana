@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Navigate, useNavigate } from 'react-router-dom-v5-compat';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
 import { useQuery } from '@kbn/react-query';
 
@@ -18,8 +17,9 @@ import { RedirectLoading } from './redirect_loading';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
-  const navigate = useNavigate();
+  const history = useHistory();
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
+
   const { conversationsService } = useAgentBuilderServices();
 
   const isNewConversation = !conversationId || conversationId === 'new';
@@ -37,25 +37,19 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   useEffect(() => {
     if (conversation?.agent_id && conversationId) {
-      navigate(
+      history.replace(
         appPaths.agent.conversations.byId({
           agentId: conversation.agent_id,
           conversationId,
-        }),
-        { replace: true }
+        })
       );
-    } else if (isError && conversationId && isLastAgentIdReady) {
-      navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
-        replace: true,
-      });
+    } else if (isError && conversationId) {
+      history.replace(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }));
     }
-  }, [conversation, conversationId, isError, isLastAgentIdReady, lastAgentId, navigate]);
+  }, [conversation, conversationId, isError, lastAgentId, history]);
 
   if (isNewConversation) {
-    if (!isLastAgentIdReady) {
-      return <RedirectLoading />;
-    }
-    return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+    return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
   }
 
   if (isLoading || !isLastAgentIdReady) {

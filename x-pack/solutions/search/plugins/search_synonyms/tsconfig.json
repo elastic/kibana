@@ -32,6 +32,7 @@
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
     "@kbn/react-query",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

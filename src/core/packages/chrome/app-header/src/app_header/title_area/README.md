@@ -5,7 +5,8 @@ title. The title is either a plain string (read-only) or an editable title that 
 user can rename inline.
 
 - `title_area.tsx` — `TitleArea`: thin layout orchestrator (back button + title in a
-  flex row). Holds no edit state.
+  flex row). Holds no edit state. Accepts an optional `placeholder` for the title slot
+  so loading skeletons share the same gap and no-back offset as a real title.
 - `title.tsx` — `Title`: the editable/read-only title itself. All the styling, width
   model, save flow, and a11y live here. Takes a `size` (`xs` | `s`) for the `EuiTitle`.
   Also exports the `isEditableTitle` type guard.

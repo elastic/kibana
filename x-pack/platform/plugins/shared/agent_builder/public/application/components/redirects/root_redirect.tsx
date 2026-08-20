@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Navigate } from 'react-router-dom-v5-compat';
+import { Redirect } from 'react-router-dom';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { appPaths } from '../../utils/app_paths';
@@ -19,5 +19,5 @@ export const RootRedirect: React.FC = () => {
     return <RedirectLoading data-test-subj="agentBuilderRootRedirectLoading" />;
   }
 
-  return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+  return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
 };

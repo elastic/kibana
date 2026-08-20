@@ -421,9 +421,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
       try {
         if (this.isParseFailureQuery(query)) {
-          // let it pass the filter to send the stats, i.e. this kind of query will be always
-          // skipped in the execution phase, but we want to report it in the stats with the
-          // parse failure reason.
+          if (query.failureReason === 'unknown_version') {
+            this.logger.debug('Skipping query with unknown version (future descriptor)', {
+              queryId: (query as { id?: string }).id,
+              name: query.name,
+            } as LogMeta);
+            return false;
+          }
+          // invalid_descriptor: let it pass so a skipped stat is reported in telemetry.
           return true;
         }
         const { name, scheduleCron, enabled } = query;
