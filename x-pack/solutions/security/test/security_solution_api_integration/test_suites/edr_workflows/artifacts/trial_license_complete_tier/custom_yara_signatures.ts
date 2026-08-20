@@ -509,6 +509,73 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
               });
+
+              describe('meta.scan_type', () => {
+                it('accepts rules with meta.scan_type set to "Memory"', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "Memory" condition: true }
+                      `)
+                    )
+                    .expect(200);
+                });
+
+                it('rejects rules with meta.scan_type set to an invalid value', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "invalid" condition: true }
+                      rule rule2 { meta: scan_type = "memory" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.scan_type" value "invalid" on rule "rule1", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.scan_type" value "memory" on rule "rule2", only "Memory" is allowed/
+                      )
+                    );
+                });
+
+                it('rejects rules with multiple meta.scan_type fields set', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            scan_type = "Memory"
+                            scan_type = "Whatever"
+                          condition: true
+                         }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.scan_type" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+              });
             });
 
             describe('Module support', () => {

@@ -38,6 +38,7 @@ export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
 export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
 
 const VALID_META_ARCH_VALUES = ['x86', 'arm64'];
+const VALID_META_SCAN_TYPE_VALUE = 'Memory';
 
 const validateYaraRuleContentByteLength = (value: string): string | void => {
   const byteLength = Buffer.byteLength(value, 'utf8');
@@ -344,6 +345,24 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
             severity: 'error',
           });
         }
+      }
+    }
+
+    // Validate meta.scan_type field
+    for (const rule of result.rules) {
+      if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== VALID_META_SCAN_TYPE_VALUE) {
+        const lineNumberOfRule = getRuleIdentifierLineNumber(rule.identifier);
+        const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
+          'scan_type',
+          lineNumberOfRule
+        );
+
+        result.errorCount++;
+        result.errors.push({
+          message: `Invalid "meta.scan_type" value "${rule.meta.scan_type}" on rule "${rule.identifier}", only "Memory" is allowed`,
+          line: lineNumber,
+          severity: 'error',
+        });
       }
     }
 
