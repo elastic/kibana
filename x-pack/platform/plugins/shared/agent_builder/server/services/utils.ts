@@ -25,6 +25,10 @@ interface StableUserIdAuthUser {
   authentication_realm?: { type?: string; name?: string };
 }
 
+interface AuthenticatedApiKeyUser extends StableUserIdAuthUser {
+  api_key?: { id?: string };
+}
+
 /**
  * Builds a stable principal id for Agent Builder ownership checks.
  *
@@ -75,18 +79,13 @@ export const toStableUserId = async ({
  * sessions for the same user. Older keys or creators without an activated profile return
  * undefined and callers fall back to username matching.
  */
-const resolveApiKeyOwnerProfileUid = async ({
-  request,
+const getApiKeyOwnerProfileUid = async ({
+  id,
   esClient,
 }: {
-  request: KibanaRequest;
+  id: string;
   esClient: ElasticsearchClient;
 }): Promise<string | undefined> => {
-  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-  if (!id) {
-    return undefined;
-  }
-
   try {
     const response = await esClient.security.getApiKey({
       with_profile_uid: true,
@@ -102,6 +101,40 @@ const resolveApiKeyOwnerProfileUid = async ({
   }
 };
 
+const resolveApiKeyOwnerProfileUid = async ({
+  request,
+  esClient,
+}: {
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+}): Promise<string | undefined> => {
+  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+  return id ? getApiKeyOwnerProfileUid({ id, esClient }) : undefined;
+};
+
+const resolveStableUserIdFromAuthenticate = async ({
+  username,
+  esClient,
+}: {
+  username: string;
+  esClient: ElasticsearchClient;
+}): Promise<string | undefined> => {
+  const authResponse = (await esClient.security.authenticate()) as AuthenticatedApiKeyUser;
+
+  return toStableUserId({
+    authUser: {
+      username,
+      profile_uid: authResponse.profile_uid,
+      authentication_type: authResponse.authentication_type,
+      authentication_realm: authResponse.authentication_realm,
+    },
+    resolveApiKeyProfileUid: () => {
+      const id = authResponse.api_key?.id;
+      return id ? getApiKeyOwnerProfileUid({ id, esClient }) : Promise.resolve(undefined);
+    },
+  });
+};
+
 /**
  * Resolves the current user from a request.
  *
@@ -114,7 +147,7 @@ const resolveApiKeyOwnerProfileUid = async ({
  * the API key owner's username does not match the originating user.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API for the username only.
+ * back through ES `_security/_authenticate` and, for API keys, the key lookup API.
  */
 export const getUserFromRequest = async ({
   request,
@@ -129,11 +162,17 @@ export const getUserFromRequest = async ({
   const isAdmin = await isAdminFromRequest({ esClient });
 
   if (authUser?.username) {
+    const stableUserId = await toStableUserId({
+      authUser,
+      resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
+    });
+
+    const fallbackStableUserId =
+      stableUserId ??
+      (await resolveStableUserIdFromAuthenticate({ username: authUser.username, esClient }));
+
     return {
-      id: await toStableUserId({
-        authUser,
-        resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
-      }),
+      id: fallbackStableUserId,
       username: authUser.username,
       isAdmin,
     };

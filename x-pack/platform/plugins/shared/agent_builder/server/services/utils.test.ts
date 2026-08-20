@@ -343,6 +343,36 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
 
+  it('recovers an API key creator profile uid for fake requests with username-only auth users', async () => {
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'originating-user',
+    } as any);
+    esClient.security.authenticate.mockResolvedValue({
+      username: 'originating-user',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+      api_key: { id: 'task-api-key-id' },
+    } as any);
+    esClient.security.getApiKey.mockResolvedValue({
+      api_keys: [{ id: 'task-api-key-id', profile_uid: 'profile-from-task-api-key' }],
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'profile-from-task-api-key',
+      username: 'originating-user',
+      isAdmin: false,
+    });
+    expect(esClient.security.authenticate).toHaveBeenCalled();
+    expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+      with_profile_uid: true,
+      id: 'task-api-key-id',
+    });
+  });
+
   it('falls back to ES authenticate API for un-enriched fake requests', async () => {
     const request = httpServerMock.createFakeKibanaRequest({});
 
