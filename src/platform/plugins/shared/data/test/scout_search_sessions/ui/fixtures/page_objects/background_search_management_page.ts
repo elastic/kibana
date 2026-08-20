@@ -30,8 +30,8 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('searchSessionsRow');
   }
 
-  async expectRowCount(count: number, timeout = 30_000) {
-    await expect(this.rows()).toHaveCount(count, { timeout });
+  async expectRowCount(count: number) {
+    await expect(this.rows()).toHaveCount(count);
   }
 
   async waitForRowStatus(targetStatus: string) {

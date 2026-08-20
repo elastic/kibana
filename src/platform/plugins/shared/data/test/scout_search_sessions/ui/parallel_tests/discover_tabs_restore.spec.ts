@@ -56,9 +56,11 @@ spaceTest.describe(
       // Discover persists its tabs per user, so a restored tab left open comes back in the next
       // test and re-persists the background search it holds. This has to run in the hook rather
       // than the test body so it still happens when a test fails mid-restore.
+      // Closed back-to-front: `closeTab` waits on a positional locator, so closing anything but
+      // the last tab leaves that position resolving to the tab that shifted into it.
       const openTabs = await pageObjects.unifiedTabs.getTabLabels();
-      for (let i = 1; i < openTabs.length; i++) {
-        await pageObjects.unifiedTabs.closeTab(1);
+      for (let i = openTabs.length - 1; i >= 1; i--) {
+        await pageObjects.unifiedTabs.closeTab(i);
       }
     });
 
@@ -132,6 +134,45 @@ spaceTest.describe(
 
           // The restored tab must come straight back as rendered. A re-run would drop
           // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
+            'data-render-complete',
+            'true'
+          );
+        });
+      }
+    );
+
+    spaceTest(
+      'restoring a background search does not re-run the query in an unrelated tab',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('store a background search', async () => {
+          await pageObjects.discover.goto({ queryMode: 'esql' });
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.backgroundSearch.sendToBackground();
+        });
+
+        await spaceTest.step('run the same slow query in a second tab', async () => {
+          await pageObjects.unifiedTabs.createNewTab();
+          await pageObjects.discover.selectTextBaseLang();
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
+
+        await spaceTest.step('restore the background search into a third tab', async () => {
+          await pageObjects.backgroundSearchManagement.goTo();
+          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
+          await pageObjects.backgroundSearchManagement.viewRow();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
+
+        await spaceTest.step('the second tab is still rendered', async () => {
+          // Restoring elsewhere must not invalidate an unrelated tab: a re-run would drop
+          // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          await pageObjects.unifiedTabs.selectTab(1);
+
           await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
             'data-render-complete',
             'true'
