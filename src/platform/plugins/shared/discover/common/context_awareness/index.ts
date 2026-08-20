@@ -15,9 +15,8 @@ export {
   type ProfileStateDefinition,
   type ProfileStateDescriptor,
   type ProfileStateMap,
-  createProfileSavedStateTransform,
   type ProfileSavedStateTransform,
-  type TabTypeStateMap,
+  createProfileSavedStateTransform,
 } from './profile_state';
 export { createProfileStateRegistry } from './create_profile_state_registry';
 export {

@@ -211,10 +211,12 @@ Each `ProfileStateDefinition<TState>` has:
 `getStateAdapter()` validates that the requested definition matches the registered descriptor and default state.
 
 The same registry owns transforms between runtime profile state and the saved payload for a Discover tab type.
-`createProfileStateRegistry()` registers all definitions before their transforms. A transform is rejected unless its
-`stateDefinition` exactly matches an existing registration, and transforms for the same tab type cannot claim the same
-saved field. Browser persistence uses this shared registry to hydrate profile state from saved sessions and serialize it
-back without separate saved-state service plumbing.
+`createProfileStateRegistry()` registers all definitions before their transforms. Each tab type has at most one
+transform, which declares an ordered tuple of distinct state definitions. The registry passes their full effective
+states to `toSavedState` in that order, and the transform must return the complete saved payload for its tab type.
+`fromSavedState` returns an equally sized tuple of partial states that the registry maps back to the declared
+definitions. Browser persistence uses this shared registry to hydrate profile state from saved sessions and serialize
+it back without separate saved-state service plumbing.
 
 ### State types and lifetime
 

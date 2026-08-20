@@ -71,38 +71,46 @@ export interface ProfileStateDefinition<TState extends SerializableRecord> {
  */
 export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
 
-/** Saved payloads by tab type, derived from the saved object schema. */
-export type TabTypeStateMap = {
-  [T in DiscoverSessionTabTypeState as T['type']]: Omit<T, 'type'>;
-};
-
-/** Maps runtime profile state to and from part of a tab type's saved payload. */
-export interface ProfileSavedStateTransform<
-  TTabType extends keyof TabTypeStateMap,
-  TState extends SerializableRecord,
-  TField extends keyof TabTypeStateMap[TTabType] = keyof TabTypeStateMap[TTabType]
-> {
-  tabType: TTabType;
-  /** Fields of the tab type payload this transform owns. Must not overlap another transform's. */
-  savedFields: readonly TField[];
-  stateDefinition: ProfileStateDefinition<TState>;
-  toSavedState: (state: TState) => Pick<TabTypeStateMap[TTabType], TField>;
-  fromSavedState: (saved: Pick<TabTypeStateMap[TTabType], TField>) => Partial<TState>;
-}
-
-/** Identity helper so callers don't have to write the transform's generics by hand. */
-export const createProfileSavedStateTransform = <
-  TTabType extends keyof TabTypeStateMap,
-  TState extends SerializableRecord,
-  TField extends keyof TabTypeStateMap[TTabType]
->(
-  transform: ProfileSavedStateTransform<TTabType, TState, TField>
-): ProfileSavedStateTransform<TTabType, TState, TField> => transform;
-
 /**
  * Controls how registered default values are handled when filtering profile state.
  */
 export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
+
+type SavedTabType = DiscoverSessionTabTypeState['type'];
+
+type TabTypeState<TTabType extends SavedTabType> = Omit<
+  Extract<DiscoverSessionTabTypeState, { type: TTabType }>,
+  'type'
+>;
+
+type ProfileStateDefinitions = readonly ProfileStateDefinition<SerializableRecord>[];
+
+type ProfileStates<TDefinitions extends ProfileStateDefinitions> = {
+  [TIndex in keyof TDefinitions]: TDefinitions[TIndex]['defaultState'];
+};
+
+type PartialProfileStates<TDefinitions extends ProfileStateDefinitions> = {
+  [TIndex in keyof TDefinitions]: Partial<TDefinitions[TIndex]['defaultState']>;
+};
+
+/** Maps runtime profile state to and from part of a tab type's saved payload. */
+export interface ProfileSavedStateTransform<
+  TTabType extends SavedTabType,
+  TDefinitions extends ProfileStateDefinitions
+> {
+  tabType: TTabType;
+  stateDefinitions: TDefinitions;
+  toSavedState: (profileStates: ProfileStates<TDefinitions>) => TabTypeState<TTabType>;
+  fromSavedState: (savedState: TabTypeState<TTabType>) => PartialProfileStates<TDefinitions>;
+}
+
+/** Identity helper so callers don't have to write the transform's generics by hand. */
+export const createProfileSavedStateTransform = <
+  TTabType extends SavedTabType,
+  const TDefinitions extends ProfileStateDefinitions
+>(
+  transform: ProfileSavedStateTransform<TTabType, TDefinitions>
+): ProfileSavedStateTransform<TTabType, TDefinitions> => transform;
 
 type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
   keyof TState,
@@ -115,18 +123,14 @@ const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(
   return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
 };
 
-type RegisteredTransform = ProfileSavedStateTransform<
-  keyof TabTypeStateMap,
-  SerializableRecord,
-  keyof TabTypeStateMap[keyof TabTypeStateMap]
->;
+type RegisteredTransform = ProfileSavedStateTransform<SavedTabType, ProfileStateDefinitions>;
 
 /**
  * Registry of profile state definitions and saved state transforms supported by Discover.
  */
 export class ProfileStateRegistry {
   private readonly stateDefinitions = new Map<string, ProfileStateDefinition<SerializableRecord>>();
-  private readonly transformsByTabType = new Map<string, RegisteredTransform[]>();
+  private readonly stateTransforms = new Map<DiscoverTabType, RegisteredTransform>();
 
   /**
    * Registers a profile state definition. Keys must be globally unique.
@@ -163,35 +167,32 @@ export class ProfileStateRegistry {
    * Registers a saved state transform for an existing matching state definition.
    */
   public registerTransform<
-    TTabType extends keyof TabTypeStateMap,
-    TState extends SerializableRecord,
-    TField extends keyof TabTypeStateMap[TTabType]
-  >(transform: ProfileSavedStateTransform<TTabType, TState, TField>) {
-    if (!this.hasDefinition(transform.stateDefinition)) {
-      throw new Error(
-        `State with key ${transform.stateDefinition.key} must be registered before this transform.`
-      );
+    TTabType extends SavedTabType,
+    const TDefinitions extends ProfileStateDefinitions
+  >(transform: ProfileSavedStateTransform<TTabType, TDefinitions>) {
+    if (this.stateTransforms.has(transform.tabType)) {
+      throw new Error(`Transform for tab type ${transform.tabType} is already registered.`);
     }
 
-    const existingTransforms = this.transformsByTabType.get(transform.tabType) ?? [];
-    const claimedFields = new Set<keyof TabTypeStateMap[TTabType]>(
-      existingTransforms.flatMap(({ savedFields }) => savedFields)
-    );
+    const definitionKeys = new Set<string>();
 
-    for (const field of transform.savedFields) {
-      if (claimedFields.has(field)) {
+    for (const definition of transform.stateDefinitions) {
+      if (!this.hasDefinition(definition)) {
         throw new Error(
-          `Field "${String(field)}" of tab type "${
-            transform.tabType
-          }" is already claimed by another transform.`
+          `State with key ${definition.key} must be registered before this transform.`
         );
       }
+
+      if (definitionKeys.has(definition.key)) {
+        throw new Error(
+          `State with key ${definition.key} is already included in the transform for tab type ${transform.tabType}.`
+        );
+      }
+
+      definitionKeys.add(definition.key);
     }
 
-    this.transformsByTabType.set(transform.tabType, [
-      ...existingTransforms,
-      transform as unknown as RegisteredTransform,
-    ]);
+    this.stateTransforms.set(transform.tabType, transform as unknown as RegisteredTransform);
   }
 
   /**
@@ -205,16 +206,17 @@ export class ProfileStateRegistry {
       return undefined;
     }
 
-    const transforms = this.transformsByTabType.get(tabType) ?? [];
-    let payload: SerializableRecord = {};
+    const transform = this.stateTransforms.get(tabType);
 
-    for (const transform of transforms) {
-      const effectiveState = {
-        ...transform.stateDefinition.defaultState,
-        ...profileStateMap[transform.stateDefinition.key],
-      };
-      payload = { ...payload, ...transform.toSavedState(effectiveState) };
+    if (!transform) {
+      return undefined;
     }
+
+    const states = transform.stateDefinitions.map((definition) => ({
+      ...definition.defaultState,
+      ...profileStateMap[definition.key],
+    }));
+    const payload = transform.toSavedState(states);
 
     return { type: tabType, ...payload } as DiscoverSessionTabTypeState;
   }
@@ -230,23 +232,16 @@ export class ProfileStateRegistry {
     }
 
     const { type, ...payload } = tabTypeState;
-    const transforms = this.transformsByTabType.get(type) ?? [];
+    const transform = this.stateTransforms.get(type);
 
-    for (const transform of transforms) {
-      const narrowedPayload: SerializableRecord = {};
+    if (!transform) {
+      return profileStateMap;
+    }
 
-      for (const field of transform.savedFields) {
-        if (Object.hasOwn(payload, field)) {
-          narrowedPayload[field] = payload[field];
-        }
-      }
+    const states = transform.fromSavedState(payload);
 
-      profileStateMap[transform.stateDefinition.key] = transform.fromSavedState(
-        narrowedPayload as Pick<
-          TabTypeStateMap[typeof type],
-          (typeof transform.savedFields)[number]
-        >
-      );
+    for (const [index, definition] of transform.stateDefinitions.entries()) {
+      profileStateMap[definition.key] = states[index];
     }
 
     return profileStateMap;
