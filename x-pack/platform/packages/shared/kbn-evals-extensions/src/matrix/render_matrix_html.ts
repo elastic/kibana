@@ -132,8 +132,13 @@ const mdToHtml = (md: string): string => {
   const lines = md.split('\n');
   const out: string[] = [];
   let inUl = false;
+  let inNested = false;
   let inOl = false;
   const closeList = () => {
+    if (inNested) {
+      out.push('</ul></li>');
+      inNested = false;
+    }
     if (inUl) {
       out.push('</ul>');
       inUl = false;
@@ -145,14 +150,16 @@ const mdToHtml = (md: string): string => {
   };
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const trimmed = line.trimStart();
+    const indent = line.length - trimmed.length;
     // Fenced code block: ``` ... ``` — content must stay verbatim (ES|QL
     // queries legitimately contain pipes; treating those as tables mangles
     // them). esc() inside <pre><code> keeps untrusted content inert.
-    if (line.trim().startsWith('```')) {
+    if (trimmed.startsWith('```')) {
       closeList();
       const code: string[] = [];
       let j = i + 1;
-      while (j < lines.length && !lines[j].trim().startsWith('```')) {
+      while (j < lines.length && !lines[j].trimStart().startsWith('```')) {
         code.push(lines[j]);
         j++;
       }
@@ -160,19 +167,21 @@ const mdToHtml = (md: string): string => {
       i = j; // skip the closing fence (or EOF)
       continue;
     }
-    if (line.startsWith('### ')) {
+    if (trimmed.startsWith('### ')) {
       closeList();
-      out.push(`<h6>${esc(line.slice(4))}</h6>`);
+      // Run heading content through inline markdown too — models emit
+      // "### **Bold Heading**" and esc() alone shows literal asterisks.
+      out.push(`<h6>${inlineMd(esc(trimmed.slice(4)))}</h6>`);
       continue;
     }
-    if (line.startsWith('## ')) {
+    if (trimmed.startsWith('## ')) {
       closeList();
-      out.push(`<h5>${esc(line.slice(3))}</h5>`);
+      out.push(`<h5>${inlineMd(esc(trimmed.slice(3)))}</h5>`);
       continue;
     }
-    if (line.startsWith('# ')) {
+    if (trimmed.startsWith('# ')) {
       closeList();
-      out.push(`<h4>${esc(line.slice(2))}</h4>`);
+      out.push(`<h4>${inlineMd(esc(trimmed.slice(2)))}</h4>`);
       continue;
     }
     if (line.startsWith('---')) {
@@ -211,25 +220,44 @@ const mdToHtml = (md: string): string => {
       i = j - 1;
       continue;
     }
-    if (/^\d+\.\s/.test(line)) {
+    if (/^\d+\.\s/.test(trimmed)) {
       if (!inOl) {
         closeList();
         inOl = true;
       }
-      out.push(`<li>${inlineMd(esc(line.replace(/^\d+\.\s/, '')))}</li>`);
+      out.push(`<li>${inlineMd(esc(trimmed.replace(/^\d+\.\s/, '')))}</li>`);
       continue;
     }
-    if (line.startsWith('- ') || line.startsWith('* ')) {
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       if (!inUl) {
         closeList();
         inUl = true;
       }
-      out.push(`<li>${inlineMd(esc(line.slice(2)))}</li>`);
+      // Nested sub-bullets (indented "  * item") open a nested <ul> inside the
+      // previous <li>. The old untrimmed startsWith('* ') check dropped them
+      // to <p> paragraphs with a literal asterisk.
+      const content = inlineMd(esc(trimmed.slice(2)));
+      if (indent >= 2) {
+        if (!inNested) {
+          // Re-open the previous <li> as a container: strip its closing
+          // </li> and start a nested <ul> inside it.
+          const last = (out.pop() ?? '<li></li>').replace(/<\/li>$/, '');
+          out.push(`${last}<ul>`);
+          inNested = true;
+        }
+        out.push(`<li>${content}</li>`);
+      } else {
+        if (inNested) {
+          out.push('</ul></li>');
+          inNested = false;
+        }
+        out.push(`<li>${content}</li>`);
+      }
       continue;
     }
-    if (line.startsWith('> ')) {
+    if (trimmed.startsWith('> ')) {
       closeList();
-      out.push(`<blockquote><p>${inlineMd(esc(line.slice(2)))}</p></blockquote>`);
+      out.push(`<blockquote><p>${inlineMd(esc(trimmed.slice(2)))}</p></blockquote>`);
       continue;
     }
     if (line.trim() === '') {
@@ -268,8 +296,8 @@ const stepHtml = (step: TraceStep, index: number): string => {
       (step.skills ?? []).join(', ')
     )}</div>`;
   }
-  return `<div class="step reasoning"><span class="step-tag">think</span>${esc(
-    step.text ?? ''
+  return `<div class="step reasoning"><span class="step-tag">think</span>${inlineMd(
+    esc(step.text ?? '')
   )}</div>`;
 };
 

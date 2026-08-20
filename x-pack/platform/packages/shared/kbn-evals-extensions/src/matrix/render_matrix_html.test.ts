@@ -282,4 +282,34 @@ describe('renderMatrixHtml', () => {
     expect(html).not.toMatch(/<p>\| WHERE/);
     expect(html).toContain('Done.');
   });
+
+  it('renders bold inside headings and indented sub-bullets as nested lists', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'q',
+        toolTrail: [],
+        answer:
+          '### **Analysis of the Alert**\n' +
+          '- **Technique:** DLL Side-Loading\n' +
+          '  * **Host:** `srv-win-defend-01`\n' +
+          '  * **User:** SYSTEM\n' +
+          '- **Severity:** High\n' +
+          '**Is it something you should worry about?** Yes.',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    // Heading content runs through inline markdown: no literal asterisks.
+    expect(html).toContain('<h6><strong>Analysis of the Alert</strong></h6>');
+    // Indented '  * item' becomes a nested <ul> inside the previous <li>...
+    expect(html).toMatch(/<li><strong>Technique:<\/strong> DLL Side-Loading<ul>/);
+    expect(html).toMatch(/<li><strong>Host:<\/strong> <code>srv-win-defend-01<\/code><\/li>/);
+    // ...and the nested list closes before the next top-level bullet.
+    expect(html).toMatch(/<\/ul><\/li>\s*<li><strong>Severity:<\/strong> High<\/li>/);
+    // No literal asterisk-bullet paragraphs remain.
+    expect(html).not.toMatch(/<p>\s*\* /);
+    expect(html).not.toContain('**');
+  });
 });
