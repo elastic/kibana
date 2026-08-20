@@ -74,20 +74,20 @@ Get project (`getProject`)
 :   Retrieve full details of a single Jira project by key or ID.
     - `projectId` (required): The project key (for example, `PROJ`) or numeric project ID.
 
-Get issue types (`getIssueTypes`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Get issue types (`getIssueTypes`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   List the issue types available in a project (for example, Bug, Task, Story). Use before `createIssue` to discover valid type names and IDs.
     - `projectKey` (required): The project key (for example, `PROJ`).
 
-Get create metadata (`getCreateMetadata`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Get create metadata (`getCreateMetadata`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Return the required and optional fields for creating an issue of a specific type. Use after `getIssueTypes` to build a valid `createIssue` payload.
     - `projectKey` (required): The project key.
     - `issueTypeId` (required): The numeric issue type ID from `getIssueTypes`.
 
-Get transitions (`getTransitions`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Get transitions (`getTransitions`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   List the workflow transitions available for an issue. Use before `transitionIssue` — Jira requires a transition ID, not a status name.
     - `issueId` (required): The issue key or numeric ID.
 
-Get attachment (`getAttachment`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Get attachment (`getAttachment`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Download the content of an attachment by its ID. Returns the file as a base64-encoded string with its MIME type. Attachment IDs are found in a `getIssue` response.
     - `attachmentId` (required): The numeric attachment ID.
 
@@ -102,7 +102,7 @@ Search users (`searchUsers`)
 
 ### Write actions
 
-Create issue (`createIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Create issue (`createIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Create a new Jira issue.
     - `projectKey` (required): The project key (for example, `PROJ`).
     - `summary` (required): The issue title.
@@ -113,51 +113,51 @@ Create issue (`createIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.
     - `assigneeAccountId` (optional): Atlassian account ID of the assignee. Use `searchUsers` to resolve a name or email.
     - `parent` (optional): Parent issue key for creating a subtask (for example, `PROJ-10`).
 
-Update issue (`updateIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Update issue (`updateIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Update fields on an existing issue. Only the fields you provide are changed; omitted fields are left as-is.
     - `issueId` (required): The issue key or numeric ID.
     - `summary`, `description`, `issueType`, `priority`, `labels`, `parent` (optional): Same format as `createIssue`.
     - `assigneeAccountId` (optional): Account ID to assign, or `null` to unassign.
 
-Add comment (`addComment`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Add comment (`addComment`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Post a comment on an existing issue.
     - `issueId` (required): The issue key or numeric ID.
     - `body` (required): Comment text in plain text. Newlines become separate paragraphs.
 
-Transition issue (`transitionIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Transition issue (`transitionIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Move an issue to a new status by executing a workflow transition. Call `getTransitions` first to get the transition ID — Jira does not accept status names directly.
     - `issueId` (required): The issue key or numeric ID.
     - `transitionId` (required): The transition ID from `getTransitions`.
 
-Assign issue (`assignIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Assign issue (`assignIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Assign an issue to a user, set it to the project default, or unassign it.
     - `issueId` (required): The issue key or numeric ID.
     - `accountId` (required): The Atlassian account ID from `searchUsers`, `"-1"` for the default assignee, or `null` to unassign.
 
-Add attachment (`addAttachment`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Add attachment (`addAttachment`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Attach a file to an issue. The file content must be provided as a base64-encoded string.
     - `issueId` (required): The issue key or numeric ID.
     - `file` (required): Base64-encoded file content.
     - `filename` (required): Filename including extension (for example, `screenshot.png`).
 
-Link issues (`linkIssues`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create a directional link between two issues (for example, "relates to", "blocks", "duplicates").
+Link issues (`linkIssues`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
+:   Create a directional link between two issues (for example, "Relates", "Blocks", "Duplicate").
     - `inwardIssueKey` (required): Key of the inward issue.
     - `outwardIssueKey` (required): Key of the outward issue.
     - `linkType` (required): Link type name as configured in your Jira instance. The value is case-sensitive and must match exactly (for example, `"Relates"` not `"relates to"`).
     - `comment` (optional): A plain-text comment to add to the link.
 
-Delete issue (`deleteIssue`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Delete issue (`deleteIssue`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Permanently delete an issue. This action is irreversible and is not available as an agent tool.
     - `issueId` (required): The issue key or numeric ID.
     - `deleteSubtasks` (optional): Set to `true` to also delete subtasks. Required if the issue has subtasks.
 
-Add watcher (`addWatcher`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Add watcher (`addWatcher`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Add a user to the watcher list for an issue.
     - `issueId` (required): The issue key or numeric ID.
     - `accountId` (required): The Atlassian account ID from `searchUsers`.
 
-Remove watcher (`removeWatcher`) {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
+Remove watcher (`removeWatcher`) {applies_to}`serverless: preview` {applies_to}`stack: ga 9.6+`
 :   Remove a user from the watcher list for an issue.
     - `issueId` (required): The issue key or numeric ID.
     - `accountId` (required): The Atlassian account ID of the watcher to remove.
