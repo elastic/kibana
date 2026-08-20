@@ -149,7 +149,7 @@ const LOCATION_AGENTS_HELP = i18n.translate('xpack.synthetics.monitorDetails.loc
 const MW_UNSUPPORTED_AGENT_TOOLTIP = (agentVersion: string | null) =>
   i18n.translate('xpack.synthetics.monitorDetails.locationAgents.mwUnsupportedTooltip', {
     defaultMessage:
-      'Agent version {agentVersion} predates {minVersion} — maintenance windows are not supported, so this monitor may keep running during one.',
+      'Agent version {agentVersion} predates {minVersion} — maintenance window scheduling is not supported, so this monitor may keep running during one.',
     values: {
       agentVersion: agentVersion ?? '',
       minVersion: MIN_MW_SUPPORTED_AGENT_VERSION,
