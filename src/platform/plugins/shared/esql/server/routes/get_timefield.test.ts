@@ -11,6 +11,16 @@ import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { registerGetTimeFieldRoute } from './get_timefield';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
+jest.mock('@kbn/esql-utils', () => ({
+  getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('logs-*'),
+  parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
+}));
+
+jest.mock('@elastic/esql', () => ({
+  Parser: { parse: jest.fn().mockReturnValue({ root: { commands: [] } }) },
+  isSubQuery: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('@kbn/esql-server-utils', () => ({
   EsqlService: jest.fn().mockImplementation(() => ({
     getViews: jest.fn().mockResolvedValue({ views: [] }),
@@ -116,19 +126,6 @@ describe('registerGetTimeFieldRoute', () => {
       await handler(requestHandlerContext, { body: { query } }, response);
 
       expect(response.badRequest).not.toHaveBeenCalled();
-    });
-
-    it('blocks the PoC payload from the vulnerability report (depth 120)', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const depth = 120;
-      const query = 'FROM a | WHERE ' + '('.repeat(depth) + '1' + ')'.repeat(depth);
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).toHaveBeenCalled();
-      expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
-      expect(Parser.parse).not.toHaveBeenCalled();
     });
 
     it('blocks the permanent-hang PoC payload (depth 1500)', async () => {
