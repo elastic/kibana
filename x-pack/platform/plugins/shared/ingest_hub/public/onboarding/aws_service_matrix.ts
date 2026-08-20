@@ -206,6 +206,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
     ecfLogType: 'cloudtrail',
   },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'cloudtrail_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'cloudtrail',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
+  },
   {
     id: 'config',
     name: 'AWS Config',
@@ -261,6 +271,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
     ecfLogType: 'waf',
   },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'waf_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'waf',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
+  },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
   {
@@ -307,6 +327,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'vpcflow',
+  },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'vpcflow_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'vpcflow',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'vpn',
