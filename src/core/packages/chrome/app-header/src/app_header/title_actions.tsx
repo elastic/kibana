@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
 import type { AppHeaderFavoriteAction, AppHeaderShareAction } from '../types';
+import { asOptionalPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
@@ -73,8 +74,8 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
     return null;
   }
 
-  const shareTooltipContent = shareAction?.tooltip?.content;
-  const shareTooltipTitle = shareAction?.tooltip?.title;
+  const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
+  const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
   const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
 
   return (
