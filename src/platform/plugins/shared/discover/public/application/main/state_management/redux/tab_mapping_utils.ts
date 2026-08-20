@@ -82,8 +82,8 @@ export const fromSavedObjectTabToTabState = ({
     id: tab.id,
     label: tab.label,
     profileState: profileStateRegistry.mergeState(
-      profileStateRegistry.fromSavedState(tab.tabTypeState),
-      existingTab?.profileState
+      existingTab?.profileState,
+      profileStateRegistry.fromSavedState(tab.tabTypeState)
     ),
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,

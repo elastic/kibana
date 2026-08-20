@@ -25,7 +25,10 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { createProfileStateRegistry } from '../../../../../common/context_awareness';
+import {
+  createProfileStateRegistry,
+  METRICS_STATE_DEF,
+} from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -838,6 +841,39 @@ describe('tab mapping utils', () => {
       expect(tabState.initialInternalState?.tabType).toBe(DiscoverTabType.Metrics);
       expect(tabState.profileState).toEqual({
         metricsState: { dimensions: ['host.name'] },
+      });
+    });
+
+    it('restores saved profile fields while preserving fields absent from the saved payload', () => {
+      const tabState = fromSavedObjectTabToTabState({
+        tab: {
+          ...getPersistedTabMock({
+            tabId: 'metrics-tab',
+            dataView: dataViewMockWithTimeField,
+            services: tabTypeServices,
+          }),
+          tabTypeState: {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['saved-dimension'],
+          },
+        },
+        existingTab: getTabStateMock({
+          id: 'metrics-tab',
+          profileState: {
+            metricsState: {
+              ...METRICS_STATE_DEF.defaultState,
+              dimensions: ['live-dimension'],
+            },
+          },
+        }),
+        profileStateRegistry,
+      });
+
+      expect(tabState.profileState).toEqual({
+        metricsState: {
+          ...METRICS_STATE_DEF.defaultState,
+          dimensions: ['saved-dimension'],
+        },
       });
     });
 
