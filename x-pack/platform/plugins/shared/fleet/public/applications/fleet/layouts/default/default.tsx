@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiLink, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
@@ -138,10 +139,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   return (
     <TourManagerProvider>
       {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
-          iconType="popper"
           onDismiss={granularPrivilegesCallout.dismiss}
           title={
             <>

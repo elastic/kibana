@@ -494,6 +494,9 @@ export interface RoundModelUsageStats {
   model?: string;
 }
 
+/** Placeholder title assigned to a new conversation */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
 /**
  * Main structure representing a conversation with an agent.
  */

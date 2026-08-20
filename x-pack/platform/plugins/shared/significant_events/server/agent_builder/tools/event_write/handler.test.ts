@@ -402,7 +402,7 @@ describe('mergeSignalsLatestPerRule', () => {
     type: 'detection',
     stream_name: 'logs.test',
     description: 'Test signal',
-    confirmed: true,
+    verdict: 'confirms',
     metadata: {
       detection_id: `det-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -442,6 +442,17 @@ describe('mergeSignalsLatestPerRule', () => {
     expect(ruleUuids).toContain('rule-2');
   });
 
+  it('carries forward a non-blocking signal unchanged', () => {
+    const nonBlocking = { ...makeSignal('rule-1'), verdict: 'refutes' as const };
+    const result = mergeSignalsLatestPerRule(
+      [{ '@timestamp': TS_EARLIER, signals: [nonBlocking] }],
+      [makeSignal('rule-2')],
+      TS_SUBMITTED
+    );
+
+    expect(result).toContainEqual(nonBlocking);
+  });
+
   it('prefers prior doc when its timestamp is newer than submitted', () => {
     const priorSignal = makeSignal('rule-1');
     const submittedSignal = makeSignal('rule-1');
@@ -450,6 +461,20 @@ describe('mergeSignalsLatestPerRule', () => {
     expect((result[0] as Extract<SignalEntry, { type: 'detection' }>).metadata.detection_id).toBe(
       priorSignal.metadata.detection_id
     );
+  });
+
+  it('normalizes a legacy carried-forward description before persistence', () => {
+    const legacySignal = {
+      ...makeSignal('rule-1'),
+      description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+    };
+    const result = mergeSignalsLatestPerRule(
+      [{ '@timestamp': TS_EARLIER, signals: [legacySignal] }],
+      [],
+      TS_SUBMITTED
+    );
+
+    expect(result[0].description).toHaveLength(MAX_SIGNAL_DESCRIPTION_LENGTH);
   });
 });
 
@@ -527,7 +552,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       {
         type: 'detection',
         metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency' },
-        confirmed: true,
+        verdict: 'confirms',
       } as never,
     ],
     dedup_window: 'now-24h',
@@ -545,7 +570,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
           rule_name: 'High Latency',
           ...(changePointType !== undefined ? { change_point_type: changePointType } : {}),
         },
-        confirmed: true,
+        verdict: 'confirms',
       } as never,
     ],
   });
@@ -598,7 +623,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
             rule_name: 'High Latency',
             change_point_type: 'spike',
           },
-          confirmed: true,
+          verdict: 'confirms',
         } as never,
       ],
     };
@@ -624,7 +649,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
                 rule_name: 'High Latency',
                 change_point_type: 'dip',
               },
-              confirmed: true,
+              verdict: 'confirms',
             } as never,
           ],
         },
@@ -836,7 +861,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
         {
           type: 'detection',
           metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency', change_point_type: '' },
-          confirmed: true,
+          verdict: 'confirms',
         } as never,
       ],
     };
@@ -940,6 +965,7 @@ describe('eventsWriteItemSchema', () => {
         type: 'detection',
         stream_name: 'logs.test',
         description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        verdict: 'not_checked',
         metadata: {
           detection_id: 'det-1',
           rule_uuid: 'rule-1',

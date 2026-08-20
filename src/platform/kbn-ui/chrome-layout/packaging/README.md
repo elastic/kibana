@@ -32,3 +32,13 @@ their targets are missing (Step 0 of this script does this automatically).
 # Start the dev server (http://localhost:3000)
 cd example && ./start.sh
 ```
+
+## Host requirements
+
+- Wrap the layout in an EUI provider.
+- Install React 18 or later, EUI, and Emotion as peer dependencies.
+- Use the layout as the single full-viewport application shell.
+
+`GridLayoutGlobalStyles` contains only shell-level document and EUI overlay behavior, plus the
+generic `plain` / `framed` appearance. Kibana DOM selectors, legacy compatibility variables, and
+application-specific global styles are not included in the package.

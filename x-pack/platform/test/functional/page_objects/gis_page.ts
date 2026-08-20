@@ -545,10 +545,8 @@ export class GisPageObject extends FtrService {
   async setJoinWhereQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapJoinWhereExpressionButton');
-    const filterEditorContainer = await this.testSubjects.find('mapJoinWhereFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();
