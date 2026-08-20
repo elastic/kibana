@@ -24,7 +24,7 @@ import { dashboardDesignGuidancePrompt } from '../../../skills/generation_guidan
 import type { PanelFacts } from './panel_facts';
 
 /** Maximum number of findings the judge may return. */
-const MAX_FINDINGS = 30;
+const MAX_FINDINGS = 10;
 
 export interface ReviewFinding {
   scope: 'panel' | 'dashboard';
@@ -128,9 +128,9 @@ const buildChartAuthoringRulesSection = (panelFacts: PanelFacts[]): string => {
 
   return `## Chart Authoring Rules
 
-Lens panels were authored under the rules below. Flag violations as findings (default severity: warning).
+Lens panels were authored under the rules below. Use them as context for judging whether a panel is genuinely broken or misleading — not as a checklist to enforce. Only report a rule violation when the config is objectively invalid (e.g. a legacy palette id, categorical color mapping on a numeric column) or clearly harms readability of the rendered chart.
 
-Some rules are conditional on the original user request (e.g. "unless the user asks"). You do not see that request, so when a config deviates in a way those rules permit on explicit request, report it as a \`suggestion\` (a question to raise with the user) rather than a \`warning\` — unless the config is objectively invalid (e.g. a legacy palette id, categorical color mapping on a numeric column).
+Some rules are conditional on the original user request (e.g. "unless the user asks"). You do not see that request, so a deviation those rules permit on explicit request is NOT a finding — assume it was intentional.
 
 ${titleRulesPromptContent}
 
@@ -335,14 +335,25 @@ ${focus ? `## Review Focus\n\n${focus}\n\n` : ''}## Instructions
 
 Review the dashboard holistically. Consider how panels relate to each other — redundancy, ordering, composition, cross-panel consistency (units, color semantics), and whether the overall layout tells a coherent story.
 
-For each panel consider: does the data make sense for the stated intent, are the chart type and configuration appropriate for the data shape, are there signs of broken queries (all-zero results, empty rows, errors)?
+For each panel consider: does the data make sense for the stated intent, and are the chart type and configuration appropriate for the data shape?
+
+Always check each panel's execution facts for these data defects — they are real findings, not judgment calls:
+- execution errors, or a query returning 0 rows (the panel renders empty)
+- an all-zero metric or all-zero numeric column
+- null or empty-string values in a column used as a category, breakdown, or axis (\`top_values\` containing null, or a high \`null_share\`) — Lens renders these as a "(blank)" bucket; suggest excluding them in the query (e.g. \`WHERE field IS NOT NULL\`) or labelling them via \`COALESCE\` when they carry meaning. When the "(blank)" bucket is the largest or a dominant category, the chart is actively misleading — report it as \`critical\`; otherwise \`warning\`
+
+You are a high-precision reviewer: your findings trigger automated fixes and user-facing follow-ups, so every false positive has a real cost. Report a finding ONLY when you are confident it describes a real, observable defect — grounded in the panel facts above (an error, a data shape that contradicts the config, an objectively invalid config value) — and fixing it would materially change what a viewer sees or understands. Do NOT report:
+- stylistic preferences, alternative phrasings of titles/descriptions, or "could also" ideas
+- hypothetical concerns not evidenced by the executed results (e.g. "might be slow on larger data")
+- deviations from the guidelines that could plausibly be intentional
+- duplicate findings — if one root cause affects several panels, report it once at dashboard scope
+
+When in doubt, omit the finding. Zero findings is a valid and expected outcome for a well-composed dashboard.
 
 Report up to ${MAX_FINDINGS} findings, prioritising by impact. Use severity:
 - critical: the dashboard is broken or actively misleading (query error, all-zero metric, wrong chart type that inverts the meaning)
-- warning: noticeably degrades usability or correctness (too many legend items for the panel size, missing title, slow query)
-- suggestion: a polish opportunity that would improve clarity or aesthetics
-
-Zero findings is a valid and expected outcome for a well-composed dashboard.
+- warning: a real defect that noticeably degrades correctness or readability for a viewer (e.g. a legend so crowded the chart is unreadable, a number format that misstates units)
+- suggestion: a concrete, high-value improvement — not routine polish
 
 For each finding, provide a concrete suggestion in plain prose describing what to change.
 

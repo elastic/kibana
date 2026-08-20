@@ -38,11 +38,11 @@ ${kibanaRendering.guidance}
 
 After any ${dashboardTools.generateDashboard} call that created or edited panel content (operations: \`add_panels\`, \`edit_panels\`, \`add_section\` with inline panels), call ${dashboardTools.reviewDashboard} in a **separate turn** — never in the same response as \`generate_dashboard\`.
 
-Apply all \`critical\` and \`warning\` findings automatically via a follow-up \`generate_dashboard\` call. Surface \`suggestion\` findings to the user rather than applying them without consent.
+Handle the findings as follows:
+- Apply \`critical\` findings automatically via a follow-up \`generate_dashboard\` call — these mean the dashboard is broken or misleading.
+- Do **not** apply \`warning\` or \`suggestion\` findings on your own. Summarise them briefly to the user and ask whether they want any of the improvements applied.
 
-After applying fixes, call \`review_dashboard\` at most once more. If findings remain after that second review, report them to the user instead of looping further.
-
-When calling \`review_dashboard\` after a self-review fix cycle, set the \`focus\` field to identify the panels you changed so the judge can prioritise them.
+Call \`review_dashboard\` at most **once** per user request. Do not re-review after applying fixes — report what you fixed and move on. Only review again if the user explicitly asks for another review.
 
 Do **not** call \`review_dashboard\` after operations that only change layout or metadata (\`set_metadata\`, \`move_panels\`, \`update_panel_layouts\`, \`remove_panels\`, control add/remove).
 `,
