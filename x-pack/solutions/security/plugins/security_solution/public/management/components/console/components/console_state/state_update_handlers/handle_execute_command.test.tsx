@@ -490,7 +490,7 @@ describe('When a Console command is entered by the user', () => {
         await enterCommand('cmd-cond-allof --trigger');
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-          'Use of --trigger requires the following additonal arguments: --depA, --depB'
+          'Use of --trigger requires the following additional arguments: --depA, --depB'
         );
       });
 
@@ -499,7 +499,7 @@ describe('When a Console command is entered by the user', () => {
         await enterCommand('cmd-cond-allof --trigger --depA');
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-          'Use of --trigger requires the following additonal arguments: --depA, --depB'
+          'Use of --trigger requires the following additional arguments: --depA, --depB'
         );
       });
 
@@ -549,7 +549,7 @@ describe('When a Console command is entered by the user', () => {
         await enterCommand('cmd-cond-oneof --trigger');
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-          'Argument --trigger requires one of the following arguments: --depX, --depY'
+          'Argument --trigger requires (only) one of the following arguments: --depX, --depY'
         );
       });
 

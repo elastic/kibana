@@ -112,7 +112,7 @@ export const executionTranslations = Object.freeze({
     return (
       <FormattedMessage
         id="xpack.securitySolution.console.commandValidation.missingConditionallyRequiredExclusiveOrArg"
-        defaultMessage="Argument {argName} requires one of the following arguments: {listOfMissingArgs}"
+        defaultMessage="Argument {argName} requires (only) one of the following arguments: {listOfMissingArgs}"
         values={{
           argName: (
             <ConsoleCodeBlock bold inline>

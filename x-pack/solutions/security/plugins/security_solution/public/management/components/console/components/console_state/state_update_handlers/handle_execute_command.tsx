@@ -307,9 +307,13 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           );
         }
 
-        if (Object.keys(conditionalArgs.oneOf)) {
+        if (Object.keys(conditionalArgs.oneOf).length > 0) {
           for (const exclusiveOrGroupArgs of Object.values(conditionalArgs.oneOf)) {
-            if (!exclusiveOrGroupArgs.some((requiredArg) => parsedInput.hasArg(requiredArg.name))) {
+            if (
+              !exclusiveOrGroupArgs.some((requiredArg) => parsedInput.hasArg(requiredArg.name)) ||
+              exclusiveOrGroupArgs.filter((requiredArg) => parsedInput.hasArg(requiredArg.name))
+                .length > 1
+            ) {
               return updateStateWithNewCommandHistoryItem(
                 state,
                 createCommandHistoryEntry(
