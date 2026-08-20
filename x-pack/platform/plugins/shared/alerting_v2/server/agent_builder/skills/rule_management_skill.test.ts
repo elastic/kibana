@@ -21,6 +21,7 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  getPrivilegeChecker: jest.fn() as any,
 });
 
 describe('createRuleManagementSkill', () => {

@@ -101,7 +101,13 @@ The end-to-end notification path:
 7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via \`scheduleWorkflow\`.
 8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).
 
-Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
+Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.
+
+---
+
+## Privileges
+
+The \`${ALERTING_TOOL_IDS.manageActionPolicy}\` tool requires the **Action Policies: All** Kibana privilege. Read-only users can discover and inspect action policies via \`platform.core.sml_search\` and \`platform.core.sml_attach\`.`,
       },
       {
         name: 'action-policy-schema',

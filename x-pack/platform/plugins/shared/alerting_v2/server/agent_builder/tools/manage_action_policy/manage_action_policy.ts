@@ -11,9 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -38,16 +41,18 @@ export interface ManageActionPolicyToolDeps {
   getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
   getAvailableConnectors: (
     spaceId: string,
-    request: import('@kbn/core/server').KibanaRequest
+    request: KibanaRequest
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
+  getPrivilegeChecker: (context: { request: KibanaRequest }) => PrivilegeChecker;
 }
 
 export const manageActionPolicyTool = ({
   logger,
   getWorkflow,
   getAvailableConnectors,
+  getPrivilegeChecker,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -69,6 +74,23 @@ Use operations[] to:
     { actionPolicyAttachmentId: previousAttachmentId, operations },
     { attachments, spaceId, request }
   ) => {
+    const privilegeChecker = getPrivilegeChecker({ request });
+    const privilegeDisplayName = getAlertingPrivilegeDisplayName('actionPolicies', 'all');
+    const authorized = await privilegeChecker.canWrite('actionPolicies');
+    if (!authorized) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Unauthorized to compose or modify Alerting V2 action policies. Missing Kibana privilege: ${privilegeDisplayName}. Ask an administrator to grant this privilege, or continue with discovery-only if you only have Action Policies: Read.`,
+              metadata: { missingPrivileges: [privilegeDisplayName] },
+            },
+          },
+        ],
+      };
+    }
+
     let policyId: string | undefined;
     try {
       const currentAttachment = previousAttachmentId
