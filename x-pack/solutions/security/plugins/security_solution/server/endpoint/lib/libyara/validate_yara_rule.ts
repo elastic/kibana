@@ -8,7 +8,14 @@
 import { createRequire } from 'module';
 import path from 'path';
 import type { Logger } from '@kbn/logging';
-import type { YaraDiagnostic, YaraValidateResult } from './types';
+import type {
+  YaraCompiledRule,
+  YaraCompiledRuleMeta,
+  YaraDiagnostic,
+  YaraMetaKeyOfInterest,
+  YaraValidateResult,
+} from './types';
+import { YARA_META_KEYS_OF_INTEREST } from './constants';
 
 let logger: Logger | undefined;
 
@@ -36,14 +43,14 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
     const json = mod.UTF8ToString(ptr);
     const result = parseResult(json);
     const durationMs = Math.round(performance.now() - started);
-    const outcome = result.errors.length > 0 ? 'compile_error' : 'success';
+    const outcome = result.errorCount > 0 ? 'compile_error' : 'success';
 
     logger?.debug(
       () =>
         `YARA validate completed: outcome=${outcome}, errorCount=${
-          result.errors.length
-        }, warningCount=${
-          result.warnings.length
+          result.errorCount
+        }, warningCount=${result.warningCount}, ruleCount=${
+          result.rules.length
         }, durationMs=${durationMs}, sourceByteLength=${Buffer.byteLength(source, 'utf8')}`
     );
 
@@ -150,10 +157,57 @@ const loadModule = async (): Promise<YaraValidateModule> => {
   return modulePromise;
 };
 
+const isYaraMetaKeyOfInterest = (value: string): value is YaraMetaKeyOfInterest =>
+  YARA_META_KEYS_OF_INTEREST.some((key) => key === value);
+
+const parseOptionalString = (value: string | undefined): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const parseDuplicateMeta = (value: string[] | undefined): YaraMetaKeyOfInterest[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter(isYaraMetaKeyOfInterest);
+};
+
+const parseCompiledRule = (item: {
+  identifier?: string;
+  meta?: { os?: string; arch?: string; scan_type?: string };
+  duplicateMeta?: string[];
+}): YaraCompiledRule => {
+  const meta: YaraCompiledRuleMeta = {};
+  const os = parseOptionalString(item.meta?.os);
+  const arch = parseOptionalString(item.meta?.arch);
+  const scanType = parseOptionalString(item.meta?.scan_type);
+
+  if (os !== undefined) {
+    meta.os = os;
+  }
+  if (arch !== undefined) {
+    meta.arch = arch;
+  }
+  if (scanType !== undefined) {
+    meta.scan_type = scanType;
+  }
+
+  return {
+    identifier: item.identifier ?? '',
+    meta,
+    duplicateMeta: parseDuplicateMeta(item.duplicateMeta),
+  };
+};
+
 const parseResult = (json: string): YaraValidateResult => {
   const parsed = JSON.parse(json) as {
     errors?: Array<{ severity?: string; message?: string; line?: number }>;
     warnings?: Array<{ severity?: string; message?: string; line?: number }>;
+    rules?: Array<{
+      identifier?: string;
+      meta?: { os?: string; arch?: string; scan_type?: string };
+      duplicateMeta?: string[];
+    }>;
+    errorCount?: number;
+    warningCount?: number;
   };
 
   const toDiagnostic = (
@@ -165,8 +219,14 @@ const parseResult = (json: string): YaraValidateResult => {
     line: typeof item.line === 'number' ? item.line : 0,
   });
 
+  const errors = (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error'));
+  const warnings = (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning'));
+
   return {
-    errors: (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error')),
-    warnings: (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning')),
+    errors,
+    warnings,
+    errorCount: typeof parsed.errorCount === 'number' ? parsed.errorCount : errors.length,
+    warningCount: typeof parsed.warningCount === 'number' ? parsed.warningCount : warnings.length,
+    rules: (parsed.rules ?? []).map(parseCompiledRule),
   };
 };

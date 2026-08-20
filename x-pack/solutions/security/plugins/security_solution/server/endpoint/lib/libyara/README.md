@@ -4,6 +4,14 @@ This folder contains the official `libyara` C API wrapped in-house in WebAssembl
 
 We use `libyara` to validate rules exactly the same way as Endpoint does, with the same tool on the same version.
 
+## Limits
+
+A maximum number of 256 rules are validated per entry, above that the validator returns an error.
+See `MAX_RULES` directive in `validate_yara.c`.
+
+A maximum of 64 errors and 64 warnings are stored in the `errors` / `warnings` arrays. Additional diagnostics are counted but not stored, so `errorCount` / `warningCount` remain accurate. The arrays exist to hint at where problems are, not to enumerate every diagnostic.
+See `MAX_DIAGNOSTICS` directive in `validate_yara.c`.
+
 ## Usage
 
 ```ts

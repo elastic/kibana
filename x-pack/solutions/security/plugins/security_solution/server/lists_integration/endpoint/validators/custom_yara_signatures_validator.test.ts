@@ -20,7 +20,13 @@ import { validateYaraRule } from '../../../endpoint/lib/libyara';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../endpoint/lib/libyara', () => ({
-  validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [],
+  })),
   getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
 }));
 
@@ -40,7 +46,13 @@ describe('YARA Signatures API validations', () => {
     );
     exceptionsGenerator = new ExceptionsListItemGenerator();
     mockValidateYaraRule.mockReset();
-    mockValidateYaraRule.mockResolvedValue({ errors: [], warnings: [] });
+    mockValidateYaraRule.mockResolvedValue({
+      errors: [],
+      warnings: [],
+      errorCount: 0,
+      warningCount: 0,
+      rules: [],
+    });
   });
 
   it('should initialize', () => {
@@ -272,6 +284,9 @@ describe('YARA Signatures API validations', () => {
       mockValidateYaraRule.mockResolvedValue({
         errors: [{ severity: 'error', message: 'syntax error', line: 2 }],
         warnings: [],
+        errorCount: 1,
+        warningCount: 0,
+        rules: [],
       });
 
       await expect(
@@ -284,6 +299,9 @@ describe('YARA Signatures API validations', () => {
       mockValidateYaraRule.mockResolvedValue({
         errors: [],
         warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
+        errorCount: 0,
+        warningCount: 1,
+        rules: [{ identifier: 'T', meta: {}, duplicateMeta: [] }],
       });
 
       await expect(
