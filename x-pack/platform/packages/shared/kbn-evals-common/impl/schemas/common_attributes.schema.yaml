@@ -361,6 +361,7 @@ components:
 
     JudgeEvidence:
       type: array
+      minItems: 1
       maxItems: 3
       items:
         type: string
@@ -430,13 +431,19 @@ components:
           type: string
           minLength: 1
           maxLength: 32768
+          description: >-
+            Mustache template for the evaluation request. Use unescaped
+            interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence
+            and reference data so their contents are not HTML-escaped.
         system_prompt:
           type: string
           minLength: 1
           maxLength: 32768
           description: >-
             System instructions for the judge. Required so every immutable
-            evaluator version contains its complete prompt configuration.
+            evaluator version contains its complete prompt configuration. Use
+            unescaped Mustache interpolation (`{{{variable}}}` or
+            `{{& variable}}`) when inserting evidence or reference data.
         evidence:
           $ref: '#/components/schemas/JudgeEvidence'
         reference_data_keys:

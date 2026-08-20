@@ -28,6 +28,13 @@ interface MockRow {
   _source: EvaluatorStorageDocument;
 }
 
+interface MockBulkDeleteItem {
+  delete: {
+    result?: string;
+    error?: { reason?: string };
+  };
+}
+
 const JUDGE: LlmJudgeConfig = {
   prompt: 'Rate {{{agent_response}}}',
   system_prompt: 'Judge the response according to the supplied criteria.',
@@ -178,8 +185,12 @@ const createStorageAdapter = ({
   });
 
   const bulk = jest.fn(
-    async ({ operations }: { operations: Array<{ delete?: { _id: string } }> }) => {
-      const items = operations.map((operation) => {
+    async ({
+      operations,
+    }: {
+      operations: Array<{ delete?: { _id: string } }>;
+    }): Promise<{ errors: boolean; items: MockBulkDeleteItem[] }> => {
+      const items: MockBulkDeleteItem[] = operations.map((operation) => {
         const found = operation.delete ? docs.delete(operation.delete._id) : false;
         return { delete: { result: found ? 'deleted' : 'not_found' } };
       });
@@ -652,6 +663,57 @@ describe('EvaluatorDefinitionClient', () => {
       await expect(client.delete('tone')).resolves.toEqual({ deleted: 501 });
       expect(bulk).toHaveBeenCalledTimes(2);
       expect(docs.size).toBe(0);
+    });
+
+    it('stops when concurrent updates keep adding versions', async () => {
+      const { client, docs, bulk } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      let minor = 1;
+
+      bulk.mockImplementation(
+        async ({ operations }: { operations: Array<{ delete?: { _id: string } }> }) => {
+          for (const operation of operations) {
+            if (operation.delete) {
+              docs.delete(operation.delete._id);
+            }
+          }
+
+          const version = `1.${minor++}.0`;
+          docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', version), {
+            name: 'tone',
+            version,
+            kind: 'llm',
+            description: 'Concurrent update',
+            judge: JUDGE,
+            space_ids: [DEFAULT_SPACE_ID],
+            created_at: new Date(2026, 0, 1, 0, 0, minor).toISOString(),
+            updated_at: new Date(2026, 0, 1, 0, 0, minor).toISOString(),
+          });
+
+          return {
+            errors: false,
+            items: operations.map(() => ({ delete: { result: 'deleted' } })),
+          };
+        }
+      );
+
+      await expect(client.delete('tone')).rejects.toThrow(
+        'Could not finish deleting evaluator "tone" after 100 batches'
+      );
+      expect(bulk).toHaveBeenCalledTimes(100);
+    });
+
+    it('fails when Elasticsearch reports a bulk deletion error', async () => {
+      const { client, bulk } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [{ delete: { error: { reason: 'index is read-only' } } }],
+      });
+
+      await expect(client.delete('tone')).rejects.toThrow(
+        'Failed to delete evaluator "tone": index is read-only'
+      );
     });
 
     it('removes one version when asked for one', async () => {

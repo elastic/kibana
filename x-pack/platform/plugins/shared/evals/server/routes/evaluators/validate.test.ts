@@ -149,26 +149,31 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     codeEvaluator,
   ]);
 
-  const setup = () => {
+  const setup = ({
+    registry = evaluatorRegistry,
+    spaceId,
+  }: { registry?: EvaluatorRegistry; spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
+    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
 
     registerValidateRoute({
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry,
+      evaluatorRegistry: registry,
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId,
     });
 
     const route = versionedRouter.getRoute('post', EVALS_VALIDATE_URL);
     const routeConfig = versionedRouter.post.mock.calls[0][0];
     const { handler } = route.versions[API_VERSIONS.internal.v1];
 
-    return { handler, routeConfig };
+    return { handler, routeConfig, getSpaceId };
   };
 
   const buildContext = (searchMock = buildRouteSearchMock()) =>
@@ -190,6 +195,28 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     expect(routeConfig.security).toEqual({
       authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
     });
+  });
+
+  it('resolves evaluators from the active space', async () => {
+    const registry = createEvaluatorRegistryMock([codeEvaluator]);
+    const asScoped = jest.spyOn(registry, 'asScoped');
+    const { handler, getSpaceId } = setup({ registry, spaceId: 'marketing' });
+    const request = {
+      body: {
+        subject: { traces: [{ trace_id: FULL_TRACE_ID }] },
+        evaluators: [{ name: 'latency' }],
+      },
+    } as unknown as Parameters<typeof handler>[1];
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getSpaceId).toHaveBeenCalledWith(request);
+    expect(asScoped).toHaveBeenCalledWith({ spaceId: 'marketing' });
   });
 
   it('marks all evaluators ready for complete evidence traces', async () => {

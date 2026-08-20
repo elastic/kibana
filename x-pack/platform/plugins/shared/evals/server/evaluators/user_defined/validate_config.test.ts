@@ -93,6 +93,13 @@ describe('validateJudgeConfig', () => {
   });
 
   describe('inputs', () => {
+    it('rejects a judge that does not inspect any trace evidence', () => {
+      expectRejection(
+        config({ prompt: 'Always return pass.', evidence: [] }),
+        'must require at least one trace evidence field'
+      );
+    });
+
     it('rejects evidence asked for twice', () => {
       expectRejection(
         config({ evidence: ['response', 'response'] }),
@@ -126,6 +133,21 @@ describe('validateJudgeConfig', () => {
   });
 
   describe('templates', () => {
+    it('rejects interpolation that would HTML-escape evidence', () => {
+      expectRejection(
+        config({ prompt: 'Rate {{agent_response}}' }),
+        'uses HTML-escaped Mustache interpolation for "agent_response"'
+      );
+    });
+
+    it('accepts both unescaped Mustache interpolation forms', () => {
+      expect(() =>
+        validateJudgeConfig(
+          config({ prompt: 'Rate {{{agent_response}}} and {{& agent_response}}' })
+        )
+      ).not.toThrow();
+    });
+
     it('rejects a prompt reading a variable the judge is never given', () => {
       expectRejection(
         config({ prompt: 'Compare {{{agent_response}}} with {{{expected}}}' }),
@@ -167,10 +189,8 @@ describe('validateJudgeConfig', () => {
       );
     });
 
-    it('accepts a prompt with no variables at all', () => {
-      expect(() =>
-        validateJudgeConfig(config({ prompt: 'Rate the trace.', evidence: [] }))
-      ).not.toThrow();
+    it('accepts a prompt with no variables when evidence is still required', () => {
+      expect(() => validateJudgeConfig(config({ prompt: 'Rate the trace.' }))).not.toThrow();
     });
   });
 });

@@ -927,9 +927,7 @@ describe('DatasetClient', () => {
   });
 
   describe('spaces', () => {
-    it('narrows reads with the same rule that filters scores', async () => {
-      // Two statements of one rule: if they drift, a dataset and its scores
-      // disagree about which space they are visible in.
+    it('narrows reads with the shared space filter', async () => {
       for (const spaceId of [DEFAULT_SPACE_ID, 'marketing']) {
         const { client, datasetsStorage } = createClient({ spaceId });
 

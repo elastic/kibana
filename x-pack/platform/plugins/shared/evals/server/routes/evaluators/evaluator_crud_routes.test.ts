@@ -152,6 +152,16 @@ describe('evaluator CRUD routes', () => {
       ).toBe(false);
     });
 
+    it('rejects a definition without trace evidence', () => {
+      expect(
+        CreateEvaluatorRequestBody.safeParse({
+          name: 'tone',
+          description: 'Rates response tone',
+          judge: { ...JUDGE, evidence: [] },
+        }).success
+      ).toBe(false);
+    });
+
     it('rejects a score name that cannot fit its persisted composite name', () => {
       expect(
         CreateEvaluatorRequestBody.safeParse({
@@ -222,6 +232,27 @@ describe('evaluator CRUD routes', () => {
       );
 
       expect(response.status).toBe(409);
+    });
+
+    it('does not expose an unexpected internal error', async () => {
+      const { handler, context, client, logger } = setup();
+      client.create.mockRejectedValueOnce(new Error('sensitive storage failure'));
+
+      const response = await handler(
+        context,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_EVALUATORS_URL,
+          body: { name: 'tone', description: 'Tone', judge: JUDGE },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual({ message: 'Failed to create evaluator' });
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to create evaluator: sensitive storage failure'
+      );
     });
 
     it('rejects judge templates that read undeclared inputs', async () => {

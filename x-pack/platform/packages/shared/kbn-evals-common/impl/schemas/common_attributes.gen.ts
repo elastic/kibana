@@ -221,7 +221,10 @@ export const EvaluatorOriginEnum = EvaluatorOrigin.enum;
  * Which parts of the normalized trace the judge is shown, and therefore requires: the user query (`input`), the agent response (`response`), and the tool calls (`steps`). Rendered into the prompt as `user_query`, `agent_response`, and `tool_calls`. A trace missing any of them is reported as unmet rather than judged.
  */
 export const JudgeEvidence = lazySchema(() =>
-  z.array(z.enum(['input', 'response', 'steps'])).max(3)
+  z
+    .array(z.enum(['input', 'response', 'steps']))
+    .min(1)
+    .max(3)
 );
 export type JudgeEvidence = z.infer<typeof JudgeEvidence>;
 
@@ -255,9 +258,12 @@ export type JudgeScore = z.infer<typeof JudgeScore>;
  */
 export const LlmJudgeConfig = lazySchema(() =>
   z.object({
+    /**
+     * Mustache template for the evaluation request. Use unescaped interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence and reference data so their contents are not HTML-escaped.
+     */
     prompt: z.string().min(1).max(32768),
     /**
-     * System instructions for the judge. Required so every immutable evaluator version contains its complete prompt configuration.
+     * System instructions for the judge. Required so every immutable evaluator version contains its complete prompt configuration. Use unescaped Mustache interpolation (`{{{variable}}}` or `{{& variable}}`) when inserting evidence or reference data.
      */
     system_prompt: z.string().min(1).max(32768),
     evidence: JudgeEvidence,

@@ -29,12 +29,17 @@ export class InvalidJudgeConfigError extends Error {
   }
 }
 
-/**
- * Variables a mustache template reads. Section and inverted-section tags are
- * walked too, so a template guarding on `{{#expected}}` counts as using it.
- */
-const getTemplateVariables = (template: string): string[] => {
-  const collect = (tokens: unknown[], into: Set<string>): void => {
+interface TemplateVariables {
+  all: string[];
+  escaped: string[];
+}
+
+/** Reads variables and records interpolations that Mustache would HTML-escape. */
+const getTemplateVariables = (template: string): TemplateVariables => {
+  const all = new Set<string>();
+  const escaped = new Set<string>();
+
+  const collect = (tokens: unknown[]): void => {
     for (const token of tokens) {
       if (!Array.isArray(token)) {
         continue;
@@ -42,18 +47,20 @@ const getTemplateVariables = (template: string): string[] => {
 
       const [type, value, , , children] = token as [string, string, ...unknown[]];
       if (type === 'name' || type === '&' || type === '#' || type === '^') {
-        into.add(value.split('.')[0]);
+        all.add(value.split('.')[0]);
+      }
+      if (type === 'name') {
+        escaped.add(value.split('.')[0]);
       }
 
       if (Array.isArray(children)) {
-        collect(children, into);
+        collect(children);
       }
     }
   };
 
-  const variables = new Set<string>();
-  collect(Mustache.parse(template), variables);
-  return [...variables];
+  collect(Mustache.parse(template));
+  return { all: [...all], escaped: [...escaped] };
 };
 
 const findDuplicates = (values: string[]): string[] => {
@@ -78,6 +85,12 @@ const findDuplicates = (values: string[]): string[] => {
  */
 export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
   const { scores } = judge.output;
+
+  if (judge.evidence.length === 0) {
+    throw new InvalidJudgeConfigError(
+      'An evaluator must require at least one trace evidence field: input, response, or steps.'
+    );
+  }
 
   const duplicateScores = findDuplicates(scores.map(({ name }) => name));
   if (duplicateScores.length > 0) {
@@ -141,7 +154,7 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
     ['prompt', judge.prompt],
     ['system_prompt', judge.system_prompt],
   ] as Array<[string, string]>) {
-    let variables: string[];
+    let variables: TemplateVariables;
     try {
       variables = getTemplateVariables(template);
     } catch (error) {
@@ -152,13 +165,20 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
       );
     }
 
-    const unknown = variables.filter((variable) => !available.has(variable));
+    const unknown = variables.all.filter((variable) => !available.has(variable));
     if (unknown.length > 0) {
       const unknownNames = unknown.map((variable) => `"${variable}"`).join(', ');
       throw new InvalidJudgeConfigError(
         `The ${label} references ${unknownNames}, which the evaluator is not given. Declare it as evidence (${EVIDENCE_TEMPLATE_VARIABLES.join(
           ', '
         )}) or as a reference data key.`
+      );
+    }
+
+    if (variables.escaped.length > 0) {
+      const escapedNames = variables.escaped.map((variable) => `"${variable}"`).join(', ');
+      throw new InvalidJudgeConfigError(
+        `The ${label} uses HTML-escaped Mustache interpolation for ${escapedNames}. Use triple braces (for example, {{{agent_response}}}) or {{& variable}} so evidence is passed to the judge unchanged.`
       );
     }
   }

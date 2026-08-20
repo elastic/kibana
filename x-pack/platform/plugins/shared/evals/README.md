@@ -230,7 +230,7 @@ POST /internal/evals/evaluators
 - **`evidence`** names the parts of the normalized trace the judge is shown, and therefore requires. They reach the prompt as `{{{user_query}}}`, `{{{agent_response}}}`, and `{{{tool_calls}}}`. A trace missing one is reported as `evidence_unmet` rather than judged.
 - **`reference_data_keys`** names values the example must carry, each exposed to the prompt under its own name. Keys use letters, digits, `_`, or `-` and must start with a letter or `_`. An example missing one is refused before a model is called.
 - **`output.scores`** declares what the judge reports. A `number` score is a value between 0 and 1; a `categorical` score picks from `labels`, each of which carries the numeric value that label is worth, so categorical judgements still aggregate.
-- The prompt is a Mustache template and may only reference declared evidence and reference data keys. Anything else is rejected at create time instead of rendering blank mid-experiment.
+- The prompt is a Mustache template and may only reference declared evidence and reference data keys. Use triple braces (`{{{variable}}}`) or unescaped interpolation (`{{& variable}}`); ordinary `{{variable}}` interpolation is rejected because Mustache would HTML-escape the trace content. Anything undeclared is also rejected at create time instead of rendering blank mid-experiment.
 
 ### Versioning
 

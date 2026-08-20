@@ -92,9 +92,13 @@ describe('GET /internal/evals/evaluators', () => {
       },
     ]);
 
-  const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry } = {}) => {
+  const setup = ({
+    evaluatorRegistry,
+    spaceId,
+  }: { evaluatorRegistry?: EvaluatorRegistry; spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
+    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
     registerListEvaluatorsRoute({
       router,
@@ -104,13 +108,14 @@ describe('GET /internal/evals/evaluators', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId,
     });
 
     const route = versionedRouter.getRoute('get', EVALS_EVALUATORS_URL);
     const routeConfig = versionedRouter.get.mock.calls[0][0];
     const { handler } = route.versions[API_VERSIONS.internal.v1];
 
-    return { route, routeConfig, handler, logger };
+    return { route, routeConfig, handler, logger, getSpaceId };
   };
 
   it('registers read privilege authz requirement', () => {
@@ -166,6 +171,23 @@ describe('GET /internal/evals/evaluators', () => {
         required: ['expected'],
       }),
     });
+  });
+
+  it('lists evaluators from the active space', async () => {
+    const evaluatorRegistry = buildEvaluatorRegistry();
+    const asScoped = jest.spyOn(evaluatorRegistry, 'asScoped');
+    const { handler, getSpaceId } = setup({ evaluatorRegistry, spaceId: 'marketing' });
+    const request = {} as Parameters<typeof handler>[1];
+
+    const response = await handler(
+      {} as Parameters<typeof handler>[0],
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getSpaceId).toHaveBeenCalledWith(request);
+    expect(asScoped).toHaveBeenCalledWith({ spaceId: 'marketing' });
   });
 
   it('marks persisted evaluators as user-defined', async () => {

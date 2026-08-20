@@ -11,8 +11,11 @@ import { isResponseError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import semverCompare from 'semver/functions/compare';
 import semverInc from 'semver/functions/inc';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { MAX_EVALUATOR_NAME_LENGTH, getEvaluatorDefinitionId } from '@kbn/evals-common';
+import {
+  MAX_EVALUATOR_NAME_LENGTH,
+  buildSpaceFilter,
+  getEvaluatorDefinitionId,
+} from '@kbn/evals-common';
 import type {
   EvaluatorDefinitionDocument,
   LlmJudgeConfig,
@@ -59,6 +62,9 @@ const EVALUATOR_DEFINITIONS_PAGE_SIZE = 500;
 /** How many versions of one name a listing or delete covers. */
 const MAX_EVALUATOR_VERSIONS = 500;
 
+/** Prevents a delete from running forever while concurrent updates keep adding versions. */
+const DELETE_MAX_BATCHES = 100;
+
 /**
  * How many of a name's most recent documents the aggregation carries back for
  * semver to choose between. More than one because two versions written in the
@@ -95,17 +101,6 @@ export const assertValidEvaluatorName = (name: string): void => {
       'must be lowercase alphanumeric, may contain "-" or "_" inside, and must start and end with a letter or digit'
     );
   }
-};
-
-/** Includes legacy documents without `space_ids` only in the default space. */
-const buildEvaluatorSpaceFilter = (spaceId: string): QueryDslQueryContainer => {
-  const should: QueryDslQueryContainer[] = [{ terms: { space_ids: [spaceId] } }];
-
-  if (spaceId === DEFAULT_SPACE_ID) {
-    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
-  }
-
-  return { bool: { should, minimum_should_match: 1 } };
 };
 
 interface LatestByNameAggregation {
@@ -146,7 +141,7 @@ export class EvaluatorDefinitionClient {
     this.storage = storageAdapter.getClient();
     this.logger = logger;
     this.spaceId = spaceId;
-    this.spaceFilter = buildEvaluatorSpaceFilter(spaceId);
+    this.spaceFilter = buildSpaceFilter(spaceId);
     this.isBuiltIn = isBuiltIn;
   }
 
@@ -377,7 +372,7 @@ export class EvaluatorDefinitionClient {
     }
 
     let deleted = 0;
-    while (true) {
+    for (let batch = 1; batch <= DELETE_MAX_BATCHES; batch++) {
       const targets = await this.listVersions(name);
       if (targets.length === 0) {
         return { deleted };
@@ -386,6 +381,10 @@ export class EvaluatorDefinitionClient {
       const result = await this.deleteBatch(name, targets);
       deleted += result.deleted;
     }
+
+    throw new Error(
+      `Could not finish deleting evaluator "${name}" after ${DELETE_MAX_BATCHES} batches because versions kept appearing`
+    );
   }
 
   private async deleteBatch(
