@@ -149,7 +149,21 @@ export const useFeedback = (
           setIsSubmitting(true);
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: null })
-            .then(() => patchCache(undefined))
+            .then(() => {
+              patchCache(undefined);
+              services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted, {
+                round_id: roundId,
+                conversation_id: conversationId,
+                trace_id: ebtContext?.traceId,
+                connector_id: ebtContext?.connectorId,
+                model: ebtContext?.model,
+                agent_id: ebtContext?.agentId,
+                tool_names: ebtContext?.toolNames,
+                input_tokens: ebtContext?.inputTokens,
+                output_tokens: ebtContext?.outputTokens,
+                llm_calls: ebtContext?.llmCalls,
+              });
+            })
             .catch(() => {
               addErrorToast({ title: labels.retractError });
               setVoteState(prev);
@@ -305,23 +319,21 @@ export const useFeedback = (
           submitted_at: new Date().toISOString(),
         });
 
-        if (currentVote === 'down') {
-          services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-            round_id: roundId,
-            conversation_id: conversationId,
-            vote: currentVote,
-            chips: chips as string[],
-            ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
-            trace_id: ebtContext?.traceId,
-            connector_id: ebtContext?.connectorId,
-            model: ebtContext?.model,
-            agent_id: ebtContext?.agentId,
-            tool_names: ebtContext?.toolNames,
-            input_tokens: ebtContext?.inputTokens,
-            output_tokens: ebtContext?.outputTokens,
-            llm_calls: ebtContext?.llmCalls,
-          });
-        }
+        services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+          round_id: roundId,
+          conversation_id: conversationId,
+          vote: currentVote,
+          chips: chips as string[],
+          ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
+          trace_id: ebtContext?.traceId,
+          connector_id: ebtContext?.connectorId,
+          model: ebtContext?.model,
+          agent_id: ebtContext?.agentId,
+          tool_names: ebtContext?.toolNames,
+          input_tokens: ebtContext?.inputTokens,
+          output_tokens: ebtContext?.outputTokens,
+          llm_calls: ebtContext?.llmCalls,
+        });
 
         setSubmittedPhase('visible');
 

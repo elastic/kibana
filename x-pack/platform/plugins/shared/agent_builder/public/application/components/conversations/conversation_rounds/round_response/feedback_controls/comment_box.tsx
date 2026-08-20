@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTextArea, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTextArea, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +40,21 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
-                defaultMessage: 'Your comment may be used to improve the product.',
+                defaultMessage:
+                  'Your comment may be shared with Elastic to improve the product. {privacyLink}',
+                values: {
+                  privacyLink: (
+                    <EuiLink
+                      href="https://www.elastic.co/legal/privacy-statement"
+                      target="_blank"
+                      external
+                    >
+                      {i18n.translate('xpack.agentBuilder.feedback.commentDisclosurePrivacyLink', {
+                        defaultMessage: 'Privacy Statement',
+                      })}
+                    </EuiLink>
+                  ),
+                },
               })}
             </EuiText>
           </EuiFlexItem>
