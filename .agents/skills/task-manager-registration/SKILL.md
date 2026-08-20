@@ -31,9 +31,6 @@ taskManager.registerTaskDefinitions({
     priority: TaskPriority.Normal,
     paramsSchema: schema.object({ /* ... */ }),
     stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (s) => s } },
-    taskTypeGroup: schema.maybe(
-      schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
-    ),
     createTaskRunner: (context) => {
       const { taskInstance, signal } = context;
       return {
@@ -371,10 +368,7 @@ await taskManager.ensureScheduled({
 
 Even on first scheduling, the empty `state` you pass MUST be valid input to `stateSchemaByVersion[1].schema`. Schedule with `state: {}` only when the v1 schema accepts an empty object.
 
-## 10.`taskTypeGroup` — only set for alerting and action tasks
-**Rule:** Default value is undefined. This property should only be set for actions and alerting tasks that are rule and connector executors, not maintenance or cleanup tasks.
-
-## 11. CI gate — update the registered task types assertion
+## 10. CI gate — update the registered task types assertion
 
 **Rule:** Adding a new task type breaks the FTR test at `x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts` by design. Add the new task type id to the assertion array in the same PR.
 
