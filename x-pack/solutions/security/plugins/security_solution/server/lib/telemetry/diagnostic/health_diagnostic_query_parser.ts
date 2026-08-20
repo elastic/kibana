@@ -31,10 +31,10 @@ const parseOne = (doc: YAML.Document): HealthDiagnosticQuery => {
     } else if (version === 3) {
       return parseV3(raw);
     } else {
-      return parseUnknown(raw);
+      return parseUnknown(raw, 'unknown_version');
     }
   } catch {
-    return parseUnknown(raw);
+    return parseUnknown(raw, 'invalid_descriptor');
   }
 };
 
@@ -136,14 +136,14 @@ const INDEX_QUERY_FORBIDDEN_FIELDS_V3 = [
 
 const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => {
   if (!raw || typeof raw !== 'object') {
-    return parseUnknown(raw);
+    return parseUnknown(raw, 'invalid_descriptor');
   }
   const type = raw.type;
 
   if (type === 'API') {
     for (const field of API_QUERY_FORBIDDEN_FIELDS) {
       if (field in raw) {
-        return parseUnknown(raw);
+        return parseUnknown(raw, 'invalid_descriptor');
       }
     }
     const knownFields = new Set<string>([
@@ -152,7 +152,7 @@ const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => 
     ]);
     for (const key of Object.keys(raw)) {
       if (!knownFields.has(key)) {
-        return parseUnknown(raw);
+        return parseUnknown(raw, 'invalid_descriptor');
       }
     }
     try {
@@ -176,28 +176,32 @@ const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => 
         encryptionKeyId: raw.encryptionKeyId as string | undefined,
       } satisfies HealthDiagnosticQueryV3;
     } catch (err) {
-      return parseUnknown(raw);
+      return parseUnknown(raw, 'invalid_descriptor');
     }
   }
 
   if (type === 'DSL' || type === 'EQL' || type === 'ESQL') {
     for (const field of INDEX_QUERY_FORBIDDEN_FIELDS_V3) {
       if (field in raw) {
-        return parseUnknown(raw);
+        return parseUnknown(raw, 'invalid_descriptor');
       }
     }
     return parseV2({ ...raw, version: 2 });
   }
 
-  return parseUnknown(raw);
+  return parseUnknown(raw, 'invalid_descriptor');
 };
 
-const parseUnknown = (raw: unknown): ParseFailureQuery => {
+const parseUnknown = (
+  raw: unknown,
+  failureReason: ParseFailureQuery['failureReason']
+): ParseFailureQuery => {
   const obj = raw as Record<string, unknown> | null;
   return {
     id: obj?.id as string | undefined,
     name: obj?.name as string | undefined,
     _raw: raw,
+    failureReason,
   };
 };
 

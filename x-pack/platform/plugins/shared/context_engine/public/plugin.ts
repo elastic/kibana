@@ -23,6 +23,7 @@ import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 import type {
+  AgentBuilderIntegration,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -52,13 +53,20 @@ export class ContextEnginePlugin
     Promise.resolve(undefined);
   private appChromeAdapter: ContextEngineAppChromeAdapter | undefined;
 
+  /** Registered suggest-automation hooks from context_engine_agent_builder. */
+  private agentBuilderIntegration?: AgentBuilderIntegration;
+
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+  setup(
+    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
+  ): ContextEnginePluginSetup {
     this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
     const getAgentBuilder = () => this.agentBuilderPromise;
     const getAppChromeAdapter = () => this.appChromeAdapter;
+    const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
+      this.agentBuilderIntegration;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -103,6 +111,7 @@ export class ContextEnginePlugin
           history: params.history,
           getChatOpener: () => chatOpener,
           appChrome,
+          getAgentBuilderIntegration,
         });
       },
     });
@@ -126,7 +135,11 @@ export class ContextEnginePlugin
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {};
+    return {
+      registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => {
+        this.agentBuilderIntegration = integration;
+      },
+    };
   }
 
   stop() {}

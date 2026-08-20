@@ -6,6 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -133,19 +134,21 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
   });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider
-          services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
-              <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
-            </MemoryRouter>
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
+                <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </ChromeServiceProvider>
   );
 };
 

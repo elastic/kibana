@@ -7,6 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
+  AgentBuilderIntegration,
   ChatOpener,
   ContextEngineAppServices,
   ContextEngineStartDependencies,
@@ -24,6 +25,12 @@ export interface ContextEngineServices extends ContextEngineAppServices {
    * mount is picked up on the next render.
    */
   getChatOpener?: () => ChatOpener | undefined;
+  /**
+   * Getter for registered suggest-automation hooks, resolved at call time (`undefined` when none are
+   * registered). A getter rather than the resolved value so hooks registered after mount are picked
+   * up on the next render.
+   */
+  getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }
 
 const useTypedKibana = () => useKibana<ContextEngineServices>();

@@ -6,6 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -46,21 +47,23 @@ jest.mock('../hooks/use_data_connectors', () => ({
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider
-          services={{
-            ...services,
-            history: scopedHistoryMock.create(),
-            appChrome: createAppChromeMock(),
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <CreateAiIndexPage />
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <CreateAiIndexPage />
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </ChromeServiceProvider>
   );
 };
 
