@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/core-ui-settings-browser-mocks'
-  - '@kbn/core-mount-utils-browser'
   - '@kbn/core-custom-branding-browser-mocks'
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-analytics-browser-mocks'
