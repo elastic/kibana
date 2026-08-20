@@ -12,22 +12,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 /**
- * Server args aligned with x-pack/platform/test/examples/config.ts so developer
- * example plugins (and their cross-dependencies) load via `--plugin-path`.
- *
- * Do not add `--run-examples` here: Scout CI starts Kibana from `--kibanaInstallDir`
- * (prebuilt dist). Sibling `scout_examples` suites rely on plugin-path only.
- */
-export const examplesPluginPathArgs = findTestPluginPaths([
-  resolve(REPO_ROOT, 'examples'),
-  resolve(REPO_ROOT, 'x-pack/examples'),
-]);
-
-/**
- * Stateful examples server args: example plugins + search sessions
- * (not available in serverless).
+ * Stateful examples server args: example plugins via `--plugin-path` plus search
+ * sessions. Do not add `--run-examples` — Scout CI uses `--kibanaInstallDir`.
  */
 export const examplesServerArgs = [
   '--data.search.sessions.enabled=true',
-  ...examplesPluginPathArgs,
+  ...findTestPluginPaths([
+    resolve(REPO_ROOT, 'examples'),
+    resolve(REPO_ROOT, 'x-pack/examples'),
+  ]),
 ];

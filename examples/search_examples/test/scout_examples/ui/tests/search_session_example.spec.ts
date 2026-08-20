@@ -13,24 +13,55 @@
  * the shard_delay aggregation.
  */
 
-import { test } from '@kbn/scout';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  APP_ID,
-  DATA_VIEW,
   LENS_BASIC_KBN_ARCHIVE,
   LOGSTASH_FUNCTIONAL_ARCHIVE,
   LOGSTASH_TIME_RANGE,
-  deleteAllSearchSessions,
-  saveBackgroundSearch,
-  selectSingleComboOption,
+  test,
 } from '../fixtures';
 
-test.describe('Search session example', { tag: ['@local-stateful-classic'] }, () => {
+const SESSION_API_PATH = '/internal/session';
+const SESSION_API_VERSION = '1';
+const SESSION_HEADERS = {
+  [ELASTIC_HTTP_VERSION_HEADER]: SESSION_API_VERSION,
+  'kbn-xsrf': 'anything',
+  'kbn-system-request': 'true',
+};
+
+/** Deletes every search session so leftovers do not interfere with later runs. */
+async function deleteAllSearchSessions(kbnClient: KbnClient): Promise<void> {
+  const { data } = await kbnClient.request<{ saved_objects: Array<{ id: string }> }>({
+    method: 'POST',
+    path: `${SESSION_API_PATH}/_find`,
+    headers: SESSION_HEADERS,
+    body: { page: 1, perPage: 10_000, sortField: 'created', sortOrder: 'asc' },
+  });
+
+  if (data.saved_objects.length === 0) {
+    return;
+  }
+
+  await Promise.all(
+    data.saved_objects.map(({ id }) =>
+      kbnClient.request({
+        method: 'DELETE',
+        path: `${SESSION_API_PATH}/${id}`,
+        headers: SESSION_HEADERS,
+        ignoreErrors: [404],
+      })
+    )
+  );
+}
+
+test.describe('Search session example', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, isSnapshotBuild }) => {
     test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
     await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
+    await deleteAllSearchSessions(kbnClient);
   });
 
   test.afterAll(async ({ kbnClient, isSnapshotBuild }) => {
@@ -41,11 +72,10 @@ test.describe('Search session example', { tag: ['@local-stateful-classic'] }, ()
     await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
-  test.beforeEach(async ({ browserAuth, page, pageObjects, kbnUrl }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    // Privileged: saving/restoring sessions needs more than viewer.
     await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.get(`/app/${APP_ID}/search-sessions`));
-    // Wait for the app to be fully rendered before any test interacts with it.
-    await expect(page.testSubj.locator('dataViewSelector')).toBeVisible();
+    await pageObjects.searchExamples.gotoSearchSessions();
     await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
   });
 
@@ -54,17 +84,25 @@ test.describe('Search session example', { tag: ['@local-stateful-classic'] }, ()
   });
 
   test('should start search, save session, restore session using restore button', async ({
-    page,
+    pageObjects,
   }) => {
-    await selectSingleComboOption(page, 'dataViewSelector', DATA_VIEW);
-    await selectSingleComboOption(page, 'searchMetricField', 'bytes');
+    const { searchExamples } = pageObjects;
 
-    await page.testSubj.locator('startSearch').click();
-    // Save while the shard_delay search is still in-flight.
-    await saveBackgroundSearch(page);
-    await expect(page.testSubj.locator('restoreSearch')).toBeVisible({ timeout: 120_000 });
+    await test.step('configure demo', async () => {
+      await searchExamples.configureSearchSessionDemo();
+    });
 
-    await page.testSubj.locator('restoreSearch').click();
-    await expect(page.testSubj.locator('searchResults-2')).toBeVisible({ timeout: 60_000 });
+    await test.step('start search and save session', async () => {
+      await searchExamples.startSearch.click();
+      await searchExamples.saveBackgroundSearch();
+      // shard_delay keeps the search in-flight until save/restore finish
+      await expect(searchExamples.restoreSearch).toBeVisible({ timeout: 120_000 });
+    });
+
+    await test.step('restore session', async () => {
+      await searchExamples.restoreSearch.click();
+      // shard_delay keeps the search in-flight until save/restore finish
+      await expect(searchExamples.searchResults(2)).toBeVisible({ timeout: 60_000 });
+    });
   });
 });

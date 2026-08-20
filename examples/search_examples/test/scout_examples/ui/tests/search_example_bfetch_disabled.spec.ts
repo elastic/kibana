@@ -8,7 +8,7 @@
  */
 
 /**
- * Smoke coverage of the search_examples demo.
+ * Stateful-only: serverless already forces bfetch off via uiSettings.overrides.
  */
 
 import {
@@ -18,45 +18,41 @@ import {
   test,
 } from '../fixtures';
 
-test.describe('Search example', { tag: '@local-stateful-classic' }, () => {
+test.describe('Search example with bfetch disabled', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
     await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
+    await kbnClient.uiSettings.update({ 'bfetch:disable': true });
   });
 
   test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.unset('bfetch:disable');
     await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    const { searchExamples } = pageObjects;
     await browserAuth.loginAsViewer();
-    await pageObjects.searchExamples.gotoSearch();
-    await pageObjects.searchExamples.configureSearchDemo();
+    await searchExamples.gotoSearch();
+    await searchExamples.configureSearchDemo();
     await page.components.toast().closeAll();
   });
 
   test('should have an other bucket', async ({ pageObjects }) => {
     const { searchExamples } = pageObjects;
-    await test.step('run search with other bucket', async () => {
-      await searchExamples.searchSourceWithOther.click();
-    });
-    await test.step('assert other bucket in response', async () => {
-      await assertOtherBucketResponse(searchExamples, { expectOtherBucket: true });
-    });
+    await searchExamples.searchSourceWithOther.click();
+    await assertOtherBucketResponse(searchExamples, { expectOtherBucket: true });
   });
 
   test('should not have an other bucket', async ({ pageObjects }) => {
     const { searchExamples } = pageObjects;
-    await test.step('run search without other bucket', async () => {
-      await searchExamples.searchSourceWithoutOther.click();
-    });
-    await test.step('assert no other bucket in response', async () => {
-      await assertOtherBucketResponse(searchExamples, { expectOtherBucket: false });
-    });
+    await searchExamples.searchSourceWithoutOther.click();
+    await assertOtherBucketResponse(searchExamples, { expectOtherBucket: false });
   });
 
-  test('should handle warnings', async ({ pageObjects }) => {
-    await pageObjects.searchExamples.searchWithWarning.click();
+  test('should show a warning toast', async ({ pageObjects }) => {
+    const { searchExamples } = pageObjects;
+    await searchExamples.searchWithWarning.click();
     await pageObjects.toasts.waitForToastWithText('Watch out!');
   });
 });

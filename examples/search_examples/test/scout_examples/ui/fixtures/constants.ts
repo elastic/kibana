@@ -22,6 +22,3 @@ export const LOGSTASH_TIME_RANGE = {
 };
 
 export const APP_ID = 'searchExamples';
-
-export const SESSION_API_PATH = '/internal/session';
-export const SESSION_API_VERSION = '1';

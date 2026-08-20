@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { APP_ID, LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures';
+import {
+  LENS_BASIC_KBN_ARCHIVE,
+  LOGSTASH_FUNCTIONAL_ARCHIVE,
+  test,
+} from '../fixtures';
 
-test.describe('Partial results example', { tag: tags.deploymentAgnostic }, () => {
+test.describe('Partial results example', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
     await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
@@ -21,19 +24,18 @@ test.describe('Partial results example', { tag: tags.deploymentAgnostic }, () =>
     await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
-  test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.get(`/app/${APP_ID}/search`));
-    // Wait for the app to be fully rendered before any test interacts with it.
-    await expect(page.testSubj.locator('requestFibonacci')).toBeVisible();
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.searchExamples.gotoSearch();
+    await pageObjects.searchExamples.requestFibonacci.waitFor({ state: 'visible' });
   });
 
-  test('should update a progress bar', async ({ page }) => {
-    await page.testSubj.locator('responseTab').click();
-    const progressBar = page.testSubj.locator('progressBar');
-    await expect(progressBar).toHaveAttribute('value', '0');
+  test('should update a progress bar', async ({ pageObjects }) => {
+    const { searchExamples } = pageObjects;
+    await searchExamples.responseTab.click();
+    await expect(searchExamples.progressBar).toHaveAttribute('value', '0');
 
-    await page.testSubj.locator('requestFibonacci').click();
-    await expect(progressBar).not.toHaveAttribute('value', '0');
+    await searchExamples.requestFibonacci.click();
+    await expect(searchExamples.progressBar).not.toHaveAttribute('value', '0');
   });
 });

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { APP_ID, LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures';
+import { LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE, test } from '../fixtures';
 
-test.describe('SQL search example', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('SQL search example', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
     await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
@@ -21,20 +20,24 @@ test.describe('SQL search example', { tag: ['@local-stateful-classic'] }, () => 
     await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
   });
 
-  test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.get(`/app/${APP_ID}/sql-search`));
-    // Wait for the app to be fully rendered before any test interacts with it.
-    await expect(page.testSubj.locator('sqlQueryInput')).toBeVisible();
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.searchExamples.gotoSqlSearch();
   });
 
-  test('should search', async ({ page }) => {
+  test('should search', async ({ page, pageObjects }) => {
+    const { searchExamples } = pageObjects;
     const sqlQuery = `SELECT index, bytes FROM "logstash-*" ORDER BY "@timestamp" DESC`;
-    await page.testSubj.locator('sqlQueryInput').fill(sqlQuery);
-    await page.testSubj.locator('querySubmitButton').click();
 
-    await expect(page.testSubj.locator('requestCodeBlock')).toContainText(JSON.stringify(sqlQuery));
-    await expect(page.testSubj.locator('responseCodeBlock')).toContainText('"logstash-2015.09.22"');
-    await expect(page.components.toast().toasts).toHaveCount(0);
+    await test.step('submit SQL query', async () => {
+      await searchExamples.sqlQueryInput.fill(sqlQuery);
+      await searchExamples.querySubmitButton.click();
+    });
+
+    await test.step('assert request and response', async () => {
+      await expect(searchExamples.requestCodeBlock).toContainText(JSON.stringify(sqlQuery));
+      await expect(searchExamples.responseCodeBlock).toContainText('"logstash-2015.09.22"');
+      await expect(page.components.toast().toasts).toHaveCount(0);
+    });
   });
 });

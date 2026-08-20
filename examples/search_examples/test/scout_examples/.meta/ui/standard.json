@@ -1,5 +1,5 @@
 {
-  "sha1": "12243bec7f7f9ce52ca71ec097b2f37fa079994d",
+  "sha1": "fa61785993ba809bbecbf2e67d7b9f5b8b458380",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -10,19 +10,51 @@
       "title": "Partial results example should update a progress bar",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/partial_results_example.spec.ts",
-        "line": 21,
-        "column": 21
+        "line": 27,
+        "column": 39
+      }
+    },
+    {
+      "id": "431038a9dc80b95-678ad92fdc7f647",
+      "title": "Search example with bfetch disabled should have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "431038a9dc80b95-88ac1fd3c97f400",
+      "title": "Search example with bfetch disabled should not have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 34,
+        "column": 13
+      }
+    },
+    {
+      "id": "431038a9dc80b95-ac6f8147056ae3c",
+      "title": "Search example with bfetch disabled should show a warning toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 41,
+        "column": 8
       }
     },
     {
@@ -30,19 +62,12 @@
       "title": "Search example should have an other bucket",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
-        "line": 69,
-        "column": 8
+        "line": 28,
+        "column": 21
       }
     },
     {
@@ -50,19 +75,12 @@
       "title": "Search example should not have an other bucket",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
-        "line": 73,
-        "column": 39
+        "line": 36,
+        "column": 5
       }
     },
     {
@@ -70,32 +88,12 @@
       "title": "Search example should handle warnings",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
-        "line": 75,
-        "column": 21
-      }
-    },
-    {
-      "id": "41fbcb7cfc00b12-346daa97424de61",
-      "title": "Search example with bfetch disabled should have an other bucket with bfetch disabled",
-      "expectedStatus": "passed",
-      "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
-        "line": 92,
-        "column": 47
+        "line": 44,
+        "column": 13
       }
     },
     {
@@ -107,8 +105,8 @@
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_session_example.spec.ts",
-        "line": 44,
-        "column": 8
+        "line": 69,
+        "column": 7
       }
     },
     {
@@ -120,8 +118,8 @@
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/sql_search_example.spec.ts",
-        "line": 24,
-        "column": 8
+        "line": 20,
+        "column": 21
       }
     }
   ]
