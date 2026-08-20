@@ -22,7 +22,7 @@ import {
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PageScope } from '../../../data_view_manager/constants';
-import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
+import { scopedDataViewSelector } from '../../../data_view_manager/redux/selectors';
 import {
   endTimelineSaving,
   saveTimeline,
@@ -68,9 +68,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
 
-    const { dataViewId: reduxDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
-      storeState
-    );
+    const { dataViewId: reduxDataViewId } = scopedDataViewSelector(PageScope.timeline)(storeState);
 
     let dataViewId: string | null = null;
     let indexNames: string[] = [];

@@ -25,12 +25,13 @@ spaceTest.describe('Discover view mode toggle', { tag: '@local-stateful-classic'
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('should show Documents tab', async ({ page }) => {
-    await expect(page.testSubj.locator('dscViewModeToggle')).toBeVisible();
+  spaceTest('should show Documents selected', async ({ page }) => {
+    await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeVisible();
     await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
 
-    const documentsTab = page.testSubj.locator('dscViewModeDocumentButton');
-    await expect(documentsTab).toHaveAttribute('aria-selected', 'true');
+    const toggleButton = page.testSubj.locator('dscViewModeToggleButton');
+    await expect(toggleButton).toHaveText('View as');
+    await expect(toggleButton).toHaveAttribute('data-selected-value', 'documents');
   });
 
   spaceTest('should show an error callout on invalid query', async ({ page, pageObjects }) => {
@@ -46,26 +47,26 @@ spaceTest.describe('Discover view mode toggle', { tag: '@local-stateful-classic'
   });
 
   spaceTest('should hide view mode toggle in fullscreen mode', async ({ page }) => {
-    await expect(page.testSubj.locator('dscViewModeToggle')).toBeVisible();
+    await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeVisible();
 
     await page.testSubj.click('dataGridFullScreenButton');
-    await expect(page.testSubj.locator('dscViewModeToggle')).toBeHidden();
+    await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeHidden();
 
     await page.testSubj.click('dataGridFullScreenButton');
-    await expect(page.testSubj.locator('dscViewModeToggle')).toBeVisible();
+    await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeVisible();
   });
 
   spaceTest(
     'should not show view mode toggle for ES|QL searches',
     async ({ page, pageObjects }) => {
-      await expect(page.testSubj.locator('dscViewModeToggle')).toBeVisible();
+      await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeVisible();
 
-      const documentsTab = page.testSubj.locator('dscViewModeDocumentButton');
-      await expect(documentsTab).toHaveAttribute('aria-selected', 'true');
+      const toggleButton = page.testSubj.locator('dscViewModeToggleButton');
+      await expect(toggleButton).toHaveAttribute('data-selected-value', 'documents');
 
       await pageObjects.discover.selectTextBaseLang();
 
-      await expect(page.testSubj.locator('dscViewModeToggle')).toBeHidden();
+      await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeHidden();
       await expect(page.testSubj.locator('discoverQueryTotalHits')).toBeVisible();
       await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
     }
