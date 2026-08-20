@@ -57,6 +57,8 @@ import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 import { withUsageCounter } from '../usage_counters';
+import type { EnsureAuthorizedToUpdateParams } from './ensure_authorized_to_update';
+import { ensureAuthorizedToUpdate } from './ensure_authorized_to_update';
 
 /**
  * API for interacting with the cases entities.
@@ -90,6 +92,10 @@ export interface CasesSubClient {
    * Retrieves a single case with the specified ID.
    */
   get(params: GetParams): Promise<Case>;
+  /**
+   * Ensures the current user can update a case without mutating it.
+   */
+  ensureAuthorizedToUpdate(params: EnsureAuthorizedToUpdateParams): Promise<void>;
   /**
    * @experimental
    * Retrieves a single case resolving the specified ID.
@@ -172,6 +178,7 @@ const usageCounterByMethod = {
   find: null,
   search: null,
   get: null,
+  ensureAuthorizedToUpdate: null,
   resolve: null,
   bulkGet: null,
   push: 'push_case',
@@ -213,6 +220,8 @@ export const createCasesSubClient = (
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
+    ensureAuthorizedToUpdate: (params: EnsureAuthorizedToUpdateParams) =>
+      ensureAuthorizedToUpdate(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params: CasesBulkGetRequest) => bulkGet(params, clientArgs),
     push: withUsageCounter(usageCounterByMethod.push, clientArgs, (params: PushParams) =>

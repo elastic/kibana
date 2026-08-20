@@ -21,6 +21,10 @@ export type {
   CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
+  CasesWorkflowExecutionMetadata,
+  CaseWorkflowRunOrigin,
+  RunCaseWorkflowRequest,
+  RunCaseWorkflowResponse,
 } from './types/api';
 export type { Case, Cases, RelatedCase } from './types/domain';
 export type {
@@ -77,11 +81,17 @@ export {
   AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
   AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
-export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export {
+  getCasesFromAlertsUrl,
+  getCaseFindUserActionsUrl,
+  getCaseWorkflowRunUrl,
+  throwErrors,
+} from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
@@ -111,3 +121,10 @@ export { AttachmentActionType } from './utils/attachment_actions';
 
 export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
 export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';
+
+export {
+  ALERT_WORKFLOW_ORIGIN_TYPE,
+  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+} from './types/api/workflow/v1';

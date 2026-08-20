@@ -21,6 +21,8 @@ import type {
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
+export type AlertPreprocessingContext = Pick<WorkflowsRequestHandlerContext, 'core' | 'alerting'>;
+
 /**
  * Extracts rule information from an alert's _source
  */
@@ -94,7 +96,7 @@ function selectPrimaryRule(
  */
 async function fetchAlerts(
   alertIds: AlertSelection[],
-  context: WorkflowsRequestHandlerContext,
+  context: AlertPreprocessingContext,
   logger: Logger
 ): Promise<AlertHit[]> {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -148,7 +150,7 @@ async function fetchAlerts(
  */
 export async function preprocessAlertInputs(
   inputs: Record<string, unknown>,
-  context: WorkflowsRequestHandlerContext,
+  context: AlertPreprocessingContext,
   spaceId: string,
   logger: Logger
 ): Promise<Record<string, unknown>> {

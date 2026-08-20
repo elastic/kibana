@@ -40,7 +40,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingApiRequestHandlerContext,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
@@ -48,6 +51,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
@@ -66,6 +70,7 @@ export interface CasesServerSetupDependencies {
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
 }
 
@@ -99,6 +104,7 @@ export interface CaseRequestContext {
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
+  alerting: AlertingApiRequestHandlerContext;
 }>;
 
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;
