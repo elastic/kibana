@@ -40,7 +40,7 @@ export function computeMoonShadow({
 }): MoonShadowResult | null {
   try {
     const moonAffectedModules = expandWithImplicitConsumers(
-      getAffectedProjectsMoon(mergeBase, true),
+      getAffectedProjectsMoon(mergeBase, true, gitChangedFiles),
       gitChangedFiles,
       log
     );
