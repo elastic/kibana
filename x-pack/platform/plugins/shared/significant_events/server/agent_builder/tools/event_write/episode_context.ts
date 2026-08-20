@@ -87,8 +87,7 @@ export const mergeSignalsLatestPerRule = (
       })),
       { timestamp: submittedTimestamp, values: submitted },
     ],
-    (signal) =>
-      signal.type === 'detection' ? (signal.metadata?.rule_uuid ?? undefined) : undefined
+    (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
   ).map((signal) =>
     signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
       ? signal

@@ -267,7 +267,7 @@ describe('preserveStableNarrative', () => {
       symptom_hypothesis: 'Stored hypothesis',
       summary: 'Stored summary',
       confidence: 0.8,
-    }) as SignificantEvent;
+    } as SignificantEvent);
 
   it('returns undefined when latestEvent is missing', () => {
     expect(preserveStableNarrative(['rule-1'], undefined, ['rule-1'])).toBeUndefined();
