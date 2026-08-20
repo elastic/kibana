@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
@@ -38,6 +38,7 @@ import { NotificationsList } from '../notifications/components/notifications_lis
 import { useMemoryUsage } from '../memory_usage/use_memory_usage';
 import { useFieldFormatter } from '../contexts/kibana';
 import { type StatEntry } from '../components/collapsible_panel/collapsible_panel';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -140,9 +141,9 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     () => [
       {
         id: TAB_IDS.OVERVIEW,
-        name: (
-          <FormattedMessage id="xpack.ml.overview.overviewTabLabel" defaultMessage="Overview" />
-        ),
+        label: i18n.translate('xpack.ml.overview.overviewTabLabel', {
+          defaultMessage: 'Overview',
+        }),
         content: (
           <>
             <>
@@ -220,13 +221,10 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
       },
       {
         id: TAB_IDS.NOTIFICATIONS,
-        name: (
-          <FormattedMessage
-            id="xpack.ml.overview.notificationsTabLabel"
-            defaultMessage="Notifications"
-          />
-        ),
-        append: errorsAndWarningCount ? true : undefined,
+        label: i18n.translate('xpack.ml.overview.notificationsTabLabel', {
+          defaultMessage: 'Notifications',
+        }),
+        badge: errorsAndWarningCount > 0 ? errorsAndWarningCount : undefined,
         content: <NotificationsList />,
       },
     ],
@@ -248,24 +246,22 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         title={i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
           defaultMessage: 'Machine Learning Overview',
         })}
-        showDatePicker
         docLink={helpLink}
         tabs={tabs.map((tab) => ({
           id: tab.id,
-          label:
-            tab.id === TAB_IDS.OVERVIEW
-              ? i18n.translate('xpack.ml.overview.overviewTabLabel', {
-                  defaultMessage: 'Overview',
-                })
-              : i18n.translate('xpack.ml.overview.notificationsTabLabel', {
-                  defaultMessage: 'Notifications',
-                }),
+          label: tab.label,
           isSelected: tab.id === selectedTabId,
           onClick: () => setSelectedTabId(tab.id),
-          badge: tab.append ? errorsAndWarningCount : undefined,
+          badge: tab.badge,
           'data-test-subj': `mlManagementOverviewPageTabs ${tab.id}`,
         }))}
       />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <NodeAvailableWarning />
       <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
       <SavedObjectsWarning
@@ -279,7 +275,6 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         }}
       />
       <UpgradeWarning />
-      <EuiSpacer />
       {tabs.find((tab) => tab.id === selectedTabId)?.content}
       <HelpMenu docLink={helpLink} />
     </div>

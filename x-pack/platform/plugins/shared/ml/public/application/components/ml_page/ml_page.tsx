@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { createContext, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import type { EuiPaddingSize } from '@elastic/eui';
@@ -43,12 +43,6 @@ interface RouteToApp {
 type RouteModules = RouteToPath | RouteToApp;
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
-
-export const MlPageControlsContext = createContext<{
-  isManagementMode: boolean;
-}>({
-  isManagementMode: false,
-});
 
 /**
  * Main page component of the ML App
@@ -155,34 +149,28 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     }, [activeRoute]);
 
     const sideNavItems = useSideNavItems(activeRoute);
-    const isManagementMode = entryPoint !== undefined;
-
-    return (
-      <MlPageControlsContext.Provider value={{ isManagementMode }}>
-        {entryPoint === undefined ? (
-          <KibanaPageTemplate
-            className={'ml-app'}
-            data-test-subj={'mlApp'}
-            restrictWidth={false}
-            panelled
-            solutionNav={
-              showMLNavMenu
-                ? {
-                    name: i18n.translate('xpack.ml.plugin.title', {
-                      defaultMessage: 'Machine Learning',
-                    }),
-                    icon: 'machineLearningApp',
-                    items: sideNavItems,
-                  }
-                : undefined
-            }
-          >
-            <CommonPageWrapper pageDeps={pageDeps} routeList={routeList} />
-          </KibanaPageTemplate>
-        ) : (
-          <CommonPageWrapper pageDeps={pageDeps} routeList={routeList} paddingSize="none" />
-        )}
-      </MlPageControlsContext.Provider>
+    return entryPoint === undefined ? (
+      <KibanaPageTemplate
+        className={'ml-app'}
+        data-test-subj={'mlApp'}
+        restrictWidth={false}
+        panelled
+        solutionNav={
+          showMLNavMenu
+            ? {
+                name: i18n.translate('xpack.ml.plugin.title', {
+                  defaultMessage: 'Machine Learning',
+                }),
+                icon: 'machineLearningApp',
+                items: sideNavItems,
+              }
+            : undefined
+        }
+      >
+        <CommonPageWrapper pageDeps={pageDeps} routeList={routeList} paddingSize="m" />
+      </KibanaPageTemplate>
+    ) : (
+      <CommonPageWrapper pageDeps={pageDeps} routeList={routeList} paddingSize="none" />
     );
   }
 );

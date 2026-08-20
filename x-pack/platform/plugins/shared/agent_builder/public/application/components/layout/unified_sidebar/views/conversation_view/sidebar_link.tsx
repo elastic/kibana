@@ -59,7 +59,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
         <EuiText size="s">{label}</EuiText>
         {!hideIcon && (
           <EuiIcon
-            type="arrowRight"
+            type="chevronSingleRight"
             size="s"
             aria-hidden={true}
             css={css`

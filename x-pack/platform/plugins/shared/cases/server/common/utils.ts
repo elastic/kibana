@@ -58,7 +58,7 @@ import type {
   AttachmentRequestV2,
   AttachmentsFindResponseV2,
   CasePostRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
 } from '../../common/types/api';
 import {
   isEventAttachmentType,
@@ -136,6 +136,7 @@ export const transformCases = ({
   page,
   perPage,
   total,
+  mttr,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -144,7 +145,9 @@ export const transformCases = ({
   page: number;
   perPage: number;
   total: number;
-}): CasesFindResponse => ({
+  /** Average resolve time in seconds of the matching cases; only the search API provides it. */
+  mttr?: number | null;
+}): CasesSearchResponse => ({
   page,
   per_page: perPage,
   total,
@@ -152,6 +155,11 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
+  // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseRt`
+  // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public
+  // `_find` response and break its strict decode / OpenAPI contract.
+  ...(mttr !== undefined ? { mttr } : {}),
 });
 
 export const flattenCaseSavedObject = ({

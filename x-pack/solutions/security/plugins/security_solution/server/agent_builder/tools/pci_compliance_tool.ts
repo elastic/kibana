@@ -263,6 +263,13 @@ export const pciComplianceTool = (
       });
     },
     tags: ['security', 'compliance', 'pci', 'audit'],
+    annotations: {
+      title: 'Run PCI Compliance Checks',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };
 

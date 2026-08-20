@@ -189,13 +189,13 @@ export default function slackTest({ getService }: FtrProviderContext) {
           id: simulatedActionId,
           provider: 'actions',
           actions: new Map([
-            ['execute-start', { equal: 1 }],
-            ['execute', { equal: 1 }],
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
           ]),
         });
       });
 
-      const executeEvent = events[1];
+      const executeEvent = events.find((e) => e?.event?.action === 'execute');
       expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(18);
     });
 

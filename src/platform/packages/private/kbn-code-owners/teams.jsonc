@@ -42,25 +42,14 @@
   {
     "id": "apm-agent-approvers",
     "name": "APM Agent Approvers",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/apm-agent-approvers"
     },
     "responsibilities": [
       "Client Apps plugin"
-    ]
-  },
-  {
-    "id": "ai-infra",
-    "name": "AI Infrastructure",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/appex-ai-infra",
-      "label": "Team:AI Infra"
-    },
-    "responsibilities": [
-      "AI Infrastructure"
     ]
   },
   {
@@ -94,10 +83,14 @@
     ]
   },
   {
-    "id": "cloud-services",
-    "name": "Cloud Services",
+    "id": "siem-conduit",
+    "name": "SIEM Conduit",
+    "areas": [
+      "security"
+    ],
     "github": {
-      "team": "elastic/cloud-services"
+      "team": "elastic/siem-conduit",
+      "label": "Team:security-siem-conduit"
     }
   },
   {
@@ -187,17 +180,6 @@
     }
   },
   {
-    "id": "integration-experience",
-    "name": "Security Integrations Integration Experience",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/integration-experience",
-      "label": "Team:Integration-Experience"
-    }
-  },
-  {
     "id": "jinastic",
     "name": "Jinastic",
     "areas": [
@@ -233,9 +215,7 @@
   {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
-    "areas": [
-      "security"
-    ],
+    "areas": [],
     "github": {
       "team": "elastic/kibana-cloud-security-posture",
       "label": "Team:Cloud Security"
@@ -436,7 +416,6 @@
     "github": {
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
-      
     }
   },
   {
@@ -480,20 +459,6 @@
     }
   },
   {
-    "id": "machine-learning",
-    "name": "Machine Learning",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/ml-ui",
-      "label": ":ml"
-    },
-    "responsibilities": [
-      "Machine Learning UI, Transforms UI"
-    ]
-  },
-  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
@@ -511,6 +476,14 @@
       "Observability observed asset model",
       "Evals"
     ]
+  },
+  {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
   },
   {
     "id": "obs-cloudnative-monitoring",
@@ -583,29 +556,9 @@
     ]
   },
   {
-    "id": "obs-presentation",
-    "name": "Obs UX: Presentation",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-presentation-team",
-      "label": "Team:obs-presentation"
-    },
-    "responsibilities": [
-      "APM",
-      "Hosts",
-      "Infrastructure",
-      "Universal Profiling",
-      "Observability Overview"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
-    "name": "Obs UX: Signals & Metrics",
-    "areas": [
-      "observability"
-    ],
+    "name": "Observability signals: Metrics",
+    "areas": ["observability"],
     "github": {
       "team": "elastic/obs-signals-metrics-team",
       "label": "Team:obs-signals-metrics"
@@ -615,6 +568,24 @@
       "Hosts UI",
       "Metrics Explorer",
       "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-logs",
+    "name": "Obs UX: Signals & Logs",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-logs-team",
+      "label": "Team:obs-signals-logs"
+    },
+    "responsibilities": [
+      "Logs Analytics and Skills",
+      "Logs Explorer / Logs Stream (legacy)",
+      "Left Nav & Classic Overview Page",
+      "Synthetics (Synthetics UI, Synthetics Recorder, Synthetics Service and Heartbeat)",
+      "eBPF + Profiling OTel"
     ]
   },
   {
@@ -757,27 +728,28 @@
     }
   },
   {
-    "id": "search-kibana",
-    "name": "Search Solution",
+    "id": "search-ml-ux",
+    "name": "Search & ML UX",
     "areas": [
       "search",
       "workplaceai",
-      "vectordb"
+      "vectordb",
+      "platform"
     ],
-    "description": "Enterprise Search & Search Solution",
+    "description": "Elasticsearch solution, ML UX, Vector DB, Inference UIs",
     "github": {
-      "team": "elastic/search-kibana",
-      "label": "Team:Search"
+      "team": "elastic/search-ml-ux",
+      "label": "Team:Search & ML UX"
     }
   },
   {
-    "id": "security-data-analytics",
-    "name": "Security Data Analytics",
+    "id": "security-data-engineering",
+    "name": "Security Data Engineering",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/security-data-analytics",
+      "team": "elastic/security-data-engineering",
       "label": "Team: SecuritySolution"
     },
     "responsibilities": [
@@ -1126,6 +1098,14 @@
     "github": {
       "team": "elastic/platform-analytics",
       "label": "Team:Platform Analytics"
+    }
+  },
+  {
+    "id": "trade",
+    "name": "Threat Research and Detection Engineering Team",
+    "github": {
+      "team": "elastic/threat-research-and-detection-engineering",
+      "label": "Team:TRaDE"
     }
   }
 ]

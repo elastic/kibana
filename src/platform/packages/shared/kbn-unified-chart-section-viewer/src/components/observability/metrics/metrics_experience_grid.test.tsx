@@ -25,22 +25,18 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
-import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import type {
-  ParsedMetricItem,
-  Dimension,
-  UnifiedMetricsGridProps,
-  MetricsGridSettings,
-} from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
+import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { FEATURE_FLAGS } from '../../../common/constants';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -206,9 +202,11 @@ const TestWrapper = ({
 }) => (
   <EuiProvider highContrastMode={false}>
     <IntlProvider locale="en">
-      <ExternalServicesProvider externalServices={externalServices}>
-        {children}
-      </ExternalServicesProvider>
+      <EventBasedTelemetryProvider>
+        <ExternalServicesProvider externalServices={externalServices}>
+          {children}
+        </ExternalServicesProvider>
+      </EventBasedTelemetryProvider>
     </IntlProvider>
   </EuiProvider>
 );
@@ -294,10 +292,11 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
@@ -328,7 +327,7 @@ describe('MetricsExperienceGrid', () => {
 
   it('renders the toolbar', () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(getByTestId('toggleActions')).toBeInTheDocument();
@@ -431,7 +430,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
@@ -449,7 +448,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
@@ -473,15 +472,16 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     const inputButton = getByTestId('metricsExperienceToolbarSearch');
@@ -523,15 +523,16 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
@@ -568,10 +569,11 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
@@ -587,7 +589,7 @@ describe('MetricsExperienceGrid', () => {
 
       render(
         <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
-        { wrapper: IntlProvider }
+        { wrapper: TestWrapper }
       );
 
       expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
@@ -612,10 +614,11 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
@@ -635,7 +638,7 @@ describe('MetricsExperienceGrid', () => {
           breakdownField="host.name"
           onBreakdownFieldChange={onBreakdownFieldChange}
         />,
-        { wrapper: IntlProvider }
+        { wrapper: TestWrapper }
       );
 
       expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
@@ -661,16 +664,17 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
       const { getByTestId } = render(
         <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
-        { wrapper: IntlProvider }
+        { wrapper: TestWrapper }
       );
 
       act(() => {
@@ -688,7 +692,7 @@ describe('MetricsExperienceGrid', () => {
   describe('grid settings flyout', () => {
     it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
       const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-        wrapper: IntlProvider,
+        wrapper: TestWrapper,
       });
 
       expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
@@ -711,8 +715,9 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange,
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
       });
 

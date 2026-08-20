@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278716
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: "Fix cases view and save when the applied template was deleted"
+description: "Opening or saving a case no longer fails when the case still references a template that was deleted."

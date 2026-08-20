@@ -8,6 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
 import type { MarkdownReadResponseBody } from './types';
@@ -22,6 +23,10 @@ export async function read(
     MARKDOWN_SAVED_OBJECT_TYPE,
     id
   );
+
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw new Error(savedObject.error.message);
+  }
 
   return getMarkdownCRUResponseBody(savedObject);
 }

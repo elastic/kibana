@@ -27,6 +27,8 @@ interface GeojsonFileSourceDescriptor {
   tooltipContent: string | null;
   name: string;
   type: SOURCE_TYPES.GEOJSON_FILE;
+  // Aligns with maps vector layer `sourceDescriptor` loose branch (unknown extra keys).
+  [key: string]: unknown;
 }
 
 function convertToFeatureCollection(

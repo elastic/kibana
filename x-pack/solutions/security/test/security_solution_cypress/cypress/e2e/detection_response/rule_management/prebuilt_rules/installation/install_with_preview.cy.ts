@@ -20,7 +20,6 @@ import {
   INSTALL_PREBUILT_RULE_PREVIEW,
   RULES_MANAGEMENT_TABLE,
 } from '../../../../../screens/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 import {
   installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
@@ -52,7 +51,10 @@ import {
   closePrebuiltRuleInstallFlyout,
   openPrebuiltRuleInstallFlyoutFor,
 } from '../../../../../tasks/prebuilt_rules_preview';
-import { visitAddRulesPage } from '../../../../../tasks/rules_management';
+import {
+  navigateBackToRulesManagement,
+  visitAddRulesPage,
+} from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
@@ -109,7 +111,7 @@ describe(
         assertRuleInstallationSuccessToastShown([PREBUILT_RULE_ASSET]);
 
         // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        navigateBackToRulesManagement();
         expectRulesInTable(RULES_MANAGEMENT_TABLE, [PREBUILT_RULE_NAME]);
 
         clickAddElasticRulesButton();

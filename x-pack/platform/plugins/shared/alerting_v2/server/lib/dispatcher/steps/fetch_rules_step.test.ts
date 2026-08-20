@@ -9,7 +9,13 @@ import { FetchRulesStep } from './fetch_rules_step';
 import type { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createRuleSoAttributes } from '../../test_utils';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('FetchRulesStep', () => {
   let rulesSoService: RulesSavedObjectService;
@@ -38,7 +44,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -52,7 +58,7 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -83,7 +89,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -105,7 +111,7 @@ describe('FetchRulesStep', () => {
       dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -125,10 +131,53 @@ describe('FetchRulesStep', () => {
       dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
+  });
+
+  it('excludes episodes with null rule_id from the findByIds call', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 1' } }),
+        namespaces: ['default'],
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlertEpisode({ rule_id: 'r1' }),
+        createAlertEpisode({ source: 'pagerduty', rule_id: null, episode_id: 'ext-1' }),
+        createAlertEpisode({ source: 'datadog', rule_id: null, episode_id: 'ext-2' }),
+      ],
+    });
+
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
+    expect(result.data?.rules?.size).toBe(1);
+  });
+
+  it('does not call findByIds when all episodes have null rule_id', async () => {
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlertEpisode({ source: 'pagerduty', rule_id: null, episode_id: 'ext-1' }),
+        createAlertEpisode({ source: 'datadog', rule_id: null, episode_id: 'ext-2' }),
+      ],
+    });
+
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(mockFindByIds).not.toHaveBeenCalled();
+    expect(result.data?.rules?.size).toBe(0);
   });
 });

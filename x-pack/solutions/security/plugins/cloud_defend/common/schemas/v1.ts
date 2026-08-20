@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
-import { DEFAULT_POLICIES_PER_PAGE } from '../constants';
+import { DEFAULT_POLICIES_PER_PAGE, POLICY_NAME_MAX_LENGTH } from '../constants';
 
 export const policiesQueryParamsSchema = schema.object({
   /**
@@ -55,7 +55,7 @@ export const policiesQueryParamsSchema = schema.object({
   /**
    * Policy filter
    */
-  policy_name: schema.maybe(schema.string()),
+  policy_name: schema.maybe(schema.string({ maxLength: POLICY_NAME_MAX_LENGTH })),
 });
 
 export type PoliciesQueryParams = TypeOf<typeof policiesQueryParamsSchema>;

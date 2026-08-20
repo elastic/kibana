@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -18,13 +19,10 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { combineLatest, from, map, switchMap } from 'rxjs';
-import {
-  CONTEXT_ENGINE_APP_ID,
-  CONTEXT_ENGINE_APP_PATH,
-  CONTEXT_ENGINE_ENABLED_FLAG,
-} from '../common/features';
+import { from, map, switchMap } from 'rxjs';
+import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
+  AgentBuilderIntegration,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -50,10 +48,22 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
+    Promise.resolve(undefined);
+
+  /** Registered suggest-automation hooks from context_engine_agent_builder. */
+  private agentBuilderIntegration?: AgentBuilderIntegration;
+
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+  setup(
+    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
+  ): ContextEnginePluginSetup {
+    this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
+    const getAgentBuilder = () => this.agentBuilderPromise;
+    const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
+      this.agentBuilderIntegration;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -62,22 +72,18 @@ export class ContextEnginePlugin
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
       visibleIn: [...VISIBLE_LOCATIONS],
-      // Inaccessible by default: the app and its routes are gated until both the
-      // feature flag and the advanced setting are on. While inaccessible, core also
-      // removes it from every navigation surface.
+      // Inaccessible by default: the app and its routes are gated until the advanced
+      // setting is on. While inaccessible, core also removes it from every navigation
+      // surface.
       status: AppStatus.inaccessible,
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          combineLatest([
-            coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false),
-            coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false),
-          ]).pipe(
+          coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false).pipe(
             map(
-              ([flagEnabled, settingEnabled]): AppUpdater =>
+              (settingEnabled): AppUpdater =>
                 () => ({
-                  status:
-                    flagEnabled && settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
                 })
             )
           )
@@ -85,14 +91,21 @@ export class ContextEnginePlugin
       ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const [{ mountApp }, { createAnalyzeChatOpener }] = await Promise.all([
+          import('./application'),
+          import('./analyze_chat_opener'),
+        ]);
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const agentBuilder = await getAgentBuilder();
+        const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
+          getChatOpener: () => chatOpener,
+          getAgentBuilderIntegration,
         });
       },
     });
@@ -100,8 +113,23 @@ export class ContextEnginePlugin
     return {};
   }
 
+  private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
+  }
+
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {};
+    return {
+      registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => {
+        this.agentBuilderIntegration = integration;
+      },
+    };
   }
 
   stop() {}

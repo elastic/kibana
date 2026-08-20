@@ -734,7 +734,6 @@ export function resolveEsArgs(
         ].join(',')
       );
 
-      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
       esArgs.set('serverless.project_type', esProjectTypeFromKbn.get(options.projectType)!);
       esArgs.set('serverless.project_id', projectIdOverride ?? MOCK_IDP_UIAM_PROJECT_ID);
 
@@ -1286,6 +1285,8 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
       _id: linkedProject.projectId,
       _organization: MOCK_IDP_UIAM_ORGANIZATION_ID,
       _type: esProjectType,
+      _csp: 'aws',
+      _region: 'eu-west-1',
       env: 'local',
     },
   };
@@ -1338,7 +1339,11 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
   if (runningNodes.length) {
     log.info('Killing running serverless containers.');
 
-    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    try {
+      execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    } catch {
+      log.debug('Some containers had already stopped before kill completed.');
+    }
   }
 }
 
@@ -1423,6 +1428,8 @@ async function getOperatorVolume(
   };
   const projectTags = {
     ...Object.fromEntries(Object.entries(projectInfo).map(([key, value]) => [`_${key}`, value])),
+    _csp: 'aws',
+    _region: 'eu-west-1',
     env: 'local',
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scoreContinuationStability } from './continuation_stability';
+import { scoreContinuationRouting, scoreContinuationStability } from './continuation_stability';
 
 describe('scoreContinuationStability', () => {
   it('scores a perfect single-event-ID cascade as 1.0', () => {
@@ -32,6 +32,28 @@ describe('scoreContinuationStability', () => {
     expect(result.reusedCycles).toBe(0);
     expect(result.comparableCycles).toBe(2);
     expect(result.distinctEventIds).toBe(3);
+  });
+
+  it('rewards a new event ID when the prior event is outside the lookup window', () => {
+    const result = scoreContinuationStability([
+      { producedEventIds: ['event-old'] },
+      { producedEventIds: ['event-new'], expectReuse: false },
+    ]);
+
+    expect(result.score).toBe(1);
+    expect(result.correctCycles).toBe(1);
+    expect(result.reusedCycles).toBe(0);
+  });
+
+  it('penalizes reuse when the prior event is outside the lookup window', () => {
+    const result = scoreContinuationStability([
+      { producedEventIds: ['event-old'] },
+      { producedEventIds: ['event-old'], expectReuse: false },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.correctCycles).toBe(0);
+    expect(result.reusedCycles).toBe(1);
   });
 
   it('gives partial credit when one follow-up reuses and one proliferates', () => {
@@ -112,5 +134,59 @@ describe('scoreContinuationStability', () => {
     expect(result.comparableCycles).toBe(2);
     expect(result.score).toBe(0.5);
     expect(result.distinctEventIds).toBe(2);
+  });
+});
+
+describe('scoreContinuationRouting', () => {
+  it('credits an explicit established event_id as continuation', () => {
+    const result = scoreContinuationRouting([
+      { producedEventIds: ['event-1'] },
+      { producedEventIds: ['event-1'], requestedEventIds: ['event-1'] },
+    ]);
+
+    expect(result.score).toBe(1);
+    expect(result.reusedCycles).toBe(1);
+  });
+
+  it('does not mistake write-time deduplication for agent-selected continuation', () => {
+    const result = scoreContinuationRouting([
+      { producedEventIds: ['event-1'] },
+      { producedEventIds: ['event-1'], requestedEventIds: [], expectReuse: false },
+    ]);
+
+    expect(result.score).toBe(1);
+    expect(result.reusedCycles).toBe(0);
+  });
+
+  it('penalizes an omitted event_id when continuation is expected', () => {
+    const result = scoreContinuationRouting([
+      { producedEventIds: ['event-1'] },
+      { producedEventIds: ['event-2'], requestedEventIds: [] },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.reusedCycles).toBe(0);
+  });
+
+  it('excludes cycles whose routing was not captured instead of scoring them as failures', () => {
+    const result = scoreContinuationRouting([
+      { producedEventIds: ['event-1'] },
+      { producedEventIds: ['event-1'] }, // requestedEventIds undefined — instrumentation gap
+    ]);
+
+    expect(result.score).toBeNull();
+    expect(result.emptyCycles).toBe(1);
+  });
+
+  it('still grades captured cycles after an uncaptured one', () => {
+    const result = scoreContinuationRouting([
+      { producedEventIds: ['event-1'] },
+      { producedEventIds: ['event-1'] }, // uncaptured — excluded
+      { producedEventIds: ['event-1'], requestedEventIds: ['event-1'] },
+    ]);
+
+    expect(result.score).toBe(1);
+    expect(result.comparableCycles).toBe(1);
+    expect(result.emptyCycles).toBe(1);
   });
 });

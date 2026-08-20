@@ -49,7 +49,7 @@ const successResult = (): RunFullResetResult =>
  * would invoke, and returns it alongside the mocks so tests can assert on
  * progress writes.
  */
-const setupRunner = (tmStart: TaskManagerStartContract) => {
+const setupRunner = (tmStart: TaskManagerStartContract, signal = new AbortController().signal) => {
   const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
   const logger = loggerMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -73,9 +73,12 @@ const setupRunner = (tmStart: TaskManagerStartContract) => {
     .registerTaskDefinitions;
   const definitions = registerFn.mock.calls[0][0];
   const definition = definitions[RESET_TASK_TYPE];
-  const run = definition.createTaskRunner().run as () => Promise<{ state: unknown }>;
+  // Task Manager passes a `{ taskInstance, signal }` context to
+  // `createTaskRunner`; the reset runner reads the `signal` directly.
+  const run = definition.createTaskRunner({ taskInstance: { state: {} }, signal })
+    .run as () => Promise<{ state: unknown }>;
 
-  return { run, definition, logger, definitions };
+  return { run, definition, logger, definitions, signal };
 };
 
 describe('reset_task', () => {
@@ -127,6 +130,19 @@ describe('reset_task', () => {
       expect(state.cases_error).toBeNull();
       expect(state.activity_error).toBeNull();
       expect(state.attachments_error).toBeNull();
+    });
+
+    it("threads Task Manager's abort signal into runFullReset for cooperative cancellation", async () => {
+      const tmStart = taskManagerMock.createStart();
+      const { signal } = new AbortController();
+      mockRunFullReset.mockResolvedValue(successResult());
+
+      const { run } = setupRunner(tmStart, signal);
+      await run();
+
+      // The runner must forward the task's abort signal so an in-flight
+      // reset bails at the next page boundary on timeout / shutdown.
+      expect(mockRunFullReset).toHaveBeenCalledWith(expect.objectContaining({ signal }));
     });
 
     it('routes per-surface onProgress counts to the matching *_processed slot', async () => {

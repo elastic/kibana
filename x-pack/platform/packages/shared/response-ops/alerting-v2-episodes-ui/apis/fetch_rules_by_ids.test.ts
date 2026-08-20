@@ -19,7 +19,7 @@ describe('fetchRulesByIds', () => {
       items: [],
       total: 0,
       page: 1,
-      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+      per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
     });
   });
 

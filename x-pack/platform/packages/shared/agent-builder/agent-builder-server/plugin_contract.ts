@@ -7,18 +7,19 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  AgentCreateRequest,
-  Conversation,
-  ConversationWithoutRounds,
-  ConversationListOptions,
-} from '@kbn/agent-builder-common';
+import type { AgentCreateRequest } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
-import type { BuiltInAgentDefinition, AgentTypeDefinition, AgentRegistry } from './agents';
+import type {
+  BuiltInAgentDefinition,
+  AgentTypeDefinition,
+  AgentRegistry,
+  AgentAvailabilityConfig,
+} from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
@@ -123,8 +124,16 @@ export interface AgentsStart {
   /**
    * Ensure a system-owned persisted agent exists in a space without overwriting later edits.
    * Intended for code-owned startup installation; does not require a user request.
+   *
+   * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
+   * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
+   * `ensure` call for that id.
    */
-  ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
+  ensure: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
 }
 
 /**
@@ -183,27 +192,13 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
- */
-export interface ReadOnlyConversationClient {
-  /**
-   * Retrieve a single conversation by its ID, including all rounds.
-   */
-  get(conversationId: string): Promise<Conversation>;
-  /**
-   * List conversations for the current user, optionally filtered by agent ID.
-   */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
-}
-
-/**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**

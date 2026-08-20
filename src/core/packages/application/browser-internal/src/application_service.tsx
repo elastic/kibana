@@ -106,12 +106,14 @@ interface AppInternalState {
  */
 export class ApplicationService {
   private readonly apps = new Map<string, App<any>>();
+  private readonly appOwners = new Map<string, PluginOpaqueId>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly appNotFoundSubject = new BehaviorSubject(false);
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject<void>();
   private registrationClosed = false;
@@ -219,6 +221,7 @@ export class ApplicationService {
           status: app.status ?? AppStatus.accessible,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
+        this.appOwners.set(app.id, plugin);
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
         }
@@ -280,6 +283,8 @@ export class ApplicationService {
       shareReplay(1)
     );
 
+    const appNotFound$ = this.appNotFoundSubject.asObservable().pipe(takeUntil(this.stop$));
+
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
       {
@@ -330,11 +335,18 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
+      appNotFound$,
       currentActionMenu$: this.currentActionMenu$.pipe(
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
       history: this.history!,
+      getRegisteredAppsInfo: () =>
+        [...this.apps.entries()].map(([appId, app]) => ({
+          appId,
+          owner: this.appOwners.get(appId)!,
+          deepLinkIds: Object.keys(flattenDeepLinks(app.deepLinks)),
+        })),
       isAppRegistered: (appId: string): boolean => {
         return applications$.value.get(appId) !== undefined;
       },
@@ -387,6 +399,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            setAppNotFoundState={this.setAppNotFoundState}
             hasCustomBranding$={this.hasCustomBranding$}
           />
         );
@@ -441,6 +454,12 @@ export class ApplicationService {
     return true;
   }
 
+  private setAppNotFoundState = (active: boolean) => {
+    if (active !== this.appNotFoundSubject.value) {
+      this.appNotFoundSubject.next(active);
+    }
+  };
+
   private onBeforeUnload = (event: Event) => {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
@@ -456,6 +475,7 @@ export class ApplicationService {
 
   public stop() {
     this.stop$.next();
+    this.appNotFoundSubject.complete();
     this.currentAppId$.complete();
     this.currentActionMenu$.complete();
     this.statusUpdaters$.complete();

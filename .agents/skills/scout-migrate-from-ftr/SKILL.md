@@ -30,7 +30,7 @@ Before starting, collect or confirm:
 
 Follow [`references/generate-plan.md`](references/generate-plan.md) to produce a migration plan in the target Scout module root. The plan answers _what_ should change and _why_; the executor answers _how_.
 
-If a plan already exists for this source directory and matches the current FTR contents, skip to step 2.
+If a plan already exists for this source directory, validate its file inventory, FTR configs, hooks, referenced services/page objects, and stateful/serverless mirrors against the current source tree before reusing it. Update and re-surface the plan if anything changed; an existing plan filename alone is not evidence that the plan is current. Only skip to step 2 after this validation passes.
 
 ## Step 2 — Review gate (stop)
 
@@ -64,10 +64,10 @@ Once execution is complete, run the new Scout tests and fix failures until they 
 
 For faster feedback during the loop, start the test servers once and reuse them across iterations:
 
-1. Start servers (one-time): `node scripts/scout.js start-server --stateful --serverConfigSet <configSet>` (or `--serverless <project>`).
+1. Start servers (one-time): `node scripts/scout start-server --arch stateful --domain classic [--serverConfigSet <configSet>]` (or `--arch serverless --domain <domain>`).
 2. Run the specs per iteration: `node scripts/playwright test --config <playwright.config.ts> <test-file>`.
 
-Falling back to `node scripts/scout.js run-tests` works but restarts the servers each time, which is much slower for iterative debugging.
+Falling back to `node scripts/scout run-tests` works but restarts the servers each time, which is much slower for iterative debugging.
 
 Loop:
 
@@ -84,6 +84,7 @@ Address `blocker` and `major` findings before considering the migration done. Su
 
 ## Guardrails
 
+- **All five steps are mandatory and ordered**: do not execute without a current migration plan and explicit approval. Do not declare the migration complete until the migrated tests have run successfully and the parity/best-practices review is complete. If work is blocked, report it as blocked at the current step rather than skipping later steps.
 - **The review gate is non-negotiable**: never proceed from step 1 to step 3 without explicit user approval, even if the plan looks obviously correct.
 - **Step 1 is read-only**: do not create, modify, or delete any test files during planning.
 - **Loop discipline (step 4)**: don't paper over a real failure by skipping the test, loosening the assertion, or adding a sleep. Diagnose, then fix.
@@ -96,3 +97,4 @@ Address `blocker` and `major` findings before considering the migration done. Su
 - Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run: [`references/execute-plan.md`](references/execute-plan.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md)
 - Step 4 run commands and iteration patterns: [`docs/extend/testing/run-scout-tests.md`](../../../docs/extend/testing/run-scout-tests.md)
+- Driving EUI components in the new Scout test: see the EUI-helper guidance in the `scout-ui-testing` skill (`page.components.*`; don't 1:1-map legacy wrappers; route missing capabilities through the shared contribution workflow).

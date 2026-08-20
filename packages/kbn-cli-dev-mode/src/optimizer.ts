@@ -47,6 +47,11 @@ export interface Options {
  * Check if RSPack optimizer should be used instead of Webpack optimizer
  */
 function isRspackOptimizerEnabled(): boolean {
+  if (process.env.KBN_USE_RSPACK === undefined) {
+    process.env.KBN_USE_RSPACK = 'true';
+    return true;
+  }
+
   const v = process.env.KBN_USE_RSPACK;
   return v === 'true' || v === '1';
 }
@@ -59,6 +64,8 @@ export class Optimizer {
   private readonly phase$ = new Rx.ReplaySubject<OptimizerPhase>(1);
 
   constructor(options: Options) {
+    const useRspackOptimizer = isRspackOptimizerEnabled();
+
     if (!options.enabled) {
       this.run$ = Rx.EMPTY;
       this.ready$.next(true);
@@ -67,7 +74,7 @@ export class Optimizer {
     }
 
     // Check if we should use RSPack optimizer
-    if (isRspackOptimizerEnabled()) {
+    if (useRspackOptimizer) {
       this.run$ = this.createRspackRun$(options);
     } else {
       this.run$ = this.createWebpackRun$(options);
@@ -136,6 +143,8 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
+            pluginPaths: options.pluginPaths,
+            pluginScanDirs: options.pluginScanDirs,
             basePath: options.basePath,
             log,
           });
@@ -165,10 +174,7 @@ export class Optimizer {
         })
         .catch((error) => {
           log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
-          log.warning('Falling back to @kbn/optimizer...');
-
-          // Fallback to webpack optimizer
-          this.createWebpackRun$(options).subscribe(subscriber);
+          subscriber.error(error);
         });
 
       // Cleanup when run$ completes or is unsubscribed (e.g., on SIGINT)

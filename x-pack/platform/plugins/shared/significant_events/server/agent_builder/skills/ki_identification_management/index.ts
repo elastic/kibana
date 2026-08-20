@@ -28,6 +28,9 @@ export const createKiIdentificationManagementSkill = ({
     id: 'ki-identification-management',
     name: 'ki-identification-management',
     basePath: 'skills/platform/streams',
+    // Onboarding / identification workflow only — keep out of elastic capabilities so
+    // investigation agents do not auto-load it.
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => [

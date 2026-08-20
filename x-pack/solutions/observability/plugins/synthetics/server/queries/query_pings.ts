@@ -18,7 +18,7 @@ import type {
 } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
 import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
-import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
 import { getHeartbeatLocationsPostFilter } from '../../common/lib';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
@@ -62,7 +62,7 @@ export async function queryPings<F>(
   const locationsPostFilter = getHeartbeatLocationsPostFilter((locations ?? []) as string[]);
 
   const searchBody = {
-    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),

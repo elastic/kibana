@@ -29,6 +29,7 @@ import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { EntitySummaryStalenessReason } from '@kbn/entity-store/common';
 import {
   buildEntitySummaryStaleness,
@@ -44,9 +45,11 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
+import { useInferenceConnectorAccess } from '../hooks/use_inference_connector_access';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
@@ -92,6 +95,15 @@ export const EntityHighlightsAccordion: React.FC<{
     const cName = aiConnectors.find((c) => c.id === connectorId)?.name ?? '';
     return cName;
   }, [aiConnectors, connectorId]);
+
+  const {
+    canUseSelectedConnector,
+    isCheckingPrivileges: isCheckingInferencePrivileges,
+    missingInferencePrivilege,
+  } = useInferenceConnectorAccess({
+    connectors: aiConnectors,
+    selectedConnectorId: connectorId,
+  });
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
   const { hasConnectorsReadPrivilege, hasAssistantPrivilege } = useAssistantAvailability();
@@ -256,19 +268,23 @@ export const EntityHighlightsAccordion: React.FC<{
     hasAssistantPrivilege,
   ]);
 
+  const canGenerateWithSelectedConnector = canGenerate && canUseSelectedConnector;
+
   const isLoading = useMemo(
     () =>
       isGeneratingSummary ||
       isPersistedSummaryLoading ||
       // Connector / anonymization loading only matters for generation, not for
       // displaying an already-persisted summary to a read-only user.
-      (canGenerate && (isAnonymizationFieldsLoading || isLoadingConnectors)),
+      (canGenerate &&
+        (isAnonymizationFieldsLoading || isLoadingConnectors || isCheckingInferencePrivileges)),
     [
       canGenerate,
       isAnonymizationFieldsLoading,
       isGeneratingSummary,
       isLoadingConnectors,
       isPersistedSummaryLoading,
+      isCheckingInferencePrivileges,
     ]
   );
 
@@ -377,7 +393,7 @@ export const EntityHighlightsAccordion: React.FC<{
                 size="s"
                 iconType="refresh"
                 onClick={onGenerateSummary}
-                isDisabled={!connectorId || isLoading}
+                isDisabled={!connectorId || isLoading || !canGenerateWithSelectedConnector}
                 data-test-subj="entity-highlights-error-regenerate"
               >
                 <FormattedMessage
@@ -400,7 +416,7 @@ export const EntityHighlightsAccordion: React.FC<{
             stalenessReasons={activeStalenessReasons}
             onRefresh={onGenerateSummary}
             onDismiss={onDismissStalenessCallout}
-            canRegenerate={canGenerate}
+            canRegenerate={canGenerateWithSelectedConnector}
             isRefreshing={isSummaryRefreshing}
           />
         )}
@@ -436,24 +452,19 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" textAlign="left">
-                  {!connectorId ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
-                      defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
-                      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-                    />
-                  )}
+                  {getEntitySummaryEmptyStateDescription({
+                    connectorId,
+                    connectorName,
+                    connectors: aiConnectors,
+                    missingInferencePrivilege,
+                  })}
                 </EuiText>
               </EuiFlexItem>
               {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
                   <AiButton
                     onClick={onGenerateSummary}
-                    isDisabled={!connectorId}
+                    isDisabled={!connectorId || !canGenerateWithSelectedConnector}
                     size="s"
                     iconType="sparkles"
                   >
@@ -494,5 +505,63 @@ export const EntityHighlightsAccordion: React.FC<{
       </EuiAccordion>
       <EuiHorizontalRule />
     </>
+  );
+};
+
+const getEntitySummaryEmptyStateDescription = ({
+  connectorId,
+  connectorName,
+  connectors,
+  missingInferencePrivilege,
+}: {
+  connectorId: string;
+  connectorName: string;
+  connectors?: Array<{ actionTypeId?: string }>;
+  missingInferencePrivilege: boolean;
+}): React.ReactElement => {
+  if (!connectorId) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+        defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+      />
+    );
+  }
+
+  if (missingInferencePrivilege) {
+    const hasAlternativeNonInferenceConnector = (connectors ?? []).some(
+      (connector) => connector.actionTypeId !== InferenceConnectorType.Inference
+    );
+
+    if (hasAlternativeNonInferenceConnector) {
+      return (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilegeWithAlternative"
+          defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it, or switch to a different AI connector."
+          values={{
+            connectorName: <strong>{connectorName}</strong>,
+            privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+          }}
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilege"
+        defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it."
+        values={{
+          connectorName: <strong>{connectorName}</strong>,
+          privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+        }}
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+    />
   );
 };

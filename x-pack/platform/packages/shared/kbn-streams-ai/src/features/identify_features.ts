@@ -8,7 +8,12 @@
 import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import {
   type BaseFeature,
   type IgnoredFeature,
@@ -21,6 +26,13 @@ import { conditionSchema, isConditionComplete, type Condition } from '@kbn/strea
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
+
+/**
+ * Mirrors the "2–5 evidence strings" guidance in the system prompt. Capping here rather than
+ * with `maxItems` in the finalize schema keeps an over-long array from failing tool-call
+ * validation, which would retry the whole generation and then drop the batch.
+ */
+const MAX_EVIDENCE_ITEMS = 5;
 
 export interface PreviouslyIdentifiedFeature {
   id: string;
@@ -77,6 +89,8 @@ export interface IdentifyFeaturesOptions {
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
   searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 export async function identifyFeatures({
@@ -90,6 +104,8 @@ export async function identifyFeatures({
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
   searchSimilarFeatures,
+  additionalTools,
+  additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
@@ -117,10 +133,11 @@ export async function identifyFeatures({
         known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
-      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt, additionalTools }),
       inferenceClient,
-      maxSteps: 4,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
       toolCallbacks: {
+        ...(additionalToolCallbacks ?? {}),
         search_similar_features: async (toolCall) => {
           if (!searchSimilarFeatures) {
             return {
@@ -179,6 +196,9 @@ export async function identifyFeatures({
         ...feature,
         stream_name: streamName,
         filter: tryParseFilter(feature.filter),
+        ...(Array.isArray(feature.evidence)
+          ? { evidence: feature.evidence.slice(0, MAX_EVIDENCE_ITEMS) }
+          : {}),
       };
       const result = identifiedFeatureSchema.safeParse(candidate);
       if (!result.success || Object.keys(result.data.properties).length === 0) {
