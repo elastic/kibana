@@ -11,6 +11,7 @@ import { validate as uuidValidate } from 'uuid';
 import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   agentBuilderDefaultAgentId,
@@ -285,7 +286,7 @@ export function registerConversationRoutes({
               ),
               title: schema.maybe(
                 schema.string({
-                  maxLength: 500,
+                  maxLength: CONVERSATION_TITLE_MAX_LENGTH,
                   meta: {
                     description: 'Title for the conversation. Defaults to "New conversation".',
                   },

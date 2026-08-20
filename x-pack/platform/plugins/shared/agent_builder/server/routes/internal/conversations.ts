@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONVERSATION_TITLE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -35,7 +36,7 @@ export function registerInternalConversationRoutes({
           conversation_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
-          title: schema.string({ maxLength: 500 }),
+          title: schema.string({ maxLength: CONVERSATION_TITLE_MAX_LENGTH }),
         }),
       },
       options: { access: 'internal' },

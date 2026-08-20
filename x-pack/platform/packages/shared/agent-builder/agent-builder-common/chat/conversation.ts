@@ -453,6 +453,9 @@ export interface RoundModelUsageStats {
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
+/** Maximum accepted length for a client-supplied conversation title */
+export const CONVERSATION_TITLE_MAX_LENGTH = 500;
+
 /**
  * Main structure representing a conversation with an agent.
  */
