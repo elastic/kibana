@@ -105,27 +105,24 @@ spaceTest.describe(
             kbnUrl,
             click: () => page.testSubj.click(openInDiscoverAction),
           });
-          try {
-            await expect(discoverPage.testSubj.locator('^filter-badge')).toHaveCount(3);
-            await expect
-              .soft(
-                discoverPage.testSubj.locator('~filter-key-host.raw', {
-                  hasText: 'cdn.theacademyofperformingartsandscience.org',
-                })
-              )
-              .toBeVisible();
-            await expect
-              .soft(discoverPage.testSubj.locator('~filter-key-geo.src', { hasText: 'AF' }))
-              .toBeVisible();
-            await expect
-              .soft(discoverPage.testSubj.locator('~filter', { hasText: 'Lens context (lucene)' }))
-              .toBeVisible();
-            await expect
-              .soft(discoverPage.testSubj.locator('queryInput'))
-              .toHaveValue('request.keyword : "/apm"');
-          } finally {
-            await discoverPage.close();
-          }
+
+          await expect(discoverPage.testSubj.locator('^filter-badge')).toHaveCount(3);
+          await expect
+            .soft(
+              discoverPage.testSubj.locator('~filter-key-host.raw', {
+                hasText: 'cdn.theacademyofperformingartsandscience.org',
+              })
+            )
+            .toBeVisible();
+          await expect
+            .soft(discoverPage.testSubj.locator('~filter-key-geo.src', { hasText: 'AF' }))
+            .toBeVisible();
+          await expect
+            .soft(discoverPage.testSubj.locator('~filter', { hasText: 'Lens context (lucene)' }))
+            .toBeVisible();
+          await expect
+            .soft(discoverPage.testSubj.locator('queryInput'))
+            .toHaveValue('request.keyword : "/apm"');
         });
       }
     );

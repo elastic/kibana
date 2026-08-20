@@ -49,7 +49,6 @@ export class QueryBar {
     await menuButton.click();
     await menuPanel.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('switchQueryLanguageButton').click();
-    await languageItem.waitFor({ state: 'visible' });
     await languageItem.click();
     await this.page.testSubj.locator('contextMenuPanelTitleButton').click();
     await this.page.testSubj
