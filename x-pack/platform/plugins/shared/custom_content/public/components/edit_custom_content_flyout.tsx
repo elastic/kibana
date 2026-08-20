@@ -33,6 +33,9 @@ import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
+// Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
+// so the computed max-height always prevents a scrollbar regardless of minor layout changes.
+const FLYOUT_FIXED_CHROME_HEIGHT = 360;
 
 export interface EditCustomContentFlyoutProps {
   esqlQuery: string | undefined;
@@ -107,11 +110,10 @@ export const EditCustomContentFlyout = ({
   const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
   const editorHeightRef = useRef(EDITOR_DEFAULT_HEIGHT);
 
-  // Flyout header + footer + body padding + template label row + spacers + help text.
-  // Intentionally overestimated so max-height always prevents a scrollbar.
-  const CHROME = 360;
   const onEsqlSectionResize = useCallback(({ height }: { width: number; height: number }) => {
-    setMaxEditorHeight(Math.max(120, window.innerHeight - CHROME - height));
+    setMaxEditorHeight(
+      Math.max(EDITOR_DEFAULT_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
+    );
   }, []);
 
   const onEditorContainerResize = useCallback(({ height }: { width: number; height: number }) => {
