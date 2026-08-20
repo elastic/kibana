@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { getAiIndexDest, validateAiIndexId } from '../../../common/ai_index_dest';
-export type { AiIndexIdValidation } from '../../../common/ai_index_dest';
+export { createKiStepDefinition } from './create_ki';
+export { updateKiStepDefinition } from './update_ki';
+export { deleteKiStepDefinition } from './delete_ki';
