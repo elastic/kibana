@@ -34,10 +34,6 @@ export default ({ getService }: FtrProviderContext) => {
       migrationId = response.body.migration_id;
     });
 
-    afterEach(async () => {
-      await ruleMigrationRoutes.stop({ migrationId });
-    });
-
     describe('Happy path', () => {
       it('should delete existing migration without any issues', async () => {
         await ruleMigrationRoutes.delete({
@@ -154,6 +150,9 @@ export default ({ getService }: FtrProviderContext) => {
             message:
               'A running migration cannot be deleted. Please stop the migration first and try again',
           });
+
+          /** this is the only test that leaves a migration running, stop it so it does not leak into the following tests */
+          await ruleMigrationRoutes.stop({ migrationId });
         });
 
         it('should return 404 if migration ID does not exist', async () => {
