@@ -167,6 +167,7 @@ export function getFakeKibanaRequest(
       context.logger.warn(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
         {
+          labels: { spaceId },
           tags: UIAM_LOGS_USAGE_TAGS,
         }
       );
