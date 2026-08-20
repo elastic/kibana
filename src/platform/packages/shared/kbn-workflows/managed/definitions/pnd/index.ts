@@ -12,6 +12,9 @@
 // workflow.execute. The Orchestrators keep the canonical Watch ids so they are
 // projected 1:1 as the Watches; the Workers carry -worker ids and are not shown
 // as top-level Watches.
+import RULE_CREATION_YAML from './rule_creation.yaml';
+import RULE_PREVIEW_YAML from './rule_preview.yaml';
+import RULE_TUNING_YAML from './rule_tuning.yaml';
 import WATCH_AD_CONTINUATION_ORCHESTRATOR_YAML from './watch_ad_continuation_orchestrator.yaml';
 import WATCH_AD_CONTINUATION_WORKER_YAML from './watch_ad_continuation_worker.yaml';
 import WATCH_DARK_CONTINUOUS_HUNT_WORKER_YAML from './watch_dark_continuous_hunt_worker.yaml';
@@ -25,9 +28,6 @@ import WATCH_DETECTION_RULE_TUNING_WORKER_YAML from './watch_detection_rule_tuni
 import WATCH_FLOOR_ORCHESTRATOR_YAML from './watch_floor_orchestrator.yaml';
 import WATCH_FLOOR_WORKER_YAML from './watch_floor_worker.yaml';
 import WATCH_OFFICER_YAML from './watch_officer.yaml';
-import RULE_CREATION_YAML from './rule_creation.yaml';
-import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_YAML from './rule_tuning.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 // Orchestrators keep the canonical Watch ids (1:1 Watch projection).
@@ -204,7 +204,6 @@ export const PND_WATCH_AD_CONTINUATION_WORKER_WORKFLOW = {
   visibility: WORKER_VISIBILITY,
   yaml: WATCH_AD_CONTINUATION_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
-
 
 export const PND_RULE_PREVIEW_WORKFLOW = {
   billable: false,
