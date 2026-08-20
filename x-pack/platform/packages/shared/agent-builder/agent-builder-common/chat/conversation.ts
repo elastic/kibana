@@ -25,6 +25,8 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
+import type { TimelineEvent } from './timeline_events';
+import type { MetadataFieldValue } from '../templates';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -449,6 +451,18 @@ export interface RoundModelUsageStats {
   model?: string;
 }
 
+/** Placeholder title assigned to a new conversation */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a client-supplied conversation title */
+export const CONVERSATION_TITLE_MAX_LENGTH = 500;
+
+/**
+ * Defensive cap on the length of a conversation id accepted from a request.
+ * Conversation ids are UUIDs, so this should be more than enough.
+ */
+export const CONVERSATION_ID_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */
@@ -492,8 +506,21 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
+  /**
+   * Arbitrary key/value metadata seeded from a template or set by callers.
+   * Stored in ES as a `flattened` field; typed values are recovered on read via the active template.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation. */
+  template_id?: string;
+  /** Version of the template as it was when it was last applied. */
+  template_version?: number;
   /** Whether the conversation has been pinned by the user. */
   pinned?: boolean;
+  /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
+  read_only?: boolean;
+  /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
+  events?: TimelineEvent[];
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
