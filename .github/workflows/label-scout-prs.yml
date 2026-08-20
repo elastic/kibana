@@ -39,8 +39,6 @@ jobs:
             const prNumber = Number(context.payload.pull_request.number);
             const selected =
               context.payload.action === 'opened' &&
-              !context.payload.repository?.fork &&
-              context.payload.sender?.type !== 'Bot' &&
               Number.isInteger(prNumber) &&
               prNumber % 10 === 0;
             core.setOutput('selected', String(selected));
