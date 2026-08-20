@@ -10,6 +10,7 @@
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -817,22 +818,18 @@ describe('tab mapping utils', () => {
     const profileStateRegistry = createProfileStateRegistry();
     const tabTypeServices = { ...services, profileStateRegistry };
 
-    it('fromSavedObjectTabToTabState populates initialInternalState.tabType and merges the saved profile state', () => {
-      const persistedTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({
-          id: 'metrics-tab',
-          profileState: { metricsState: { dimensions: ['host.name'] } },
+    it('hydrates and round-trips an unopened tab type', () => {
+      const persistedTab: DiscoverSessionTab = {
+        ...getPersistedTabMock({
+          tabId: 'metrics-tab',
+          dataView: dataViewMockWithTimeField,
+          services: tabTypeServices,
         }),
-        services: tabTypeServices,
-        currentDataView: undefined,
-        tabType: DiscoverTabType.Metrics,
-      });
-
-      expect(persistedTab.tabTypeState).toEqual({
-        type: DiscoverTabType.Metrics,
-        dimensions: ['host.name'],
-      });
-
+        tabTypeState: {
+          type: DiscoverTabType.Metrics,
+          dimensions: ['host.name'],
+        },
+      };
       const tabState = fromSavedObjectTabToTabState({
         tab: persistedTab,
         profileStateRegistry,
@@ -842,6 +839,15 @@ describe('tab mapping utils', () => {
       expect(tabState.profileState).toEqual({
         metricsState: { dimensions: ['host.name'] },
       });
+
+      const resavedTab = fromTabStateToSavedObjectTab({
+        tab: tabState,
+        services: tabTypeServices,
+        currentDataView: undefined,
+        tabType: tabState.initialInternalState?.tabType,
+      });
+
+      expect(resavedTab.tabTypeState).toEqual(persistedTab.tabTypeState);
     });
 
     it('restores saved profile fields while preserving fields absent from the saved payload', () => {
@@ -877,38 +883,7 @@ describe('tab mapping utils', () => {
       });
     });
 
-    it('round-trips a tab type verbatim for a tab that was never opened', () => {
-      // Simulates opening a session that contains a metrics tab, without ever selecting
-      // that tab: no data source profile has resolved for it, so the tab type used for
-      // persistence must come from what was loaded, not a live resolution.
-      const persistedTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({
-          id: 'unopened-metrics-tab',
-          profileState: { metricsState: { dimensions: ['service.name'] } },
-        }),
-        services: tabTypeServices,
-        currentDataView: undefined,
-        tabType: DiscoverTabType.Metrics,
-      });
-
-      const loadedTabState = fromSavedObjectTabToTabState({
-        tab: persistedTab,
-        profileStateRegistry,
-      });
-
-      // No currentDataView (never initialized) and the inherited tab type from load time,
-      // exactly as a tab that was never selected would be saved again.
-      const resavedTab = fromTabStateToSavedObjectTab({
-        tab: loadedTabState,
-        services: tabTypeServices,
-        currentDataView: undefined,
-        tabType: loadedTabState.initialInternalState?.tabType,
-      });
-
-      expect(resavedTab.tabTypeState).toEqual(persistedTab.tabTypeState);
-    });
-
-    it('drops the saved tab type when the resolved tab type is undefined -- losing a type', () => {
+    it('drops the saved tab type when the resolved tab type is undefined', () => {
       const tabState = getTabStateMock({
         id: 'metrics-tab',
         profileState: { metricsState: { dimensions: ['host.name'] } },
@@ -918,14 +893,13 @@ describe('tab mapping utils', () => {
         tab: tabState,
         services: tabTypeServices,
         currentDataView: undefined,
-        // The query no longer matches the metrics profile, so nothing resolved this save.
         tabType: undefined,
       });
 
       expect(savedObjectTab.tabTypeState).toBeUndefined();
     });
 
-    it('gains a tab type when the resolved tab type is now set -- gaining a type', () => {
+    it('expands defaults when the tab gains a type', () => {
       const tabState = getTabStateMock({ id: 'newly-metrics-tab' });
 
       const savedObjectTab = fromTabStateToSavedObjectTab({
@@ -935,7 +909,6 @@ describe('tab mapping utils', () => {
         tabType: DiscoverTabType.Metrics,
       });
 
-      // Defaults are expanded even though the tab never had explicit metrics state.
       expect(savedObjectTab.tabTypeState).toEqual({
         type: DiscoverTabType.Metrics,
         dimensions: [],
