@@ -2157,6 +2157,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/api_integration/apis/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional/apps/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/fixtures/es_archives/ml/  @elastic/search-ml-ux
+/x-pack/platform/test/fixtures/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/functional/services/ml @elastic/search-ml-ux
 /x-pack/platform/test/functional_basic/apps/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/search-ml-ux
