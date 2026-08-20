@@ -79,7 +79,6 @@ export const categorizeLogsService = setup({
   initial: 'countingDocuments',
   states: {
     countingDocuments: {
-      // Entry (not `retry`) so future paths here also clear stale `ignoredCategoryTerms`.
       entry: 'resetCategorizationResults',
       invoke: {
         src: 'countDocuments',

@@ -119,12 +119,7 @@ describe('LogCategories', () => {
     // Human-readable message must be visible
     expect(await screen.findByText('Something went wrong fetching logs')).toBeInTheDocument();
 
-    // Stack must NOT be visible in the default (collapsed accordion) view.
-    // EuiAccordion renders children to the DOM even when closed (CSS-hidden),
-    // so `toBeInTheDocument` would always pass — assert on visibility instead.
-    const stackElement = screen.queryByText(new RegExp(distinctiveStack));
-    if (stackElement != null) {
-      expect(stackElement).not.toBeVisible();
-    }
+    const stackElement = await screen.findByText(new RegExp(distinctiveStack));
+    expect(stackElement).not.toBeVisible();
   });
 });

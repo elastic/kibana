@@ -67,6 +67,6 @@ const unknownErrorDescription = i18n.translate(
 const errorDetailsAccordionLabel = i18n.translate(
   'xpack.observabilityLogsOverview.logCategories.errorDetailsAccordionLabel',
   {
-    defaultMessage: 'Technical details',
+    defaultMessage: 'Error details',
   }
 );

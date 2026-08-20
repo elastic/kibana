@@ -145,14 +145,8 @@ describe('categorizeLogsService', () => {
       await waitFor(actor, (state) => state.matches('cancelled'));
 
       const snapshot = actor.getSnapshot();
-      // The core assertion of the issue: cancel must NOT store an error
       expect(snapshot.context.error).toBeUndefined();
-      // Note: context.categories still holds pass-1 results in the `cancelled` state —
-      // they are cleared by `resetCategorizationResults` on entry of `countingDocuments`
-      // when the user retries. The `cancelled` render path shows `LogCategoriesCancelledContent`,
-      // which never displays those stale results.
 
-      // Prevent the unresolved promise from leaking after the test
       resolvePass2({ categories: [] as LogCategory[], hasReachedLimit: false as boolean });
     });
   });
@@ -193,11 +187,7 @@ describe('categorizeLogsService', () => {
       countDeferred.resolve({ documentCount: 0, samplingProbability: 1 });
     });
 
-    it('does not duplicate categories and clears ignoredCategoryTerms on retry (append-trap regression)', async () => {
-      // Scenario: cancel during pass 2, then retry. Stale `categories` from pass 1
-      // must NOT appear in the retry's pass 2 `ignoredCategoryTerms`, otherwise
-      // the retry will silently omit those patterns from its result.
-      // Expected call order: run1-pass1, run1-pass2 (held/cancelled), run2-pass1, run2-pass2.
+    it('retry after cancel does not reuse previous categories as ignoredCategoryTerms', async () => {
       let callCount = 0;
       let resolvePass2!: (v: { categories: LogCategory[]; hasReachedLimit: boolean }) => void;
       const calls: Array<{ ignoredCategoryTerms: string[] }> = [];
@@ -245,21 +235,12 @@ describe('categorizeLogsService', () => {
       actor.send({ type: 'cancel' });
       await waitFor(actor, (state) => state.matches('cancelled'));
 
-      // In the `cancelled` state, context.categories still holds the pass-1 results —
-      // they are cleared by `resetCategorizationResults` on entry of `countingDocuments`.
-      // This is intentional: the reset must happen before the retry's pass-2 `input`
-      // selector runs, to ensure `ignoredCategoryTerms` starts empty.
       expect(actor.getSnapshot().context.error).toBeUndefined();
 
       actor.send({ type: 'retry' });
       await waitFor(actor, (state) => state.matches('done'));
 
-      // The retry run's final categories must only be those from the retry run
-      // (0 in this test, since we returned [] for all retry passes)
       expect(actor.getSnapshot().context.categories).toEqual([]);
-
-      // The critical assertion: all 4 calls happened and the retry's pass 2 started
-      // with no stale terms from run 1's categories.
       expect(calls).toHaveLength(4);
       expect(calls[3].ignoredCategoryTerms).toEqual([]);
 
