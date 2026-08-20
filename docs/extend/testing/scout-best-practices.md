@@ -191,6 +191,7 @@ await esClient.indices.create({ index: indexName });
 ```ts
 // random suffix (simple and strong uniqueness)
 const indexName = `my-plugin-test-index-${randomUUID()}`;
+
 await esClient.indices.create({ index: indexName });
 // afterAll
 await esClient.indices.delete({ index: indexName });
