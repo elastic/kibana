@@ -25,7 +25,7 @@ export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
     gaugeAggregation: { type: ProfileStateType.Persistent },
     histogramPercentile: { type: ProfileStateType.Persistent },
     // Sort is typed as `Url` so it can be bookmarked and shared. This does not cost reload
-    // persistence: `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` in `tabs_storage_manager.ts` covers
+    // persistence: `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` in `profile_state.ts` covers
     // both `Persistent` and `Url`, so sort still survives a reload with no `_p` in the URL.
     sortField: { type: ProfileStateType.Url },
     sortDirection: { type: ProfileStateType.Url },

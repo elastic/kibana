@@ -8,11 +8,11 @@
  */
 
 import {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   ProfileStateRegistry,
   ProfileStateType,
-  METRICS_STATE_DEF,
-} from '../../../../common/context_awareness';
-import { LOCALLY_PERSISTED_PROFILE_STATE_TYPES } from './tabs_storage_manager';
+} from '../profile_state';
+import { METRICS_STATE_DEF } from './metrics_grid_profile_state';
 
 const KEY = METRICS_STATE_DEF.key;
 
