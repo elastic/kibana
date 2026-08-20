@@ -88,7 +88,6 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT 500'));
   });
 
-
   it('extract_iocs filters ordinary host chatter out of network destinations', async () => {
     const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
     const extractIocs = inlineTools.find(
@@ -96,11 +95,7 @@ describe('endpointForensicAnalysisSkill', () => {
     ) as { handler: (args: unknown, context: unknown) => Promise<unknown> } | undefined;
 
     const esqlQuery = jest.fn().mockResolvedValue({
-      columns: [
-        { name: 'destination.ip' },
-        { name: 'destination.domain' },
-        { name: '@timestamp' },
-      ],
+      columns: [{ name: 'destination.ip' }, { name: 'destination.domain' }, { name: '@timestamp' }],
       values: [
         ['10.0.0.5', null, '2026-01-01T00:00:00Z'],
         ['8.8.8.8', null, '2026-01-01T00:01:00Z'],
