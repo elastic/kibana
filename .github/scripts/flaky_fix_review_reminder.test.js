@@ -208,16 +208,17 @@ test('a PR whose files resolve no codeowners is not pinged', async () => {
   });
 });
 
-test('sweep pings the first due, ready, unreviewed PR with its codeowners', async () => {
+test('sweep pings due, ready, unreviewed PRs with their codeowners', async () => {
   await withFixtureAndNow(async () => {
     const state = scenarioState();
     process.env.DRY_RUN = 'false';
     await reminder({ github: makeGithub(state), context, core: silentCore });
 
-    // #1 is the first due PR; the cap of MAX_PINGS_PER_RUN stops the run there.
+    // Both due PRs (#1, never pinged; #5, due for a re-ping) are pinged in one sweep.
     const posted = state.posted.map((c) => c.issue_number);
-    assert.deepEqual(posted, [1]);
+    assert.deepEqual(posted, [1, 5]);
     assert.match(state.posted[0].body, /@elastic\/security-solution/);
+    assert.match(state.posted[1].body, /@elastic\/kibana-core/);
   });
 });
 
