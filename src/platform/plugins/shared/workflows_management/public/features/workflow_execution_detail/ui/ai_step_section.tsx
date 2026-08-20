@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonIcon,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiHorizontalRule, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { StepAiMetadata } from '../lib/normalize_step_ai';
 import { stepAiToTokenUsage } from '../lib/normalize_step_ai';
 import { useKibana } from '../../../hooks/use_kibana';
 import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
+import { StepDetailAccordionSection } from './step_detail_accordion_section';
 
 interface AiStepSectionProps {
   ai: StepAiMetadata;
@@ -32,7 +27,6 @@ interface AiStepSectionProps {
 export const AiStepSection = React.memo<AiStepSectionProps>(({ ai, connectorName }) => {
   const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
-  const [isOpen, setIsOpen] = useState(true);
 
   const usage = stepAiToTokenUsage(ai);
   const hasContext =
@@ -48,126 +42,106 @@ export const AiStepSection = React.memo<AiStepSectionProps>(({ ai, connectorName
       : undefined;
 
   return (
-    <div
-      css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}
+    <StepDetailAccordionSection
       data-test-subj="workflowExecutionAiSection"
+      title={i18n.translate('workflows.executionFlyout.aiSection.label', {
+        defaultMessage: 'AI',
+      })}
     >
-      <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
-        <EuiButtonIcon
-          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-          size="xs"
-          color="text"
-          aria-label={i18n.translate('workflows.executionFlyout.aiSection.toggle', {
-            defaultMessage: 'AI section',
-          })}
-          onClick={() => setIsOpen((v) => !v)}
-        />
-        <span css={{ fontSize: '14px', fontWeight: 600, color: euiTheme.colors.title }}>
-          {i18n.translate('workflows.executionFlyout.aiSection.label', {
-            defaultMessage: 'AI',
-          })}
-        </span>
-      </div>
-      {isOpen && (
-        <div
-          css={{
-            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-            borderRadius: euiTheme.border.radius.medium,
-            overflow: 'hidden',
-            padding: '12px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: euiTheme.size.s,
-          }}
-        >
-          {hasContext && (
-            <div
-              css={{
-                display: 'grid',
-                gridTemplateColumns: 'max-content minmax(0, 1fr)',
-                columnGap: euiTheme.size.m,
-                rowGap: '4px',
-                alignItems: 'center',
-              }}
-            >
-              {ai.model && (
-                <div css={{ display: 'contents' }} data-test-subj="workflowExecutionAiSectionModel">
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('workflows.executionFlyout.aiSection.model', {
-                      defaultMessage: 'Model',
-                    })}
-                  </EuiText>
-                  <EuiText size="xs" css={{ fontFamily: euiTheme.font.familyCode, minWidth: 0 }}>
-                    {ai.model}
-                  </EuiText>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: euiTheme.size.s,
+        }}
+      >
+        {hasContext && (
+          <div
+            css={{
+              display: 'grid',
+              gridTemplateColumns: 'max-content minmax(0, 1fr)',
+              columnGap: euiTheme.size.m,
+              rowGap: '4px',
+              alignItems: 'center',
+            }}
+          >
+            {ai.model && (
+              <div css={{ display: 'contents' }} data-test-subj="workflowExecutionAiSectionModel">
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.executionFlyout.aiSection.model', {
+                    defaultMessage: 'Model',
+                  })}
+                </EuiText>
+                <EuiText size="xs" css={{ fontFamily: euiTheme.font.familyCode, minWidth: 0 }}>
+                  {ai.model}
+                </EuiText>
+              </div>
+            )}
+            {(connectorName || ai.connectorId) && (
+              <div
+                css={{ display: 'contents' }}
+                data-test-subj="workflowExecutionAiSectionConnector"
+              >
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.executionFlyout.aiSection.connector', {
+                    defaultMessage: 'Connector',
+                  })}
+                </EuiText>
+                <div css={{ minWidth: 0 }}>
+                  {connectorHref ? (
+                    <EuiLink
+                      href={connectorHref}
+                      target="_blank"
+                      css={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <EuiText size="xs" component="span">
+                        {connectorName ?? ai.connectorId}
+                      </EuiText>
+                    </EuiLink>
+                  ) : (
+                    <EuiText size="xs">{connectorName ?? ai.connectorId}</EuiText>
+                  )}
                 </div>
-              )}
-              {(connectorName || ai.connectorId) && (
-                <div
-                  css={{ display: 'contents' }}
-                  data-test-subj="workflowExecutionAiSectionConnector"
-                >
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('workflows.executionFlyout.aiSection.connector', {
-                      defaultMessage: 'Connector',
-                    })}
-                  </EuiText>
-                  <div css={{ minWidth: 0 }}>
-                    {connectorHref ? (
-                      <EuiLink
-                        href={connectorHref}
-                        target="_blank"
-                        css={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <EuiText size="xs" component="span">
-                          {connectorName ?? ai.connectorId}
-                        </EuiText>
-                      </EuiLink>
-                    ) : (
-                      <EuiText size="xs">{connectorName ?? ai.connectorId}</EuiText>
-                    )}
-                  </div>
-                </div>
-              )}
-              {ai.timeToFirstTokenMs !== undefined && (
-                <div css={{ display: 'contents' }} data-test-subj="workflowExecutionAiSectionTtft">
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('workflows.executionFlyout.aiSection.ttft', {
-                      defaultMessage: 'Time to first token',
-                    })}
-                  </EuiText>
-                  <EuiText size="xs" css={{ minWidth: 0 }}>
-                    {i18n.translate('workflows.executionFlyout.aiSection.ttftValue', {
-                      defaultMessage: '{ms} ms',
-                      values: { ms: Math.round(ai.timeToFirstTokenMs) },
-                    })}
-                  </EuiText>
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+            {ai.timeToFirstTokenMs !== undefined && (
+              <div css={{ display: 'contents' }} data-test-subj="workflowExecutionAiSectionTtft">
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.executionFlyout.aiSection.ttft', {
+                    defaultMessage: 'Time to first token',
+                  })}
+                </EuiText>
+                <EuiText size="xs" css={{ minWidth: 0 }}>
+                  {i18n.translate('workflows.executionFlyout.aiSection.ttftValue', {
+                    defaultMessage: '{ms} ms',
+                    values: { ms: Math.round(ai.timeToFirstTokenMs) },
+                  })}
+                </EuiText>
+              </div>
+            )}
+          </div>
+        )}
 
-          {usage && (
-            <div data-test-subj="workflowExecutionAiSectionTokenUsage">
-              {hasContext && (
-                <EuiHorizontalRule margin="none" css={{ marginBottom: euiTheme.size.s }} />
-              )}
-              <TokenUsageBreakdown
-                usage={usage}
-                // Model/connector are already listed above; only surface multi-call
-                // aggregates in the shared footer.
-                callCount={ai.callCount}
-                data-test-subj="workflowTokenUsageBreakdown"
-              />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+        {usage && (
+          <div data-test-subj="workflowExecutionAiSectionTokenUsage">
+            {hasContext && (
+              <EuiHorizontalRule margin="none" css={{ marginBottom: euiTheme.size.s }} />
+            )}
+            <TokenUsageBreakdown
+              usage={usage}
+              // Model/connector are already listed above; only surface multi-call
+              // aggregates in the shared footer.
+              callCount={ai.callCount}
+              data-test-subj="workflowTokenUsageBreakdown"
+            />
+          </div>
+        )}
+      </div>
+    </StepDetailAccordionSection>
   );
 });
 

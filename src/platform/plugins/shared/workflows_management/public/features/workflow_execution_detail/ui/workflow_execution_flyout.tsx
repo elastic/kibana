@@ -70,6 +70,7 @@ import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
+import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepDataValueCell } from './step_data_value_cell';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { findStepConnectorId } from '../lib/find_step_connector_id';
@@ -80,8 +81,10 @@ import {
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;
-  workflowName: string;
-  workflowTags: string[];
+  /** Optional; falls back to the loaded execution / definition name. */
+  workflowName?: string;
+  /** Optional; falls back to tags on the workflow definition when present. */
+  workflowTags?: string[];
   onClose: () => void;
 }
 
@@ -109,8 +112,9 @@ const i18nTexts = {
 };
 
 const FLYOUT_CLASSNAME = 'workflowExecutionFlyout';
-const EXECUTION_PANEL_WIDTH = 650;
-const STEP_DETAIL_WIDTH = 650;
+/** Keep slim enough that the YAML editor stays readable with both panels open. */
+const EXECUTION_PANEL_WIDTH = 560;
+const STEP_DETAIL_WIDTH = 560;
 /** Field column: content-sized between a header-comfortable min and a path-truncation max. */
 const FIELD_COLUMN_MIN_PX = 100;
 const FIELD_COLUMN_MAX_PX = 160;
@@ -173,7 +177,6 @@ const SECTION_PAGE_SIZE = 10;
 const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
-  const [isOpen, setIsOpen] = useState(true);
   const [isViewPopoverOpen, setIsViewPopoverOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -278,28 +281,14 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   }, []);
 
   return (
-    <div css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
-      {/* Section header bar */}
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          height: '32px',
-          gap: '4px',
-        }}
-      >
-        <EuiButtonIcon
-          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-          size="xs"
-          color="text"
-          onClick={() => setIsOpen((v) => !v)}
-          aria-label={i18n.translate('workflows.executionFlyout.stepDetail.toggleSection', {
-            defaultMessage: '{label} section',
-            values: { label },
-          })}
-        />
-        <span css={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>{label}</span>
-        {hasTable && (
+    <StepDetailAccordionSection
+      title={label}
+      toggleAriaLabel={i18n.translate('workflows.executionFlyout.stepDetail.toggleNamedSection', {
+        defaultMessage: '{label} section',
+        values: { label },
+      })}
+      extraAction={
+        hasTable ? (
           <EuiPopover
             isOpen={isViewPopoverOpen}
             closePopover={() => setIsViewPopoverOpen(false)}
@@ -351,112 +340,101 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
               ]}
             />
           </EuiPopover>
-        )}
-      </div>
-
-      {/* Section content */}
-      {isOpen && (
-        <div
-          css={{
-            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-            borderRadius: '6px',
-            overflow: 'hidden',
-          }}
+        ) : undefined
+      }
+    >
+      {effectiveView === 'code' ? (
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          transparentBackground
+          paddingSize="none"
+          overflowHeight={300}
+          isCopyable
+          css={`
+            & .euiCodeBlock__controls {
+              background: ${euiTheme.colors.emptyShade};
+              top: 4px;
+              right: 4px;
+              padding: 2px;
+              border-radius: 4px;
+            }
+          `}
         >
-          {effectiveView === 'code' ? (
-            <EuiCodeBlock
-              language="json"
-              fontSize="s"
-              transparentBackground
-              paddingSize="m"
-              overflowHeight={300}
-              isCopyable
-              css={`
-                & .euiCodeBlock__controls {
-                  background: ${euiTheme.colors.emptyShade};
-                  top: 4px;
-                  right: 4px;
-                  padding: 2px;
-                  border-radius: 4px;
-                }
-              `}
-            >
-              {JSON.stringify(data ?? null, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            <div css={{ padding: '16px', minWidth: 0 }}>
-              <div css={{ marginBottom: '16px' }}>
-                <EuiFieldSearch
-                  compressed
-                  fullWidth
-                  placeholder={i18n.translate(
-                    'workflows.executionFlyout.stepDetail.searchPlaceholder',
-                    { defaultMessage: 'Search fields and values' }
-                  )}
-                  aria-label={i18n.translate(
-                    'workflows.executionFlyout.stepDetail.searchAriaLabel',
-                    { defaultMessage: 'Search fields and values' }
-                  )}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  data-test-subj="workflowExecutionStepDataSearch"
-                />
-              </div>
-              <div
-                data-test-subj="workflowExecutionStepDataTable"
-                css={css`
-                  min-width: 0;
-                  width: 100%;
-                  overflow: hidden;
+          {JSON.stringify(data ?? null, null, 2)}
+        </EuiCodeBlock>
+      ) : (
+        <div css={{ minWidth: 0 }}>
+          <div css={{ marginBottom: euiTheme.size.m }}>
+            <EuiFieldSearch
+              compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'workflows.executionFlyout.stepDetail.searchPlaceholder',
+                { defaultMessage: 'Search fields and values' }
+              )}
+              aria-label={i18n.translate(
+                'workflows.executionFlyout.stepDetail.searchAriaLabel',
+                { defaultMessage: 'Search fields and values' }
+              )}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-test-subj="workflowExecutionStepDataSearch"
+            />
+          </div>
+          <div
+            data-test-subj="workflowExecutionStepDataTable"
+            css={css`
+              min-width: 0;
+              width: 100%;
+              overflow: hidden;
 
-                  .euiTable {
-                    table-layout: fixed;
-                    width: 100%;
-                  }
+              .euiTable {
+                table-layout: fixed;
+                width: 100%;
+              }
 
-                  .workflowStepDataFieldCol {
-                    min-width: ${FIELD_COLUMN_MIN_PX}px;
-                    max-width: ${FIELD_COLUMN_MAX_PX}px;
-                    width: ${FIELD_COLUMN_MAX_PX}px;
-                  }
+              .workflowStepDataFieldCol {
+                min-width: ${FIELD_COLUMN_MIN_PX}px;
+                max-width: ${FIELD_COLUMN_MAX_PX}px;
+                width: ${FIELD_COLUMN_MAX_PX}px;
+              }
 
-                  .workflowStepDataValueCol {
-                    width: auto;
-                    overflow: hidden;
-                  }
+              .workflowStepDataValueCol {
+                width: auto;
+                overflow: hidden;
+              }
 
-                  .workflowStepDataValueCol .euiTableCellContent {
-                    display: block;
-                    overflow: hidden;
-                    max-width: 100%;
-                  }
-                `}
-              >
-                <EuiBasicTable<StepDataTableRow>
-                  items={paginatedRows}
-                  columns={tableColumns}
-                  compressed
-                  tableLayout="fixed"
-                  responsiveBreakpoint={false}
-                  noItemsMessage={emptyTableMessage}
-                  onChange={onTableChange}
-                  pagination={
-                    pageCount > 1
-                      ? {
-                          pageIndex,
-                          pageSize: SECTION_PAGE_SIZE,
-                          totalItemCount: filteredRows.length,
-                          showPerPageOptions: false,
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-            </div>
-          )}
+              .workflowStepDataValueCol .euiTableCellContent {
+                display: block;
+                overflow: hidden;
+                max-width: 100%;
+              }
+            `}
+          >
+            <EuiBasicTable<StepDataTableRow>
+              items={paginatedRows}
+              columns={tableColumns}
+              compressed
+              tableLayout="fixed"
+              responsiveBreakpoint={false}
+              noItemsMessage={emptyTableMessage}
+              onChange={onTableChange}
+              pagination={
+                pageCount > 1
+                  ? {
+                      pageIndex,
+                      pageSize: SECTION_PAGE_SIZE,
+                      totalItemCount: filteredRows.length,
+                      showPerPageOptions: false,
+                    }
+                  : undefined
+              }
+            />
+          </div>
         </div>
       )}
-    </div>
+    </StepDetailAccordionSection>
   );
 };
 
@@ -477,7 +455,12 @@ const formatExecutionDate = (isoString: string): string | null => {
 };
 
 export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
-  ({ executionId, workflowName, workflowTags, onClose }) => {
+  ({
+    executionId,
+    workflowName: workflowNameProp,
+    workflowTags: workflowTagsProp,
+    onClose,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const { application, notifications } = useKibana().services;
     const [activeTab, setActiveTab] = useState<FlyoutTabId>('table');
@@ -487,6 +470,15 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+
+    const workflowName =
+      workflowNameProp ||
+      workflowExecution?.workflowName ||
+      workflowExecution?.workflowDefinition?.name ||
+      workflowExecution?.workflowId ||
+      '';
+    const workflowTags =
+      workflowTagsProp ?? workflowExecution?.workflowDefinition?.tags ?? [];
 
     const { href: executionHref } = useNavigateToExecution({
       workflowId: workflowExecution?.workflowId ?? '',
@@ -766,18 +758,18 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 overflow: 'hidden',
               }}
             >
-              <div
-                css={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  overflowX: 'hidden',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  minWidth: 0,
-                }}
-              >
+                <div
+                  css={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    padding: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                    minWidth: 0,
+                  }}
+                >
                 {/* Header row — clean, no separator line */}
                 <div
                   css={{
@@ -785,6 +777,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     alignItems: 'center',
                     gap: '8px',
                     flexShrink: 0,
+                    paddingBottom: euiTheme.size.m,
                   }}
                 >
                   {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
@@ -816,7 +809,15 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   />
                 </div>
 
-                <EuiHorizontalRule margin="none" css={{ marginLeft: '-16px', marginRight: '-16px', width: 'calc(100% + 32px)' }} />
+                <EuiHorizontalRule
+                  margin="none"
+                  css={{
+                    marginBottom: euiTheme.size.m,
+                    marginLeft: '-16px',
+                    marginRight: '-16px',
+                    width: 'calc(100% + 32px)',
+                  }}
+                />
 
                 {isLoadingStepData && !isPseudoStep ? (
                   <EuiFlexGroup justifyContent="center">

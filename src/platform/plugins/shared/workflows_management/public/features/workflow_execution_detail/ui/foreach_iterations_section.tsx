@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
+import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepExecutionOpenTree } from './workflow_step_execution_tree';
 
 interface ForeachIterationsSectionProps {
@@ -36,31 +37,30 @@ export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> =
   executionStatus,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(true);
 
-    const foreachRoot = useMemo(() => {
-      const tree = buildStepExecutionsTree(allStepExecutions);
-      const find = (
-        items: ReturnType<typeof buildStepExecutionsTree>
-      ): ReturnType<typeof buildStepExecutionsTree>[number] | undefined => {
-        for (const item of items) {
-          const isForeachType = item.stepType === 'foreach' || item.stepType === 'while';
-          const hasIterationChildren = item.children.some(
-            (c) => c.stepType === 'foreach-iteration' || c.stepType === 'while-iteration'
-          );
-          if (
-            item.stepId === foreachStep.stepId &&
-            (item.stepExecutionId === foreachStep.id || isForeachType || hasIterationChildren)
-          ) {
-            return item;
-          }
-          const nested = find(item.children);
-          if (nested) return nested;
+  const foreachRoot = useMemo(() => {
+    const tree = buildStepExecutionsTree(allStepExecutions);
+    const find = (
+      items: ReturnType<typeof buildStepExecutionsTree>
+    ): ReturnType<typeof buildStepExecutionsTree>[number] | undefined => {
+      for (const item of items) {
+        const isForeachType = item.stepType === 'foreach' || item.stepType === 'while';
+        const hasIterationChildren = item.children.some(
+          (c) => c.stepType === 'foreach-iteration' || c.stepType === 'while-iteration'
+        );
+        if (
+          item.stepId === foreachStep.stepId &&
+          (item.stepExecutionId === foreachStep.id || isForeachType || hasIterationChildren)
+        ) {
+          return item;
         }
-        return undefined;
-      };
-      return find(tree);
-    }, [allStepExecutions, foreachStep.id, foreachStep.stepId]);
+        const nested = find(item.children);
+        if (nested) return nested;
+      }
+      return undefined;
+    };
+    return find(tree);
+  }, [allStepExecutions, foreachStep.id, foreachStep.stepId]);
 
   const iterationCount = foreachRoot?.children.length ?? 0;
 
@@ -79,48 +79,25 @@ export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> =
   }
 
   return (
-    <div
-      css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}
+    <StepDetailAccordionSection
       data-test-subj="workflowExecutionIterationsSection"
-    >
-      <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
-        <EuiButtonIcon
-          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-          size="xs"
-          color="text"
-          aria-label={i18n.translate('workflows.executionFlyout.iterationsSection.toggle', {
-            defaultMessage: 'Iterations section',
-          })}
-          onClick={() => setIsOpen((v) => !v)}
-        />
+      title={
         <EuiText size="s" css={{ fontWeight: 600, color: euiTheme.colors.title }}>
           <span>{headerLabel}</span>
         </EuiText>
+      }
+    >
+      <div role="group" aria-label={headerLabel}>
+        <StepExecutionOpenTree
+          roots={[foreachRoot]}
+          stepExecutions={allStepExecutions}
+          selectedId={selectedId}
+          onStepExecutionClick={onSelectStep}
+          isExecutionComplete={executionStatus != null ? isTerminalStatus(executionStatus) : true}
+          childrenOnly
+          data-test-subj="workflowExecutionIterationsTree"
+        />
       </div>
-      {isOpen && (
-        <div
-          role="group"
-          aria-label={headerLabel}
-          css={{
-            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-            borderRadius: euiTheme.border.radius.medium,
-            overflow: 'hidden',
-            padding: euiTheme.size.s,
-          }}
-        >
-          <StepExecutionOpenTree
-            roots={[foreachRoot]}
-            stepExecutions={allStepExecutions}
-            selectedId={selectedId}
-            onStepExecutionClick={onSelectStep}
-            isExecutionComplete={
-              executionStatus != null ? isTerminalStatus(executionStatus) : true
-            }
-            childrenOnly
-            data-test-subj="workflowExecutionIterationsTree"
-          />
-        </div>
-      )}
-    </div>
+    </StepDetailAccordionSection>
   );
 };
