@@ -144,6 +144,24 @@ await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
 await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1');
 ```
 
+❌ **Don't:** assert behavior that requires the whole deployment to hold no matching data. Cleaning your own fixtures doesn't make this precondition true — any other suite's documents break it:
+
+```ts
+await logsSynthtraceEsClient.clean(); // only removes *this suite's* data
+await pageObjects.landing.goto();
+// passes only if *no* log data exists anywhere on the deployment
+await expect(page).toHaveURL(/\/app\/observabilityOnboarding/);
+```
+
+✔️ **Do:** cover the empty-state branch in a Jest unit test where the data check is mocked and the precondition is guaranteed, and keep the Scout test for the data-present path:
+
+```ts
+// landing.test.tsx — deterministic: the "no data" state is mocked, not assumed
+mockLogsDataService.getStatus.mockResolvedValue({ hasData: false });
+render(<LandingPage />);
+expect(mockNavigateToApp).toHaveBeenCalledWith('observabilityOnboarding');
+```
+
 :::::
 
 ## Don't leak state into the next suite [dont-leak-state-into-the-next-suite]
@@ -159,6 +177,25 @@ Clean up in the right place:
 
 - **Per-test data**: clean up in `afterEach`/`afterAll`.
 - **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
+
+:::::{dropdown} Examples
+❌ **Don't:** use a fixed literal resource name. Every spec, parallel worker, and leftover from an earlier suite shares it — one teardown deletes everyone's data:
+
+```ts
+const indexName = 'my-plugin-test-index';
+await esClient.indices.create({ index: indexName });
+```
+
+✔️ **Do:** make the name unique per run (or per worker, in parallel suites), and derive cleanup from the same value:
+
+```ts
+const indexName = `my-plugin-test-index-${randomUUID()}`;
+await esClient.indices.create({ index: indexName });
+// afterAll
+await esClient.indices.delete({ index: indexName });
+```
+
+:::::
 
 :::::{tip}
 If your suite passes locally and alone but fails in CI, suspect this whole class first: check what state the failing assertion actually depends on, and which other suite could have created or deleted it.
