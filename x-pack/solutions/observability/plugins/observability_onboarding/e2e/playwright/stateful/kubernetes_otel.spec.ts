@@ -18,6 +18,15 @@ import { assertDiscoverHasData } from '../lib/validation_helpers';
  * to spin up a local k8s cluster with the required resources.
  */
 
+/**
+ * Retries are disabled for this spec because each retry remounts the
+ * onboarding flow and mints a fresh onboardingId, but Ensemble runs the
+ * code snippet (helm install) only once — with the first attempt's id.
+ * Subsequent retries poll has-data for an id the collector was never
+ * configured with, so they can never pass and only burn the step budget.
+ */
+test.describe.configure({ retries: 0 });
+
 test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
   await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
@@ -32,6 +41,15 @@ const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
+  /**
+   * Cold GKE nodes require pulling the EDOT daemon-collector image (~6 min),
+   * on top of helm install, operator + daemon-collector readiness waits, and
+   * java-app rollout. 20 min covers: ~30s (helm + operator) + ~6 min (image
+   * pull + daemonset rollout) + ~1 min (connect + ingest) + APM/dashboard
+   * assertions.
+   */
+  test.setTimeout(20 * 60_000);
+
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
@@ -62,12 +80,26 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
       ?.replace('myapp', INSTRUMENTED_APP_NAME)
       ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
     /**
-     * Adding timeout so Ensemble waits for the
-     * pods to be created before instrumenting the app
+     * Wait for the OTel operator, the gateway collector, AND the
+     * daemon-collector DaemonSet before annotating and restarting the
+     * java-app.
+     *
+     * Operator readiness gates the mutating webhook (instrumentation
+     * injection). Gateway readiness matters because ALL data (logs, metrics,
+     * traces) is exported daemon -> gateway -> Elastic; if the gateway never
+     * becomes ready (e.g. its 2x500Mi replicas are unschedulable on a small
+     * cluster), no data reaches Elasticsearch at all while the daemon still
+     * looks healthy. Daemon-collector readiness ensures its OTLP endpoint
+     * (port 4318) is up before the java-app starts: on cold nodes the image
+     * pull takes ~6 min, and the OTel Java agent will not automatically
+     * reconnect if the endpoint was unavailable at its own startup.
      */
-    const sleepSnippet = `sleep 120`;
+    const collectorReadinessSnippet = `kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-opentelemetry-operator --namespace opentelemetry-operator-system
+kubectl rollout status --watch --timeout=300s deployment/opentelemetry-kube-stack-gateway-collector --namespace opentelemetry-operator-system
+kubectl rollout status --watch --timeout=660s daemonset/opentelemetry-kube-stack-daemon-collector --namespace opentelemetry-operator-system`;
+    const instrumentedAppReadinessSnippet = `kubectl rollout status --watch --timeout=300s deployment/${INSTRUMENTED_APP_NAME} --namespace ${INSTRUMENTED_APP_CONTAINER_NAMESPACE}`;
 
-    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
+    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${collectorReadinessSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}\n${instrumentedAppReadinessSnippet}`;
   } else {
     codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}`;
   }
@@ -90,13 +122,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    * after the blur event and shows "We are monitoring your cluster"
    * once both logs and metrics have arrived.
    */
-  await otelKubernetesFlowPage.assertDataReceivedIndicator();
-
-  /**
-   * Additional buffer to ensure data has propagated
-   * to dashboards and Discover before navigating.
-   */
-  await page.waitForTimeout(2 * 60000);
+  await otelKubernetesFlowPage.assertDataReceivedIndicator(15 * 60_000);
 
   if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
@@ -178,7 +204,12 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
           ...(errorBody !== undefined ? { errorBody } : {}),
         });
       });
-      await apmPage.goto(serviceInventoryHref);
+      // The CTA uses an /app/r locator redirect, which can remain stuck on the
+      // "Redirecting..." page in serverless CI. Navigate to its target directly
+      // so the inventory mounts before the service-row retry loop starts.
+      await apmPage.goto(`${process.env.KIBANA_BASE_URL}/app/apm/services`, {
+        waitUntil: 'domcontentloaded',
+      });
       const apmServiceInventoryPage = new ApmServiceInventoryPage(apmPage);
 
       const serviceTestId = `serviceLink_${apmServiceName}`;

@@ -256,11 +256,11 @@ describe('toStoredFieldAttributes', () => {
   });
 
   describe('primitive fields', () => {
-    it('always writes the entry even when all optional attrs are absent', () => {
+    it('omits the entry when all optional attrs are absent', () => {
       const result = toStoredFieldAttributes({
         my_field: { type: 'keyword' },
       });
-      expect(result).toHaveProperty('my_field');
+      expect(result).toEqual({});
     });
 
     it('sets customLabel when custom_label is present', () => {
@@ -300,21 +300,21 @@ describe('toStoredFieldAttributes', () => {
 
     it('omits count when popularity is absent', () => {
       const result = toStoredFieldAttributes({
-        my_field: { type: 'keyword' },
+        my_field: { type: 'keyword', custom_label: 'My Label' },
       });
       expect(result!.my_field).not.toHaveProperty('count');
     });
   });
 
   describe('composite fields', () => {
-    it('always writes an entry for each subfield keyed as "parentName.subFieldName"', () => {
+    it('omits the entry for a subfield with no attrs', () => {
       const result = toStoredFieldAttributes({
         my_composite: {
           type: RUNTIME_FIELD_COMPOSITE_TYPE,
           fields: { sub: { type: 'keyword' } },
         },
       });
-      expect(result!['my_composite.sub']).toEqual({});
+      expect(result).toEqual({});
     });
 
     it('writes entry for subfields with at least one attr set, keyed as "parentName.subFieldName"', () => {

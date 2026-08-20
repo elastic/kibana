@@ -69,7 +69,7 @@ export const AnalyzerPreviewContainer = memo(
 
     const isEnabled = useIsAnalyzerEnabled(hit);
 
-    const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
+    const iconType = useMemo(() => (showIcon ? 'chevronLimitLeft' : undefined), [showIcon]);
 
     // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
     const isNavigationEnabled = useMemo(
@@ -77,8 +77,8 @@ export const AnalyzerPreviewContainer = memo(
       [disableNavigation, isEnabled]
     );
 
-    const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
     const { dataView, status } = useDataView(PageScope.analyzer);
+    const selectedPatterns = useSelectedPatterns(dataView);
     const dataViewLoading = status === 'loading' || status === 'pristine';
     const dataViewError =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());

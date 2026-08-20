@@ -9,7 +9,11 @@
 
 import type { ESQLColumn, ESQLIdentifier, ESQLSingleAstItem } from '@elastic/esql/types';
 import { isParametrized } from '@elastic/esql';
-import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
+import {
+  isUnmappedFieldsStrategy,
+  UnmappedFieldsStrategy,
+  type ICommandContext,
+} from '../../../registry/types';
 import { errors, getMessageFromId } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
 import { getExpressionType } from '../expressions';
@@ -91,8 +95,8 @@ export class ColumnValidator {
   private get isUnmappedColumnAllowed(): boolean {
     const unmappedFieldsStrategy = this.context.unmappedFieldsStrategy;
     return (
-      unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
-      unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
+      isUnmappedFieldsStrategy(unmappedFieldsStrategy) &&
+      unmappedFieldsStrategy !== UnmappedFieldsStrategy.DEFAULT
     );
   }
 

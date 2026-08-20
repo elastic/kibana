@@ -19,6 +19,7 @@ import {
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
   isDefaultTriggerEventSearchScope,
+  omitUnchangedWorkflowInputDefaults,
   resolveInitialSelectedTrigger,
 } from './workflow_execute_modal_helpers';
 
@@ -42,6 +43,62 @@ function workflowWithExtensionTriggers(
     triggers: triggers as WorkflowYaml['triggers'],
   };
 }
+
+describe('omitUnchangedWorkflowInputDefaults', () => {
+  const inputsSchema = normalizeFieldsToJsonSchema({
+    properties: {
+      dynamicDefault: { type: 'string', default: '{{ consts.expected }}' },
+      staticDefault: { type: 'string', default: 'blue' },
+      tags: { type: 'array', items: { type: 'string' }, default: ['one', 'two'] },
+      settings: {
+        type: 'object',
+        properties: {
+          theme: { type: 'string', default: '{{ consts.theme }}' },
+          locale: { type: 'string', default: 'en' },
+        },
+      },
+      provided: { type: 'string' },
+    },
+  });
+
+  it('omits unchanged defaults while retaining caller-provided values', () => {
+    expect(
+      omitUnchangedWorkflowInputDefaults(
+        {
+          dynamicDefault: '{{ consts.expected }}',
+          staticDefault: 'blue',
+          tags: ['one', 'two'],
+          settings: {
+            theme: '{{ consts.theme }}',
+            locale: 'fr',
+          },
+          provided: '{{ literal.data }}',
+        },
+        inputsSchema
+      )
+    ).toEqual({
+      settings: { locale: 'fr' },
+      provided: '{{ literal.data }}',
+    });
+  });
+
+  it('retains defaults that the caller changed', () => {
+    expect(
+      omitUnchangedWorkflowInputDefaults(
+        {
+          dynamicDefault: 'literal override',
+          staticDefault: 'red',
+          tags: ['three'],
+        },
+        inputsSchema
+      )
+    ).toEqual({
+      dynamicDefault: 'literal override',
+      staticDefault: 'red',
+      tags: ['three'],
+    });
+  });
+});
 
 describe('hasCustomEventTrigger', () => {
   it('returns false when definition is null', () => {

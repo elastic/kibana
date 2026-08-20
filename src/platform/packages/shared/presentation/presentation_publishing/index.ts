@@ -26,6 +26,7 @@ export {
   getViewModeSubject,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export { apiCanCancelRequests, type CanCancelRequests } from './interfaces/can_cancel_requests';
 export {
   apiCanLockHoverActions,
   type CanLockHoverActions,
@@ -78,6 +79,10 @@ export {
   apiPublishesApproximation,
   type PublishesApproximation,
 } from './interfaces/fetch/publishes_approximation';
+export {
+  type PublishesFetchOnlyVisible,
+  apiPublishesFetchOnlyVisible,
+} from './interfaces/fetch/fetch_only_visible';
 export {
   apiHasAppContext,
   type EmbeddableAppContext,

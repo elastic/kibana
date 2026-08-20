@@ -20,8 +20,11 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import {
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -162,6 +165,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       sampleSize,
       excludedRowRendererIds,
       columns: timelineColumns,
+      isSuperTimeline,
     } = useSelector((state: State) => selectTimelineById(state, timelineId));
 
     const settings: UnifiedDataTableProps['settings'] = useMemo(() => {
@@ -181,6 +185,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
+    // The new document details flyout opened from Timeline must render alert/event field cell actions
+    // on the details-flyout trigger so the "Toggle column in table" action is available (it is not
+    // registered on the default trigger). The scope is bound to `timelineId`, so the action toggles
+    // columns on this Timeline via the Redux store; no alerts table ref is needed here.
+    const timelineCellActionRenderer = useMemo(
+      () =>
+        createCellActionRenderer(timelineId, {
+          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+          visibleCellActions: 6,
+        }),
+      [timelineId]
+    );
+
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (enableNewFlyout) {
@@ -197,7 +214,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             openDocumentFlyoutFromIndex({
               documentId: eventData._id,
               indexName: eventData.ecs._index,
-              renderCellActions: cellActionRenderer,
+              renderCellActions: timelineCellActionRenderer,
               onAlertUpdated: refetch,
               origin: FLYOUT_ORIGIN.TIMELINE,
               title: getDocumentHistoryTitle(eventData),
@@ -235,6 +252,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         enableNewFlyout,
         openAttackFlyout,
         openDocumentFlyoutFromIndex,
+        timelineCellActionRenderer,
         refetch,
         timelineId,
         openFlyout,
@@ -303,7 +321,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [timelineId, updatedAt]
     );
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
+    // isSuperTimeline in metadata invalidates the useBulkLoadActions cache when timeline mode changes.
+    const cellActionsMetadata = useMemo(
+      () => ({ scopeId: timelineId, isSuperTimeline }),
+      [timelineId, isSuperTimeline]
+    );
 
     const onUpdateSampleSize = useCallback(
       (newSampleSize: number) => {

@@ -214,13 +214,23 @@ export class FieldFormatsRegistry {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[] | undefined} esTypes
+   * @param  {FieldFormatParams | undefined} params
    * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): string {
-    // @ts-ignore
-    return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
-      ? [fieldType, ...esTypes].join('-')
-      : fieldType;
+  getDefaultInstanceCacheResolver(
+    fieldType: KBN_FIELD_TYPES,
+    esTypes?: ES_FIELD_TYPES[],
+    params?: FieldFormatParams
+  ): string {
+    const typeKey: string =
+      Array.isArray(esTypes) && !esTypes.some((esType) => String(esType) === String(fieldType))
+        ? [fieldType, ...esTypes].join('-')
+        : fieldType;
+
+    // params are merged into the created instance, so they must take part in the cache key
+    return params && Object.keys(params).length > 0
+      ? `${typeKey}-${JSON.stringify(params)}`
+      : typeKey;
   }
 
   /**

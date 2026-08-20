@@ -17,6 +17,10 @@ project:
   owner: '@elastic/context-eng'
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
+  - '@kbn/actions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
@@ -35,9 +39,32 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/esql'
   - '@kbn/es-query'
-  - '@kbn/try-in-console'
   - '@kbn/share-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/tooling-log'
+  - '@kbn/connector-specs'
   - '@kbn/console-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/workflows-ui'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-management'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/code-editor'
+  - '@kbn/ui-callout'
+  - '@kbn/logging-mocks'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-provider-client'
+  - '@kbn/content-management-table-list-view-common'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/security-plugin'
+  - '@kbn/zod'
+  - '@kbn/es-types'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
@@ -49,6 +76,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

@@ -6,13 +6,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import moment from 'moment';
+import {
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
 import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
+  ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID,
   ENTITY_TAB_TABLE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
 import {
@@ -24,9 +32,9 @@ import { useEntityStoreStatus } from '../../../../entity_analytics/components/en
 import { useEntityEnginePrivileges } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges';
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../../../../entity_analytics/components/entity_analytics_read_privileges_callout';
-import { EntityStoreDisabledEmptyPromptBody } from '../../../../entity_analytics/pages/entity_store_disabled_empty_prompt';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityLocalTableState } from '../hooks/use_entity_local_table_state';
+import { useEntityLastSeen } from '../hooks/use_entity_last_seen';
 import { isEntityAttachment, matchesSearchTerm, CASE_ATTACHMENT_TABLE_CONFIG } from '../utils';
 
 /**
@@ -94,9 +102,17 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
   // `readonly: true` checks only read privileges, not run/enable cluster privileges.
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
 
-  const isEntityStoreDisabled =
-    entityStoreStatusData?.status === 'not_installed' ||
-    entityStoreStatusData?.status === 'stopped';
+  const isEntityStoreStopped = entityStoreStatusData?.status === 'stopped';
+  const isEntityStoreNotInstalled = entityStoreStatusData?.status === 'not_installed';
+  const isEntityStoreDisabled = isEntityStoreStopped || isEntityStoreNotInstalled;
+
+  // Only fetch last_seen when the store is stopped (data still exists in the index).
+  // When not_installed the index has been cleared so there is nothing to query.
+  const { data: lastSeen } = useEntityLastSeen({
+    entityIds,
+    spaceId,
+    enabled: isEntityStoreStopped,
+  });
 
   // Only treat as missing privileges on a successful response; errors fall through
   // to avoid hiding the table on transient failures.
@@ -115,15 +131,46 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
     return <EuiLoadingSpinner size="l" />;
   }
 
-  if (isEntityStoreDisabled) {
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <EntityStoreDisabledEmptyPromptBody />
-        <EuiSpacer size="s" />
-      </>
-    );
-  }
+  const storeDisabledCallout = isEntityStoreDisabled ? (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        announceOnMount
+        data-test-subj={ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID}
+        color="warning"
+        iconType="warning"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.title"
+            defaultMessage="Entity Store is disabled"
+          />
+        }
+      >
+        <p>
+          {isEntityStoreStopped ? (
+            lastSeen ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.stopped.body"
+                defaultMessage="These entities were last seen {relativeTime} and are no longer being refreshed."
+                values={{ relativeTime: moment(lastSeen).fromNow() }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.stopped.noTimestamp.body"
+                defaultMessage="These entities are no longer being refreshed."
+              />
+            )
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.cases.tab.storeDisabled.notInstalled.body"
+              defaultMessage="Entity data has been cleared and these entities are no longer being updated."
+            />
+          )}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
+  ) : null;
 
   const privilegesCallout = (
     <EntityAnalyticsReadPrivilegesCallout
@@ -144,6 +191,7 @@ const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
 
   return (
     <>
+      {storeDisabledCallout}
       {privilegesCallout}
       <EuiFlexItem data-test-subj={ENTITY_TAB_TABLE_TEST_ID}>
         <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>

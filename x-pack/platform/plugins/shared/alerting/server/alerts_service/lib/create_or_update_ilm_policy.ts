@@ -22,7 +22,8 @@ interface CreateOrUpdateIlmPolicyOpts {
 
 /**
  * Reads the content hash stamped in `_meta` on the currently-installed ILM
- * policy, or `undefined` if the policy does not exist or carries no stamp.
+ * policy, or `undefined` if the policy does not exist, carries no stamp, or
+ * cannot be read.
  */
 const getInstalledIlmPolicyHash = async (
   esClient: ElasticsearchClient,
@@ -36,10 +37,13 @@ const getInstalledIlmPolicyHash = async (
     const meta = response?.[name]?.policy?._meta;
     return meta?.[RESOURCE_CONTENT_HASH_META_FIELD];
   } catch (err) {
-    if (err?.statusCode === 404) {
-      return undefined;
-    }
-    throw err;
+    // Any failure reading the installed hash (404, permissions, exhausted
+    // retries) leaves the installed content unknown, which falls through to the
+    // PUT. The check must never block an install that would otherwise succeed.
+    logger.debug(
+      `Could not read installed ILM policy ${name} content hash; will install (${err.message})`
+    );
+    return undefined;
   }
 };
 

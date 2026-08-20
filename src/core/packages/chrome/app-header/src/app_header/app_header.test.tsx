@@ -12,15 +12,21 @@ import '@testing-library/jest-dom';
 import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import type { AppHeaderMetadataItems } from '../types';
 import { AppHeaderView, DiscoverAppHeader } from './app_header';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
+
+const createChromeWithIntegrationsAccess = (canAccessIntegrations: boolean) => {
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.componentDeps.capabilities.navLinks.integrations = canAccessIntegrations;
+  return chrome;
+};
 
 const renderAppHeader = (
   ui: React.ReactElement,
@@ -30,11 +36,45 @@ const renderAppHeader = (
 };
 
 describe('AppHeaderView', () => {
-  it('renders app menu share as a title action while keeping it in the menu', async () => {
+  it('renders an explicit share action in the title row only', () => {
+    const onClick = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        title="Dashboard"
+        share={{
+          onClick,
+          tooltip: { content: 'Share this dashboard', title: 'Share' },
+        }}
+        menu={{
+          items: [
+            {
+              id: 'settings',
+              order: 1,
+              label: 'Settings',
+              iconType: 'gear',
+              run: jest.fn(),
+            },
+          ],
+        }}
+      />
+    );
+
+    const titleShare = screen.getByTestId(
+      `${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`
+    );
+    fireEvent.click(titleShare);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(typeof onClick.mock.calls[0][0].returnFocus).toBe('function');
+    expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
+  });
+
+  it('does not derive a title share action from a menu share item', async () => {
     const runShare = jest.fn();
 
     renderAppHeader(
       <AppHeaderView
+        title="Dashboard"
         menu={{
           items: [
             {
@@ -42,7 +82,7 @@ describe('AppHeaderView', () => {
               order: 0,
               label: 'Share',
               iconType: 'share',
-              testId: 'shareTopNavButton',
+              testId: 'menuShare',
               run: runShare,
             },
           ],
@@ -50,32 +90,99 @@ describe('AppHeaderView', () => {
       />
     );
 
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`
+      )
+    ).not.toBeInTheDocument();
 
-    // The title-row share button is derived from the menu item.
-    fireEvent.click(
-      screen.getByTestId(`${APP_HEADER_TEST_SUBJECTS.sharePrefix} shareTopNavButton`)
-    );
-    expect(runShare).toHaveBeenCalledTimes(1);
-
-    // The share item is no longer removed from the trailing app menu; open the overflow to find it.
     fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
-    expect(await screen.findByTestId('shareTopNavButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('menuShare')).toBeInTheDocument();
+  });
+
+  it('keeps an app-owned menu share item alongside an explicit title share action', async () => {
+    const explicitOnClick = jest.fn();
+    const menuRun = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        title="Dashboard"
+        share={{ onClick: explicitOnClick }}
+        menu={{
+          items: [
+            {
+              id: 'share',
+              order: 0,
+              label: 'Share',
+              iconType: 'share',
+              testId: 'menuShare',
+              run: menuRun,
+            },
+          ],
+        }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByTestId(
+        `${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`
+      )
+    );
+    expect(explicitOnClick).toHaveBeenCalledTimes(1);
+    expect(menuRun).not.toHaveBeenCalled();
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId('menuShare')).toBeInTheDocument();
   });
 
   it('renders when the only content is a favorite action', () => {
+    const onToggle = jest.fn();
     renderAppHeader(
       <AppHeaderView
-        favorite={
-          <EuiToolTip content="Favorite" disableScreenReaderOutput>
-            <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
-          </EuiToolTip>
-        }
+        favorite={{
+          status: 'unfavorited',
+          onToggle,
+        }}
       />
     );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.favorite)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeInTheDocument();
+  });
+
+  it('renders a favorited state with custom labels and calls onToggle', () => {
+    const onToggle = jest.fn();
+    renderAppHeader(
+      <AppHeaderView
+        favorite={{
+          status: 'favorited',
+          onToggle,
+        }}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Remove from Starred' });
+    expect(button).toHaveAttribute(
+      'data-test-subj',
+      `${APP_HEADER_TEST_SUBJECTS.favoriteButton} unfavoriteButton`
+    );
+    fireEvent.click(button);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the favorite button when isDisabled is set', () => {
+    renderAppHeader(
+      <AppHeaderView
+        favorite={{
+          status: 'unfavorited',
+          onToggle: jest.fn(),
+          isDisabled: true,
+        }}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeDisabled();
   });
 
   it('renders metadata items as a wrapping row', () => {
@@ -105,6 +212,25 @@ describe('AppHeaderView', () => {
     expect(onInspect).toHaveBeenCalledTimes(1);
   });
 
+  it('does not render a React node passed as a metadata label', () => {
+    renderAppHeader(
+      <AppHeaderView
+        metadata={
+          [
+            {
+              type: 'text',
+              label: <span data-test-subj="hacked-metadata-label">hack</span>,
+            },
+            { type: 'text', label: 'Created by' },
+          ] as unknown as AppHeaderMetadataItems
+        }
+      />
+    );
+
+    expect(screen.queryByTestId('hacked-metadata-label')).not.toBeInTheDocument();
+    expect(screen.getByText('Created by')).toBeInTheDocument();
+  });
+
   it('limits metadata rendering to three items', () => {
     const metadata = [
       { type: 'text', label: 'First' },
@@ -122,10 +248,47 @@ describe('AppHeaderView', () => {
   });
 
   it('renders when the only content is a static app menu item', async () => {
-    renderAppHeader(<AppHeaderView showAddIntegrations />);
+    renderAppHeader(
+      <AppHeaderView showAddIntegrations />,
+      createChromeWithIntegrationsAccess(true)
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
+  });
+
+  it('shows Add integrations when capabilities.navLinks.integrations is true', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations />,
+      createChromeWithIntegrationsAccess(true)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)).toHaveAttribute(
+      'href',
+      '/app/integrations/browse'
+    );
+  });
+
+  it('hides Add integrations when capabilities.navLinks.integrations is false', async () => {
+    renderAppHeader(
+      <AppHeaderView title="Workflows" showAddIntegrations docLink="https://example.com/docs" />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(
+      screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.menuAddIntegrations)
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render when Add integrations is the only content and access is denied', () => {
+    renderAppHeader(
+      <AppHeaderView showAddIntegrations />,
+      createChromeWithIntegrationsAccess(false)
+    );
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
   });
 
   it('renders Discover tabs beside the title', () => {
@@ -354,7 +517,7 @@ describe('AppHeaderView', () => {
     });
   });
 
-  describe('borderless flag', () => {
+  describe('bottom border', () => {
     it('renders a bottom border by default', () => {
       renderAppHeader(<AppHeaderView title="Dashboard" />);
 
@@ -364,8 +527,8 @@ describe('AppHeaderView', () => {
       );
     });
 
-    it('omits the bottom border when borderless is set', () => {
-      renderAppHeader(<AppHeaderView title="Dashboard" borderless />);
+    it('omits the bottom border for Discover tabs', () => {
+      renderAppHeader(<DiscoverAppHeader title="Discover" tabsBar={<div>Tabs</div>} />);
 
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toHaveStyleRule(
         'border-bottom',

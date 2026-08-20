@@ -28,6 +28,7 @@ const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER
 const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+let mockCanReadExecutionHistory = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -36,7 +37,15 @@ jest.mock('@kbn/core-di-browser', () => {
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
-        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+        const capabilities = new ActualUserCapabilities({ capabilities: mockCapabilities });
+        return {
+          can: (feature: string, capability: string) => capabilities.can(feature, capability),
+          canWrite: (feature: string) => capabilities.canWrite(feature),
+          canRead: (feature: string) =>
+            feature === 'executionHistory'
+              ? mockCanReadExecutionHistory
+              : capabilities.canRead(feature),
+        };
       }
       return {};
     },
@@ -97,16 +106,16 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section',
   AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
-  AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
-  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => ({
+  AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
   AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
+}));
+
+jest.mock('./components/episode_action_policy_history_tab', () => ({
+  EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
 }));
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -185,6 +194,7 @@ const renderPage = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCanReadExecutionHistory = true;
   mockCapabilities = WRITE_CAPABILITIES;
   mockUseParams.mockReturnValue({ episodeId });
   mockUseFetchEpisodeQuery.mockReturnValue(episodeQuery);
@@ -247,8 +257,7 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
-    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
@@ -268,38 +277,36 @@ describe('EpisodeDetailsPage', () => {
     );
   });
 
-  it('renders the rule description in the header area', () => {
-    renderPage();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDescription')).toHaveTextContent(
-      'Rule description'
-    );
-  });
-
-  it('omits the header metadata row when the rule has no description', () => {
-    const loadedRuleState = fetchRuleResult.ruleState as unknown as {
-      status: RuleStateStatus;
-      ruleId: string;
-      rule: { metadata: Record<string, unknown> };
-    };
-
-    mockUseFetchRule.mockReturnValue({
-      ...fetchRuleResult,
-      ruleState: {
-        ...loadedRuleState,
-        rule: {
-          ...loadedRuleState.rule,
-          metadata: { ...loadedRuleState.rule.metadata, description: undefined },
-        },
-      },
-    } as unknown as FetchRuleResult);
-
+  it('does not render rule audit metadata in the header area', () => {
     renderPage();
 
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
+  });
+
+  it('renders the action policy history tab in the header', () => {
+    renderPage();
+
     expect(
-      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDescription')
+      screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the action policy history content when its tab is selected', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory'));
+
+    expect(screen.getByTestId('stubEpisodeActionPolicyHistoryTab')).toBeInTheDocument();
+  });
+
+  it('hides the action policy history tab when the user cannot read execution history', () => {
+    mockCanReadExecutionHistory = false;
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsMainTabActionPolicyHistory')
     ).not.toBeInTheDocument();
   });
 

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
+export type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -43,6 +47,7 @@ export type {
   ToolHandlerContext,
   ToolHandlerResult,
   BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -145,7 +150,7 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
-  ReadOnlyConversationClient,
   ConversationsStart,
 } from './plugin_contract';
+export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

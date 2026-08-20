@@ -467,7 +467,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     if (openSidebarConversation) {
       buttons.push({
         label: 'Continue in sidebar',
-        icon: 'discuss',
+        icon: 'comment',
         type: ActionButtonType.SECONDARY,
         handler: openSidebarConversation,
       });
@@ -494,6 +494,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
 
 #### Canvas flyout width
@@ -667,7 +668,7 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
   if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
-      icon: 'popout',
+      icon: 'external',
       type: ActionButtonType.SECONDARY,
       handler: () => {
         window.open(`/app/myApp/${attachment.origin}`, '_blank');
@@ -871,6 +872,74 @@ class MyPlugin {
 [`RendererUIDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/renderers/contract.ts)
 and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
 for the full contracts.
+
+## Registering conversation template UI
+
+Conversation templates give a conversation a type: a `template_id` plus typed `metadata` fields, validated server-side. The conversation template UI registry controls what renders in the conversation metadata flyout for a given template: your plugin registers reusable tabs, and per-template definitions that reference those tabs by id.
+
+The model mirrors the attachment registry: Agent Builder owns the flyout shell, and your plugin owns the tab content. The registry is browser-only — nothing UI-related is persisted.
+
+### Browser-side registration
+
+Register tabs and template UI definitions using the `conversationTemplates` API of the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Register a reusable tab
+    agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
+
+    // Assign tabs to a template, in render order
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      tabs: ['security.entities', 'security.overview'],
+    });
+  }
+}
+```
+
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its own built-in `attachments` and `timeline` tabs through this same API (from the `agentBuilderPlatform` plugin).
+
+### Complete example
+
+```tsx
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
+
+// Tab content must be self-contained: capture the services you need in a closure at
+// registration and mount your own providers inside `content`. The flyout can render
+// outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
+const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition => ({
+  label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  // A React component receiving the full conversation. It may use hooks.
+  content: ({ conversation }) => (
+    <SecurityProviders core={core}>
+      <OverviewView templateId={conversation.template_id} metadata={conversation.metadata} />
+    </SecurityProviders>
+  ),
+});
+
+class SecurityPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      tabs: ['security.overview'],
+    });
+  }
+}
+```
+
+### Rules
+
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `attachments` and `timeline` are reserved for Agent Builder's built-in tabs.
+- **Duplicates**: Registering a duplicate tab id or template id throws.
+- **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
+- **Ordering**: Template tabs render in array order. The built-in tabs always render after them.
+
+Refer to [`ConversationTemplateServiceStartContract`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/templates/contract.ts) for the full contract.
 
 ## Chat integration and pending attachments
 

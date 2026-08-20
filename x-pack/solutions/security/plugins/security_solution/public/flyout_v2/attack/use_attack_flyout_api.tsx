@@ -12,8 +12,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
@@ -132,6 +132,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -258,7 +259,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openAttackEntities = useCallback(
@@ -292,7 +293,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

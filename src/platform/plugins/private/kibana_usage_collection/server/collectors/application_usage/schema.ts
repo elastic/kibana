@@ -137,6 +137,7 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   automaticImport: commonSchema,
   canvas: commonSchema,
+  clientApps: commonSchema,
   cloud_connect: commonSchema,
   context_engine: commonSchema,
   enterpriseSearch: commonSchema,
@@ -162,6 +163,7 @@ export const applicationUsageSchema = {
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  nightshift: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-logs-explorer': commonSchema,
   'observability-overview': commonSchema,
@@ -189,6 +191,7 @@ export const applicationUsageSchema = {
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,
   uptime: commonSchema,

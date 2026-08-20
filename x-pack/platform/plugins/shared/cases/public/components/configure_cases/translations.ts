@@ -222,6 +222,21 @@ export const LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE = i18n.translate(
   }
 );
 
+export const CUSTOM_FIELDS_AND_TEMPLATES_TITLE = i18n.translate(
+  'xpack.cases.configureCases.customFieldsAndTemplatesTitle',
+  {
+    defaultMessage: 'Custom fields and templates',
+  }
+);
+
+export const CUSTOM_FIELDS_AND_TEMPLATES_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.customFieldsAndTemplatesDescription',
+  {
+    defaultMessage:
+      'Add custom fields for customized case collaboration and create templates that automatically populate values in new cases.',
+  }
+);
+
 export const SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES = i18n.translate(
   'xpack.cases.configureCases.showLegacyCustomFieldsAndTemplates',
   {

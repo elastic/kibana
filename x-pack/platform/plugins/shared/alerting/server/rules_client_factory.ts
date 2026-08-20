@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
   Logger,
@@ -89,6 +90,7 @@ export interface RulesClientFactoryOpts {
   shouldGrantUiam: boolean;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
+  analytics: CoreStart['analytics'];
 }
 
 export class RulesClientFactory {
@@ -119,6 +121,7 @@ export class RulesClientFactory {
   private shouldGrantUiam: boolean = false;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
+  private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -151,6 +154,7 @@ export class RulesClientFactory {
     this.shouldGrantUiam = options.shouldGrantUiam;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
+    this.analytics = options.analytics;
   }
 
   /**
@@ -392,6 +396,7 @@ export class RulesClientFactory {
       .asScopedToNamespace(spaceId);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
@@ -415,6 +420,7 @@ export class RulesClientFactory {
       shouldGrantUiam: this.shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
+      analytics: this.analytics,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -486,6 +492,18 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
+          // A raw UIAM credential (`essu_...`) means the request was authenticated with a
+          // user-created organization-level API key. Unlike framework-granted UIAM keys
+          // (encoded as `base64(id:key)`), it carries no key id, so it cannot be persisted on
+          // the rule for execution and invalidation bookkeeping.
+          if (isUiamCredential(authorizationHeader)) {
+            throw Boom.badRequest(
+              `Cannot use an organization-level API key to create or enable rule "${name}". ` +
+                `Organization-level API keys are not supported for rule operations; ` +
+                `use a project-scoped Elasticsearch API key instead.`
+            );
+          }
+
           const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');

@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import type { CaseUI } from '../../../../common';
 import { stringify as yamlStringify } from 'yaml';
 import { GlobalCaseFields } from './global_case_fields';
+import { renderWithTestingProviders } from '../../../common/mock';
+
+const render = (ui: React.ReactElement) => renderWithTestingProviders(ui);
 
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({
@@ -196,6 +199,32 @@ describe('GlobalCaseFields', () => {
 
       expect(screen.queryByTestId('template-field-incident_type')).not.toBeInTheDocument();
       expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+    });
+
+    it('hides a global field referenced by the template with different casing', () => {
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: {
+          // Definition was case-only renamed to "Incident_Type" after the template
+          // linked it as "incident_type" — the two now differ only in case.
+          fieldDefinitions: [makeGlobalDef('Incident_Type')],
+        },
+        isLoading: false,
+        isError: false,
+      });
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-1',
+          definition: {
+            name: 'Test',
+            fields: [{ $ref: 'incident_type' }],
+          },
+        },
+        isLoading: false,
+      });
+
+      render(<GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />);
+
+      expect(screen.queryByTestId('template-field-Incident_Type')).not.toBeInTheDocument();
     });
 
     it('shows a global field that is NOT referenced by the template', () => {

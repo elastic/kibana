@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -74,6 +74,7 @@ import type { PluginsServiceStart } from '../../plugins/plugin_service';
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -95,6 +96,11 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  /**
+   * Optional CPS project routing expression scoping this run's search tools to a set of projects
+   * Defaults to space-level routing (all linked projects in the current space) when omitted.
+   */
+  projectRouting?: string;
   /**
    * Optional abort signal for the run (e.g. from the request).
    * Propagated to hooks so they can respect cancellation.
@@ -122,6 +128,7 @@ export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
   | 'defaultConnectorId'
+  | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
@@ -207,6 +214,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    projectRouting,
     telemetryMetadata,
     maxContentLength,
     conversation,
@@ -217,6 +225,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
     conversation?: Conversation;
@@ -245,7 +254,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       maxContentLength,
     });
 
-    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
+    const subAgentExecutor = createSubAgentExecutor({
+      request,
+      getExecutionService,
+      projectRouting,
+    });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
@@ -258,12 +271,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
+      relevantSkills: experimentalEnabled,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
+      apiTools: experimentalEnabled,
     };
 
     const allDeps = {
@@ -271,6 +286,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       modelProvider,
       request,
       defaultConnectorId,
+      projectRouting,
       abortSignal,
       resultStore,
       skillsStore,
@@ -317,6 +333,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         abortSignal,
@@ -327,6 +344,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         conversation,

@@ -49,8 +49,10 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
     reviewIntervalMinutes: 10,
     discoveryBatchSize: 3,
-    triageBatchSize: 5,
     maxReviewPasses: 3,
+    flakyRuleDetectionThreshold: 10,
+    flakyRuleProbeAfterMinutes: 360,
+    flakyRuleExemptSeverityScore: 80,
   },
 };
 

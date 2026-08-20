@@ -16,6 +16,7 @@ import {
   hasReadAccess,
   hasWriteAccess,
   getAgentPermissions,
+  normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
 } from './document_access';
@@ -31,9 +32,23 @@ const baseSource: AgentProperties = {
   updated_at: '2024-01-01T00:00:00.000Z',
 };
 
-const ownerUser = { id: 'user-1', username: 'owner' };
-const nonOwnerUser = { id: 'user-2', username: 'other' };
-const ownerByUsernameOnly = { username: 'owner' };
+const ownerUser = { id: 'user-1', username: 'owner', isAdmin: false };
+const nonOwnerUser = { id: 'user-2', username: 'other', isAdmin: false };
+const ownerByUsernameOnly = { username: 'owner', isAdmin: false };
+
+describe('normalizeAccessControl', () => {
+  it('falls back to public for legacy documents without access control, unlike new agents', () => {
+    expect(normalizeAccessControl(baseSource)).toEqual({
+      access_mode: AgentAccessControlMode.Public,
+      entries: [],
+    });
+  });
+
+  it('prefers legacy visibility over the public fallback', () => {
+    const source = { ...baseSource, visibility: AgentAccessControlMode.Private };
+    expect(normalizeAccessControl(source).access_mode).toBe(AgentAccessControlMode.Private);
+  });
+});
 
 describe('hasReadAccess', () => {
   it('returns true for admins regardless of access-control mode', () => {
@@ -49,18 +64,30 @@ describe('hasReadAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for owner by username only', () => {
+  it('returns true for legacy owners that only stored created_by_name', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+  });
+
+  it('returns false for same username when the document stored a different created_by_id', () => {
+    const source = {
+      ...baseSource,
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: 'other-realm-id',
+      created_by_name: 'owner',
+    };
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(false);
   });
 
   it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
@@ -128,6 +155,7 @@ describe('hasWriteAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
@@ -306,6 +334,7 @@ describe('validateAccessControlUpdateAccess', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: ownerUser.id,
       created_by_name: 'owner',
     };
     expect(
@@ -437,6 +466,7 @@ describe('redactAccessControlForCaller', () => {
       access_mode: AgentAccessControlMode.Private,
       entries: [aliceEntry, bobEntry],
     },
+    created_by_id: ownerUser.id,
     created_by_name: 'owner',
   };
 
@@ -504,7 +534,7 @@ describe('redactAccessControlForCaller', () => {
 
   it("keeps only the caller's own entry for a user without manage rights", () => {
     // Bob has User access via the access_control (User < Manager threshold) so he cannot manage.
-    const bobUser = { username: 'bob' };
+    const bobUser = { username: 'bob', isAdmin: false };
     const definition = {
       id: 'a',
       access_control: {
@@ -525,7 +555,7 @@ describe('redactAccessControlForCaller', () => {
 
   it("keeps only the caller's own entry for a user with Editor via the access_control", () => {
     // Alice can edit the agent, but ACL management requires Manager.
-    const aliceUser = { username: 'alice' };
+    const aliceUser = { username: 'alice', isAdmin: false };
     const definition = {
       id: 'a',
       access_control: {
@@ -543,7 +573,7 @@ describe('redactAccessControlForCaller', () => {
   });
 
   it('returns the full entries list for a user with Manager via legacy acl', () => {
-    const aliceUser = { username: 'alice' };
+    const aliceUser = { username: 'alice', isAdmin: false };
     const aliceManagerEntry = {
       type: 'user' as const,
       name: 'alice',
@@ -581,6 +611,7 @@ describe('redactAccessControlForCaller', () => {
       source: {
         ...baseSource,
         id: agentBuilderDefaultAgentId,
+        created_by_id: ownerUser.id,
         created_by_name: 'owner',
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [aliceEntry] },
       },

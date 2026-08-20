@@ -24,7 +24,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { asDuration } from '@kbn/alerts-ui-shared';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import type { RuleExecutionOutcome, RuleExecutionView } from '@kbn/alerting-v2-schemas';
-import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
+import { EXECUTION_HISTORY_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { useFetchRuleExecutions } from '../../../hooks/use_fetch_rule_executions';
 import { FilteredEmptyState, RulesEmptyState } from './empty_state';
@@ -70,7 +70,7 @@ const buildColumns = (
   rulesCache: Record<string, { metadata: { name: string } }>
 ): Array<EuiBasicTableColumn<RuleExecutionView>> => [
   {
-    field: 'startedAt',
+    field: 'started_at',
     name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.timestamp', {
       defaultMessage: 'Timestamp',
     }),
@@ -188,7 +188,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     [dateTimeFormat, onRuleClick, rulesCache]
   );
   // Prevent pagination from exceeding the API's max result window
-  const total = Math.min(data?.total ?? 0, RULE_EXECUTIONS_MAX_RESULT_WINDOW);
+  const total = Math.min(data?.total ?? 0, EXECUTION_HISTORY_MAX_RESULT_WINDOW);
   const isFiltered = outcomeFilter !== 'all';
 
   if (isError) {

@@ -33,6 +33,7 @@ jest.mock('./preconfiguration/outputs');
 jest.mock('./preconfiguration/fleet_proxies');
 jest.mock('./preconfiguration/space_settings');
 jest.mock('./preconfiguration/fleet_server_host');
+jest.mock('./preconfiguration/download_source');
 jest.mock('./preconfiguration/delete_unenrolled_agent_setting');
 jest.mock('./settings');
 jest.mock('./output');

@@ -66,8 +66,13 @@ export async function setupMocha({
     reporterOptions,
   });
 
+  const hookTimeout = config.get('mochaOpts.hookTimeout');
+
   // global beforeEach hook in root suite triggers before all others
   mocha.suite.beforeEach('global before each', async function (this: Suite) {
+    if (typeof hookTimeout === 'number') {
+      this.timeout(hookTimeout);
+    }
     await lifecycle.beforeEachTest.trigger(this.currentTest!);
   });
 

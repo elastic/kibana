@@ -23,12 +23,12 @@ import {
 } from './authorization';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
-const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice' };
-const bob: CurrentUser = { id: 'bob-id', username: 'bob' };
+const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice', isAdmin: false };
+const bob: CurrentUser = { id: 'bob-id', username: 'bob', isAdmin: false };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
-    it('matches by id before username', () => {
+    it('matches by stable id', () => {
       expect(isAgentOwner({ owner, currentUser: ownerUser })).toBe(true);
       expect(
         isAgentOwner({
@@ -38,13 +38,34 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
-    it('falls back to username when ids are unavailable', () => {
+    it('falls back to username for legacy owners that never stored an id', () => {
       expect(
         isAgentOwner({
           owner: { username: 'alice' },
           currentUser: { username: 'alice' },
         })
       ).toBe(true);
+      expect(
+        isAgentOwner({
+          owner: { username: 'alice' },
+          currentUser: { id: 'realm:["file","file1","alice"]', username: 'alice' },
+        })
+      ).toBe(true);
+    });
+
+    it('does not fall back to username when the agent document stored an id', () => {
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { username: 'alice' },
+        })
+      ).toBe(false);
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { id: 'different-id', username: 'alice' },
+        })
+      ).toBe(false);
     });
   });
 
@@ -90,6 +111,14 @@ describe('agent access-control authorization', () => {
           isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Editor);
+    });
+
+    it('treats a missing access control as public so built-in agents stay usable', () => {
+      const args = { accessControl: undefined, owner, currentUser: bob, isAdmin: false };
+
+      expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.Editor);
+      expect(hasAgentReadAccess(args)).toBe(true);
+      expect(hasAgentUseAccess(args)).toBe(true);
     });
   });
 

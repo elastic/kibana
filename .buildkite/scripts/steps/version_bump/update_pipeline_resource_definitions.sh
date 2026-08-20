@@ -17,8 +17,12 @@ FILES=(
 )
 
 for file in "${FILES[@]}"; do
-  echo "Updating branch_configuration in $file"
-  sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/" "$file"
+  if grep -qE "branch_configuration:.* ${BRANCH}( |$)" "$file"; then
+    echo "$file: ${BRANCH} already in branch_configuration — skipping"
+  else
+    echo "Updating branch_configuration in $file"
+    sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/" "$file"
+  fi
 done
 
 echo "Adding ${BRANCH} daily schedule to kibana-es-snapshots.yml"
@@ -75,6 +79,12 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 head_branch="update-pipeline-resource-defs-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
 git add "${FILES[@]}"
+
+if git diff --cached --quiet; then
+  echo "No changes to commit — pipeline resource definitions already up to date"
+  exit 0
+fi
+
 git commit -m "[pipeline resource definitions] Add branch ${BRANCH} to branch_configuration"
 
 git push origin "$head_branch"

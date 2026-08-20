@@ -100,7 +100,7 @@ export const RuleCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
           defaultMessage: 'View in Rules',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));

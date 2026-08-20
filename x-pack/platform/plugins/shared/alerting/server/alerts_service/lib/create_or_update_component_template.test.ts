@@ -130,6 +130,24 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
   });
 
+  it(`should PUT when the installed template cannot be read`, async () => {
+    clusterClient.cluster.getComponentTemplate.mockRejectedValue(new Error('security_exception'));
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+      stampedComponentTemplate
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed component template test-mappings content hash; will install (security_exception)`
+    );
+  });
+
   it(`should retry on transient ES errors`, async () => {
     clusterClient.cluster.putComponentTemplate
       .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))

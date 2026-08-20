@@ -6,6 +6,52 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "features": {
+        "document_level_security": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "incremental_sync": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "native_connector_api_keys": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "sync_rules": {
+          "advanced": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "basic": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

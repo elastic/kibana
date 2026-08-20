@@ -13,8 +13,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { deleteActionPolicyOasExamples } from './delete_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ACTION_POLICY_NOT_FOUND_DESCRIPTION } from './action_policy_route_descriptions';
 
 const deleteActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -32,6 +34,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Delete an action policy',
     description: 'Delete an action policy by identifier.',
+    oasOperationObject: deleteActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -43,7 +46,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates an action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
     },
   };

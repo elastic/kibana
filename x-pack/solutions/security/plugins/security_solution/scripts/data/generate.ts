@@ -50,6 +50,7 @@ import {
   cleanThreatIntelFixtures,
   resolveThreatIntelPackIds,
   seedThreatIntelForPacks,
+  THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
 } from './lib/threat_intel_fixtures';
 import { listPacks } from './packs';
 import {
@@ -897,7 +898,25 @@ export const cli = () => {
           `Invalid --fp-count "${cliContext.flags['fp-count']}" (expected integer 0-3)`
         );
       }
-      const threatIntel = Boolean(cliContext.flags['threat-intel']);
+      const threatIntelReports = Boolean(cliContext.flags['threat-intel-reports']);
+      const threatIntel = Boolean(cliContext.flags['threat-intel']) || threatIntelReports;
+      const threatIntelReportCountRaw = getOptionalStringFlag(
+        cliContext.flags,
+        'threat-intel-report-count'
+      );
+      let historicReportsPerPack: number | undefined;
+      if (threatIntelReports) {
+        if (threatIntelReportCountRaw !== undefined && threatIntelReportCountRaw !== '') {
+          historicReportsPerPack = Number(threatIntelReportCountRaw);
+          if (!Number.isFinite(historicReportsPerPack) || historicReportsPerPack < 1) {
+            throw new Error(
+              `Invalid --threat-intel-report-count "${threatIntelReportCountRaw}" (expected integer >= 1)`
+            );
+          }
+        } else {
+          historicReportsPerPack = THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT;
+        }
+      }
       let packIds = parsePacksFlag(getOptionalStringFlag(cliContext.flags, 'packs'));
       if (threatIntel && packIds.length === 0) {
         packIds = resolveThreatIntelPackIds([]);
@@ -1129,6 +1148,7 @@ export const cli = () => {
             startMs,
             endMs,
             spaceId: effectiveSpaceId,
+            historicReportsPerPack,
           });
         }
 
@@ -1274,6 +1294,7 @@ export const cli = () => {
           'rule-from',
           'fp-count',
           'packs',
+          'threat-intel-report-count',
         ],
         boolean: [
           'clean',
@@ -1282,6 +1303,7 @@ export const cli = () => {
           'validate-fixtures',
           'leave-rules-disabled',
           'threat-intel',
+          'threat-intel-reports',
         ],
         alias: {
           n: 'events',
@@ -1308,6 +1330,8 @@ export const cli = () => {
           clean: false,
           'leave-rules-disabled': false,
           'threat-intel': false,
+          'threat-intel-reports': false,
+          'threat-intel-report-count': '',
           attacks: false,
           cases: false,
           'validate-fixtures': true,
@@ -1330,6 +1354,8 @@ export const cli = () => {
         --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
         --threat-intel                   Seed per-pack RSS sources (+ digest subscription) for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
+        --threat-intel-reports           Also seed historic Hub reports into .kibana-threat-reports from --start-date through --end-date minus 24h (implies --threat-intel). Leaves the last day empty for real workflow ingest. RSS stays current-only.
+        --threat-intel-report-count      Historic reports per pack when --threat-intel-reports is set (Default: 12)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)
