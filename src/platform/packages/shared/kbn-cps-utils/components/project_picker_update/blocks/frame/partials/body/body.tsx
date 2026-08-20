@@ -77,7 +77,7 @@ export function ProjectPickerFrameBodyHeader() {
       data-test-subj="projectPickerFrameBodyHeader"
     >
       {isReadOnly && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <KbnInfoCallout
             announceOnMount={false}
             size="s"
@@ -86,7 +86,7 @@ export function ProjectPickerFrameBodyHeader() {
         </EuiFlexItem>
       )}
       {showNoMatchingProjectsWarningCallout && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <KbnWarningCallout
             announceOnMount
             size="s"
@@ -106,7 +106,7 @@ export function ProjectPickerFrameBodyHeader() {
         </EuiFlexItem>
       )}
       {state.filterSearchError && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <KbnDangerCallout
             announceOnMount
             size="s"
@@ -126,7 +126,7 @@ export function ProjectPickerFrameBodyHeader() {
         </EuiFlexItem>
       )}
       {Boolean(state.displayedFilterExpressions.size) ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ProjectPickerFilterDisplay
             onEditFilter={handleEditFilterRequest}
             currentFilterInputId={editingFilter?.id}
@@ -152,7 +152,7 @@ export function ProjectPickerFrameBodyHeader() {
         </EuiFlexItem>
       ) : null}
       {filterViewMode === FilterViewMode.EDIT ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ProjectPickerFilterForm
             filterId={editingFilter?.id}
             onCloseFilterFormRequested={handleCloseFilterFormRequested}
@@ -180,11 +180,11 @@ export function ProjectPickerFrameBody({
       ref={scrollContainerRef}
     >
       {state.controlsState !== 'hidden' && (
-        <EuiFlexItem css={styles.filterBoxWrapper}>
+        <EuiFlexItem grow={false} css={styles.filterBoxWrapper}>
           <ProjectPickerFrameBodyHeader />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
