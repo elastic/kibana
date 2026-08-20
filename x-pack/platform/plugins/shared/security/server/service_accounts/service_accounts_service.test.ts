@@ -19,6 +19,7 @@ describe('ServiceAccountsService', () => {
     config: config as ConfigType,
     license: licenseMock.create(),
     uiam: uiamServiceMock.create(),
+    checkPrivilegesWithRequest: jest.fn(),
     organizationId: 'organization-id',
     projectId: 'project-id',
     projectType: 'security' as const,

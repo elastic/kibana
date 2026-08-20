@@ -13,6 +13,7 @@ import type {
   ServiceAccount,
   UiamOAuthProjectType,
 } from '@kbn/core-security-server';
+import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
@@ -57,6 +58,7 @@ export interface UiamServiceAccountsOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
+  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   organizationId: string;
   projectId: string;
   projectType: UiamOAuthProjectType;
@@ -66,6 +68,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
+  private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   private readonly organizationId: string;
   private readonly projectId: string;
   private readonly projectType: UiamOAuthProjectType;
@@ -74,6 +77,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     logger,
     license,
     uiam,
+    checkPrivilegesWithRequest,
     organizationId,
     projectId,
     projectType,
@@ -81,6 +85,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
+    this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.organizationId = organizationId;
     this.projectId = projectId;
     this.projectType = projectType;
@@ -97,6 +102,17 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     const accessToken = getUiamAccessTokenFromRequest(request);
+
+    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
+      elasticsearch: { cluster: ['manage_security'], index: {} },
+    });
+
+    if (!hasAllRequested) {
+      throw Boom.forbidden(
+        'Cannot create a service account: missing `manage_security` cluster privilege'
+      );
+    }
+
     this.logger.debug('Attempting to create a service account');
 
     try {

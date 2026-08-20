@@ -8,6 +8,11 @@
 import type { KibanaRequest, ServiceAccount } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
+import type {
+  CheckPrivileges,
+  CheckPrivilegesResponse,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
@@ -19,7 +24,18 @@ describe('UiamServiceAccounts', () => {
   let serviceAccounts: UiamServiceAccounts;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let mockUiam: jest.Mocked<UiamServicePublic>;
+  let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
+  let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
   let logger: Logger;
+
+  const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
+    hasAllRequested: authorized,
+    username: 'elastic',
+    privileges: {
+      kibana: [],
+      elasticsearch: { cluster: [{ privilege: 'manage_security', authorized }], index: {} },
+    },
+  });
 
   const createParams = {
     name: 'nightshift-relay',
@@ -52,11 +68,18 @@ describe('UiamServiceAccounts', () => {
     mockLicense.isEnabled.mockReturnValue(true);
     logger = loggingSystemMock.create().get('service-accounts');
     mockUiam = uiamServiceMock.create();
+    mockCheckPrivileges = {
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+      globally: jest.fn().mockResolvedValue(clusterPrivilegesResponse(true)),
+    };
+    mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
 
     serviceAccounts = new UiamServiceAccounts({
       logger,
       license: mockLicense,
       uiam: mockUiam,
+      checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
       organizationId: 'organization-id',
       projectId: 'project-id',
       projectType: 'security',
@@ -108,6 +131,28 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('ApiKey abcdef'), createParams)
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await serviceAccounts.create(request, createParams);
+
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
