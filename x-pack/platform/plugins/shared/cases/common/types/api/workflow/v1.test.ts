@@ -14,10 +14,12 @@ import {
 const validMetadata = {
   schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   source: CASES_WORKFLOW_EXECUTION_SOURCE,
-  caseId: 'case-1',
-  origin: {
-    type: 'cases.case' as const,
-    id: 'case-1',
+  data: {
+    caseId: 'case-1',
+    origin: {
+      type: 'cases.case' as const,
+      id: 'case-1',
+    },
   },
 };
 
@@ -29,12 +31,15 @@ describe('CasesWorkflowExecutionMetadataSchema', () => {
   it.each([
     ['schema version', { ...validMetadata, schemaVersion: 2 }],
     ['source', { ...validMetadata, source: 'securitySolution' }],
-    ['case id', { ...validMetadata, caseId: '' }],
+    ['case id', { ...validMetadata, data: { ...validMetadata.data, caseId: '' } }],
     [
       'origin type',
       {
         ...validMetadata,
-        origin: { type: 'cases.comment', id: 'comment-1' },
+        data: {
+          ...validMetadata.data,
+          origin: { type: 'cases.comment', id: 'comment-1' },
+        },
       },
     ],
   ])('rejects an invalid %s', (_, metadata) => {

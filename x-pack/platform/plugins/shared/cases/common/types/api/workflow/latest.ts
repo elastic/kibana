@@ -6,6 +6,7 @@
  */
 
 export type {
+  CasesWorkflowExecutionData,
   CasesWorkflowExecutionMetadata,
   CaseWorkflowRunOrigin,
   RunCaseWorkflowRequest,

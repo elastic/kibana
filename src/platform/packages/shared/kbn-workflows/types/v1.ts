@@ -121,6 +121,42 @@ export interface QueueMetrics {
   scheduleDelayMs: number | null;
 }
 
+export interface WorkflowExecutionMetadata<
+  TSource extends string = string,
+  TSchemaVersion extends number = number,
+  TData = Record<string, unknown>
+> {
+  source: TSource;
+  schemaVersion: TSchemaVersion;
+  data: TData;
+}
+
+/** Creates a strict, source-discriminated schema for caller-owned workflow execution metadata. */
+export const createWorkflowExecutionMetadataSchema = <
+  const TSource extends string,
+  const TSchemaVersion extends number,
+  TDataSchema extends z.ZodType
+>({
+  source,
+  schemaVersion,
+  dataSchema,
+}: {
+  source: TSource;
+  schemaVersion: TSchemaVersion;
+  dataSchema: TDataSchema;
+}): z.ZodObject<{
+  source: z.ZodLiteral<TSource>;
+  schemaVersion: z.ZodLiteral<TSchemaVersion>;
+  data: TDataSchema;
+}> =>
+  z
+    .object({
+      source: z.literal(source),
+      schemaVersion: z.literal(schemaVersion),
+      data: dataSchema,
+    })
+    .strict();
+
 /**
  * Normalized LLM token usage. Token-consuming steps (today `ai.agent`, and any
  * future `ai.*` / connector step) emit this shape under `output.metadata.usage`;
@@ -171,7 +207,7 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
-  /** Caller-supplied execution metadata, separate from workflow inputs */
+  /** Caller-supplied execution metadata; product integrations should use {@link createWorkflowExecutionMetadataSchema}. */
   metadata?: Record<string, unknown>;
   /**
    * Event-chain hop depth when scheduled by the event-driven trigger handler.
