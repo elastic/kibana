@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
-        getBody: () => BodyReturnType;
+        getBody: (rule?: string) => BodyReturnType;
       }
 
       beforeEach(async () => {
@@ -123,23 +123,36 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'post',
           info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () => {
-            return exceptionsGenerator.generateCustomYaraSignatureForCreate({
+          getBody: (rule?: string) => {
+            const body = exceptionsGenerator.generateCustomYaraSignatureForCreate({
               tags: [GLOBAL_ARTIFACT_TAG],
             });
+
+            if (rule) {
+              (body.entries[0] as EntryMatch).value = rule;
+            }
+
+            return body;
           },
         },
         {
           method: 'put',
           info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () =>
-            exceptionsGenerator.generateCustomYaraSignatureForUpdate({
+          getBody: (rule?: string) => {
+            const body = exceptionsGenerator.generateCustomYaraSignatureForUpdate({
               id: customYaraSignatureData.artifact.id,
               item_id: customYaraSignatureData.artifact.item_id,
               tags: [GLOBAL_ARTIFACT_TAG],
               _version: customYaraSignatureData.artifact._version,
-            }),
+            });
+
+            if (rule) {
+              (body.entries[0] as EntryMatch).value = rule;
+            }
+
+            return body;
+          },
         },
       ];
 
@@ -205,73 +218,72 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/expected value to equal \[custom_yara_signature\]/));
           });
 
-          // todo: deeper YARA rules validation is coming soon
           describe(`YARA rules validation - ${customYaraSignatureApiCall.info}`, () => {
-            describe('Supported modules', () => {
-              const supportedModules: Record<string, string> = {
-                pe: 'pe.is_pe',
-                elf: 'elf.type == elf.ET_NONE',
-                math: 'math.abs(-1) == 1',
-                time: 'time .now() >= 0',
-                string: 'string.length("a") == 1',
-                console: 'console.log("x")',
-                tests: 'tests.foobar(1) == "foo"',
-              };
+            describe('Module support', () => {
+              describe('Supported modules', () => {
+                const supportedModules: Record<string, string> = {
+                  pe: 'pe.is_pe',
+                  elf: 'elf.type == elf.ET_NONE',
+                  math: 'math.abs(-1) == 1',
+                  time: 'time .now() >= 0',
+                  string: 'string.length("a") == 1',
+                  console: 'console.log("x")',
+                  tests: 'tests.foobar(1) == "foo"',
+                };
 
-              for (const [module, condition] of Object.entries(supportedModules)) {
-                it(`accepts rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
-                  const body = customYaraSignatureApiCall.getBody();
+                for (const [module, condition] of Object.entries(supportedModules)) {
+                  it(`accepts rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(
+                        customYaraSignatureApiCall.getBody(`
+                          import "${module}"
+                          rule ${module}Check {
+                            condition:
+                              ${condition}
+                            }`)
+                      )
+                      .expect(200);
+                  });
+                }
+              });
 
-                  (body.entries[0] as EntryMatch).value = `
-                import "${module}"
-                rule ${module}Check {
-                  condition:
-                    ${condition}
-                  }`;
-                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-                    customYaraSignatureApiCall.path
-                  )
-                    .set('kbn-xsrf', 'true')
-                    .send(body)
-                    .expect(200);
-                });
-              }
-            });
+              describe('Unsupported modules', () => {
+                const unsupportedModules = [
+                  // built-in but not supported YARA modules
+                  'hash',
+                  'macho',
+                  'dotnet',
+                  'dex',
+                  'magic',
+                  'cuckoo',
 
-            describe('Unsupported modules', () => {
-              const unsupportedModules = [
-                // built-in but not supported YARA modules
-                'hash',
-                'macho',
-                'dotnet',
-                'dex',
-                'magic',
-                'cuckoo',
+                  // user modules
+                  'userModuleWithRandomName',
+                ];
 
-                // user modules
-                'userModuleWithRandomName',
-              ];
-
-              for (const module of unsupportedModules) {
-                it(`rejects rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
-                  const body = customYaraSignatureApiCall.getBody();
-
-                  (body.entries[0] as EntryMatch).value = `
-                  import "${module}"
-                  rule ${module}Check {
-                    condition:
-                      true
-                  }`;
-                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-                    customYaraSignatureApiCall.path
-                  )
-                    .set('kbn-xsrf', 'true')
-                    .send(body)
-                    .expect(400)
-                    .expect(anEndpointArtifactError)
-                    .expect(anErrorMessageWith(new RegExp(`unknown module "${module}"`)));
-                });
-              }
+                for (const module of unsupportedModules) {
+                  it(`rejects rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
+                    )
+                      .set('kbn-xsrf', 'true')
+                      .send(
+                        customYaraSignatureApiCall.getBody(`
+                          import "${module}"
+                          rule ${module}Check {
+                            condition:
+                              true
+                          }`)
+                      )
+                      .expect(400)
+                      .expect(anEndpointArtifactError)
+                      .expect(anErrorMessageWith(new RegExp(`unknown module "${module}"`)));
+                  });
+                }
+              });
             });
           });
 
