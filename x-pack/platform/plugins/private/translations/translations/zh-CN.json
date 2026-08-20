@@ -28753,7 +28753,6 @@
     "xpack.investigationOutput.evaluatingHypothesesTitle": "正在评估 {count} 个{count, plural, one {hypothesis} other {假设}}",
     "xpack.investigationOutput.failedStatusTitle": "调查失败",
     "xpack.investigationOutput.failedWithoutDetailsErrorMessage": "调查尚未完成。",
-    "xpack.investigationOutput.gapsFoundTitle": "发现缺口",
     "xpack.investigationOutput.gatheringEvidenceTitle": "收集证据",
     "xpack.investigationOutput.hypothesis": "假设：",
     "xpack.investigationOutput.hypothesisConfidenceBadgeLabel": "{confidence, number, percent}",
