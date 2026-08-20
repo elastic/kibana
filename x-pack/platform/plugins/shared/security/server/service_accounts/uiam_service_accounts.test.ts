@@ -157,8 +157,8 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
-    // The upstream endpoint does not exist yet, so the response shape is a guess. Validating it
-    // means a mismatch fails loudly rather than leaking undefined fields to consumers.
+    // Validating the response means a mismatch fails loudly rather than leaking undefined fields
+    // to consumers.
     it('rejects when the upstream response does not match the expected shape', async () => {
       mockUiam.createServiceAccount.mockResolvedValue({ id: 'service-account-id' } as never);
 
@@ -176,6 +176,20 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toThrowError('Error occured during service account creation');
+    });
+
+    // Consumers only ever see documented fields, so a field UIAM adds later cannot silently become
+    // part of Kibana's contract.
+    it('strips fields the upstream response does not declare', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        revoked: false,
+        creator: { type: 'user', id: '12345' },
+      } as never);
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
+      ).resolves.toEqual(validResponse);
     });
 
     it('logs and rethrows upstream failures', async () => {

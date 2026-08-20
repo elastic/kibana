@@ -27,21 +27,18 @@ import { getDetailedErrorMessage } from '../errors';
 import { getUiamAccessTokenFromRequest, type UiamServicePublic } from '../uiam';
 
 /**
- * The upstream endpoint has not been implemented yet, so the response shape we
- * code against is derived from the API specification rather than observed
- * behaviour. Validating it here means the first real call fails loudly instead of
- * leaking partially-undefined objects to consumers.
- *
- * TODO(https://github.com/elastic/kibana/issues/284463): revisit once UIAM ships
- * the endpoint and the response shape is confirmed.
+ * Validates the payload UIAM returns, so that a shape change fails loudly here rather than leaking
+ * partially-undefined objects to consumers. Verified against image
+ * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose create response carries exactly the
+ * fields below; anything UIAM adds later is stripped rather than passed through, so consumers only
+ * ever see documented fields.
  */
 const serviceAccountSchema = z.object({
-  // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
   id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
   type: z.literal('project'),
   name: z.string().max(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
-  organization_id: z.string(),
-  role_assignments: z.record(z.string().max(1024), z.unknown()),
+  organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+  role_assignments: z.record(z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH), z.unknown()),
   assumable_by: z
     .array(
       z.object({
