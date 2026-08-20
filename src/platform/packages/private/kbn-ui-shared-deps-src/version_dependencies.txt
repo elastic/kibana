@@ -32,7 +32,7 @@
 @xobotyi/scrollbar-width@1.9.5
 @xtuc/ieee754@1.2.0
 @xtuc/long@4.2.2
-acorn@8.15.0
+acorn@8.18.0
 ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0

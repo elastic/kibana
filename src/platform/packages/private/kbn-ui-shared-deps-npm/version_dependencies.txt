@@ -98,7 +98,7 @@
 @webassemblyjs/wast-printer@1.12.1
 @xtuc/ieee754@1.2.0
 @xtuc/long@4.2.2
-acorn@8.15.0
+acorn@8.18.0
 ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
@@ -136,7 +136,7 @@ buffer-xor@1.0.3
 buffer@5.7.1
 builtin-status-codes@3.0.0
 call-bind-apply-helpers@1.0.2
-call-bind@1.0.8
+call-bind@1.0.9
 call-bound@1.0.4
 callsites@3.1.0
 camelize@1.0.0
@@ -224,7 +224,7 @@ file-selector@0.4.0
 find-root@1.1.0
 find-up@5.0.0
 focus-lock@0.11.6
-for-each@0.3.3
+for-each@0.3.5
 fp-ts@2.16.11
 fs.realpath@1.0.0
 function-bind@1.1.2
@@ -276,7 +276,7 @@ is-arguments@1.1.1
 is-arrayish@0.2.1
 is-buffer@2.0.3
 is-callable@1.2.7
-is-core-module@2.16.1
+is-core-module@2.16.2
 is-decimal@1.0.4
 is-generator-function@1.1.0
 is-hexadecimal@1.0.1
@@ -335,7 +335,7 @@ object-assign@4.1.1
 object-inspect@1.13.4
 object-is@1.1.6
 object-keys@1.1.1
-object.assign@4.1.5
+object.assign@4.1.7
 once@1.4.0
 opentracing@0.14.4
 os-browserify@0.3.0
@@ -363,7 +363,7 @@ pify@4.0.1
 pinkie-promise@2.0.1
 pinkie@2.0.4
 pkg-dir@5.0.0
-possible-typed-array-names@1.0.0
+possible-typed-array-names@1.1.0
 postcss-value-parser@4.2.0
 prismjs@1.27.0
 process-nextick-args@2.0.1
@@ -510,7 +510,7 @@ watchpack@2.4.1
 web-namespaces@1.1.4
 webpack-sources@3.2.3
 webpack@5.96.1
-which-typed-array@1.1.18
+which-typed-array@1.1.22
 wrappy@1.0.2
 xtend@4.0.2
 yaml@1.10.3
