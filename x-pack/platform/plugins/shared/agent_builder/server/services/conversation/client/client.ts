@@ -14,13 +14,10 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
-  type TimelineEvent,
-  type TimelineEventInput,
-  type EventActor,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -56,12 +53,11 @@ import type {
   ConversationListOptions,
   NormalizedConversation,
   UpsertRoundRequest,
-  GetEventsOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
-import { conversationIndexName, createStorage } from './storage';
+import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import {
@@ -83,8 +79,29 @@ import {
   withPermissions,
   type Document,
 } from './converters';
+import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 
-const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
+/**
+ * Read-path round-trip verification. When on, a conversation's rounds are replaced by
+ * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
+ * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
+ * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
+ * persist the real rounds.
+ *
+ * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
+ * via `CI=true`. Always OFF in production: a deployed Kibana never sets
+ * `CI`, so real reads return the stored rounds untouched.
+ */
+const shouldVerifyRoundTrip = process.env.CI === 'true';
+
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  shouldVerifyRoundTrip
+    ? {
+        ...conversation,
+        rounds: eventsToRounds(roundsToEvents(conversation)),
+      }
+    : conversation;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -112,11 +129,16 @@ export interface ConversationClient {
   ): Promise<ConversationAccessControl>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(conversationId: string, updates: Record<string, unknown>): Promise<Conversation>;
-  /** Append events to the conversation's timeline. */
-  appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
-  /** Read the conversation's timeline, in order. */
-  getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
 }
+
+/**
+ * Caps `title` at the stored bound. HTTP routes already validate it, but server-side callers
+ * (LLM title generation in particular) do not, so enforce it here to cover every write path.
+ */
+const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
+  fields.title === undefined
+    ? fields
+    : { ...fields, title: fields.title.slice(0, CONVERSATION_TITLE_MAX_LENGTH) };
 
 export const createClient = ({
   space,
@@ -134,7 +156,6 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
-    esClient,
     user,
     space,
     agentRegistry,
@@ -145,28 +166,24 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
   constructor({
     storage,
-    esClient,
     user,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
-    esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
   }) {
     this.storage = storage;
-    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -266,7 +283,7 @@ class ConversationClientImpl implements ConversationClient {
         access: 'converse',
       });
 
-      return toPublicConversation(fromEs(document, this.user));
+      return verifyRoundTrip(toPublicConversation(fromEs(document, this.user)));
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -326,7 +343,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const attributes = createRequestToEs({
       conversation: {
-        ...conversationWithoutTemplateId,
+        ...withBoundedTitle(conversationWithoutTemplateId),
         access_control: normalizedAccessControl,
         metadata: resolvedMetadata,
         ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
@@ -367,7 +384,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
-      fields: () => fields,
+      fields: () => withBoundedTitle(fields),
     });
 
     return result;
@@ -558,81 +575,8 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  async appendEvents(
-    conversationId: string,
-    events: TimelineEventInput[]
-  ): Promise<TimelineEvent[]> {
-    if (events.length === 0) {
-      return [];
-    }
-
-    await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    const now = new Date().toISOString();
-    const stamped = events.map((event) => this.stampEvent(event, now));
-
-    // Atomic scripted append
-    await this.esClient.update({
-      index: conversationIndexName,
-      id: conversationId,
-      retry_on_conflict: EVENTS_APPEND_RETRY_ON_CONFLICT,
-      script: {
-        source: `
-          if (ctx._source.events == null) { ctx._source.events = []; }
-          for (def event : params.new_events) { ctx._source.events.add(event); }
-          ctx._source.updated_at = params.now;
-        `,
-        params: { new_events: stamped, now },
-      },
-    });
-
-    return stamped;
-  }
-
-  async getEvents(
-    conversationId: string,
-    options: GetEventsOptions = {}
-  ): Promise<TimelineEvent[]> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    let events: TimelineEvent[] = document._source!.events ?? [];
-
-    if (options.afterEventId) {
-      const index = events.findIndex((event) => event.id === options.afterEventId);
-      if (index < 0) {
-        throw createBadRequestError(
-          `afterEventId "${options.afterEventId}" was not found in conversation ${conversationId}`
-        );
-      }
-      events = events.slice(index + 1);
-    }
-
-    if (options.limit != null) {
-      events = events.slice(0, options.limit);
-    }
-
-    return events;
-  }
-
-  private stampEvent(event: TimelineEventInput, now: string): TimelineEvent {
-    return {
-      ...event,
-      id: event.id ?? uuidv4(),
-      created_at: event.created_at ?? now,
-      actor: event.actor ?? this.defaultActor(),
-    } as TimelineEvent;
-  }
-
-  private defaultActor(): EventActor {
-    return {
-      type: EventActorType.user,
-      id: this.user.id ?? this.user.username,
-      username: this.user.username,
-    };
-  }
-
   private toResponseConversation(document: Document): ConversationWithPermissions {
-    const conversation = toPublicConversation(fromEs(document, this.user));
+    const conversation = verifyRoundTrip(toPublicConversation(fromEs(document, this.user)));
 
     return withPermissions({ conversation, user: this.user });
   }
