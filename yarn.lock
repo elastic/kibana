@@ -7004,6 +7004,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-template@link:src/platform/packages/shared/shared-ux/flyout/template":
+  version "0.0.0"
+  uid ""
+
 "@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""

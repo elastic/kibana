@@ -769,6 +769,7 @@
     "@kbn/flyout-meta-blocks": "link:src/platform/packages/shared/shared-ux/flyout/meta-blocks",
     "@kbn/flyout-sections": "link:src/platform/packages/shared/shared-ux/flyout/sections",
     "@kbn/flyout-system-example-plugin": "link:examples/flyout_system",
+    "@kbn/flyout-template": "link:src/platform/packages/shared/shared-ux/flyout/template",
     "@kbn/foo-plugin": "link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/fs": "link:x-pack/platform/packages/shared/kbn-fs",
     "@kbn/ftr-apis-plugin": "link:src/platform/plugins/private/ftr_apis",
