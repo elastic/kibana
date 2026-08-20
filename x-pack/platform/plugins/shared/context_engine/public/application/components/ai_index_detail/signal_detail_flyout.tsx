@@ -199,7 +199,7 @@ export const SignalDetailFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               isDisabled={!hasPrevious}
               onClick={() => onNavigate(index - 1)}
               data-test-subj="contextSignalDetailPreviousButton"
@@ -220,7 +220,7 @@ export const SignalDetailFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               iconSide="right"
               isDisabled={!hasNext}
               onClick={() => onNavigate(index + 1)}

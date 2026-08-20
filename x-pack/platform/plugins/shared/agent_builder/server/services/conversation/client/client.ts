@@ -10,7 +10,7 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
-  type UserIdAndName,
+  type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -41,7 +41,6 @@ import type {
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
-  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
@@ -69,11 +68,12 @@ import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
   fromEs,
   fromEsWithoutRounds,
+  withPermissions,
   toEs,
-  createRequestToEs,
   updateConversation,
+  createRequestToEs,
+  isConversationDocument,
   type Document,
-  type VersionedDocument,
 } from './converters';
 import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
@@ -128,7 +128,7 @@ export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
-  create(conversation: ConversationCreateRequest): Promise<Conversation>;
+  create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
@@ -156,21 +156,18 @@ export const createClient = ({
   logger,
   esClient,
   user,
-  isAdmin,
   agentRegistry,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
-  user: UserIdAndName;
-  isAdmin: boolean;
+  user: CurrentUser;
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
@@ -180,29 +177,25 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  private readonly user: UserIdAndName;
-  private readonly isAdmin: boolean;
+  private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
   constructor({
     storage,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
-    user: UserIdAndName;
-    isAdmin: boolean;
+    user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
   }) {
     this.storage = storage;
     this.user = user;
-    this.isAdmin = isAdmin;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
@@ -223,6 +216,7 @@ class ConversationClientImpl implements ConversationClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
+      seq_no_primary_term: true,
       _source: [
         'agent_id',
         'user_id',
@@ -236,6 +230,9 @@ class ConversationClientImpl implements ConversationClient {
         'read_only',
         'access_control',
         'origin',
+        'template_id',
+        'template_version',
+        'metadata',
       ],
       query: {
         bool: {
@@ -247,15 +244,25 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.toResponseConversationWithoutRounds(hit as Document)
-    );
+    return response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
+
+      return withPermissions({
+        conversation: withDeserializedMetadata(fromEsWithoutRounds(hit)),
+        user: this.user,
+      });
+    });
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.toResponseConversation(document);
+    return withPermissions({
+      conversation: withDeserializedMetadata(verifyRoundTrip(fromEs(document))),
+      user: this.user,
+    });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -269,6 +276,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -279,10 +287,14 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
-    if (!hit || !hit._id) {
+    if (!hit) {
       return undefined;
+    }
+
+    if (!isConversationDocument(hit)) {
+      throw createInternalError('Conversation origin search returned an incomplete hit');
     }
 
     try {
@@ -299,7 +311,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<Conversation> {
+  async create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
@@ -567,31 +579,7 @@ class ConversationClientImpl implements ConversationClient {
     return withDeserializedMetadata(result);
   }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata({
-      ...verifyRoundTrip(fromEs(document)),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
-  }
-
-  private toResponseConversationWithoutRounds(
-    document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEsWithoutRounds(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
-  }
-
-  private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
+  private async getDocument(conversationId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -610,13 +598,11 @@ class ConversationClientImpl implements ConversationClient {
       return undefined;
     }
 
-    const { _seq_no: seqNo, _primary_term: primaryTerm } = hit;
-
-    if (seqNo === undefined || primaryTerm === undefined) {
+    if (!isConversationDocument(hit)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return { ...(hit as Document), _seq_no: seqNo, _primary_term: primaryTerm };
+    return hit;
   }
 
   /**
@@ -631,7 +617,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-  }): Promise<VersionedDocument> {
+  }): Promise<Document> {
     const document = await this.getDocument(conversationId);
 
     if (!document) {
@@ -639,7 +625,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = document._source!;
+    const conversation = fromEsWithoutRounds(document);
 
     switch (access) {
       case 'converse':
@@ -647,11 +633,11 @@ class ConversationClientImpl implements ConversationClient {
 
         if (allowed) {
           try {
-            await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
+            await this.agentRegistry.get(document._source.agent_id, { access: 'use' });
           } catch (error) {
             if (
               !isAgentNotFoundError(error) &&
-              !isAgentUnavailableError(error, conversation.agent_id)
+              !isAgentUnavailableError(error, document._source.agent_id)
             ) {
               throw error;
             }
@@ -666,19 +652,11 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'rename':
-        allowed = hasConversationRenameAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationRenameAccess({ conversation, user: this.user });
         break;
 
       case 'delete':
-        allowed = hasConversationDeleteAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
         break;
 
       case 'updateAccessControl':
@@ -716,9 +694,12 @@ class ConversationClientImpl implements ConversationClient {
         mutate: (current) =>
           updateConversation({
             conversation: current,
-            update: { id: conversationId, ...fields(current) },
-            updateDate: new Date(),
+            update: {
+              ...fields(current),
+              id: conversationId,
+            },
             space: this.space,
+            updateDate: new Date(),
           }),
       });
 
