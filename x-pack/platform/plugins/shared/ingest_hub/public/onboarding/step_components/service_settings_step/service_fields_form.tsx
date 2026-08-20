@@ -23,7 +23,6 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
-  getMandatoryBooleanFields,
   getRequiredBooleanFields,
   getRequiredTextFields,
   hasTransportChoice,
@@ -121,7 +120,6 @@ export function ServiceFieldsForm({
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f) && f !== 'regions'
   );
-  const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
   const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
 
   // Split each field group into primary (shown by default) and advanced (hidden).
@@ -134,14 +132,8 @@ export function ServiceFieldsForm({
   const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
   const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
   const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
-  const primaryMandatoryBoolFields = mandatoryBoolFields.filter((f) => !isAdvanced(f));
-  const advancedMandatoryBoolFields = mandatoryBoolFields.filter(isAdvanced);
 
-  const advancedFields = [
-    ...advancedBoolFields,
-    ...advancedOtherFields,
-    ...advancedMandatoryBoolFields,
-  ];
+  const advancedFields = [...advancedBoolFields, ...advancedOtherFields];
   const hasAdvancedOptions = advancedFields.length > 0;
 
   const anyRequiredEmpty = requiredTextFields.some((f) => {
@@ -220,21 +212,6 @@ export function ServiceFieldsForm({
         />
       ))}
 
-      {primaryMandatoryBoolFields.length > 0 && (
-        <>
-          <EuiSpacer size="m" />
-          {primaryMandatoryBoolFields.map((fieldName) => (
-            <VarField
-              key={fieldName}
-              service={service}
-              fieldName={fieldName}
-              draft={draft}
-              onFieldChange={onFieldChange}
-            />
-          ))}
-        </>
-      )}
-
       {hasAdvancedOptions && (
         <>
           <EuiSpacer size="m" />
@@ -274,20 +251,6 @@ export function ServiceFieldsForm({
                   onFieldChange={onFieldChange}
                 />
               ))}
-              {advancedMandatoryBoolFields.length > 0 && (
-                <>
-                  <EuiSpacer size="m" />
-                  {advancedMandatoryBoolFields.map((fieldName) => (
-                    <VarField
-                      key={fieldName}
-                      service={service}
-                      fieldName={fieldName}
-                      draft={draft}
-                      onFieldChange={onFieldChange}
-                    />
-                  ))}
-                </>
-              )}
             </>
           )}
         </>

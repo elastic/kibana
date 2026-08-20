@@ -27,7 +27,7 @@ export interface UseAwsServiceMatrixResult {
 
 /**
  * Returns the merged AWS service matrix, deriving managed_integration, signalType,
- * inputs, requiredConfig, mandatoryFields, defaultEnabled, and identityFederationSupported
+ * inputs, requiredConfig, defaultEnabled, and identityFederationSupported
  * from Fleet package manifests. Gated only on the core `aws` package — secondary packages
  * (aws_bedrock, awsfargate, etc.) are optional: if unavailable (technical-preview, air-gapped,
  * fetch error) those entries fall back to their static definitions.

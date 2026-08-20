@@ -73,8 +73,6 @@ export interface AwsServiceMatrixEntry {
   requiredConfig?: string[];
   /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
   optionalConfig?: string[];
-  /** Boolean manifest vars that are required: true in the package but have default values */
-  mandatoryFields?: string[];
   /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
   varTypes?: Record<string, string>;
   /** Full manifest var definitions keyed by name, with the inputs each var appears under. Derived from the package manifest. */
@@ -441,7 +439,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 /**
  * Merge the static routing table with data from any Fleet package manifest.
  * Derives managed_integration, signalType, inputs, requiredConfig, optionalConfig,
- * mandatoryFields, defaultEnabled, and identityFederationSupported from the manifest.
+ * defaultEnabled, and identityFederationSupported from the manifest.
  * Static fallback values are used when the manifest does not provide a field.
  */
 export function buildAwsServiceMatrix(
@@ -456,7 +454,6 @@ export function buildAwsServiceMatrix(
     let inputs = entry.inputs;
     let requiredConfig = entry.requiredConfig;
     let optionalConfig: string[] | undefined;
-    let mandatoryFields = entry.mandatoryFields;
     let defaultEnabled = true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
@@ -521,22 +518,13 @@ export function buildAwsServiceMatrix(
         if (v.name && v.type) varTypes[v.name] = v.type;
       }
 
+      // All required vars (shown or hidden) go into requiredConfig. field_config functions
+      // use show_user from varDefs to split them into user-visible and mandatory-hidden sections.
       const reqVars: string[] = [
-        ...new Set(
-          allVars.filter((v: any) => v.required && v.show_user).map((v: any) => v.name as string)
-        ),
+        ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
       ];
       if (reqVars.length > 0) {
         requiredConfig = reqVars;
-      }
-
-      const mandFields: string[] = [
-        ...new Set(
-          allVars.filter((v: any) => v.required && !v.show_user).map((v: any) => v.name as string)
-        ),
-      ];
-      if (mandFields.length > 0) {
-        mandatoryFields = mandFields;
       }
 
       const optVars: string[] = [
@@ -618,7 +606,6 @@ export function buildAwsServiceMatrix(
       inputs,
       requiredConfig,
       optionalConfig,
-      mandatoryFields,
       varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
       varDefs: Object.keys(varDefs).length > 0 ? varDefs : undefined,
       defaultEnabled,

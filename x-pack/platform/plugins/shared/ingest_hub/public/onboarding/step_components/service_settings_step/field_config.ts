@@ -28,6 +28,8 @@ export interface FieldMeta {
   transport?: TransportType;
   isBool: boolean;
   multi: boolean;
+  /** Whether the manifest marks this var as user-visible (show_user: true). */
+  showUser: boolean;
 }
 
 const TRANSPORT_TYPES: TransportType[] = ['aws-s3', 'aws-cloudwatch'];
@@ -48,6 +50,7 @@ export function resolveFieldMeta(
     transport,
     isBool: vd.def.type === 'bool',
     multi: vd.def.multi === true,
+    showUser: vd.def.show_user === true,
   };
 }
 
@@ -99,21 +102,9 @@ export function getFlyoutFields(
   return allFields.filter((f) => {
     const meta = resolveFieldMeta(service, f);
     if (!meta) return false;
+    if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
-    return true;
-  });
-}
-
-export function getMandatoryBooleanFields(
-  service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
-): string[] {
-  return (service.mandatoryFields ?? []).filter((f) => {
-    const meta = resolveFieldMeta(service, f);
-    if (!meta) return false;
-    if (!meta.isBool) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
@@ -127,7 +118,6 @@ export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boo
   const defaultTransport = getDefaultTransport(service);
   if (getRequiredTextFields(service, defaultTransport).length > 0) return true;
   if (getRequiredBooleanFields(service, defaultTransport).length > 0) return true;
-  if (getMandatoryBooleanFields(service, defaultTransport).length > 0) return true;
   const flyoutFields = getFlyoutFields(service, defaultTransport);
   const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
   return flyoutFields.some(
@@ -153,6 +143,7 @@ export function getRequiredTextFields(
   return (service.requiredConfig ?? []).filter((f) => {
     const meta = resolveFieldMeta(service, f);
     if (!meta) return false;
+    if (!meta.showUser) return false;
     if (meta.isBool) return false;
     if (REGION_FIELD_NAMES.has(f)) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
@@ -178,6 +169,7 @@ export function getRequiredBooleanFields(
   return (service.requiredConfig ?? []).filter((f) => {
     const meta = resolveFieldMeta(service, f);
     if (!meta) return false;
+    if (!meta.showUser) return false;
     if (!meta.isBool) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;

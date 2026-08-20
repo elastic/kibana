@@ -22,7 +22,10 @@ function makeVarDef(
   opts: Partial<RegistryVarsEntry & { inputs: string[] }> = {}
 ): ServiceVarDef {
   const { inputs = [], ...rest } = opts;
-  return { def: { name, type, title: name, ...rest } as RegistryVarsEntry, inputs };
+  return {
+    def: { name, type, title: name, show_user: true, ...rest } as RegistryVarsEntry,
+    inputs,
+  };
 }
 
 function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
