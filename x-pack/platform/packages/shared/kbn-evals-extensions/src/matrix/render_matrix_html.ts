@@ -70,6 +70,10 @@ const REPORT_CSS = `
   .answer h3 { font-size:17px; } .answer h4 { font-size:15px; } .answer h5,.answer h6 { font-size:13px; }
   .answer table.md { margin:10px 0; font-size:13px; }
   .answer table.md th { text-transform:none; letter-spacing:0; }
+  .answer table.md td, .answer table.md th { border:1px solid var(--border); padding:4px 8px; text-align:left; }
+  .answer table.md th { background:var(--panel2); }
+  .answer table.md tbody tr:nth-child(odd) { background:rgba(255,255,255,0.02); }
+  .answer blockquote { margin:8px 0; padding:2px 12px; border-left:3px solid var(--accent); color:var(--muted, #9aa4b2); }
   .answer pre { background:#0b0d12; border:1px solid var(--border); border-radius:7px;
     padding:11px 13px; overflow:auto; }
   .answer pre code { background:none; padding:0; color:#cdd3dd; }
@@ -111,7 +115,19 @@ const inlineMd = (s: string): string =>
       /^https?:\/\//i.test(url) ? `<a href="${url}">${text}</a>` : text
     );
 
-/** Minimal markdown → HTML (headings, lists, bold, code, hr). */
+const splitTableRow = (line: string): string[] =>
+  line
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((cell) => cell.trim());
+
+/**
+ * Minimal markdown → HTML (headings, lists, bold, code, hr, blockquotes,
+ * pipe tables). Input is untrusted model output: every text run is
+ * HTML-escaped before inline markdown is applied, and tables are only
+ * recognized when EVERY row cell is well-formed (never mid-list).
+ */
 const mdToHtml = (md: string): string => {
   const lines = md.split('\n');
   const out: string[] = [];
@@ -127,7 +143,23 @@ const mdToHtml = (md: string): string => {
       inOl = false;
     }
   };
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Fenced code block: ``` ... ``` — content must stay verbatim (ES|QL
+    // queries legitimately contain pipes; treating those as tables mangles
+    // them). esc() inside <pre><code> keeps untrusted content inert.
+    if (line.trim().startsWith('```')) {
+      closeList();
+      const code: string[] = [];
+      let j = i + 1;
+      while (j < lines.length && !lines[j].trim().startsWith('```')) {
+        code.push(lines[j]);
+        j++;
+      }
+      out.push(`<pre><code>${esc(code.join('\n'))}</code></pre>`);
+      i = j; // skip the closing fence (or EOF)
+      continue;
+    }
     if (line.startsWith('### ')) {
       closeList();
       out.push(`<h6>${esc(line.slice(4))}</h6>`);
@@ -148,6 +180,37 @@ const mdToHtml = (md: string): string => {
       out.push('<hr>');
       continue;
     }
+    // Pipe table: header row, then a |---|---| separator, then body rows.
+    if (
+      line.includes('|') &&
+      i + 1 < lines.length &&
+      /^\|?[\s:-]*-{2,}[\s|:-]*\|/.test(lines[i + 1]) &&
+      lines[i + 1].includes('-')
+    ) {
+      closeList();
+      const header = splitTableRow(line);
+      let j = i + 2;
+      const body: string[][] = [];
+      while (j < lines.length && lines[j].includes('|') && lines[j].trim() !== '') {
+        body.push(splitTableRow(lines[j]));
+        j++;
+      }
+      out.push('<table class="md"><thead><tr>');
+      for (const cell of header) {
+        out.push(`<th>${inlineMd(esc(cell))}</th>`);
+      }
+      out.push('</tr></thead><tbody>');
+      for (const row of body) {
+        out.push('<tr>');
+        for (const cell of row) {
+          out.push(`<td>${inlineMd(esc(cell))}</td>`);
+        }
+        out.push('</tr>');
+      }
+      out.push('</tbody></table>');
+      i = j - 1;
+      continue;
+    }
     if (/^\d+\.\s/.test(line)) {
       if (!inOl) {
         closeList();
@@ -162,6 +225,11 @@ const mdToHtml = (md: string): string => {
         inUl = true;
       }
       out.push(`<li>${inlineMd(esc(line.slice(2)))}</li>`);
+      continue;
+    }
+    if (line.startsWith('> ')) {
+      closeList();
+      out.push(`<blockquote><p>${inlineMd(esc(line.slice(2)))}</p></blockquote>`);
       continue;
     }
     if (line.trim() === '') {

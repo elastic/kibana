@@ -208,4 +208,78 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('click');
     expect(html).toContain('x');
   });
+
+  it('renders markdown pipe tables as HTML tables, not paragraph soup', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'q',
+        toolTrail: [],
+        answer:
+          '| Field | Value |\n' +
+          '|-------|-------|\n' +
+          '| **Process** | `BluetoothService.exe` |\n' +
+          '| **User Context** | SYSTEM |\n\n' +
+          '### Context\n- item one\n- item two',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    // The table is recognized and rendered as a real table element.
+    expect(html).toContain('<table class="md"><thead><tr>');
+    expect(html).toContain('<th>Field</th>');
+    expect(html).toContain('<th>Value</th>');
+    expect(html).toContain('<td><strong>Process</strong></td>');
+    expect(html).toContain('<td><code>BluetoothService.exe</code></td>');
+    // Raw pipes must not leak as paragraph text once a table is parsed.
+    expect(html).not.toMatch(/<p>\|/);
+    // Content after the table still renders normally.
+    expect(html).toContain('<h6>Context</h6>');
+  });
+
+  it('renders blockquote lines and escapes cell content in tables', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'q',
+        toolTrail: [],
+        answer:
+          '> quoted note <script>alert(1)</script>\n' +
+          '| a | b |\n' +
+          '|---|---|\n' +
+          '| <img src=x onerror=alert(1)> | plain |',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('<blockquote>');
+    // Untrusted cell/script content is escaped, never emitted as live HTML.
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('<img src=x');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  it('renders fenced code blocks verbatim, protecting ES|QL pipes from table parsing', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'q',
+        toolTrail: [],
+        answer:
+          'Query:\n```\nFROM logs-endpoint.events.library-*\n' +
+          '| WHERE event.category == "library" AND dll.name == "log.dll"\n' +
+          '| STATS load_count = COUNT(*) BY host.name\n```\nDone.',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('<pre><code>FROM logs-endpoint.events.library-*');
+    // Pipes inside the code block must NOT become a markdown table.
+    expect(html).not.toContain('<table class="md"><thead><tr><th>FROM logs');
+    expect(html).not.toMatch(/<p>\| WHERE/);
+    expect(html).toContain('Done.');
+  });
 });
