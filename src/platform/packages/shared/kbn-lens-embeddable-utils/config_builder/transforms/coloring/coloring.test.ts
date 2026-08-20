@@ -855,6 +855,117 @@ describe('Color util transforms', () => {
         ],
       });
     });
+
+    it('should convert categorical color mapping with other bucket assignment', () => {
+      const originalColorMapping: ColorMapping.Config = {
+        paletteId: SEMANTIC_PALETTE,
+        specialAssignments: [
+          {
+            rules: [{ type: 'others_bucket' }],
+            color: {
+              type: 'theme',
+              color: {
+                LIGHT: { type: 'colorCode', colorCode: '#000000' },
+                DARK: { type: 'colorCode', colorCode: '#ffffff' },
+              },
+            },
+            touched: false,
+          },
+        ],
+        assignments: [],
+        colorMode: { type: 'categorical' },
+      };
+
+      const result = fromColorMappingLensStateToAPI(originalColorMapping);
+      expect(result).toEqual({
+        palette: SEMANTIC_PALETTE,
+        mode: 'categorical',
+        mapping: [],
+        other: {
+          type: 'theme',
+          color: {
+            LIGHT: { type: 'color_code', value: '#000000' },
+            DARK: { type: 'color_code', value: '#ffffff' },
+          },
+        },
+      });
+    });
+
+    it('should convert gradient color mapping with other bucket assignment', () => {
+      const originalColorMapping: ColorMapping.Config = {
+        paletteId: SEMANTIC_PALETTE,
+        specialAssignments: [
+          {
+            rules: [{ type: 'others_bucket' }],
+            color: { type: 'colorCode', colorCode: '#000000' },
+            touched: false,
+          },
+        ],
+        assignments: [],
+        colorMode: {
+          type: 'gradient',
+          steps: [{ type: 'colorCode', colorCode: '#ffffff', touched: false }],
+          sort: 'asc',
+        },
+      };
+
+      const result = fromColorMappingLensStateToAPI(originalColorMapping);
+      expect(result).toEqual({
+        palette: SEMANTIC_PALETTE,
+        mode: 'gradient',
+        mapping: [],
+        sort: 'asc',
+        gradient: [{ type: 'color_code', value: '#ffffff' }],
+        other: { type: 'color_code', value: '#000000' },
+      });
+    });
+
+    it('should convert gradient color mapping with both unassigned and other bucket assignments', () => {
+      const originalColorMapping: ColorMapping.Config = {
+        paletteId: SEMANTIC_PALETTE,
+        specialAssignments: [
+          {
+            rules: [{ type: 'other' }],
+            color: { type: 'colorCode', colorCode: '#00ff00' },
+            touched: false,
+          },
+          {
+            rules: [{ type: 'others_bucket' }],
+            color: {
+              type: 'theme',
+              color: {
+                LIGHT: { type: 'colorCode', colorCode: '#000000' },
+                DARK: { type: 'colorCode', colorCode: '#ffffff' },
+              },
+            },
+            touched: false,
+          },
+        ],
+        assignments: [],
+        colorMode: {
+          type: 'gradient',
+          steps: [{ type: 'colorCode', colorCode: '#ff0000', touched: false }],
+          sort: 'asc',
+        },
+      };
+
+      const result = fromColorMappingLensStateToAPI(originalColorMapping);
+      expect(result).toEqual({
+        palette: SEMANTIC_PALETTE,
+        mode: 'gradient',
+        mapping: [],
+        sort: 'asc',
+        gradient: [{ type: 'color_code', value: '#ff0000' }],
+        unassigned: { type: 'color_code', value: '#00ff00' },
+        other: {
+          type: 'theme',
+          color: {
+            LIGHT: { type: 'color_code', value: '#000000' },
+            DARK: { type: 'color_code', value: '#ffffff' },
+          },
+        },
+      });
+    });
   });
 
   describe('fromColorMappingAPIToLensState', () => {
@@ -922,6 +1033,38 @@ describe('Color util transforms', () => {
             ],
             sort: 'desc',
           },
+        },
+      });
+    });
+
+    it('should convert color mapping with other bucket assignment', () => {
+      const result = fromColorMappingAPIToLensState({
+        palette: SEMANTIC_PALETTE,
+        mode: 'categorical',
+        mapping: [],
+        other: {
+          type: 'color_code',
+          value: '#000000',
+        },
+      });
+
+      expect(result).toEqual({
+        colorMapping: {
+          paletteId: SEMANTIC_PALETTE,
+          assignments: [],
+          colorMode: { type: 'categorical' },
+          specialAssignments: [
+            {
+              rules: [{ type: 'other' }],
+              color: { type: 'loop' },
+              touched: false,
+            },
+            {
+              rules: [{ type: 'others_bucket' }],
+              color: { type: 'colorCode', colorCode: '#000000' },
+              touched: false,
+            },
+          ],
         },
       });
     });
@@ -1240,6 +1383,33 @@ describe('Color util transforms', () => {
         ],
         sort: 'asc',
         unassigned: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
+      };
+
+      const lensState = fromColorMappingAPIToLensState(originalColorMapping);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
+
+      expect(backToAPI).toEqual(originalColorMapping);
+    });
+
+    it('should maintain data integrity for color mapping with an other bucket assignment', () => {
+      const originalColorMapping: ColorMappingType = {
+        palette: SEMANTIC_PALETTE,
+        mode: 'categorical',
+        mapping: [
+          { values: ['value1', 'value2'], color: { type: 'color_code', value: '#ff0000' } },
+        ],
+        unassigned: { type: 'color_code', value: '#00ff00' },
+        other: {
+          type: 'theme',
+          color: {
+            LIGHT: { type: 'color_code', value: '#000000' },
+            DARK: { type: 'color_code', value: '#ffffff' },
+          },
+        },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

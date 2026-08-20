@@ -10,6 +10,7 @@
 import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_NEUTRAL_PALETTE_INDEX,
+  DEFAULT_OTHER_ASSIGNMENT,
 } from '../config/default_color_mapping';
 import { getColorFactory } from './color_handling';
 import { toHex } from './color_math';
@@ -151,7 +152,7 @@ describe('Color mapping - color generation', () => {
       type: 'categories',
       categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     });
-    expect(colorFactory('__other__')).toBe(elasticPaletteColors[0]);
+    expect(colorFactory('__other__')).toBe(palettes.get(KbnPalette.Neutral).getColor(1));
     // expect(colorFactory(['fieldA', 'fieldB'])).toBe(elasticPaletteColors[1]);
     expect(colorFactory('__empty__')).toBe(elasticPaletteColors[2]);
     expect(colorFactory('   with-whitespaces   ')).toBe(elasticPaletteColors[3]);
@@ -439,5 +440,102 @@ describe('Color mapping - color generation', () => {
     expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
     expect(toHex(colorFactory('cat2'))).toBe(toHex(elasticPaletteColors[1]));
     expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2]));
+  });
+
+  describe('other bucket color', () => {
+    ['LIGHT', 'DARK'].forEach((theme) => {
+      it(`returns the correct theme aware color for the other bucket when in ${theme} mode`, () => {
+        const colorFactory = getColorFactory(
+          DEFAULT_COLOR_MAPPING_CONFIG,
+          palettes,
+          theme === 'DARK',
+          {
+            type: 'categories',
+            categories: ['cat1', '__other__'],
+          }
+        );
+        expect(colorFactory('__other__')).toBe(
+          theme === 'DARK' ? neutralPaletteColors[3] : neutralPaletteColors[1]
+        );
+      });
+    });
+
+    it('returns the other bucket color if assigned to specific color', () => {
+      const colorFactory = getColorFactory(
+        {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          specialAssignments: [
+            {
+              rules: [{ type: 'others_bucket' }],
+              color: {
+                type: 'colorCode',
+                colorCode: 'red',
+              },
+              touched: false,
+            },
+          ],
+        },
+        palettes,
+        false,
+        {
+          type: 'categories',
+          categories: ['cat1', '__other__'],
+        }
+      );
+      expect(colorFactory('__other__')).toBe('red');
+    });
+
+    it('returns the next available color for the other bucket when no specific color is assigned', () => {
+      const colorFactory = getColorFactory(
+        {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          specialAssignments: [DEFAULT_OTHER_ASSIGNMENT],
+        },
+        palettes,
+        false,
+        {
+          type: 'categories',
+          categories: ['cat1', '__other__'],
+        }
+      );
+      expect(colorFactory('cat1')).toBe(elasticPaletteColors[0]);
+      expect(colorFactory('__other__')).toBe(elasticPaletteColors[1]);
+    });
+
+    it('returns the color for unassigned colors if no specific color is assigned and a single color for unassigned colors is configured', () => {
+      const colorFactory = getColorFactory(
+        {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          specialAssignments: [
+            {
+              rules: [{ type: 'other' }],
+              color: {
+                type: 'colorCode',
+                colorCode: 'rebeccapurple',
+              },
+              touched: false,
+            },
+          ],
+          assignments: [
+            {
+              rules: [{ type: 'raw', value: 'cat1' }],
+              color: {
+                type: 'colorCode',
+                colorCode: 'red',
+              },
+              touched: false,
+            },
+          ],
+        },
+        palettes,
+        false,
+        {
+          type: 'categories',
+          categories: ['cat1', '__other__'],
+        }
+      );
+      expect(colorFactory('__other__')).toBe('rebeccapurple');
+      expect(colorFactory('cat1')).toBe('red');
+    });
   });
 });

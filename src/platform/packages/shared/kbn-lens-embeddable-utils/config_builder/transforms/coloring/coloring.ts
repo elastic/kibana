@@ -481,6 +481,11 @@ export function fromColorMappingLensStateToAPI(
   );
 
   const other = getOtherBucketAssignment(colorMapping.specialAssignments)?.assignment.color;
+  const otherColor = other
+    ? other.type === 'theme'
+      ? fromThemeColorLensStateToAPI(other)
+      : fromColorLensStateToAPI(other)
+    : undefined;
 
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
@@ -495,10 +500,7 @@ export function fromColorMappingLensStateToAPI(
       ...(unassigned ? { unassigned } : {}),
       ...(other
         ? {
-            other:
-              other.type === 'theme'
-                ? fromThemeColorLensStateToAPI(other)
-                : fromColorLensStateToAPI(other),
+            other: otherColor,
           }
         : {}),
     } satisfies ColorMappingCategoricalType;
@@ -519,6 +521,7 @@ export function fromColorMappingLensStateToAPI(
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...(unassigned ? { unassigned } : {}),
+    ...(otherColor ? { other: otherColor } : {}),
   } satisfies ColorMappingGradientType;
 }
 

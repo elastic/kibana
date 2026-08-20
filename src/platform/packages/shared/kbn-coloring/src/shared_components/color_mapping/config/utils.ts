@@ -88,7 +88,7 @@ export function normalizeColorMappingConfig(config: Config): Config {
   const { assignments, specialAssignments } = config;
   const assignmentMatcher = getColorAssignmentMatcher(assignments);
 
-  // if the other bucket is assigned, we need to remove it from the assignments and add a special assignment for itq
+  // if the other bucket is assigned, we need to remove it from the assignments and add a special assignment for it
   if (assignmentMatcher.hasMatch(OTHER_BUCKET_VALUE)) {
     const assignedColor = assignments[assignmentMatcher.getIndex(OTHER_BUCKET_VALUE)].color;
 
