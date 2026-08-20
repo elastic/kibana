@@ -138,10 +138,7 @@ describe.skip('package card', () => {
     } = renderPackageCard(
       cardProps({
         isCollectionCard: true,
-        groupMembers: [
-          cardProps({ id: 'member-1' }) as any,
-          cardProps({ id: 'member-2' }) as any,
-        ],
+        groupMembers: [cardProps({ id: 'member-1' }) as any, cardProps({ id: 'member-2' }) as any],
       })
     );
     expect(queryByText('2 variants')).toBeInTheDocument();
