@@ -19,7 +19,7 @@ export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
  * chunk size in `logic/import/import_rules.ts` and passed to
  * `rulesClient.bulkCreateRules` as its `batchSize`.
  */
-export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 100;
+export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 250;
 
 /**
  * `pMap` concurrency for the per-rule overwrite branch during import
