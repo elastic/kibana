@@ -8,10 +8,10 @@
  */
 
 import type { RequestHandler, RouteRegistrar } from '@kbn/core-http-server';
-import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
+import { CoreSetup, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { cacheInScope, Global } from '@kbn/core-di-internal';
-import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
+import { cacheInScope } from '@kbn/core-di-internal';
+import { type KibanaContainerModuleLoadOptions, Scope } from '@kbn/core-di';
 
 export function loadHttp({ bind, onSetup }: KibanaContainerModuleLoadOptions): void {
   onSetup(Route, Router, ({ inject }, router, route) => {
@@ -19,23 +19,16 @@ export function loadHttp({ bind, onSetup }: KibanaContainerModuleLoadOptions): v
       typeof route.method,
       RequestHandlerContext
     >;
-    let handler: RequestHandler = inject(
-      CoreStart('injection'),
-      async (injection, _context, request, response) => {
-        const scope = injection.fork();
+    let handler: RequestHandler = inject(Scope, async (scope, _context, request, response) => {
+      scope.expose(Request).toConstantValue(request);
+      scope.expose(Response).toConstantValue(response);
 
-        scope.bind(Request).toConstantValue(request);
-        scope.bind(Response).toConstantValue(response);
-        scope.bind(Global).toConstantValue(Request);
-        scope.bind(Global).toConstantValue(Response);
-
-        try {
-          return await (await scope.getAsync(route, { autobind: true })).handle();
-        } finally {
-          scope.unbindAllAsync();
-        }
+      try {
+        return await (await scope.getAsync(route, { autobind: true })).handle();
+      } finally {
+        scope.dispose();
       }
-    );
+    });
 
     if (route.handleLegacyErrors) {
       handler = router.handleLegacyErrors(handler);
