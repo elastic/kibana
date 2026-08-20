@@ -81,6 +81,13 @@ export const createDesignPipelineTool = ({
     **Result:** Returns the complete proposed pipeline, a summary, field changes with sample values, simulation results (success rate, errors, simulation mode), samples info, and any warnings or hints.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Design Pipeline',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: designPipelineSchema,
   handler: async (
     { stream_name: streamName, instruction: changeDescription, samples },

@@ -8,7 +8,16 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2-schemas';
+import {
+  IMMUTABLE_RULE_FIELDS,
+  isNoDataQueryConsistentWithStrategy,
+  isNoDataQueryProvidedForStrategy,
+  isRecoveryQueryConsistentWithStrategy,
+  isRecoveryQueryProvidedForStrategy,
+  isSignalQueryBreachOnly,
+  isSignalUsingStandaloneFormat,
+  type ImmutableRuleField,
+} from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
@@ -317,6 +326,73 @@ export function buildUpdateRuleAttributes(
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
   };
+}
+
+/**
+ * Re-checks the create schema's cross-field invariants against the merged
+ * update attributes (the update body alone can't, since `kind` is immutable and
+ * `query`/strategy fields update independently). Throws on the first violation.
+ *
+ * Excludes the `state_transition`/`kind` invariant, which `RulesClient`
+ * validates against the update body directly.
+ */
+export function validateMergedRuleAttributes(
+  ruleId: string,
+  attrs: RuleSavedObjectAttributes
+): void {
+  const invariants: Array<{
+    valid: boolean;
+    message: string;
+    code: string;
+    details: Record<string, unknown>;
+  }> = [
+    {
+      valid: isSignalUsingStandaloneFormat(attrs),
+      message: 'kind "signal" requires query.format "standalone".',
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isSignalQueryBreachOnly(attrs),
+      message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isRecoveryQueryConsistentWithStrategy(attrs),
+      message: 'query.recovery is only allowed when recovery_strategy is "query".',
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+    {
+      valid: isRecoveryQueryProvidedForStrategy(attrs),
+      message: 'query.recovery is required when recovery_strategy is "query".',
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+    {
+      valid: isNoDataQueryConsistentWithStrategy(attrs),
+      message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+    {
+      valid: isNoDataQueryProvidedForStrategy(attrs),
+      message:
+        'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+  ];
+
+  for (const invariant of invariants) {
+    if (!invariant.valid) {
+      throw Boom.badRequest(invariant.message, {
+        code: invariant.code,
+        details: invariant.details,
+      });
+    }
+  }
 }
 
 /**

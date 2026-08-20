@@ -26,12 +26,14 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
 } from '@kbn/alerting-v2-constants';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
+import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
@@ -60,6 +62,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
+  bind(RuleChangeHistoryApi).toSelf().inSingletonScope();
   bind(UserCapabilities).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
@@ -75,6 +78,17 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
     registerCreateAlertEventStep(workflowsExtensionsSetup);
+
+    // Register change-history telemetry event types once, lazily, to keep the
+    // React UI out of the page-load bundle.
+    const analytics = container.get(CoreSetup('analytics'));
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingSection = management.sections.register({
@@ -100,11 +114,28 @@ const pluginModule = new ContainerModule(({ bind }) => {
     });
 
     alertingSection.registerApp({
+      id: ALERTING_V2_RULE_LIBRARY_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.ruleLibraryNavTitle', {
+        defaultMessage: 'Rule library',
+      }),
+      order: 2,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountRuleLibraryApp } = await import('./application/mount');
+        return mountRuleLibraryApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingSection.registerApp({
       id: ALERTING_V2_EPISODES_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.alertEpisodesNavTitle', {
         defaultMessage: 'Alerts',
       }),
-      order: 2,
+      order: 3,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountEpisodesApp } = await import('./application/mount');
@@ -121,7 +152,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
       title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
         defaultMessage: 'Action Policies',
       }),
-      order: 3,
+      order: 4,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountActionPoliciesApp } = await import('./application/mount');
