@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/core-plugins-browser'
   - '@kbn/config'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

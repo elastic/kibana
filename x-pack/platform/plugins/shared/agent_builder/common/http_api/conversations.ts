@@ -8,7 +8,7 @@
 import type {
   Conversation,
   ConversationAccessControl,
-  ConversationAccessControlEntry,
+  ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
   ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
@@ -54,9 +54,11 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
+export type CreateConversationResponse = ConversationWithPermissions;
+
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
-  entries: Array<Omit<ConversationAccessControlEntry, 'added_at'>>;
+  entries: ConversationAccessControlEntryInput[];
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;

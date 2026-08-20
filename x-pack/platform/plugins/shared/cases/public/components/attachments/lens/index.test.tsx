@@ -16,7 +16,8 @@ import {
 import { basicCase } from '../../../containers/mock';
 import { getVisualizationAttachmentType } from '.';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { allCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 
 describe('getVisualizationAttachmentType', () => {
   const mockEmbeddableComponent = jest
@@ -34,6 +35,7 @@ describe('getVisualizationAttachmentType', () => {
     version: '1',
     savedObjectId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
+    permissions: allCasesPermissions(),
     rowContext: {
       appId: 'cases',
       manageMarkdownEditIds: [],
@@ -45,6 +47,11 @@ describe('getVisualizationAttachmentType', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .spyOn(KibanaServices, 'get')
+      .mockReturnValue({ lens: { canUseEditor: () => true } } as ReturnType<
+        typeof KibanaServices.get
+      >);
   });
 
   it('create the attachment type correctly', () => {
@@ -162,6 +169,36 @@ describe('getVisualizationAttachmentType', () => {
 
       expect(attachmentViewObject.getActions).toBeUndefined();
       expect('children' in attachmentViewObject).toBe(false);
+    });
+
+    it('getActions omits the open-in-lens action without lens editor permission', () => {
+      jest
+        .spyOn(KibanaServices, 'get')
+        .mockReturnValue({ lens: { canUseEditor: () => false } } as ReturnType<
+          typeof KibanaServices.get
+        >);
+
+      const lensType = getVisualizationAttachmentType();
+      const actions = lensType
+        .getAttachmentViewObject(attachmentViewProps)
+        .getActions?.(attachmentViewProps)!;
+
+      expect(actions.length).toBe(0);
+    });
+
+    it('does not set custom actions for an ES|QL visualization', () => {
+      const lensType = getVisualizationAttachmentType();
+      const attachmentViewObject = lensType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        data: {
+          state: {
+            attributes: { state: { query: { esql: '' } } },
+            timeRange: {},
+          },
+        },
+      });
+
+      expect(attachmentViewObject.getActions).toBeUndefined();
     });
 
     it('renders the open visualization button correctly', () => {
