@@ -82,6 +82,23 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
   // Only mount `EuiTourStep` once the current step's anchor is in the DOM. EuiTourStep resolves
   // its anchor a tick after mount; rendering before the anchor exists produces an unanchored
   // popover that never recovers.
+  //
+  // Scroll the active step's anchor into view so the tour doesn't open off-screen (e.g. the
+  // attach button at the bottom of a long case activity thread).
+  useEffect(() => {
+    if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
+      return;
+    }
+    const anchorEl = document.querySelector(currentStepConfig.anchor);
+    // jsdom does not implement scrollIntoView; guard so tours used in unit tests do not crash.
+    if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
+      // Instant, not smooth. EuiTourStep measures the anchor and positions the popover as soon as it
+      // mounts; a smooth scroll is still animating at that point, so the popover was placed against
+      // the anchor's pre-scroll coordinates and opened off-screen.
+      anchorEl.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }
+  }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
+
   if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
     return null;
   }
@@ -101,6 +118,9 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
       step={currentStep}
       stepsTotal={stepsTotal}
       isStepOpen
+      // Keeps the popover with its anchor if anything scrolls after it opens — a sticky panel
+      // settling, or the reader scrolling mid-step.
+      repositionOnScroll
       minWidth={popoverWidth}
       maxWidth={popoverWidth}
       onFinish={onFinish}

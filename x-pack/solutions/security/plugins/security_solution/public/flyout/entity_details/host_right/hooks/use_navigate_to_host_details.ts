@@ -42,12 +42,12 @@ export const useNavigateToHostDetails = ({
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
 
-  telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-    entity: EntityType.host,
-  });
-
   return useCallback(
     (path?: EntityDetailsPath) => {
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: EntityType.host,
+      });
+
       const left = {
         id: HostDetailsPanelKey,
         params: {
@@ -92,6 +92,7 @@ export const useNavigateToHostDetails = ({
       hasNonClosedAlerts,
       contextID,
       entityStoreEntityId,
+      telemetry,
     ]
   );
 };

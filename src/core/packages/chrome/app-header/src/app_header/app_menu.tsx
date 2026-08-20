@@ -8,18 +8,18 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { hasNonGlobalStaticItems, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { hasNonGlobalStaticItems, type AppMenuConfig } from '@kbn/app-menu';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { LegacyHeaderActionMenu } from './legacy_action_menu';
 import { useAppHeaderStaticItems } from './hooks';
 
 const AppMenuComponent = lazy(async () => {
-  const { AppMenuComponent: Component } = await import('@kbn/core-chrome-app-menu-components');
+  const { AppMenuComponent: Component } = await import('@kbn/app-menu');
   return { default: Component };
 });
 
 export interface AppMenuProps {
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
+  menu?: AppMenuConfig;
   docLink?: string;
   showAddIntegrations?: boolean;
 }
@@ -36,11 +36,7 @@ export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegra
   if (menu || hasStaticItems) {
     return (
       <Suspense>
-        <AppMenuComponent
-          config={menu}
-          staticItems={staticItems}
-          isCollapsed={menu?.isCollapsed ?? false}
-        />
+        <AppMenuComponent config={menu} staticItems={staticItems} />
       </Suspense>
     );
   }

@@ -17,39 +17,38 @@ description: |
   validation succeeds, so report failures never affect the generation outcome.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - AI Agent
+  - attack-discovery
+  - security
+  - ai-agent
   - attackDiscovery:skill_report
 
 triggers:
   - type: manual
-
-inputs:
-  additionalProperties: false
-  properties:
-    connector_id:
-      description: >
-        GenAI connector id used by the report `ai.agent` step's model routing.
-        Per Constraint A this is the same connector selected for the generation
-        request, so the report is rendered by the model the user selected rather
-        than the Agent Builder default. When omitted (or empty), the step falls
-        back to the Agent Builder default model.
-      type: string
-    conversation_id:
-      description: >
-        Identifier of the persisted Agent Builder conversation created by the
-        skill alert retrieval workflow. The report is rendered into this same
-        conversation.
-      type: string
-    execution_uuid:
-      description: >
-        The Attack Discovery 2.0 generation `execution_uuid` whose persisted
-        discoveries should be rendered as the report (via the status-only path).
-      type: string
-  required:
-    - conversation_id
-    - execution_uuid
+    inputs:
+      additionalProperties: false
+      properties:
+        connector_id:
+          description: >
+            GenAI connector id used by the report `ai.agent` step's model routing.
+            Per Constraint A this is the same connector selected for the generation
+            request, so the report is rendered by the model the user selected rather
+            than the Agent Builder default. When omitted (or empty), the step falls
+            back to the Agent Builder default model.
+          type: string
+        conversation_id:
+          description: >
+            Identifier of the persisted Agent Builder conversation created by the
+            skill alert retrieval workflow. The report is rendered into this same
+            conversation.
+          type: string
+        execution_uuid:
+          description: >
+            The Attack Discovery 2.0 generation `execution_uuid` whose persisted
+            discoveries should be rendered as the report (via the status-only path).
+          type: string
+      required:
+        - conversation_id
+        - execution_uuid
 
 steps:
   # Resume the persisted conversation and drive the skill's status-only path

@@ -110,6 +110,7 @@ const IlmPutBody = {
   policy: {
     _meta: {
       managed: true,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
     phases: {
       hot: {

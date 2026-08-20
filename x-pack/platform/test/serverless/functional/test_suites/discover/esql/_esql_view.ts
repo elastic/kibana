@@ -21,12 +21,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const browser = getService('browser');
-  const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
-    'appMenu',
     'svlCommonPage',
     'common',
     'discover',
@@ -86,13 +84,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('showQueryBarMenu');
         expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
         await testSubjects.existOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.existOrFail('dscViewModeToggleButton');
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
@@ -110,15 +108,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.missingOrFail('dscViewModeToggle');
-        await testSubjects.missingOrFail('dscViewModeDocumentButton');
+        await testSubjects.missingOrFail('dscViewModeToggleButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
@@ -274,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch modal', () => {
+    describe('switching to a data view', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -282,69 +279,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
-      it('should show switch modal when switching to a data view', async () => {
+      it('should switch to a data view immediately', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
-      it('should not show switch modal when switching to a data view while a saved search is open', async () => {
+      it('should switch to a data view immediately while a saved search with unsaved changes is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
-        await find.clickByCssSelector(
-          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
-        );
-        await retry.try(async () => {
-          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
-        });
-        await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectDataViewMode();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
-      });
-
-      it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.saveSearch('esql_test2');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedSearch.switchToDataViewMode();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.assertHitCount('14,004');
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
@@ -408,7 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {

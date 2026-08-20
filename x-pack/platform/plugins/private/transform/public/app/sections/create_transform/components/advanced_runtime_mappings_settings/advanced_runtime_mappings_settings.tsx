@@ -16,7 +16,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -137,16 +136,11 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                       tooltipProps={{ disableScreenReaderOutput: true }}
                     >
                       {(copy: () => void) => (
-                        <EuiToolTip
-                          content={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            onClick={copy}
-                            iconType="copy"
-                            aria-label={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
-                          />
-                        </EuiToolTip>
+                        <EuiButtonIcon
+                          onClick={copy}
+                          iconType="copy"
+                          aria-label={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                        />
                       )}
                     </EuiCopy>
                   </EuiFlexItem>

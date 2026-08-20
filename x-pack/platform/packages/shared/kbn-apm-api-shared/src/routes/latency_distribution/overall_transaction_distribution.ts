@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
 import { latencyDistributionChartTypeSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -15,27 +15,29 @@ export type LatencyOverallTransactionDistributionResponse = OverallLatencyDistri
 export const latencyOverallTransactionDistributionRoute =
   defineRoute<LatencyOverallTransactionDistributionResponse>()({
     endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
-    params: z.object({
-      body: z
-        .object({
-          serviceName: z.string().optional(),
-          transactionName: z.string().optional(),
-          transactionType: z.string().optional(),
-          termFilters: z
-            .array(
-              z.object({
-                fieldName: z.string(),
-                fieldValue: z.union([z.string(), z.number()]),
-              })
-            )
-            .optional(),
-          durationMin: z.coerce.number().optional(),
-          durationMax: z.coerce.number().optional(),
-          percentileThreshold: z.coerce.number(),
-          chartType: latencyDistributionChartTypeSchema,
-        })
-        .merge(environmentSchema)
-        .merge(kuerySchema)
-        .merge(rangeSchema),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        body: z
+          .object({
+            serviceName: z.string().optional(),
+            transactionName: z.string().optional(),
+            transactionType: z.string().optional(),
+            termFilters: z
+              .array(
+                z.object({
+                  fieldName: z.string(),
+                  fieldValue: z.union([z.string(), z.number()]),
+                })
+              )
+              .optional(),
+            durationMin: z.coerce.number().optional(),
+            durationMax: z.coerce.number().optional(),
+            percentileThreshold: z.coerce.number(),
+            chartType: latencyDistributionChartTypeSchema,
+          })
+          .merge(environmentSchema)
+          .merge(kuerySchema)
+          .merge(rangeSchema),
+      })
+    ),
   });

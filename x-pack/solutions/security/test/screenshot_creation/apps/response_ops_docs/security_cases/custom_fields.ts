@@ -19,13 +19,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('case settings screenshots', async () => {
       // With the templates feature flag pinned ON for this suite, custom fields and
       // templates are managed on the dedicated v2 templates / field-library pages
-      // rather than inline on the Case Settings page.
+      // rather than inline on the Case Settings page. The settings page itself is
+      // the redesigned panel (`casesRedesign.settings` defaults ON), which renders
+      // `cases-redesign-settings-panel` instead of the legacy `case-configure-title`.
       await pageObjects.common.navigateToApp('security', { path: 'cases' });
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
+      await retry.waitFor('cases-redesign-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-redesign-settings-panel');
       });
       await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories);
 

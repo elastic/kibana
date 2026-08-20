@@ -10,7 +10,8 @@ export const benchmarkValuesMock = {
   integrationName: 'EKS',
   resourceName: 'Clusters',
   resourceCountLabel: 'clusters',
-  integrationLink: '/kbn/app/fleet/integrations/cloud_security_posture-1.12.0/add-integration/kspm',
+  integrationLink:
+    '/kbn/app/integrations/detail/cloud_security_posture-1.12.0/add-integration/kspm',
   learnMoreLink: 'https://ela.st/kspm-get-started',
 };
 

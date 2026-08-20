@@ -14,8 +14,9 @@ import { buildOwnsConfigs } from './configs';
 export const ownsMaintainer: RegisterEntityMaintainerConfig = {
   id: 'owns',
   description:
-    'Resolves owns (user → host device) relationships from raw_identifiers on entity documents ' +
-    '(Okta: user → enrolled device via owns.raw_identifiers.host.id)',
+    'Resolves owns (user → host device) relationships. ' +
+    'Okta: from raw_identifiers on entity documents (owns.raw_identifiers.host.id). ' +
+    'Entra ID: from device log documents, inverting registered_owners into user-keyed edges.',
   interval: '1d',
   timeout: '1h',
   initialState: {},
@@ -25,7 +26,7 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -52,7 +53,8 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildOwnsConfigs(lastProcessedTimestamp),
-      abortController,
+      maintainerName: 'owns',
+      signal,
       telemetryCollector: collector,
     });
 
@@ -85,8 +87,8 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
 
     // Do not advance the watermark if the run was aborted — the next run should
     // re-process the same window to avoid missing entities.
-    if (abortController.signal.aborted) {
-      logger.info('[owns] Run was aborted; watermark not advanced');
+    if (signal.aborted) {
+      logger.info('Run was aborted; watermark not advanced');
       return status.state;
     }
 

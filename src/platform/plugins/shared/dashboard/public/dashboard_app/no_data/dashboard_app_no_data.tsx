@@ -16,6 +16,7 @@ import {
   getIndexForESQLQuery,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
@@ -157,6 +158,13 @@ export const DashboardAppNoDataPage = ({
 export const isDashboardAppInNoDataState = async () => {
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
   if (hasUserDataView) return false;
+
+  // consider has data if there is at least one dataset
+  const hasDatasets = await coreServices.http
+    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+    .then((res) => res.datasets.length > 0)
+    .catch(() => false);
+  if (hasDatasets) return false;
 
   // consider has data if there is unsaved dashboard with edits
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;

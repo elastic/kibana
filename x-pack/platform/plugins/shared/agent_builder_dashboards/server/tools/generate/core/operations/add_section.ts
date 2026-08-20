@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import { createPanelInputMaterializer } from './panel_creation';
+import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
 import { defineOperation } from './types';
 import { addSectionPanelItemSchema } from './panels';
 
@@ -26,7 +26,7 @@ export const addSectionOperation = defineOperation({
         'Optional inline panels (source: "config" or source: "request") to create inside the new section. Panel grids are section-relative.'
       ),
   }),
-  handler: ({ dashboardData, operation, operationIndex, context }) => {
+  handler: async ({ dashboardData, operation, operationIndex, context }) => {
     let nextSection: DashboardSection = {
       id: uuidv4(),
       title: operation.title,
@@ -43,15 +43,32 @@ export const addSectionOperation = defineOperation({
         failures: context.failures,
       });
 
+      const materialized = operation.panels.map((item, i) => ({
+        item,
+        panel: materializePanelInput(item, i),
+      }));
+
+      if (context.resolveCustomContentTemplate) {
+        await applyCustomContentTemplates(
+          materialized,
+          context.resolveCustomContentTemplate,
+          context.failures
+        );
+      }
+
       const sectionPanels: AttachmentPanel[] = [];
 
-      for (const [panelInputIndex, item] of operation.panels.entries()) {
-        const panelContent = materializePanelInput(item, panelInputIndex);
-        if (panelContent === undefined) {
-          continue;
-        }
+      for (const { item, panel } of materialized) {
+        if (panel === undefined) continue;
 
-        sectionPanels.push({ id: uuidv4(), ...panelContent, grid: item.grid });
+        const panelId = uuidv4();
+        sectionPanels.push({ id: panelId, ...panel.panelContent, grid: item.grid });
+        if (panel.authoringNote) {
+          context.panelAuthoringNotes.push({
+            panelId,
+            authoringNote: panel.authoringNote,
+          });
+        }
       }
 
       nextSection = {

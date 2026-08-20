@@ -16,7 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { ProfileStateType, type ProfileStateRegistry } from '../../../context_awareness';
+import { ProfileStateType, type ProfileStateRegistry } from '../../../../common/context_awareness';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import {
   createTabItem,

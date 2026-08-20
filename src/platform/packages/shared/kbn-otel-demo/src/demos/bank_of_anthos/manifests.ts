@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
 /**
@@ -530,6 +530,6 @@ export const bankOfAnthosManifests: DemoManifestGenerator = {
       });
     }
 
-    return manifests.map((m) => yaml.dump(m, { lineWidth: -1 })).join('---\n');
+    return manifests.map((m) => stringify(m, { lineWidth: 0 })).join('---\n');
   },
 };

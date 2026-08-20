@@ -73,4 +73,6 @@ if (!evalsGroup) {
   process.exit(1);
 }
 
-emitPipeline(['steps:', preludeSteps, evalsGroup, postludeSteps]);
+const pipelineEnv = ['env:', `  CI_STATS_DISABLE_PR_REPORT: 'true'`].join('\n');
+
+emitPipeline([pipelineEnv, 'steps:', preludeSteps, evalsGroup, postludeSteps]);
