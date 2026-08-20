@@ -163,7 +163,7 @@ describe('Memory dump response action', () => {
       await enterConsoleCommand(renderResult, user, `memory-dump --process`);
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'Argument --process requires one of the following arguments: --entityId, --pid'
+        'Argument --process requires (only) one of the following arguments: --entityId, --pid'
       );
     });
 
