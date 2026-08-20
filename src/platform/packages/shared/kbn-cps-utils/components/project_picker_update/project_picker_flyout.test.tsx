@@ -150,6 +150,34 @@ describe('ProjectPickerFlyoutContent', () => {
     expect(onApplyChanges).toHaveBeenCalledWith('_id:* AND NOT _id:linked1');
   });
 
+  it('applies selected projects as explicit ids in snapshot mode', async () => {
+    const user = userEvent.setup();
+    const { onApplyChanges } = renderFlyout({
+      projectRoutingStrategy: 'snapshot',
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectOne._id))
+      ).toHaveAttribute('aria-checked', 'true');
+    });
+
+    await user.click(
+      screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectOne._id))
+    );
+    await user.click(
+      screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectTwo._id))
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeEnabled();
+    });
+
+    await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+
+    expect(onApplyChanges).toHaveBeenCalledWith('_id:origin');
+  });
+
   it('disables Discard and Apply after round-tripping back to the baseline selection', async () => {
     const user = userEvent.setup();
     renderFlyout();

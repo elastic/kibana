@@ -81,7 +81,7 @@ describe('fetchIndexStats', () => {
   };
 
   const mockDocumentCount = (count: number, failedShards = 0) => {
-    client.asInternalUser.count.mockResolvedValue({
+    client.asCurrentUser.count.mockResolvedValue({
       count,
       _shards: { total: 2, successful: 2 - failedShards, skipped: 0, failed: failedShards },
     });
@@ -172,7 +172,7 @@ describe('fetchIndexStats', () => {
     });
     expect(logger.warn).toHaveBeenCalled();
     expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-    expect(client.asInternalUser.count).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
   });
 
   it('treats a metering response without indices as an empty deployment', async () => {
@@ -219,7 +219,7 @@ describe('fetchIndexStats', () => {
       documentsCount: 0,
     });
     expect(client.asInternalUser.indices.stats).not.toHaveBeenCalled();
-    expect(client.asInternalUser.count).not.toHaveBeenCalled();
+    expect(client.asCurrentUser.count).not.toHaveBeenCalled();
   });
 
   it('counts top-level documents rather than reusing the metering num_docs', async () => {
@@ -230,7 +230,7 @@ describe('fetchIndexStats', () => {
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asInternalUser.count).toHaveBeenCalledWith({
+    expect(client.asCurrentUser.count).toHaveBeenCalledWith({
       index: ['*', '-.*'],
       expand_wildcards: ['open'],
     });
@@ -253,7 +253,7 @@ describe('fetchIndexStats', () => {
   it('returns a null documentsCount (not 0) when the count call fails', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
     mockVectorStats(10);
-    client.asInternalUser.count.mockRejectedValue(new Error('boom'));
+    client.asCurrentUser.count.mockRejectedValue(new Error('boom'));
 
     const result = await fetchIndexStats(client, logger);
 
