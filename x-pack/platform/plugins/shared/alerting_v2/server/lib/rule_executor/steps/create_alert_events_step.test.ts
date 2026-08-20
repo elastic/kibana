@@ -13,14 +13,12 @@ import {
   createRuleResponse,
   createRulePipelineState,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
-    step = new CreateAlertEventsStep(loggerService);
+    step = new CreateAlertEventsStep();
   });
 
   it('builds alert-typed events for kind: alert rule', async () => {

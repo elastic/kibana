@@ -9,6 +9,8 @@
 
 export { AppHeader, AppHeaderView } from './app_header';
 export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
+export { AppHeaderLoading, AppHeaderLoadingView } from './app_header';
+export type { AppHeaderLoadingProps, AppHeaderLoadingMenu } from './app_header';
 export {
   ChromeAppHeaderRegistration,
   useChromeAppHeaderRegistration,
@@ -19,7 +21,7 @@ export {
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
   getAppMenuActionButtonTestSubj,
-} from '@kbn/core-chrome-app-menu-components';
+} from '@kbn/app-menu';
 export type {
   AppHeaderBack,
   AppHeaderBadge,

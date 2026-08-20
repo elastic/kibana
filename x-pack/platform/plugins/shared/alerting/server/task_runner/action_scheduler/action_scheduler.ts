@@ -21,7 +21,7 @@ import type {
   RuleAlertData,
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
-import { withAlertingSpan } from '../lib';
+import { createTaskRunnerLogger, withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
@@ -117,6 +117,17 @@ export class ActionScheduler<
     }
 
     const actionsToNotLog: string[] = [];
+    const logger = createTaskRunnerLogger({
+      logger: this.context.logger,
+      labels: {
+        ruleId: this.context.rule.id,
+        ruleType: this.context.rule.alertTypeId,
+        spaceId: this.context.taskInstance.params.spaceId,
+        executionId: this.context.executionId,
+        taskInstanceId: this.context.taskInstance.id,
+      },
+    });
+
     if (bulkScheduleResponse.length) {
       for (const r of bulkScheduleResponse) {
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
@@ -130,7 +141,7 @@ export class ActionScheduler<
             status: ActionsCompletion.PARTIAL,
           });
 
-          this.context.logger.debug(
+          logger.debug(
             `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
           );
 

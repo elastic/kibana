@@ -30,6 +30,7 @@ interface BaseConverseParams {
   executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
+  projectRouting?: string;
 }
 
 export type ChatParams = BaseConverseParams & {
@@ -71,6 +72,7 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
+      project_routing: params.projectRouting,
     });
   }
 
@@ -86,6 +88,7 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
+      project_routing: params.projectRouting,
     });
   }
 
@@ -98,6 +101,7 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       browser_api_tools: params.browserApiTools ?? [],
       action: 'regenerate',
+      project_routing: params.projectRouting,
     });
   }
 

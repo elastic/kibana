@@ -77,6 +77,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     reportIp: {
       isTool: true,
+      scope: 'write',
       description:
         'Submit an abuse report for an IPv4 or IPv6 address. Requires one or more numeric category IDs (see AbuseIPDB category list). Returns the updated abuseConfidenceScore.',
       input: lazySchema(() =>
