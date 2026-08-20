@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { test } from '../fixtures';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';
 const dateRangeEnd = '2019-09-11T19:40:08.078Z';

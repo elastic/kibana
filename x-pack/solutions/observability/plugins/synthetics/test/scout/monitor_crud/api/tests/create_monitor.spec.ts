@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import { formatKibanaNamespace } from '../../../../../common/formatters';
 import {
   apiTest,
@@ -20,7 +21,6 @@ import {
   parseMonitorResponse,
 } from '../../../common/fixtures/monitors';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
-import { tags } from '@kbn/scout-oblt';
 
 /**
  * Ported from FTR

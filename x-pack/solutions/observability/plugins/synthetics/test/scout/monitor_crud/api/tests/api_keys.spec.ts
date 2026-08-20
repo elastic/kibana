@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, KIBANA_HEADERS } from '../../../common/fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { apiTest, KIBANA_HEADERS } from '../../../common/fixtures';
 
 /**
  * Ported from FTR

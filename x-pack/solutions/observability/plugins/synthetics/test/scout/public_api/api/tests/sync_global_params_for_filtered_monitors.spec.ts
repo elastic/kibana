@@ -7,6 +7,7 @@
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -20,7 +21,6 @@ import {
 } from '../../../common/fixtures/fleet';
 import { delay, tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
-import { tags } from '@kbn/scout-oblt';
 
 const MONITOR_WITH_PARAM_A = 'test-monitor-with-paramA';
 const MONITOR_WITH_PARAM_B = 'test-monitor-with-paramB';

@@ -6,9 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 import { makeChecksWithStatus } from '../fixtures/helpers/make_checks';
-import { tags } from '@kbn/scout-oblt';
 
 const NO_LOCATION_MONITOR_ID = 'location-testing-id';
 const LESS_AVAIL_MONITOR_ID = 'less-availability-monitor';

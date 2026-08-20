@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { test } from '../fixtures';
 
 const queryParams = {
   dateRangeStart: '2021-11-21T22:06:06.502Z',

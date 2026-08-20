@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import { formatKibanaNamespace } from '../../../../../common/formatters';
 import {
   apiTest,
@@ -24,7 +25,6 @@ import {
 import { getPackagePolicyForMonitor } from '../../../common/fixtures/fleet';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { browserMonitorFixture } from '../../../common/fixtures/data/browser_monitor';
-import { tags } from '@kbn/scout-oblt';
 
 interface ServiceLocation {
   id: string;

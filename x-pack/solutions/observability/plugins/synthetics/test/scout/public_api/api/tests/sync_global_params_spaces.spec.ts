@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -22,7 +23,6 @@ import {
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { browserMonitorFixture } from '../../../common/fixtures/data/browser_monitor';
-import { tags } from '@kbn/scout-oblt';
 
 const SYNTHETICS_PARAM_SO_TYPE = 'synthetics-param';
 

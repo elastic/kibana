@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -15,7 +16,6 @@ import { enableSynthetics, inspectMonitor } from '../../../common/fixtures/monit
 import { createParam } from '../../../common/fixtures/params';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { inspectBrowserMonitorFixture } from '../fixtures/data/browser_monitor_fixture';
-import { tags } from '@kbn/scout-oblt';
 
 const LOCAL_PUBLIC_LOCATION = {
   id: 'dev',

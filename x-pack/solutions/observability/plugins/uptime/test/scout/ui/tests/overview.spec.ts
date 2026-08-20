@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test, testData } from '../fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { test, testData } from '../fixtures';
 
 test.describe('Uptime overview page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {

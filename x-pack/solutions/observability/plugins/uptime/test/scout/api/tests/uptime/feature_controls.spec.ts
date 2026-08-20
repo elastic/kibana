@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, testData } from '../../fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { apiTest, testData } from '../../fixtures';
 
 apiTest.describe('feature controls', { tag: tags.stateful.classic }, () => {
   const space1Id = 'space_1';
