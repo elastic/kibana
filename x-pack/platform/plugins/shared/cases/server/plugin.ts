@@ -77,8 +77,8 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
-import { registerCasesWorkflowExecutionContext } from './workflows/execution_context';
 import { initUiSettings } from './ui_settings';
+import { CasesWorkflowRunService } from './workflows/run_workflow';
 
 export class CasePlugin
   implements
@@ -224,6 +224,20 @@ export class CasePlugin
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+    const workflowRunService = plugins.workflowsManagement
+      ? new CasesWorkflowRunService({
+          management: plugins.workflowsManagement.management,
+          logger: this.logger,
+          audit: plugins.security.audit,
+        })
+      : undefined;
 
     registerRoutes({
       router,
@@ -233,7 +247,11 @@ export class CasePlugin
           docLinks: core.docLinks,
           config: this.caseConfig,
         }),
-        ...getInternalRoutes(this.userProfileService, this.caseConfig),
+        ...getInternalRoutes(
+          this.userProfileService,
+          this.caseConfig,
+          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+        ),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -250,14 +268,6 @@ export class CasePlugin
         const [coreStart] = await core.getStartServices();
         return this.getCasesClientWithRequest(coreStart, clientSource)(request);
       };
-    };
-
-    const getSpaceId = (request?: KibanaRequest) => {
-      if (!request) {
-        return DEFAULT_SPACE_ID;
-      }
-
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
     const serverlessProjectType = this.isServerless
@@ -285,7 +295,6 @@ export class CasePlugin
       () => core.getStartServices()
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
-    registerCasesWorkflowExecutionContext(plugins.workflowsExtensions, getCasesClient('workflow'));
 
     if (plugins.agentBuilder) {
       registerCasesAgentBuilderTools(

@@ -30,13 +30,6 @@ export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const WORKFLOW_FOLLOW_UP_FAILED_WARNING = i18n.translate(
-  'xpack.workflowsUi.runWorkflowPanel.start.followUpFailedWarningMessage',
-  {
-    defaultMessage: 'Workflow started, but its follow-up action failed',
-  }
-);
-
 export const RUN_WORKFLOW_BUTTON = i18n.translate('xpack.workflowsUi.runWorkflowPanel.run.button', {
   defaultMessage: 'Run workflow',
 });

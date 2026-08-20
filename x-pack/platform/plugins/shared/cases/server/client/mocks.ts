@@ -146,6 +146,7 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     getConnectors: jest.fn(),
     stats: jest.fn(),
     getUsers: jest.fn(),
+    preflightWorkflowExecution: jest.fn(),
     recordWorkflowExecution: jest.fn(),
   });
 };

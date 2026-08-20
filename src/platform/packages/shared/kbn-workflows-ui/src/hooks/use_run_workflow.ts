@@ -40,12 +40,7 @@ export const useRunWorkflow = <P extends object = {}>(
 
   return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowParams & P>({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs, metadata, executionContext }) =>
-      api.runWorkflow(id, {
-        inputs,
-        ...(metadata && { metadata }),
-        ...(executionContext && { executionContext }),
-      }),
+    mutationFn: ({ id, inputs, metadata }) => api.runWorkflow(id, { inputs, metadata }),
     ...options,
   });
 };

@@ -19,7 +19,6 @@ import type {
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
-import type { WorkflowExecutionContextDefinition } from './execution_context_registry';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -50,13 +49,6 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
-
-  /**
-   * Register a workflow execution context definition during setup.
-   *
-   * @throws Error if the context type is already registered, invalid, or registration occurs after start
-   */
-  registerExecutionContextDefinition(definition: WorkflowExecutionContextDefinition): void;
 
   /**
    * Register the workflows client provider.
@@ -97,16 +89,6 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The trigger definition, or undefined if not registered
      */
     getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
-
-    /**
-     * Get a workflow execution context definition by type.
-     */
-    getExecutionContextDefinition(type: string): WorkflowExecutionContextDefinition | undefined;
-
-    /**
-     * Get all registered workflow execution context definitions.
-     */
-    getAllExecutionContextDefinitions(): WorkflowExecutionContextDefinition[];
 
     /**
      * Get the workflows client for the current request.

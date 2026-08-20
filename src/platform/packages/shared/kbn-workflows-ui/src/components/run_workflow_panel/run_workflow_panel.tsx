@@ -15,11 +15,7 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import type {
-  RunWorkflowResponseDto,
-  WorkflowExecutionContext,
-  WorkflowListItemDto,
-} from '@kbn/workflows';
+import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
@@ -41,11 +37,20 @@ import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_u
  */
 export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 
+export interface RunWorkflowExecutorParams {
+  workflowId: string;
+  inputs: WorkflowRunInputs;
+}
+
+export type RunWorkflowExecutor = (
+  params: RunWorkflowExecutorParams
+) => Promise<RunWorkflowResponseDto>;
+
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
-  /** Product entity associated with the workflow execution. */
-  executionContext?: WorkflowExecutionContext;
+  /** Optional executor used instead of the shared useRunWorkflow hook. */
+  runWorkflow?: RunWorkflowExecutor;
   /**
    * Server-side managed workflow visibility filter. Only managed workflows tagged with a
    * matching managedVisibilityContexts value (selector or solution) are returned by the server.
@@ -74,22 +79,35 @@ interface RunWorkflowPanelServices {
   rendering?: ToMountPointParams;
 }
 
-/** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
-export const RunWorkflowPanel = ({
+interface RunWorkflowExecutionCallbacks {
+  onSuccess: (response: RunWorkflowResponseDto) => void;
+  onError: (error: unknown) => void;
+  onSettled: () => void;
+}
+
+type ExecuteRunWorkflow = (
+  params: RunWorkflowExecutorParams,
+  callbacks: RunWorkflowExecutionCallbacks
+) => void;
+
+interface RunWorkflowPanelContentProps extends Omit<RunWorkflowPanelProps, 'runWorkflow'> {
+  executeRunWorkflow: ExecuteRunWorkflow;
+}
+
+const RunWorkflowPanelContent = ({
   inputs,
-  executionContext,
   visibility,
   sortWorkflow,
   filterWorkflow,
   onClose,
   onExecute,
-}: RunWorkflowPanelProps) => {
+  executeRunWorkflow,
+}: RunWorkflowPanelContentProps) => {
   const {
     services: { application, notifications, rendering },
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
-  const runWorkflow = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
@@ -135,63 +153,54 @@ export const RunWorkflowPanel = ({
       setIsLoading(true);
       onExecute?.();
 
-      runWorkflow.mutate(
-        {
-          id: selectedId,
-          inputs: { ...extraInputs, ...inputs },
-          ...(executionContext && { executionContext }),
-        },
-        {
-          onSuccess: (data: RunWorkflowResponseDto) => {
-            notifications.toasts.addSuccess({
-              title: i18n.WORKFLOW_START_SUCCESS_TOAST,
-              ...(rendering && {
-                text: toMountPoint(
-                  <EuiFlexGroup justifyContent={'flexEnd'}>
-                    <EuiButton
-                      size="s"
-                      onClick={() => {
-                        application.navigateToApp(WORKFLOWS_APP_ID, {
-                          openInNewTab: true,
-                          path: `${selectedId}?executionId=${data.workflowExecutionId}`,
-                        });
-                      }}
-                    >
-                      {i18n.WORKFLOW_START_SUCCESS_BUTTON}
-                    </EuiButton>
-                  </EuiFlexGroup>,
-                  rendering
-                ),
-              }),
-            });
-            if (data.followUp?.status === 'failed') {
-              notifications.toasts.addWarning({
-                title: i18n.WORKFLOW_FOLLOW_UP_FAILED_WARNING,
-              });
-            }
-          },
-          onError: (err) => {
-            notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-              title: i18n.WORKFLOW_START_FAILED_TOAST,
-            });
-          },
-          onSettled: () => {
-            setIsLoading(false);
-            onClose();
-          },
-        }
+      const mergedInputs = { ...extraInputs, ...inputs };
+      const onSuccess = (data: RunWorkflowResponseDto) => {
+        notifications.toasts.addSuccess({
+          title: i18n.WORKFLOW_START_SUCCESS_TOAST,
+          ...(rendering && {
+            text: toMountPoint(
+              <EuiFlexGroup justifyContent={'flexEnd'}>
+                <EuiButton
+                  size="s"
+                  onClick={() => {
+                    application.navigateToApp(WORKFLOWS_APP_ID, {
+                      openInNewTab: true,
+                      path: `${selectedId}?executionId=${data.workflowExecutionId}`,
+                    });
+                  }}
+                >
+                  {i18n.WORKFLOW_START_SUCCESS_BUTTON}
+                </EuiButton>
+              </EuiFlexGroup>,
+              rendering
+            ),
+          }),
+        });
+      };
+      const onError = (err: unknown) => {
+        notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+          title: i18n.WORKFLOW_START_FAILED_TOAST,
+        });
+      };
+      const onSettled = () => {
+        setIsLoading(false);
+        onClose();
+      };
+
+      executeRunWorkflow(
+        { workflowId: selectedId, inputs: mergedInputs },
+        { onSuccess, onError, onSettled }
       );
     },
     [
       application,
       selectedId,
-      runWorkflow,
       inputs,
-      executionContext,
       notifications,
       rendering,
       onClose,
       onExecute,
+      executeRunWorkflow,
     ]
   );
 
@@ -273,3 +282,42 @@ export const RunWorkflowPanel = ({
     </>
   );
 };
+
+const RunWorkflowPanelWithDefaultExecutor = (props: Omit<RunWorkflowPanelProps, 'runWorkflow'>) => {
+  const defaultRunWorkflow = useRunWorkflow();
+  const executeRunWorkflow = useCallback<ExecuteRunWorkflow>(
+    ({ workflowId, inputs }, callbacks) => {
+      defaultRunWorkflow.mutate({ id: workflowId, inputs }, callbacks);
+    },
+    [defaultRunWorkflow]
+  );
+
+  return <RunWorkflowPanelContent {...props} executeRunWorkflow={executeRunWorkflow} />;
+};
+
+interface RunWorkflowPanelWithCustomExecutorProps
+  extends Omit<RunWorkflowPanelProps, 'runWorkflow'> {
+  runWorkflow: RunWorkflowExecutor;
+}
+
+const RunWorkflowPanelWithCustomExecutor = ({
+  runWorkflow,
+  ...props
+}: RunWorkflowPanelWithCustomExecutorProps) => {
+  const executeRunWorkflow = useCallback<ExecuteRunWorkflow>(
+    (params, { onSuccess, onError, onSettled }) => {
+      void runWorkflow(params).then(onSuccess, onError).finally(onSettled);
+    },
+    [runWorkflow]
+  );
+
+  return <RunWorkflowPanelContent {...props} executeRunWorkflow={executeRunWorkflow} />;
+};
+
+/** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
+export const RunWorkflowPanel = ({ runWorkflow, ...props }: RunWorkflowPanelProps) =>
+  runWorkflow ? (
+    <RunWorkflowPanelWithCustomExecutor {...props} runWorkflow={runWorkflow} />
+  ) : (
+    <RunWorkflowPanelWithDefaultExecutor {...props} />
+  );

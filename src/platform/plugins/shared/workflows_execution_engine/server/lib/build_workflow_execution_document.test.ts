@@ -75,60 +75,6 @@ describe('buildWorkflowExecutionDocument', () => {
     expect(workflowExecution.id).toBeDefined();
   });
 
-  it('persists a dedicated execution context without exposing it to runtime context', () => {
-    const workflowExecution = buildWorkflowExecutionDocument({
-      ...baseParams,
-      context: {
-        spaceId: 'default',
-        inputs: { foo: 'bar' },
-        executionContext: {
-          type: 'cases.case',
-          id: 'case-1',
-          ignored: 'not persisted',
-        },
-      },
-    });
-
-    expect(workflowExecution.executionContext).toEqual({
-      type: 'cases.case',
-      id: 'case-1',
-    });
-    expect(workflowExecution.context).toEqual({
-      spaceId: 'default',
-      inputs: { foo: 'bar' },
-    });
-  });
-
-  it('persists a parent execution context reference', () => {
-    const workflowExecution = buildWorkflowExecutionDocument({
-      ...baseParams,
-      context: {
-        spaceId: 'default',
-        executionContext: {
-          type: 'alerts.alert',
-          id: 'alert-1',
-          parent: {
-            type: 'cases.case',
-            id: 'case-1',
-            ignored: 'not persisted',
-          },
-        },
-      },
-    });
-
-    expect(workflowExecution.executionContext).toEqual({
-      type: 'alerts.alert',
-      id: 'alert-1',
-      parent: {
-        type: 'cases.case',
-        id: 'case-1',
-      },
-    });
-    expect(workflowExecution.context).toEqual({
-      spaceId: 'default',
-    });
-  });
-
   it('copies managed workflow billable metadata', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,

@@ -31,11 +31,9 @@ import type {
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
-  WorkflowExecutionContext,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
   WorkflowExecutionEventDispatchMetadata,
-  WorkflowExecutionFollowUp,
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
@@ -56,11 +54,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import {
-  getEventChainContext,
-  type ServerTriggerDefinition,
-  setWorkflowEventChainContext,
-} from '@kbn/workflows-extensions/server';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
   parseYamlToJSONWithoutValidation,
@@ -218,7 +212,6 @@ export interface ExecuteWorkflowBaseParams {
   request: KibanaRequest;
   spaceId: string;
   inputs?: Record<string, unknown>;
-  executionContext?: WorkflowExecutionContext;
   waitForCompletion?: boolean;
   completionTimeoutSec?: number;
   triggeredBy?: string;
@@ -251,7 +244,6 @@ export type ExecuteWorkflowParams = ExecuteSavedWorkflowParams | ExecuteInlineWo
 
 export interface ExecuteWorkflowResult {
   workflowExecutionId: string;
-  followUp?: WorkflowExecutionFollowUp;
   execution?: WorkflowExecutionDto;
   timedOut?: boolean;
 }
@@ -266,8 +258,7 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean,
-    private readonly logger?: Logger
+    public readonly isWorkflowsAvailable: boolean
   ) {}
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
@@ -492,30 +483,8 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     request: KibanaRequest,
     triggeredBy?: string,
-    metadata?: Record<string, unknown>,
-    executionContext?: WorkflowExecutionContext
+    metadata?: Record<string, unknown>
   ): Promise<string> {
-    const result = await this.startWorkflowExecution(
-      workflow,
-      spaceId,
-      inputs,
-      request,
-      triggeredBy,
-      metadata,
-      executionContext
-    );
-    return result.workflowExecutionId;
-  }
-
-  public async startWorkflowExecution(
-    workflow: WorkflowExecutionEngineModel,
-    spaceId: string,
-    inputs: Record<string, any>,
-    request: KibanaRequest,
-    triggeredBy?: string,
-    metadata?: Record<string, unknown>,
-    executionContext?: WorkflowExecutionContext
-  ): Promise<{ workflowExecutionId: string; followUp?: WorkflowExecutionFollowUp }> {
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -526,30 +495,13 @@ export class WorkflowsManagementApi {
     if (metadata) {
       context.metadata = metadata;
     }
-    if (executionContext) {
-      context.executionContext = executionContext;
-    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
       context,
       request
     );
-    const followUp = executionContext
-      ? await this.runExecutionContextFollowUp({
-          workflowsExecutionEngine,
-          workflow,
-          workflowExecutionId: executeResponse.workflowExecutionId,
-          executionContext,
-          inputs,
-          request,
-        })
-      : undefined;
-
-    return {
-      workflowExecutionId: executeResponse.workflowExecutionId,
-      ...(followUp ? { followUp } : {}),
-    };
+    return executeResponse.workflowExecutionId;
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
@@ -561,23 +513,20 @@ export class WorkflowsManagementApi {
       completionTimeoutSec = DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC,
       triggeredBy,
       metadata,
-      executionContext,
     } = params;
 
     const workflow = isExecuteInlineWorkflowParams(params)
       ? await this.createEphemeralWorkflowExecutionModel(params)
       : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId);
 
-    const startResult = await this.startWorkflowExecution(
+    const workflowExecutionId = await this.runWorkflow(
       workflow,
       spaceId,
       inputs,
       request,
       triggeredBy,
-      metadata,
-      executionContext
+      metadata
     );
-    const { workflowExecutionId, followUp } = startResult;
 
     const { execution, timedOut } = await this.waitForWorkflowExecution({
       workflowExecutionId,
@@ -588,95 +537,9 @@ export class WorkflowsManagementApi {
 
     return {
       workflowExecutionId,
-      ...(followUp ? { followUp } : {}),
       ...(execution ? { execution } : {}),
       ...(timedOut ? { timedOut } : {}),
     };
-  }
-
-  private async runExecutionContextFollowUp({
-    workflowsExecutionEngine,
-    workflow,
-    workflowExecutionId,
-    executionContext,
-    inputs,
-    request,
-  }: {
-    workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
-    workflow: WorkflowExecutionEngineModel;
-    workflowExecutionId: string;
-    executionContext: WorkflowExecutionContext;
-    inputs: Record<string, unknown>;
-    request: KibanaRequest;
-  }): Promise<WorkflowExecutionFollowUp | undefined> {
-    const workflowsExtensions = await this.workflowsService.getWorkflowsExtensions();
-    const definition = workflowsExtensions.getExecutionContextDefinition(executionContext.type);
-    if (!definition?.onExecutionStarted) {
-      return undefined;
-    }
-
-    const existingEventChainContext = getEventChainContext(request);
-    const event = inputs.event;
-    const eventRecord =
-      event && typeof event === 'object' && !Array.isArray(event)
-        ? (event as Record<string, unknown>)
-        : undefined;
-    const eventDepth =
-      typeof eventRecord?.eventChainDepth === 'number' && eventRecord.eventChainDepth >= 0
-        ? eventRecord.eventChainDepth
-        : undefined;
-    const eventVisited = Array.isArray(eventRecord?.eventChainVisitedWorkflowIds)
-      ? eventRecord.eventChainVisitedWorkflowIds.filter(
-          (id): id is string => typeof id === 'string' && id.length > 0
-        )
-      : undefined;
-    const maxVisitedWorkflowIds = Math.max(
-      1,
-      workflowsExecutionEngine.triggerEvents.maxEventChainDepth
-    );
-    const previousVisited = eventVisited ?? existingEventChainContext?.visitedWorkflowIds ?? [];
-    const visitedWorkflowIds =
-      previousVisited[previousVisited.length - 1] === workflow.id
-        ? previousVisited.slice(0, maxVisitedWorkflowIds)
-        : [...previousVisited, workflow.id].slice(0, maxVisitedWorkflowIds);
-
-    setWorkflowEventChainContext(request, {
-      depth: eventDepth ?? existingEventChainContext?.depth ?? -1,
-      sourceExecutionId: workflowExecutionId,
-      visitedWorkflowIds,
-    });
-
-    const startedAt = Date.now();
-    try {
-      await definition.onExecutionStarted({
-        request,
-        executionContext,
-        workflow: {
-          id: workflow.id,
-          name: workflow.name,
-        },
-        workflowExecutionId,
-        inputs,
-      });
-      this.logger?.debug(
-        `Workflow execution context follow-up succeeded: contextType=${
-          executionContext.type
-        } workflowId=${workflow.id} executionId=${workflowExecutionId} durationMs=${
-          Date.now() - startedAt
-        }`
-      );
-      return { status: 'succeeded' };
-    } catch (error) {
-      this.logger?.error(
-        `Workflow execution context follow-up failed: contextType=${
-          executionContext.type
-        } workflowId=${workflow.id} executionId=${workflowExecutionId} durationMs=${
-          Date.now() - startedAt
-        }`,
-        { error }
-      );
-      return { status: 'failed' };
-    }
   }
 
   private async createEphemeralWorkflowExecutionModel(

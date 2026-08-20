@@ -17,14 +17,17 @@ export interface RecordWorkflowExecutionParams {
   origin: WorkflowUserAction['payload']['origin'];
 }
 
-export const recordWorkflowExecution = async (
-  { caseId, workflow, origin }: RecordWorkflowExecutionParams,
+export interface PreflightWorkflowExecutionParams {
+  caseId: string;
+}
+
+const validateWorkflowExecutionActivity = async (
+  { caseId }: PreflightWorkflowExecutionParams,
   clientArgs: CasesClientArgs
-): Promise<void> => {
+): Promise<Awaited<ReturnType<CasesClientArgs['services']['caseService']['getCase']>>> => {
   const {
     authorization,
     services: { caseService, userActionService },
-    user,
   } = clientArgs;
 
   const theCase = await caseService.getCase({ id: caseId });
@@ -39,6 +42,26 @@ export const recordWorkflowExecution = async (
     userActionService,
     userActionsToAdd: 1,
   });
+
+  return theCase;
+};
+
+export const preflightWorkflowExecution = async (
+  params: PreflightWorkflowExecutionParams,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  await validateWorkflowExecutionActivity(params, clientArgs);
+};
+
+export const recordWorkflowExecution = async (
+  { caseId, workflow, origin }: RecordWorkflowExecutionParams,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    services: { userActionService },
+    user,
+  } = clientArgs;
+  const theCase = await validateWorkflowExecutionActivity({ caseId }, clientArgs);
 
   await userActionService.creator.createUserAction({
     userAction: {

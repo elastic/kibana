@@ -52,28 +52,6 @@ describe('useRunWorkflow', () => {
     });
   });
 
-  it('forwards execution context to the API', async () => {
-    const executionContext = { type: 'cases.case', id: 'case-1' };
-    mockWorkflowApi.runWorkflow.mockResolvedValue({
-      workflowExecutionId: 'execution-1',
-    } as RunWorkflowResponseDto);
-
-    const { result } = renderHook(() => useRunWorkflow(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        id: 'workflow-1',
-        inputs: {},
-        executionContext,
-      });
-    });
-
-    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith('workflow-1', {
-      inputs: {},
-      executionContext,
-    });
-  });
-
   it('throws when http service is unavailable', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     mockWorkflowApi.runWorkflow.mockRejectedValue(new Error('HTTP service unavailable'));

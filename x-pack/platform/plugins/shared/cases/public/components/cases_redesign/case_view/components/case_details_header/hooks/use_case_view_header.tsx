@@ -65,7 +65,7 @@ export const useCaseViewHeader = ({
     openModal: openRunWorkflowModal,
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
-    executionContext: workflowExecutionContext,
+    runWorkflow,
     filterWorkflow: workflowFilterWorkflow,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
@@ -222,7 +222,7 @@ export const useCaseViewHeader = ({
   const runWorkflowModal = isRunWorkflowModalOpen ? (
     <RunCaseWorkflowModal
       inputs={workflowInputs}
-      executionContext={workflowExecutionContext}
+      runWorkflow={runWorkflow}
       filterWorkflow={workflowFilterWorkflow}
       sortWorkflow={workflowSortWorkflow}
       onClose={closeRunWorkflowModal}

@@ -31,11 +31,6 @@ describe('getWorkflowExecution', () => {
     stepExecutionIds: ['step-doc-1', 'step-doc-2'],
     workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
     concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
-    executionContext: {
-      type: 'alerts.alert',
-      id: 'alert-1',
-      parent: { type: 'cases.case', id: 'case-1' },
-    },
   };
 
   beforeEach(() => {
@@ -245,13 +240,6 @@ describe('getWorkflowExecution', () => {
       expect(result?.id).toBe('exec-1');
       expect(result?.stepExecutions).toHaveLength(2);
       expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
-      expect(result).toMatchObject({
-        executionContext: {
-          type: 'alerts.alert',
-          id: 'alert-1',
-          parent: { type: 'cases.case', id: 'case-1' },
-        },
-      });
       expect(result).not.toHaveProperty('billable');
     });
 

@@ -22,7 +22,7 @@ import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 describe('Execution Routes', () => {
-  let routeHandlers: Record<string, { config: any; handler: (...args: any[]) => Promise<any> }>;
+  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockRouter: IRouter;
@@ -93,7 +93,6 @@ describe('Execution Routes', () => {
     mockApi = {
       getWorkflow: jest.fn(),
       runWorkflow: jest.fn(),
-      startWorkflowExecution: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
@@ -116,9 +115,8 @@ describe('Execution Routes', () => {
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
-        .mockImplementation((config: any, handler: (...args: any[]) => Promise<any>) => {
+        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
           routeHandlers[`${method}:${path}`] = {
-            config,
             handler: async (context, request, response) => {
               request.authzResult ??= defaultAuthzResult;
               return handler(context, request, response);
@@ -173,59 +171,19 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should validate bounded hierarchical execution contexts', () => {
-      const bodySchema = routeHandlers[`POST:${path}`].config.validate.request.body;
-      const body = {
-        inputs: {},
-        executionContext: {
-          type: 'alerts.alert',
-          id: 'alert-1',
-          parent: {
-            type: 'cases.case',
-            id: 'case-1',
-          },
-        },
-      };
-
-      expect(bodySchema.validate(body)).toEqual(body);
-      expect(() =>
-        bodySchema.validate({
-          ...body,
-          executionContext: {
-            ...body.executionContext,
-            parent: {
-              ...body.executionContext.parent,
-              id: 'a'.repeat(513),
-            },
-          },
-        })
-      ).toThrow();
-    });
-
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.startWorkflowExecution.mockResolvedValue({
-        workflowExecutionId: 'exec-1',
-        followUp: { status: 'succeeded' },
-      });
+      mockApi.runWorkflow.mockResolvedValue('exec-1');
       const h = handler('POST', path)!;
       const request = {
         params: { id: 'wf-1' },
-        body: {
-          inputs: { k: 'v' },
-          metadata: { src: 'ui' },
-          executionContext: {
-            type: 'alerts.alert',
-            id: 'alert-1',
-            parent: { type: 'cases.case', id: 'case-1' },
-          },
-        },
+        body: { inputs: { k: 'v' }, metadata: { src: 'ui' } },
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.startWorkflowExecution).toHaveBeenCalledWith(
+      expect(mockApi.runWorkflow).toHaveBeenCalledWith(
         {
           id: 'wf-1',
           name: 'Test',
@@ -237,20 +195,9 @@ describe('Execution Routes', () => {
         { k: 'v' },
         request,
         undefined,
-        { src: 'ui' },
-        {
-          type: 'alerts.alert',
-          id: 'alert-1',
-          parent: { type: 'cases.case', id: 'case-1' },
-        }
+        { src: 'ui' }
       );
-      expect(result).toEqual({
-        type: 'ok',
-        body: {
-          workflowExecutionId: 'exec-1',
-          followUp: { status: 'succeeded' },
-        },
-      });
+      expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
 
     it('should return not found when workflow does not exist', async () => {
@@ -262,7 +209,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.startWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -302,9 +249,9 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when execution creation throws', async () => {
+    it('should return custom error when api.runWorkflow throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.startWorkflowExecution.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflow.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 
@@ -415,8 +362,6 @@ describe('Execution Routes', () => {
           page: 2,
           size: 25,
           trackTotalHits: true,
-          contextType: 'cases.case',
-          contextId: 'case-1',
         },
       };
 
@@ -430,8 +375,6 @@ describe('Execution Routes', () => {
           page: 2,
           size: 25,
           trackTotalHits: true,
-          contextType: 'cases.case',
-          contextId: 'case-1',
         }),
         'default'
       );
@@ -468,17 +411,6 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: expect.stringContaining('Invalid KQL') },
-      });
-      expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
-    });
-
-    it('should reject a half-specified execution context filter', async () => {
-      const h = handler('GET', path)!;
-
-      await h(mockContext, { query: { contextType: 'cases.case' } } as any, mockResponse as any);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'contextType and contextId must be supplied together.' },
       });
       expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
     });

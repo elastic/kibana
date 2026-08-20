@@ -10,10 +10,7 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import {
-  MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
-  toWorkflowExecutionEngineModel,
-} from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
@@ -55,30 +52,6 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
                   meta: { description: 'Optional metadata for the execution.' },
                 })
               ),
-              executionContext: schema.maybe(
-                schema.object({
-                  type: schema.string({
-                    minLength: 1,
-                    maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
-                  }),
-                  id: schema.string({
-                    minLength: 1,
-                    maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
-                  }),
-                  parent: schema.maybe(
-                    schema.object({
-                      type: schema.string({
-                        minLength: 1,
-                        maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
-                      }),
-                      id: schema.string({
-                        minLength: 1,
-                        maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
-                      }),
-                    })
-                  ),
-                })
-              ),
             }),
           },
         },
@@ -106,7 +79,7 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             });
           }
 
-          const { inputs, metadata, executionContext } = request.body;
+          const { inputs, metadata } = request.body;
 
           let processedInputs = inputs;
           const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
@@ -118,20 +91,19 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
 
           const workflowForExecution: WorkflowExecutionEngineModel =
             toWorkflowExecutionEngineModel(workflow);
-          const executeResult = await api.startWorkflowExecution(
+          const workflowExecutionId = await api.runWorkflow(
             workflowForExecution,
             spaceId,
             processedInputs,
             request,
             undefined,
-            metadata,
-            executionContext
+            metadata
           );
           audit.logWorkflowRun(request, {
             workflowId: id,
-            executionId: executeResult.workflowExecutionId,
+            executionId: workflowExecutionId,
           });
-          return response.ok({ body: executeResult });
+          return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
           audit.logWorkflowRun(request, {
             workflowId: request.params.id,

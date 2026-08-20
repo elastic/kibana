@@ -19,8 +19,12 @@ import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
-import type { AlertWorkflowExecutionTarget } from './alert_workflow_execution_context';
-import { useResolveAlertWorkflowExecutionContext } from './alert_workflow_execution_context';
+import { useAlertWorkflowExecutor } from './alert_workflow_executor';
+
+export interface AlertWorkflowExecutionTarget {
+  _id: string;
+  _index: string;
+}
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
 // analysis workflow). Module-scoped so the object reference is stable across renders.
@@ -46,7 +50,7 @@ export interface AlertWorkflowsPanelProps {
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
 export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
-  const resolveExecutionContext = useResolveAlertWorkflowExecutionContext();
+  const runWorkflow = useAlertWorkflowExecutor();
   const inputs = useMemo(
     () => ({
       event: {
@@ -56,15 +60,10 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     }),
     [alertIds]
   );
-  const executionContext = useMemo(
-    () => resolveExecutionContext?.(alertIds),
-    [alertIds, resolveExecutionContext]
-  );
-
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      executionContext={executionContext}
+      runWorkflow={runWorkflow}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}

@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  createCasesWorkflowExecutionContextDefinition,
-  createCasesWorkflowExecutionContextDefinitions,
-} from './definition';
-export { registerCasesWorkflowExecutionContext } from './register';
+export type { CaseWorkflowRunOrigin, RunCaseWorkflowRequest, RunCaseWorkflowResponse } from './v1';

@@ -270,36 +270,6 @@ export class WorkflowExecutionQueryService {
     if (params.concurrencyGroupKey !== undefined) {
       must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
     }
-    if ((params.contextType === undefined) !== (params.contextId === undefined)) {
-      throw Object.assign(new Error('contextType and contextId must be supplied together.'), {
-        statusCode: 400,
-      });
-    }
-    if (params.contextType !== undefined && params.contextId !== undefined) {
-      must.push({
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [
-                  { term: { 'executionContext.type': params.contextType } },
-                  { term: { 'executionContext.id': params.contextId } },
-                ],
-              },
-            },
-            {
-              bool: {
-                must: [
-                  { term: { 'executionContext.parent.type': params.contextType } },
-                  { term: { 'executionContext.parent.id': params.contextId } },
-                ],
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    }
 
     const startedAtRange = buildTimeRangeFilter(
       'startedAt',

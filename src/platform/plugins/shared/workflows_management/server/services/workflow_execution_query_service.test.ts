@@ -265,67 +265,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
-  describe('searchExecutionsView', () => {
-    const emptyResponse = { hits: { hits: [], total: { value: 0 } } };
-
-    it('matches a complete primary or parent execution context alongside existing filters', async () => {
-      mockEsClient.search.mockResolvedValue(emptyResponse as any);
-
-      await service.searchExecutionsView(
-        {
-          contextType: 'cases.case',
-          contextId: 'case-1',
-          statuses: ['completed'] as any,
-          includeManagedExecutions: false,
-        },
-        'default'
-      );
-
-      const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.query.bool.must).toEqual(
-        expect.arrayContaining([
-          {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    must: [
-                      { term: { 'executionContext.type': 'cases.case' } },
-                      { term: { 'executionContext.id': 'case-1' } },
-                    ],
-                  },
-                },
-                {
-                  bool: {
-                    must: [
-                      { term: { 'executionContext.parent.type': 'cases.case' } },
-                      { term: { 'executionContext.parent.id': 'case-1' } },
-                    ],
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          { terms: { status: ['completed'] } },
-        ])
-      );
-      expect(call.query.bool.must_not).toEqual(
-        expect.arrayContaining([{ exists: { field: 'stepId' } }])
-      );
-    });
-
-    it('rejects a half-specified execution context filter', async () => {
-      await expect(
-        service.searchExecutionsView({ contextType: 'cases.case' }, 'default')
-      ).rejects.toMatchObject({
-        message: 'contextType and contextId must be supplied together.',
-        statusCode: 400,
-      });
-      expect(mockEsClient.search).not.toHaveBeenCalled();
-    });
-  });
-
   describe('getWorkflowExecutionHistory', () => {
     it('queries step executions by executionId and spaceId', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);

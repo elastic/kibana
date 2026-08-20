@@ -15,14 +15,14 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 
 describe('RunCaseWorkflowModal', () => {
-  it('forwards the case execution context to the shared panel', () => {
-    const executionContext = { type: 'cases.case' as const, id: 'case-1' };
+  it('forwards the Cases workflow executor to the shared panel', () => {
+    const runWorkflow = jest.fn();
     const filterWorkflow = jest.fn(() => true);
 
     render(
       <RunCaseWorkflowModal
         inputs={{ event: { caseId: 'case-1' } }}
-        executionContext={executionContext}
+        runWorkflow={runWorkflow}
         filterWorkflow={filterWorkflow}
         onClose={jest.fn()}
       />
@@ -31,7 +31,7 @@ describe('RunCaseWorkflowModal', () => {
     expect(mockRunWorkflowPanel).toHaveBeenCalledWith(
       expect.objectContaining({
         inputs: { event: { caseId: 'case-1' } },
-        executionContext,
+        runWorkflow,
         filterWorkflow,
       })
     );

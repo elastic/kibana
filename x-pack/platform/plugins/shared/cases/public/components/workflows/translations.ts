@@ -14,3 +14,11 @@ export const RUN_WORKFLOW = i18n.translate('xpack.cases.workflows.runWorkflow', 
 export const SELECT_WORKFLOW_TITLE = i18n.translate('xpack.cases.workflows.selectWorkflowTitle', {
   defaultMessage: 'Select workflow',
 });
+
+export const WORKFLOW_ACTIVITY_FAILED = i18n.translate(
+  'xpack.cases.workflows.activityFailedWarningMessage',
+  {
+    defaultMessage:
+      'The workflow started, but the execution could not be added to the case activity.',
+  }
+);

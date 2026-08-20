@@ -13,7 +13,6 @@ import type {
   ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
-  WorkflowExecutionContext,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   WorkflowsEventsLogDocumentSource,
@@ -76,7 +75,6 @@ export interface GetSchemaParams {
 export interface RunWorkflowOptions {
   inputs: Record<string, unknown>;
   metadata?: Record<string, unknown>;
-  executionContext?: WorkflowExecutionContext;
 }
 
 export interface TestWorkflowParams {
@@ -87,8 +85,6 @@ export interface TestWorkflowParams {
 
 export interface SearchExecutionsParams {
   kql?: string;
-  contextType?: string;
-  contextId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];

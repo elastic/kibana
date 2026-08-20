@@ -53,14 +53,6 @@ describe('searchWorkflowExecutions', () => {
                 triggeredBy: 'manual',
                 executedBy: 'elastic',
                 concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
-                executionContext: {
-                  type: 'alerts.alert',
-                  id: 'alert-1',
-                  parent: {
-                    type: 'cases.case',
-                    id: 'case-1',
-                  },
-                },
               },
             },
           ],
@@ -83,14 +75,6 @@ describe('searchWorkflowExecutions', () => {
           tags: ['reporting'],
           managed: true,
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
-          executionContext: {
-            type: 'alerts.alert',
-            id: 'alert-1',
-            parent: {
-              type: 'cases.case',
-              id: 'case-1',
-            },
-          },
         })
       );
     });

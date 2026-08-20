@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import {
   CaseCreatedTriggerId,
@@ -16,13 +17,11 @@ import {
   CommentsAddedTriggerId,
   ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
-import {
-  createCaseWorkflowExecutionContext,
-  type CaseWorkflowExecutionContext,
-} from '../../../common/workflows/execution_context';
+import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CaseUI } from '../../containers/types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 
 /**
  * All six `cases.*` trigger ids — workflows triggered by any of these are floated to the top of
@@ -90,8 +89,8 @@ interface UseRunCaseWorkflowResult {
   closeModal: () => void;
   /** Stable inputs object to pass to RunWorkflowPanel / RunCaseWorkflowModal. */
   inputs: Record<string, unknown>;
-  /** Stable correlation context shared by every workflow run from this case. */
-  executionContext: CaseWorkflowExecutionContext;
+  /** Stable Cases wrapper executor shared by every workflow run from this case. */
+  runWorkflow: RunWorkflowExecutor;
   /** Predicate that limits the selector to workflows matching the configured tags. */
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator that floats configured tags, then `cases.*` workflows, to the top. */
@@ -129,10 +128,11 @@ export const useRunCaseWorkflow = ({
     }),
     [caseData.id, caseData.owner]
   );
-  const executionContext = useMemo(
-    () => createCaseWorkflowExecutionContext(caseData.id),
+  const origin = useMemo(
+    () => ({ type: CASE_WORKFLOW_ORIGIN_TYPE, id: caseData.id }),
     [caseData.id]
   );
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
   const filterWorkflow = useMemo(() => createCaseWorkflowFilter(workflowTags), [workflowTags]);
   const sortWorkflow = useMemo(() => createCaseWorkflowComparator(workflowTags), [workflowTags]);
 
@@ -142,7 +142,7 @@ export const useRunCaseWorkflow = ({
     openModal,
     closeModal,
     inputs,
-    executionContext,
+    runWorkflow,
     filterWorkflow,
     sortWorkflow,
     workflowTags,

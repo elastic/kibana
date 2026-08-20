@@ -215,10 +215,10 @@ export class WorkflowApi {
 
   async runWorkflow(
     id: string,
-    { inputs, metadata, executionContext }: RunWorkflowOptions
+    { inputs, metadata }: RunWorkflowOptions
   ): Promise<RunWorkflowResponseDto> {
     return this.http.post(`${BASE}/workflow/${encodeURIComponent(id)}/run`, {
-      body: JSON.stringify({ inputs, metadata, executionContext }),
+      body: JSON.stringify({ inputs, metadata }),
       version: API_VERSION,
     });
   }

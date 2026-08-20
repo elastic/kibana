@@ -24,7 +24,7 @@ import {
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
 import { ObservablesAddedTriggerId } from '../../../common/workflows/triggers';
-import { createObservableWorkflowExecutionContext } from '../../../common/workflows/execution_context';
+import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
@@ -37,6 +37,7 @@ import { useDeleteObservable } from '../../containers/use_delete_observables';
 import * as workflowI18n from '../workflows/translations';
 import { createCaseWorkflowComparator } from '../workflows/use_run_case_workflow';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
 
 const RUN_OBSERVABLE_WORKFLOW_PANEL_ID = 'run-observable-workflow-panel';
 const RUN_WORKFLOWS_PANEL_WIDTH = 400;
@@ -95,10 +96,11 @@ export const ObservableActionsPopoverButton: React.FC<{
     }),
     [caseData.id, caseData.owner, observable]
   );
-  const workflowExecutionContext = useMemo(
-    () => createObservableWorkflowExecutionContext(observable.id, caseData.id),
-    [caseData.id, observable.id]
+  const workflowOrigin = useMemo(
+    () => ({ type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, id: observable.id }),
+    [observable.id]
   );
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin: workflowOrigin });
   const workflowSortWorkflow = useMemo(
     () => createCaseWorkflowComparator(workflowTags, OBSERVABLE_TRIGGER_TYPES),
     [workflowTags]
@@ -156,7 +158,7 @@ export const ObservableActionsPopoverButton: React.FC<{
         content: (
           <RunWorkflowPanel
             inputs={workflowInputs}
-            executionContext={workflowExecutionContext}
+            runWorkflow={runWorkflow}
             sortWorkflow={workflowSortWorkflow}
             onClose={closePopover}
           />
@@ -171,7 +173,7 @@ export const ObservableActionsPopoverButton: React.FC<{
     isLoading,
     onDeletionModalOpen,
     permissions,
-    workflowExecutionContext,
+    runWorkflow,
     workflowInputs,
     workflowSortWorkflow,
   ]);

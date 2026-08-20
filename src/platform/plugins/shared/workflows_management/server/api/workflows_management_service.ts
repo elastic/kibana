@@ -108,8 +108,6 @@ export interface SearchExecutionsViewParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   concurrencyGroupKey?: string;
-  contextType?: string;
-  contextId?: string;
   startedAfter?: string;
   startedBefore?: string;
   finishedAfter?: string;

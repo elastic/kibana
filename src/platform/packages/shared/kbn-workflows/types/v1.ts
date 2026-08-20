@@ -173,8 +173,6 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
-  /** Product entity associated with this execution. */
-  executionContext?: WorkflowExecutionContext;
   /**
    * Event-chain hop depth when scheduled by the event-driven trigger handler.
    * Root copy survives partial `context` updates (same pattern as telemetry extraction).
@@ -310,8 +308,6 @@ export interface WorkflowExecutionDto {
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
-  /** Product entity associated with this execution. */
-  executionContext?: WorkflowExecutionContext;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
@@ -417,24 +413,8 @@ export const SearchWorkflowCommandSchema = z.object({
   _full: z.boolean().default(false),
 });
 
-export const MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH = 512;
-
-export const WorkflowExecutionContextReferenceSchema = z.object({
-  type: z.string().min(1).max(MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH),
-  id: z.string().min(1).max(MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH),
-});
-export type WorkflowExecutionContextReference = z.infer<
-  typeof WorkflowExecutionContextReferenceSchema
->;
-
-export const WorkflowExecutionContextSchema = WorkflowExecutionContextReferenceSchema.extend({
-  parent: WorkflowExecutionContextReferenceSchema.optional(),
-});
-export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
-
 export const RunWorkflowCommandSchema = z.object({
   inputs: z.record(z.string(), z.unknown()),
-  executionContext: WorkflowExecutionContextSchema.optional(),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
@@ -453,17 +433,8 @@ export const TestWorkflowCommandSchema = z.object({
 });
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
-export const WorkflowExecutionFollowUpStatusSchema = z.enum(['succeeded', 'failed']);
-export type WorkflowExecutionFollowUpStatus = z.infer<typeof WorkflowExecutionFollowUpStatusSchema>;
-
-export const WorkflowExecutionFollowUpSchema = z.object({
-  status: WorkflowExecutionFollowUpStatusSchema,
-});
-export type WorkflowExecutionFollowUp = z.infer<typeof WorkflowExecutionFollowUpSchema>;
-
 export const RunWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
-  followUp: WorkflowExecutionFollowUpSchema.optional(),
 });
 export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
 

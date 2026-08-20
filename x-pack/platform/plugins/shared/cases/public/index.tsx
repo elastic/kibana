@@ -46,6 +46,8 @@ export type {
   RenderWorkflowUserActionActionArgs,
 } from './components/cases_context';
 export { ShowTableButton } from './components/attachments/common/show_table_button';
+export { useCasesWorkflowExecutor } from './components/workflows/use_cases_workflow_executor';
+export type { UseCasesWorkflowExecutorParams } from './components/workflows/use_cases_workflow_executor';
 export type {
   CasesTimelineIntegration,
   SelectTimelineModalProps,

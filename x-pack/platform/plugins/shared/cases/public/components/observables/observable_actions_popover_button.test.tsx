@@ -236,11 +236,7 @@ describe('ObservableActionsPopoverButton', () => {
       expect(await screen.findByTestId('mock-run-workflow-panel')).toBeInTheDocument();
       expect(mockRunWorkflowPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          executionContext: {
-            type: 'cases.observable',
-            id: observable.id,
-            parent: { type: 'cases.case', id: caseData.id },
-          },
+          runWorkflow: expect.any(Function),
         })
       );
     });

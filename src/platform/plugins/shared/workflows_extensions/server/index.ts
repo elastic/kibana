@@ -73,15 +73,6 @@ export {
   PollStepDefaults,
 } from './step_registry/types';
 
-export {
-  createWorkflowExecutionContextDefinition,
-  WorkflowExecutionContextRegistry,
-} from './execution_context_registry';
-export type {
-  WorkflowExecutionContextDefinition,
-  WorkflowExecutionContextDefinitionParams,
-} from './execution_context_registry';
-
 export { TriggerRegistry } from './trigger_registry';
 
 export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';

@@ -10,7 +10,7 @@ import { UserActionActions, UserActionTypes } from '../../../common/types/domain
 import { Operations } from '../../authorization';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { recordWorkflowExecution } from './record_workflow_execution';
+import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
 
 const workflow = {
   id: 'workflow-1',
@@ -56,6 +56,21 @@ describe('recordWorkflowExecution', () => {
         payload: { workflow, origin },
       },
     });
+  });
+
+  it('preflights authorization and capacity without creating activity', async () => {
+    await preflightWorkflowExecution({ caseId: theCase.id }, clientArgs);
+
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+      operation: Operations.updateCase,
+      entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+    });
+    expect(
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+    ).toHaveBeenCalledWith({
+      caseIds: [theCase.id],
+    });
+    expect(clientArgs.services.userActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
 
   it(`rejects activity after ${MAX_USER_ACTIONS_PER_CASE} user actions`, async () => {

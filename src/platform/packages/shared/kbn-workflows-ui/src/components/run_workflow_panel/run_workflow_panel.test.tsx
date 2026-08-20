@@ -9,17 +9,18 @@
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowPanelProps } from './run_workflow_panel';
 import * as i18n from './translations';
 
 const mockMutate = jest.fn();
+const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
 const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: true }));
 const mockNavigateToApp = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockAddWarning = jest.fn();
 const mockAddError = jest.fn();
 
 const noInputsWorkflow: WorkflowListItemDto = {
@@ -58,7 +59,7 @@ const requiredInputsWorkflow: WorkflowListItemDto = {
 let mockWorkflowsData: WorkflowListItemDto[] = [noInputsWorkflow];
 
 jest.mock('../../hooks/use_run_workflow', () => ({
-  useRunWorkflow: () => ({ mutate: mockMutate }),
+  useRunWorkflow: () => mockUseRunWorkflow(),
 }));
 
 jest.mock('../../hooks/use_workflows', () => ({
@@ -121,7 +122,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         notifications: {
           toasts: {
             addSuccess: mockAddSuccess,
-            addWarning: mockAddWarning,
             addError: mockAddError,
           },
         },
@@ -183,6 +183,7 @@ describe('RunWorkflowPanel', () => {
     fireEvent.click(screen.getByTestId('select-workflow-option'));
     fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
+    expect(mockUseRunWorkflow).toHaveBeenCalled();
     expect(mockMutate).toHaveBeenCalledWith(
       { id: 'test-workflow-id', inputs: { alert_ids: ['alert-1'] } },
       expect.objectContaining({
@@ -190,28 +191,6 @@ describe('RunWorkflowPanel', () => {
         onError: expect.any(Function),
         onSettled: expect.any(Function),
       })
-    );
-  });
-
-  it('should forward execution context without changing onExecute timing', () => {
-    const onExecute = jest.fn();
-    const executionContext = { type: 'cases.case', id: 'case-1' };
-    renderComponent({ executionContext, onExecute });
-
-    fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
-
-    expect(onExecute).toHaveBeenCalledTimes(1);
-    expect(mockMutate).toHaveBeenCalledWith(
-      {
-        id: 'test-workflow-id',
-        inputs: { alert_ids: ['alert-1'] },
-        executionContext,
-      },
-      expect.any(Object)
-    );
-    expect(onExecute.mock.invocationCallOrder[0]).toBeLessThan(
-      mockMutate.mock.invocationCallOrder[0]
     );
   });
 
@@ -283,21 +262,6 @@ describe('RunWorkflowPanel', () => {
     );
   });
 
-  it('should warn when the workflow starts but its follow-up fails', () => {
-    renderComponent();
-
-    fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
-
-    const { onSuccess } = mockMutate.mock.calls[0][1];
-    onSuccess({ workflowExecutionId: 'exec-123', followUp: { status: 'failed' } });
-
-    expect(mockAddSuccess).toHaveBeenCalled();
-    expect(mockAddWarning).toHaveBeenCalledWith({
-      title: i18n.WORKFLOW_FOLLOW_UP_FAILED_WARNING,
-    });
-  });
-
   it('should show an error toast on failed execution', () => {
     renderComponent();
 
@@ -310,6 +274,69 @@ describe('RunWorkflowPanel', () => {
 
     expect(mockAddError).toHaveBeenCalledWith(error, {
       title: i18n.WORKFLOW_START_FAILED_TOAST,
+    });
+  });
+
+  describe('with a custom executor', () => {
+    it('bypasses useRunWorkflow and reuses the success lifecycle and deeplink', async () => {
+      const runWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'custom-exec-123' });
+      const onExecute = jest.fn();
+      const onClose = jest.fn();
+      renderComponent({ runWorkflow, onExecute, onClose });
+
+      expect(mockUseRunWorkflow).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      expect(onExecute).toHaveBeenCalledTimes(1);
+      expect(runWorkflow).toHaveBeenCalledWith({
+        workflowId: 'test-workflow-id',
+        inputs: { alert_ids: ['alert-1'] },
+      });
+      expect(onExecute.mock.invocationCallOrder[0]).toBeLessThan(
+        runWorkflow.mock.invocationCallOrder[0]
+      );
+      expect(mockMutate).not.toHaveBeenCalled();
+      expect(screen.getByTestId('run-workflow-execute-button')).toBeDisabled();
+
+      await waitFor(() => {
+        expect(mockAddSuccess).toHaveBeenCalledWith(
+          expect.objectContaining({ title: i18n.WORKFLOW_START_SUCCESS_TOAST })
+        );
+        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
+      });
+
+      render(mockAddSuccess.mock.calls[0][0].text as React.ReactElement);
+      fireEvent.click(screen.getByText(i18n.WORKFLOW_START_SUCCESS_BUTTON));
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith(WORKFLOWS_APP_ID, {
+        openInNewTab: true,
+        path: 'test-workflow-id?executionId=custom-exec-123',
+      });
+    });
+
+    it('reuses the error and settled lifecycle', async () => {
+      const error = new Error('custom execution failed');
+      const runWorkflow = jest.fn().mockRejectedValue(error);
+      const onClose = jest.fn();
+      renderComponent({ runWorkflow, onClose });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      expect(screen.getByTestId('run-workflow-execute-button')).toBeDisabled();
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledWith(error, {
+          title: i18n.WORKFLOW_START_FAILED_TOAST,
+        });
+        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
+      });
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockMutate).not.toHaveBeenCalled();
     });
   });
 
@@ -410,6 +437,24 @@ describe('RunWorkflowPanel', () => {
           onSettled: expect.any(Function),
         })
       );
+    });
+
+    it('should pass merged manual inputs to a custom executor', () => {
+      const runWorkflow = jest.fn(() => new Promise<never>(() => {}));
+      renderComponent({
+        inputs: { ticketId: 'preset', alert_ids: ['alert-1'] },
+        runWorkflow,
+      });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+      fireEvent.click(screen.getByTestId('inputs-modal-submit'));
+
+      expect(runWorkflow).toHaveBeenCalledWith({
+        workflowId: 'test-workflow-id',
+        inputs: { ticketId: 'preset', alert_ids: ['alert-1'] },
+      });
+      expect(mockMutate).not.toHaveBeenCalled();
     });
 
     it('should close the modal before starting execution', () => {

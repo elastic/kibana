@@ -7,13 +7,13 @@
 
 import * as rt from 'io-ts';
 import {
-  ALERT_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-  ALERTS_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-  ATTACHMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-  CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-  COMMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-  OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE,
-} from '../../../../workflows/execution_context';
+  ALERT_WORKFLOW_ORIGIN_TYPE,
+  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  COMMENT_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+} from './constants';
 import { UserActionTypes } from '../action/v1';
 
 export const WorkflowPayloadRt = rt.strict({
@@ -26,12 +26,12 @@ export const WorkflowOriginRt = rt.exact(
   rt.intersection([
     rt.type({
       type: rt.union([
-        rt.literal(CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-        rt.literal(OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-        rt.literal(ALERT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-        rt.literal(ALERTS_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-        rt.literal(COMMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-        rt.literal(ATTACHMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+        rt.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+        rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
+        rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
+        rt.literal(COMMENT_WORKFLOW_ORIGIN_TYPE),
+        rt.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
       ]),
       id: rt.string,
     }),

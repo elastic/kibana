@@ -15,7 +15,7 @@ import {
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
 } from './use_run_alert_workflow_panel';
-import { AlertWorkflowExecutionContextProvider } from './alert_workflow_execution_context';
+import { AlertWorkflowExecutorProvider } from './alert_workflow_executor';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { AlertTableContextMenuItem } from '../types';
@@ -247,29 +247,23 @@ describe('useRunAlertWorkflowPanel', () => {
   });
 });
 
-describe('AlertWorkflowsPanel execution context', () => {
-  it('resolves context from the embedding surface', () => {
+describe('AlertWorkflowsPanel executor', () => {
+  it('uses the executor from the embedding surface', () => {
     const alertIds = [{ _id: 'alert-123', _index: 'alerts-index' }];
-    const executionContext = {
-      type: 'cases.alert',
-      id: 'alert-123',
-      parent: { type: 'cases.case', id: 'case-1' },
-    };
-    const resolveExecutionContext = jest.fn().mockReturnValue(executionContext);
+    const runWorkflow = jest.fn();
 
     render(
-      <AlertWorkflowExecutionContextProvider resolveExecutionContext={resolveExecutionContext}>
+      <AlertWorkflowExecutorProvider runWorkflow={runWorkflow}>
         <AlertWorkflowsPanel alertIds={alertIds} onClose={jest.fn()} />
-      </AlertWorkflowExecutionContextProvider>
+      </AlertWorkflowExecutorProvider>
     );
 
-    expect(resolveExecutionContext).toHaveBeenCalledWith(alertIds);
     expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
-      expect.objectContaining({ executionContext })
+      expect.objectContaining({ runWorkflow })
     );
   });
 
-  it('leaves context undefined outside an embedding surface', () => {
+  it('leaves the executor undefined outside an embedding surface', () => {
     render(
       <AlertWorkflowsPanel
         alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
@@ -278,7 +272,7 @@ describe('AlertWorkflowsPanel execution context', () => {
     );
 
     expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
-      expect.objectContaining({ executionContext: undefined })
+      expect.objectContaining({ runWorkflow: undefined })
     );
   });
 });

@@ -9,7 +9,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
@@ -18,7 +17,6 @@ import {
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
-import { getEventChainContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -30,8 +28,6 @@ describe('WorkflowsManagementApi', () => {
   let mockWorkflowsService: jest.Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-  let mockLogger: ReturnType<typeof loggerMock.create>;
-  let getExecutionContextDefinition: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,8 +39,6 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
-    mockLogger = loggerMock.create();
-    getExecutionContextDefinition = jest.fn();
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -62,12 +56,9 @@ describe('WorkflowsManagementApi', () => {
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
-      getWorkflowsExtensions: jest.fn().mockResolvedValue({
-        getExecutionContextDefinition,
-      }),
     } as any;
 
-    api = new WorkflowsManagementApi(mockWorkflowsService, true, mockLogger);
+    api = new WorkflowsManagementApi(mockWorkflowsService, true);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
@@ -730,132 +721,6 @@ steps:
         'default',
         { includeOutput: true }
       );
-    });
-
-    it('persists context and invokes the matching post-start handler once', async () => {
-      const onExecutionStarted = jest.fn().mockResolvedValue(undefined);
-      getExecutionContextDefinition.mockReturnValue({ onExecutionStarted });
-      mockWorkflowsService.getWorkflow.mockResolvedValue({
-        id: 'workflow-123',
-        name: 'Test Workflow',
-        enabled: true,
-        valid: true,
-        yaml: 'name: Test Workflow',
-        definition: workflowDefinition,
-      } as any);
-
-      const result = await runWithTimers(
-        api.executeWorkflow({
-          workflowId: 'workflow-123',
-          inputs: { foo: 'bar' },
-          executionContext: {
-            type: 'cases.case',
-            id: 'case-1',
-            parent: { type: 'alerts.alert', id: 'alert-1' },
-          },
-          spaceId: 'default',
-          request: mockRequest,
-          waitForCompletion: false,
-        })
-      );
-
-      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          executionContext: {
-            type: 'cases.case',
-            id: 'case-1',
-            parent: { type: 'alerts.alert', id: 'alert-1' },
-          },
-        }),
-        mockRequest
-      );
-      expect(onExecutionStarted).toHaveBeenCalledTimes(1);
-      expect(onExecutionStarted).toHaveBeenCalledWith({
-        request: mockRequest,
-        executionContext: {
-          type: 'cases.case',
-          id: 'case-1',
-          parent: { type: 'alerts.alert', id: 'alert-1' },
-        },
-        workflow: { id: 'workflow-123', name: 'Test Workflow' },
-        workflowExecutionId: 'test-exec-id',
-        inputs: { foo: 'bar' },
-      });
-      expect(getEventChainContext(mockRequest)).toEqual({
-        depth: -1,
-        sourceExecutionId: 'test-exec-id',
-        visitedWorkflowIds: ['workflow-123'],
-      });
-      expect(result).toEqual({
-        workflowExecutionId: 'test-exec-id',
-        followUp: { status: 'succeeded' },
-        execution: workflowExecution,
-      });
-    });
-
-    it('returns the execution id and failed follow-up status when the handler rejects', async () => {
-      const handlerError = new Error('case update failed');
-      getExecutionContextDefinition.mockReturnValue({
-        onExecutionStarted: jest.fn().mockRejectedValue(handlerError),
-      });
-      mockWorkflowsService.getWorkflow.mockResolvedValue({
-        id: 'workflow-123',
-        name: 'Test Workflow',
-        enabled: true,
-        valid: true,
-        yaml: 'name: Test Workflow',
-        definition: workflowDefinition,
-      } as any);
-
-      const result = await runWithTimers(
-        api.executeWorkflow({
-          workflowId: 'workflow-123',
-          executionContext: { type: 'cases.case', id: 'case-1' },
-          spaceId: 'default',
-          request: mockRequest,
-          waitForCompletion: false,
-        })
-      );
-
-      expect(result).toEqual({
-        workflowExecutionId: 'test-exec-id',
-        followUp: { status: 'failed' },
-        execution: workflowExecution,
-      });
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'contextType=cases.case workflowId=workflow-123 executionId=test-exec-id'
-        ),
-        { error: handlerError }
-      );
-    });
-
-    it('omits follow-up status for an unregistered context type', async () => {
-      getExecutionContextDefinition.mockReturnValue(undefined);
-      mockWorkflowsService.getWorkflow.mockResolvedValue({
-        id: 'workflow-123',
-        name: 'Test Workflow',
-        enabled: true,
-        valid: true,
-        yaml: 'name: Test Workflow',
-        definition: workflowDefinition,
-      } as any);
-
-      const result = await runWithTimers(
-        api.executeWorkflow({
-          workflowId: 'workflow-123',
-          executionContext: { type: 'external.entity', id: 'entity-1' },
-          spaceId: 'default',
-          request: mockRequest,
-          waitForCompletion: false,
-        })
-      );
-
-      expect(result).toEqual({
-        workflowExecutionId: 'test-exec-id',
-        execution: workflowExecution,
-      });
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {

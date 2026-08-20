@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { UserProfileService } from '../../services';
 import { getConnectorsRoute } from './internal/get_connectors';
 import { getCaseUserActionStatsRoute } from './internal/get_case_user_actions_stats';
@@ -29,8 +30,17 @@ import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_cont
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
+import type { CasesWorkflowRunService } from '../../workflows/run_workflow';
+import { createRunWorkflowRoute } from './internal/run_workflow';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+export const getInternalRoutes = (
+  userProfileService: UserProfileService,
+  config: ConfigType,
+  workflowRun?: {
+    service: CasesWorkflowRunService;
+    getSpaceId: (request: KibanaRequest) => string;
+  }
+) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -53,4 +63,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
+    ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
   ] as CaseRoute[];

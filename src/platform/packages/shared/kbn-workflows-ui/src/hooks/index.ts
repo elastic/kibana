@@ -8,7 +8,6 @@
  */
 
 export * from './use_workflows';
-export * from './use_workflow_executions';
 export * from './use_query_trigger_events';
 export * from './use_run_workflow';
 export * from './use_workflows_capabilities';
