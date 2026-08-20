@@ -29,7 +29,12 @@ export interface GetReportParamsOptions {
   objectType: string;
   sharingData: any;
   title: string;
+  optimizedForPrinting?: boolean;
+  colorMode?: 'light' | 'dark';
 }
+
+const isScreenshotReportType = (reportTypeId: ReportTypeId) =>
+  reportTypeId === 'pngV2' || reportTypeId === 'printablePdfV2';
 
 export const getReportParams = ({
   apiClient,
@@ -37,6 +42,8 @@ export const getReportParams = ({
   objectType,
   sharingData,
   title,
+  optimizedForPrinting,
+  colorMode,
 }: GetReportParamsOptions) => {
   const getParams = reportParamsProviders[reportTypeId];
   if (!getParams) {
@@ -47,6 +54,8 @@ export const getReportParams = ({
       ...getParams({
         objectType,
         sharingData,
+        ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
+        ...(isScreenshotReportType(reportTypeId) ? { colorMode } : {}),
       }),
       objectType,
       title,

@@ -615,6 +615,56 @@ function renderDarkModeTestCases(
         });
         expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
+
+      it('report color mode header light should override User Settings darkMode', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(true)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: true } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(
+          createKibanaRequest({ headers: { 'x-kbn-report-color-mode': 'light' } }),
+          uiSettings
+        );
+
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: false,
+          baseHref: '/mock-server-basepath',
+        });
+      });
+
+      it('report color mode header dark should override User Settings lightMode', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(false)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return false;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(
+          createKibanaRequest({ headers: { 'x-kbn-report-color-mode': 'dark' } }),
+          uiSettings
+        );
+
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          baseHref: '/mock-server-basepath',
+        });
+      });
     });
   });
 }

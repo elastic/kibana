@@ -45,18 +45,18 @@ export const getShareMenuItems =
 
     const requiresSavedState = sharingData.locatorParams === null;
 
-    const generateExportUrlPNG = () => {
+    const generateExportUrlPNG = ({ colorMode }: ExportGenerationOpts) => {
       const jobParams = apiClient.getDecoratedJobParams(
-        getJobParams(jobProviderOptions, 'pngV2')()
+        getJobParams({ ...jobProviderOptions, colorMode }, 'pngV2')()
       );
       const relativePathPNG = apiClient.getReportingPublicJobPath('pngV2', jobParams);
 
       return new URL(relativePathPNG, window.location.href).toString();
     };
 
-    const generateReportPNG = ({ intl }: ExportGenerationOpts) => {
+    const generateReportPNG = ({ intl, colorMode }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(jobProviderOptions, 'pngV2')(),
+        ...getJobParams({ ...jobProviderOptions, colorMode }, 'pngV2')(),
       });
 
       return firstValueFrom(startServices$).then(([startServices]) => {
@@ -118,6 +118,7 @@ export const getShareMenuItems =
       generateAssetExport: generateReportPNG,
       exportType: 'pngV2',
       requiresSavedState,
+      renderColorModeOption: true,
       copyAssetURIConfig: {
         headingText: i18n.translate(
           'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHeading',

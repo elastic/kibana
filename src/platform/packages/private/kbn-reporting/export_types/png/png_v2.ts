@@ -20,6 +20,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  getReportColorModeHeaders,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
@@ -117,6 +118,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
                 browserTimezone: payload.browserTimezone,
                 layout,
                 request,
+                headers: getReportColorModeHeaders(payload.colorMode),
                 urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
                 taskInstanceFields,
                 logger,

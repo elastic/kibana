@@ -42,6 +42,13 @@ export const getScheduledReportFormSchema = (
       },
     ],
   },
+  optimizedForPrinting: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+  },
+  colorMode: {
+    defaultValue: 'light',
+  },
   startDate: {},
   timezone: {},
   recurringSchedule: getRecurringScheduleFormSchema({ allowInfiniteRecurrence: false }),

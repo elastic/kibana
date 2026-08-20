@@ -51,4 +51,5 @@ export interface JobParamsProviderOptions {
   shareableUrl?: string;
   objectType: string;
   optimizedForPrinting?: boolean;
+  colorMode?: 'light' | 'dark';
 }

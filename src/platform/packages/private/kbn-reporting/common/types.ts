@@ -62,6 +62,12 @@ export interface ReportOutput extends TaskRunResult {
  */
 export type CsvPagingStrategy = 'pit' | 'scroll';
 
+/**
+ * Explicit light/dark setting stored on screenshot report jobs (PDF/PNG).
+ * Not used for CSV. Do not persist `system` or `space_default`.
+ */
+export type ReportColorMode = 'light' | 'dark';
+
 export interface BaseParams {
   browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
@@ -70,6 +76,11 @@ export interface BaseParams {
   forceNow?: string;
   layout?: LayoutParams; // png & pdf only
   pagingStrategy?: CsvPagingStrategy; // csv only
+  /**
+   * PDF/PNG only. Theme used when Chromium renders the report.
+   * Stored on the job so scheduled runs stay stable if the creator later changes Appearance.
+   */
+  colorMode?: ReportColorMode;
 }
 
 /**

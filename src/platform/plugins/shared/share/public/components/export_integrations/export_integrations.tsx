@@ -29,6 +29,7 @@ import {
   type EuiSwitchEvent,
   EuiSwitch,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
@@ -41,6 +42,7 @@ import {
 } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig, ShareContext } from '../../types';
 import { DraftModeCallout } from '../common/draft_mode_callout';
+import { ColorModeKeyPad, type ReportColorMode } from './color_mode_keypad';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -97,7 +99,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="share.exportFlyoutContent.optimizeForPrinting.helpText"
-                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page. Light color mode is recommended for printing."
               />
             </EuiText>
           }
@@ -142,7 +144,11 @@ export function ManagedExportFlyout({
   isSaving,
   sharingData,
 }: ManagedExportFlyoutProps) {
+  const { colorMode: euiColorMode } = useEuiTheme();
   const [usePrintLayout, setPrintLayout] = useState(false);
+  const [colorMode, setColorMode] = useState<ReportColorMode>(
+    euiColorMode === 'DARK' ? 'dark' : 'light'
+  );
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
 
   const totalHitsSizeWarning = useMemo(() => {
@@ -160,12 +166,13 @@ export function ManagedExportFlyout({
       await exportIntegration.config.generateAssetExport({
         intl,
         optimizedForPrinting: usePrintLayout,
+        colorMode: exportIntegration.config.renderColorModeOption ? colorMode : undefined,
       });
     } finally {
       setIsCreatingExport(false);
       onCloseFlyout();
     }
-  }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
+  }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout, colorMode]);
 
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
   const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
@@ -193,7 +200,22 @@ export function ManagedExportFlyout({
               <EuiFlexItem>
                 <LayoutOptionsSwitch
                   usePrintLayout={usePrintLayout}
-                  printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
+                  printLayoutChange={(evt) => {
+                    const checked = evt.target.checked;
+                    setPrintLayout(checked);
+                    if (checked) {
+                      setColorMode('light');
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+            {exportIntegration.config.renderColorModeOption && (
+              <EuiFlexItem>
+                <ColorModeKeyPad
+                  colorMode={colorMode}
+                  onChange={setColorMode}
+                  usePrintLayout={usePrintLayout}
                 />
               </EuiFlexItem>
             )}
@@ -229,6 +251,9 @@ export function ManagedExportFlyout({
                         {exportIntegration.config.copyAssetURIConfig.generateAssetURIValue({
                           intl,
                           optimizedForPrinting: usePrintLayout,
+                          colorMode: exportIntegration.config.renderColorModeOption
+                            ? colorMode
+                            : undefined,
                         })}
                       </EuiCodeBlock>
                     </EuiFlexItem>

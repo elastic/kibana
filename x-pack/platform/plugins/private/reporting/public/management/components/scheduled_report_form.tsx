@@ -22,7 +22,9 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { ColorModeKeyPad } from '@kbn/share-plugin/public';
 import { useKibana } from '@kbn/reporting-public';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -32,6 +34,7 @@ import {
   getUseField,
   useForm,
   useFormData,
+  UseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -84,6 +87,7 @@ export type FormData = Pick<
   | 'emailSubject'
   | 'emailMessage'
   | 'optimizedForPrinting'
+  | 'colorMode'
 >;
 
 export interface ScheduledReportFormProps {
@@ -140,6 +144,8 @@ export const ScheduledReportForm = ({
     actions: { validateEmailAddresses },
     userProfile: userProfileService,
   } = useKibana().services;
+  const { colorMode: euiColorMode } = useEuiTheme();
+  const defaultColorMode = euiColorMode === 'DARK' ? 'dark' : 'light';
   const { data: userProfile, isLoading: isUserProfileLoading } = useGetUserProfileQuery({
     userProfileService,
   });
@@ -177,23 +183,36 @@ export const ScheduledReportForm = ({
     [availableReportTypes, validateEmailAddresses]
   );
   const { form } = useForm<FormData>({
-    defaultValue: scheduledReport,
+    defaultValue: {
+      ...scheduledReport,
+      colorMode: scheduledReport.colorMode ?? defaultColorMode,
+    },
     options: { stripEmptyFields: true },
     schema,
     onSubmit: onSubmitForm,
   });
-  const [{ reportTypeId, startDate, timezone, sendByEmail, emailSubject, emailMessage }] =
-    useFormData<FormData>({
-      form,
-      watch: [
-        'reportTypeId',
-        'startDate',
-        'timezone',
-        'sendByEmail',
-        'emailSubject',
-        'emailMessage',
-      ],
-    });
+  const [
+    {
+      reportTypeId,
+      startDate,
+      timezone,
+      sendByEmail,
+      emailSubject,
+      emailMessage,
+      optimizedForPrinting,
+    },
+  ] = useFormData<FormData>({
+    form,
+    watch: [
+      'reportTypeId',
+      'startDate',
+      'timezone',
+      'sendByEmail',
+      'emailSubject',
+      'emailMessage',
+      'optimizedForPrinting',
+    ],
+  });
   const now = useMemo(() => moment().set({ second: 0, millisecond: 0 }), []);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
 
@@ -262,6 +281,14 @@ export const ScheduledReportForm = ({
     isUserProfileLoading,
     userProfile?.user.email,
   ]);
+
+  const previousPrintLayout = useRef(Boolean(scheduledReport.optimizedForPrinting));
+  useEffect(() => {
+    if (optimizedForPrinting && !previousPrintLayout.current) {
+      form.setFieldValue('colorMode', 'light');
+    }
+    previousPrintLayout.current = Boolean(optimizedForPrinting);
+  }, [form, optimizedForPrinting]);
 
   const isEmailActive = Boolean(sendByEmail);
 
@@ -347,15 +374,29 @@ export const ScheduledReportForm = ({
                   config={{
                     type: FIELD_TYPES.TOGGLE,
                     label: i18n.SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_LABEL,
+                    defaultValue: false,
                   }}
                   componentProps={{
                     helpText: i18n.SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_DESCRIPTION,
                     euiFieldProps: {
                       compressed: true,
                       readOnly: editMode || readOnly,
+                      'data-test-subj': 'usePrintLayout',
                     },
                   }}
                 />
+              )}
+              {(reportTypeId === 'printablePdfV2' || reportTypeId === 'pngV2') && (
+                <UseField path="colorMode">
+                  {(field) => (
+                    <ColorModeKeyPad
+                      colorMode={(field.value as 'light' | 'dark') ?? defaultColorMode}
+                      onChange={(nextColorMode) => field.setValue(nextColorMode)}
+                      usePrintLayout={Boolean(optimizedForPrinting)}
+                      isDisabled={editMode || readOnly}
+                    />
+                  )}
+                </UseField>
               )}
             </ResponsiveFormGroup>
             <ResponsiveFormGroup

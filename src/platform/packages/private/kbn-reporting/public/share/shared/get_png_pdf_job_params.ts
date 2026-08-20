@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReportColorMode } from '@kbn/reporting-common/types';
 import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
 import type { JobParamsProviderOptions } from '../share_context_menu';
 
@@ -32,22 +33,29 @@ interface PngPdfReportBaseParams {
   layout: { dimensions: { height: number; width: number }; id: 'preserve_layout' | 'print' };
   objectType: string;
   locatorParams: any;
+  colorMode?: ReportColorMode;
 }
 
+type PngPdfParamsOptions = ReportParamsGetterOptions & {
+  optimizedForPrinting?: boolean;
+  colorMode?: ReportColorMode;
+};
+
 export const getPngReportParams: ReportParamsGetter<
-  ReportParamsGetterOptions,
+  PngPdfParamsOptions,
   PngPdfReportBaseParams
-> = ({ sharingData }): PngPdfReportBaseParams => {
+> = ({ sharingData, colorMode }): PngPdfReportBaseParams => {
   return {
     ...getBaseParams('pngV2'),
     locatorParams: sharingData.locatorParams,
+    ...(colorMode ? { colorMode } : {}),
   };
 };
 
 export const getPdfReportParams: ReportParamsGetter<
-  ReportParamsGetterOptions & { optimizedForPrinting?: boolean },
+  PngPdfParamsOptions,
   PngPdfReportBaseParams
-> = ({ sharingData, optimizedForPrinting = false }) => {
+> = ({ sharingData, optimizedForPrinting = false, colorMode }) => {
   const params = {
     ...getBaseParams('printablePdfV2'),
     locatorParams: [sharingData.locatorParams],
@@ -55,19 +63,20 @@ export const getPdfReportParams: ReportParamsGetter<
   if (optimizedForPrinting) {
     params.layout.id = 'print';
   }
-  return params;
+  return colorMode ? { ...params, colorMode } : params;
 };
 
 export const getJobParams =
   (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
-    const { objectType, sharingData, optimizedForPrinting } = opts;
+    const { objectType, sharingData, optimizedForPrinting, colorMode } = opts;
     let baseParams: PngPdfReportBaseParams;
     if (type === 'pngV2') {
-      baseParams = getPngReportParams({ sharingData });
+      baseParams = getPngReportParams({ sharingData, colorMode });
     } else {
       baseParams = getPdfReportParams({
         sharingData,
         optimizedForPrinting,
+        colorMode,
       });
     }
     return {

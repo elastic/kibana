@@ -141,6 +141,7 @@ const jobParamsSchema = z
     relativeUrls: relativeUrlsSchema.optional(), // used in tests could be legacy
     relativeUrl: relativeUrlSchema.optional(), // used in tests could be legacy
     isEsqlMode: z.boolean().optional(), // for CSV reports
+    colorMode: z.enum(['light', 'dark']).optional(), // PDF/PNG screenshot color mode
   })
   .strict();
 

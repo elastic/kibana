@@ -152,6 +152,8 @@ describe('ScheduledReportForm', () => {
           startDate: '2025-11-10T12:00:00.000Z',
           timezone: 'UTC',
           title: 'Scheduled report 1',
+          colorMode: 'light',
+          optimizedForPrinting: false,
         },
         true
       );
@@ -264,6 +266,8 @@ describe('ScheduledReportForm', () => {
             startDate: '2025-11-10T12:00:00.000Z',
             timezone: 'UTC',
             title: 'Updated scheduled report title',
+            colorMode: 'light',
+            optimizedForPrinting: false,
           },
           true
         );
@@ -357,5 +361,73 @@ describe('ScheduledReportForm', () => {
 
       expect(onSubmitForm).toHaveBeenCalled();
     });
+  });
+
+  it('shows the color mode keypad for PDF reports', async () => {
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />
+    );
+
+    expect(await screen.findByTestId('reportColorModeMenu')).toBeInTheDocument();
+    expect(screen.getByTestId('reportColorModeLight')).toBeInTheDocument();
+    expect(screen.getByTestId('reportColorModeDark')).toBeInTheDocument();
+    expect(
+      screen.getByText('This setting applies to the export, not the current appearance.')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('reportColorModeRecommended')).not.toBeInTheDocument();
+    expect(screen.queryByText('This report will use the light theme.')).not.toBeInTheDocument();
+  });
+
+  it('shows a Recommended badge next to Color mode when print format is on', async () => {
+    user = userEvent.setup({ delay: null });
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />
+    );
+
+    expect(await screen.findByTestId('usePrintLayout')).toBeInTheDocument();
+    expect(screen.queryByTestId('reportColorModeRecommended')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('usePrintLayout'));
+
+    expect(screen.getByTestId('reportColorModeRecommended')).toBeInTheDocument();
+    expect(screen.queryByText('This report will use the light theme.')).not.toBeInTheDocument();
+
+    await user.hover(screen.getByTestId('reportColorModeRecommended'));
+    expect(
+      await screen.findByText('Light is recommended for printed reports.')
+    ).toBeInTheDocument();
+  });
+
+  it('does not show a Recommended badge for PNG reports', async () => {
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        scheduledReport={{ ...defaultProps.scheduledReport, reportTypeId: 'pngV2' }}
+        availableReportTypes={[{ label: 'PNG', id: 'pngV2' }]}
+      />
+    );
+
+    expect(await screen.findByTestId('reportColorModeMenu')).toBeInTheDocument();
+    expect(screen.queryByTestId('usePrintLayout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('reportColorModeRecommended')).not.toBeInTheDocument();
+  });
+
+  it('does not show the color mode keypad for CSV reports', async () => {
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        scheduledReport={{ ...defaultProps.scheduledReport, reportTypeId: 'csv_v2' }}
+        availableReportTypes={[{ label: 'CSV', id: 'csv_v2' }]}
+      />
+    );
+
+    expect(await screen.findByTestId('scheduleExportForm')).toBeInTheDocument();
+    expect(screen.queryByTestId('reportColorModeMenu')).not.toBeInTheDocument();
   });
 });
