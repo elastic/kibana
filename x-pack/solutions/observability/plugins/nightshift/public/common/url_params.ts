@@ -13,7 +13,7 @@
  */
 export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
 
-export const BLAST_RADIUS_QUERY_PARAM = 'blastRadius';
+export const IMPACTED_SERVICES_QUERY_PARAM = 'impactedServices';
 
 export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;

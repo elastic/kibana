@@ -176,7 +176,7 @@ export const EventFlyoutImpactedServicesPartiallyUnavailable: Story = {
 
 export const BlastRadiusFilterActive: Story = {
   args: {
-    initialEntry: '/?blastRadius=entity%3Acheckout-api%3Acheckout-api',
+    initialEntry: '/?impactedServices=entity%3Acheckout-api%3Acheckout-api',
     scenario: 'populated',
   },
 };

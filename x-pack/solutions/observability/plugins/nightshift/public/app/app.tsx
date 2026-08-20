@@ -6,7 +6,7 @@
  */
 
 import { css, keyframes } from '@emotion/react';
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -44,9 +44,9 @@ import { EventFlyout } from '../event/event_flyout';
 import { NightshiftHeader } from './header';
 import { NightshiftEmptyState } from './empty_state';
 import {
-  BLAST_RADIUS_QUERY_PARAM,
   clearNightshiftEventIdParam,
   getNightshiftEventIdFromSearch,
+  IMPACTED_SERVICES_QUERY_PARAM,
   setNightshiftEventIdParam,
 } from '../common/url_params';
 
@@ -109,12 +109,31 @@ export function NightshiftApp(): React.ReactElement {
   const eventByIdQuery = useFetchEventById(selectedEventIdFromUrl, { enabled: shouldFetchById });
   const selectedEvent = eventFromList ?? eventByIdQuery.data;
 
-  // `isFetched` gates the callout: only a settled lookup proves absence.
-  const eventNotFound =
-    Boolean(selectedEventIdFromUrl) && !selectedEvent && !isLoading && eventByIdQuery.isFetched;
+  // Held in state rather than derived: the id is stripped from the URL the moment it fails to
+  // resolve, so the callout needs its own copy to keep naming the event the user followed.
+  const [notFoundEventId, setNotFoundEventId] = useState<string>();
+
+  useEffect(() => {
+    if (!selectedEventIdFromUrl || isLoading) {
+      return;
+    }
+    if (selectedEvent) {
+      setNotFoundEventId(undefined);
+      return;
+    }
+    // Only a settled lookup proves absence; acting earlier would flash the callout mid-fetch.
+    if (!eventByIdQuery.isFetched) {
+      return;
+    }
+
+    setNotFoundEventId(selectedEventIdFromUrl);
+    const params = new URLSearchParams(history.location.search);
+    clearNightshiftEventIdParam(params);
+    history.replace({ search: params.toString() });
+  }, [eventByIdQuery.isFetched, history, isLoading, selectedEvent, selectedEventIdFromUrl]);
 
   const selectedBlastRadiusKey = useMemo(
-    () => new URLSearchParams(search).get(BLAST_RADIUS_QUERY_PARAM) ?? undefined,
+    () => new URLSearchParams(search).get(IMPACTED_SERVICES_QUERY_PARAM) ?? undefined,
     [search]
   );
 
@@ -139,6 +158,7 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
+      setNotFoundEventId(undefined);
       const params = new URLSearchParams(history.location.search);
       setNightshiftEventIdParam(params, event.event_id);
       history.replace({ search: params.toString() });
@@ -193,9 +213,9 @@ export function NightshiftApp(): React.ReactElement {
       const params = new URLSearchParams(history.location.search);
       const nextKey = activeBlastRadiusChip === chipKey ? undefined : chipKey;
       if (nextKey) {
-        params.set(BLAST_RADIUS_QUERY_PARAM, nextKey);
+        params.set(IMPACTED_SERVICES_QUERY_PARAM, nextKey);
       } else {
-        params.delete(BLAST_RADIUS_QUERY_PARAM);
+        params.delete(IMPACTED_SERVICES_QUERY_PARAM);
       }
       history.replace({ search: params.toString() });
     },
@@ -292,7 +312,7 @@ export function NightshiftApp(): React.ReactElement {
     selectedEventUuid: selectedEvent?.event_uuid,
   };
 
-  const eventNotFoundCallout = eventNotFound ? (
+  const eventNotFoundCallout = notFoundEventId ? (
     <div
       css={css`
         margin-top: ${euiTheme.size.m};
@@ -305,7 +325,8 @@ export function NightshiftApp(): React.ReactElement {
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
-          defaultMessage: 'Significant Event not found',
+          defaultMessage: 'Significant Event {eventId} not found',
+          values: { eventId: notFoundEventId },
         })}
       >
         <EuiText size="s">

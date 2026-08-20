@@ -615,7 +615,7 @@ describe('NightshiftApp', () => {
     renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-low'] });
 
     expect(screen.getByText('Flyout: Low severity event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
   });
 
   it('does not show the not-found callout while the by-id lookup is in flight', () => {
@@ -625,10 +625,10 @@ describe('NightshiftApp', () => {
     renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-pending'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
   });
 
-  it('keeps an unresolved eventId in the URL instead of clearing it', () => {
+  it('names the unresolved event in the callout and clears the id from the URL', () => {
     setEvents({ events: [mockEvent({ event_id: 'evt-listed' })] });
 
     renderWithIntl(
@@ -639,8 +639,8 @@ describe('NightshiftApp', () => {
       { initialEntries: ['/?eventId=evt-unknown'] }
     );
 
-    expect(screen.getByText('Significant Event not found')).toBeInTheDocument();
-    expect(screen.getByTestId('locationProbe')).toHaveTextContent('eventId=evt-unknown');
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
+    expect(screen.getByTestId('locationProbe')).not.toHaveTextContent('eventId=evt-unknown');
   });
 
   it('ignores a legacy eventUuid parameter', () => {
@@ -649,7 +649,7 @@ describe('NightshiftApp', () => {
     renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
     expect(mockUseFetchEventById).toHaveBeenCalledWith(undefined, { enabled: false });
   });
 
@@ -697,7 +697,7 @@ describe('NightshiftApp', () => {
     );
 
     expect(screen.getByText('Flyout: Investigated event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
   });
 
   it('keeps the not-found warning visible until a valid event is selected', () => {
@@ -705,11 +705,11 @@ describe('NightshiftApp', () => {
     renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-unknown'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
-    expect(screen.getByText('Significant Event not found')).toBeInTheDocument();
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
 
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
     expect(screen.getByTestId('stubEventFlyout')).toBeInTheDocument();
   });
 
