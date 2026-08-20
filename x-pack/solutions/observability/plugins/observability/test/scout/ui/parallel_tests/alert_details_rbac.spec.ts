@@ -89,14 +89,12 @@ test.describe(
       // page header, so the header's rule-type subject can appear a beat before
       // the section does. Wait for whichever overview the persona will actually
       // see — the custom section for a readable rule, the generic overview
-      // otherwise — inside the re-navigating loop, so callers assert only against
-      // fully-loaded content instead of racing the rule fetch.
+      // otherwise — so callers assert only against fully-loaded content instead
+      // of racing the rule fetch.
       const overviewSubj = ruleReadable ? CUSTOM_SECTION_SUBJ : DEFAULT_OVERVIEW_SUBJ;
-      await expect(async () => {
-        await pageObjects.alertPage.goto(logsAlertId);
-        await expect(page.testSubj.locator('alertDetailsTabbedContent')).toBeVisible();
-        await expect(page.testSubj.locator(overviewSubj)).toBeVisible();
-      }).toPass({ timeout: 60_000, intervals: [2_000] });
+      await pageObjects.alertPage.goto(logsAlertId);
+      await expect(page.testSubj.locator('alertDetailsTabbedContent')).toBeVisible();
+      await expect(page.testSubj.locator(overviewSubj)).toBeVisible();
     };
 
     test('logs rule reader sees the custom alert details overview', async ({
