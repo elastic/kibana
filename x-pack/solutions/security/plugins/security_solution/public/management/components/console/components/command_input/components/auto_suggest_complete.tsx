@@ -61,10 +61,12 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
 
       // If we don't know the command yet, then let's see if we can suggest one now
       if (!enteredCommand) {
-        const commandNameSuggestion = commandDefinitions.find(
-          (command) =>
-            command.name !== leftOfCursorText && command.name.startsWith(leftOfCursorText)
-        );
+        const commandNameSuggestion = commandDefinitions
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .find(
+            (command) =>
+              command.name !== leftOfCursorText && command.name.startsWith(leftOfCursorText)
+          );
 
         const newSuggestionValue = (commandNameSuggestion?.name ?? '').replace(
           leftOfCursorText,
@@ -87,9 +89,10 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
       if (/(--\S+)$/.test(leftOfCursorText)) {
         const partialArgName = leftOfCursorText.substring(leftOfCursorText.lastIndexOf('--') + 2);
         const newSuggestionValue = (
-          Object.keys(enteredCommand?.commandDefinition?.args ?? {}).find(
-            (argName) => argName !== partialArgName && argName.startsWith(partialArgName)
-          ) || ''
+          Object.keys(enteredCommand?.commandDefinition?.args ?? {})
+            .sort()
+            .find((argName) => argName !== partialArgName && argName.startsWith(partialArgName)) ||
+          ''
         ).replace(partialArgName, '');
 
         if (newSuggestionValue !== suggestionValue) {
