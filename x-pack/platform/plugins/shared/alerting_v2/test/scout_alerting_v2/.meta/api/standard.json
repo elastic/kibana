@@ -1,5 +1,5 @@
 {
-  "sha1": "57e6bae28710e945037ba53bf2a643dcb4030116",
+  "sha1": "c96fe986f701e54ce2dc0475f9e159bd49361ef2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -6772,6 +6772,58 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-27fa83fe5bf9ac2",
+      "title": "Update rule API validation: should reject recovery_strategy \"query\" without a recovery block",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 484,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-3f809bfcb5a75ba",
+      "title": "Update rule API validation: should reject a composed rule setting recovery_strategy \"query\" without a recovery segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 499,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-5191b364a564f46",
+      "title": "Update rule API validation: should reject clearing recovery_strategy while a composed recovery segment remains",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 521,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-7c60ed290b85c05",
+      "title": "Update rule API validation: should reject a no_data_strategy without a no_data block (standalone)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 548,
+        "column": 10
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-0be0aa964382938",
       "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -6780,7 +6832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 484,
+        "line": 563,
         "column": 10
       }
     },
@@ -6793,7 +6845,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 499,
+        "line": 578,
         "column": 10
       }
     },
@@ -6806,7 +6858,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 519,
+        "line": 598,
         "column": 10
       }
     },

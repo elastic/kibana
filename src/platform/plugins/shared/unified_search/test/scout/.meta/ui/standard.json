@@ -1,5 +1,9 @@
 {
-  "sha1": "d3bef4f3c9918b96dbd4c8b05da89cbb95a2f1b5",
+  "sha1": "23b69ec1bf47dac3552155cdac63620369e477dd",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "8fe9df63e0d68b2-2d457382a48710c",
@@ -22,6 +26,19 @@
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
         "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "7a42b236e507511-25901aabcbb1c0f",
+      "title": "Date range picker presets persistence does not offer deletion of quick ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
+        "line": 62,
         "column": 12
       }
     },
