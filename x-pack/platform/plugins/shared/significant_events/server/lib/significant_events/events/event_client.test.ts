@@ -14,7 +14,7 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
-import { EventClient } from './event_client';
+import { EventClient, normalizeLegacyVerdict } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
 
 const createEvent = (): SignificantEvent => ({
@@ -87,6 +87,48 @@ const createSearchClient = ({
 };
 
 describe('EventClient', () => {
+  describe('legacy signal verdict normalization', () => {
+    it.each([
+      [
+        { confirmed: true, evidence: { esql_query: 'FROM logs.test', result: 'found' } },
+        'confirms',
+      ],
+      [
+        { confirmed: false, evidence: { esql_query: 'FROM logs.test', result: 'found' } },
+        'refutes',
+      ],
+      [{ confirmed: true }, 'not_checked'],
+      [{ confirmed: false }, 'not_checked'],
+      [{ evidence: null }, 'not_checked'],
+      [{ evidence: { esql_query: 'FROM logs.test', result: 'error' } }, 'inconclusive'],
+      [
+        {
+          evidence: { esql_query: 'FROM logs.test', result: 'found' },
+        },
+        'off_topic',
+      ],
+    ] as const)('normalizes %o to %s', (legacyFields, verdict) => {
+      const signal = normalizeLegacyVerdict({
+        type: 'detection',
+        stream_name: 'logs.test',
+        description: 'Legacy signal',
+        metadata: {
+          rule_uuid: 'rule-1',
+          detection_id: 'detection-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+        ...legacyFields,
+      });
+
+      expect(signal.verdict).toBe(verdict);
+      expect(signal).not.toHaveProperty('confirmed');
+      expect(signal).not.toHaveProperty('verification');
+      const normalizedEvent = { ...createEvent(), signals: [signal] };
+      expect(storedEventSchema.safeParse(normalizedEvent).success).toBe(true);
+    });
+  });
+
   describe('bulkCreate', () => {
     it('accepts stored narratives that exceed agent input limits (backward compat)', () => {
       const event: SignificantEvent = {
@@ -99,6 +141,7 @@ describe('EventClient', () => {
             type: 'detection',
             stream_name: 'logs.test',
             description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+            verdict: 'not_checked',
             metadata: {
               detection_id: 'detection-1',
               rule_uuid: 'rule-1',

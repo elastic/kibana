@@ -29,11 +29,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import { buildCustomContentContextAttachment } from '../utils/chat_integration';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../../common/constants';
 
 export interface EditCustomContentFlyoutProps {
   embeddableId: string;
@@ -49,6 +46,7 @@ export interface EditCustomContentFlyoutProps {
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
   onRunPreview: (html: string) => void;
+  onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -65,9 +63,9 @@ export const EditCustomContentFlyout = ({
   onSave,
   onClose,
   onRunPreview,
+  onGenerateWithChat,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { agentBuilder } = getServices();
 
   const {
     draftEsqlQuery,
@@ -96,20 +94,8 @@ export const EditCustomContentFlyout = ({
   });
 
   const handleGenerateWithChat = useCallback(() => {
-    if (!agentBuilder) return;
-    agentBuilder.openChat({
-      attachments: [
-        buildCustomContentContextAttachment(
-          draftTemplate,
-          draftEsqlQuery || undefined,
-          embeddableId,
-          panelTitle
-        ),
-      ],
-      sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
-    });
-    onClose();
-  }, [agentBuilder, draftTemplate, draftEsqlQuery, embeddableId, panelTitle, onClose]);
+    onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
+  }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
@@ -129,7 +115,7 @@ export const EditCustomContentFlyout = ({
     position: 'absolute',
     top: euiTheme.size.xs,
     right: euiTheme.size.m,
-    zIndex: 1,
+    zIndex: euiTheme.levels.content,
   });
 
   return (
@@ -202,9 +188,13 @@ export const EditCustomContentFlyout = ({
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
               <AiButton size="s" iconType="sparkles" onClick={handleGenerateWithChat}>
-                {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                  defaultMessage: 'Refine with chat',
-                })}
+                {draftTemplate
+                  ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
+                      defaultMessage: 'Refine with chat',
+                    })
+                  : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
+                      defaultMessage: 'Generate with chat',
+                    })}
               </AiButton>
             </EuiFlexItem>
           )}
@@ -215,7 +205,8 @@ export const EditCustomContentFlyout = ({
         <EuiFormRow
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
-            defaultMessage: 'The HTML template uses Liquid syntax filled with live query data.',
+            defaultMessage:
+              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
           <div css={editorContainerCss}>
@@ -224,6 +215,10 @@ export const EditCustomContentFlyout = ({
               value={draftTemplate}
               onChange={setDraftTemplate}
               height={240}
+              placeholder={i18n.translate('xpack.customContent.editFlyout.templatePlaceholder', {
+                defaultMessage:
+                  '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+              })}
               options={{
                 fontSize: 12,
                 minimap: { enabled: false },

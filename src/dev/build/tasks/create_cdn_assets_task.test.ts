@@ -17,7 +17,7 @@ import { getMockConfig } from '../lib/__mocks__/get_config';
 import { copyAll } from '../lib';
 
 jest.mock('../lib');
-jest.mock('globby');
+jest.mock('globby', () => ({ globbySync: jest.fn() }));
 jest.mock('del', () => jest.fn().mockResolvedValue(undefined));
 
 jest.mock('@kbn/core-i18n-server-internal', () => ({
@@ -36,8 +36,8 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 
-const globby = jest.requireMock('globby') as { sync: jest.Mock };
-globby.sync = jest.fn().mockReturnValue([]);
+const { globbySync } = jest.requireMock('globby') as { globbySync: jest.Mock };
+globbySync.mockReturnValue([]);
 
 const mockedCopyAll = copyAll as jest.MockedFunction<typeof copyAll>;
 
