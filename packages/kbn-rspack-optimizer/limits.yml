@@ -23,20 +23,21 @@ pageLoadAssetSize:
   cloud: 8477
   cloudConnect: 5575
   cloudDataMigration: 1755
-  cloudDefend: 3060
+  cloudDefend: 3030
   cloudExperiments: 67356
   cloudFullStory: 1373
-  cloudLinks: 18005
+  cloudLinks: 17938
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1962
+  contextEngine: 2359
+  contextEngineAgentBuilder: 2284
   controls: 4166
   core: 320
-  cps: 5002
+  cps: 6032
   crossClusterReplication: 7691
-  customContent: 1617
+  customContent: 2127
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -66,7 +67,7 @@ pageLoadAssetSize:
   esql: 306
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 4255
+  evals: 4254
   eventAnnotation: 17299
   eventAnnotationListing: 2987
   exploratoryView: 707
@@ -95,7 +96,7 @@ pageLoadAssetSize:
   home: 9251
   imageEmbeddable: 1732
   inbox: 1294
-  indexLifecycleManagement: 32081
+  indexLifecycleManagement: 32000
   indexManagement: 316
   inference: 5564
   inferenceWorkflows: 895
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
+  nightshiftInvestigations: 419
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
@@ -140,7 +142,7 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7685
+  observabilityOnboarding: 8873
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
@@ -185,9 +187,9 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 338339
+  shared-core: 336543
   shared-misc: 114567
-  shared-packages: 4546017
+  shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3153

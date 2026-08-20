@@ -88,7 +88,6 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
           type: CONNECTOR_KI_TYPE,
           title: name,
           content: contentParts.join('\n'),
-          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_KI_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(
