@@ -1,5 +1,5 @@
 {
-  "sha1": "70b6d89f5bb256132f741fa06e92202fc01a2663",
+  "sha1": "9c85ce3fc81c65c345ebcb8379e148cccb2d482f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -85,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 46,
+        "line": 56,
         "column": 26
       }
     },
@@ -113,8 +113,64 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 91,
+        "line": 101,
         "column": 25
+      }
+    },
+    {
+      "id": "bf75566191cf10a-a43f6e33c1f7dde",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to grant a UIAM API key on a real request authenticated with an internal UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 144,
+        "column": 27
+      }
+    },
+    {
+      "id": "bf75566191cf10a-467bf33af432936",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to grant a UIAM API key on a real request authenticated with an organization UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 161,
+        "column": 24
       }
     },
     {
@@ -141,8 +197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 129,
-        "column": 50
+        "line": 194,
+        "column": 16
       }
     },
     {
@@ -169,8 +225,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 150,
-        "column": 7
+        "line": 211,
+        "column": 11
       }
     },
     {

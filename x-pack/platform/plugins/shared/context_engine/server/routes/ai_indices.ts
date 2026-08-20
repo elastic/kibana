@@ -7,9 +7,8 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -17,6 +16,7 @@ import {
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
+  MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
@@ -47,6 +47,7 @@ import type { AiIndexService } from '../ai_indices/service';
 import { getKiSummary } from '../ai_indices/ki_summary';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
+import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -72,6 +73,14 @@ const aiIndexPropertiesSchema = {
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
       meta: { description: 'Human-readable description of the AI index.' },
+    })
+  ),
+  feedback_agent_id: schema.maybe(
+    schema.string({
+      maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
+      meta: {
+        description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
+      },
     })
   ),
   dest: schema.object({
@@ -128,18 +137,6 @@ const aiIndexPropertiesSchema = {
 
 const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
 const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
-
-const withContextEngineFeatureFlag =
-  <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
-  async (ctx, request, response) => {
-    const { uiSettings } = await ctx.core;
-    // Registered by the agent_builder_sml plugin (server/ui_settings.ts).
-    const isEnabled = await uiSettings.client.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
-    if (!isEnabled) {
-      return response.notFound();
-    }
-    return handler(ctx, request, response);
-  };
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
   if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {

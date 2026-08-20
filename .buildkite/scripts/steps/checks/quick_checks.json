@@ -86,6 +86,9 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/buildkite_unit_tests.sh"
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
   },
   {

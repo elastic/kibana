@@ -489,7 +489,12 @@ export function isRealRequest(request: unknown): request is KibanaRequest | Requ
 }
 
 function isCompleted(request: Request) {
-  return request.raw.res.writableFinished;
+  const { res } = request.raw;
+  // For http/1, it is sufficient to check `writableFinished` because `writableEnded` is always true when the response is finished.
+  // For http/2, we need to check both `writableFinished` and `writableEnded` to be true to be sure the response is finished.
+  // This allows Kibana's aborted$ event to be emitted when the client cancels the request, regardless of the protocol.
+  // The addition of `writableEnded` works around inconsistencies in Node.js, which are resolved in Node.js 27+: https://github.com/nodejs/node/pull/63249
+  return res.writableFinished && res.writableEnded;
 }
 
 /**

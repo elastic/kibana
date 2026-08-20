@@ -116,16 +116,24 @@ export const ActionPoliciesTable = () => {
 
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
-      const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
-        policy;
+      const {
+        name,
+        description,
+        destinations,
+        matcher,
+        group_by: groupBy,
+        throttle,
+        tags,
+        grouping_mode: groupingMode,
+      } = policy;
       const data: CreateActionPolicyData = {
         name: `${name} [clone]`,
         description,
         destinations,
-        groupingMode: groupingMode ?? 'per_episode',
+        grouping_mode: groupingMode ?? 'per_episode',
         ...(tags != null && { tags }),
         ...(matcher != null && { matcher }),
-        ...(groupBy != null && { groupBy }),
+        ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });
@@ -162,7 +170,7 @@ export const ActionPoliciesTable = () => {
                 }),
               },
               {
-                field: 'updatedAt',
+                field: 'updated_at',
                 name: i18n.translate('xpack.alertingV2.actionPoliciesList.sort.updatedAt', {
                   defaultMessage: 'Last update',
                 }),

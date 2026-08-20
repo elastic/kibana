@@ -90,6 +90,7 @@ export const useConversationPermissions = (): ConversationPermissions => {
   return {
     rename: conversation?.permissions.rename ?? false,
     delete: conversation?.permissions.delete ?? false,
+    update_access_control: conversation?.permissions.update_access_control ?? false,
   };
 };
 
