@@ -27,7 +27,10 @@ describe('scheduledReportModelVersions v6', () => {
 
   it('adds the createdById mapping', () => {
     expect(v6.changes).toEqual([
-      { type: 'mappings_addition', addedMappings: { createdById: { type: 'keyword' } } },
+      {
+        type: 'mappings_addition',
+        addedMappings: { createdById: { type: 'keyword', ignore_above: 1024 } },
+      },
     ]);
   });
 

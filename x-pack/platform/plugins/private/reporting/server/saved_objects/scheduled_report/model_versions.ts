@@ -67,6 +67,7 @@ export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
         addedMappings: {
           createdById: {
             type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },

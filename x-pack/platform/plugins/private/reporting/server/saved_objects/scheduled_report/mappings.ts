@@ -18,6 +18,9 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     },
     createdById: {
       type: 'keyword',
+      // Generous bound: the value can embed a realm-qualified username (e.g. SAML NameIDs or
+      // LDAP DNs), and the ownership `list` filter relies on this field being indexed.
+      ignore_above: 1024,
     },
   },
 };
