@@ -98,9 +98,23 @@ spaceTest.describe('Dashboard search timeout', { tag: '@local-stateful-classic' 
 
       await spaceTest.step('re-submitting starts a new session that is still shared', async () => {
         await page.testSubj.click('querySubmitButton');
-        // Waiting for the error again confirms the new search cycle has run before reading ids.
-        await expect(timeoutError).toBeVisible({ timeout: 30_000 });
-        await page.components.toast().closeAll();
+
+        // The timeout error is raised once per dashboard visit, so it cannot be used to tell that
+        // the second search cycle has started. The session id changing is the signal. Toasts are
+        // closed on every attempt because they overlay the panels the inspector opens from.
+        await expect
+          .poll(
+            async () => {
+              await page.components.toast().closeAll();
+              const currentSessionId =
+                await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
+                  UNDELAYED_PANEL_TITLE
+                );
+              return currentSessionId !== undelayedSessionId;
+            },
+            { timeout: 30_000 }
+          )
+          .toBe(true);
 
         const newUndelayedSessionId =
           await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(UNDELAYED_PANEL_TITLE);

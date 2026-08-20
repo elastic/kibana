@@ -80,8 +80,9 @@ export class BackgroundSearchPage {
   async sendToBackground({ isSubmitButton = false }: SendToBackgroundOptions = {}) {
     const submitButton = this.page.testSubj.locator(SUBMIT_BUTTON);
     // While a search is in flight the submit button is swapped for the cancel button, so wait
-    // for it to come back before clicking.
-    await submitButton.waitFor({ state: 'visible' });
+    // for it to come back before clicking. Raised above the default because a preceding search
+    // is subject to the 5s stalling filter these specs use.
+    await submitButton.waitFor({ state: 'visible', timeout: 30_000 });
     await submitButton.click();
 
     // Confirm the search is actually in flight before reaching for the secondary action.

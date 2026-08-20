@@ -68,9 +68,13 @@ spaceTest.describe('Discover search session state', { tag: '@local-stateful-clas
 
       await spaceTest.step('re-submitting the query starts a fresh session', async () => {
         await pageObjects.discover.submitQuery();
+        // The error callout clearing is what proves a successful search replaced the failed
+        // restore. The URL losing the session id does not: the failed restore drops it too, so
+        // waiting on the URL can return before the new request has been recorded.
+        await expect(page.testSubj.locator('discoverErrorCalloutTitle')).toBeHidden();
         await pageObjects.discover.waitUntilSearchingHasFinished();
-        // Discover rewrites the hash asynchronously; waiting on the predicate avoids reading
-        // the URL before the app has dropped the restored session id.
+        // Also waited on for the next step: going back only reaches the restored session if the
+        // fresh search has pushed its own history entry.
         await page.waitForURL((url) => !url.href.includes('searchSessionId'));
 
         await pageObjects.unifiedTabs.openInspectorForActiveTab();

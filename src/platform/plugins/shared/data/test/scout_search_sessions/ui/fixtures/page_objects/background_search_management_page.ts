@@ -74,6 +74,9 @@ export class BackgroundSearchManagementPage {
     const input = this.page.testSubj.locator('editNameInput');
     await input.fill(newName);
     await this.page.testSubj.click('confirmEditName');
+    // The rename modal's overlay mask swallows pointer events until it unmounts, so anything
+    // clicked next races its removal. Waiting on the input covers the whole modal.
+    await input.waitFor({ state: 'hidden' });
   }
 
   async viewRow() {
