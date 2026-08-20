@@ -15,13 +15,10 @@ jest.mock('../../hooks/use_space_default_agent', () => ({
 }));
 
 let mockPathname = '/agents/agent-a';
+// Render Redirect as a marker so we can assert redirects without a full router.
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: mockPathname }),
-}));
-
-// Render Navigate as a marker so we can assert redirects without a full router.
-jest.mock('react-router-dom-v5-compat', () => ({
-  Navigate: ({ to }: { to: string }) => <div>{`navigate:${to}`}</div>,
+  Redirect: ({ to }: { to: string }) => <div>{`navigate:${to}`}</div>,
 }));
 
 // Render the loading spinner as a marker so we can assert the isReady gate.

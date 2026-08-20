@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { Navigate } from 'react-router-dom-v5-compat';
-import { useLocation } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 
 import { appPaths } from '../../utils/app_paths';
 import { getAgentIdFromPath } from '../../route_config';
@@ -30,7 +29,7 @@ export const AgentRouteGuard: React.FC<React.PropsWithChildren<{}>> = ({ childre
     currentAgentId &&
     currentAgentId !== effectiveDefaultAgentId
   ) {
-    return <Navigate to={appPaths.agent.root({ agentId: effectiveDefaultAgentId })} replace />;
+    return <Redirect to={appPaths.agent.root({ agentId: effectiveDefaultAgentId })} />;
   }
 
   return <>{children}</>;
