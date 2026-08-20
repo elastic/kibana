@@ -9,12 +9,14 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { shouldResetProfileAppStateDefaultField } from './profile_app_state_defaults';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
 const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
@@ -155,9 +157,14 @@ export const buildEsqlFetchSubscribe = ({
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 
     const appStateColumns = getCurrentTab().appState.columns ?? [];
-    const nextSelectedColumns = appStateColumns.filter(
+    const stickSource = !shouldResetProfileAppStateDefaultField(
+      getCurrentTab().profileAppStateDefaults,
+      'columns'
+    );
+    const columnsFromResponse = appStateColumns.filter(
       (column) => responseColumns?.includes(column) ?? true
     );
+    const nextSelectedColumns = withStickySource(appStateColumns, columnsFromResponse, stickSource);
     const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
 
     const { viewMode } = getCurrentTab().appState;
@@ -171,11 +178,12 @@ export const buildEsqlFetchSubscribe = ({
 
       // just change URL state if necessary
       if (changeDefaultColumns || changeSelectedColumns || changeViewMode) {
-        const nextColumns = changeDefaultColumns
-          ? nextDefaultColumns
-          : changeSelectedColumns
-          ? nextSelectedColumns
-          : undefined;
+        let nextColumns: string[] | undefined;
+        if (changeDefaultColumns) {
+          nextColumns = withStickySource(appStateColumns, nextDefaultColumns, stickSource);
+        } else if (changeSelectedColumns) {
+          nextColumns = nextSelectedColumns;
+        }
 
         const nextState = {
           ...(nextColumns && { columns: nextColumns }),
@@ -197,4 +205,31 @@ export const buildEsqlFetchSubscribe = ({
   };
 
   return { esqlFetchSubscribe, cleanupEsql };
+};
+
+/**
+ * Inserts Summary (`_source`) into the new ES|QL column list at its previous index
+ * when `stickSource` is true. Does not re-insert Summary if the user turned it off.
+ */
+const withStickySource = (
+  previousColumns: string[],
+  nextColumns: string[],
+  stickSource: boolean
+): string[] => {
+  if (!stickSource) {
+    return nextColumns;
+  }
+
+  const sourceIndex = previousColumns.indexOf(SOURCE_COLUMN);
+  if (sourceIndex === -1) {
+    return nextColumns;
+  }
+
+  const columnsWithoutSource = nextColumns.filter((column) => column !== SOURCE_COLUMN);
+  const insertAt = Math.min(sourceIndex, columnsWithoutSource.length);
+  return [
+    ...columnsWithoutSource.slice(0, insertAt),
+    SOURCE_COLUMN,
+    ...columnsWithoutSource.slice(insertAt),
+  ];
 };
