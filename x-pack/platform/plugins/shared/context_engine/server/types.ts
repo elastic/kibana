@@ -7,6 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -14,6 +15,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
+import type { AiIndexService } from './ai_indices/service';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -21,6 +23,7 @@ export interface ContextEnginePluginSetup {
 }
 
 export interface ContextEnginePluginStart {
+  getAiIndexService: () => AiIndexService;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
 }
@@ -34,5 +37,6 @@ export interface ContextEngineSetupDependencies {
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }

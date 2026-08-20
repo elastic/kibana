@@ -69,6 +69,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
               defaultMessage:
                 "Your trial includes up to 30,000 embedding requests or 100 million tokens, whichever comes first. You'll only be billed once you're on a paid plan.",
             }),
+            trialOnly: true,
           },
           {
             id: 'jinaModels',

@@ -13,6 +13,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ui-chrome-layout-utils"
+    "@kbn/core-chrome-layout"
   ]
 }
