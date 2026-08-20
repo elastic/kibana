@@ -22,6 +22,31 @@ describe('watchRegistry', () => {
     expect(watchRegistry.get(SYSTEM_SECURITY_WATCH_OFFICER_ID)?.settings).toBeUndefined();
   });
 
+  it('renders Watch Floor settings into the managed YAML', () => {
+    const definition = getManagedWorkflowDefinition(SYSTEM_SECURITY_WATCH_FLOOR_ID);
+    if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+      throw new Error('Watch Floor must be registered as a managed YAML template');
+    }
+
+    const manualYaml = definition.yamlTemplate({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+    });
+    const supervisedYaml = definition.yamlTemplate({
+      settingsVersion: 1,
+      autonomyLevel: 'supervised',
+    });
+
+    expect(supervisedYaml).not.toBe(manualYaml);
+    expect(
+      (parse(manualYaml) as { consts: { watch_settings: unknown } }).consts.watch_settings
+    ).toEqual({
+      settingsVersion: 1,
+      autonomy: 'manual',
+    });
+    expect(supervisedYaml).not.toContain('__WATCH_AUTONOMY_LEVEL__');
+  });
+
   it('requires every managed watch to carry exactly one tier tag', () => {
     for (const registration of watchRegistry.list()) {
       const definition = getManagedWorkflowDefinition(registration.id);
