@@ -210,19 +210,19 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'config',
-    // name: 'AWS Config',
+    name: 'AWS Config',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'guardduty',
-    // name: 'AWS GuardDuty',
+    name: 'AWS GuardDuty',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'inspector',
-    // name: 'AWS Inspector',
+    name: 'AWS Inspector',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
@@ -240,19 +240,19 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'securityhub_findings',
-    // name: 'AWS Security Hub',
+    name: 'AWS Security Hub',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_findings_full_posture',
-    // name: 'AWS Security Hub (Full Posture / CSPM)',
+    name: 'AWS Security Hub (Full Posture / CSPM)',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_insights',
-    // name: 'AWS Security Hub (Insights)',
+    name: 'AWS Security Hub (Insights)',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
@@ -385,26 +385,26 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'guardrails',
-    // name: 'AWS Bedrock (Guardrails)',
+    name: 'AWS Bedrock (Guardrails)',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'invocation',
-    // name: 'AWS Bedrock (Invocation)',
+    name: 'AWS Bedrock (Invocation)',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'runtime',
-    // name: 'AWS Bedrock (Runtime)',
+    name: 'AWS Bedrock (Runtime)',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'bedrock_agentcore',
-    // name: 'AWS Bedrock AgentCore',
+    name: 'AWS Bedrock AgentCore',
     category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
     showInUI: false,
@@ -413,7 +413,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
     id: 'task_stats',
-    // name: 'AWS Fargate',
+    name: 'AWS Fargate',
     category: 'containers',
     packageName: 'awsfargate',
   },
@@ -422,7 +422,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
-    // name: 'AWS MQ',
+    name: 'AWS MQ',
     category: 'application_integration',
     packageName: 'aws_mq',
     showInUI: false,
@@ -432,7 +432,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
-    // name: 'AWS Logs (Generic)',
+    name: 'AWS Logs (Generic)',
     category: 'management_governance',
     packageName: 'aws_logs',
   },

@@ -67,18 +67,6 @@ const MOCK_PACKAGES: Record<string, any> = {
     policy_templates: [],
     data_streams: [{ path: 'mq', type: 'metrics', streams: [] }],
   },
-  aws_cloudtrail_otel: {
-    policy_templates: [],
-    data_streams: [{ path: 'cloudtrail_otel', type: 'logs', streams: [] }],
-  },
-  aws_vpcflow_otel: {
-    policy_templates: [],
-    data_streams: [{ path: 'vpcflow_otel', type: 'logs', streams: [] }],
-  },
-  aws_waf_otel: {
-    policy_templates: [],
-    data_streams: [{ path: 'waf_otel', type: 'logs', streams: [] }],
-  },
   aws_logs: {
     policy_templates: [],
     data_streams: [{ path: 'aws_logs', type: 'logs', streams: [] }],

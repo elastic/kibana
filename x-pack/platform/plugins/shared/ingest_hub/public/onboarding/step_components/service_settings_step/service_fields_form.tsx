@@ -78,9 +78,8 @@ function VarField({
   if (!meta) return null;
   const value = toTyped(draft[fieldName], meta);
   const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
-  const effective = toTyped(draft[fieldName], meta);
   const errors =
-    forceShowErrors && isRequired && typeof effective === 'string' && !effective.trim()
+    forceShowErrors && isRequired && typeof value === 'string' && !value.trim()
       ? [
           i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.requiredField.error', {
             defaultMessage: 'This field is required.',
