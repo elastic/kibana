@@ -54,6 +54,7 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  projectRouting?: string;
 }
 
 /**
