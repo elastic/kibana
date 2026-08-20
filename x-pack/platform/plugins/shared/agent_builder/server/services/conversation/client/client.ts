@@ -32,11 +32,7 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type {
-  ConversationTemplate,
-  SerializedMetadataValue,
-  MetadataFieldValue,
-} from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -68,7 +64,11 @@ import type { ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
-import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
+import {
+  buildMetadataFromTemplate,
+  serializeMetadataValue,
+  withDeserializedMetadata,
+} from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
@@ -78,40 +78,11 @@ import {
   withPermissions,
   toEs,
   updateConversation,
-  fromNormalized,
+  toPublicConversation,
   createRequestToEs,
   isConversationDocument,
   type Document,
 } from './converters';
-
-/** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
-const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
-  conversation: T
-): T => {
-  if (!conversation.template_id || !conversation.metadata) return conversation;
-  const template = getTemplate(conversation.template_id);
-  if (!template) return conversation;
-  return {
-    ...conversation,
-    metadata: deserializeMetadata(
-      conversation.metadata as Record<string, SerializedMetadataValue>,
-      template
-    ),
-  };
-};
-
-const buildMetadataFromTemplate = (
-  template: ConversationTemplate
-): Record<string, SerializedMetadataValue> =>
-  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
-    (acc, [fieldName, def]) => {
-      if (def.default_value !== undefined) {
-        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
-      }
-      return acc;
-    },
-    {}
-  );
 
 const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
 
@@ -259,7 +230,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-    const conversation = fromNormalized(withDeserializedMetadata(fromEs(document, this.user)));
+    const conversation = toPublicConversation(fromEs(document, this.user));
 
     return withPermissions({ conversation, user: this.user });
   }
@@ -302,7 +273,7 @@ class ConversationClientImpl implements ConversationClient {
         access: 'converse',
       });
 
-      return withDeserializedMetadata(fromNormalized(fromEs(document, this.user)));
+      return toPublicConversation(fromEs(document, this.user));
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -406,7 +377,7 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => fields,
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async addAttachmentsToLastRound(
@@ -437,7 +408,7 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async upsertRound(
@@ -468,7 +439,7 @@ class ConversationClientImpl implements ConversationClient {
         read: false,
       }),
     });
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
@@ -552,7 +523,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async patchMetadata(
@@ -591,7 +562,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async appendEvents(
@@ -791,7 +762,7 @@ class ConversationClientImpl implements ConversationClient {
           }),
       });
 
-      return fromNormalized(document);
+      return toPublicConversation(document);
     } catch (error) {
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {

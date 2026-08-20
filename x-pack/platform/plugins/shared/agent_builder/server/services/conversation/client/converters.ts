@@ -49,6 +49,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
+import { withDeserializedMetadata } from '../templates/serialize';
 
 export type Document = Omit<
   Required<
@@ -280,10 +281,17 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
   };
 };
 
-/** Strips server-internal fields before a conversation crosses the public API boundary. */
-export const fromNormalized = (conversation: NormalizedConversation): Conversation => {
+/**
+ * Converts the server-internal conversation shape to the public `Conversation` contract.
+ *
+ * Internal fields that support persistence or migrations, such as `read_by`, are stripped and
+ * serialized storage fields, such as template metadata, are deserialized before the object crosses
+ * the public API boundary.
+ */
+export const toPublicConversation = (conversation: NormalizedConversation): Conversation => {
   const { read_by: _readBy, ...conversationWithoutReadBy } = conversation;
-  return conversationWithoutReadBy;
+
+  return withDeserializedMetadata(conversationWithoutReadBy);
 };
 
 export const toEs = (

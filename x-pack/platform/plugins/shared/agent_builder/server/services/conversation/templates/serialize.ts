@@ -11,6 +11,7 @@ import type {
   MetadataFieldValue,
   SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
+import { getTemplate } from './registry';
 
 /** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; everything else → String(value). */
 export const serializeMetadataValue = (
@@ -57,3 +58,34 @@ export const deserializeMetadata = (
   }
   return result;
 };
+
+/** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
+export const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
+  conversation: T
+): T => {
+  if (!conversation.template_id || !conversation.metadata) return conversation;
+
+  const template = getTemplate(conversation.template_id);
+  if (!template) return conversation;
+
+  return {
+    ...conversation,
+    metadata: deserializeMetadata(
+      conversation.metadata as Record<string, SerializedMetadataValue>,
+      template
+    ),
+  };
+};
+
+export const buildMetadataFromTemplate = (
+  template: ConversationTemplate
+): Record<string, SerializedMetadataValue> =>
+  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
+    (acc, [fieldName, def]) => {
+      if (def.default_value !== undefined) {
+        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
+      }
+      return acc;
+    },
+    {}
+  );
