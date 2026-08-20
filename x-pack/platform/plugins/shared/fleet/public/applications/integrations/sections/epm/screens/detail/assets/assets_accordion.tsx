@@ -27,16 +27,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 
 import { AssetTitleMap } from '../../../constants';
-import type { DisplayedAssetTypes } from '../../../../../../../../common';
+import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
-import type { AlertingAsset, AlertingEngine } from '../alerting/types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
+type AccordionAsset = GetBulkAssetsResponse['items'][number];
+type AccordionAssetEngine = AccordionAsset['attributes']['engine'];
+
 type AlertingEngineTab = 'v2' | 'v1';
 
-const isV2AlertingAsset = (asset: AlertingAsset): boolean => asset.attributes?.engine === 'v2';
+const isV2AlertingAsset = (asset: AccordionAsset): boolean => asset.attributes?.engine === 'v2';
 
 const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
@@ -59,7 +61,7 @@ const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
 );
 
 const getAlertingEngineBadge = (
-  engine: AlertingEngine | undefined
+  engine: AccordionAssetEngine
 ): { label: string; ariaLabel: string } => {
   if (engine === 'v2') {
     return { label: ALERTING_ENGINE_V2_BADGE, ariaLabel: ALERTING_ENGINE_V2_ARIA_LABEL };
@@ -70,7 +72,7 @@ const getAlertingEngineBadge = (
 
 export const AssetsAccordion: FunctionComponent<{
   type: DisplayedAssetType;
-  savedObjects: AlertingAsset[];
+  savedObjects: AccordionAsset[];
 }> = ({ savedObjects, type }) => {
   const startServices = useStartServices();
   const { http } = startServices;

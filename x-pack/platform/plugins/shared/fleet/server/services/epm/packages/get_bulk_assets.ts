@@ -23,6 +23,9 @@ import type { SimpleSOAssetAttributes } from '../../../types';
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
+};
+
+type AlertingRuleTemplateAttributes = DisplayableSOAssetAttributes & {
   engine?: 'v1' | 'v2';
   rule?: {
     metadata?: {
@@ -64,6 +67,11 @@ const getAppLinkForESAssetType = (type: string, id: string): string =>
 
 type BulkAssetItem = GetBulkAssetsResponse['items'][number];
 
+const isType = <TAttributes extends DisplayableSOAssetAttributes>(
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  type: string
+): obj is SavedObject<TAttributes> => obj.type === type;
+
 const toAssetType = (
   obj: SavedObject<DisplayableSOAssetAttributes>,
   soType: SavedObjectsType | undefined,
@@ -74,23 +82,15 @@ const toAssetType = (
     description: obj.attributes?.description,
   };
 
-  switch (obj.type) {
-    case KibanaSavedObjectType.alertingRuleTemplate: {
-      const engine =
-        obj.attributes?.engine === 'v1' || obj.attributes?.engine === 'v2'
-          ? obj.attributes.engine
-          : undefined;
-      const ruleMetadata = obj.attributes?.rule?.metadata;
-      attributes = {
-        ...attributes,
-        title: ruleMetadata?.name ?? attributes.title,
-        description: ruleMetadata?.description ?? attributes.description,
-        ...(engine && { engine }),
-      };
-      break;
-    }
-    default:
-      break;
+  if (isType<AlertingRuleTemplateAttributes>(obj, KibanaSavedObjectType.alertingRuleTemplate)) {
+    const { engine, rule } = obj.attributes;
+    const ruleMetadata = rule?.metadata;
+    attributes = {
+      ...attributes,
+      title: ruleMetadata?.name ?? attributes.title,
+      description: ruleMetadata?.description ?? attributes.description,
+      ...(engine === 'v1' || engine === 'v2' ? { engine } : {}),
+    };
   }
 
   return {
