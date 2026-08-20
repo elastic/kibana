@@ -53,7 +53,12 @@ apiTest.describe(
   'Dataset quality - degraded docs chart preview',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    let viewerHeaders: Record<string, string>;
+
+    apiTest.beforeAll(async ({ logsSynthtraceEsClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      viewerHeaders = { ...testData.COMMON_HEADERS, ...cookieHeader };
+
       await indexLogs(
         logsSynthtraceEsClient,
         Array.from({ length: DATASET_COUNT }, (_, datasetIndex) =>
@@ -92,13 +97,11 @@ apiTest.describe(
 
     apiTest(
       'returns proper timeSeries data for degraded fields when querying a single dataStream',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
+      async ({ apiClient }) => {
         const response = await apiClient.get(
           chartPreviewUrl({ index: `logs-${datasetFor(5)}-*` }),
           {
-            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+            headers: viewerHeaders,
             responseType: 'json',
           }
         );
@@ -123,13 +126,11 @@ apiTest.describe(
 
     apiTest(
       'returns proper timeSeries data when querying at a specific interval',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
+      async ({ apiClient }) => {
         const response = await apiClient.get(
           chartPreviewUrl({ index: `logs-${datasetFor(1)}-*`, interval: '5m' }),
           {
-            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+            headers: viewerHeaders,
             responseType: 'json',
           }
         );
@@ -147,61 +148,54 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'returns proper timeSeries data grouped using multiple keys',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+    apiTest('returns proper timeSeries data grouped using multiple keys', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        chartPreviewUrl({
+          index: `logs-${datasetFor(1)}-*`,
+          groupBy: ['_index', 'service.name'],
+        }),
+        {
+          headers: viewerHeaders,
+          responseType: 'json',
+        }
+      );
 
-        const response = await apiClient.get(
-          chartPreviewUrl({
-            index: `logs-${datasetFor(1)}-*`,
-            groupBy: ['_index', 'service.name'],
-          }),
-          {
-            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-            responseType: 'json',
-          }
-        );
-
-        expect(response).toHaveStatusCode(200);
-        // Every document of dataset `.1` is degraded, and the two services alternate
-        // between the buckets, so the groups are exactly out of phase.
-        expect(response.body.series).toStrictEqual([
-          {
-            name: `${dataStreamFor(1)},${OTHER_SERVICE_NAME}1`,
-            data: [
-              { x: START_MS, y: 100 },
-              { x: START_MS + MINUTE_MS, y: 0 },
-              { x: START_MS + 2 * MINUTE_MS, y: 100 },
-              { x: START_MS + 3 * MINUTE_MS, y: 0 },
-              { x: START_MS + 4 * MINUTE_MS, y: 100 },
-              { x: START_MS + 5 * MINUTE_MS, y: 0 },
-            ],
-          },
-          {
-            name: `${dataStreamFor(1)},${SERVICE_NAME}1`,
-            data: [
-              { x: START_MS, y: 0 },
-              { x: START_MS + MINUTE_MS, y: 100 },
-              { x: START_MS + 2 * MINUTE_MS, y: 0 },
-              { x: START_MS + 3 * MINUTE_MS, y: 100 },
-              { x: START_MS + 4 * MINUTE_MS, y: 0 },
-              { x: START_MS + 5 * MINUTE_MS, y: 100 },
-            ],
-          },
-        ]);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      // Every document of dataset `.1` is degraded, and the two services alternate
+      // between the buckets, so the groups are exactly out of phase.
+      expect(response.body.series).toStrictEqual([
+        {
+          name: `${dataStreamFor(1)},${OTHER_SERVICE_NAME}1`,
+          data: [
+            { x: START_MS, y: 100 },
+            { x: START_MS + MINUTE_MS, y: 0 },
+            { x: START_MS + 2 * MINUTE_MS, y: 100 },
+            { x: START_MS + 3 * MINUTE_MS, y: 0 },
+            { x: START_MS + 4 * MINUTE_MS, y: 100 },
+            { x: START_MS + 5 * MINUTE_MS, y: 0 },
+          ],
+        },
+        {
+          name: `${dataStreamFor(1)},${SERVICE_NAME}1`,
+          data: [
+            { x: START_MS, y: 0 },
+            { x: START_MS + MINUTE_MS, y: 100 },
+            { x: START_MS + 2 * MINUTE_MS, y: 0 },
+            { x: START_MS + 3 * MINUTE_MS, y: 100 },
+            { x: START_MS + 4 * MINUTE_MS, y: 0 },
+            { x: START_MS + 5 * MINUTE_MS, y: 100 },
+          ],
+        },
+      ]);
+    });
 
     apiTest(
       'returns maximum 5 timeseries but totalGroups indicates that there were more',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
+      async ({ apiClient }) => {
         const response = await apiClient.get(
           chartPreviewUrl({ index: `logs-${DATASET_PREFIX}.*-*` }),
           {
-            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+            headers: viewerHeaders,
             responseType: 'json',
           }
         );
@@ -214,13 +208,11 @@ apiTest.describe(
 
     apiTest(
       'returns empty when dataStream does not exist or does not have data reported',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
+      async ({ apiClient }) => {
         const response = await apiClient.get(
           chartPreviewUrl({ index: 'logs-dq.chart.missing-*' }),
           {
-            headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+            headers: viewerHeaders,
             responseType: 'json',
           }
         );
