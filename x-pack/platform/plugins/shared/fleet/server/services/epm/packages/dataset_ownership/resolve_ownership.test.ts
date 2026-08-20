@@ -228,6 +228,32 @@ describe('resolveDatasetOwnership', () => {
     expect(result.conflicts).toEqual([]);
   });
 
+  it('treats a claimed, installed template with no _meta owner as ours', async () => {
+    const result = await resolveDatasetOwnership({
+      esClient: esMock({
+        streams: [{ name: 'logs-payroll.records-default', template: 'logs-payroll.records' }],
+        templates: [
+          {
+            name: 'logs-payroll.records',
+            index_template: {
+              priority: 200,
+              index_patterns: ['logs-payroll.records-*'],
+            },
+          },
+        ],
+      }),
+      soClient: soMock({
+        claims: [heldClaim()],
+        installedTemplateIds: ['logs-payroll.records'],
+      }),
+      packageName: 'mine',
+      prospective,
+    });
+
+    expect(result.conflicts).toEqual([]);
+    expect(result.allowlist).toEqual(['logs-payroll.records-default']);
+  });
+
   it('counts a pending claim from a previous failed attempt, so a retry can resume', async () => {
     const result = await resolveDatasetOwnership({
       esClient: esMock({

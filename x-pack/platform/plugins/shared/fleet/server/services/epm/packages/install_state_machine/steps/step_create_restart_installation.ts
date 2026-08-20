@@ -7,11 +7,14 @@
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ConcurrentInstallOperationError } from '../../../../../errors';
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
 
 import { restartInstallation, createInstallation } from '../../install';
+import { getInstallationObject } from '../../get';
+import { hasLiveReservation } from '../../dataset_ownership/reservation';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { withPackageSpan } from '../../utils';
@@ -26,88 +29,120 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     spaceId,
     force,
     verificationResult,
-    installedPkg,
     installedAsDependencyOf,
+    datasetClaimAttemptId,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const dependencies = getPackageDependencies(packageInfo);
 
-  // if some installation already exists
-  if (installedPkg) {
-    let previousVersion: string | null | undefined;
-    if (semverGt(pkgVersion, installedPkg.attributes.install_version)) {
-      previousVersion = installedPkg.attributes.install_version;
-    } else if (semverLt(pkgVersion, installedPkg.attributes.install_version)) {
-      previousVersion = null;
-    }
-    const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
-    const hasExceededTimeout =
-      Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
-      MAX_TIME_COMPLETE_INSTALL;
-    logger.debug(`Package install - Install status ${installedPkg.attributes.install_status}`);
+  const current = await getInstallationObject({ savedObjectsClient, pkgName });
+  context.installedPkg = current;
 
-    // if the installation is currently running, don't try to install
-    // instead, only return already installed assets
-    if (isStatusInstalling && hasExceededTimeout) {
-      // If this is a forced installation, ignore the timeout and restart the installation anyway
-      logger.debug(`Package install - Installation is running and has exceeded timeout`);
+  const concurrentError = () =>
+    new ConcurrentInstallOperationError(
+      `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+        pkgVersion || 'unknown'
+      } detected, aborting.`
+    );
 
-      if (force) {
-        logger.debug(`Package install - Forced installation, restarting`);
-        await withPackageSpan('Restarting installation with force flag', () =>
-          restartInstallation({
-            savedObjectsClient,
-            pkgName,
-            pkgVersion,
-            installSource,
-            verificationResult,
-            previousVersion,
-            installedAsDependencyOf,
-            existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
-            dependencies,
-          })
-        );
-      } else {
-        throw new ConcurrentInstallOperationError(
-          `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
-            pkgVersion || 'unknown'
-          } detected, aborting.`
-        );
-      }
-    } else {
-      // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
-      // (it might be stuck) update the saved object and proceed
-      logger.debug(
-        `Package install - no installation running or the installation has been running longer than ${MAX_TIME_COMPLETE_INSTALL}, restarting`
-      );
-      await withPackageSpan('Restarting installation', () =>
-        restartInstallation({
+  if (!current) {
+    logger.debug(`Package install - Create installation`);
+    try {
+      await withPackageSpan('Creating installation', () =>
+        createInstallation({
           savedObjectsClient,
-          pkgName,
-          pkgVersion,
+          packageInfo,
           installSource,
+          spaceId,
           verificationResult,
-          previousVersion,
           installedAsDependencyOf,
-          existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
           dependencies,
+          datasetClaimAttemptId,
         })
       );
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error)) throw error;
+      const raced = await getInstallationObject({ savedObjectsClient, pkgName });
+      if (
+        hasLiveReservation(raced?.attributes) &&
+        raced?.attributes.dataset_claim_attempt_id !== datasetClaimAttemptId &&
+        !force
+      ) {
+        throw concurrentError();
+      }
+      if (!raced) throw error;
+      context.installedPkg = raced;
+      await restartCurrent(context, raced);
     }
-  } else {
-    logger.debug(`Package install - Create installation`);
-
-    await withPackageSpan('Creating installation', () =>
-      createInstallation({
-        savedObjectsClient,
-        packageInfo,
-        installSource,
-        spaceId,
-        verificationResult,
-        installedAsDependencyOf,
-        dependencies,
-      })
-    );
+    return;
   }
+
+  if (
+    hasLiveReservation(current.attributes) &&
+    current.attributes.dataset_claim_attempt_id !== datasetClaimAttemptId &&
+    !force
+  ) {
+    throw concurrentError();
+  }
+
+  const isStatusInstalling = current.attributes.install_status === 'installing';
+  const stillWithinTimeout =
+    Date.now() - Date.parse(current.attributes.install_started_at) < MAX_TIME_COMPLETE_INSTALL;
+  if (
+    isStatusInstalling &&
+    stillWithinTimeout &&
+    !force &&
+    !hasLiveReservation(current.attributes)
+  ) {
+    throw concurrentError();
+  }
+
+  await restartCurrent(context, current);
+}
+
+async function restartCurrent(
+  context: InstallContext,
+  current: NonNullable<InstallContext['installedPkg']>
+) {
+  const {
+    savedObjectsClient,
+    logger,
+    installSource,
+    packageInstallContext,
+    force,
+    verificationResult,
+    installedAsDependencyOf,
+    datasetClaimAttemptId,
+  } = context;
+  const { packageInfo } = packageInstallContext;
+  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const dependencies = getPackageDependencies(packageInfo);
+
+  let previousVersion: string | null | undefined;
+  if (semverGt(pkgVersion, current.attributes.install_version)) {
+    previousVersion = current.attributes.install_version;
+  } else if (semverLt(pkgVersion, current.attributes.install_version)) {
+    previousVersion = null;
+  }
+
+  logger.debug(`Package install - Install status ${current.attributes.install_status}`);
+  await withPackageSpan(
+    force ? 'Restarting installation with force flag' : 'Restarting installation',
+    () =>
+      restartInstallation({
+        savedObjectsClient,
+        pkgName,
+        pkgVersion,
+        installSource,
+        verificationResult,
+        previousVersion,
+        installedAsDependencyOf,
+        existingIsDependencyOf: current.attributes.is_dependency_of ?? [],
+        dependencies,
+        datasetClaimAttemptId,
+        version: current.version,
+        previousAttemptId: current.attributes.dataset_claim_attempt_id ?? undefined,
+      })
+  );
 }

@@ -87,7 +87,7 @@ export const assertComponentTemplatesMutable = async ({
     if (adopted) continue;
 
     const metaOwner = existing.component_template?._meta?.package?.name;
-    if (metaOwner === packageName && tracked.has(name)) continue;
+    if (tracked.has(name) && (metaOwner === packageName || !metaOwner)) continue;
 
     throw new DatasetOwnershipConflictError(
       `Component template "${name}" is not owned by package "${packageName}". ` +

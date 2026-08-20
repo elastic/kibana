@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { InstallSource, InstallablePackage } from '../../../../../common/types';
 import { withPackageSpan } from '../utils';
 
-import { getPackageClaimNames, getPackageProspectiveTemplates } from './claim_names';
+import { getPackageClaimNames, getClaimNamesFromInstalledEs, mergeClaimNames } from './claim_names';
 import { acquireDatasetClaims, recordAdoptedStreamBaselines } from './claims';
 import { DatasetOwnershipConflictError } from './errors';
 import { withDatasetOwnershipLock } from './lock';
@@ -33,6 +33,7 @@ export const enforceInstallDatasetOwnership = async (args: {
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   attemptId: string;
+  installedEs?: Array<{ id: string; type: string }>;
   /**
    * Runs before the lock is released, after claims are acquired. Used to create the package SO so
    * DELETE cannot treat an in-flight first install as an abandoned adoption.
@@ -53,6 +54,7 @@ const runEnforceInstallDatasetOwnership = async ({
   packageInfo,
   installSource,
   attemptId,
+  installedEs,
 }: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -60,11 +62,12 @@ const runEnforceInstallDatasetOwnership = async ({
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   attemptId: string;
+  installedEs?: Array<{ id: string; type: string }>;
 }): Promise<{ ownedDataStreams: string[]; acquiredDatasetClaims: string[] }> => {
-  // Prospective names come from the package manifest. Input packages and custom
-  // integrations can synthesize extra index templates later in
-  // `step_install_index_template_pipelines`. Those names are not claimed here.
-  const claimNames = getPackageClaimNames(packageInfo);
+  const claimNames = mergeClaimNames(
+    getPackageClaimNames(packageInfo),
+    getClaimNamesFromInstalledEs(installedEs ?? [])
+  );
 
   const prefixClaim = claimNames.find(({ isPrefix }) => isPrefix);
   if (UNTRUSTED_SOURCES.includes(installSource) && prefixClaim) {
@@ -79,7 +82,7 @@ const runEnforceInstallDatasetOwnership = async ({
       esClient,
       soClient,
       packageName: packageInfo.name,
-      prospective: getPackageProspectiveTemplates(packageInfo),
+      prospective: claimNames.map((names) => ({ ...names, templateName: names.baseName })),
     })
   );
 

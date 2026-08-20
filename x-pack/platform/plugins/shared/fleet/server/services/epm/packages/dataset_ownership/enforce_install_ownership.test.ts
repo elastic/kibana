@@ -207,6 +207,25 @@ describe('enforceInstallDatasetOwnership', () => {
     );
   });
 
+  it('also claims index templates already recorded on the package SO', async () => {
+    mockedResolve.mockResolvedValue(clean);
+    mockedAcquire.mockResolvedValue({ acquired: ['logs-mine.data', 'logs-custom'] });
+
+    await enforceInstallDatasetOwnership({
+      ...args(),
+      installedEs: [{ id: 'logs-custom', type: 'index_template' }],
+    });
+
+    expect(mockedAcquire).toHaveBeenCalledWith(
+      expect.objectContaining({
+        claims: expect.arrayContaining([
+          { baseName: 'logs-mine.data', indexPatterns: ['logs-mine.data-*'] },
+          { baseName: 'logs-custom', indexPatterns: ['logs-custom-*'] },
+        ]),
+      })
+    );
+  });
+
   it('resolves before it acquires, so this attempt claim cannot vouch for itself', async () => {
     const order: string[] = [];
     mockedResolve.mockImplementation(async () => {

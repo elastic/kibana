@@ -23,13 +23,21 @@ export const withDatasetOwnershipLock = async <T>(fn: () => Promise<T>): Promise
     throw new FleetErrorWithStatusCode('Dataset ownership lock is unavailable', 503);
   }
 
-  return pRetry(() => lockManager.withLock(DATASET_OWNERSHIP_LOCK_ID, fn), {
-    onFailedAttempt: async (error) => {
-      if (!(error instanceof LockAcquisitionError)) {
-        throw error;
-      }
-    },
-    minTimeout: 50,
-    maxRetryTime: 30 * 1000,
-  });
+  let callbackStarted = false;
+  return pRetry(
+    () =>
+      lockManager.withLock(DATASET_OWNERSHIP_LOCK_ID, async () => {
+        callbackStarted = true;
+        return fn();
+      }),
+    {
+      onFailedAttempt: async (error) => {
+        if (callbackStarted || !(error instanceof LockAcquisitionError)) {
+          throw error;
+        }
+      },
+      minTimeout: 50,
+      maxRetryTime: 30 * 1000,
+    }
+  );
 };

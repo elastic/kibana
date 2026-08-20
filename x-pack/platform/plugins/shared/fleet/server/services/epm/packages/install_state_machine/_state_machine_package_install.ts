@@ -273,13 +273,10 @@ export async function _stateMachineInstallPackage(
           packageInfo: context.packageInstallContext.packageInfo,
           installSource: context.installSource,
           attemptId: context.datasetClaimAttemptId,
+          installedEs: installedPkg?.attributes.installed_es,
           afterAcquire: async () => {
-            // DELETE treats origin:adoption + missing package SO as abandoned. Hold the lock until
-            // that SO exists so an in-flight first install cannot lose its claim.
-            if (!installedPkg) {
-              await stepCreateRestartInstallation(context);
-              reservedPackageInstall = true;
-            }
+            await stepCreateRestartInstallation(context);
+            reservedPackageInstall = true;
           },
         });
 

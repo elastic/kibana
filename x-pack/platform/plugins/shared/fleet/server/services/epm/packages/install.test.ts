@@ -120,10 +120,14 @@ jest.mock('./dataset_ownership', () => ({
   releaseAttemptClaims: jest.fn().mockResolvedValue(undefined),
   finalizeDatasetClaims: jest.fn().mockResolvedValue(undefined),
   getPackageClaimNames: jest.fn(() => []),
+  getClaimNamesFromInstalledEs: jest.fn(() => []),
+  mergeClaimNames: jest.fn((primary: unknown) => primary),
   enforceInstallDatasetOwnership: jest.fn().mockResolvedValue({
     ownedDataStreams: [],
     acquiredDatasetClaims: [],
   }),
+  withDatasetOwnershipLock: jest.fn(async (fn: () => Promise<unknown>) => fn()),
+  transferPendingClaims: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../utils/agentless', () => {
@@ -165,6 +169,11 @@ describe('createInstallation', () => {
         name: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
+      expect(soClient.create).toHaveBeenCalledWith(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'test-package', overwrite: false })
+      );
     });
   });
 
@@ -919,7 +928,7 @@ describe('handleInstallPackageFailure', () => {
         }),
       })
     );
-    expect(releaseAttemptClaims).toHaveBeenCalledWith(savedObjectsClient, pkgName, 'attempt-1');
+    expect(releaseAttemptClaims).not.toHaveBeenCalled();
     jest.mocked(getInstallationObject).mockReset();
   });
 
@@ -1531,6 +1540,9 @@ describe('dataset claims on success', () => {
     await installPackageWithStateMachine(successOptions as never);
 
     expect(order).toEqual(['removeOldAssets', 'finalize']);
+    expect(mockedFinalizeDatasetClaims).toHaveBeenCalledWith(
+      expect.objectContaining({ requireReservation: true })
+    );
   });
 
   it('does not finalize when removing old assets fails', async () => {

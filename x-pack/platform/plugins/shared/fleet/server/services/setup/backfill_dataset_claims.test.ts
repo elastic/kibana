@@ -13,10 +13,15 @@ import {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { backfillDatasetClaims, sweepOrphanedDatasetClaims } from './backfill_dataset_claims';
+import { appContextService } from '../app_context';
+
+jest.mock('../app_context');
 
 const soClient = savedObjectsClientMock.create();
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 const logger = loggingSystemMock.createLogger();
+const withLock = jest.fn(async (_id: string, fn: () => Promise<unknown>) => fn());
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 const installed = (packages: unknown[]) =>
   soClient.find.mockResolvedValue({
@@ -33,6 +38,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   soClient.create.mockResolvedValue({ id: 'x' } as never);
   soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('t', 'x'));
+  withLock.mockImplementation(async (_id, fn) => fn());
+  mockedAppContextService.getLockManagerService.mockReturnValue({ withLock } as never);
 });
 
 describe('backfillDatasetClaims', () => {

@@ -58,4 +58,16 @@ describe('withDatasetOwnershipLock', () => {
     ).rejects.toThrow(/claim conflict/);
     expect(withLock).toHaveBeenCalledTimes(1);
   });
+
+  it('does not retry a LockAcquisitionError after the callback has started', async () => {
+    const withLock = jest.fn(async (_id: string, fn: () => Promise<unknown>) => fn());
+    mockedAppContextService.getLockManagerService.mockReturnValue({ withLock } as never);
+
+    await expect(
+      withDatasetOwnershipLock(async () => {
+        throw new LockAcquisitionError('lost during work');
+      })
+    ).rejects.toBeInstanceOf(LockAcquisitionError);
+    expect(withLock).toHaveBeenCalledTimes(1);
+  });
 });

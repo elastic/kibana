@@ -13,6 +13,8 @@ export {
   getPackageClaimNames,
   getPackageProspectiveTemplates,
   getProspectiveTemplatesFromExisting,
+  getClaimNamesFromInstalledEs,
+  mergeClaimNames,
   isDatasetSpecificPattern,
 } from './claim_names';
 export type { DatasetClaimNames, ProspectiveTemplate } from './claim_names';
@@ -33,8 +35,10 @@ export {
   getDatasetClaims,
   recordAdoptedStreamBaselines,
   releaseAttemptClaims,
+  transferPendingClaims,
 } from './claims';
 export { withDatasetOwnershipLock } from './lock';
+export { hasLiveReservation, isReservedToAttempt } from './reservation';
 export type {
   AdoptedStreamBaseline,
   DatasetClaimAttributes,

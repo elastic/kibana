@@ -23,6 +23,8 @@ import { updateCurrentWriteIndices } from '../../../elasticsearch/template/templ
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 
+import type { InstallContext } from '../_state_machine_package_install';
+
 import { stepUpdateCurrentWriteIndices } from './step_update_current_write_indices';
 
 jest.mock('../../../elasticsearch/template/template');
@@ -166,10 +168,8 @@ describe('stepUpdateCurrentWriteIndices', () => {
   });
 
   it('passes an empty allowlist when the context has none', async () => {
-    await stepUpdateCurrentWriteIndices({
+    const context: InstallContext = {
       savedObjectsClient: soClient,
-      // @ts-ignore
-      savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -179,7 +179,9 @@ describe('stepUpdateCurrentWriteIndices', () => {
       spaceId: DEFAULT_SPACE_ID,
       esReferences: [],
       ownedDataStreams: undefined,
-    } as never);
+    };
+
+    await stepUpdateCurrentWriteIndices(context);
 
     expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledWith(
       expect.anything(),

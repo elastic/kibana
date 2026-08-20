@@ -267,10 +267,14 @@ const installPreBuiltComponentTemplates = async (
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
         const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
-
+        const meta = content._meta ?? {};
         const esClientParams = {
           name: templateName,
           ...content,
+          _meta: {
+            ...meta,
+            package: { ...(meta.package ?? {}), name: packageInstallContext.packageInfo.name },
+          },
         };
 
         return retryTransientEsErrors(

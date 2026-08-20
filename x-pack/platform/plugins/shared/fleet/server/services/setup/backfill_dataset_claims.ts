@@ -21,6 +21,7 @@ import {
   deleteClaims,
   finalizeDatasetClaims,
   patternsOverlap,
+  withDatasetOwnershipLock,
 } from '../epm/packages/dataset_ownership';
 
 interface Candidate {
@@ -153,26 +154,26 @@ export const backfillDatasetClaims = async (
 
     const claims = [{ baseName, indexPatterns }];
     try {
-      const { acquired } = await acquireDatasetClaims({
-        soClient,
-        packageName: owner.name,
-        packageVersion: owner.version,
-        installSource: owner.source,
-        attemptId: `backfill-${uuidv4()}`,
-        // A backfill claim records ownership. It never authorizes a takeover, which is what adoption
-        // is for.
-        origin: 'backfill',
-        claims,
-      });
-      if (acquired.length > 0) {
-        await finalizeDatasetClaims({
+      await withDatasetOwnershipLock(async () => {
+        const { acquired } = await acquireDatasetClaims({
           soClient,
           packageName: owner.name,
           packageVersion: owner.version,
+          installSource: owner.source,
+          attemptId: `backfill-${uuidv4()}`,
+          origin: 'backfill',
           claims,
         });
-        created += 1;
-      }
+        if (acquired.length > 0) {
+          await finalizeDatasetClaims({
+            soClient,
+            packageName: owner.name,
+            packageVersion: owner.version,
+            claims,
+          });
+          created += 1;
+        }
+      });
     } catch (error) {
       conflicts.push(baseName);
       logger.error(
@@ -197,30 +198,35 @@ export const sweepOrphanedDatasetClaims = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<{ deleted: string[] }> => {
-  const pending = await soClient.find<DatasetClaimAttributes>({
-    type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
-    filter: `${DATASET_CLAIMS_SAVED_OBJECT_TYPE}.attributes.status:"pending"`,
-    perPage: SO_SEARCH_LIMIT,
+  return withDatasetOwnershipLock(async () => {
+    const pending = await soClient.find<DatasetClaimAttributes>({
+      type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+      filter: `${DATASET_CLAIMS_SAVED_OBJECT_TYPE}.attributes.status:"pending"`,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    if (pending.saved_objects.length === 0) return { deleted: [] };
+
+    const installed = await soClient.find<Installation>({
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const installedNames = new Set(
+      installed.saved_objects.map(({ attributes }) => attributes.name)
+    );
+
+    const orphaned = pending.saved_objects
+      .filter(
+        ({ attributes }) =>
+          attributes.origin !== 'adoption' && !installedNames.has(attributes.package_name)
+      )
+      .map(({ id }) => id);
+
+    if (orphaned.length > 0) {
+      logger.warn(
+        `Releasing ${orphaned.length} dataset claims left pending by uninstalled packages`
+      );
+      await deleteClaims(soClient, orphaned);
+    }
+    return { deleted: orphaned };
   });
-  if (pending.saved_objects.length === 0) return { deleted: [] };
-
-  const installed = await soClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    perPage: SO_SEARCH_LIMIT,
-  });
-  const installedNames = new Set(installed.saved_objects.map(({ attributes }) => attributes.name));
-
-  const orphaned = pending.saved_objects
-    .filter(
-      ({ attributes }) =>
-        attributes.origin !== 'adoption' && !installedNames.has(attributes.package_name)
-    )
-    .map(({ id }) => id);
-
-  if (orphaned.length > 0) {
-    logger.warn(`Releasing ${orphaned.length} dataset claims left pending by uninstalled packages`);
-    await deleteClaims(soClient, orphaned);
-  }
-
-  return { deleted: orphaned };
 };

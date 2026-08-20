@@ -122,10 +122,13 @@ export const resolveDatasetOwnership = async ({
    * A template is this package's only when a claim says so. `_meta` and `installed_es` corroborate
    * the claim; on their own they are package-supplied.
    */
-  const isOurs = (templateName: string): boolean =>
-    held.has(claimBaseNameOf(templateName)) &&
-    ownerOf(templateName) === packageName &&
-    installedTemplateIds.has(templateName);
+  const isOurs = (templateName: string): boolean => {
+    if (!held.has(claimBaseNameOf(templateName)) || !installedTemplateIds.has(templateName)) {
+      return false;
+    }
+    const owner = ownerOf(templateName);
+    return owner === packageName || owner === undefined;
+  };
 
   const allowlist = new Set<string>();
   const adopted = new Map<string, AdoptedStream>();

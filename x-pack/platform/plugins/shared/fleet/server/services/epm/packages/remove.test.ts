@@ -91,6 +91,7 @@ jest.mock('../elasticsearch/index/update_settings', () => ({
 jest.mock('./dataset_ownership', () => ({
   findClaimsForPackage: jest.fn().mockResolvedValue([]),
   deleteClaims: jest.fn().mockResolvedValue(undefined),
+  withDatasetOwnershipLock: jest.fn(async (fn: () => Promise<unknown>) => fn()),
 }));
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -950,5 +951,35 @@ describe('removeInstallation claim release', () => {
     );
 
     expect(mockedDeleteClaims).not.toHaveBeenCalled();
+  });
+
+  it('keeps active adoption claims when first-install cleanup asks to preserve them', async () => {
+    mockedFindClaimsForPackage.mockResolvedValue([
+      {
+        id: 'logs-adopted',
+        attributes: {
+          package_name: 'test-package',
+          status: 'active',
+          origin: 'adoption',
+          attempt_id: 'adoption-1',
+          index_patterns: ['logs-adopted-*'],
+        },
+      },
+      {
+        id: 'logs-pending',
+        attributes: {
+          package_name: 'test-package',
+          status: 'pending',
+          origin: 'install',
+          attempt_id: 'attempt-1',
+          index_patterns: ['logs-pending-*'],
+        },
+      },
+    ]);
+    esClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await removeInstallation({ ...removeArgs(), preserveActiveAdoptionClaims: true });
+
+    expect(mockedDeleteClaims).toHaveBeenCalledWith(soClientMock, ['logs-pending']);
   });
 });

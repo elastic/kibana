@@ -8,12 +8,18 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { DATASET_CLAIMS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../common/constants';
+import {
+  DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../../common/constants';
+import type { Installation } from '../../../../../common/types';
 import type { InstallSource } from '../../../../../common/types';
 
 import { DatasetClaimConflictError } from './errors';
 import { withDatasetOwnershipLock } from './lock';
 import { patternsOverlap } from './patterns';
+import { isReservedToAttempt } from './reservation';
 
 export type DatasetClaimOrigin = 'install' | 'adoption' | 'backfill';
 
@@ -191,23 +197,43 @@ export const acquireDatasetClaims = async ({
 
 /**
  * Promotes this package's claims once the install has fully succeeded, and refreshes the recorded
- * patterns and version. Called after the last step that can fail, so a claim never describes a
- * version that was not installed.
+ * patterns and version. Call under the ownership lock. Pending claims must match `attemptId`.
+ * Active same-package claims, including adoption, do not.
  */
 export const finalizeDatasetClaims = async ({
   soClient,
   packageName,
   packageVersion,
   claims,
+  attemptId,
+  requireReservation = false,
 }: {
   soClient: SavedObjectsClientContract;
   packageName: string;
   packageVersion: string;
   claims: DatasetClaimRequest[];
+  attemptId?: string;
+  requireReservation?: boolean;
 }): Promise<void> => {
+  if (requireReservation) {
+    if (!attemptId) return;
+    let reserved: Installation | undefined;
+    try {
+      reserved = (await soClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packageName))
+        .attributes;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) return;
+      throw error;
+    }
+    if (!isReservedToAttempt(reserved, attemptId)) return;
+  }
+
   for (const { baseName, indexPatterns } of claims) {
     const existing = await getClaim(soClient, baseName);
     if (!existing || existing.package_name !== packageName) continue;
+    if (existing.status === 'pending') {
+      if (!attemptId || existing.attempt_id !== attemptId) continue;
+    }
 
     const patternsChanged =
       existing.index_patterns.length !== indexPatterns.length ||
@@ -222,6 +248,81 @@ export const finalizeDatasetClaims = async ({
       package_version: packageVersion,
     });
   }
+
+  if (requireReservation) {
+    await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packageName, {
+      dataset_claim_attempt_id: null,
+    });
+  }
+};
+
+/** Moves pending claims from a previous attempt onto this one. Caller must hold the ownership lock. */
+export const transferPendingClaims = async (
+  soClient: SavedObjectsClientContract,
+  packageName: string,
+  fromAttemptId: string,
+  toAttemptId: string
+): Promise<void> => {
+  if (fromAttemptId === toAttemptId) return;
+
+  const pending = await soClient.find<DatasetClaimAttributes>({
+    type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+    filter: [
+      attributesFilter('package_name', packageName),
+      attributesFilter('status', 'pending'),
+      attributesFilter('attempt_id', fromAttemptId),
+    ].join(' and '),
+    perPage: 1000,
+  });
+
+  for (const { id } of pending.saved_objects) {
+    const current = await getClaim(soClient, id);
+    if (
+      current &&
+      current.package_name === packageName &&
+      current.status === 'pending' &&
+      current.attempt_id === fromAttemptId
+    ) {
+      await soClient.update<DatasetClaimAttributes>(DATASET_CLAIMS_SAVED_OBJECT_TYPE, id, {
+        attempt_id: toAttemptId,
+      });
+    }
+  }
+};
+
+/**
+ * Releases pending claims stamped with this attempt. Caller must hold the ownership lock.
+ * Never deletes active claims or adoption claims.
+ */
+export const releaseAttemptClaimsUnlocked = async (
+  soClient: SavedObjectsClientContract,
+  packageName: string,
+  attemptId: string
+): Promise<void> => {
+  const pending = await soClient.find<DatasetClaimAttributes>({
+    type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+    filter: [
+      attributesFilter('package_name', packageName),
+      attributesFilter('status', 'pending'),
+      attributesFilter('attempt_id', attemptId),
+    ].join(' and '),
+    perPage: 1000,
+  });
+
+  const stillThisAttempt: string[] = [];
+  for (const { id } of pending.saved_objects) {
+    const current = await getClaim(soClient, id);
+    if (
+      current &&
+      current.package_name === packageName &&
+      current.status === 'pending' &&
+      current.attempt_id === attemptId
+    ) {
+      stillThisAttempt.push(id);
+    }
+  }
+
+  await deleteClaims(soClient, stillThisAttempt);
 };
 
 /**
@@ -235,30 +336,15 @@ export const releaseAttemptClaims = async (
   attemptId: string
 ): Promise<void> => {
   return withDatasetOwnershipLock(async () => {
-    const pending = await soClient.find<DatasetClaimAttributes>({
-      type: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
-      filter: [
-        attributesFilter('package_name', packageName),
-        attributesFilter('status', 'pending'),
-        attributesFilter('attempt_id', attemptId),
-      ].join(' and '),
-      perPage: 1000,
-    });
-
-    const stillThisAttempt: string[] = [];
-    for (const { id } of pending.saved_objects) {
-      const current = await getClaim(soClient, id);
-      if (
-        current &&
-        current.package_name === packageName &&
-        current.status === 'pending' &&
-        current.attempt_id === attemptId
-      ) {
-        stillThisAttempt.push(id);
-      }
+    let reserved: Installation | undefined;
+    try {
+      reserved = (await soClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packageName))
+        .attributes;
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
     }
-
-    await deleteClaims(soClient, stillThisAttempt);
+    if (isReservedToAttempt(reserved, attemptId)) return;
+    await releaseAttemptClaimsUnlocked(soClient, packageName, attemptId);
   });
 };
 

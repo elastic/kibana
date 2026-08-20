@@ -60,7 +60,7 @@ import type { PackageSpecConditions } from '../../../../common';
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
-import { deleteClaims, findClaimsForPackage } from './dataset_ownership';
+import { deleteClaims, findClaimsForPackage, withDatasetOwnershipLock } from './dataset_ownership';
 import type { AdoptedStreamBaseline } from './dataset_ownership';
 
 const MAX_ASSETS_TO_DELETE = 1000;
@@ -143,6 +143,7 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  preserveActiveAdoptionClaims?: boolean;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -213,10 +214,18 @@ export async function removeInstallation(options: {
   });
 
   // Claims last, so a failed cleanup never frees the dataset for someone else to claim.
-  await deleteClaims(
-    savedObjectsClient,
-    claims.map(({ id }) => id)
-  );
+  await withDatasetOwnershipLock(async () => {
+    const current = await findClaimsForPackage(savedObjectsClient, pkgName);
+    const toDelete = options.preserveActiveAdoptionClaims
+      ? current.filter(
+          ({ attributes }) => !(attributes.origin === 'adoption' && attributes.status === 'active')
+        )
+      : current;
+    await deleteClaims(
+      savedObjectsClient,
+      toDelete.map(({ id }) => id)
+    );
+  });
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state

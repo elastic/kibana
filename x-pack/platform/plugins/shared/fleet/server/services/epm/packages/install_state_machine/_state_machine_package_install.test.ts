@@ -505,7 +505,7 @@ describe('_stateMachineInstallPackage', () => {
     );
   });
 
-  it('does not recreate the package SO when one already exists', async () => {
+  it('reserves the package SO under the ownership lock even when one already exists', async () => {
     mockedEnforce.mockImplementation(async (opts) => {
       await opts.afterAcquire?.();
       return { ownedDataStreams: [], acquiredDatasetClaims: [] };
@@ -515,6 +515,7 @@ describe('_stateMachineInstallPackage', () => {
       typeof stepCreateRestartInstallation
     >;
     mockCreateRestart.mockClear();
+    mockCreateRestart.mockResolvedValue(undefined as never);
 
     await _stateMachineInstallPackage({
       ...baseContext(),
@@ -522,11 +523,11 @@ describe('_stateMachineInstallPackage', () => {
       installedPkg: { attributes: { name: 'xyz' } },
     } as never);
 
-    expect(mockCreateRestart).not.toHaveBeenCalled();
+    expect(mockCreateRestart).toHaveBeenCalled();
     expect(mockHandleState).toHaveBeenCalledWith(
-      INSTALL_STATES.CREATE_RESTART_INSTALLATION,
+      INSTALL_STATES.RESOLVE_DEPENDENCIES,
       expect.anything(),
-      expect.anything()
+      expect.objectContaining({ initialState: INSTALL_STATES.RESOLVE_DEPENDENCIES })
     );
   });
 });

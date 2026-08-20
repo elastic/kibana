@@ -9,11 +9,13 @@ import type { PackageInfo, RegistryDataStream } from '../../../../../common/type
 
 import {
   claimBaseNameOf,
+  getClaimNamesFromInstalledEs,
   getDatasetClaimNames,
   getNamespaceProspectiveTemplates,
   getPackageProspectiveTemplates,
   getProspectiveTemplatesFromExisting,
   isDatasetSpecificPattern,
+  mergeClaimNames,
 } from './claim_names';
 
 jest.mock('../namespace_template_utils', () => ({ isOtelDataStream: () => false }));
@@ -159,5 +161,61 @@ describe('isDatasetSpecificPattern', () => {
     ['*payroll.records*', true],
   ])('isDatasetSpecificPattern(%s) is %s', (pattern, expected) => {
     expect(isDatasetSpecificPattern(pattern)).toBe(expected);
+  });
+});
+
+describe('getClaimNamesFromInstalledEs', () => {
+  it('skips namespace templates and non-index-template refs', () => {
+    expect(
+      getClaimNamesFromInstalledEs([
+        { id: 'logs-custom', type: 'index_template' },
+        { id: 'logs-custom@namespace.prod', type: 'index_template' },
+        { id: 'logs-custom-1.0.0', type: 'ingest_pipeline' },
+      ])
+    ).toEqual([
+      {
+        baseName: 'logs-custom',
+        indexPattern: 'logs-custom-*',
+        isPrefix: false,
+        priority: 200,
+      },
+    ]);
+  });
+});
+
+describe('mergeClaimNames', () => {
+  it('keeps the primary pattern when both lists share a base name', () => {
+    const primary = [
+      {
+        baseName: 'logs-foo',
+        indexPattern: 'logs-foo.*-*',
+        isPrefix: true,
+        priority: 150,
+      },
+    ];
+    const extra = [
+      {
+        baseName: 'logs-foo',
+        indexPattern: 'logs-foo-*',
+        isPrefix: false,
+        priority: 200,
+      },
+      {
+        baseName: 'logs-custom',
+        indexPattern: 'logs-custom-*',
+        isPrefix: false,
+        priority: 200,
+      },
+    ];
+
+    expect(mergeClaimNames(primary, extra)).toEqual([
+      primary[0],
+      {
+        baseName: 'logs-custom',
+        indexPattern: 'logs-custom-*',
+        isPrefix: false,
+        priority: 200,
+      },
+    ]);
   });
 });

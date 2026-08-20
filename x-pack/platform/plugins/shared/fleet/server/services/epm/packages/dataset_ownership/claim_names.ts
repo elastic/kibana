@@ -63,6 +63,38 @@ export const getPackageProspectiveTemplates = (
 ): ProspectiveTemplate[] =>
   getPackageClaimNames(packageInfo).map((names) => ({ ...names, templateName: names.baseName }));
 
+/** Claim names for templates already recorded on the package SO, including input-package and custom datasets. */
+export const getClaimNamesFromInstalledEs = (
+  installedEs: Array<{ id: string; type: string }>
+): DatasetClaimNames[] => {
+  const seen = new Set<string>();
+  const names: DatasetClaimNames[] = [];
+  for (const { id, type } of installedEs) {
+    if (type !== 'index_template' || id.includes('@')) continue;
+    const baseName = claimBaseNameOf(id);
+    if (seen.has(baseName)) continue;
+    seen.add(baseName);
+    names.push({
+      baseName,
+      indexPattern: `${baseName}-*`,
+      isPrefix: false,
+      priority: 200,
+    });
+  }
+  return names;
+};
+
+export const mergeClaimNames = (
+  primary: DatasetClaimNames[],
+  extra: DatasetClaimNames[]
+): DatasetClaimNames[] => {
+  const byBase = new Map(primary.map((name) => [name.baseName, name]));
+  for (const name of extra) {
+    if (!byBase.has(name.baseName)) byBase.set(name.baseName, name);
+  }
+  return [...byBase.values()];
+};
+
 /**
  * Descriptors for the namespace-scoped templates a namespace workflow is about to create. Their
  * pattern is exact rather than wildcarded and their priority carries the namespace boost, so a

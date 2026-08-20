@@ -829,6 +829,8 @@ export interface Installation {
   install_status: EpmPackageInstallStatus;
   install_version: string;
   install_started_at: string;
+  /** Live install attempt that currently holds dataset-claim reservation. Cleared on success. */
+  dataset_claim_attempt_id?: string | null;
   install_source: InstallSource;
   installed_kibana_space_id?: string;
   /** Kibana version running at the time Kibana assets for this package were last installed/updated */

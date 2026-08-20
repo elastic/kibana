@@ -58,6 +58,27 @@ describe('assertComponentTemplatesMutable', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('allows an ownerless component template tracked in installed_es', async () => {
+    esClient.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name,
+          component_template: { template: {} },
+        },
+      ],
+    } as never);
+
+    await expect(
+      assertComponentTemplatesMutable({
+        esClient,
+        soClient,
+        packageName: 'mine',
+        names: [name],
+        installedEs: [{ id: name, type: ElasticsearchAssetType.componentTemplate }],
+      })
+    ).resolves.toBeUndefined();
+  });
+
   it('allows a foreign component template covered by an active adoption claim', async () => {
     esClient.cluster.getComponentTemplate.mockResolvedValue({
       component_templates: [

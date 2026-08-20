@@ -49,6 +49,7 @@ import {
   EpmPackagesSchemaV10,
   EpmPackagesSchemaV11,
   EpmPackagesSchemaV12,
+  EpmPackagesSchemaV13,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1708,6 +1709,18 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV12.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV12,
+          },
+        },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV13.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV13,
           },
         },
       },

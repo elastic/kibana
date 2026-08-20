@@ -10,7 +10,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../../../app_context';
 
-import { acquireDatasetClaims, finalizeDatasetClaims, releaseAttemptClaims } from './claims';
+import {
+  acquireDatasetClaims,
+  finalizeDatasetClaims,
+  releaseAttemptClaims,
+  transferPendingClaims,
+} from './claims';
 import { DatasetClaimConflictError } from './errors';
 
 jest.mock('../../../app_context');
@@ -218,6 +223,7 @@ describe('finalizeDatasetClaims', () => {
       attributes: {
         package_name: 'mine',
         status: 'pending',
+        attempt_id: 'attempt-1',
         index_patterns: ['logs-mine-*'],
       },
     } as never);
@@ -270,6 +276,22 @@ describe('finalizeDatasetClaims', () => {
     expect(soClient.update).not.toHaveBeenCalled();
   });
 
+  it('does not promote a pending claim from another attempt', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      attributes: {
+        package_name: 'mine',
+        status: 'pending',
+        attempt_id: 'other',
+        index_patterns: ['logs-mine-*'],
+      },
+    } as never);
+
+    await finalizeDatasetClaims({ soClient, ...base });
+
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
   it('never touches a claim owned by a different package', async () => {
     const soClient = savedObjectsClientMock.create();
     soClient.get.mockResolvedValue({
@@ -277,6 +299,17 @@ describe('finalizeDatasetClaims', () => {
     } as never);
 
     await finalizeDatasetClaims({ soClient, ...base });
+
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it('does not finalize when the package reservation belongs to another attempt', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      attributes: { dataset_claim_attempt_id: 'other' },
+    } as never);
+
+    await finalizeDatasetClaims({ soClient, ...base, requireReservation: true });
 
     expect(soClient.update).not.toHaveBeenCalled();
   });
@@ -327,5 +360,37 @@ describe('releaseAttemptClaims', () => {
     await releaseAttemptClaims(soClient, 'mine', 'attempt-1');
 
     expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('does not delete pending claims while the package is still reserved to this attempt', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      attributes: { dataset_claim_attempt_id: 'attempt-1', install_status: 'installing' },
+    } as never);
+
+    await releaseAttemptClaims(soClient, 'mine', 'attempt-1');
+
+    expect(soClient.find).not.toHaveBeenCalled();
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe('transferPendingClaims', () => {
+  it('restamps pending claims from the previous attempt', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [{ id: 'logs-mine', attributes: { attempt_id: 'old' } }],
+    } as never);
+    soClient.get.mockResolvedValue({
+      attributes: { package_name: 'mine', status: 'pending', attempt_id: 'old' },
+    } as never);
+
+    await transferPendingClaims(soClient, 'mine', 'old', 'new');
+
+    expect(soClient.update).toHaveBeenCalledWith(
+      'fleet-dataset-claims',
+      'logs-mine',
+      expect.objectContaining({ attempt_id: 'new' })
+    );
   });
 });
