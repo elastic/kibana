@@ -60,6 +60,10 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix Agent Builder requests to Google Vertex AI {{infer}} endpoints failing when tool schemas include JSON Schema fields that Vertex doesn't accept [#284810]({{kib-pull}}284810).
 * Fix Agent Builder conversations failing when a prompt contains special tokens such as `<|endoftext|>`, or when Claude models receive empty text blocks [#283177]({{kib-pull}}283177).
 * Restore legacy root-level inputs in Agent Builder workflow tool schemas so existing workflow tools keep working [#285149]({{kib-pull}}285149).
+* Fix concurrent conversations silently dropping a round when two clients replied at the same time. Case attachment requests that now conflict return HTTP 409 instead of appearing to succeed [#281887]({{kib-pull}}281887).
+* Fix agent custom instructions failing to save because the full edit payload was sent, which broke access control entries [#277176]({{kib-pull}}277176).
+* Fix visualizations generated from a specified index silently returning an empty chart when the query read from a different source. Agent Builder now retries once and then reports an error [#282212]({{kib-pull}}282212).
+* Fix the custom answer text field losing focus after you select its radio button when an agent asks a clarifying question [#283326]({{kib-pull}}283326).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
 % * Keep answers to clarifying questions in the research agent's context when a later question is asked in the same round [#284800]({{kib-pull}}284800).
 
