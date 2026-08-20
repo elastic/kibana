@@ -75,6 +75,7 @@ describe('DirectorService', () => {
   describe('run', () => {
     it('returns empty array and zero stats when no alert events provided', async () => {
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [],
@@ -98,6 +99,7 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -116,6 +118,7 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -150,6 +153,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -184,6 +188,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -217,6 +222,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -250,6 +256,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -283,6 +290,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -317,6 +325,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithEmit,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -350,6 +359,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithLastKnown,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -389,6 +399,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
@@ -427,6 +438,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -457,6 +469,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -475,6 +488,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: abortedContext,
           alertEvents: [alertEvent],
@@ -490,6 +504,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -522,6 +537,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -559,6 +575,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -599,6 +616,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
@@ -640,6 +658,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -678,6 +697,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -720,6 +740,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule: ruleWithTransition,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -759,6 +780,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -795,6 +817,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -832,6 +855,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -879,6 +903,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents,

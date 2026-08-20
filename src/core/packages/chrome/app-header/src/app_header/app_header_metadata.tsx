@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import type { AppHeaderMetadataItem, AppHeaderMetadataItems } from '../types';
 
 const AppHeaderMetadataEntry = ({
@@ -20,6 +21,8 @@ const AppHeaderMetadataEntry = ({
   isFirst: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const label = asPlainText(item.label);
+  const value = item.type === 'text' ? asOptionalPlainText(item.value) : undefined;
 
   // Shared resting style for every metadata entry: subdued color, bold label.
   const labelStyles = css`
@@ -55,7 +58,7 @@ const AppHeaderMetadataEntry = ({
         size="xs"
         {...buttonInteraction}
       >
-        {item.label}
+        {label}
       </EuiButtonEmpty>
     );
   }
@@ -68,22 +71,22 @@ const AppHeaderMetadataEntry = ({
         data-test-subj={item['data-test-subj']}
         textSize="xs"
       >
-        {item.label}
+        {label}
       </EuiHealth>
     );
   }
 
   return (
     <EuiText css={[labelStyles, firstItemOffset]} data-test-subj={item['data-test-subj']} size="xs">
-      {item.label}
-      {item.value !== undefined && (
+      {label}
+      {value !== undefined && (
         <span
           css={css`
             font-weight: ${euiTheme.font.weight.medium};
           `}
         >
           {' '}
-          {item.value}
+          {value}
         </span>
       )}
     </EuiText>
@@ -101,7 +104,7 @@ export const AppHeaderMetadata = React.memo<{ metadata: AppHeaderMetadataItems }
             <AppHeaderMetadataEntry
               item={item}
               isFirst={index === 0}
-              key={`${item.type}-${item.label}-${index}`}
+              key={`${item.type}-${asPlainText(item.label)}-${index}`}
             />
           ))}
       </>
