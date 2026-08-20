@@ -7,10 +7,10 @@
 
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useKibana } from '../hooks/use_kibana';
 
 export const CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ = 'contextEngineBackButton';
 
@@ -32,40 +32,34 @@ export const ContextEngineSubPageHeader = ({
   'data-test-subj': dataTestSubj,
 }: ContextEngineSubPageHeaderProps) => {
   const { euiTheme } = useEuiTheme();
-  const { chrome } = useKibana().services;
-
-  // Chrome Next renders its own back button in project layout; in-page breadcrumbs duplicate it.
-  const hasChromeBackButton =
-    Boolean(chrome?.next?.isEnabled) && chrome?.getChromeStyle() === 'project';
 
   return (
-    <KibanaPageTemplate.Header
-      data-test-subj={dataTestSubj}
-      pageTitle={pageTitle}
-      description={description}
-      restrictWidth
-      bottomBorder={false}
-      breadcrumbs={
-        hasChromeBackButton
-          ? undefined
-          : [
-              {
-                text: (
-                  <>
-                    <EuiIcon size="s" type="chevronSingleLeft" aria-hidden /> {backLabel}
-                  </>
-                ),
-                href: backHref,
-                onClick: onBackClick,
-                color: 'primary',
-                'aria-current': false,
-                'data-test-subj': CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ,
-              },
-            ]
-      }
-      css={css`
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-      `}
-    />
+    <>
+      <SuppressChromeBackButton />
+      <KibanaPageTemplate.Header
+        data-test-subj={dataTestSubj}
+        pageTitle={pageTitle}
+        description={description}
+        restrictWidth
+        bottomBorder={false}
+        breadcrumbs={[
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="chevronSingleLeft" aria-hidden /> {backLabel}
+              </>
+            ),
+            href: backHref,
+            onClick: onBackClick,
+            color: 'primary',
+            'aria-current': false,
+            'data-test-subj': CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ,
+          },
+        ]}
+        css={css`
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+        `}
+      />
+    </>
   );
 };
