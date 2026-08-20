@@ -50,10 +50,7 @@ const VISIBILITY = {
 // Exact-token replacement into the static yaml (same pattern as significant
 // events scheduled workflows). A shared platform util can replace this later.
 const renderTemplate = (template: string, values: Record<string, string>): string =>
-  Object.entries(values).reduce(
-    (yaml, [token, value]) => yaml.split(token).join(value),
-    template
-  );
+  Object.entries(values).reduce((yaml, [token, value]) => yaml.split(token).join(value), template);
 
 export const THREAT_INTEL_INGEST_FEEDS_WORKFLOW = {
   billable: false,
