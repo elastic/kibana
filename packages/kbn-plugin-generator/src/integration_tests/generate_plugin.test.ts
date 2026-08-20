@@ -28,8 +28,65 @@ afterEach(async () => {
   await del(GENERATED_DIR, { force: true });
 });
 
-it('generates a DI plugin by default', async () => {
+it('generates a classic plugin by default', async () => {
   await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo'], {
+    cwd: REPO_ROOT,
+    buffer: true,
+  });
+
+  const paths = await globby('**/*', {
+    cwd: GENERATED_DIR,
+    absolute: true,
+    dot: true,
+    onlyFiles: true,
+    ignore: ['**/.git'],
+  });
+
+  expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/plugins/foo/.eslintrc.js,
+      <absolute path>/plugins/foo/.gitignore,
+      <absolute path>/plugins/foo/.i18nrc.json,
+      <absolute path>/plugins/foo/common/index.ts,
+      <absolute path>/plugins/foo/kibana.json,
+      <absolute path>/plugins/foo/package.json,
+      <absolute path>/plugins/foo/public/application.tsx,
+      <absolute path>/plugins/foo/public/components/app.tsx,
+      <absolute path>/plugins/foo/public/index.ts,
+      <absolute path>/plugins/foo/public/plugin.ts,
+      <absolute path>/plugins/foo/public/types.ts,
+      <absolute path>/plugins/foo/README.md,
+      <absolute path>/plugins/foo/server/index.ts,
+      <absolute path>/plugins/foo/server/plugin.ts,
+      <absolute path>/plugins/foo/server/routes/index.ts,
+      <absolute path>/plugins/foo/server/types.ts,
+      <absolute path>/plugins/foo/translations/ja-JP.json,
+      <absolute path>/plugins/foo/tsconfig.json,
+    ]
+  `);
+
+  const serverIndex = Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/server/index.ts'), 'utf8');
+  expect(serverIndex).toContain('export async function plugin');
+
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/classic'))).toBe(false);
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/di'))).toBe(false);
+});
+
+it('sets a default owner.name when generating with --yes', async () => {
+  await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo'], {
+    cwd: REPO_ROOT,
+    buffer: true,
+  });
+
+  // --yes must produce a bootable external-plugin manifest (owner.name is required).
+  const manifest = JSON.parse(
+    Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/kibana.json'), 'utf8')
+  );
+  expect(manifest.owner.name).toEqual('Plugin Author');
+});
+
+it('generates a DI plugin with --di', async () => {
+  await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo', '--di'], {
     cwd: REPO_ROOT,
     buffer: true,
   });
@@ -77,68 +134,15 @@ it('generates a DI plugin by default', async () => {
   expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/di'))).toBe(false);
 });
 
-it('sets a default owner.name when generating with --yes', async () => {
-  await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo'], {
-    cwd: REPO_ROOT,
-    buffer: true,
-  });
-
-  // --yes must produce a bootable external-plugin manifest (owner.name is required).
-  const manifest = JSON.parse(
-    Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/kibana.json'), 'utf8')
-  );
-  expect(manifest.owner.name).toEqual('Plugin Author');
-});
-
-it('generates a classic plugin with --classic', async () => {
-  await execa(process.execPath, ['scripts/generate_plugin.js', '-y', '--name=foo', '--classic'], {
-    cwd: REPO_ROOT,
-    buffer: true,
-  });
-
-  const paths = await globby('**/*', {
-    cwd: GENERATED_DIR,
-    absolute: true,
-    dot: true,
-    onlyFiles: true,
-    ignore: ['**/.git'],
-  });
-
-  expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
-    Array [
-      <absolute path>/plugins/foo/.eslintrc.js,
-      <absolute path>/plugins/foo/.gitignore,
-      <absolute path>/plugins/foo/.i18nrc.json,
-      <absolute path>/plugins/foo/common/index.ts,
-      <absolute path>/plugins/foo/kibana.json,
-      <absolute path>/plugins/foo/package.json,
-      <absolute path>/plugins/foo/public/application.tsx,
-      <absolute path>/plugins/foo/public/components/app.tsx,
-      <absolute path>/plugins/foo/public/index.ts,
-      <absolute path>/plugins/foo/public/plugin.ts,
-      <absolute path>/plugins/foo/public/types.ts,
-      <absolute path>/plugins/foo/README.md,
-      <absolute path>/plugins/foo/server/index.ts,
-      <absolute path>/plugins/foo/server/plugin.ts,
-      <absolute path>/plugins/foo/server/routes/index.ts,
-      <absolute path>/plugins/foo/server/types.ts,
-      <absolute path>/plugins/foo/translations/ja-JP.json,
-      <absolute path>/plugins/foo/tsconfig.json,
-    ]
-  `);
-
-  const serverIndex = Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/server/index.ts'), 'utf8');
-  expect(serverIndex).toContain('export async function plugin');
-
-  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/classic'))).toBe(false);
-  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/di'))).toBe(false);
-});
-
 it('generates a DI plugin without UI', async () => {
-  await execa(process.execPath, ['scripts/generate_plugin.js', '--name=bar', '-y', '--no-ui'], {
-    cwd: REPO_ROOT,
-    buffer: true,
-  });
+  await execa(
+    process.execPath,
+    ['scripts/generate_plugin.js', '--name=bar', '-y', '--di', '--no-ui'],
+    {
+      cwd: REPO_ROOT,
+      buffer: true,
+    }
+  );
 
   const paths = await globby('**/*', {
     cwd: GENERATED_DIR,
@@ -167,10 +171,14 @@ it('generates a DI plugin without UI', async () => {
 });
 
 it('generates a DI plugin without server plugin', async () => {
-  await execa(process.execPath, ['scripts/generate_plugin.js', '--name=baz', '-y', '--no-server'], {
-    cwd: REPO_ROOT,
-    buffer: true,
-  });
+  await execa(
+    process.execPath,
+    ['scripts/generate_plugin.js', '--name=baz', '-y', '--di', '--no-server'],
+    {
+      cwd: REPO_ROOT,
+      buffer: true,
+    }
+  );
 
   const paths = await globby('**/*', {
     cwd: GENERATED_DIR,

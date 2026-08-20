@@ -89,7 +89,7 @@ export const QUESTIONS = [
     name: 'di',
     type: 'confirm',
     message: 'Use dependency injection?',
-    default: true,
+    default: false,
   },
   {
     name: 'ui',
