@@ -133,14 +133,13 @@ describe('ExecuteRuleQueryStep', () => {
     );
   });
 
-  it('runs base with LIMIT for a conditionless composed rule (empty breach segment)', async () => {
+  it('runs base with LIMIT for a conditionless composed rule', async () => {
     mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const rule = createRuleResponse({
       query: {
         format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-        breach: { segment: '' },
       },
     });
     const state = createRulePipelineState({ rule });

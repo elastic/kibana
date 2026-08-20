@@ -156,46 +156,31 @@ export const noDataStrategy = {
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
- * Appendable ES|QL breach segment (e.g. `WHERE …`). Conceptually a bare
- * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
- * before splicing onto `base`. Empty = every base row breaches.
- * Full parser validation only runs when the segment is non-empty
- * and composed with its `base` via `composeEsqlQuery`.
+ * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
+ * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
+ * splicing the segment onto `base`. We only enforce structural bounds here
+ * (length, non-empty). Full parser validation only runs when the segment is
+ * composed with its `base` via `composeEsqlQuery`.
  */
-export const composedBreachSegmentSchema = z
-  .string()
-  .max(MAX_ESQL_QUERY_LENGTH)
-  .describe('Appendable ES|QL breach segment. Empty segment means every base row breaches.');
-
-/**
- * Appendable ES|QL recovery segment (e.g. `WHERE …`). Conceptually a bare
- * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
- * before splicing onto `base`. Must be non-empty. Full parser
- * validation runs when composed with its `base` via `composeEsqlQuery`.
- */
-export const composedRecoverySegmentSchema = z
+export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
   .max(MAX_ESQL_QUERY_LENGTH)
-  .refine((s) => s.trim().length > 0, {
-    message: 'Segment must contain at least one non-whitespace character.',
-  });
+  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
 
 /** Composed wrappers (segment-based, appended to `base`). */
 
 const composedBreachSchema = z
   .object({
-    segment: composedBreachSegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection. Empty segment means every base row breaches.'
+    segment: esqlQuerySegmentSchema.describe(
+      'Appendable ES|QL segment for breach detection (required).'
     ),
   })
   .strict();
 
 const composedRecoverySchema = z
   .object({
-    segment: composedRecoverySegmentSchema.describe(
-      'Appendable ES|QL segment for recovery detection.'
-    ),
+    segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
   })
   .strict()
   .describe('Recovery query segment. Present only when recovery_strategy is "query".');
@@ -228,14 +213,16 @@ export const composedQuerySchema = z
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    breach: composedBreachSchema
+      .optional()
+      .describe('Breach detection configuration. Omit to treat every base row as a breach.'),
     recovery: composedRecoverySchema
       .optional()
       .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
   .check((ctx) => {
-    if (ctx.value.breach.segment.trim().length > 0) {
+    if (ctx.value.breach) {
       const breachError = validateEsqlQuery(
         composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
       );
@@ -290,15 +277,14 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`, or just `base` when the segment is empty. For standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when breach is omitted. For standalone it's
+ * `breach.query` verbatim.
  */
 export const getBreachEsqlQuery = (query: Query): string => {
   if (query.format === 'standalone') {
     return query.breach.query;
   }
-  return query.breach.segment.trim()
-    ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.base;
+  return query.breach ? composeEsqlQuery(query.base, query.breach.segment) : query.base;
 };
 
 /**

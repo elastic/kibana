@@ -383,7 +383,18 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts a composed query with an empty breach segment', () => {
+    it('accepts a composed query without a breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with an empty breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         query: {
@@ -392,10 +403,10 @@ describe('createRuleDataSchema', () => {
           breach: { segment: '' },
         },
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
-    it('accepts a composed query with a whitespace-only breach segment', () => {
+    it('rejects a composed query with a whitespace-only breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         query: {
@@ -404,17 +415,16 @@ describe('createRuleDataSchema', () => {
           breach: { segment: ' ' },
         },
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
-    it('accepts recovery_strategy "query" with an empty composed breach segment', () => {
+    it('accepts recovery_strategy "query" without a composed breach block', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         recovery_strategy: 'query',
         query: {
           format: 'composed',
           base: 'FROM metrics-*',
-          breach: { segment: '' },
           recovery: { segment: 'WHERE cpu < 0.5' },
         },
       });
@@ -1433,20 +1443,12 @@ describe('getBreachEsqlQuery', () => {
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
   });
 
-  it('returns base verbatim for an empty or whitespace-only breach segment', () => {
-    const empty = {
+  it('returns base verbatim when the breach block is omitted', () => {
+    const query = {
       format: 'composed' as const,
       base: 'FROM metrics-*',
-      breach: { segment: '' },
     };
-    expect(getBreachEsqlQuery(empty)).toBe('FROM metrics-*');
-
-    const whitespace = {
-      format: 'composed' as const,
-      base: 'FROM metrics-*',
-      breach: { segment: '  \n\t ' },
-    };
-    expect(getBreachEsqlQuery(whitespace)).toBe('FROM metrics-*');
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
   });
 
   it('handles a trailing comment in base without corrupting the composed query', () => {

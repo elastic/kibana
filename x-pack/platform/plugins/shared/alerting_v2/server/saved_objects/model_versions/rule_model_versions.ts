@@ -10,6 +10,7 @@ import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
+  ruleSavedObjectAttributesSchemaV4,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
@@ -74,6 +75,14 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV3,
+    },
+  },
+  '5': {
+    // Composed rules may omit `query.breach` to treat every base row as a breach.
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV4,
     },
   },
 };
