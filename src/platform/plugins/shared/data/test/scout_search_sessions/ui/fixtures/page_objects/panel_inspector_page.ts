@@ -45,10 +45,19 @@ export class PanelInspectorPage {
     await hoverActions.scrollIntoViewIfNeeded();
     await hoverActions.hover();
 
-    // Dashboard panels keep the inspector under the "..." overflow menu rather than in the
-    // hover toolbar itself.
-    await hoverActions.getByTestId(CONTEXT_MENU_TOGGLE).click();
-    await this.page.testSubj.click(OPEN_INSPECTOR_ACTION);
+    // Whether the inspector is a quick action or sits behind the "..." menu depends on how many
+    // actions the panel exposes, so both have to be handled. The quick action is scoped to the
+    // hovered panel: on a multi-panel dashboard every panel renders its own (hidden until
+    // hovered), and a page-wide lookup picks up another panel's.
+    const quickAction = hoverActions.getByTestId(OPEN_INSPECTOR_ACTION);
+    if (await quickAction.isVisible()) {
+      await quickAction.click();
+    } else {
+      await hoverActions.getByTestId(CONTEXT_MENU_TOGGLE).click();
+      // The menu renders in a portal outside the panel, so it cannot be panel-scoped. Filtering
+      // to the visible match skips the hidden quick-action buttons the other panels render.
+      await this.page.testSubj.locator(OPEN_INSPECTOR_ACTION).filter({ visible: true }).click();
+    }
     await this.panel.waitFor({ state: 'visible' });
   }
 
