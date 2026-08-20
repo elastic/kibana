@@ -36,23 +36,6 @@ export const isReadBy = ({
 };
 
 /**
- * Migrates a legacy `read: true` (owner-only) into a `read_by` entry, so the first
- * write to an old document carries the prior state forward instead of silently
- * resetting it to unread for everyone.
- */
-export const migrateReadBy = (source: ConversationProperties): ConversationReadByEntry[] => {
-  if (source.read_by !== undefined) {
-    return source.read_by;
-  }
-
-  if (source.read === true && source.user_id) {
-    return [{ userId: source.user_id }];
-  }
-
-  return [];
-};
-
-/**
  * Adds or removes `userId` from `readBy`, leaving every other entry untouched, and
  * projects the resulting `read` boolean alongside it in the same step. A caller
  * with no stable id (e.g. an API key with no profile) is a silent no-op: both

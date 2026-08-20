@@ -42,7 +42,7 @@ import type {
   NormalizedConversation,
 } from './types';
 import type { ConversationProperties } from './storage';
-import { isReadBy, migrateReadBy } from './read_by';
+import { isReadBy } from './read_by';
 import {
   createAttachmentRefs,
   migrateRoundAttachments,
@@ -208,7 +208,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 
 export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
-  const readBy = { read_by: migrateReadBy(document._source) };
+  const readBy = { read_by: document._source.read_by ?? [] };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;

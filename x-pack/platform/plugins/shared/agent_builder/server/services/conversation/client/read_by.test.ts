@@ -7,7 +7,7 @@
 
 import type { CurrentUser } from '@kbn/agent-builder-common';
 import type { ConversationProperties } from './storage';
-import { updateReadBy, isReadBy, migrateReadBy } from './read_by';
+import { updateReadBy, isReadBy } from './read_by';
 
 const ownerId = 'owner-id';
 const otherId = 'other-id';
@@ -55,26 +55,6 @@ describe('isReadBy', () => {
 
   it('is false when both read_by and read are absent', () => {
     expect(isReadBy({ source: conversation(), user: owner })).toBe(false);
-  });
-});
-
-describe('migrateReadBy', () => {
-  it('passes an existing read_by through unchanged', () => {
-    expect(migrateReadBy(conversation({ read_by: [{ userId: ownerId }] }))).toEqual([
-      { userId: ownerId },
-    ]);
-  });
-
-  it('seeds read_by with the owner when the legacy read flag was true', () => {
-    expect(migrateReadBy(conversation({ read: true }))).toEqual([{ userId: ownerId }]);
-  });
-
-  it('does not seed read_by when the owner has no stable id', () => {
-    expect(migrateReadBy(conversation({ read: true, user_id: undefined }))).toEqual([]);
-  });
-
-  it('is empty when both read_by and the legacy read flag are absent', () => {
-    expect(migrateReadBy(conversation())).toEqual([]);
   });
 });
 
