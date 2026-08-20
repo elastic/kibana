@@ -123,6 +123,46 @@ describe('Use cases toast hook', () => {
         validateTitle('Alerts were added to "Another horrible breach!!"');
       });
 
+      it('should display the alert sync title when called with a unified alert attachment (1 alert)', () => {
+        const { result } = renderHook(
+          () => {
+            return useCasesToast();
+          },
+          { wrapper: TestProviders }
+        );
+        const unifiedAlert = {
+          ...alertComment,
+          type: 'security.alert',
+          attachmentId: 'alert-id-1',
+        } as unknown as SupportedCaseAttachment;
+
+        result.current.showSuccessAttach({
+          theCase: mockCase,
+          attachments: [unifiedAlert],
+        });
+        validateTitle('An alert was added to "Another horrible breach!!"');
+      });
+
+      it('should display the alert sync title when called with a unified alert attachment (multiple alerts)', () => {
+        const { result } = renderHook(
+          () => {
+            return useCasesToast();
+          },
+          { wrapper: TestProviders }
+        );
+        const unifiedAlert = {
+          ...alertComment,
+          type: 'security.alert',
+          attachmentId: ['alert-id-1', 'alert-id-2'],
+        } as unknown as SupportedCaseAttachment;
+
+        result.current.showSuccessAttach({
+          theCase: mockCase,
+          attachments: [unifiedAlert],
+        });
+        validateTitle('Alerts were added to "Another horrible breach!!"');
+      });
+
       it('should display a generic title when called with a non-alert attachament', () => {
         const { result } = renderHook(
           () => {

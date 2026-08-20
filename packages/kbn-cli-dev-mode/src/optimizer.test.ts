@@ -331,6 +331,8 @@ describe('rspack path', () => {
         cache: true,
         dist: true,
         examples: true,
+        pluginPaths: ['/some/dir'],
+        pluginScanDirs: ['/some-scan-path'],
         basePath: '/s/kibana',
         log: expect.any(Object),
       })

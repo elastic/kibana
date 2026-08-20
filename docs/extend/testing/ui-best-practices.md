@@ -279,7 +279,7 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 ## Use EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. `page.components` exposes the published [EUI test helpers](./eui-test-helpers.md) pre-bound to the page, so you never construct one yourself and autocomplete lists the components that are covered.
+Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. `page.components` exposes the published [EUI test helpers](./eui-test-helpers.md) pre-bound to the page, so you never construct one yourself and autocomplete lists the components that are covered. This keeps EUI-specific behavior out of specs and provides a shared abstraction maintained with EUI.
 
 :::::{dropdown} Example
 
@@ -301,7 +301,7 @@ export class MyAppPage {
 
 :::::
 
-If your component isn't covered yet, `page.testSubj` locators are fine for now. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition is [designed and owned together](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than duplicated per suite. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
+If your component isn't covered yet, `page.testSubj` locators are acceptable compatibility fallbacks. Don't add or extend wrappers in a test suite. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition follows the [shared contribution workflow](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than being duplicated per suite.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
