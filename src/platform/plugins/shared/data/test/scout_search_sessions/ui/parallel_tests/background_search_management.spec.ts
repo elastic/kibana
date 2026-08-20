@@ -20,35 +20,20 @@ import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   deleteAllBackgroundSearches,
+  findLoadedDashboardId,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
 } from '../fixtures';
 
+const DASHBOARD_TITLE = 'Delayed 5s';
+
 spaceTest.describe('Background Search management UI', { tag: '@local-stateful-classic' }, () => {
-  // Dashboard ID varies per space (createNewCopies:true assigns a new ID on each load).
-  // We capture it from the load response in beforeAll.
   let dashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
-    // Load dashboard saved objects into the worker's space. scoutSpace.savedObjects.load()
-    // uses createNewCopies:true so each space gets unique IDs — capture the dashboard ID
-    // by looking up the loaded object by its well-known title.
     const loadedObjects = await scoutSpace.savedObjects.load(DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE);
-    const dashboardTitle = 'Delayed 5s';
-    const delayed5s = loadedObjects.find(
-      (so) => so.type === 'dashboard' && so.title === dashboardTitle
-    );
-    if (!delayed5s) {
-      throw new Error(
-        `Dashboard "${dashboardTitle}" not found in loaded objects. ` +
-          `Available: ${loadedObjects
-            .filter((so) => so.type === 'dashboard')
-            .map((so) => so.title)
-            .join(', ')}`
-      );
-    }
-    dashboardId = delayed5s.id;
+    dashboardId = findLoadedDashboardId(loadedObjects, DASHBOARD_TITLE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {

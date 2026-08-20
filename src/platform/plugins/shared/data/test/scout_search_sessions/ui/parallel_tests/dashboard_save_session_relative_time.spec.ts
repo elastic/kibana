@@ -15,6 +15,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   deleteAllBackgroundSearches,
+  findLoadedDashboardId,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
 } from '../fixtures';
 
@@ -25,25 +26,12 @@ spaceTest.describe(
   'Dashboard background search with a relative time range',
   { tag: '@local-stateful-classic' },
   () => {
-    // `scoutSpace.savedObjects.load()` uses createNewCopies:true, so the dashboard gets a
-    // fresh id per space — look it up by title instead of hardcoding.
     let dashboardId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
       const loadedObjects = await scoutSpace.savedObjects.load(DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE);
-      const dashboard = loadedObjects.find(
-        (so) => so.type === 'dashboard' && so.title === DASHBOARD_TITLE
-      );
-      if (!dashboard) {
-        throw new Error(
-          `Dashboard "${DASHBOARD_TITLE}" not found in loaded objects. Available: ${loadedObjects
-            .filter((so) => so.type === 'dashboard')
-            .map((so) => so.title)
-            .join(', ')}`
-        );
-      }
-      dashboardId = dashboard.id;
+      dashboardId = findLoadedDashboardId(loadedObjects, DASHBOARD_TITLE);
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {

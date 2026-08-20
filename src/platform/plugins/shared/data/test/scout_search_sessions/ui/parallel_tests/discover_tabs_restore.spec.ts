@@ -37,7 +37,7 @@ import {
  *
  * The flyout cannot be refreshed in place: it hides the manual refresh button, and the table's
  * auto-refresh is off by default (`refreshInterval: 0s`). Remounting it by reopening is the only
- * way to re-fetch, which is what the FTR suite did too.
+ * way to re-fetch.
  */
 const reopenFlyoutUntilRowIsComplete = async (
   page: ScoutPage,

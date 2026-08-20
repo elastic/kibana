@@ -13,11 +13,12 @@
  *
  */
 
-import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
+  analystRole,
   deleteAllBackgroundSearches,
+  findLoadedDashboardId,
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
 } from '../fixtures';
@@ -25,34 +26,20 @@ import {
 const DELAYED_DASHBOARD_TITLE = 'A Dashboard in another space + Delay 5s';
 const PLAIN_DASHBOARD_TITLE = 'A Dashboard in another space';
 
-const analystRole = (spaceId: string, dashboardPrivileges: string[]): KibanaRole => ({
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: { dashboard: dashboardPrivileges },
-      spaces: [spaceId],
-    },
-  ],
-});
-
 spaceTest.describe(
   'Dashboard background search in a space',
   { tag: '@local-stateful-classic' },
   () => {
-    const dashboardIds = new Map<string, string>();
+    let delayedDashboardId: string;
+    let plainDashboardId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
       const loadedObjects = await scoutSpace.savedObjects.load(
         SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE
       );
-      for (const { type, title, id } of loadedObjects) {
-        if (type === 'dashboard') dashboardIds.set(title, id);
-      }
+      delayedDashboardId = findLoadedDashboardId(loadedObjects, DELAYED_DASHBOARD_TITLE);
+      plainDashboardId = findLoadedDashboardId(loadedObjects, PLAIN_DASHBOARD_TITLE);
       await scoutSpace.uiSettings.setDefaultTime(LOGSTASH_MONTH_TIME_RANGE);
     });
 
@@ -69,13 +56,10 @@ spaceTest.describe(
       'saves and restores a background search with store_search_session',
       async ({ browserAuth, page, pageObjects, scoutSpace }) => {
         await browserAuth.loginWithCustomRole(
-          analystRole(scoutSpace.id, ['minimal_read', 'store_search_session'])
+          analystRole(scoutSpace.id, { dashboard: ['minimal_read', 'store_search_session'] })
         );
 
-        const dashboardId = dashboardIds.get(DELAYED_DASHBOARD_TITLE);
-        expect(dashboardId, `Dashboard "${DELAYED_DASHBOARD_TITLE}" should be loaded`).toBeTruthy();
-
-        await pageObjects.dashboard.openDashboardWithId(dashboardId!);
+        await pageObjects.dashboard.openDashboardWithId(delayedDashboardId);
         await pageObjects.dashboard.waitForRenderComplete();
 
         await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
@@ -90,12 +74,11 @@ spaceTest.describe(
     spaceTest(
       'does not offer background search without the store_search_session privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, ['minimal_read']));
+        await browserAuth.loginWithCustomRole(
+          analystRole(scoutSpace.id, { dashboard: ['minimal_read'] })
+        );
 
-        const dashboardId = dashboardIds.get(PLAIN_DASHBOARD_TITLE);
-        expect(dashboardId, `Dashboard "${PLAIN_DASHBOARD_TITLE}" should be loaded`).toBeTruthy();
-
-        await pageObjects.dashboard.openDashboardWithId(dashboardId!);
+        await pageObjects.dashboard.openDashboardWithId(plainDashboardId);
         // Wait for the dashboard to finish rendering before asserting on an absence, so a
         // hidden entrypoint means "not offered" rather than "not yet drawn".
         await pageObjects.dashboard.waitForRenderComplete();

@@ -8,8 +8,55 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaRole, KibanaUrl, ScoutPage } from '@kbn/scout';
 import { SESSION_API_PATH } from './constants';
+
+/** The subset of `scoutSpace.savedObjects.load()`'s result these specs read. */
+interface LoadedSavedObject {
+  id: string;
+  type: string;
+  title: string;
+}
+
+/**
+ * Resolve a loaded dashboard's id by title. `scoutSpace.savedObjects.load()` imports with
+ * `createNewCopies: true`, so ids differ per space and cannot be hardcoded.
+ */
+export const findLoadedDashboardId = (
+  loadedObjects: LoadedSavedObject[],
+  title: string
+): string => {
+  const dashboard = loadedObjects.find((so) => so.type === 'dashboard' && so.title === title);
+  if (!dashboard) {
+    const available = loadedObjects
+      .filter((so) => so.type === 'dashboard')
+      .map((so) => so.title)
+      .join(', ');
+    throw new Error(`Dashboard "${title}" not found in loaded objects. Available: ${available}`);
+  }
+  return dashboard.id;
+};
+
+/**
+ * Role for an analyst with full access to `logstash-*` in a single space. Each spec passes the
+ * Kibana features whose privileges it is exercising.
+ */
+export const analystRole = (
+  spaceId: string,
+  feature: { discover?: string[]; dashboard?: string[] }
+): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature,
+      spaces: [spaceId],
+    },
+  ],
+});
 
 // Version header required by the background search internal API.
 const SESSION_VERSION = '1';

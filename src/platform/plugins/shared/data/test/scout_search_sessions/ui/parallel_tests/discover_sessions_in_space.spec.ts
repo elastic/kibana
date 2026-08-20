@@ -11,39 +11,22 @@
  * Background searches in Discover inside a non-default Kibana space, and the Discover
  * privilege that gates them.
  *
- * The FTR suite created a dedicated `another-space`; each Scout parallel worker already runs
- * in its own non-default space, so the roles below are simply scoped to `scoutSpace.id`.
- *
- * Migrated from
- * x-pack/platform/test/search_sessions_integration/tests/apps/discover/sessions_in_space.ts.
+ * Each parallel worker already runs in its own non-default space, so the roles below are
+ * scoped to `scoutSpace.id`.
  *
  * Local-only: `STALLING_DSL_FILTER` relies on the `test-error-query` Elasticsearch module,
  * which is not present on Elastic Cloud.
  */
 
-import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
+  analystRole,
   deleteAllBackgroundSearches,
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
   STALLING_DSL_FILTER,
 } from '../fixtures';
-
-const analystRole = (spaceId: string, discoverPrivileges: string[]): KibanaRole => ({
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: { discover: discoverPrivileges },
-      spaces: [spaceId],
-    },
-  ],
-});
 
 spaceTest.describe(
   'Discover background search in a space',
@@ -68,7 +51,7 @@ spaceTest.describe(
     spaceTest(
       'saves and restores a background search with the full Discover privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, ['all']));
+        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, { discover: ['all'] }));
 
         await pageObjects.discover.goto({ queryMode: 'classic' });
         // Fail loudly if the space archive did not provide the data view, rather than
@@ -88,7 +71,7 @@ spaceTest.describe(
     spaceTest(
       'does not offer background search with read-only Discover privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, ['read']));
+        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, { discover: ['read'] }));
 
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.selectDataView('logstash-*', { createAdHocIfMissing: false });

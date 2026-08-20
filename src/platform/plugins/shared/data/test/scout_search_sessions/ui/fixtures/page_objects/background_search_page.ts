@@ -31,7 +31,6 @@ const COMPLETED_TOAST_LINK = 'backgroundSearchCompletedToastLink';
 
 /**
  * Toast copy that indicates a background search failed, timed out, or is still running.
- * Mirrors the message list of the FTR `searchSessions.hasErrorsOrWarnings()` service helper.
  */
 const ERROR_OR_WARNING_PATTERN =
   /Your background search is still running|Timed out|Search Error|Cannot retrieve search results|Unable to connect to the Kibana server|Failed to edit name of the background search|Failed to fetch background search info/;

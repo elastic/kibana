@@ -10,8 +10,6 @@
 /**
  * Storing a background search from a Discover tab that was created mid-session, including
  * after switching back to an earlier tab.
- *
- * Migrated from x-pack/platform/test/search_sessions_integration/tests/apps/discover/tabs.ts.
  */
 
 import { expect } from '@kbn/scout/ui';
