@@ -16,5 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/zod",
+    "@kbn/i18n",
+    "@kbn/deeplinks-security",
   ]
 }

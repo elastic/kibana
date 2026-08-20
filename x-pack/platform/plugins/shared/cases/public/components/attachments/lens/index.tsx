@@ -19,6 +19,7 @@ import {
   type LensAttachmentData,
 } from '../../../../common/types/domain_zod/attachment/lens/v2';
 import { LENS_SO_TYPE } from '../../../../common/constants/attachments';
+import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 
 import {
@@ -27,7 +28,7 @@ import {
   type UnifiedHybridAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
-import { OpenLensButton } from './open_lens_button';
+import { isOpenLensActionCompatible, OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
 import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
@@ -49,13 +50,21 @@ function getOpenLensButton(savedObjectId: string, props: LensProps) {
   );
 }
 
-const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => [
-  {
-    type: AttachmentActionType.CUSTOM as const,
-    render: () => getOpenLensButton(savedObjectId, props),
-    isPrimary: false,
-  },
-];
+const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => {
+  const canUseEditor = KibanaServices.get().lens.canUseEditor();
+
+  if (!canUseEditor || !isOpenLensActionCompatible(props.attributes)) {
+    return [];
+  }
+
+  return [
+    {
+      type: AttachmentActionType.CUSTOM as const,
+      render: () => getOpenLensButton(savedObjectId, props),
+      isPrimary: false,
+    },
+  ];
+};
 
 const toLensProps = (data: LensAttachmentData) => {
   if (isLensPersistableData(data)) {
@@ -106,10 +115,11 @@ const getVisualizationAttachmentViewObject = ({
       i18n.ADDED_VISUALIZATION
     );
   const lensProps = data ? toLensProps(data) : undefined;
+  const showOpenLensAction = lensProps != null && isOpenLensActionCompatible(lensProps.attributes);
   return {
     event,
     timelineAvatar: 'lensApp',
-    ...(lensProps
+    ...(showOpenLensAction
       ? { getActions: () => getVisualizationAttachmentActions(openLensId, lensProps) }
       : {}),
     hideDefaultActions: false,

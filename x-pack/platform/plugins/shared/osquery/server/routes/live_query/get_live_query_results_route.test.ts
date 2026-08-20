@@ -96,7 +96,7 @@ describe('getLiveQueryResultsRoute', () => {
     routeHandler = getRouteHandler();
 
     const mockRequest = httpServerMock.createKibanaRequest({
-      params: { id: 'action-1', actionId: 'action-1' },
+      params: { id: 'action-1', actionId: 'query-1' },
       query: {},
     });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -114,5 +114,86 @@ describe('getLiveQueryResultsRoute', () => {
       expect.objectContaining({ strategy: OSQUERY_SEARCH_STRATEGY })
     );
     expect(mockResponse.ok).toHaveBeenCalled();
+  });
+
+  it('returns not found when the actionId does not belong to the parent action', async () => {
+    (getActionResponses as jest.Mock).mockReturnValue(of({}));
+
+    const searchFn = jest.fn().mockReturnValueOnce(
+      of({
+        actionDetails: {
+          _source: { queries: [{ action_id: 'query-1', agents: ['agent-1'] }] },
+        },
+      })
+    );
+
+    routeHandler = getRouteHandler();
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(
+      { search: Promise.resolve({ search: searchFn }) } as any,
+      httpServerMock.createKibanaRequest({
+        params: { id: 'action-1', actionId: 'not-my-query' },
+        query: {},
+      }),
+      mockResponse
+    );
+
+    expect(mockResponse.notFound).toHaveBeenCalled();
+    expect(searchFn).toHaveBeenCalledTimes(1);
+    expect(searchFn).not.toHaveBeenCalledWith(
+      expect.objectContaining({ factoryQueryType: OsqueryQueries.results }),
+      expect.anything()
+    );
+  });
+
+  describe('when CPS is enabled', () => {
+    it('uses the CPS-scoped search client for action details and results', async () => {
+      (getActionResponses as jest.Mock).mockReturnValue(of({}));
+
+      const mockCpsSearchFn = jest
+        .fn()
+        .mockReturnValueOnce(
+          of({
+            actionDetails: {
+              _source: { queries: [{ action_id: 'query-1', agents: ['agent-1'] }] },
+            },
+          })
+        )
+        .mockReturnValueOnce(of({ edges: [] }));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = jest.fn();
+
+      mockOsqueryContext = {
+        cpsEnabled: true,
+        service: {},
+        logFactory: { get: jest.fn() },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      routeHandler = getRouteHandler();
+
+      await routeHandler(
+        {
+          core: Promise.resolve({}),
+          search: Promise.resolve({ search: contextSearchFn }),
+        } as never,
+        httpServerMock.createKibanaRequest({
+          params: { id: 'action-1', actionId: 'query-1' },
+          query: {},
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockCpsSearch).toHaveBeenCalledWith(expect.anything(), { projectRouting: 'space' });
+      expect(mockCpsSearchFn).toHaveBeenCalledTimes(2);
+      expect(contextSearchFn).not.toHaveBeenCalled();
+    });
   });
 });

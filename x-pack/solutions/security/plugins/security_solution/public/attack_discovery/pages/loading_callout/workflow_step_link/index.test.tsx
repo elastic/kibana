@@ -137,7 +137,7 @@ describe('WorkflowStepLink', () => {
 
     const link = screen.getByTestId('workflowStepLink');
 
-    expect(link.querySelector('[data-euiicon-type="popout"]')).toBeInTheDocument();
+    expect(link.querySelector('[data-euiicon-type="external"]')).toBeInTheDocument();
   });
 
   it('passes correct workflowId and workflowRunId from step to hook', () => {

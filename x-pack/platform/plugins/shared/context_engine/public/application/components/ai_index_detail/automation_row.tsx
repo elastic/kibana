@@ -91,7 +91,7 @@ export const AutomationRow = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 href={editHref}
                 title={i18n.translate(

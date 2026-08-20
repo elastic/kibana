@@ -9,34 +9,30 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import { commitExists } from './utils/commit_exists';
 
 interface CheckoutOptions {
   log: ToolingLog;
   dir: string;
+  sourceRepo: string;
   sha: string;
 }
 
 /**
  * Force checkout a worktree according to the given sha
  */
-export async function checkout({ log, dir, sha }: CheckoutOptions): Promise<void> {
+export async function checkout({ log, dir, sourceRepo, sha }: CheckoutOptions): Promise<void> {
   // Ensure the target sha is present locally. If rev-parse fails, fetch and retry.
 
-  async function ensureObjectExists() {
-    return await execa('git', ['cat-file', '-e', `${sha}^{commit}`], { cwd: dir })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  let exists = await ensureObjectExists();
+  let exists = await commitExists(dir, sha);
 
   if (!exists) {
-    await execa('git', ['fetch', '--all', '--prune', '--quiet'], { cwd: dir }).catch((error) => {
-      throw new Error(`Failed to fetch updates in worktree ${dir}`, { cause: error });
+    await execa('git', ['fetch', sourceRepo, sha, '--quiet'], { cwd: dir }).catch((error) => {
+      throw new Error(`Failed to fetch commit ${sha} in worktree ${dir}`, { cause: error });
     });
   }
 
-  exists = await ensureObjectExists();
+  exists = await commitExists(dir, sha);
 
   if (!exists) {
     throw new Error(`Commit ${sha} not found after fetch in worktree ${dir}`);
