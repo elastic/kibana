@@ -53,15 +53,35 @@ export function checkSuperuser(req: KibanaRequest) {
   }
 
   const userRoles = user.roles || [];
-  // system_indices_superuser is a built-in ES role with all cluster + index privileges;
-  // it is equivalent to superuser for the purposes of this check.
-  const isSuperuser =
-    userRoles.includes('superuser') || userRoles.includes('system_indices_superuser');
-  if (!isSuperuser) {
+  if (!userRoles.includes('superuser')) {
     return false;
   }
 
   return true;
+}
+
+/**
+ * Returns true when the caller may access Fleet debug routes.
+ *
+ * Accepts `superuser` and `system_indices_superuser`.  The latter is a strict
+ * superset of `superuser` (cluster:all, indices:* with allow_restricted_indices,
+ * applications:* with privileges:*) and is how local serverless dev clusters
+ * authenticate — accepting it here grants nothing the caller cannot already do.
+ */
+export function isDebugAuthorized(req: KibanaRequest) {
+  if (!checkSecurityEnabled()) {
+    return false;
+  }
+
+  const security = appContextService.getSecurityCore();
+  const user = security.authc.getCurrentUser(req);
+
+  if (!user) {
+    return false;
+  }
+
+  const userRoles = user.roles || [];
+  return userRoles.includes('superuser') || userRoles.includes('system_indices_superuser');
 }
 
 const computeUiApiPrivileges = (

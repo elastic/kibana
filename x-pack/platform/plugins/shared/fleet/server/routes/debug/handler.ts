@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetRequestHandler } from '../../types';
 import { fetchIndex, fetchSavedObjectNames, fetchSavedObjects } from '../../services/debug';
-import { checkSuperuser } from '../../services/security';
+import { isDebugAuthorized } from '../../services/security';
 import type {
   FetchIndexRequestSchema,
   FetchSavedObjectNamesRequestSchema,
@@ -25,7 +25,7 @@ export const fetchIndexHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof FetchIndexRequestSchema.body>
 > = async (context, request, response) => {
-  if (!checkSuperuser(request)) {
+  if (!isDebugAuthorized(request)) {
     return response.forbidden({ body: SUPERUSER_REQUIRED_BODY });
   }
   const coreContext = await context.core;
@@ -40,7 +40,7 @@ export const fetchSavedObjectsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof FetchSavedObjectsRequestSchema.body>
 > = async (context, request, response) => {
-  if (!checkSuperuser(request)) {
+  if (!isDebugAuthorized(request)) {
     return response.forbidden({ body: SUPERUSER_REQUIRED_BODY });
   }
   const soClient = (await context.fleet).internalSoClient;
@@ -53,7 +53,7 @@ export const fetchSavedObjectNamesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof FetchSavedObjectNamesRequestSchema.body>
 > = async (context, request, response) => {
-  if (!checkSuperuser(request)) {
+  if (!isDebugAuthorized(request)) {
     return response.forbidden({ body: SUPERUSER_REQUIRED_BODY });
   }
   const soClient = (await context.fleet).internalSoClient;

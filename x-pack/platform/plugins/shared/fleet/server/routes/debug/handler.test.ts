@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../../constants';
 
-import { checkSuperuser } from '../../services/security';
+import { isDebugAuthorized } from '../../services/security';
 import { addNamespaceFilteringToQuery } from '../../services/spaces/query_namespaces_filtering';
 
 import {
@@ -18,12 +18,12 @@ import {
   fetchSavedObjectsHandler,
 } from './handler';
 
-jest.mock('../../services/security', () => ({ checkSuperuser: jest.fn() }));
+jest.mock('../../services/security', () => ({ isDebugAuthorized: jest.fn() }));
 jest.mock('../../services/spaces/query_namespaces_filtering', () => ({
   addNamespaceFilteringToQuery: jest.fn(),
 }));
 
-const mockCheckSuperuser = checkSuperuser as jest.MockedFunction<typeof checkSuperuser>;
+const mockIsDebugAuthorized = isDebugAuthorized as jest.MockedFunction<typeof isDebugAuthorized>;
 const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as jest.MockedFunction<
   typeof addNamespaceFilteringToQuery
 >;
@@ -42,7 +42,7 @@ describe('Fleet debug handlers', () => {
   });
 
   beforeEach(() => {
-    mockCheckSuperuser.mockReturnValue(true);
+    mockIsDebugAuthorized.mockReturnValue(true);
     // Pass query through unchanged (simulates space awareness disabled / no filter added).
     mockAddNamespaceFilteringToQuery.mockImplementation(async (query) => query);
   });
@@ -53,7 +53,7 @@ describe('Fleet debug handlers', () => {
 
   describe('fetchIndexHandler', () => {
     it('returns 403 when caller is not superuser', async () => {
-      mockCheckSuperuser.mockReturnValue(false);
+      mockIsDebugAuthorized.mockReturnValue(false);
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const context = {
         core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
@@ -124,11 +124,36 @@ describe('Fleet debug handlers', () => {
       expect(result).toEqual({ body: searchResult, statusCode: 200 });
       expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents', query: { bool: {} } });
     });
+
+    it('returns 200 when caller has system_indices_superuser role', async () => {
+      // system_indices_superuser is a superset of superuser (cluster:all, indices:*,
+      // applications:*) and is the default identity in local serverless dev clusters.
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const searchResult = { hits: { hits: [] }, took: 0, _shards: {} };
+      esClient.search.mockResolvedValue(searchResult as any);
+
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
+        fleet: Promise.resolve({
+          internalSoClient: savedObjectsClientMock.create(),
+          spaceId: 'default',
+        }),
+      } as any;
+      const response = createMockResponse();
+
+      const result = await fetchIndexHandler(
+        context,
+        { body: { index: '.fleet-agents' } } as any,
+        response as any
+      );
+
+      expect(result).toEqual({ body: searchResult, statusCode: 200 });
+    });
   });
 
   describe('fetchSavedObjectsHandler', () => {
     it('returns 403 when caller is not superuser', async () => {
-      mockCheckSuperuser.mockReturnValue(false);
+      mockIsDebugAuthorized.mockReturnValue(false);
       const soClient = savedObjectsClientMock.create();
       const context = {
         core: Promise.resolve({
@@ -216,7 +241,7 @@ describe('Fleet debug handlers', () => {
 
   describe('fetchSavedObjectNamesHandler', () => {
     it('returns 403 when caller is not superuser', async () => {
-      mockCheckSuperuser.mockReturnValue(false);
+      mockIsDebugAuthorized.mockReturnValue(false);
       const soClient = savedObjectsClientMock.create();
       const context = {
         core: Promise.resolve({
