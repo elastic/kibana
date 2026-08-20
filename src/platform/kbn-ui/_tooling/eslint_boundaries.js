@@ -93,6 +93,16 @@ module.exports = {
       ],
     },
 
+    '@kbn/ui-app-menu': {
+      alternative: 'Import from @kbn/app-menu instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/app-menu/app-menu/',
+          reason: 'App-facing contract that re-exports the portable implementation.',
+        },
+      ],
+    },
+
     '@kbn/ui-storybook-config': {
       alternative: 'Storybook-only config; do not import from Kibana runtime code.',
     },

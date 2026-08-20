@@ -14,6 +14,7 @@ import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
 import {
@@ -124,6 +125,11 @@ export interface AlertingV2FeatureDefinition {
   readonly id: string;
   readonly name: string;
   readonly managementApp: string;
+  /**
+   * Extra management apps granted by this feature. Used when a feature owns
+   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   */
+  readonly additionalManagementApps?: readonly string[];
   readonly privileges: {
     readonly all: AlertingV2FeaturePrivilege;
     readonly read: AlertingV2FeaturePrivilege;
@@ -131,11 +137,16 @@ export interface AlertingV2FeatureDefinition {
   readonly subFeatures: readonly AlertingV2SubFeature[];
 }
 
+export const getFeatureManagementApps = (
+  feature: AlertingV2FeatureDefinition
+): readonly string[] => [feature.managementApp, ...(feature.additionalManagementApps ?? [])];
+
 export const ALERTING_V2_FEATURES = {
   rules: {
     id: 'alerting_v2_rules',
     name: 'Rules',
     managementApp: ALERTING_V2_RULES_APP_ID,
+    additionalManagementApps: [ALERTING_V2_RULE_LIBRARY_APP_ID],
     privileges: {
       all: {
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],

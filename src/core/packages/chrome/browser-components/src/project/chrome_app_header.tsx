@@ -17,7 +17,7 @@ import type {
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
