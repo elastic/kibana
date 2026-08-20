@@ -20,7 +20,7 @@ import type { ColorMode } from '@xyflow/react';
 import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useQuery } from '@kbn/react-query';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import {
   SequenceNode,
   SequenceEdge,
@@ -34,7 +34,8 @@ import type {
   SequenceNodeType,
   SequenceEdgeType,
 } from '@kbn/alerting-v2-rule-form';
-import { ALERTING_V2_RULE_API_PATH } from '../../constants';
+import { RulesApi } from '../../services/rules_api';
+import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { useCanvasFitView } from './use_canvas_fit_view';
 
 const nodeTypes = { sequenceStage: SequenceNode };
@@ -159,23 +160,14 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   excludeRuleId,
 }) => {
   const { colorMode } = useEuiTheme();
-  const http = useService(CoreStart('http'));
+  const rulesApi = useService(RulesApi);
 
   // TODO: Add pagination or infinite scroll for users with more than 200 rules
   const { data: rulesData, isLoading: isLoadingRules } = useQuery({
     queryKey: ['sequence-builder-available-rules'],
     refetchOnWindowFocus: false,
     queryFn: () =>
-      http.get<{
-        items: Array<{
-          id: string;
-          kind: 'alert' | 'signal';
-          metadata: { name: string };
-          grouping?: { fields: string[] } | null;
-        }>;
-      }>(ALERTING_V2_RULE_API_PATH, {
-        query: { perPage: 200, sortField: 'name', sortOrder: 'asc' },
-      }),
+      rulesApi.listRules(toFindRulesRequest({ perPage: 200, sortField: 'name', sortOrder: 'asc' })),
   });
 
   const fetchedRules = useMemo<FetchedRule[]>(

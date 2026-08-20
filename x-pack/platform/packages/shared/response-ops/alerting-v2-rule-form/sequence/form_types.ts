@@ -80,9 +80,10 @@ export const getCommonGroupingFields = (state: SequenceFormValues): string[] => 
   const allRules = state.steps.flatMap((s) => s.rules);
   if (allRules.length === 0) return [];
 
-  const fieldSets = allRules.map((r) => new Set(r.groupingFields));
-  const first = fieldSets[0];
-  if (first.size === 0) return [];
-  const rest = fieldSets.slice(1);
-  return [...first].filter((f) => rest.every((s) => s.has(f)));
+  const first = allRules[0].groupingFields;
+  if (first.length === 0) return [];
+
+  const firstKey = first.join('\0');
+  const allMatch = allRules.every((r) => r.groupingFields.join('\0') === firstKey);
+  return allMatch ? first : [];
 };
