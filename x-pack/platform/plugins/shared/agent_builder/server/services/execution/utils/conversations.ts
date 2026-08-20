@@ -40,8 +40,8 @@ export const createConversation$ = ({
     title: title$,
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
-    switchMap(async ({ title, roundCompletedEvent }) => {
-      const createdConversation = await conversationClient.create({
+    switchMap(({ title, roundCompletedEvent }) => {
+      return conversationClient.create({
         id: conversation.id,
         title,
         agent_id: conversation.agent_id,
@@ -59,8 +59,9 @@ export const createConversation$ = ({
           ? { workspace_id: roundCompletedEvent.data.workspace_id }
           : {}),
       });
-
-      return createConversationCreatedEvent(createdConversation);
+    }),
+    switchMap((createdConversation) => {
+      return of(createConversationCreatedEvent(createdConversation));
     })
   );
 };

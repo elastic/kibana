@@ -9,11 +9,15 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
+  TimelineEventType,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { roundsToEvents } from './rounds_to_events';
@@ -136,5 +140,74 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
     it('drops an in-progress round (the run has no terminal event yet)', () => {
       expect(roundTrip([baseRound({ status: ConversationRoundStatus.inProgress })])).toEqual([]);
     });
+  });
+});
+
+// Cases that can only be expressed as raw event input (no round produces them via roundsToEvents):
+// malformed ids and non-terminal / empty timelines.
+describe('eventsToRounds (events-input-only)', () => {
+  it('derives the round id from the execution id, falling back when it has no suffix', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'um',
+        type: TimelineEventType.userMessage,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'hi' },
+      },
+      {
+        id: 'ec',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2026-01-01T00:00:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'exec-abc',
+        trigger_event_id: 'um',
+        data: {
+          steps: [],
+          model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+          time_to_first_token: 0,
+          time_to_last_token: 0,
+          outcome: { type: 'responded', response: { message: 'yo' } },
+        },
+      },
+    ];
+
+    expect(eventsToRounds(events)[0].id).toBe('exec-abc');
+  });
+
+  it('skips an execution with no execution_terminated event (failed/aborted/still running)', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'um',
+        type: TimelineEventType.userMessage,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'hi' },
+      },
+      {
+        id: 'es',
+        type: TimelineEventType.executionStarted,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'exec-1',
+        trigger_event_id: 'um',
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      },
+      {
+        id: 'ef',
+        type: TimelineEventType.executionFailed,
+        created_at: '2026-01-01T00:00:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'exec-1',
+        trigger_event_id: 'um',
+        data: { error: { message: 'boom' } as never },
+      },
+    ];
+
+    expect(eventsToRounds(events)).toEqual([]);
+  });
+
+  it('returns no rounds when there are no executions', () => {
+    expect(eventsToRounds([])).toEqual([]);
   });
 });

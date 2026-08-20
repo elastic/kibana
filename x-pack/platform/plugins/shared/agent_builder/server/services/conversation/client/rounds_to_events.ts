@@ -12,7 +12,6 @@ import type {
   ExecutionOutcome,
   ExecutionRunSummary,
   TimelineEvent,
-  UserMessageEventData,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -43,7 +42,7 @@ export const roundToEvents = (
       type: TimelineEventType.userMessage,
       created_at: round.started_at,
       actor: userMessageActor(conversation, round),
-      data: userMessageData(round),
+      data: round.input,
     },
     {
       id: `${round.id}::execution_started`,
@@ -82,11 +81,8 @@ export const roundToEvents = (
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
-/** The `user_message` payload for a round: the whole round input, carried verbatim. */
-export const userMessageData = (round: ConversationRound): UserMessageEventData => round.input;
-
 /** The run summary for a round (shared by both outcomes); the response/prompts live on the outcome. */
-export const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
+const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
   steps: round.steps,
   model_usage: round.model_usage,
   time_to_first_token: round.time_to_first_token,
@@ -122,7 +118,7 @@ export const userMessageActor = (
 };
 
 /** Actor for a run's lifecycle events. */
-export const agentActor = (conversation: Conversation): EventActor => ({
+const agentActor = (conversation: Conversation): EventActor => ({
   type: EventActorType.agent,
   id: conversation.agent_id,
 });
