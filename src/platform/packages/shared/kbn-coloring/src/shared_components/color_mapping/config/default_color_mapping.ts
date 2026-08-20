@@ -12,6 +12,8 @@ import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
 import { getOtherAssignmentColor } from './utils';
+import { getColorAssignmentMatcher } from '../color/color_assignment_matcher';
+import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
@@ -85,6 +87,7 @@ export function getColorsFromMapping(
     return Array.from({ length: 6 }, (d, i) => colorScale(i / 6));
   } else {
     const palette = palettes.get(paletteId);
+    const assignmentMatcher = getColorAssignmentMatcher(assignments);
 
     const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
 
@@ -93,6 +96,9 @@ export function getColorsFromMapping(
       : [getColor(otherColor.color, palettes)];
     return [
       ...assignments.map((a) => {
+        if (assignmentMatcher.hasMatch(OTHER_BUCKET_VALUE)) {
+          return '';
+        }
         return a.color.type === 'gradient' ? '' : getColor(a.color, palettes);
       }),
       ...otherColors,

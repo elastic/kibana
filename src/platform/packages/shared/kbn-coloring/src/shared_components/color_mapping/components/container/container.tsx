@@ -23,6 +23,8 @@ import { Gradient } from '../palette_selector/gradient';
 import { ScaleMode } from '../palette_selector/scale';
 import { UnassignedTermsConfig } from './unassigned_terms_config';
 import { Assignments } from './assignments';
+import { OtherTermConfig } from './other_term_config';
+import { OTHER_BUCKET_VALUE } from '../../special_tokens';
 
 export function Container({
   data,
@@ -129,6 +131,11 @@ export function Container({
       {assignments.length > 0 && (
         <EuiFlexItem>
           <UnassignedTermsConfig data={data} isDarkMode={isDarkMode} palettes={palettes} />
+        </EuiFlexItem>
+      )}
+      {data.type === 'categories' && data.categories.includes(OTHER_BUCKET_VALUE) && (
+        <EuiFlexItem>
+          <OtherTermConfig isDarkMode={isDarkMode} palettes={palettes} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

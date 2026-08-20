@@ -11,9 +11,17 @@ import { createSlice } from 'redux-toolkit-v1';
 import type { PayloadAction } from 'redux-toolkit-v1';
 import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../config';
-import { DEFAULT_OTHER_ASSIGNMENT } from '../config/default_color_mapping';
+import {
+  DEFAULT_OTHER_ASSIGNMENT,
+  DEFAULT_OTHERS_BUCKET_ASSIGNMENT,
+} from '../config/default_color_mapping';
 import type { OtherAssignment, OtherBucketAssignment } from '../config/types';
-import { getOtherAssignment, getOtherBucketAssignment } from '../config/utils';
+import {
+  getOtherAssignment,
+  getOtherBucketAssignment,
+  isOtherAssignment,
+  isOtherBucketAssignment,
+} from '../config/utils';
 
 export interface RootState {
   colorMapping: ColorMapping.Config;
@@ -166,6 +174,59 @@ export const colorMappingSlice = createSlice({
       }
     },
 
+    removeSpecialAssignment: (
+      state,
+      action: PayloadAction<{ rule: 'other' | 'others_bucket' }>
+    ) => {
+      switch (action.payload.rule) {
+        case 'other':
+          state.specialAssignments = state.specialAssignments.filter(
+            (assignment) => !isOtherAssignment(assignment)
+          );
+          break;
+        case 'others_bucket':
+          state.specialAssignments = state.specialAssignments.filter(
+            (assignment) => !isOtherBucketAssignment(assignment)
+          );
+          break;
+      }
+    },
+
+    addSpecialAssignment: (
+      state,
+      action: PayloadAction<
+        | {
+            rule: 'other';
+            color?: NonNullable<OtherAssignment>['color'];
+          }
+        | {
+            rule: 'others_bucket';
+            color?: NonNullable<OtherBucketAssignment>['color'];
+          }
+      >
+    ) => {
+      switch (action.payload.rule) {
+        case 'other':
+          state.specialAssignments = [
+            ...state.specialAssignments,
+            {
+              ...DEFAULT_OTHER_ASSIGNMENT,
+              ...(action.payload.color ? { color: action.payload.color } : {}),
+            },
+          ];
+          break;
+        case 'others_bucket':
+          state.specialAssignments = [
+            ...state.specialAssignments,
+            {
+              ...DEFAULT_OTHERS_BUCKET_ASSIGNMENT,
+              ...(action.payload.color ? { color: action.payload.color } : {}),
+            },
+          ];
+          break;
+      }
+    },
+
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
       if (state.assignments.length === 0) {
@@ -271,6 +332,8 @@ export const {
   updateAssignment,
   updateAssignmentColor,
   updateSpecialAssignmentColor,
+  removeSpecialAssignment,
+  addSpecialAssignment,
   updateAssignmentRule,
   updateAssignmentRules,
   removeAssignment,
