@@ -4316,6 +4316,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-browser-shared@link:x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-common-queries@link:x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries":
   version "0.0.0"
   uid ""
@@ -4905,6 +4909,10 @@
   uid ""
 
 "@kbn/content-packs-schema@link:x-pack/platform/packages/shared/kbn-content-packs-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/context-engine-agent-builder-plugin@link:x-pack/platform/plugins/shared/context_engine_agent_builder":
   version "0.0.0"
   uid ""
 
@@ -7636,10 +7644,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
   version "0.0.0"
   uid ""
@@ -9553,14 +9557,6 @@
   uid ""
 
 "@kbn/ui-callout@link:src/platform/kbn-ui/callout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-chrome-layout-constants@link:src/platform/kbn-ui/chrome-layout-constants":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-chrome-layout-utils@link:src/platform/kbn-ui/chrome-layout-utils":
   version "0.0.0"
   uid ""
 
@@ -16492,7 +16488,12 @@ aws4@1.13.2, aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.13.2.tgz#0aa167216965ac9474ccfa83892cfb6b3e1e52ef"
   integrity sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==
 
-axe-core@4.12.1, axe-core@^4.12.1, axe-core@~4.12.1:
+axe-core@4.13.0:
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.13.0.tgz#f868ecb1bd61d982321760e51d841ab497ab86d0"
+  integrity sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==
+
+axe-core@^4.12.1, axe-core@~4.12.1:
   version "4.12.1"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.12.1.tgz#69fe2bf6dfc0b24973af91b1d8e945f79e1b7c44"
   integrity sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==
@@ -24694,12 +24695,7 @@ json-schema-traverse@^1.0.0:
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
   integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
 
-json-schema-typed@8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/json-schema-typed/-/json-schema-typed-8.0.1.tgz#826ee39e3b6cef536f85412ff048d3ff6f19dfa0"
-  integrity sha512-XQmWYj2Sm4kn4WeTYvmpKEbyPsL7nBsb647c7pMe6l02/yx2+Jfc4dT6UZkEXnIUb5LhD55r2HPsJ1milQ4rDg==
-
-json-schema-typed@^8.0.2:
+json-schema-typed@8.0.2, json-schema-typed@^8.0.2:
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/json-schema-typed/-/json-schema-typed-8.0.2.tgz#e98ee7b1899ff4a184534d1f167c288c66bbeff4"
   integrity sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA==
@@ -28256,10 +28252,10 @@ picocolors@1.1.1, picocolors@^1.0.0, picocolors@^1.1.1:
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.1.1.tgz#3d321af3eab939b083c8f929a1d12cda81c26b6b"
   integrity sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==
 
-picomatch@4.0.4, picomatch@^4.0.3, picomatch@^4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
-  integrity sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==
+picomatch@4.0.5, picomatch@^4.0.3, picomatch@^4.0.4:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.5.tgz#51ea57a17d86f605f81039595fbc40ed06a55fab"
+  integrity sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==
 
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.3, picomatch@^2.3.1:
   version "2.3.2"
