@@ -115,7 +115,7 @@ const buildMetadataFromTemplate = (
  * persist the real rounds.
  *
  * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
- * via `AGENT_BUILDER_ROUNDTRIP_VERIFY=true`. Always OFF in production: a deployed Kibana never sets
+ * via `CI=true`. Always OFF in production: a deployed Kibana never sets
  * `CI`, so real reads return the stored rounds untouched.
  */
 
