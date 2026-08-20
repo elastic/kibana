@@ -16,6 +16,8 @@ import {
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
 } from '../../../common/constants';
 
+import { appContextService } from '../app_context';
+
 import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
