@@ -54,6 +54,7 @@ jest.mock('../../../../features/ai_integration', () => ({
   setSidebarOpen: jest.fn(),
   consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
   getCarriedAttachmentId: jest.fn().mockReturnValue(undefined),
+  hasPersistedConversation: jest.fn().mockReturnValue(false),
   findLinkedWorkflowAttachment: jest.requireActual('../../../../features/ai_integration')
     .findLinkedWorkflowAttachment,
 }));
@@ -64,11 +65,13 @@ const {
   setSidebarOpen: mockSetSidebarOpen,
   consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
   getCarriedAttachmentId: mockGetCarriedAttachmentId,
+  hasPersistedConversation: mockHasPersistedConversation,
 } = jest.requireMock('../../../../features/ai_integration') as {
   setLastCreateAttachmentId: jest.MockedFunction<AiIntegrationModule['setLastCreateAttachmentId']>;
   setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
   consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   getCarriedAttachmentId: jest.MockedFunction<AiIntegrationModule['getCarriedAttachmentId']>;
+  hasPersistedConversation: jest.MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
 const { AttachmentBridge: mockAttachmentBridge } = jest.requireMock(
   '../../../../features/ai_integration'
@@ -188,6 +191,7 @@ describe('useAgentBuilderIntegration', () => {
     mockModel = createMockModel(INITIAL_YAML);
     mockConsumeSidebarRestoreFor.mockReturnValue(false);
     mockGetCarriedAttachmentId.mockReturnValue(undefined);
+    mockHasPersistedConversation.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -1177,6 +1181,47 @@ describe('useAgentBuilderIntegration', () => {
       );
       await flushChatAccessCheck();
     };
+
+    it('adds nothing until a restored conversation reveals its attachment', async () => {
+      // The sidebar restores this session's last conversation on open, so the
+      // editor cannot know its attachment id at mount.
+      const agentBuilder = createMockAgentBuilder();
+      mockHasPersistedConversation.mockReturnValue(true);
+      await renderSavedEditor(agentBuilder);
+
+      expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next(
+          activeConversation([workflowAttachment(DRAFT_ID, 'workflow-a')])
+        );
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: DRAFT_ID })
+      );
+    });
+
+    it('opens the chat without an attachment while a restored conversation loads', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      mockHasPersistedConversation.mockReturnValue(true);
+      setupKibanaMock(agentBuilder);
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: createMockEditor(mockModel) },
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+        })
+      );
+      await flushChatAccessCheck();
+
+      act(() => result.current.openAgentChat());
+
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({ attachments: [] })
+      );
+    });
 
     it('uses the carried draft id for the very first sync after a save', async () => {
       const agentBuilder = createMockAgentBuilder();

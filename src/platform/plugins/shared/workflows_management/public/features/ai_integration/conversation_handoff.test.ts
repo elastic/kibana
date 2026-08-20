@@ -11,6 +11,7 @@ import {
   carryConversationToWorkflow,
   consumeSidebarRestoreFor,
   getCarriedAttachmentId,
+  hasPersistedConversation,
   isSidebarOpen,
   requestSidebarRestore,
   setLastCreateAttachmentId,
@@ -164,6 +165,35 @@ describe('conversation_handoff', () => {
       carryConversationToWorkflow('workflow-b');
 
       expect(getCarriedAttachmentId('workflow-b')).toBeUndefined();
+    });
+  });
+
+  describe('hasPersistedConversation', () => {
+    it('is true when the sidebar has a conversation stored for this session', () => {
+      window.localStorage.setItem(
+        'agentBuilder.lastConversation.workflow-editor:workflow-a.default',
+        '"conv-1"'
+      );
+
+      expect(hasPersistedConversation('workflow-a')).toBe(true);
+    });
+
+    it('is false for a session with nothing stored', () => {
+      window.localStorage.setItem(
+        'agentBuilder.lastConversation.workflow-editor:workflow-b.default',
+        '"conv-1"'
+      );
+
+      expect(hasPersistedConversation('workflow-a')).toBe(false);
+    });
+
+    it('does not match a session id that only shares a prefix', () => {
+      window.localStorage.setItem(
+        'agentBuilder.lastConversation.workflow-editor:workflow-a-extra.default',
+        '"conv-1"'
+      );
+
+      expect(hasPersistedConversation('workflow-a')).toBe(false);
     });
   });
 });

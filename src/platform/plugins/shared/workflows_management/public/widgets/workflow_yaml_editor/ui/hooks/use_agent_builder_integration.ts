@@ -20,6 +20,7 @@ import {
   consumeSidebarRestoreFor,
   findLinkedWorkflowAttachment,
   getCarriedAttachmentId,
+  hasPersistedConversation,
   ProposalManager,
   setActiveProposalManager,
   setLastCreateAttachmentId,
@@ -79,6 +80,7 @@ export const useAgentBuilderIntegration = ({
   const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
   const syncAttachmentIdRef = useRef<string | undefined>(undefined);
+  const attachmentTargetResolvedRef = useRef(true);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
@@ -268,7 +270,7 @@ export const useAgentBuilderIntegration = ({
     });
 
     const syncAttachment = (yaml: string) => {
-      if (!attachmentTargetResolved) return;
+      if (!attachmentTargetResolvedRef.current) return;
       const attachment = buildAttachment(yaml);
       agentBuilder.setChatConfig({
         sessionTag: `workflow-editor:${sessionId}`,
@@ -278,27 +280,30 @@ export const useAgentBuilderIntegration = ({
       agentBuilder.addAttachment(attachment);
     };
 
-    let attachmentTargetResolved = true;
+    // The sidebar restores this session's last conversation, which may already
+    // hold the attachment to write into. Adding one before it loads makes a
+    // second.
+    attachmentTargetResolvedRef.current = !hasPersistedConversation(sessionId);
     let originLinkRequested = false;
 
     // `conversation_id_set` only fires for newly created conversations, so a
     // resumed one takes both its id and its attachment from here.
     const activeConversationSub = agentBuilder.events.ui?.activeConversation$.subscribe(
       (activeConversation) => {
-        if (activeConversation?.id) {
+        // `null` means no chat surface is bound, which says nothing about the
+        // conversation the sidebar will restore.
+        if (!activeConversation) return;
+        if (activeConversation.id) {
           conversationIdRef.current = activeConversation.id;
         }
 
-        // A conversation still loading may already hold the attachment to
-        // write into. Syncing now would add a second one.
-        const isLoading = Boolean(activeConversation?.id) && !activeConversation?.conversation;
-        if (isLoading) {
-          attachmentTargetResolved = false;
+        if (activeConversation.id && !activeConversation.conversation) {
+          attachmentTargetResolvedRef.current = false;
           return;
         }
 
         const linked = findLinkedWorkflowAttachment({
-          attachments: activeConversation?.conversation?.attachments,
+          attachments: activeConversation.conversation?.attachments,
           attachmentId,
           workflowId,
           carriedAttachmentId: workflowId ? getCarriedAttachmentId(workflowId) : undefined,
@@ -308,15 +313,15 @@ export const useAgentBuilderIntegration = ({
           bridge.setAttachmentId(linked.id);
         }
 
-        if (!attachmentTargetResolved) {
-          attachmentTargetResolved = true;
+        if (!attachmentTargetResolvedRef.current) {
+          attachmentTargetResolvedRef.current = true;
           const yaml = editorRef.current?.getModel()?.getValue();
           if (yaml !== undefined) syncAttachment(yaml);
         }
 
         // A create-session attachment predates the workflow, so nothing has
         // pointed it at one yet.
-        const conversationId = activeConversation?.id;
+        const conversationId = activeConversation.id;
         if (!conversationId || !workflowId || originLinkRequested) return;
         if (!linked || linked.origin === workflowId) return;
         originLinkRequested = true;
@@ -359,6 +364,7 @@ export const useAgentBuilderIntegration = ({
       sessionAutoOpenedRef.current = false;
       conversationIdRef.current = undefined;
       syncAttachmentIdRef.current = undefined;
+      attachmentTargetResolvedRef.current = true;
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
@@ -407,15 +413,20 @@ export const useAgentBuilderIntegration = ({
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
-        attachments: [
-          buildWorkflowAttachment({
-            yaml: currentYaml,
-            attachmentId: syncAttachmentIdRef.current ?? attachmentId,
-            workflowId,
-            workflowName,
-            diagnostics: serializeClientDiagnostics(validationErrors),
-          }),
-        ],
+        // Left empty while a restored conversation is still loading; the
+        // active-conversation subscription adds the attachment once it knows
+        // which one this session shares.
+        attachments: attachmentTargetResolvedRef.current
+          ? [
+              buildWorkflowAttachment({
+                yaml: currentYaml,
+                attachmentId: syncAttachmentIdRef.current ?? attachmentId,
+                workflowId,
+                workflowName,
+                diagnostics: serializeClientDiagnostics(validationErrors),
+              }),
+            ]
+          : [],
         onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;

@@ -23,6 +23,7 @@ export {
   setLastCreateAttachmentId,
   carryConversationToWorkflow,
   getCarriedAttachmentId,
+  hasPersistedConversation,
   setSidebarOpen,
   isSidebarOpen,
   requestSidebarRestore,

@@ -50,6 +50,21 @@ export const getCarriedAttachmentId = (workflowId: string): string | undefined =
   carriedAttachmentIds.get(workflowId);
 
 /**
+ * True when the sidebar will restore a conversation for this session, which the
+ * editor cannot sync into until it knows which attachment that conversation
+ * already holds. Mirrors the key `agent_builder` writes on open.
+ */
+export const hasPersistedConversation = (sessionId: string): boolean => {
+  if (typeof window === 'undefined' || !window.localStorage) return false;
+
+  const prefix = `${STORAGE_KEY_PREFIX}${SESSION_TAG_PREFIX}${sessionId}.`;
+  for (let i = 0; i < window.localStorage.length; i++) {
+    if (window.localStorage.key(i)?.startsWith(prefix)) return true;
+  }
+  return false;
+};
+
+/**
  * Rewrite persisted conversation-id localStorage entries from the create
  * session's tag onto `savedWorkflowId`'s tag. Iterates a prefix because keys
  * include a trailing agentId we don't know here. No-op if no create session
