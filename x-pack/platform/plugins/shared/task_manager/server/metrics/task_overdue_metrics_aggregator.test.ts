@@ -227,7 +227,12 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     const result = aggregator.collect();
+
     expect(result.by_type.actions).toBeUndefined();
+    expect(result.by_type['actions:oauth_state_cleanup']).toEqual({
+      overdue_by: { counts: [1], values: [10] },
+      overdue_by_values: [0],
+    });
   });
 
   test('should correctly ignore reset events', () => {
