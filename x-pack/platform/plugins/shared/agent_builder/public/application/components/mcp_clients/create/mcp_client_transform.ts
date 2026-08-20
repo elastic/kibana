@@ -44,7 +44,7 @@ export const toClientLogoPayload = (
  * @returns The payload for the create OAuth client endpoint.
  */
 export const toCreateOAuthClientPayload = (
-  { clientName, clientLogo, redirect, isConfidential }: McpClientFormData,
+  { clientName, clientLogo, redirect, isConfidential, isA2A }: McpClientFormData,
   fallbackLogoDataUrl?: string
 ): CreateOAuthClientPayload => {
   return {
@@ -52,5 +52,6 @@ export const toCreateOAuthClientPayload = (
     client_logo: toClientLogoPayload(clientLogo, fallbackLogoDataUrl),
     redirect_uris: redirect.uris.map(({ value }) => value),
     client_type: isConfidential ? OAuthClientType.CONFIDENTIAL : OAuthClientType.PUBLIC,
+    ...(isA2A ? { is_a2a: true } : {}),
   };
 };
