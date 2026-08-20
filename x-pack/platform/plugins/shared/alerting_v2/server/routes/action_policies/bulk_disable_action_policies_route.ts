@@ -15,6 +15,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { bulkDisableActionPoliciesOasExamples } from './bulk_disable_action_policies_oas_example';
 
 @injectable()
 export class BulkDisableActionPoliciesRoute extends BaseAlertingRoute {
@@ -27,6 +28,7 @@ export class BulkDisableActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Disable action policies in bulk by ID',
+    oasOperationObject: bulkDisableActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {

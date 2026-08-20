@@ -245,7 +245,7 @@ export const AgentPolicySummaryLine = memo<{
         {withDescription && description && (
           <EuiFlexItem>
             <EuiToolTip content={description}>
-              <EuiText color="subdued" size="xs">
+              <EuiText color="subdued" size="xs" tabIndex={0}>
                 {description}
               </EuiText>
             </EuiToolTip>

@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/observability-schema",
-  "owner": "@elastic/obs-presentation-team",
+  "owner": "@elastic/obs-signals-traces-team",
   "group": "observability",
-  "visibility": "private",
+  "visibility": "private"
 }

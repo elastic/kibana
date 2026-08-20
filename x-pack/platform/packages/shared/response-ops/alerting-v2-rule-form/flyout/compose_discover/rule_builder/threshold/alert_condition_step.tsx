@@ -468,6 +468,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {isFieldMapError && !isLoadingFieldMap && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             title={i18n.translate('xpack.alertingV2.ruleBuilder.fieldLoadErrorTitle', {
@@ -741,7 +742,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addStat}
         data-test-subj="ruleBuilderAddStat"
       >
@@ -827,7 +828,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       ))}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addEvaluation}
         data-test-subj="ruleBuilderAddEvaluation"
       >
@@ -989,7 +990,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addCondition}
         data-test-subj="ruleBuilderAddCondition"
       >

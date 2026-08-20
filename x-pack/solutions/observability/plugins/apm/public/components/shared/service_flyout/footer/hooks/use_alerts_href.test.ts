@@ -45,6 +45,14 @@ function buildContext(
       },
     },
     service: { name: serviceName },
+    capabilities: {
+      loading: false,
+      error: undefined,
+      schema: 'ecs' as const,
+      header: { serviceNameLink: true, badges: true },
+      overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+      footer: { alerts: true, slos: true },
+    },
     filters: { environment, rangeFrom, rangeTo },
   };
 }

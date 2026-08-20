@@ -19,6 +19,8 @@ import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
+import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
+import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
@@ -41,6 +43,11 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
+export interface ServiceFlyoutTelemetry {
+  client: { reportServiceFlyoutViewed: (params: { tabId: string; source: string }) => void };
+  source: string;
+}
+
 interface ServiceFlyoutProps {
   deps: ServiceFlyoutContextValue['deps'];
   service: ServiceFlyoutContextValue['service'];
@@ -50,12 +57,21 @@ interface ServiceFlyoutProps {
     rangeTo: string;
     transactionType?: string;
   };
-  onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
+  telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
+  historyKey?: symbol;
+  contextActions?: ServiceFlyoutContextValue['contextActions'];
 }
 
-export function ServiceFlyout({ deps, service, filters, onView, onClose }: ServiceFlyoutProps) {
-  const { core, share, lens, dataViews, alerting } = deps;
+export function ServiceFlyout({
+  deps,
+  service,
+  filters,
+  telemetry,
+  onClose,
+  historyKey,
+  contextActions,
+}: ServiceFlyoutProps) {
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
@@ -65,16 +81,29 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
-  const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
+  const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
+
+  const capabilities = useServiceFlyoutCapabilities({
+    serviceName: service.name,
+    environment: flyoutEnvironment,
+    start,
+    end,
+  });
+
+  const { indices: indicesValue, loading: indicesLoading } = useApmIndices({
+    http: deps.core.http,
+  });
+  const indices = indicesLoading ? undefined : indicesValue ?? null;
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
 
+  const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
-    onView?.({ tabId: selectedTabId });
-  }, [onView, selectedTabId]);
+    telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
+  }, [telemetryClient, telemetrySource, selectedTabId]);
 
   const renderTabContent = () => {
     switch (selectedTabId) {
@@ -88,8 +117,11 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
   return (
     <ServiceFlyoutContextProvider
       value={{
-        deps: { core, share, lens, dataViews, alerting },
+        deps,
+        contextActions,
         service,
+        capabilities,
+        indices,
         filters: {
           environment: flyoutEnvironment,
           setEnvironment: setFlyoutEnvironment,
@@ -99,12 +131,12 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
           refreshToken,
           onRefresh: () => setRefreshToken(Date.now()),
           transactionType: flyoutTransactionType,
-          setTransactionType,
+          setTransactionType: setFlyoutTransactionType,
         },
       }}
     >
       <TimeRangeMetadataContextProvider
-        uiSettings={core.uiSettings}
+        uiSettings={deps.core.uiSettings}
         start={start}
         end={end}
         kuery=""
@@ -120,6 +152,7 @@ export function ServiceFlyout({ deps, service, filters, onView, onClose }: Servi
           resizable
           minWidth={660}
           session="start"
+          historyKey={historyKey}
           flyoutMenuProps={{ title }}
           aria-labelledby={titleId}
         >

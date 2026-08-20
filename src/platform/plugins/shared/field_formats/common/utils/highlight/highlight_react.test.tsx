@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@emotion/jest';
+import { render as renderComponent } from '@testing-library/react';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
@@ -18,11 +20,13 @@ import type { FieldFormatHighlightTags } from '../../types';
  * an implementation detail of renderToStaticMarkup, not semantically meaningful.
  */
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return ReactDOM.renderToStaticMarkup(<>{node}</>)
+    .replace(/&quot;/g, '"')
+    .replace(/ class="css-[^"]+"/g, '');
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const mark = (word: string) => `<mark class="ffSearch__highlight">${word}</mark>`;
+const mark = (word: string) => `<mark>${word}</mark>`;
 
 describe('getHighlightReact', () => {
   it('returns plain string unchanged when no field name is provided', () => {
@@ -54,6 +58,21 @@ describe('getHighlightReact', () => {
       check('lorem ipsum dolor', [`${hl('lorem')} ipsum dolor`], `${mark('lorem')} ipsum dolor`);
     });
 
+    test('underlines highlighted text', () => {
+      const { container } = renderComponent(
+        <>
+          {getHighlightReact('lorem ipsum', 'myField', {
+            highlight: { myField: [`${hl('lorem')} ipsum`] },
+          })}
+        </>
+      );
+
+      expect(container.querySelector('mark')).toHaveStyleRule(
+        'text-decoration',
+        'dotted underline'
+      );
+    });
+
     test('highlights a single word in the middle', () => {
       check('lorem ipsum dolor', [`lorem ${hl('ipsum')} dolor`], `lorem ${mark('ipsum')} dolor`);
     });
@@ -67,6 +86,25 @@ describe('getHighlightReact', () => {
         'lorem ipsum dolor sit',
         [`lorem ${hl('ipsum')} dolor ${hl('sit')}`],
         `lorem ${mark('ipsum')} dolor ${mark('sit')}`
+      );
+    });
+
+    test('does not match highlight terms inside previously inserted tag markers', () => {
+      // "field" is a substring of the @kibana-highlighted-field@ tag literal itself:
+      // matching it against a partially tagged working string used to corrupt the
+      // markers and render raw tag debris
+      check(
+        'the field is great',
+        [`the ${hl('field')} is great`, hl('field')],
+        `the ${mark('field')} is great`
+      );
+    });
+
+    test('does not match highlight terms inside tag markers across occurrences', () => {
+      check(
+        'field one field',
+        [`${hl('field')} one field`, hl('field')],
+        `${mark('field')} one ${mark('field')}`
       );
     });
 

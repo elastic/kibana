@@ -53,7 +53,7 @@ import {
 import { ServiceNodeWithCollapseAffordance } from './service_node_with_collapse_affordance';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
 import { ServiceFlyout } from '../../../shared/service_flyout';
-import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
+import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from '../use_service_map_flyout_props';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -265,14 +265,7 @@ function ContextualGraphInner({
     handlePopoverClose();
   }, [handlePopoverClose]);
 
-  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
-
-  const handleServiceFlyoutView = useCallback(
-    ({ tabId }: { tabId: string }) => {
-      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
-    },
-    [telemetry, flyoutSource]
-  );
+  const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
 
   const topLeftToolbarStyles = useMemo(
     () => css`
@@ -433,7 +426,7 @@ function ContextualGraphInner({
                 service={flyoutProps.service}
                 deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
                 filters={flyoutProps.filters}
-                onView={handleServiceFlyoutView}
+                telemetry={{ client: telemetry, source: flyoutSource }}
                 onClose={handlePopoverClose}
               />
             )}

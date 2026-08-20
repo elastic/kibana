@@ -19,7 +19,10 @@ import type {
 import * as i18n from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
+type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
   label,
@@ -31,6 +34,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, setValue, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -53,7 +57,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

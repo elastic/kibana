@@ -10,7 +10,7 @@
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -20,7 +20,10 @@ export type AppHeaderBack = string | AppHeaderBackTarget;
 /** @public */
 export interface AppHeaderBackTarget {
   href: string;
-  /** Click handler, called alongside href navigation when provided. */
+  /**
+   * Optional handler for behavior that differs from `href` navigation.
+   * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
+   */
   onClick?: MouseEventHandler;
   /** Destination name for accessibility (e.g. "Back to {label}"). */
   label?: string;
@@ -92,7 +95,7 @@ export interface AppHeaderTabAction {
  * @remarks
  * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
  * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
- * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * (`AppMenuRunActionParams` in `@kbn/app-menu`) by adding a nested `items`
  * prop and passing an anchor/`returnFocus` handler down to `onClick`.
  *
  * @public
@@ -233,6 +236,21 @@ export interface AppHeaderFavoriteAction {
 }
 
 /**
+ * Share action for the app-header title-actions area.
+ * Apps own behavior and menu placement; App Header owns title presentation.
+ *
+ * @public
+ */
+export interface AppHeaderShareAction {
+  onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
+  isDisabled?: boolean;
+  tooltip?: {
+    content: string;
+    title?: string;
+  };
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  *
@@ -252,6 +270,7 @@ interface AppHeaderConfigBase {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
+  share?: AppHeaderShareAction;
   spacing?: AppHeaderSpacing;
 }
 
@@ -269,6 +288,16 @@ type AppHeaderSecondaryContent =
 export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
+ * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
+ * suppress the breadcrumb-derived fallback.
+ *
+ * @public
+ */
+export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
+  back?: AppHeaderBack | false;
+};
+
+/**
  * Chrome Next rollout APIs.
  *
  * @remarks
@@ -278,7 +307,12 @@ export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
+  /**
+   * Whether the Chrome Next feature flag is enabled.
+   *
+   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
+   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   */
   readonly isEnabled: boolean;
   aiButton: {
     /**
@@ -332,7 +366,7 @@ export interface ChromeNext {
      * Pass the config to show; the returned callback removes it.
      * Per-app, cleared on app change.
      */
-    set(config: AppHeaderConfig): () => void;
+    set(config: ChromeAppHeaderConfig): () => void;
   };
   userMenu: {
     /**

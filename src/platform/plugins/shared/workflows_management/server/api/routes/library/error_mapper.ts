@@ -8,7 +8,11 @@
  */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
-import { InstallFormValidationError, MissingInstallFormFieldError } from '@kbn/workflows-library';
+import {
+  InstallFormValidationError,
+  MissingInstallFormFieldError,
+  TemplateParseError,
+} from '@kbn/workflows-library';
 
 import {
   LibraryDisabledError,
@@ -57,6 +61,12 @@ export function mapLibraryError(response: KibanaResponseFactory, error: unknown)
         },
       },
     });
+  }
+
+  if (error instanceof TemplateParseError) {
+    // A client-supplied template YAML (e.g. an uploaded file) failed to parse
+    // or its metadata is malformed — a 400, not a catalog 404/503.
+    return response.badRequest({ body: { message: error.message } });
   }
 
   if (error instanceof LibraryNotFoundError) {

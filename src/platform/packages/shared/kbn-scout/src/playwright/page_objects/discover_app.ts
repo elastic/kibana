@@ -12,6 +12,7 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
 
@@ -21,6 +22,8 @@ export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
+  /** Open a Discover session by id (`#/view/{id}`) instead of a blank Discover page. */
+  savedSearchId?: string;
 }
 
 export interface DataViewOptions {
@@ -39,16 +42,22 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
+  public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.saveModal = new SavedObjectSaveModal(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
 
-    await this.page.gotoApp('discover');
+    await this.page.gotoApp(
+      'discover',
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+    );
     await this.waitForDiscoverPage();
   }
 
@@ -95,7 +104,13 @@ export class DiscoverApp {
     await dataViewSwitch.click();
   }
 
-  async selectDataView(name: string) {
+  async selectDataView(
+    name: string,
+    {
+      createAdHocIfMissing = true,
+      waitForFieldList = true,
+    }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
+  ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
@@ -107,13 +122,19 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await switcher.waitFor({ state: 'hidden' });
-    await this.waitUntilFieldListHasCountOfFields();
+    if (waitForFieldList) {
+      await this.waitUntilFieldListHasCountOfFields();
+    }
   }
 
   getSelectedDataView(): Locator {
@@ -144,21 +165,65 @@ export class DiscoverApp {
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    const title = name.endsWith('*') ? name : `${name}*`;
+    const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // wait for timestamp options; default @timestamp applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    // Retry: title validation can race its debounced index lookup and get stuck
+    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    // Re-submitting also covers serverless, where the form's submission re-validation can
+    // transiently report "no matching indices" even though the matching sources panel already
+    // shows results, leaving the flyout open with its submit buttons disabled.
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
 
-    if (adHoc) {
-      await this.page.testSubj.click('exploreIndexPatternButton');
-    } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
+      if (attempt > 1) {
+        await titleInput.fill(''); // force a real value change to re-trigger validation
+      }
+      await titleInput.fill(title);
+      // wait for async title validation to settle before continuing.
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+
+      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
+      // field's initial state, so on its own it cannot tell "options loaded" apart from
+      // "loading has not started". Submitting too early still passes validation, but creates
+      // the data view with no time field, so no time filter is applied and hit counts include
+      // documents outside the selected range.
+      await expect
+        .poll(
+          async () => {
+            const isLoading = await timestampField.getAttribute('data-is-loading');
+            if (isLoading !== '0') {
+              return false;
+            }
+            return (await timestampCombo.getSelectedOptions()).length > 0;
+          },
+          { timeout: 30_000, intervals: [200] }
+        )
+        .toBe(true);
+
+      if (adHoc) {
+        await this.page.testSubj.click('exploreIndexPatternButton');
+      } else {
+        await this.page.testSubj.click('saveIndexPatternButton');
+      }
+
+      const flyoutClosed = await flyout
+        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (flyoutClosed) {
+        break;
+      }
+      if (isLastAttempt) {
+        throw new Error(
+          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
+        );
+      }
     }
-    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -234,11 +299,64 @@ export class DiscoverApp {
       await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
     await this.waitUntilTabIsLoaded();
   }
 
-  async createRuntimeField(fieldName: string, script: string) {
+  async editDataViewFromSearchBar({
+    newIndexPattern,
+    newTimeField,
+  }: {
+    newIndexPattern?: string;
+    newTimeField?: string;
+  }) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (newIndexPattern) {
+      const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+      await titleInput.fill(newIndexPattern);
+      const form = this.page.testSubj.locator('indexPatternEditorForm');
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+    }
+
+    if (newTimeField) {
+      const timestampField = this.page.testSubj.locator('timestampField');
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      await this.page.components.comboBox('timestampField').setSelectedOptions([newTimeField]);
+    }
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    const confirmVisible = await confirmButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) {
+      await confirmButton.click();
+    }
+
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async createRuntimeField({
+    fieldName,
+    script,
+    popularity,
+  }: {
+    fieldName: string;
+    script: string;
+    popularity?: number;
+  }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
     const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
@@ -250,8 +368,49 @@ export class DiscoverApp {
       .getByRole('textbox', { name: /Editor content/ })
       .waitFor({ state: 'visible' });
     await this.codeEditor.setCodeEditorValue(script);
+
+    if (typeof popularity === 'number') {
+      await this.setPopularity(popularity);
+    }
+
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async getCurrentDataViewId(): Promise<string> {
+    const currentUrl = this.page.url();
+    const matches = [...currentUrl.matchAll(/dataViewId:[^,]*/g)];
+    const ids = matches.map(([m]) =>
+      decodeURIComponent(m).replace('dataViewId:', '').replaceAll("'", '')
+    );
+    if (!ids.length) {
+      throw new Error(
+        `Discover URL state doesn't contain a dataViewId reference. URL: ${currentUrl}`
+      );
+    }
+    const first = ids[0];
+    if (!ids.every((id) => id === first)) {
+      throw new Error('Discover URL state contains different dataViewId references.');
+    }
+    return first;
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    // The field may appear in multiple sidebar sections (Popular + Available);
+    // scope to Available fields to avoid strict-mode violations.
+    const fieldItem = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await fieldItem.waitFor({ state: 'visible' });
+    await fieldItem.click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`discoverFieldListPanelDelete-${fieldName}`);
+    const confirmModal = this.page.testSubj.locator('runtimeFieldDeleteConfirmModal');
+    await confirmModal.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('deleteModalConfirmText', 'remove');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await confirmModal.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -265,6 +424,64 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
+  }
+
+  async setPopularity(popularity: number) {
+    await this.page.testSubj.click('toggleAdvancedSetting');
+    const row = this.page.testSubj.locator('popularityRow');
+    await row.locator('[data-test-subj="toggle"]').click();
+    await this.page.testSubj.locator('editorFieldCount').fill(String(popularity));
+  }
+
+  async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
+    const row = this.page.testSubj.locator('customLabelRow');
+    await row.waitFor({ state: 'visible' });
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
+    }
+    const input = row.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(label);
+  }
+
+  async setCustomDescription(
+    description: string,
+    { enableToggle = false }: { enableToggle?: boolean } = {}
+  ) {
+    const row = this.page.testSubj.locator('customDescriptionRow');
+    await row.waitFor({ state: 'visible' });
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
+    }
+    const input = row.locator('textarea, input');
+    await input.fill(description);
+  }
+
+  getCustomDescriptionFormError(): Locator {
+    return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
+  }
+
+  async saveOpenFieldEditor({ confirmChange = false }: { confirmChange?: boolean } = {}) {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('fieldSaveButton');
+    if (confirmChange) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await this.page.testSubj.fill('saveModalConfirmText', 'change');
+      await confirmButton.waitFor({ state: 'visible' });
+      await confirmButton.click();
+    }
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async discardOpenFieldEditorChanges() {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('closeFlyoutButton');
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    await confirmButton.click();
+    await fieldEditor.waitFor({ state: 'hidden' });
   }
 
   async clickAppMenuItem(
@@ -362,6 +579,106 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Creates an ES|QL control from the editor: types a query ending in a variable position,
+   * picks "Create control" from the suggestion widget and saves the flyout. Returns once
+   * the control group is rendered.
+   */
+  async createEsqlControl(
+    query: string,
+    {
+      variableName,
+      label,
+      values,
+    }: { variableName?: string; label?: string; values?: string[] } = {}
+  ) {
+    // Monaco registers its text model only once the editor has mounted, and the ES|QL
+    // editor can still be mounting after the tab reports loaded, for instance right after
+    // adding a new Discover panel. Setting a value or triggering suggestions before then
+    // has no model to act on.
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.codeEditor.triggerSuggest(query);
+
+    const suggestionWidget = this.codeEditor.getCodeEditorSuggestWidget();
+    await suggestionWidget.waitFor({ state: 'visible' });
+    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+
+    const flyout = this.page.testSubj.locator('create_esql_control_flyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (variableName !== undefined) {
+      await this.page.testSubj.fill('esqlVariableName', variableName);
+    }
+    if (label !== undefined) {
+      await this.page.testSubj.fill('esqlControlLabel', label);
+    }
+    if (values) {
+      const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
+      for (const value of values) {
+        await valuesComboBox.setCustomSelectedOptions([value]);
+      }
+    }
+
+    // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
+    // esql/public/triggers/esql_controls/control_flyout/index.tsx), and the click waits for
+    // it to become enabled. That means waiting on the control's own ES|QL query rather than
+    // on rendering, so query latency sets the budget.
+    await this.page.testSubj.locator('saveEsqlControlsFlyoutButton').click({ timeout: 30_000 });
+    await flyout.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Clicks "Save and return" in the top nav, available when Discover is opened as
+   * the editor for a by-value dashboard panel. Transfers the panel state straight
+   * back to the dashboard without opening a save modal.
+   */
+  async saveAndReturnToEditor() {
+    await this.clickAppMenuItem('discoverSaveButton');
+  }
+
+  /**
+   * Clicks "Cancel" in the top nav save split-button, available when Discover is
+   * opened as the editor for a by-value dashboard panel. Discards the edits and
+   * returns to the dashboard.
+   */
+  async cancelEditorChanges() {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    await this.page.testSubj.locator('discoverCancelButton').click();
+  }
+
+  /**
+   * Saves the current Discover table (including any ES|QL controls) as a by-value
+   * panel on a brand-new dashboard, then navigates to that dashboard.
+   */
+  async saveTableToNewDashboard(title: string) {
+    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
+    await this.saveModal.modal.waitFor({ state: 'visible' });
+
+    // Pick "new" before the title: filling the title re-renders the modal and would reset
+    // the radio (confirm stays disabled on "existing" with no pick).
+    await this.saveModal.selectNewDashboard();
+    await this.saveModal.fillTitle(title);
+    // Not `saveModal.confirm()`: it waits for the modal to close, which cannot happen yet.
+    // Saving navigates away, and a session with unsaved changes raises the app-leave prompt
+    // first, which keeps the save modal mounted until it is dismissed below.
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+
+    // The leave prompt can also unmount on its own once navigation starts, so confirming it
+    // is best effort.
+    await this.page.testSubj
+      .locator('appLeaveConfirmModal')
+      .getByTestId('confirmModalConfirmButton')
+      .click()
+      .catch(() => {});
+
+    await this.saveModal.modal.waitFor({ state: 'hidden', timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
+    // The panel travels to the dashboard in session storage and is consumed on arrival, so
+    // the method only returns once the dashboard is reached.
+    await this.page.waitForURL(/\/app\/dashboards/);
   }
 
   async getSharedUrl(): Promise<string> {
@@ -521,6 +838,32 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('discoverQueryHits');
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getQuerySubmitButton(): Locator {
+    return this.page.testSubj.locator('querySubmitButton');
+  }
+
+  getQueryCancelButton(): Locator {
+    return this.page.testSubj.locator('queryCancelButton');
+  }
+
+  getSearchResponseWarningsEmptyPrompt(): Locator {
+    return this.page.testSubj.locator('searchResponseWarningsEmptyPrompt');
+  }
+
+  async getSearchFetchCount(): Promise<number> {
+    const fetchCounter = this.page.locator('[data-fetch-counter]');
+    await fetchCounter.waitFor({ state: 'attached' });
+    return Number(await fetchCounter.getAttribute('data-fetch-counter'));
+  }
+
+  getErrorCalloutTitle(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutTitle');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -531,6 +874,12 @@ export class DiscoverApp {
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
+  }
+
+  async getHistogramSuggestionType(): Promise<string | null> {
+    const chart = this.page.testSubj.locator('unifiedHistogramChart');
+    await chart.waitFor({ state: 'visible' });
+    return chart.getAttribute('data-suggestion-type');
   }
 
   async clickHistogramBar() {
@@ -547,6 +896,15 @@ export class DiscoverApp {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    await this.waitUntilHitCountHasSettled();
+  }
+
+  private async waitUntilHitCountHasSettled() {
+    const loadingCounter = this.page.testSubj
+      .locator('discoverQueryTotalHits')
+      .and(this.page.locator('[data-fetch-status="loading"]'));
+
+    await loadingCounter.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -615,7 +973,14 @@ export class DiscoverApp {
    * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
    */
   async getBreakdownFieldValue(): Promise<string> {
-    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await this.page.testSubj.innerText(
+      'unifiedHistogramBreakdownSelectorButton'
+    );
+
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -663,23 +1028,26 @@ export class DiscoverApp {
       this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
     getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
       this.controls.getControlFrame(controlId).getByText(value),
+    /**
+     * Locator for an options-list control's selected-values label, e.g. `AE` for a
+     * single selection or `AE, CN` for multiple. Unlike
+     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
+     * assert that a value is the *only* selection.
+     */
+    getSelectionsLocator: (controlId: string): Locator =>
+      this.page.testSubj
+        .locator(`optionsList-control-${controlId}`)
+        .getByTestId('optionsListSelections'),
   };
 
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
+  getDocHeaderLabels(): Locator {
+    return this.page.locator(
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+    );
   }
 
   async getDocHeader(): Promise<string[]> {
-    const headers = await this.page
-      .locator(
-        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-      )
-      .allInnerTexts();
+    const headers = await this.getDocHeaderLabels().allInnerTexts();
     return headers.map((h) => h.trim());
   }
 
@@ -725,10 +1093,22 @@ export class DiscoverApp {
 
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async showTable() {
+    await this.page.testSubj.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async hideTable() {
+    await this.page.testSubj.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async expectXYVisChartVisible() {
@@ -787,6 +1167,22 @@ export class DiscoverApp {
     }
   }
 
+  /**
+   * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
+   * `dragFieldWithKeyboardToTable` implementation.
+   */
+  async dragFieldToGridWithKeyboard(fieldName: string) {
+    const keyboardHandler = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await keyboardHandler.focus();
+    await this.page.keyboard.press('Enter'); // enter DnD mode
+    // domDroppable_overlay renders when DnD is active — use it as a sync point
+    await this.page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
+    await this.page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
+    await this.page.keyboard.press('Enter'); // drop
+  }
+
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
     const viewButtons: Locator[] = await this.page.testSubj
       .locator('dataVisualizerActionViewInLensButton')
@@ -840,18 +1236,17 @@ export class DiscoverApp {
 
     if (currentMode !== 'classic') {
       await this.clickAppMenuItem('select-classic-mode-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'visible',
-      });
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'hidden',
-      });
     }
 
     await this.waitUntilSearchingHasFinished();
     const queryMode = await this.getCurrentQueryMode();
     expect(queryMode).toBe('classic');
+  }
+
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
@@ -1118,5 +1513,151 @@ export class DiscoverApp {
     } catch {
       return false;
     }
+  }
+
+  getCascadeLayout(): Locator {
+    return this.page.testSubj.locator('data-cascade');
+  }
+
+  /**
+   * Trigger for the "Group by" popover in the cascade layout toolbar. Despite
+   * the `...Switch` test subject it is a popover button, not a toggle — use
+   * {@link optOutOfCascadeLayout} to actually leave the cascade layout.
+   */
+  getCascadeLayoutSwitch(): Locator {
+    return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  /**
+   * Leaves the cascade ("grouped results") layout that Discover switches to for
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. Expects the
+   * cascade layout to be showing — it fails rather than silently doing nothing
+   * if the layout is absent, so callers notice when the trigger stops applying.
+   */
+  async optOutOfCascadeLayout() {
+    await this.getCascadeLayoutSwitch().click();
+    await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+    await this.waitUntilTabIsLoaded();
+    await this.getCascadeLayout().waitFor({ state: 'hidden' });
+  }
+
+  async isShowingCascadeLayout(): Promise<boolean> {
+    const cascadeLayout = this.getCascadeLayout();
+    const flatLayout = this.page.testSubj.locator('discoverDocTable');
+
+    await cascadeLayout.or(flatLayout).waitFor({ state: 'visible' });
+    return cascadeLayout.isVisible();
+  }
+
+  private getCascadeScrollContainer(): Locator {
+    return this.page.testSubj.locator('dataCascadeScrollContainer');
+  }
+
+  /**
+   * Returns the ids of the top-level ("root") cascade rows currently
+   * scrolled into view within the cascade scroll container.
+   */
+  async getCascadeLayoutVisibleRowIds(): Promise<string[]> {
+    return this.getCascadeScrollContainer().evaluate((container) => {
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds: string[] = [];
+      for (const row of rows) {
+        const rowRect = row.getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(row.id || '');
+        }
+      }
+      return visibleIds;
+    });
+  }
+
+  /**
+   * Whether the given cascade row id is currently expanded.
+   */
+  async isCascadeLayoutRowExpanded(rowId: string): Promise<boolean> {
+    return (await this.page.locator(`[id="${rowId}"]`).getAttribute('aria-expanded')) === 'true';
+  }
+
+  /**
+   * Clicks the expand/collapse toggle for the cascade row with the given id,
+   * without waiting for the resulting state change. Scoped to the row: while
+   * scrolled, the sticky pinned group header renders a `createPortal`
+   * duplicate of this same button elsewhere in the DOM (outside the row), so
+   * an unscoped page-wide testSubj locator can match two elements.
+   */
+  async clickCascadeRowToggle(rowId: string): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .locator(`[data-test-subj="toggle-row-${rowId}-button"]`)
+      .click();
+  }
+
+  /**
+   * Waits until the cascade row with the given id reports the given expansion
+   * state, without waiting for the data of an expanded row to load.
+   */
+  async waitForCascadeLayoutRowExpanded(rowId: string, expanded: boolean): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .and(this.page.locator(`[aria-expanded="${expanded}"]`))
+      .waitFor({ state: 'attached' });
+  }
+
+  /**
+   * Toggles (expands/collapses) the cascade row with the given id and waits
+   * for the `aria-expanded` state to flip before returning. Waits for the doc
+   * table to finish rendering after an expand, since that triggers a fetch.
+   */
+  async toggleCascadeLayoutRow(rowId: string): Promise<void> {
+    const row = this.page.locator(`[id="${rowId}"]`);
+    const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
+
+    await this.clickCascadeRowToggle(rowId);
+    await this.waitForCascadeLayoutRowExpanded(rowId, !wasExpanded);
+
+    if (!wasExpanded) {
+      await this.dataGrid.waitForDocTableRendered();
+    }
+  }
+
+  /**
+   * Waits for the cascade layout's virtualizer to finish
+   * measuring/correcting itself (e.g. restoring a scroll anchor after a tab
+   * switch). The scroll container is hidden behind a loading spinner via
+   * `visibility: hidden` until the virtualizer reports itself stable.
+   */
+  async waitForCascadeLayoutStable(): Promise<void> {
+    await this.getCascadeScrollContainer().waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Current `scrollTop` of the cascade layout's scroll container.
+   */
+  async getCascadeLayoutScrollTop(): Promise<number> {
+    return this.getCascadeScrollContainer().evaluate((container) => container.scrollTop);
+  }
+
+  /**
+   * Scrolls the cascade layout's scroll container by `delta` pixels.
+   */
+  async scrollCascadeLayoutBy(delta: number): Promise<void> {
+    await this.getCascadeScrollContainer().evaluate((container, scrollDelta) => {
+      container.scrollTop += scrollDelta;
+    }, delta);
+  }
+
+  /**
+   * Waits for a just-performed scroll/expand of the cascade layout to be
+   * persisted for state restoration. Persistence is debounced/throttled
+   * internally with no externally observable signal, so callers must pause
+   * here before triggering a remount (e.g. switching tabs) or the
+   * just-performed change can be dropped and restored from stale state.
+   */
+  async waitForCascadeStatePersisted(): Promise<void> {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(500);
   }
 }

@@ -48,6 +48,7 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
         id: 'example-1',
         index: 1,
         input: { question: 'What is Kibana?' },
+        metadata: { category: 'es-and-cases-creation' },
         dataset: {
           id: 'dataset-1',
           name: 'Dataset 1',
@@ -131,12 +132,115 @@ describe('EvaluationScoreService', () => {
         git: request.metadata.git,
         ci: request.metadata.ci,
       },
+      example: {
+        id: request.scores[0].example.id,
+        metadata: request.scores[0].example.metadata,
+        dataset: request.scores[0].example.dataset,
+      },
       task: { model: request.task_model, repetition_index: 0 },
       evaluator: { model: request.evaluator_model, name: 'correctness' },
     });
     expect(computeScoreDocumentId(capturedDocuments[0])).toBe(
       'exp-1-suite-1-task-model-dataset-1-example-1-correctness-0'
     );
+  });
+
+  describe('evaluator model attribution', () => {
+    const captureDocuments = async (request: IngestScoresRequestBody) => {
+      const captured: Array<{ _id: string } & EvaluationScoreDocument> = [];
+      const { coreDataStreams, create } = createDataStreamsMock();
+
+      create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+        captured.push(...(documents as Array<{ _id: string } & EvaluationScoreDocument>));
+        return {
+          errors: false,
+          items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+        };
+      });
+
+      const service = new EvaluationScoreService(loggingSystemMock.createLogger(), coreDataStreams);
+      await service.write(request, ['default']);
+
+      return captured;
+    };
+
+    const withScoreEvaluator = (
+      evaluator: Partial<IngestScoresRequestBody['scores'][number]['evaluator']>
+    ): IngestScoresRequestBody => {
+      const request = getBaseRequest();
+      return {
+        ...request,
+        scores: [
+          {
+            ...request.scores[0],
+            evaluator: { ...request.scores[0].evaluator, ...evaluator },
+          },
+        ],
+      };
+    };
+
+    it('prefers the model the evaluator reports over the request default', async () => {
+      const perScoreModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
+      const documents = await captureDocuments(
+        withScoreEvaluator({ kind: 'llm', model: perScoreModel })
+      );
+
+      expect(documents[0].evaluator).toMatchObject({ kind: 'llm', model: perScoreModel });
+    });
+
+    it('leaves code evaluators unattributed rather than applying the request default', async () => {
+      const documents = await captureDocuments(withScoreEvaluator({ kind: 'code' }));
+
+      expect(documents[0].evaluator).toMatchObject({ kind: 'code' });
+      expect(documents[0].evaluator.model).toBeUndefined();
+    });
+
+    it('still honors a model a code evaluator reports', async () => {
+      const perScoreModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
+      const documents = await captureDocuments(
+        withScoreEvaluator({ kind: 'code', model: perScoreModel })
+      );
+
+      expect(documents[0].evaluator.model).toEqual(perScoreModel);
+    });
+
+    it('falls back to the request default when the evaluator reports neither model nor kind', async () => {
+      const request = getBaseRequest();
+      const documents = await captureDocuments(request);
+
+      expect(documents[0].evaluator.model).toEqual(request.evaluator_model);
+      expect(documents[0].evaluator.kind).toBeUndefined();
+    });
+
+    it('falls back to the request default for llm evaluators that report no model', async () => {
+      const request = withScoreEvaluator({ kind: 'llm' });
+      const documents = await captureDocuments(request);
+
+      expect(documents[0].evaluator.model).toEqual(request.evaluator_model);
+    });
+
+    it('attributes each score in one request independently', async () => {
+      const request = getBaseRequest();
+      const judgeModel = { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' };
+      const documents = await captureDocuments({
+        ...request,
+        scores: [
+          {
+            ...request.scores[0],
+            evaluator: { name: 'correctness', score: 0.8, kind: 'llm', model: judgeModel },
+          },
+          {
+            ...request.scores[0],
+            evaluator: { name: 'latency', score: 42, kind: 'code' },
+          },
+        ],
+      });
+
+      expect(documents.map(({ evaluator }) => [evaluator.name, evaluator.model])).toEqual([
+        ['correctness', judgeModel],
+        ['latency', undefined],
+      ]);
+    });
   });
 
   it('treats 409 bulk drops as idempotent conflicts', async () => {

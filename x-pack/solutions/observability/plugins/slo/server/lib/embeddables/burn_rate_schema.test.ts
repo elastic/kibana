@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getBurnRateEmbeddableSchema } from './burn_rate_schema';
 
@@ -20,8 +21,8 @@ describe('burn rate schema validation', () => {
       hide_title: false,
     };
 
-    expect(() => burnRateSchema.validate(validState)).not.toThrow();
-    const result = burnRateSchema.validate(validState);
+    expect(() => burnRateSchema.parse(validState)).not.toThrow();
+    const result = burnRateSchema.parse(validState);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: 'test-instance-id',
@@ -37,8 +38,8 @@ describe('burn rate schema validation', () => {
       duration: '6h',
     };
 
-    expect(() => burnRateSchema.validate(minimalState)).not.toThrow();
-    const result = burnRateSchema.validate(minimalState);
+    expect(() => burnRateSchema.parse(minimalState)).not.toThrow();
+    const result = burnRateSchema.parse(minimalState);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: '*',
@@ -53,8 +54,8 @@ describe('burn rate schema validation', () => {
       duration: '30m',
     };
 
-    expect(() => burnRateSchema.validate(state)).not.toThrow();
-    const result = burnRateSchema.validate(state);
+    expect(() => burnRateSchema.parse(state)).not.toThrow();
+    const result = burnRateSchema.parse(state);
     expect(result).toMatchObject({
       slo_id: 'test-slo-id',
       slo_instance_id: 'instance-abc',
@@ -68,7 +69,10 @@ describe('burn rate schema validation', () => {
       duration: '1h',
     };
 
-    expect(() => burnRateSchema.validate(invalidState)).toThrow(/slo_id/);
+    expectPrettyError(burnRateSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at slo_id"
+    `);
   });
 
   it('should reject missing duration', () => {
@@ -77,7 +81,10 @@ describe('burn rate schema validation', () => {
       slo_instance_id: '*',
     };
 
-    expect(() => burnRateSchema.validate(invalidState)).toThrow(/duration/);
+    expectPrettyError(burnRateSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at duration"
+    `);
   });
 
   it('should default slo_instance_id to * when omitted', () => {
@@ -86,7 +93,7 @@ describe('burn rate schema validation', () => {
       duration: '1h',
     };
 
-    const result = burnRateSchema.validate(state);
+    const result = burnRateSchema.parse(state);
     expect(result.slo_instance_id).toBe('*');
   });
 });

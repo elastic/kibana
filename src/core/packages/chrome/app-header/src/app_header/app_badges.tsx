@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
+import { asPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const MAX_VISIBLE_BADGES = 2;
@@ -72,7 +73,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
       css={badgesContainer}
     >
       {visibleBadges.map((badge) => (
-        <EuiFlexItem grow={false} key={badge.label}>
+        <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
           <AppBadge badge={badge} />
         </EuiFlexItem>
       ))}
@@ -110,7 +111,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
               css={overflowList}
             >
               {overflowBadges.map((badge) => (
-                <EuiFlexItem grow={false} key={badge.label}>
+                <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
                   <AppBadge badge={badge} />
                 </EuiFlexItem>
               ))}

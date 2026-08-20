@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 
 import {
   EuiButtonIcon,
@@ -27,6 +27,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
+import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { useToasts } from '../../../../../hooks/use_toasts';
@@ -55,6 +56,12 @@ const labels = {
   markAsUnread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsUnread', {
     defaultMessage: 'Mark as unread',
   }),
+  pin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.pin', {
+    defaultMessage: 'Pin',
+  }),
+  unpin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.unpin', {
+    defaultMessage: 'Unpin',
+  }),
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
   }),
@@ -76,6 +83,8 @@ export interface ConversationListItemRowProps {
   onItemClick?: () => void;
   status?: ConversationDisplayStatus;
   read?: boolean;
+  isPinned?: boolean;
+  permissions: ConversationPermissions;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -88,15 +97,25 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   onItemClick,
   status,
   read,
+  isPinned = false,
+  permissions,
 }) => {
+  const canRename = permissions.rename;
+  const canDelete = permissions.delete;
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
-    useConversationListMutations({ routeConversationId, agentId });
+  const {
+    deleteConversation,
+    renameConversation,
+    markAsRead,
+    markAsUnread,
+    markAsPinned,
+    markAsUnpinned,
+  } = useConversationListMutations({ routeConversationId, agentId });
   const { addErrorToast } = useToasts();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -201,24 +220,28 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const menuItems = useMemo(
     () => [
-      <EuiContextMenuItem
-        key="rename"
-        icon="pencil"
-        data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
-        onClick={() => {
-          closePopover();
-          setIsRenameModalOpen(true);
-        }}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
-        })}
-      >
-        {labels.rename}
-      </EuiContextMenuItem>,
+      ...(canRename
+        ? [
+            <EuiContextMenuItem
+              key="rename"
+              icon="pencil"
+              data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
+              onClick={() => {
+                closePopover();
+                setIsRenameModalOpen(true);
+              }}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
+              })}
+            >
+              {labels.rename}
+            </EuiContextMenuItem>,
+          ]
+        : []),
       <EuiContextMenuItem
         key="read-status"
-        icon={isUnread ? 'eyeClosed' : 'eye'}
+        icon={isUnread ? 'eyeSlash' : 'eye'}
         onClick={() => {
           closePopover();
           if (isUnread) {
@@ -237,25 +260,61 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        key="delete"
-        icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-        data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
-        css={css`
-          color: ${euiTheme.colors.danger};
-        `}
+        key="pin"
+        icon="pin"
         onClick={() => {
           closePopover();
-          setIsDeleteModalOpen(true);
+          if (isPinned) {
+            markAsUnpinned(conversationId);
+          } else {
+            markAsPinned(conversationId);
+          }
         }}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
+          action: isPinned
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
+            : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
         })}
       >
-        {labels.delete}
+        {isPinned ? labels.unpin : labels.pin}
       </EuiContextMenuItem>,
+      ...(canDelete
+        ? [
+            <EuiContextMenuItem
+              key="delete"
+              icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+              data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
+              css={css`
+                color: ${euiTheme.colors.danger};
+              `}
+              onClick={() => {
+                closePopover();
+                setIsDeleteModalOpen(true);
+              }}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
+              })}
+            >
+              {labels.delete}
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ],
-    [closePopover, conversationId, euiTheme.colors.danger, isUnread, markAsRead, markAsUnread]
+    [
+      canDelete,
+      canRename,
+      closePopover,
+      conversationId,
+      euiTheme.colors.danger,
+      isPinned,
+      isUnread,
+      markAsPinned,
+      markAsRead,
+      markAsUnpinned,
+      markAsUnread,
+    ]
   );
 
   const menuButton = (

@@ -6,14 +6,14 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { waitForApmAppMenuReady } from '../page_helpers';
 
 export class IndicesPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/apm-indices`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getErrorIndexInput() {
