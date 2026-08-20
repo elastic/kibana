@@ -30,11 +30,6 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
-/**
- * Outcome of one investigation run, reported by the API rather than derived in the browser.
- * `pending` also covers a terminal execution whose result is not persisted yet, so callers never
- * see a transient `failed` for a run that is about to succeed.
- */
 export type InvestigationRunStatus = 'pending' | 'complete' | 'failed';
 
 /**

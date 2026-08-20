@@ -247,7 +247,6 @@ function InvestigationFlyoutRow({
   );
 }
 
-/** Only a complete investigation can be opened, so the badge has a single state. */
 function InvestigationFlyoutBadge(): React.ReactElement {
   return (
     <GradientOutlinedStatusBadge

@@ -82,11 +82,6 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   } = useInvestigationState({
     http,
     workflowExecutionId: latestInvestigation?.workflow_execution_id,
-    /**
-     * A workflow that dies before its terminal step never stamps `completed_at`, so the event doc
-     * alone would report a dead run as running forever. Prefer the API's view of the execution and
-     * only fall back to the timestamp until it answers.
-     */
     isRunning:
       latestRunStatus != null
         ? latestRunStatus === 'pending'

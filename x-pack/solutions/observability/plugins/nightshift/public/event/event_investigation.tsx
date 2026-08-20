@@ -58,7 +58,6 @@ export function EventInvestigation({
     setIsFlyoutOpen(true);
   }, []);
 
-  // Only a completed run has a result worth opening in the flyout.
   const canOpenInvestigationFlyout =
     Boolean(investigation?.workflow_execution_id) && isInvestigationInvestigated(status);
 

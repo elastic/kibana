@@ -59,10 +59,6 @@ const recommendationChatTooltip = i18n.translate(
   }
 );
 
-/**
- * Short status wording for the card, which already sits under an "Investigation" heading. The
- * badges keep the long form because nothing else there names what the status refers to.
- */
 const getSummaryStatusLabel = (status: InvestigationStatus): string => {
   if (isInvestigationInvestigated(status)) {
     return getInvestigationCompleteStatusLabel();

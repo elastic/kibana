@@ -40,7 +40,6 @@ const getEventInvestigationRunStatus = (
 export interface SignificantEventListProps {
   title: string;
   events: SignificantEvent[];
-  /** Investigation outcomes from the API, keyed by workflow execution id. */
   investigationStatuses?: Record<string, InvestigationRunStatus>;
   selectedEventUuid?: string;
   statusColor: 'danger' | 'success';

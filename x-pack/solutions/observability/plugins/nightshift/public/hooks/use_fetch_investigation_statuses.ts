@@ -14,17 +14,10 @@ export const NIGHTSHIFT_INVESTIGATION_STATUSES_QUERY_KEY = [
   'nightshift.investigationStatuses',
 ] as const;
 
-/** Poll while any run is still pending, so a finishing investigation settles on its own. */
 const PENDING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
-/** Matches the `workflow_execution_ids` bound on the `investigations/_status` route. */
 const MAX_INVESTIGATION_STATUS_IDS = 1000;
 
-/**
- * Resolves the outcome of the given investigation runs from the API, keyed by workflow execution
- * id. Runs whose execution cannot be found or read are absent from the result, so an unknown run
- * is distinguishable from a failed one.
- */
 export const useFetchInvestigationStatuses = (
   workflowExecutionIds: string[]
 ): UseQueryResult<Record<string, InvestigationRunStatus>, Error> => {
@@ -32,7 +25,6 @@ export const useFetchInvestigationStatuses = (
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
 
-  // Sorted and de-duplicated so an unchanged set of runs keeps the same query key.
   const ids = useMemo(
     () =>
       [...new Set(workflowExecutionIds.filter(Boolean))]

@@ -21,10 +21,6 @@ export const resolveStatusFromExecution = (
     return 'pending';
   }
 
-  /**
-   * Retries and loops produce several step executions sharing one `stepId`, so the outcome is the
-   * last attempt's — an earlier failure that was retried successfully must not win.
-   */
   const stepExecution = (execution.stepExecutions ?? [])
     .filter((step) => step.stepId === INVESTIGATE_STEP_ID)
     .sort((a, b) => a.stepExecutionIndex - b.stepExecutionIndex)
@@ -43,19 +39,9 @@ export const resolveStatusFromExecution = (
     return 'failed';
   }
 
-  /**
-   * The execution completed but its structured output is not readable yet — the workflow engine
-   * flushes step output shortly after the agent stream ends. Reporting `failed` here would make a
-   * successful run briefly look broken, so it stays `pending` until the output lands.
-   */
   return 'pending';
 };
 
-/**
- * Resolves the outcome of each investigation run from its workflow execution, which is the source
- * of truth. Unknown or unreadable executions are omitted rather than reported as failures, so a
- * caller can tell "this run failed" apart from "I could not find out".
- */
 export const resolveInvestigationStatuses = async ({
   workflowsManagement,
   spaceId,

@@ -225,10 +225,6 @@ function InvestigationCompleteStatus({
   );
 }
 
-/**
- * Terminal-failure counterpart to {@link InvestigationCompleteStatus}; its cross is decorative
- * because the adjacent label already names the failure.
- */
 function InvestigationFailedStatus({
   label,
   testSubj,
