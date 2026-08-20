@@ -31,13 +31,26 @@ import { FeedbackModal } from './feedback_controls/feedback_modal';
 import { UpInvite } from './feedback_controls/up_invite';
 import { FeedbackSubmitted } from './feedback_controls/feedback_submitted';
 
+const copyLabels = {
+  response: {
+    action: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
+      defaultMessage: 'Copy response',
+    }),
+    success: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
+      defaultMessage: 'Response copied to clipboard',
+    }),
+  },
+  prompt: {
+    action: i18n.translate('xpack.agentBuilder.roundResponseActions.copyPrompt', {
+      defaultMessage: 'Copy prompt',
+    }),
+    success: i18n.translate('xpack.agentBuilder.roundResponseActions.copyPromptSuccess', {
+      defaultMessage: 'Prompt copied to clipboard',
+    }),
+  },
+} as const;
+
 const labels = {
-  copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
-    defaultMessage: 'Copy response',
-  }),
-  copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
-    defaultMessage: 'Response copied to clipboard',
-  }),
   regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
     defaultMessage: 'Regenerate response',
   }),
@@ -50,6 +63,8 @@ interface RoundResponseActionsProps {
   isVisible: boolean;
   isLastRound?: boolean;
   rawRound?: ConversationRound;
+  /** Which side of the round `content` comes from, so the copy wording matches it. */
+  copyTarget?: keyof typeof copyLabels;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
@@ -57,6 +72,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isVisible,
   isLastRound,
   rawRound,
+  copyTarget = 'response',
 }) => {
   const { euiTheme } = useEuiTheme();
   const { addSuccessToast } = useToasts();
@@ -66,12 +82,14 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const isTracingEnabled = useTracingEnabled();
   const agentId = useAgentId();
 
+  const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
+
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
     if (isSuccess) {
-      addSuccessToast(labels.copySuccess);
+      addSuccessToast(copySuccessLabel);
     }
-  }, [content, addSuccessToast]);
+  }, [content, addSuccessToast, copySuccessLabel]);
 
   const handleResend = useCallback(() => {
     regenerate();
@@ -148,10 +166,10 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={labels.copy} disableScreenReaderOutput>
+            <EuiToolTip content={copyLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="copy"
-                aria-label={labels.copy}
+                aria-label={copyLabel}
                 onClick={handleCopy}
                 color="text"
                 data-test-subj="roundResponseCopyButton"
