@@ -32,7 +32,6 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
   onOpenGridSettings: () => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export const useToolbarActions = ({
@@ -44,7 +43,6 @@ export const useToolbarActions = ({
   isLoading = false,
   metricItems,
   onOpenGridSettings,
-  onKeyDown,
 }: UseToolbarActionsProps) => {
   const {
     selectedDimensions,
@@ -62,7 +60,6 @@ export const useToolbarActions = ({
     value: searchTerm,
     isFullscreen,
     onSearchTermChange,
-    onKeyDown,
   });
 
   const isEditGridEnabled = useFeatureFlag(

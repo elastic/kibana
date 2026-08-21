@@ -42,7 +42,6 @@ const renderToolbarActionsHook = (externalServices?: ExternalServices) => {
         allDimensions: [],
         renderToggleActions: () => undefined,
         onOpenGridSettings: jest.fn(),
-        onKeyDown: jest.fn(),
       }),
     { wrapper }
   );

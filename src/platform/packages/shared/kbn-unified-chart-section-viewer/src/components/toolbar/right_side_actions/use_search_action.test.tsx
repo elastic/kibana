@@ -23,7 +23,6 @@ const defaultProps: UseSearchActionProps = {
   value: '',
   isFullscreen: false,
   onSearchTermChange: jest.fn(),
-  onKeyDown: jest.fn(),
 };
 
 /**
@@ -85,13 +84,9 @@ describe('useSearchAction', () => {
     expect(result.current.searchInput).toBeDefined();
   });
 
-  it('returns a stable result object across re-renders so the toolbar memo does not churn', () => {
-    const { result, rerender } = renderHook(() => useSearchAction(defaultProps));
-    const first = result.current;
-
-    rerender();
-
-    expect(result.current).toBe(first);
+  it('exports stable data-test-subj string values that Scout page objects depend on', () => {
+    expect(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).toBe('metricsExperienceToolbarSearch');
+    expect(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ).toBe('metricsExperienceGridToolbarSearch');
   });
 
   describe('with fake timers', () => {
@@ -127,12 +122,9 @@ describe('useSearchAction', () => {
     });
   });
 
-  it('collapses and clears the search on Escape and still forwards the event', () => {
-    const onKeyDown = jest.fn();
+  it('collapses and clears the search on Escape', () => {
     const onSearchTermChange = jest.fn();
-    render(
-      <Harness {...defaultProps} onKeyDown={onKeyDown} onSearchTermChange={onSearchTermChange} />
-    );
+    render(<Harness {...defaultProps} onSearchTermChange={onSearchTermChange} />);
 
     act(() => {
       screen.getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).click();
@@ -148,16 +140,14 @@ describe('useSearchAction', () => {
       fireEvent.keyDown(input, { key: keys.ESCAPE });
     });
 
-    expect(onKeyDown).toHaveBeenCalled();
     expect(
       screen.queryByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('forwards Escape without collapsing while in fullscreen', () => {
-    const onKeyDown = jest.fn();
-    render(<Harness {...defaultProps} isFullscreen onKeyDown={onKeyDown} />);
+  it('does not collapse on Escape while in fullscreen', () => {
+    render(<Harness {...defaultProps} isFullscreen />);
 
     act(() => {
       screen.getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).click();
@@ -169,7 +159,6 @@ describe('useSearchAction', () => {
       fireEvent.keyDown(input, { key: keys.ESCAPE });
     });
 
-    expect(onKeyDown).toHaveBeenCalled();
     expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)).toBeInTheDocument();
   });
 

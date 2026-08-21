@@ -153,7 +153,6 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
     onOpenGridSettings: toggleGridSettingsFlyout,
-    onKeyDown,
   });
 
   if (metricItems.length === 0 && isDiscoverLoading) {

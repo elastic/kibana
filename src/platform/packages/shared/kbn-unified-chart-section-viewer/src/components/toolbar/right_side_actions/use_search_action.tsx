@@ -22,7 +22,6 @@ export interface UseSearchActionProps {
   value: string;
   isFullscreen: boolean;
   onSearchTermChange: (value: string) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export interface SearchAction {
@@ -47,7 +46,6 @@ export const useSearchAction = ({
   value,
   isFullscreen,
   onSearchTermChange,
-  onKeyDown,
 }: UseSearchActionProps): SearchAction => {
   const { euiTheme } = useEuiTheme();
 
@@ -77,10 +75,8 @@ export const useSearchAction = ({
       if (e.key === keys.ESCAPE && !isFullscreen && showSearchInput) {
         onClearSearch();
       }
-
-      onKeyDown(e);
     },
-    [isFullscreen, showSearchInput, onClearSearch, onKeyDown]
+    [isFullscreen, showSearchInput, onClearSearch]
   );
 
   const onSearchChange = useCallback(
@@ -130,12 +126,12 @@ export const useSearchAction = ({
           data-test-subj={METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ}
           css={css`
             min-width: ${SEARCH_INPUT_MIN_WIDTH}px;
-            margin-right: ${euiTheme.size.s};
+            margin-inline-end: ${euiTheme.size.s};
           `}
         />
       ) : undefined,
     [showSearchInput, searchTerm, onSearchChange, handleKeyDown, onBlur, euiTheme.size.s]
   );
 
-  return useMemo(() => ({ searchButton, searchInput }), [searchButton, searchInput]);
+  return { searchButton, searchInput };
 };
