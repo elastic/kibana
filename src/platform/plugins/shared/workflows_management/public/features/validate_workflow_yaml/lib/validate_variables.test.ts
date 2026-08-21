@@ -132,7 +132,6 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
       }) // First variable is valid
       .mockReturnValueOnce({
         id: 'error-1',
@@ -169,7 +168,7 @@ describe('validateVariables', () => {
     expect(result[2].message).toBe('Variable anotherInvalidVar is invalid');
   });
 
-  it('should handle context schema errors', () => {
+  it('skips checks when the context schema is unavailable', () => {
     const variables = [
       createVariableItem({ key: 'var1', yamlPath: ['steps', 0, 'with', 'value'] }),
     ];
@@ -180,15 +179,7 @@ describe('validateVariables', () => {
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
-      message: 'Failed to get context schema for path',
-      severity: 'error',
-      owner: 'variable-validation',
-      ruleId: 'contextSchemaUnavailable',
-      hoverMessage: null,
-      key: 'var1',
-    });
+    expect(result).toEqual([]);
     expect(mockValidateVariable).not.toHaveBeenCalled();
   });
 
@@ -221,7 +212,6 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
       })
       .mockReturnValueOnce({
         id: 'error-1',
@@ -247,7 +237,6 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
       })
       .mockReturnValueOnce({
         id: 'error-2',
@@ -265,14 +254,12 @@ describe('validateVariables', () => {
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
 
-    expect(result).toHaveLength(5);
+    expect(result).toHaveLength(4);
     expect(result[0].message).toBe(null);
     expect(result[1].message).toBe('Variable invalid1 is invalid');
     expect(result[2].message).toBe(null);
-    expect(result[3].message).toBe('Failed to get context schema for path');
-    expect(result[3].severity).toBe('error');
-    expect(result[4].message).toBe('Variable invalid2 is invalid');
-    expect(result[4].severity).toBe('warning');
+    expect(result[3].message).toBe('Variable invalid2 is invalid');
+    expect(result[3].severity).toBe('warning');
   });
 
   it('should handle empty variable list', () => {
@@ -396,7 +383,6 @@ describe('validateVariables', () => {
       message: null,
       severity: null,
       owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
       hoverMessage: null,
     });
 

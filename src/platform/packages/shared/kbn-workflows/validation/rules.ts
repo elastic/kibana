@@ -88,12 +88,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { propertyPath: string };
   };
-  /** The context schema needed to check this variable was unavailable. */
-  contextSchemaUnavailable: {
-    owner: 'variable-validation';
-    defaultSeverity: 'error';
-    values: Record<string, never>;
-  };
   /** A `{% for %}` collection path that does not resolve to something iterable. */
   invalidCollectionPath: {
     owner: 'variable-validation';
@@ -112,13 +106,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { reason: string };
   };
-  /** The variable resolved cleanly. Carries hover information, not a problem. */
-  variableResolved: {
-    owner: 'variable-validation';
-    defaultSeverity: 'info';
-    values: { description: string };
-  };
-
   // -- liquid templates ---------------------------------------------------------
   liquidSyntaxError: {
     owner: 'liquid-template-validation';
@@ -139,37 +126,17 @@ export interface WorkflowValidationRules {
   };
 
   // -- connectors ---------------------------------------------------------------
-  /** The dynamic connector type list could not be loaded. */
-  dynamicConnectorTypesUnavailable: {
-    owner: 'connector-id-validation';
-    defaultSeverity: 'error';
-    values: Record<string, never>;
-  };
   connectorNotFound: {
     owner: 'connector-id-validation';
     defaultSeverity: 'error';
     values: { displayName: string; id: string };
   };
-  /** The connector ID resolved. Carries hover information, not a problem. */
-  connectorResolved: {
-    owner: 'connector-id-validation';
-    defaultSeverity: 'info';
-    values: { displayName: string; name: string };
-  };
-
   // -- step properties ----------------------------------------------------------
   invalidStepProperty: {
     owner: 'step-property-validation';
     defaultSeverity: 'error';
     values: { reason: string };
   };
-  /** A step property resolved cleanly. */
-  stepPropertyResolved: {
-    owner: 'step-property-validation';
-    defaultSeverity: 'info';
-    values: Record<string, never>;
-  };
-
   // -- workflow inputs ----------------------------------------------------------
   /** An input key the target workflow does not declare. */
   unknownInputKey: {
@@ -321,25 +288,17 @@ export const WORKFLOW_VALIDATION_RULES: {
   variablePathParseError: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidVariableReference: { owner: 'variable-validation', defaultSeverity: 'error' },
   unknownVariableType: { owner: 'variable-validation', defaultSeverity: 'warning' },
-  contextSchemaUnavailable: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidCollectionPath: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidForeachParameter: { owner: 'variable-validation', defaultSeverity: 'warning' },
   validationRunFailed: { owner: 'variable-validation', defaultSeverity: 'error' },
-  variableResolved: { owner: 'variable-validation', defaultSeverity: 'info' },
 
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
   liquidTemplateDiagnostic: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
   liquidUnexpectedError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
 
-  dynamicConnectorTypesUnavailable: {
-    owner: 'connector-id-validation',
-    defaultSeverity: 'error',
-  },
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
-  connectorResolved: { owner: 'connector-id-validation', defaultSeverity: 'info' },
 
   invalidStepProperty: { owner: 'step-property-validation', defaultSeverity: 'error' },
-  stepPropertyResolved: { owner: 'step-property-validation', defaultSeverity: 'info' },
 
   unknownInputKey: { owner: 'workflow-inputs-validation', defaultSeverity: 'warning' },
   invalidInputType: { owner: 'workflow-inputs-validation', defaultSeverity: 'error' },

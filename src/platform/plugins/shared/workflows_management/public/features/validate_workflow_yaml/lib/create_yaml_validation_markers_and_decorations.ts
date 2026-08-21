@@ -48,7 +48,7 @@ export function createMarkersAndDecorations(
       endColumn: validationResult.endColumn,
     };
     if (validationResult.owner === 'variable-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
@@ -118,11 +118,11 @@ export function createMarkersAndDecorations(
         },
       });
     } else if (validationResult.owner === 'connector-id-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message ?? '',
+          message: validationResult.message,
           source: 'connector-id-validation',
         });
       }
@@ -131,7 +131,7 @@ export function createMarkersAndDecorations(
         options: createSelectionDecoration(validationResult),
       });
     } else if (validationResult.owner === 'step-property-validation') {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
@@ -161,7 +161,7 @@ export function createMarkersAndDecorations(
         },
       });
     } else {
-      if (validationResult.severity !== null) {
+      if (validationResult.message !== null) {
         pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],

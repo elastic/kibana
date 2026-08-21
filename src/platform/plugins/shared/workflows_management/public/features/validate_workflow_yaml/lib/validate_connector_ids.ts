@@ -45,21 +45,7 @@ export function validateConnectorIds(
   const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
-    const errorResult: YamlValidationResult = {
-      id: 'connector-id-validation',
-      severity: 'error',
-      message: 'Dynamic connector types not found',
-      owner: 'connector-id-validation',
-      ruleId: 'dynamicConnectorTypesUnavailable',
-      startLineNumber: 0,
-      startColumn: 0,
-      endLineNumber: 0,
-      endColumn: 0,
-      afterMessage: null,
-      beforeMessage: null,
-      hoverMessage: null,
-    };
-    return [errorResult];
+    return results;
   }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
@@ -149,7 +135,6 @@ export function validateConnectorIds(
         severity: 'info',
         message: null,
         owner: 'connector-id-validation',
-        ruleId: 'connectorResolved',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,

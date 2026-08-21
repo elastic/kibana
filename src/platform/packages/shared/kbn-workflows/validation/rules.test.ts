@@ -16,11 +16,8 @@ describe('workflow validation rules registry', () => {
     expect(WORKFLOW_VALIDATION_RULE_IDS).toMatchInlineSnapshot(`
       Array [
         "connectorNotFound",
-        "connectorResolved",
-        "contextSchemaUnavailable",
         "deprecatedStepType",
         "duplicateStepName",
-        "dynamicConnectorTypesUnavailable",
         "esqlDiagnostic",
         "foreachItemRuntimeType",
         "graphBuildError",
@@ -45,7 +42,6 @@ describe('workflow validation rules registry', () => {
         "missingRequiredInput",
         "parallelFanOutExceedsLimit",
         "schemaViolation",
-        "stepPropertyResolved",
         "targetWorkflowNotFound",
         "unboundedParallelFanOut",
         "undefinedVariable",
@@ -53,7 +49,6 @@ describe('workflow validation rules registry', () => {
         "unknownVariableType",
         "validationRunFailed",
         "variablePathParseError",
-        "variableResolved",
         "variableUncheckableInvalidSchema",
         "yamlSyntaxError",
       ]

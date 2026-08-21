@@ -66,26 +66,12 @@ describe('validateConnectorIds', () => {
   });
 
   describe('when dynamicConnectorTypes is null', () => {
-    it('should return error indicating dynamic connector types not found', () => {
+    it('skips checks that depend on dynamic connector types', () => {
       const connectorIdItems: ConnectorIdItem[] = [createConnectorIdItem()];
 
       const results = validateConnectorIds(connectorIdItems, null, '');
 
-      expect(results).toHaveLength(1);
-      expect(results[0]).toMatchObject({
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        ruleId: 'dynamicConnectorTypesUnavailable',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        beforeMessage: null,
-        hoverMessage: null,
-      });
+      expect(results).toEqual([]);
     });
   });
 
@@ -106,7 +92,6 @@ describe('validateConnectorIds', () => {
         severity: 'info',
         message: null,
         owner: 'connector-id-validation',
-        ruleId: 'connectorResolved',
         startLineNumber: 5,
         startColumn: 10,
         endLineNumber: 5,
@@ -115,6 +100,7 @@ describe('validateConnectorIds', () => {
       });
       expect(results[0].hoverMessage).toBeDefined();
       expect(typeof results[0].hoverMessage).toBe('string');
+      expect(results[0]).not.toHaveProperty('ruleId');
     });
   });
 

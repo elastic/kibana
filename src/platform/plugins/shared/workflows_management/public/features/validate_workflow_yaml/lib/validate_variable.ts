@@ -67,7 +67,6 @@ export function validateVariable(
         message: null,
         severity: null,
         owner: 'variable-validation',
-        ruleId: 'variableResolved',
         hoverMessage: getVariableHoverMessage(key, itemSchema),
       };
     } catch (error) {
@@ -137,7 +136,7 @@ export function validateVariable(
       message: refSchema.description,
       severity: 'warning',
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
+      ruleId: 'unknownVariableType',
       hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
@@ -158,7 +157,6 @@ export function validateVariable(
     message: null,
     severity: null,
     owner: 'variable-validation',
-    ruleId: 'variableResolved',
     hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
   };
 }

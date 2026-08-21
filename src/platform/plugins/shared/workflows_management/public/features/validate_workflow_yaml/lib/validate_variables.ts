@@ -114,15 +114,8 @@ export function validateVariables(
       if (error) {
         errors.push(error);
       }
-    } catch (e) {
-      errors.push({
-        ...variableItem,
-        message: 'Failed to get context schema for path',
-        severity: 'error',
-        owner: 'variable-validation',
-        ruleId: 'contextSchemaUnavailable',
-        hoverMessage: null,
-      });
+    } catch {
+      // Context schema construction is a prerequisite for these checks.
     }
   }
 

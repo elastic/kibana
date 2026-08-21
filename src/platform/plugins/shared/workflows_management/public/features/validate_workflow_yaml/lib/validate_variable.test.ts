@@ -221,7 +221,7 @@ describe('validateVariable', () => {
       message: 'This variable comes from external source',
       severity: 'warning',
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
+      ruleId: 'unknownVariableType',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -259,9 +259,9 @@ describe('validateVariable', () => {
       message: null,
       severity: null,
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
       hoverMessage: expect.stringContaining('(property) test.variable:'),
     });
+    expect(result).not.toHaveProperty('ruleId');
   });
 
   it('should handle complex nested paths', () => {
@@ -281,7 +281,6 @@ describe('validateVariable', () => {
       message: null,
       severity: null,
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
       hoverMessage: expect.stringContaining('(property) response.data.items[0].name:'),
     });
   });
@@ -308,7 +307,6 @@ describe('validateVariable', () => {
       message: null,
       severity: null,
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
       hoverMessage: expect.stringContaining('(property) inputs.days_to_plan:'),
     });
   });
@@ -334,7 +332,6 @@ describe('validateVariable', () => {
       message: null,
       severity: null,
       owner: 'variable-validation',
-      ruleId: 'variableResolved',
       hoverMessage: expect.stringContaining('(property) inputs.items:'),
     });
   });
