@@ -49,11 +49,13 @@ const miService = {
 const awsServicesMapWithMI = new Map([['guardduty', miService]]);
 const awsServicesMapEmpty = new Map();
 
-function makeDeployReturn(overrides: {
-  handleDeploy?: jest.Mock;
-  isDeploying?: boolean;
-  failedInstances?: string[];
-} = {}) {
+function makeDeployReturn(
+  overrides: {
+    handleDeploy?: jest.Mock;
+    isDeploying?: boolean;
+    failedInstances?: string[];
+  } = {}
+) {
   return {
     handleDeploy: overrides.handleDeploy ?? jest.fn(),
     isDeploying: overrides.isDeploying ?? false,
@@ -81,13 +83,11 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
-    MockManagedIntegrationsSection.mockImplementation(
-      ({ onDeploy }: { onDeploy: () => void }) => (
-        <button data-test-subj="mock-deploy-btn" onClick={onDeploy}>
-          Deploy
-        </button>
-      )
-    );
+    MockManagedIntegrationsSection.mockImplementation(({ onDeploy }: { onDeploy: () => void }) => (
+      <button data-test-subj="mock-deploy-btn" onClick={onDeploy}>
+        Deploy
+      </button>
+    ));
   });
 
   describe('Next button gating — MI services present', () => {
