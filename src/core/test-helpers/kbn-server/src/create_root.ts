@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import { join } from 'path';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -324,10 +325,31 @@ export function createTestServers({
     writeTo: process.stdout,
   });
 
+  // On CI, capture the raw Elasticsearch stdout/stderr to a file under
+  // target/test_failures (uploaded on failure) so integration-test failures that
+  // stem from ES startup/crash can be diagnosed. Jest integration otherwise ships
+  // no ES log artifact. See https://github.com/elastic/kibana/issues/256786.
+  // Best-effort: if the directory can't be created, fall back to the default
+  // ToolingLog forwarding. Callers can still override via `settings.es`.
+  let defaultEsLogsPath: string | undefined;
+  if (process.env.CI) {
+    try {
+      const testFailuresDir = join(REPO_ROOT, 'target', 'test_failures');
+      Fs.mkdirSync(testFailuresDir, { recursive: true });
+      defaultEsLogsPath = join(
+        testFailuresDir,
+        `es_jest_integration_${process.pid}_${Date.now()}.log`
+      );
+    } catch (e) {
+      defaultEsLogsPath = undefined;
+    }
+  }
+
   const es = createTestEsCluster(
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
+      ...(defaultEsLogsPath ? { writeLogsToPath: defaultEsLogsPath } : {}),
     })
   );
 
