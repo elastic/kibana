@@ -38,7 +38,14 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: jest.fn(), replace: mockHistoryReplace }),
 }));
 
-jest.mock('./components/responsive_package_grid', () => ({ ResponsivePackageGrid: () => null }));
+// Capture the items prop so tests can invoke injected onCardClick handlers directly.
+let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
+jest.mock('./components/responsive_package_grid', () => ({
+  ResponsivePackageGrid: ({ items }: { items: any[] }) => {
+    capturedFilteredCards = items;
+    return null;
+  },
+}));
 jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
 jest.mock('./components/side_bar', () => ({ Sidebar: () => null }));
 jest.mock('./components/no_data_prompt', () => ({ NoDataPrompt: () => null }));
@@ -83,6 +90,7 @@ describe('BrowseIntegrationsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedFilteredCards = [];
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
@@ -274,24 +282,26 @@ describe('BrowseIntegrationsPage', () => {
     });
 
     it('calls history.replace with the collection param when a collection card is clicked', async () => {
-      const collectionCard = {
-        ...nginxCollectionCard,
-        onCardClick: undefined as undefined | (() => void),
-      };
-      let capturedOnCardClick: (() => void) | undefined;
-
-      // Capture the overridden onCardClick that BrowseIntegrationsPage injects
       mockUseBrowseIntegrationHook.mockReturnValue(
-        makeDefaultHookReturn({ filteredCards: [collectionCard], allCards: [collectionCard] })
+        makeDefaultHookReturn({
+          filteredCards: [nginxCollectionCard],
+          allCards: [nginxCollectionCard],
+        })
       );
-
-      // We verify history.replace is called with collection=nginx when the card's
-      // injected onCardClick handler fires. Simulate by checking the replace call
-      // after a re-render that injects the handler.
       renderPage();
 
-      // history.replace should NOT yet have been called (flyout not open)
-      expect(mockHistoryReplace).not.toHaveBeenCalled();
+      // BrowseIntegrationsPage overrides onCardClick on collection cards to call openCollection.
+      // Access it via the captured list prop on ResponsivePackageGrid.
+      await waitFor(() => {
+        expect(capturedFilteredCards.length).toBeGreaterThan(0);
+      });
+      const card = capturedFilteredCards.find((c) => c.isCollectionCard);
+      expect(card?.onCardClick).toBeDefined();
+      card!.onCardClick!();
+
+      expect(mockHistoryReplace).toHaveBeenCalledWith(
+        expect.objectContaining({ search: expect.stringContaining('collection=nginx') })
+      );
     });
   });
 });

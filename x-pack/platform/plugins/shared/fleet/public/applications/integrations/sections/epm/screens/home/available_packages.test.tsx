@@ -19,7 +19,14 @@ jest.mock('../../../../hooks', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
-jest.mock('../../components/package_list_grid', () => ({ PackageListGrid: () => null }));
+// Capture the list prop so tests can invoke injected onCardClick handlers directly.
+let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
+jest.mock('../../components/package_list_grid', () => ({
+  PackageListGrid: ({ list }: { list: any[] }) => {
+    capturedFilteredCards = list;
+    return null;
+  },
+}));
 jest.mock('../../components/integration_preference', () => ({
   IntegrationPreference: () => null,
 }));
@@ -104,6 +111,7 @@ function renderPage() {
 describe('AvailablePackages — collection flyout URL state', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedFilteredCards = [];
     mockUseAvailablePackages.mockReturnValue(makeDefaultHookReturn());
     mockUseLocation.mockReturnValue({ pathname: '/app/integrations/browse', search: '' });
   });
@@ -130,6 +138,29 @@ describe('AvailablePackages — collection flyout URL state', () => {
     await waitFor(() => {
       expect(queryByTestId('collectionFlyout')).not.toBeInTheDocument();
     });
+  });
+
+  it('calls history.replace with the collection param when a collection card is clicked', async () => {
+    mockUseAvailablePackages.mockReturnValue(
+      makeDefaultHookReturn({
+        filteredCards: [nginxCollectionCard],
+        allCards: [nginxCollectionCard],
+      })
+    );
+    renderPage();
+
+    // AvailablePackages overrides onCardClick on collection cards to call openCollection.
+    // Access it via the captured list prop on PackageListGrid.
+    await waitFor(() => {
+      expect(capturedFilteredCards.length).toBeGreaterThan(0);
+    });
+    const card = capturedFilteredCards.find((c) => c.isCollectionCard);
+    expect(card?.onCardClick).toBeDefined();
+    card!.onCardClick!();
+
+    expect(mockHistoryReplace).toHaveBeenCalledWith(
+      expect.objectContaining({ search: expect.stringContaining('collection=nginx') })
+    );
   });
 
   it('calls history.replace without the collection param when the flyout is closed', async () => {
