@@ -13,7 +13,7 @@ spaceTest.describe(
   'GenAI Settings - Page Display',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.search,

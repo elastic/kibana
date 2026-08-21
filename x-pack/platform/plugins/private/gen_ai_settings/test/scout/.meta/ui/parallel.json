@@ -7,6 +7,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -24,6 +25,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -41,6 +43,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -60,6 +63,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -91,6 +95,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -108,6 +113,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -127,6 +133,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -146,6 +153,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-observability_complete",
@@ -164,11 +172,12 @@
       "title": "GenAI Settings - Selection Modal without Agent Builder Privileges AI Agent card selection modal is disabled without Agent Builder privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_ab_privilege.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 14
       }
     },
@@ -177,11 +186,12 @@
       "title": "GenAI Settings - Selection Modal without AI Assistants Privileges AI Assistant cards should be disabled without AI Assistants privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_assistant_privilege.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 14
       }
     },
