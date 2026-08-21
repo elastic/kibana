@@ -94,6 +94,7 @@ export const mergeSignalsLatestPerRule = (
       : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
   );
 
+/** Unions stream names and topology across prior episode documents and the submitted payload. */
 export const mergeEpisodeContext = (
   priorDocs: EpisodeContextSource[],
   submitted: Omit<EpisodeContextSource, '@timestamp'> & {

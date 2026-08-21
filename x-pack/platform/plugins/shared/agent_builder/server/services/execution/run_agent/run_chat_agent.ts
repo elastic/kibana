@@ -62,6 +62,7 @@ import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
+import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
 
@@ -122,6 +123,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     todoStateManager,
     renderers,
+    conversationClient,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -143,6 +145,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     subAgentExecutor: context.subAgentExecutor,
     initialState: conversation?.state?.background_executions,
   });
+
+  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -271,6 +275,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationTemplate,
     filteredSkills,
     relevantSkillsEnabled,
+    parentConversationId: conversation?.id,
+    subagentTracker,
+    conversationExists: (id: string) => conversationClient.exists(id),
   });
 
   // Then add dynamic tools
@@ -325,6 +332,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     template_id: conversation?.template_id,
   };
+  processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
   if (relevantSkillsEnabled) {
@@ -364,6 +372,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     promptFactory,
     backgroundExecutionService,
+    subagentTracker,
     roundId,
     sessionId: conversation?.id ?? executionId,
     cacheControl: { type: 'ephemeral', ttl: '5m' },
@@ -432,6 +441,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
           todoStateManager,
+          subagents: subagentTracker.snapshot(),
         }),
       pendingRound,
       startTime,
@@ -476,12 +486,14 @@ const getConversationState = ({
   backgroundExecutionService,
   compactionSummary,
   todoStateManager,
+  subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
+  subagents?: Record<string, string>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
@@ -491,6 +503,7 @@ const getConversationState = ({
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(todos !== undefined ? { todos } : {}),
+    ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
 };
 
