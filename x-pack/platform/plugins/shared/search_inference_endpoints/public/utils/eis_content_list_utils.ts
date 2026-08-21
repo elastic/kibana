@@ -55,14 +55,8 @@ export const toGroupedModel = (item: ContentListItem): GroupedModel =>
 export const getItemModelId = (item: ContentListItem): string | undefined =>
   (item as EisContentListItem).modelId;
 
-const getIncludeExclude = (
-  value: ActiveFilters[string]
-): Required<IncludeExcludeFilter> => {
-  if (
-    !value ||
-    typeof value !== 'object' ||
-    (!('include' in value) && !('exclude' in value))
-  ) {
+const getIncludeExclude = (value: ActiveFilters[string]): Required<IncludeExcludeFilter> => {
+  if (!value || typeof value !== 'object' || (!('include' in value) && !('exclude' in value))) {
     return { include: [], exclude: [] };
   }
 
@@ -91,9 +85,7 @@ export const createEisFindItems =
   async ({ searchQuery, filters, sort }) => {
     const providerFilter = getIncludeExclude(filters[EIS_PROVIDER_FILTER_ID]);
     const categoryFilter = getIncludeExclude(filters[EIS_CATEGORY_FILTER_ID]);
-    const selectedTaskTypes = new Set(
-      categoryFilter.include as TaskTypeCategory[]
-    );
+    const selectedTaskTypes = new Set(categoryFilter.include as TaskTypeCategory[]);
 
     const matched = sortModels(
       filterGroupedModels(models, {

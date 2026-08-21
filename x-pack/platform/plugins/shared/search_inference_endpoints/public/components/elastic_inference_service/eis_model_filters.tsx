@@ -16,10 +16,7 @@ import {
   useFieldQueryFilter,
 } from '@kbn/content-list-toolbar';
 import { TASK_TYPE_FILTERS } from '../../utils/eis_utils';
-import {
-  EIS_CATEGORY_FILTER_ID,
-  EIS_PROVIDER_FILTER_ID,
-} from '../../utils/eis_content_list_utils';
+import { EIS_CATEGORY_FILTER_ID, EIS_PROVIDER_FILTER_ID } from '../../utils/eis_content_list_utils';
 
 interface FilterControlProps {
   query?: Query;
