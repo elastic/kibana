@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import {
   useAiButtonGradientStyles,
@@ -19,9 +19,37 @@ import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
 import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
 import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
 import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
+import { ADD_TO_CHAT_LABEL } from './constants';
 
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
+
+const usesAddToChatLabel = (iconType?: AiButtonIconType): boolean => iconType === 'addToChat';
+
+const resolveButtonLabel = (
+  iconType: AiButtonIconType | undefined,
+  children: React.ReactNode
+): React.ReactNode => (usesAddToChatLabel(iconType) ? ADD_TO_CHAT_LABEL : children);
+
+const resolveIconOnlyTooltipContent = ({
+  iconType,
+  ariaLabel,
+  toolTipContent,
+}: {
+  iconType: AiButtonIconType;
+  ariaLabel: string;
+  toolTipContent?: React.ReactNode;
+}): React.ReactNode => {
+  if (usesAddToChatLabel(iconType)) {
+    return ADD_TO_CHAT_LABEL;
+  }
+
+  if (toolTipContent != null) {
+    return toolTipContent;
+  }
+
+  return ariaLabel;
+};
 
 // Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: 'xs' | 's' | 'm') => (size === 'xs' ? 's' : 'm');
@@ -76,21 +104,35 @@ export const AiButtonBase = (props: AiButtonProps) => {
       display: _display,
       iconOnly: _iconOnly,
       variant: _variant,
+      withToolTip,
+      toolTipContent,
+      'aria-label': ariaLabel,
       ...rest
     } = props;
 
     const filtered = filterForButtonOrAnchor(rest, !!rest.href);
     const iconProps = {
       ...filtered,
+      'aria-label': ariaLabel,
       iconType: resolvedIconType(iconType),
       iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
       css: [buttonCss, iconGradientCss, userCss],
     };
 
+    const iconButton = <EuiButtonIcon {...iconProps} />;
+
     return (
       <>
         {svgGradientDefs}
-        <EuiButtonIcon {...iconProps} />
+        {withToolTip === true ? (
+          <EuiToolTip
+            content={resolveIconOnlyTooltipContent({ iconType, ariaLabel, toolTipContent })}
+          >
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
       </>
     );
   }
@@ -111,7 +153,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
       iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
       iconType: iconType ? resolvedIconType(iconType) : undefined,
       css: [buttonCss, iconGradientCss, userCss],
-      children: <span css={labelCss}>{children}</span>,
+      children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
     };
     return (
       <>
@@ -140,7 +182,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
     iconType: iconType ? resolvedIconType(iconType) : undefined,
     css: [buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss],
     fill: variant === 'accent',
-    children: <span css={labelCss}>{children}</span>,
+    children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
   };
 
   return (

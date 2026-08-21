@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "1",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -80,7 +80,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -154,7 +154,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -193,7 +193,7 @@
   "type": "doc",
   "value": {
     "id": "6",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -232,7 +232,7 @@
   "type": "doc",
   "value": {
     "id": "7",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -271,7 +271,7 @@
   "type": "doc",
   "value": {
     "id": "8",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -306,7 +306,7 @@
   "type": "doc",
   "value": {
     "id": "9",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -341,7 +341,7 @@
   "type": "doc",
   "value": {
     "id": "10",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -376,7 +376,7 @@
   "type": "doc",
   "value": {
     "id": "11",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -415,7 +415,7 @@
   "type": "doc",
   "value": {
     "id": "12",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -452,7 +452,7 @@
   "type": "doc",
   "value": {
     "id": "13",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -489,7 +489,7 @@
   "type": "doc",
   "value": {
     "id": "14",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -536,7 +536,7 @@
   "type": "doc",
   "value": {
     "id": "15",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -575,7 +575,7 @@
   "type": "doc",
   "value": {
     "id": "16",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -614,7 +614,7 @@
   "type": "doc",
   "value": {
     "id": "17",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -653,7 +653,7 @@
   "type": "doc",
   "value": {
     "id": "18",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -710,7 +710,7 @@
   "type": "doc",
   "value": {
     "id": "19",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -753,7 +753,7 @@
   "type": "doc",
   "value": {
     "id": "20",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -796,7 +796,7 @@
   "type": "doc",
   "value": {
     "id": "21",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -839,7 +839,7 @@
   "type": "doc",
   "value": {
     "id": "22",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -890,7 +890,7 @@
   "type": "doc",
   "value": {
     "id": "23",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -933,7 +933,7 @@
   "type": "doc",
   "value": {
     "id": "24",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -981,7 +981,7 @@
   "type": "doc",
   "value": {
     "id": "25",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1029,7 +1029,7 @@
   "type": "doc",
   "value": {
     "id": "26",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1076,7 +1076,7 @@
   "type": "doc",
   "value": {
     "id": "27",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1133,7 +1133,7 @@
   "type": "doc",
   "value": {
     "id": "28",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1168,7 +1168,7 @@
   "type": "doc",
   "value": {
     "id": "29",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1203,7 +1203,7 @@
   "type": "doc",
   "value": {
     "id": "30",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1238,7 +1238,7 @@
   "type": "doc",
   "value": {
     "id": "31",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1273,7 +1273,7 @@
   "type": "doc",
   "value": {
     "id": "32",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1311,7 +1311,7 @@
   "type": "doc",
   "value": {
     "id": "33",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1349,7 +1349,7 @@
   "type": "doc",
   "value": {
     "id": "34",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1388,7 +1388,7 @@
   "type": "doc",
   "value": {
     "id": "rel-hierarchy-external-caller",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1434,7 +1434,7 @@
   "type": "doc",
   "value": {
     "id": "35",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1474,7 +1474,7 @@
   "type": "doc",
   "value": {
     "id": "36",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1514,7 +1514,7 @@
   "type": "doc",
   "value": {
     "id": "37",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1553,7 +1553,7 @@
   "type": "doc",
   "value": {
     "id": "38",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1600,7 +1600,7 @@
   "type": "doc",
   "value": {
     "id": "39",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1632,6 +1632,425 @@
         "ip": ["10.0.1.100", "::1", "127.0.0.1"],
         "name": "Target Host with multiple ips"
       }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "40",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-actor-1",
+        "name": "over-split-actor-1",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:over-split-target"]
+          }
+        },
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-actor-1", "ip": ["10.0.1.1"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "41",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-actor-2",
+        "name": "over-split-actor-2",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:over-split-target"]
+          }
+        },
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-actor-2", "ip": ["10.0.1.2"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "42",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-target",
+        "name": "over-split-target",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-target", "ip": ["10.0.1.9"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "43",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:origin-pinned-server",
+        "name": "Origin Pinned Server",
+        "source": "manual",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Linux Server",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:relationship-target-server"]
+          }
+        }
+      },
+      "host": { "name": "origin-pinned-server", "id": "pinned-hw-uuid-1", "ip": ["10.0.2.1"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "44",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:grouped-actor-server-1",
+        "name": "Grouped Actor Server 1",
+        "source": "manual",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Linux Server",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:relationship-target-server"]
+          }
+        }
+      },
+      "host": { "name": "grouped-actor-server-1", "id": "pinned-hw-uuid-2", "ip": ["10.0.2.2"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "45",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:grouped-actor-server-2",
+        "name": "Grouped Actor Server 2",
+        "source": "manual",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Linux Server",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:relationship-target-server"]
+          }
+        }
+      },
+      "host": { "name": "grouped-actor-server-2", "id": "pinned-hw-uuid-3", "ip": ["10.0.2.3"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "46",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:relationship-target-server",
+        "name": "Relationship Target Server",
+        "source": "manual",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Linux Server"
+      },
+      "host": { "name": "relationship-target-server", "id": "pinned-hw-uuid-4", "ip": ["10.0.2.4"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "47",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:different-subtype-actor-server",
+        "name": "Different Subtype Actor Server",
+        "source": "manual",
+        "sub_type": "GCP Compute Instance",
+        "type": "Linux Server",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:relationship-target-server"]
+          }
+        }
+      },
+      "host": { "name": "different-subtype-actor-server", "id": "pinned-hw-uuid-5", "ip": ["10.0.2.5"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unrelated-rel-my-server-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:my-server-1",
+        "name": "my-server-1",
+        "source": "manual",
+        "sub_type": "Linux Host",
+        "type": "Host",
+        "relationships": {
+          "resolution": {
+            "resolved_to": ["host:my-server-2"]
+          }
+        }
+      },
+      "host": { "name": "my-server-1", "id": "some-hw-uuid", "ip": ["10.0.1.42"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unrelated-rel-my-server-2",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:my-server-2",
+        "name": "my-server-2",
+        "source": "manual",
+        "sub_type": "Linux Host",
+        "type": "Host"
+      },
+      "host": { "name": "my-server-2", "id": "some-hw-uuid", "ip": ["10.0.1.42"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unrelated-rel-my-server-3",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:my-server-3",
+        "name": "my-server-3",
+        "source": "manual",
+        "sub_type": "Linux Host",
+        "type": "Host",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:my-server-2", "host:my-server-5"]
+          },
+          "resolution": {
+            "resolved_to": ["host:my-server-4"]
+          }
+        }
+      },
+      "host": { "name": "my-server-3", "id": "some-hw-uuid", "ip": ["10.0.1.42"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unrelated-rel-my-server-4",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:my-server-4",
+        "name": "my-server-4",
+        "source": "manual",
+        "sub_type": "Linux Host",
+        "type": "Host"
+      },
+      "host": { "name": "my-server-4", "id": "some-hw-uuid", "ip": ["10.0.1.42"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "unrelated-rel-my-server-5",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "host" },
+        "id": "host:my-server-5",
+        "name": "my-server-5",
+        "source": "manual",
+        "sub_type": "Linux Host",
+        "type": "Host"
+      },
+      "host": { "name": "my-server-5", "id": "some-hw-uuid", "ip": ["10.0.1.42"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-actor-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "user" },
+        "id": "user:multi-actor-1@example.com@gcp",
+        "name": "MultiActor1",
+        "source": "manual",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "user": { "id": "multi-actor-1@example.com", "name": "MultiActor1" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-actor-2",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "user" },
+        "id": "user:multi-actor-2@example.com@gcp",
+        "name": "MultiActor2",
+        "source": "manual",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "user": { "id": "multi-actor-2@example.com", "name": "MultiActor2" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-service-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "service" },
+        "id": "service:TargetMultiService1",
+        "name": "TargetMultiService1",
+        "source": "manual",
+        "sub_type": "GCP Service Account",
+        "type": "Service"
+      },
+      "service": { "name": "TargetMultiService1" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-bucket-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "generic" },
+        "id": "projects/your-project-id/buckets/target-bucket-1",
+        "name": "TargetBucket1",
+        "source": "manual",
+        "sub_type": "GCP Storage Bucket",
+        "type": "Storage"
+      },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-bucket-2",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "generic" },
+        "id": "projects/your-project-id/buckets/target-bucket-2",
+        "name": "TargetBucket2",
+        "source": "manual",
+        "sub_type": "GCP Storage Bucket",
+        "type": "Storage"
+      },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
     }
   }
 }

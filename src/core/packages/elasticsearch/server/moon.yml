@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/es-errors'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/config-schema'
 tags:
   - shared-server

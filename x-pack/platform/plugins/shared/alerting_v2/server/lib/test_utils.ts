@@ -24,6 +24,7 @@ import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
 import type { RuleSavedObjectAttributes } from '../saved_objects';
+import { createLoggerService } from './services/logger_service/logger_service.mock';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -49,25 +50,27 @@ export function createMockLogger(): jest.Mocked<Logger> {
 /**
  * Creates a standard RuleResponse for testing.
  */
-export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse {
+export function createRuleResponse(
+  overrides: Partial<Omit<RuleResponse, 'metadata'>> & {
+    metadata?: Partial<RuleResponse['metadata']>;
+  } = {}
+): RuleResponse {
+  const { metadata, ...rest } = overrides;
   return {
     id: 'rule-1',
     kind: 'alert',
-    metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
-    createdBy: 'elastic_profile_uid',
-    createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic_profile_uid',
-    updatedAt: '2025-01-01T00:00:00.000Z',
-    ...overrides,
+    created_by: 'elastic_profile_uid',
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_by: 'elastic_profile_uid',
+    updated_at: '2025-01-01T00:00:00.000Z',
+    ...rest,
+    metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
   };
 }
 
@@ -82,11 +85,8 @@ export function createRuleSoAttributes(
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
     createdBy: 'elastic_profile_uid',
@@ -124,7 +124,13 @@ export function createRuleExecutionPipelineInput(
     ruleId: 'rule-1',
     spaceId: 'default',
     scheduledAt: '2025-01-01T00:00:00.000Z',
+    executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...overrides,
   };
 }
@@ -132,6 +138,11 @@ export function createRuleExecutionPipelineInput(
 export function createRulePipelineState(state?: Partial<RulePipelineState>): RulePipelineState {
   return {
     input: createRuleExecutionInput(),
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...state,
   };
 }
@@ -184,6 +195,78 @@ export function createEsqlResponse(
     columns,
     values,
   };
+}
+
+export interface MockArrowBatch {
+  numRows: number;
+  rows: Array<Record<string, unknown>>;
+}
+
+export interface MockArrowReader {
+  closed: boolean;
+  cancel: jest.Mock<Promise<void>, []>;
+  [Symbol.asyncIterator]: () => AsyncIterator<{
+    numRows: number;
+    toArray: () => Array<{ toJSON: () => Record<string, unknown> }>;
+  }>;
+}
+
+/**
+ * Creates a mock {@link AsyncRecordBatchStreamReader}-shaped object that yields
+ * the provided batches when iterated. Marks itself `closed` once iteration
+ * completes.
+ */
+export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReader {
+  const reader: MockArrowReader = {
+    closed: false,
+    cancel: jest.fn().mockImplementation(async () => {
+      reader.closed = true;
+    }),
+    async *[Symbol.asyncIterator]() {
+      for (const batch of batches) {
+        yield {
+          numRows: batch.numRows,
+          toArray: () =>
+            batch.rows.map((row) => ({
+              toJSON: () => row,
+            })),
+        };
+      }
+      reader.closed = true;
+    },
+  };
+
+  return reader;
+}
+
+/**
+ * Configures `mockEsClient.helpers.esql(...)` to return an `EsqlHelper`-shaped
+ * object whose `toArrowReader` is the provided jest mock. Use this together
+ * with {@link createMockArrowReader} to drive `QueryService.executeQueryStream`
+ * in tests.
+ */
+export function mockHelpersEsqlToArrowReader(
+  mockEsClient: DeeplyMockedApi<ElasticsearchClient>,
+  toArrowReader: jest.Mock
+): void {
+  (mockEsClient.helpers.esql as unknown as jest.Mock).mockReturnValue({
+    toArrowReader,
+    toRecords: jest.fn(),
+    toArrowTable: jest.fn(),
+  });
+}
+
+/**
+ * Convenience wrapper that wires {@link mockHelpersEsqlToArrowReader} with a
+ * reader produced from {@link createMockArrowReader}.
+ */
+export function mockHelpersEsqlArrowBatches(
+  mockEsClient: DeeplyMockedApi<ElasticsearchClient>,
+  batches: MockArrowBatch[]
+): MockArrowReader {
+  const reader = createMockArrowReader(batches);
+  mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+  return reader;
 }
 
 export function createAlertEvent(overrides: Partial<AlertEvent> = {}): AlertEvent {

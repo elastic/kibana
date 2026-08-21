@@ -5,196 +5,182 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFieldSearch,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiSpacer,
-  type Criteria,
-} from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDebouncedValue } from '@kbn/react-hooks';
-import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
-import type { RuleApiResponse } from '../../services/rules_api';
-import { useFetchRules } from '../../hooks/use_fetch_rules';
-import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
+import { useBoolean } from '@kbn/react-hooks';
+import { UserCapabilities } from '../../services/user_capabilities';
+import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import {
+  RuleCreateOptionsPanel,
+  getCreateWithAgentTooltipText,
+} from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import {
+  KindFilter,
+  RULES_LIST_FEATURES_FIELDS,
+  StatusFilter,
+  TagsFilter,
+} from './rules_list_filters';
+import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
-import type { RulesListTableSortField } from './rules_list_table';
-import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
-import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
-import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
-import { buildRulesListFilter } from './utils';
-
-const DEFAULT_PER_PAGE = 20;
-export const SEARCH_DEBOUNCE_MS = 300;
-
-const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
-  kind: 'kind',
-  enabled: 'enabled',
-  name: 'metadata',
-};
-
-const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
-  Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
-) as Partial<Record<string, FindRulesSortField>>;
+import { useRulesDataSource } from './rules_data_source';
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-
   useBreadcrumbs('rules_list');
 
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [searchInput, setSearchInput] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
-  const [modeFilter, setModeFilter] = useState('');
-  const [sortField, setSortField] = useState<FindRulesSortField>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+  const dataSource = useRulesDataSource();
 
-  const filter = useMemo(
-    () =>
-      buildRulesListFilter({
-        enabled: statusFilter,
-        tags: tagsFilter,
-        kind: modeFilter,
-      }),
-    [statusFilter, tagsFilter, modeFilter]
-  );
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
+  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
+    useComposeDiscoverFlyout();
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  // We always render the "Create with agent" entry points; when the skill is unavailable they
+  // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, filter]);
-
-  const { data, isLoading, isError, error } = useFetchRules({
-    page,
-    perPage,
-    filter,
-    search: debouncedSearch || undefined,
-    sortField,
-    sortOrder: sortDirection,
-  });
-
-  const { data: allTags } = useFetchRuleTags();
-
-  const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
-    if (tablePage) {
-      setPage(tablePage.index + 1);
-      setPerPage(tablePage.size);
-    }
-
-    if (sort) {
-      const nextSortField = TABLE_FIELD_TO_API_SORT_FIELD[sort.field as string];
-      if (nextSortField) {
-        const sortChanged = nextSortField !== sortField || sort.direction !== sortDirection;
-        setSortField(nextSortField);
-        setSortDirection(sort.direction);
-        if (sortChanged) {
-          setPage(1);
-        }
-      }
-    }
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateFlyout();
+  };
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
+  const onCreateThresholdRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateBuilderFlyout('threshold');
   };
 
-  const availableTagOptions = allTags ?? [];
-
-  const hasActiveFilters = Boolean(filter);
+  const emptyState = canWrite ? (
+    <RuleCreateOptionsPanel
+      onCreateEsqlRule={openCreateFlyout}
+      onCreateWithAgent={navigateToAgentBuilder}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+      createWithAgentTooltipText={createWithAgentTooltipText}
+      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+    />
+  ) : (
+    <EuiEmptyPrompt
+      iconType="bell"
+      data-test-subj="rulesListReadOnlyEmpty"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
+            defaultMessage="No rules"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
+            defaultMessage="There are no rules to display."
+          />
+        </p>
+      }
+    />
+  );
 
   return (
     <div>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.pageTitle"
-            defaultMessage="Alerting V2 Rules"
-          />
-        }
-        rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            fill
-            href={basePath.prepend(paths.ruleCreate)}
-            data-test-subj="createRuleButton"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]}
-      />
-      <EuiSpacer size="m" />
-      {isError ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.alertingV2.rulesList.loadErrorTitle"
-                defaultMessage="Failed to load rules"
-              />
-            }
-            color="danger"
-            iconType="error"
-          >
-            {error instanceof Error ? error.message : String(error)}
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      ) : null}
-      {!isError ? (
-        <>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiFieldSearch
-                fullWidth
-                isClearable
-                value={searchInput}
-                placeholder={i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
-                  defaultMessage: 'Search rules',
-                })}
-                onChange={(event) => setSearchInput(event.target.value)}
-                data-test-subj="rulesListSearchBar"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <StatusFilterPopover value={statusFilter} onChange={setStatusFilter} />
-                <TagsFilterPopover
-                  options={availableTagOptions}
-                  value={tagsFilter}
-                  onChange={setTagsFilter}
-                />
-                <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
+      <ContentListProvider
+        id={RULES_CONTENT_LIST_ID}
+        queryKeyScope={RULES_CONTENT_LIST_ID}
+        labels={{
+          entity: i18n.translate('xpack.alertingV2.rulesList.entity', {
+            defaultMessage: 'rule',
+          }),
+          entityPlural: i18n.translate('xpack.alertingV2.rulesList.entityPlural', {
+            defaultMessage: 'rules',
+          }),
+          searchPlaceholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
+            defaultMessage: 'Search rules',
+          }),
+        }}
+        dataSource={dataSource}
+        features={{
+          sorting: {
+            initialSort: { field: 'name', direction: 'asc' },
+            fields: [
+              {
+                field: 'name',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.name', {
+                  defaultMessage: 'Name',
+                }),
+              },
+              {
+                field: 'kind',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.kind', {
+                  defaultMessage: 'Outcome',
+                }),
+              },
+              {
+                field: 'enabled',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.enabled', {
+                  defaultMessage: 'Enabled',
+                }),
+              },
+            ],
+          },
+          pagination: { initialPageSize: 20 },
+          search: true,
+          // useBulkSelect owns selection — Content List's page-scoped selectedIds
+          // cannot express select-all-with-exclusions.
+          selection: false,
+          fields: RULES_LIST_FEATURES_FIELDS,
+        }}
+      >
+        <RulesListHeader
+          canWrite={canWrite}
+          onCreateRule={openCreateOptionsFlyout}
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={navigateToAgentBuilder}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+          createWithAgentTooltipText={createWithAgentTooltipText}
+        />
+        <ContentList emptyState={emptyState} data-test-subj="rulesList">
+          <ContentListToolbar>
+            <ContentListToolbar.Filters>
+              <StatusFilter />
+              <TagsFilter />
+              <KindFilter />
+            </ContentListToolbar.Filters>
+          </ContentListToolbar>
           <RulesListTableContainer
-            items={data?.items ?? []}
-            totalItemCount={data?.total ?? 0}
-            page={page}
-            perPage={perPage}
-            search={debouncedSearch}
-            filter={filter}
-            hasActiveFilters={hasActiveFilters}
-            sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
-            sortDirection={sortDirection}
-            isLoading={isLoading}
-            onTableChange={onTableChange}
+            onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
-        </>
+        </ContentList>
+      </ContentListProvider>
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          onClose={closeCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+          createWithAgentTooltipText={createWithAgentTooltipText}
+          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+        />
       ) : null}
+      {flyout}
     </div>
   );
 };

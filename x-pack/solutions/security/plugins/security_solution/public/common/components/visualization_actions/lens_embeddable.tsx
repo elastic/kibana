@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -70,6 +70,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   disableOnClickFilter = false,
   casesAttachmentMetadata,
   signalIndexName,
+  excludedPatterns,
   esql,
 }) => {
   const styles = useMemo(
@@ -104,6 +105,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
     esql,
     signalIndexName,
+    excludedPatterns,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYVisualizationState)
     ?.preferredSeriesType;
@@ -259,7 +261,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             onLoad={setInspectData}
             overrides={overrides}
             searchSessionId={searchSessionId}
-            showInspector={false}
             style={lensComponentStyle}
             css={{ minWidth: '100px' }}
             syncCursor={false}

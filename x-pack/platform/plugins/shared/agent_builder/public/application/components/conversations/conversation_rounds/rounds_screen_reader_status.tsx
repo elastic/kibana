@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { euiScreenReaderOnly } from '@elastic/eui';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 
 // Intervals grow by 5s each announcement, capped at 30s.
 // e.g. announcements fire at: 0s, 5s, 15s, 30s, 50s, 75s, 105s, 135s, ...
@@ -66,7 +66,7 @@ const useGeneratingAnnouncements = (isActive: boolean) => {
 export const RoundsScreenReaderStatus: React.FC<{ lastRound?: ConversationRound }> = ({
   lastRound,
 }) => {
-  const { isResponseLoading } = useSendMessage();
+  const { isResponseLoading } = useConversationStream();
   const announcement = useGeneratingAnnouncements(isResponseLoading);
 
   const responseWasLoading = useRef(false);

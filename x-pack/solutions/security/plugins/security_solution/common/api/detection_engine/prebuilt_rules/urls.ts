@@ -18,7 +18,6 @@ export const PREBUILT_RULES_STATUS_URL = `${LEGACY_BASE_URL}/_status` as const;
 
 export const GET_PREBUILT_RULES_STATUS_URL = `${BASE_URL}/status` as const;
 export const GET_PREBUILT_RULES_BASE_VERSION_URL = `${BASE_URL}/base_version` as const;
-export const BOOTSTRAP_PREBUILT_RULES_URL = `${BASE_URL}/_bootstrap` as const;
 export const BOOTSTRAP_EASE_RULES_URL = `${BASE_URL}/_bootstrap_ease_rules` as const;
 export const REVIEW_RULE_UPGRADE_URL = `${BASE_URL}/upgrade/_review` as const;
 export const PERFORM_RULE_UPGRADE_URL = `${BASE_URL}/upgrade/_perform` as const;

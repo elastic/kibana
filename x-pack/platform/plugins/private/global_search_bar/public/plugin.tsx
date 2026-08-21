@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  CoreSetup,
+  CoreStart,
+  OverlayRef,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
+import type { SearchProps } from './components/types';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from './components/types';
+import { SearchModal } from './components/search_modal';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -40,18 +51,79 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     const { application, http } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
+    const searchProps: SearchProps = {
+      globalSearch: { ...globalSearch, searchCharLimit: this.config.input_max_limit },
+      navigateToUrl: application.navigateToUrl,
+      taggingApi: savedObjectsTagging,
+      basePathUrl: http.basePath.prepend('/plugins/globalSearchBar/assets/'),
+      reportEvent,
+    };
+
+    let activeModalRef: OverlayRef | null = null;
+    let closingPromise: Promise<void> | null = null;
+
+    const closeModal = (): Promise<void> => {
+      if (closingPromise) {
+        return closingPromise;
+      }
+
+      const ref = activeModalRef;
+      activeModalRef = null;
+      if (!ref) {
+        return Promise.resolve();
+      }
+
+      // Share the in-flight close so navigate-from-search can await the same unmount
+      // even if onResultSelect already started closing the overlay.
+      closingPromise = ref.close().finally(() => {
+        closingPromise = null;
+      });
+      return closingPromise;
+    };
+
+    // Close the search overlay and wait for ModalService cleanup before navigating.
+    // Otherwise leave-confirm (openConfirm) replaces the search modal mid-click and
+    // the confirm buttons become inert (single-slot overlays modal host).
+    const navigateFromSearchModal: ApplicationStart['navigateToUrl'] = async (url, options) => {
+      await closeModal();
+      return application.navigateToUrl(url, options);
+    };
+
+    const toggleSearchModal = () => {
+      if (activeModalRef || closingPromise) {
+        void closeModal();
+        return;
+      }
+
+      activeModalRef = core.overlays.openModal(
+        toMountPoint(
+          <SearchModal
+            {...searchProps}
+            navigateToUrl={navigateFromSearchModal}
+            onClose={closeModal}
+          />,
+          core
+        ),
+        {
+          className: SEARCH_MODAL_SELECTOR_PREFIX,
+          'data-test-subj': SEARCH_MODAL_SELECTOR_PREFIX,
+          outsideClickCloses: true,
+        }
+      );
+      activeModalRef.onClose.then(() => {
+        activeModalRef = null;
+      });
+    };
+
+    if (core.chrome.next.isEnabled) {
+      core.chrome.next.globalSearch.set({
+        onClick: toggleSearchModal,
+      });
+    }
+
     core.chrome.navControls.registerCenter({
       order: 1000,
-      content: (
-        <SearchBar
-          globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
-          navigateToUrl={application.navigateToUrl}
-          taggingApi={savedObjectsTagging}
-          basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-          chromeStyle$={core.chrome.getChromeStyle$()}
-          reportEvent={reportEvent}
-        />
-      ),
+      content: <SearchBar {...searchProps} chromeStyle$={core.chrome.getChromeStyle$()} />,
     });
 
     return {};

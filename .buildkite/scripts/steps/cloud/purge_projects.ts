@@ -14,7 +14,7 @@ import { getKibanaDir } from '#pipeline-utils';
 async function getPrProjects() {
   // BOOKMARK - List of Kibana project types
   const match =
-    /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|workplaceai)(?:-(ai_soc|logs_essentials))?$/;
+    /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|workplaceai|vectordb)(?:-(ai_soc|logs_essentials))?$/;
   try {
     // BOOKMARK - List of Kibana project types
     return (
@@ -22,7 +22,7 @@ async function getPrProjects() {
         projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
         projectRequest.get('/api/v1/serverless/projects/security'),
         projectRequest.get('/api/v1/serverless/projects/observability'),
-        // TODO handle the new 'workplace ai' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+        // TODO handle the new 'workplaceai' and 'vectordb' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
       ])
     )
       .map((response) => response.data.items)
@@ -52,7 +52,7 @@ async function deleteProject({
   name,
 }: {
   // BOOKMARK - List of Kibana project types
-  type: 'elasticsearch' | 'security' | 'observability' | 'workplaceai';
+  type: 'elasticsearch' | 'security' | 'observability' | 'workplaceai' | 'vectordb';
   id: number;
   name: string;
 }) {
@@ -103,7 +103,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplaceai|ai4soc)$/.test(
+          /^ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplaceai|vectordb|ai4soc)$/.test(
             label.name
           )
         ).length

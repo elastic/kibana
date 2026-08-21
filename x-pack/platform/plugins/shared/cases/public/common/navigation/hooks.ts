@@ -14,6 +14,7 @@ import {
   CASES_CREATE_PATH,
   CASES_CONFIGURE_TEMPLATES_PATH,
   CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
+  CASES_CONFIGURE_FIELD_LIBRARY_PATH,
 } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import type { ICasesDeepLinkId } from './deep_links';
@@ -77,6 +78,7 @@ const navigationMapping = {
   configure: { path: CASES_CONFIGURE_PATH },
   templates: { path: CASES_CONFIGURE_TEMPLATES_PATH },
   createTemplate: { path: CASES_CONFIGURE_CREATE_TEMPLATE_PATH },
+  fieldLibrary: { path: CASES_CONFIGURE_FIELD_LIBRARY_PATH },
 };
 
 export const useAllCasesNavigation = () => {
@@ -118,6 +120,14 @@ export const useCasesCreateTemplateNavigation = () => {
     deepLinkId: APP_ID,
   });
   return { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate };
+};
+
+export const useCasesFieldLibraryNavigation = () => {
+  const [getCasesFieldLibraryUrl, navigateToCasesFieldLibrary] = useCasesNavigation({
+    path: navigationMapping.fieldLibrary.path,
+    deepLinkId: APP_ID,
+  });
+  return { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary };
 };
 
 export const useTemplateViewParams = () => useParams<TemplateViewPathParams>();

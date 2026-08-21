@@ -45,7 +45,7 @@ export const CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS = i18n.transla
   'xpack.cases.workflowSteps.createCaseFromTemplate.documentation.details',
   {
     defaultMessage:
-      'This step resolves a case template from the securitySolution case configuration and creates a new case. You can optionally specify overwrite fields to customize the created case.',
+      'This step resolves a case template — from the case templates feature when enabled, otherwise from the per-space case configuration — and creates a new case. You can optionally specify overwrite fields to customize the created case. When the case templates feature is enabled, the calling user additionally needs the "getTemplate" privilege, unlike creating a case from a template through the Cases API directly. The resolved template must have a default title and description, or you must provide "overwrites.title" / "overwrites.description".',
   }
 );
 
@@ -112,6 +112,32 @@ export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const SET_EXTENDED_FIELDS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.label',
+  {
+    defaultMessage: 'Cases - Set extended fields',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.description',
+  {
+    defaultMessage: 'Sets one or more extended field values on an existing case',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.documentation.details',
+  {
+    defaultMessage:
+      'This step writes one or more extended fields on a case in a single request. Provide `fields` as a map of storage key to value (for example `priority_as_keyword: "high"`). Storage keys follow the {storageKeyConvention} convention; discover the keys a case accepts with `GET /api/cases/{caseIdPath}/fields`. Values are strings in canonical storage format — for multi-value controls such as `checkbox_group` or `user_picker`, pass a JSON-encoded array string. Provided fields are merged into the case\'s existing extended fields; unlisted fields are left unchanged. Server-side validation rejects unknown keys and values that do not match the field definition.',
+    values: {
+      storageKeyConvention: '<name>_as_<type>',
+      caseIdPath: '{case_id}',
+    },
+  }
+);
+
 export const ADD_COMMENT_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addComment.label', {
   defaultMessage: 'Cases - Add comment',
 });
@@ -119,14 +145,14 @@ export const ADD_COMMENT_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.
 export const ADD_COMMENT_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.addComment.description',
   {
-    defaultMessage: 'Adds a user comment to a case',
+    defaultMessage: 'Adds a comment to a case',
   }
 );
 
 export const ADD_COMMENT_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addComment.documentation.details',
   {
-    defaultMessage: 'This step appends a new user comment to the selected case.',
+    defaultMessage: 'This step appends a new comment to the selected case.',
   }
 );
 
@@ -145,7 +171,7 @@ export const GET_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.getCase.documentation.details',
   {
     defaultMessage:
-      'This step retrieves a complete case object from the cases system using its ID. You can optionally include comments and attachments in the response.',
+      'This step retrieves a complete case object from the cases system using its ID. The `include_comments` parameter is deprecated; use the `cases.getAllAttachments` step to retrieve case attachments.',
   }
 );
 
@@ -328,6 +354,28 @@ export const ADD_EVENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const ADD_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.label',
+  {
+    defaultMessage: 'Cases - Add attachments to case',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.description',
+  {
+    defaultMessage: 'Adds one or more attachments of any registered type to a case in one request',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.documentation.details',
+  {
+    defaultMessage:
+      'This step adds one or more attachments to an existing case in a single bulk request. Each `attachments` entry is a per-type payload whose shape is chosen by its `type` discriminator (`comment`, `stack.alert`, `security.event`, etc.); the YAML editor narrows the available fields once a type is picked.',
+  }
+);
+
 export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.findSimilarCases.label',
   {
@@ -431,6 +479,24 @@ export const ADD_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const REMOVE_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.removeTags.label', {
+  defaultMessage: 'Cases - Remove tags from case',
+});
+
+export const REMOVE_TAG_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.removeTags.description',
+  {
+    defaultMessage: 'Remove tags from an existing case',
+  }
+);
+
+export const REMOVE_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.removeTags.documentation.details',
+  {
+    defaultMessage: 'This step removes tags from an existing case.',
+  }
+);
+
 export const ADD_CATEGORY_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.label',
   {
@@ -476,6 +542,62 @@ export const CASE_NOT_FOUND_MESSAGE = (caseId: string) =>
     defaultMessage: 'Case "{caseId}" was not found.',
     values: { caseId },
   });
+
+export const CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.eventSchema.caseId',
+  {
+    defaultMessage: 'The ID of the case.',
+  }
+);
+
+export const CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.case.eventSchema.owner',
+  {
+    defaultMessage: 'The owner of the case.',
+  }
+);
+
+export const CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseUpdated.eventSchema.updatedFields',
+  {
+    defaultMessage: 'A list of case fields updated by this operation.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.status',
+  {
+    defaultMessage: 'The current status of the case.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatus',
+  {
+    defaultMessage: 'The previous status of the case.',
+  }
+);
+
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentIds',
+  {
+    defaultMessage: 'The IDs of the attachments that were added (all of the same type).',
+  }
+);
+
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentType',
+  {
+    defaultMessage: 'The type of the attachments that were added (e.g. "comment", "alert").',
+  }
+);
+
+export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.commentsAdded.eventSchema.commentIds',
+  {
+    defaultMessage: 'The IDs of the comments that were added.',
+  }
+);
 
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
@@ -605,5 +727,24 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step retrieves up to 1000 cases in a single request. Any IDs that could not be fetched are reported in the errors array. Use this to avoid N sequential get operations in fan-out workflows.',
+  }
+);
+
+export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCases.label', {
+  defaultMessage: 'Cases - Push cases',
+});
+
+export const PUSH_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.pushCases.description',
+  {
+    defaultMessage: 'Pushes a case or multiple cases to their configured external connector',
+  }
+);
+
+export const PUSH_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.pushCases.documentation.details',
+  {
+    defaultMessage:
+      'This step pushes a case or multiple cases to their external connector. If no connector is configured on a case, the step will fail. The step returns the updated case objects after the push.',
   }
 );

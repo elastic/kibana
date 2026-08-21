@@ -27,7 +27,7 @@ export const journey = new Journey({
   })
   .step('Navigate to Service Overview Page', async ({ page }) => {
     await page.click(subj('serviceLink_nodejs'));
-    await page.waitForSelector(subj('apmMainTemplateHeaderServiceName'));
+    await page.waitForSelector(subj('appHeaderTitle'));
   })
   .step('Navigate to Transactions tabs', async ({ page }) => {
     await page.click(subj('transactionsTab'));

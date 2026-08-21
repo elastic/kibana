@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { CRAWLERS_PATH } from '../routes';
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from './translations';
 import { SearchEmptyPrompt } from '../search_empty_prompt';
@@ -23,7 +24,10 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
     <SearchEmptyPrompt
       backButton={{
         label: BACK_BUTTON_LABEL,
-        onClickBack: () => application?.navigateToUrl(CRAWLERS_PATH),
+        onClickBack: () =>
+          application?.navigateToApp(MANAGEMENT_APP_ID, {
+            path: `/data/content_connectors${CRAWLERS_PATH}`,
+          }),
       }}
       icon="web"
       title={i18n.translate('xpack.contentConnectors.elasticManagedWebCrawlerEmpty.title', {
@@ -61,7 +65,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         gutterSize="s"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon color="primary" size="l" type="globe" />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -89,10 +93,10 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="web" />
+                          <EuiIcon color="primary" size="l" type="web" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElastic" />
+                          <EuiIcon color="primary" size="l" type="logoElastic" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

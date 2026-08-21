@@ -33,7 +33,7 @@ export class FleetMetricsTask {
 
   constructor(
     taskManager: TaskManagerSetupContract,
-    fetchAgentMetrics: (abortController: AbortController) => Promise<AgentMetrics | undefined>
+    fetchAgentMetrics: (signal: AbortSignal) => Promise<AgentMetrics | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -42,15 +42,15 @@ export class FleetMetricsTask {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
               return withSpan({ name: TYPE, type: 'metrics' }, () =>
-                this.runTask(taskInstance, () => fetchAgentMetrics(abortController))
+                this.runTask(taskInstance, () => fetchAgentMetrics(signal))
               );
             },
             cancel: async () => {},

@@ -8,4 +8,4 @@
  */
 
 export type { ContentEditorConfig } from './types';
-export { useContentEditorInspect } from './use_content_editor_inspect';
+export { useContentEditorOpen } from './use_content_editor_open';

@@ -430,7 +430,9 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
-    const featureFlagsSetup = this.featureFlags.setup();
+    const featureFlagsSetup = this.featureFlags.setup({
+      http: httpSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -481,8 +483,9 @@ export class Server {
       userStorage: userStorageSetup,
     };
 
-    const pluginsSetup = await this.plugins.setup(coreSetup);
-    this.#pluginsInitialized = pluginsSetup.initialized;
+    const { contracts, initialized } = await this.plugins.setup(coreSetup);
+    coreSetup._plugins = contracts;
+    this.#pluginsInitialized = initialized;
     /**
      * This is a necessary step to ensure that the pricing service is ready to be used.
      * It must be called after all plugins have been setup.
@@ -618,6 +621,7 @@ export class Server {
 
     this.rendering.start({
       featureFlags: featureFlagsStart,
+      userStorage: userStorageStart,
     });
 
     this.coreStart = {
@@ -645,8 +649,7 @@ export class Server {
 
     this.coreApp.start(this.coreStart);
 
-    const { contracts } = await this.plugins.start(this.coreStart);
-    this.coreStart._plugins = contracts;
+    await this.plugins.start(this.coreStart);
 
     await this.http.start();
 

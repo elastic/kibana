@@ -14,10 +14,9 @@ import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
-  DashboardCreateRequestBody,
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
-  DashboardUpdateRequestBody,
+  DashboardState,
 } from '../../server';
 import {
   DASHBOARD_API_PATH,
@@ -54,7 +53,7 @@ const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PAT
 
 export const dashboardClient = {
   create: async (
-    dashboardState: DashboardCreateRequestBody,
+    dashboardState: DashboardState,
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
@@ -107,17 +106,20 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchParams: DashboardSearchRequestParams) => {
+  search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
-    return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
+
+    const response = await coreServices.http.get<DashboardSearchResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
         ...(query ? { query: `${query}*` } : {}),
       },
     });
+
+    return response;
   },
-  update: async (id: string, dashboardState: DashboardUpdateRequestBody) => {
+  update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       buildDashboardAppPath(id),
       {

@@ -65,6 +65,8 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+export type SourceDisplayMode = 'summary' | 'json';
+
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
     onClick: (payload: { selectedDocIds: string[] }) => void;
@@ -78,3 +80,5 @@ export type CustomBulkActions = Array<
     key: string;
   }
 >;
+
+export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;

@@ -123,7 +123,6 @@ export const LegendSizeSettings = ({
             defaultMessage: 'Requires legend to be right or left aligned',
           })}
           position="top"
-          delay="regular"
           display="block"
         >
           {legendSizeSelect}

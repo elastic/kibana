@@ -4,22 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
+import React, { useEffect, useMemo, useRef } from 'react';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '@kbn/apm-shared/public';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
+import { apmRouter } from '../components/routing/apm_route_config';
+import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
-import { apmRouter } from '../components/routing/apm_route_config';
-import { getDateRange } from '../context/url_params_context/helpers';
-import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
-import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
-import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
+import { getDateRange } from '../context/url_params_context/helpers';
+import { setApmInternalServices } from '../plugin';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import type { EmbeddableDeps } from './types';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -27,12 +34,14 @@ export interface ApmEmbeddableContextProps {
   rangeFrom?: string;
   rangeTo?: string;
   kuery?: string;
+  /** Seeded into the in-memory router URL so hooks reading URL params get a concrete env. */
+  environment?: string;
 }
 
-function buildHistoryEntry(rangeFrom: string, rangeTo: string, kuery: string) {
+function buildHistoryEntry(rangeFrom: string, rangeTo: string, kuery: string, environment: string) {
   return `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
     kuery
-  )}&comparisonEnabled=false`;
+  )}&environment=${encodeURIComponent(environment)}&comparisonEnabled=false`;
 }
 
 /** Providers for dashboard/flyout embeddables. Uses `I18nProvider` for react-intl but omits Core `i18n.Context` (`EuiContext`) and `KibanaThemeProvider` so the DOM stays shallow for flyout flex layout; theme/CSS still comes from the host `KibanaRenderContextProvider`. */
@@ -40,6 +49,7 @@ export function ApmEmbeddableContext({
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   kuery = '',
+  environment = ENVIRONMENT_ALL.value,
   deps,
   children,
 }: ApmEmbeddableContextProps) {
@@ -52,7 +62,7 @@ export function ApmEmbeddableContext({
   const history = useRef<MemoryHistory | null>(null);
   if (history.current === null) {
     history.current = createMemoryHistory({
-      initialEntries: [buildHistoryEntry(rangeFrom, rangeTo, kuery)],
+      initialEntries: [buildHistoryEntry(rangeFrom, rangeTo, kuery, environment)],
     });
   }
 
@@ -63,8 +73,8 @@ export function ApmEmbeddableContext({
       return;
     }
 
-    history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery));
-  }, [history, rangeFrom, rangeTo, kuery]);
+    history.current?.replace(buildHistoryEntry(rangeFrom, rangeTo, kuery, environment));
+  }, [history, rangeFrom, rangeTo, kuery, environment]);
 
   const services = {
     config: deps.config,
@@ -80,13 +90,22 @@ export function ApmEmbeddableContext({
     lens: deps.pluginsStart.lens,
     uiActions: deps.pluginsStart.uiActions,
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
-    share: deps.pluginsSetup.share,
+    share: deps.pluginsStart.share,
     kibanaEnvironment: deps.kibanaEnvironment,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
     licensing: deps.pluginsStart.licensing,
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
+  const isCpsEnabled = deps.coreStart.featureFlags.getBooleanValue(
+    OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+  );
+  useMemo(() => {
+    const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+    const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+    setApmInternalServices({ callApmApi, cpsManager });
+  }, [deps.coreStart, deps.pluginsStart.cps?.cpsManager, isCpsEnabled]);
 
   return (
     <I18nProvider>

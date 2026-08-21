@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { IngestPipeline } from '@kbn/file-upload-common';
@@ -178,6 +179,12 @@ export class CombinedFieldsForm extends Component<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.fileUpload.combinedFieldsForm.semanticTextOptionsAriaLabel',
+                {
+                  defaultMessage: 'Semantic text options',
+                }
+              )}
               button={
                 <EuiButton
                   onClick={this.togglePopover.bind(null, 'semantic')}
@@ -204,6 +211,12 @@ export class CombinedFieldsForm extends Component<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.fileUpload.combinedFieldsForm.geoPointOptionsAriaLabel',
+                {
+                  defaultMessage: 'Geo point options',
+                }
+              )}
               button={
                 <EuiButton
                   onClick={this.togglePopover.bind(null, 'geo')}
@@ -252,17 +265,21 @@ export class CombinedFieldsForm extends Component<Props, State> {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    onClick={this.removeCombinedField.bind(null, idx)}
-                    title={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
                       defaultMessage: 'Remove combined field',
                     })}
-                    aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
-                      defaultMessage: 'Remove combined field',
-                    })}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      onClick={this.removeCombinedField.bind(null, idx)}
+                      aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                        defaultMessage: 'Remove combined field',
+                      })}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ))}

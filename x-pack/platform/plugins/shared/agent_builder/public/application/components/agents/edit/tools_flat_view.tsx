@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiCheckbox,
   EuiScreenReaderOnly,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -34,6 +35,8 @@ interface ToolsFlatViewProps {
   onPageChange: (pageIndex: number) => void;
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
+  areElasticCapabilitiesEnabled?: boolean;
+  defaultToolIdSet?: Set<string>;
 }
 
 interface ToolDetailsColumnProps {
@@ -62,7 +65,9 @@ const ToolDetailsColumn: React.FC<ToolDetailsColumnProps> = ({ tool }) => {
 const createCheckboxColumn = (
   selectedTools: ToolSelection[],
   onToggleTool: (toolId: string) => void,
-  disabled: boolean
+  disabled: boolean,
+  areElasticCapabilitiesEnabled: boolean,
+  defaultToolIdSet: Set<string>
 ) => ({
   width: '40px',
   name: (
@@ -74,14 +79,20 @@ const createCheckboxColumn = (
     const toolFields: ToolSelectionRelevantFields = {
       id: tool.id,
     };
-    return (
+    const isAutoIncluded = areElasticCapabilitiesEnabled && defaultToolIdSet.has(tool.id);
+    const checkbox = (
       <EuiCheckbox
         id={`tool-${tool.id}`}
-        checked={isToolSelected(toolFields, selectedTools)}
+        checked={isToolSelected(toolFields, selectedTools) || isAutoIncluded}
         onChange={() => onToggleTool(tool.id)}
-        disabled={disabled}
+        disabled={disabled || isAutoIncluded}
         aria-label={labels.tools.selectToolCheckboxAriaLabel(tool.id)}
       />
+    );
+    return isAutoIncluded ? (
+      <EuiToolTip content={labels.agentTools.autoIncludedTooltip}>{checkbox}</EuiToolTip>
+    ) : (
+      checkbox
     );
   },
 });
@@ -108,14 +119,24 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   onPageChange,
   pageSize,
   onPageSizeChange,
+  areElasticCapabilitiesEnabled = false,
+  defaultToolIdSet,
 }) => {
+  const emptyDefaultToolIdSet = React.useMemo(() => new Set<string>(), []);
+  const resolvedDefaultToolIdSet = defaultToolIdSet ?? emptyDefaultToolIdSet;
   const columns = React.useMemo(
     () => [
-      createCheckboxColumn(selectedTools, onToggleTool, disabled),
+      createCheckboxColumn(
+        selectedTools,
+        onToggleTool,
+        disabled,
+        areElasticCapabilitiesEnabled,
+        resolvedDefaultToolIdSet
+      ),
       createToolDetailsColumn(),
       createTagsColumn(),
     ],
-    [selectedTools, onToggleTool, disabled]
+    [selectedTools, onToggleTool, disabled, areElasticCapabilitiesEnabled, resolvedDefaultToolIdSet]
   );
 
   const handleTableChange = React.useCallback(

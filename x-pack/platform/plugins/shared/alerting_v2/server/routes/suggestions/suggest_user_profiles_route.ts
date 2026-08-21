@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -15,16 +15,22 @@ import type { AlertingServerStartDependencies } from '../../types';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../constants';
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
-const suggestUserProfilesBodySchema = schema.object({
-  name: schema.string(),
-  size: schema.maybe(schema.number({ min: 0, max: 100 })),
+const suggestUserProfilesBodySchema = z.object({
+  name: z.string().min(1).max(256).describe('Name fragment to search by.'),
+  size: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .optional()
+    .describe('Maximum number of profiles to return. Defaults to 10'),
 });
 
-type SuggestUserProfilesBody = TypeOf<typeof suggestUserProfilesBodySchema>;
+type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 
 /**
  *
@@ -48,7 +54,7 @@ type SuggestUserProfilesBody = TypeOf<typeof suggestUserProfilesBodySchema>;
 @injectable()
 export class SuggestUserProfilesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [...ROUTE_AUTH_PRIVILEGES],
@@ -59,11 +65,17 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     summary: 'Suggest user profiles',
     description: 'Suggest user profiles for assignee search in alert episodes.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
       body: suggestUserProfilesBodySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'suggest user profiles';
 

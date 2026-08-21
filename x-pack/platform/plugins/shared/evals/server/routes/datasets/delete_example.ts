@@ -12,13 +12,15 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { ExampleNotFoundError } from '../../storage/example_not_found_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerDeleteExampleRoute = ({
@@ -26,13 +28,14 @@ export const registerDeleteExampleRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .delete({
       path: EVALS_DATASET_EXAMPLE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Delete evaluation dataset example',
     })
@@ -77,30 +80,18 @@ export const registerDeleteExampleRoute = ({
           }
 
           const { datasetId, exampleId } = request.params;
-          const coreContext = await context.core;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
-          const dataset = await datasetClient.get(datasetId);
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
 
-          if (!dataset) {
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
           }
 
-          if (!dataset.examples.some((example) => example.id === exampleId)) {
-            return response.notFound({
-              body: { message: `Evaluation dataset example not found: ${exampleId}` },
-            });
-          }
-
-          const wasDeleted = await datasetClient.deleteExample(exampleId);
-          if (!wasDeleted) {
-            return response.notFound({
-              body: { message: `Evaluation dataset example not found: ${exampleId}` },
-            });
-          }
+          await datasetClient.deleteExample(exampleId, datasetId);
 
           return response.ok({
             body: {
@@ -116,7 +107,14 @@ export const registerDeleteExampleRoute = ({
             });
           }
 
-          logger.error(`Failed to delete evaluation dataset example: ${error}`);
+          if (error instanceof ExampleNotFoundError) {
+            return response.notFound({
+              body: { message: error.message },
+            });
+          }
+
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to delete evaluation dataset example: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to delete evaluation dataset example' },

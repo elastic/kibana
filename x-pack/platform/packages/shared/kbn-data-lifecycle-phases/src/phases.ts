@@ -6,6 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -36,6 +37,29 @@ export const PHASE_NAMES: Record<IlmPhase, string> = {
   }),
   delete: i18n.translate('xpack.dataLifecyclePhases.phaseNameDelete', {
     defaultMessage: 'Delete',
+  }),
+};
+
+/**
+ * Lowercase phase words ("hot", "warm", …) for interpolation into a sentence, e.g. help text like
+ * "Must occur after the {phase} phase (40d).". Kept separate from `PHASE_NAMES` so the word is
+ * localized without the mid-sentence capitalization of a standalone label.
+ */
+export const PHASE_NAMES_LOWERCASE: Record<IlmPhase, string> = {
+  hot: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseHot', {
+    defaultMessage: 'hot',
+  }),
+  warm: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseWarm', {
+    defaultMessage: 'warm',
+  }),
+  cold: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseCold', {
+    defaultMessage: 'cold',
+  }),
+  frozen: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseFrozen', {
+    defaultMessage: 'frozen',
+  }),
+  delete: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseDelete', {
+    defaultMessage: 'delete',
   }),
 };
 
@@ -117,11 +141,20 @@ export type PhaseColorMap = Record<IlmPhase, string>;
 export const usePhaseColors = (): PhaseColorMap => {
   const { euiTheme } = useEuiTheme();
 
-  return {
-    hot: euiTheme.colors.severity.risk,
-    warm: euiTheme.colors.severity.warning,
-    cold: euiTheme.colors.severity.neutral,
-    frozen: euiTheme.colors.vis.euiColorVis3,
-    delete: euiTheme.colors.backgroundBaseSubdued,
-  };
+  return useMemo(
+    () => ({
+      hot: euiTheme.colors.severity.risk,
+      warm: euiTheme.colors.severity.warning,
+      cold: euiTheme.colors.severity.neutral,
+      frozen: euiTheme.colors.vis.euiColorVis3,
+      delete: euiTheme.colors.backgroundBaseSubdued,
+    }),
+    [
+      euiTheme.colors.severity.risk,
+      euiTheme.colors.severity.warning,
+      euiTheme.colors.severity.neutral,
+      euiTheme.colors.vis.euiColorVis3,
+      euiTheme.colors.backgroundBaseSubdued,
+    ]
+  );
 };

@@ -162,12 +162,6 @@ describe('Metrics case', () => {
         },
       },
       connectors: { total: 1 },
-      actions: {
-        isolateHost: {
-          isolate: { total: 1 },
-          unisolate: { total: 2 },
-        },
-      },
       lifespan: {
         creationDate: new Date(0).toISOString(),
         closeDate: new Date(2).toISOString(),
@@ -240,51 +234,6 @@ describe('Metrics case', () => {
       const query = SingleCaseMetricsResponseRt.decode({
         ...defaultRequest,
         connectors: { total: 1, foo: 'bar' },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from actions', () => {
-      const query = SingleCaseMetricsResponseRt.decode({
-        ...defaultRequest,
-        actions: { ...defaultRequest.actions, foo: 'bar' },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from isolate hosts', () => {
-      const query = SingleCaseMetricsResponseRt.decode({
-        ...defaultRequest,
-        actions: {
-          ...defaultRequest.actions,
-          isolateHost: { ...defaultRequest.actions.isolateHost, foo: 'bar' },
-        },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from unisolate host', () => {
-      const query = SingleCaseMetricsResponseRt.decode({
-        ...defaultRequest,
-        actions: {
-          ...defaultRequest.actions,
-          isolateHost: {
-            ...defaultRequest.actions.isolateHost,
-            unisolate: { foo: 'bar', total: 2 },
-          },
-        },
       });
 
       expect(query).toStrictEqual({

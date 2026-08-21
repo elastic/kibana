@@ -31,6 +31,7 @@
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/ui-callout"
   ]
 }

@@ -7,8 +7,10 @@
 
 import type { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
-import { createDispatcherPipelineState } from '../fixtures/test_utils';
+import { createDispatcherPipelineState, createStepLogger } from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
+
+const logger = createStepLogger();
 
 describe('FetchPoliciesStep', () => {
   let npSoService: ActionPolicySavedObjectService;
@@ -18,6 +20,8 @@ describe('FetchPoliciesStep', () => {
     ({ actionPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
       createActionPolicySavedObjectService());
   });
+
+  const buildStep = () => new FetchPoliciesStep(npSoService);
 
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([
@@ -30,7 +34,9 @@ describe('FetchPoliciesStep', () => {
           matcher: null,
           groupBy: null,
           throttle: null,
-          auth: { apiKey: 'decrypted-key', owner: 'elastic', createdByUser: false },
+          apiKey: 'decrypted-key',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
           createdBy: null,
           updatedBy: null,
           createdAt: '2026-01-01T00:00:00.000Z',
@@ -39,10 +45,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -63,10 +66,7 @@ describe('FetchPoliciesStep', () => {
   it('returns empty map when no policies exist', async () => {
     mockFindAllDecrypted.mockResolvedValue([]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -78,14 +78,37 @@ describe('FetchPoliciesStep', () => {
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
+  });
+
+  it('surfaces the matcher used to scope a policy to a rule', async () => {
+    mockFindAllDecrypted.mockResolvedValue([
+      {
+        id: 'p-scoped',
+        attributes: {
+          name: 'Scoped',
+          matcher: 'rule.id: "rule-7"',
+          destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          apiKey: 'k',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      },
+    ]);
+
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
+
+    if (result.type !== 'continue') throw new Error('expected continue');
+    const policy = result.data?.policies?.get('p-scoped');
+    expect(policy?.matcher).toBe('rule.id: "rule-7"');
   });
 
   it('fetches multiple policies', async () => {
@@ -95,7 +118,9 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
-          auth: { apiKey: 'key-1', owner: 'elastic', createdByUser: false },
+          apiKey: 'key-1',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
           createdBy: null,
           updatedBy: null,
           createdAt: '2026-01-01T00:00:00.000Z',
@@ -107,7 +132,9 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 2',
           destinations: [],
-          auth: { apiKey: 'key-2', owner: 'elastic', createdByUser: false },
+          apiKey: 'key-2',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
           createdBy: null,
           updatedBy: null,
           createdAt: '2026-01-01T00:00:00.000Z',
@@ -116,10 +143,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState(), logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

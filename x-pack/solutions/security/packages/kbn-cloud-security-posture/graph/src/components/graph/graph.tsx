@@ -99,6 +99,11 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
 
+const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
+  ...fitViewOptions,
+  maxZoom: 0.85,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -255,13 +260,17 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        xyflow.fitView();
+        if (interactive) {
+          xyflow.fitView();
+        } else {
+          xyflow.fitView(nonInteractiveFitViewOptions);
+        }
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
         if (!interactive) {
           const resizeObserver = new ResizeObserver(() => {
-            xyflow.fitView();
+            xyflow.fitView(nonInteractiveFitViewOptions);
           });
           resizeObserver.observe(document.querySelector('.react-flow') as Element);
           return () => resizeObserver.disconnect();
@@ -277,6 +286,7 @@ export const Graph = memo<GraphProps>(
           key={reactFlowKey}
           data-test-subj={GRAPH_ID}
           fitView={true}
+          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -284,6 +294,11 @@ export const Graph = memo<GraphProps>(
           edges={edgesState}
           nodesConnectable={false}
           edgesFocusable={false}
+          // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
+          // preview) so nodes never receive a selected/focused state through keyboard focus or
+          // programmatic selection, which would otherwise show selection visuals.
+          nodesFocusable={interactive}
+          elementsSelectable={interactive}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
           snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid

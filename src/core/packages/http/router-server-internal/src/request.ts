@@ -36,11 +36,16 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
+import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { patchRequest } from './patch_requests';
@@ -114,9 +119,18 @@ export class CoreKibanaRequest<
     query: Q;
     body: B;
   } {
-    const params = routeValidator.getParams(raw.params, 'request params');
-    const query = routeValidator.getQuery(raw.query, 'request query');
-    const body = routeValidator.getBody(raw.body, 'request body');
+    const params = validateRequestPart(
+      () => routeValidator.getParams(raw.params, 'request params'),
+      'params'
+    );
+    const query = validateRequestPart(
+      () => routeValidator.getQuery(raw.query, 'request query'),
+      'query'
+    );
+    const body = validateRequestPart(
+      () => routeValidator.getBody(raw.body, 'request body'),
+      'body'
+    );
     return { query, params, body };
   }
 
@@ -152,6 +166,10 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: SpaceId;
+  /** {@inheritDoc KibanaRequest.basePath} */
+  public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
 
@@ -180,6 +198,10 @@ export class CoreKibanaRequest<
 
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
+    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+    // FakeRawRequests carry it as a top-level field.
+    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+    this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
@@ -402,6 +424,30 @@ export class CoreKibanaRequest<
   }
 }
 
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
+  try {
+    return validate();
+  } catch (error) {
+    throw new RequestValidationFailure(
+      error instanceof Error ? error.message : String(error),
+      source,
+      getRawValidationError(error)
+    );
+  }
+}
+
+function getRawValidationError(error: unknown): unknown {
+  if (
+    error instanceof Error &&
+    'cause' in error &&
+    error.cause instanceof Error &&
+    'rawError' in error.cause
+  ) {
+    return error.cause.rawError;
+  }
+  return error;
+}
+
 /**
  * Returns underlying Hapi Request
  * @internal
@@ -443,7 +489,12 @@ export function isRealRequest(request: unknown): request is KibanaRequest | Requ
 }
 
 function isCompleted(request: Request) {
-  return request.raw.res.writableFinished;
+  const { res } = request.raw;
+  // For http/1, it is sufficient to check `writableFinished` because `writableEnded` is always true when the response is finished.
+  // For http/2, we need to check both `writableFinished` and `writableEnded` to be true to be sure the response is finished.
+  // This allows Kibana's aborted$ event to be emitted when the client cancels the request, regardless of the protocol.
+  // The addition of `writableEnded` works around inconsistencies in Node.js, which are resolved in Node.js 27+: https://github.com/nodejs/node/pull/63249
+  return res.writableFinished && res.writableEnded;
 }
 
 /**

@@ -12,11 +12,17 @@ import { EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
+import {
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
+} from '../../ebt_constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import {
@@ -25,8 +31,17 @@ import {
   createTraceIdWhereClause,
 } from './create_span_links_where_clauses';
 
+const spanLinksEbtBase = {
+  element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+  detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+};
+const spanNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SPAN, ...spanLinksEbtBase };
+const serviceNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...spanLinksEbtBase };
+const traceIdEbt = { action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRACE, ...spanLinksEbtBase };
+
 const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createSpanNameWhereClause(item), [item]);
 
   const content = (
     <EuiTextTruncate
@@ -40,7 +55,8 @@ const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDe
       indexPattern={indexes.apm.traces}
       dataTestSubj={`${type}-spanNameLink-${item.spanId}`}
       tabLabel={item.details?.spanName || NOT_AVAILABLE_LABEL}
-      whereClause={createSpanNameWhereClause(item)}
+      whereClause={whereClause}
+      ebt={spanNameEbt}
     >
       {content}
     </DiscoverEsqlLink>
@@ -49,6 +65,7 @@ const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDe
 
 const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createServiceNameWhereClause(item), [item]);
 
   const serviceName = item.details?.serviceName || NOT_AVAILABLE_LABEL;
   const content = (
@@ -63,7 +80,8 @@ const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLin
           indexPattern={indexes.apm.traces}
           dataTestSubj={`${type}-serviceNameLink-${serviceName}`}
           tabLabel={serviceName}
-          whereClause={createServiceNameWhereClause(item)}
+          whereClause={whereClause}
+          ebt={serviceNameEbt}
         >
           {content}
         </DiscoverEsqlLink>
@@ -74,6 +92,7 @@ const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLin
 
 const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createTraceIdWhereClause(item), [item]);
 
   const content = (
     <EuiTextTruncate data-test-subj={`${type}-traceId-${item.traceId}`} text={item.traceId} />
@@ -84,7 +103,8 @@ const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDet
       indexPattern={indexes.apm.traces}
       dataTestSubj={`${type}-traceIdLink-${item.traceId}`}
       tabLabel={item.traceId}
-      whereClause={createTraceIdWhereClause(item)}
+      whereClause={whereClause}
+      ebt={traceIdEbt}
     >
       {content}
     </DiscoverEsqlLink>

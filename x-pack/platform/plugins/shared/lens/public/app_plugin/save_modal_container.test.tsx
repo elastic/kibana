@@ -42,11 +42,9 @@ describe('runSaveLensVisualization', () => {
       newTitle: faker.lorem.word(),
       newDescription: faker.lorem.sentence(),
       newTags: [faker.lorem.word(), faker.lorem.word()],
-      isTitleDuplicateConfirmed: false,
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
-      onTitleDuplicate: jest.fn(),
       ...propsOverrides,
     };
     const options = {
@@ -338,12 +336,14 @@ describe('runSaveLensVisualization', () => {
         },
         { saveToLibrary: true }
       );
-      await runSaveLensVisualization(props, saveProps, options);
+      const result = await runSaveLensVisualization(props, saveProps, options);
 
       // callback called
       expect(saveToLibraryFn).toHaveBeenCalled();
       expect(toasts.addSuccess).toHaveBeenCalled();
       expect(props.redirectTo).toHaveBeenCalled();
+      expect(result?.persistedDoc?.savedObjectId).toBeTruthy();
+      expect(result?.isLinkedToOriginatingApp).toBeFalsy();
 
       // not called
       expect(props.application.navigateToApp).not.toHaveBeenCalledWith('lens', { path: '/' });

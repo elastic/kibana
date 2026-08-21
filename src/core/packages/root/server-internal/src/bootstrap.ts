@@ -55,6 +55,12 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
   rootLogger.info('Kibana is starting');
 
+  if (!isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.warn(
+      'Code generation from strings is allowed on this Kibana instance. This hardening measure was disabled (KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false / --disallow-code-generation-from-strings not set).'
+    );
+  }
+
   cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
@@ -127,6 +133,16 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     }
   } catch (err) {
     await shutdown(err);
+  }
+}
+
+function isCodeGenerationFromStringsDisallowed(): boolean {
+  try {
+    // eslint-disable-next-line no-new-func -- we are intentionally trying to execute code generation from strings
+    new Function('');
+    return false;
+  } catch {
+    return true;
   }
 }
 

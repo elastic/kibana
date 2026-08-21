@@ -11,15 +11,14 @@ import {
   compositeTargetSchema,
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
-  compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
 } from '../../../schema/composite_slo';
 
 const createCompositeSLOBodySchema = z.object({
   name: z.string(),
   description: z.string(),
-  members: z.array(compositeSloMemberSchema).min(2).max(25),
+  members: compositeSloMembersSchema,
   compositeMethod: compositeMethodSchema,
   timeWindow: compositeRollingTimeWindowSchema,
   budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
@@ -33,10 +32,7 @@ const createCompositeSLOParamsSchema = z.object({
   body: createCompositeSLOBodySchema,
 });
 
-const createCompositeSLOResponseSchema = compositeSloDefinitionSchema;
-
 type CreateCompositeSLOInput = z.input<typeof createCompositeSLOBodySchema>;
-type CreateCompositeSLOResponse = z.infer<typeof createCompositeSLOResponseSchema>;
 
-export { createCompositeSLOParamsSchema, createCompositeSLOResponseSchema };
-export type { CreateCompositeSLOInput, CreateCompositeSLOResponse };
+export { createCompositeSLOParamsSchema };
+export type { CreateCompositeSLOInput };

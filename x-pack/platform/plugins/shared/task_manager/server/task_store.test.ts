@@ -27,7 +27,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SavedObjectAttributes, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
@@ -35,7 +35,6 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
@@ -73,8 +72,6 @@ const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
 const mockExecutionContextStart = executionContextServiceMock.createSetupContract();
-
-const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -144,14 +141,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -275,14 +268,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -392,12 +381,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [task],
-        request,
-        coreStart.security,
-        basePathMock
-      );
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -431,14 +415,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -557,13 +537,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -685,14 +661,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -857,12 +829,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -963,12 +933,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1063,12 +1031,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1181,13 +1147,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1311,13 +1273,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1543,13 +1501,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -1884,7 +1838,7 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1985,7 +1939,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2093,7 +2047,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2378,15 +2332,11 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: {
           getScopedClient: mockGetScopedClient,
         } as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -2456,13 +2406,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3019,6 +2965,66 @@ describe('TaskStore', () => {
       expect(serialized).not.toContain('apiKey');
       expect(serialized).not.toContain('uiamApiKey');
     });
+
+    test(`maps each result to its own doc when two partial updates target the same task id`, async () => {
+      // All runners share one BufferedTaskStore, so partial updates for the same task
+      // id can be batched together; each result must echo its own doc, not the first.
+      const finishingUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        version: 'WzQsMV0=',
+        status: 'idle' as TaskStatus,
+        runAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      };
+      const retryAtUpdate: PartialConcreteTaskInstance = {
+        id: 'task_dup',
+        retryAt: mockedDate,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task_dup',
+              _version: 3,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 85,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([finishingUpdate, retryAtUpdate]);
+
+      expect(result[0]).toMatchObject({
+        value: { id: 'task_dup', status: 'idle', startedAt: null, retryAt: null },
+      });
+      // If the retryAt-only update inherits the finishing update's `startedAt: null`,
+      // the long-running retryAt updater builds a ready-to-run instance with a null
+      // startedAt, which later crashes the poll cycle.
+      expect(result[1]).toMatchObject({ value: { id: 'task_dup', retryAt: mockedDate } });
+      expect(result[1]).not.toMatchObject({ value: { startedAt: null } });
+    });
   });
 
   describe('remove', () => {
@@ -3066,14 +3072,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3196,14 +3198,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3287,14 +3285,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         apiKeyStrategy: spyStrategy as any,
@@ -3372,13 +3366,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3441,13 +3431,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3545,13 +3531,9 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
-            requestTimeouts: {
-              update_by_query: 1000,
-            },
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
-            basePath: basePathMock,
             executionContext: mockExecutionContextStart,
             apiKeyStrategy: new EsApiKeyStrategy(),
           });
@@ -3576,13 +3558,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3605,13 +3583,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3635,14 +3609,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3854,7 +3824,7 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
-        basePathMock
+        {}
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -3910,14 +3880,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -3947,14 +3913,10 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4208,13 +4170,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4262,13 +4220,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4296,45 +4250,6 @@ describe('TaskStore', () => {
     });
   });
 
-  describe('updateByQuery', () => {
-    let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-
-    beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      store = new TaskStore({
-        logger: mockLogger(),
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-    });
-    test('should pass requestTimeout and retryOnTimeout', async () => {
-      esClient.updateByQuery.mockResponse({
-        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
-      } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
-        requestTimeout: 1000,
-        retryOnTimeout: false,
-      });
-    });
-  });
-
   describe('bulkGetVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
@@ -4351,13 +4266,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
@@ -4470,13 +4381,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
-        basePath: basePathMock,
         executionContext: mockExecutionContextStart,
         apiKeyStrategy: new EsApiKeyStrategy(),
       });

@@ -49,6 +49,29 @@ export type UserActivityEventType =
   | 'user';
 
 /**
+ * ECS `event.outcome` allowed values for user activity events.
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-outcome
+ * @public
+ */
+export type UserActivityEventOutcome = 'success' | 'failure' | 'unknown';
+
+/**
+ * ECS `error.*` fields supported on user activity log entries (subset).
+ * @see https://www.elastic.co/guide/en/ecs/current/ecs-error.html
+ * @public
+ */
+export interface UserActivityError {
+  /** The kind of error (for example, exception class name). */
+  type?: string;
+  /** Error message. */
+  message?: string;
+  /** Stack trace as a string. */
+  stack_trace?: string;
+  /** Optional error code. */
+  code?: string;
+}
+
+/**
  * Information about the event being performed by the user.
  * @public
  */
@@ -57,6 +80,8 @@ export interface UserActivityEvent {
   action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
+  /** ECS event outcome; use with {@link UserActivityEventOutcome}. */
+  outcome?: UserActivityEventOutcome;
   /** ISO8601 timestamp of the event start time. */
   start?: string;
   /** ISO8601 timestamp of the event end time. */
@@ -79,6 +104,8 @@ export interface TrackUserActionParams {
   event: UserActivityEvent;
   /** Object attributes written to the log entry. */
   object: UserActivityObject;
+  /** ECS error fields written at the top level of the log entry when provided. */
+  error?: UserActivityError;
   /** Additional bucket of non-standard metadata. */
   metadata?: UserActivityMetadata;
 }

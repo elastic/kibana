@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
@@ -48,6 +48,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   userName,
   skip,
   type,
+  entityRecord,
   identityFields,
 }) => {
   const dispatch = useDispatch();
@@ -123,6 +124,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
         entityType: 'user',
         isScopedToEntity,
         identityFields,
+        entityRecord: isScopedToEntity && entityRecord ? entityRecord : undefined,
         fallbackDisplayName: userName,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,6 +139,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
       type,
       userName,
       identityFields,
+      entityRecord: isScopedToEntity && entityRecord ? entityRecord : undefined,
       euid,
     }),
     filterQuery: anomaliesInfluencersFilterQuery,

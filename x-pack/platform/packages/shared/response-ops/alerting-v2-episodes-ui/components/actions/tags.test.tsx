@@ -46,4 +46,14 @@ describe('AlertEpisodeTags', () => {
     expect(await screen.findByText('c')).toBeInTheDocument();
     expect(await screen.findByText('d')).toBeInTheDocument();
   });
+
+  it('renders nothing when tags is omitted', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <AlertEpisodeTags size={2} />
+      </IntlProvider>
+    );
+
+    expect(container.querySelector('.euiBadge')).not.toBeInTheDocument();
+  });
 });

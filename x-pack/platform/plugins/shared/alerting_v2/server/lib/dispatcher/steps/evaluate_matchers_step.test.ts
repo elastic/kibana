@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
@@ -13,6 +14,7 @@ import {
   createAlertEpisode,
   createDispatcherPipelineState,
   createRule,
+  createRuleScopedActionPolicy,
 } from '../fixtures/test_utils';
 import type {
   AlertEpisode,
@@ -31,7 +33,7 @@ describe('EvaluateMatchersStep', () => {
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    step = new EvaluateMatchersStep(loggerService);
+    step = new EvaluateMatchersStep();
   });
 
   const runStep = async (
@@ -39,8 +41,12 @@ describe('EvaluateMatchersStep', () => {
     rules: Map<RuleId, Rule>,
     policies: Map<ActionPolicyId, ActionPolicy>
   ): Promise<MatchedPair[]> => {
-    const state = createDispatcherPipelineState({ dispatchable, rules, policies });
-    const result = await step.execute(state);
+    const state = createDispatcherPipelineState({
+      dispatchable,
+      rules,
+      policies,
+    });
+    const result = await step.execute(state, loggerService);
     if (result.type !== 'continue') {
       throw new Error(`expected step output 'continue', got '${result.type}'`);
     }
@@ -82,12 +88,21 @@ describe('EvaluateMatchersStep', () => {
     expect(matched).toHaveLength(2);
   });
 
-  it('skips episodes whose rule is not found', async () => {
-    const episode = createAlertEpisode({ rule_id: 'unknown-rule' });
+  it('external episode (null rule_id) is matched by a catch-all policy in its space', async () => {
+    const episode = createAlertEpisode({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'space-a',
+      group_hash: 'pd-1',
+      episode_id: 'pd-ep-1',
+    });
+    const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
 
-    const matched = await runStep([episode], new Map(), new Map());
+    const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
 
-    expect(matched).toHaveLength(0);
+    expect(matched).toHaveLength(1);
+    expect(matched[0].episode).toBe(episode);
+    expect(matched[0].policy).toBe(policy);
   });
 
   it('does not match when KQL matcher evaluates to false', async () => {
@@ -210,6 +225,18 @@ describe('EvaluateMatchersStep', () => {
 
     expect(matched).toHaveLength(0);
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Policy matcher failed to evaluate; treating as no-match',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          policy_id: 'p1',
+          episode_id: episode.episode_id,
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        }),
+      })
+    );
+    const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
+    expect(warnMessage).not.toContain('invalid kql (((');
   });
 
   it('continues evaluating sibling policies when one matcher throws', async () => {
@@ -257,7 +284,7 @@ describe('EvaluateMatchersStep', () => {
     expect(mockLogger.warn).toHaveBeenCalledTimes(2);
   });
 
-  it('warn message includes policy id, rule id, episode id, and matcher', async () => {
+  it('warn message keeps policy and episode ids in labels and omits the matcher', async () => {
     const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p-broken', matcher: 'invalid kql (((' });
@@ -265,15 +292,24 @@ describe('EvaluateMatchersStep', () => {
     await runStep([episode], new Map([['r1', rule]]), new Map([['p-broken', policy]]));
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Policy matcher failed to evaluate; treating as no-match',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          policy_id: 'p-broken',
+          episode_id: 'ep-42',
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        }),
+      })
+    );
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
-    expect(rendered).toContain('p-broken');
-    expect(rendered).toContain('r1');
-    expect(rendered).toContain('ep-42');
-    expect(rendered).toContain('invalid kql (((');
+    expect(rendered).not.toContain('invalid kql (((');
+    expect(rendered).not.toContain('p-broken');
+    expect(rendered).not.toContain('ep-42');
   });
 
-  it('truncates matchers longer than 500 chars in the warn message', async () => {
+  it('does not log long matchers at any length', async () => {
     const longMatcher = '('.repeat(600);
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
@@ -283,8 +319,61 @@ describe('EvaluateMatchersStep', () => {
 
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
-    expect(rendered).toContain(`${longMatcher.slice(0, 500)}…`);
-    expect(rendered).not.toContain(longMatcher);
+    expect(rendered).not.toContain('(');
+    expect(rendered).not.toContain(longMatcher.slice(0, 20));
+  });
+
+  describe('external episode matching', () => {
+    it('external episode with null rule_id is matched by a space-scoped catch-all policy', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        episode_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].episode).toBe(episode);
+      expect(matched[0].policy).toBe(policy);
+    });
+
+    it('external episode is not matched when the policy is in a different space', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        episode_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-b' });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('policy with rule.name matcher does not match an external episode (no rule in context)', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        episode_id: 'pd-ep-2',
+      });
+      const policy = createActionPolicy({
+        id: 'p1',
+        spaceId: 'default',
+        matcher: 'rule.name: "My Rule"',
+      });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('rule-aware KQL matching', () => {
@@ -430,6 +519,108 @@ describe('EvaluateMatchersStep', () => {
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
       expect(matched).toHaveLength(1);
+    });
+  });
+
+  describe('top-level severity matching', () => {
+    it('matches on top-level severity when episode severity equals the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'critical' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when episode severity differs from the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'low' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match and does not throw when episode has no severity', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('matches combined severity and rule conditions', async () => {
+      const episodes = [
+        createAlertEpisode({ rule_id: 'r1', severity: 'high' }),
+        createAlertEpisode({ rule_id: 'r1', severity: 'low' }),
+      ];
+      const rule = createRule({ id: 'r1', tags: ['production'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "high" and rule.tags: "production"',
+      });
+
+      const matched = await runStep(episodes, new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+  });
+
+  describe('rule-scoped policy via matcher', () => {
+    it('matches a rule-scoped policy when rule.id equals the episode rule', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createRuleScopedActionPolicy('r1', { id: 'p1' });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].policy).toBe(policy);
+    });
+
+    it('skips a rule-scoped policy whose rule.id differs from the episode rule', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createRuleScopedActionPolicy('r2', { id: 'p1' });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('mixes global and rule-scoped policies correctly', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const globalPolicy = createActionPolicy({ id: 'g1' });
+      const scoped1 = createRuleScopedActionPolicy('r1', { id: 's1' });
+      const scoped2 = createRuleScopedActionPolicy('r2', { id: 's2' });
+
+      const matched = await runStep(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map<ActionPolicyId, ActionPolicy>([
+          ['g1', globalPolicy],
+          ['s1', scoped1],
+          ['s2', scoped2],
+        ])
+      );
+
+      const matchedIds = matched.map(({ policy }) => policy.id).sort();
+      expect(matchedIds).toEqual(['g1', 's1']);
     });
   });
 });

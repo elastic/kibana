@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
+import type { alertEventSeveritySchema } from './create_alert_event_data_schema';
+
 export interface MatcherContextRule {
   id: string;
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface MatcherContext {
@@ -20,7 +19,8 @@ export interface MatcherContext {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
-  rule: MatcherContextRule;
+  severity?: z.infer<typeof alertEventSeveritySchema>;
+  rule?: MatcherContextRule;
   data?: Record<string, unknown>;
 }
 
@@ -34,12 +34,9 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
   { path: 'episode_status', type: 'string' },
   { path: 'group_hash', type: 'string' },
   { path: 'last_event_timestamp', type: 'string' },
+  { path: 'severity', type: 'string' },
   { path: 'rule.id', type: 'string' },
   { path: 'rule.name', type: 'string' },
-  { path: 'rule.description', type: 'string' },
   { path: 'rule.tags', type: 'string[]' },
-  { path: 'rule.enabled', type: 'boolean' },
-  { path: 'rule.createdAt', type: 'string' },
-  { path: 'rule.updatedAt', type: 'string' },
   { path: 'data', type: 'object' },
 ];

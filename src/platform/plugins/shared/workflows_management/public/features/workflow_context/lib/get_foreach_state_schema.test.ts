@@ -10,7 +10,12 @@
 import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { z } from '@kbn/zod/v4';
-import { getForeachStateSchema } from './get_foreach_state_schema';
+import {
+  FOREACH_ITEM_SCHEMA_DESC,
+  getForeachCollectionDiagnostic,
+  getForeachItemSchema,
+  getForeachStateSchema,
+} from './get_foreach_state_schema';
 
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
@@ -188,5 +193,96 @@ describe('getForeachStateSchema', () => {
     expect(foreachStateSchema.shape.item.description).toMatch(
       /Unable to parse foreach parameter as JSON/
     );
+  });
+});
+
+describe('getForeachCollectionDiagnostic', () => {
+  it('returns null when item schema is resolved', () => {
+    const itemSchema = z.object({ id: z.string() });
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        previous: z.object({ output: z.array(itemSchema) }),
+      }),
+    });
+    const resolved = getForeachItemSchema(stepContext, 'steps.previous.output');
+    expect(getForeachCollectionDiagnostic(resolved, 'steps.previous.output')).toBeNull();
+  });
+
+  it('returns error when path cannot be resolved', () => {
+    const unresolved = getForeachItemSchema(DynamicStepContextSchema, 'steps.missing.output');
+    expect(getForeachCollectionDiagnostic(unresolved, 'steps.missing.output')).toEqual({
+      message: 'Collection steps.missing.output is invalid',
+      severity: 'error',
+    });
+    expect(unresolved.description).toBe(FOREACH_ITEM_SCHEMA_DESC.UNRESOLVED_PATH);
+  });
+
+  it('returns warning when the collection type cannot be narrowed to an array', () => {
+    // Mirrors `types_field_value` from the generated Elasticsearch schemas: every
+    // ES|QL/ES result cell is typed by this union, with no array branch.
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        run_query: z.object({
+          output: z.object({
+            values: z.array(z.array(z.union([z.number(), z.string(), z.boolean(), z.null()]))),
+          }),
+        }),
+      }),
+    });
+    const itemSchema = getForeachItemSchema(stepContext, 'steps.run_query.output.values[0][0]');
+    expect(itemSchema).toBeInstanceOf(z.ZodUnknown);
+    expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
+    expect(
+      getForeachCollectionDiagnostic(itemSchema, 'steps.run_query.output.values[0][0]')
+    ).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
+      severity: 'warning',
+    });
+  });
+
+  it.each([
+    ['unknown', z.unknown()],
+    ['any', z.any()],
+  ])('returns warning when the collection type is %s', (_name, outputSchema) => {
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        set_exception_list_id: z.object({
+          output: z.object({ exception_list_id: outputSchema }),
+        }),
+      }),
+    });
+    const path = 'steps.set_exception_list_id.output.exception_list_id';
+    const itemSchema = getForeachItemSchema(stepContext, path);
+    expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
+    expect(getForeachCollectionDiagnostic(itemSchema, path)).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
+      severity: 'warning',
+    });
+  });
+
+  it.each([
+    ['number', z.number()],
+    ['boolean', z.boolean()],
+    ['object', z.object({ name: z.string() })],
+  ])('still hard-errors for known non-iterable %s collections', (typeName, outputSchema) => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({ items: outputSchema }),
+    });
+    expect(() => getForeachItemSchema(stepContext, 'consts.items')).toThrow(
+      new RegExp(`Expected array for foreach iteration, but got ${typeName}`)
+    );
+  });
+
+  it('returns warning for runtime JSON string collections', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        previous: z.object({ output: z.string() }),
+      }),
+    });
+    const runtimeJson = getForeachItemSchema(stepContext, 'steps.previous.output');
+    expect(getForeachCollectionDiagnostic(runtimeJson, 'steps.previous.output')).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
+      severity: 'warning',
+    });
   });
 });

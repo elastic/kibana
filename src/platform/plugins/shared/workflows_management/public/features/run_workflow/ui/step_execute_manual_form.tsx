@@ -12,9 +12,9 @@ import { css } from '@emotion/react';
 import React, { useCallback, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const SCHEMA_URI = `inmemory://schemas/test-step-json-manual-editor-schema`;
 

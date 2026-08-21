@@ -77,6 +77,7 @@ export type {
   UserProfileSuggestParams,
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileServiceStart,
 } from '@kbn/security-plugin-types-server';
 
@@ -90,6 +91,8 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     showNavLinks: true,
     ui: true,
     roleManagementEnabled: true,
+    uiam: { enabled: true },
+    serviceAccounts: { enabled: true },
   },
 };
 export const plugin: PluginInitializer<

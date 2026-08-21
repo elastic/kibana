@@ -31,7 +31,7 @@ export function MitigationAccordion({
   initialIsOpen = false,
 }: MitigationAccordionProps) {
   const accordionId = useGeneratedHtmlId({
-    prefix: title,
+    prefix: dataTestSubjPrefix,
   });
 
   return (
@@ -46,6 +46,7 @@ export function MitigationAccordion({
       <EuiPanel hasBorder grow={false}>
         <EuiAccordion
           id={accordionId}
+          buttonElement="div"
           buttonContent={<EuiLink>{title}</EuiLink>}
           paddingSize="none"
           initialIsOpen={initialIsOpen}

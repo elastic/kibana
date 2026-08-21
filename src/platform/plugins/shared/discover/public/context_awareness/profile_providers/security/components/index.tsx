@@ -41,3 +41,51 @@ export const EnhancedAlertFlyoutFooterLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedIOCOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_overview').then((module) => ({
+      default: module.EnhancedIOCOverview,
+    }))
+  )
+);
+
+export const EnhancedIOCFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_footer').then((module) => ({
+      default: module.EnhancedIOCFlyoutFooter,
+    }))
+  )
+);
+
+export const EnhancedIOCFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_header').then((module) => ({
+      default: module.EnhancedIOCFlyoutHeader,
+    }))
+  )
+);
+
+export const EnhancedAttackFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_attack_flyout_header').then((module) => ({
+      default: module.EnhancedAttackFlyoutHeader,
+    }))
+  )
+);
+
+export const EnhancedAttackFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_attack_flyout_footer').then((module) => ({
+      default: module.EnhancedAttackFlyoutFooter,
+    }))
+  )
+);
+
+export const EnhancedAttackEventOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_attack_event_overview').then((module) => ({
+      default: module.EnhancedAttackEventOverview,
+    }))
+  )
+);

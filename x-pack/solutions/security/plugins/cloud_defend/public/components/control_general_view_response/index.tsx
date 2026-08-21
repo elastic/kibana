@@ -298,13 +298,16 @@ export const ControlGeneralViewResponse = ({
           )}
           <EuiFlexItem>
             <EuiPopover
+              aria-label={i18n.responseOptions}
               button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  onClick={onTogglePopover}
-                  aria-label="Response options"
-                  data-test-subj="cloud-defend-btnresponsepopover"
-                />
+                <EuiToolTip content="Response options" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    onClick={onTogglePopover}
+                    aria-label="Response options"
+                    data-test-subj="cloud-defend-btnresponsepopover"
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
               closePopover={closePopover}
@@ -312,7 +315,6 @@ export const ControlGeneralViewResponse = ({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="duplicate"
@@ -378,7 +380,7 @@ export const ControlGeneralViewResponse = ({
         <EuiSpacer size="s" />
         {!response.exclude && (
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onShowExclude}
             size="xs"
             data-test-subj="cloud-defend-btnshowexclude"

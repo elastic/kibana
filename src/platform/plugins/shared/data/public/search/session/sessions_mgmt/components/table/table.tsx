@@ -9,6 +9,7 @@
 
 import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -211,6 +212,9 @@ export function SearchSessionsMgmtTable({
     <EuiInMemoryTable<UISession>
       {...props}
       id={SEARCH_SESSIONS_TABLE_ID}
+      tableCaption={i18n.translate('data.mgmt.searchSessions.table.tableCaption', {
+        defaultMessage: 'Search sessions',
+      })}
       data-test-subj={SEARCH_SESSIONS_TABLE_ID}
       rowProps={(searchSession: UISession) => ({
         'data-test-subj': `searchSessionsRow`,

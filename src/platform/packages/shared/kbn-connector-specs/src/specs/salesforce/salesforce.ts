@@ -50,22 +50,14 @@ export const SalesforceConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {},
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
+        isRecommended: true,
         defaults: {
           scope: 'api refresh_token',
         },
@@ -77,6 +69,15 @@ export const SalesforceConnector: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.salesforce.com/services/oauth2/token',
             },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials',
+        defaults: {},
+        overrides: {
+          meta: {
             scope: { hidden: true },
           },
         },
@@ -276,23 +277,13 @@ export const SalesforceConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Salesforce test handler');
-
-      try {
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
-        await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
-          params: { q: 'SELECT Id FROM User LIMIT 1' },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to Salesforce',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: error instanceof Error ? error.message : String(error),
-        };
-      }
+      const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+      await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
+        params: { q: 'SELECT Id FROM User LIMIT 1' },
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

@@ -7,6 +7,8 @@
 
 import {
   actionPolicyResponseSchema,
+  errorResponseSchema,
+  ID_MAX_LENGTH,
   snoozeActionPolicyBodySchema,
   type SnoozeActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
@@ -17,12 +19,17 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { snoozeActionPolicyOasExamples } from './snooze_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const snoozeActionPolicyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()
@@ -37,22 +44,29 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
+    oasOperationObject: snoozeActionPolicyOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(snoozeActionPolicyParamsSchema),
-      body: buildRouteValidationWithZod(snoozeActionPolicyBodySchema),
+      params: snoozeActionPolicyParamsSchema,
+      body: snoozeActionPolicyBodySchema,
     },
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the snoozed action policy.',
       },
       400: {
-        description: 'Indicates invalid request parameters or body.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
-        description: 'Indicates an action policy with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };
@@ -76,7 +90,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.actionPolicyClient.snoozeActionPolicy({
       id: this.request.params.id,
-      snoozedUntil: this.request.body.snoozedUntil,
+      snoozedUntil: this.request.body.snoozed_until,
     });
 
     return this.ctx.response.ok({ body: result });

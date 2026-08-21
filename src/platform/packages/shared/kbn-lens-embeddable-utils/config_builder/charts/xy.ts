@@ -22,7 +22,6 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {
   BuildDependencies,
-  LensAnnotationLayer,
   LensAttributes,
   LensBreakdownConfig,
   LensReferenceLineLayer,
@@ -218,7 +217,7 @@ function getXValueColumn(
 }
 
 function buildAllFormulasInLayer(
-  layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
+  layer: LensSeriesLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView
 ): PersistedIndexPatternLayer {
@@ -234,45 +233,37 @@ function buildAllFormulasInLayer(
 }
 
 function buildFormulaLayer(
-  layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
+  layer: LensSeriesLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
-  if (layer.type === 'series') {
-    const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
-
-    if (layer.xAxis) {
-      const columnName = `x_${ACCESSOR}${i}`;
-      const breakdownColumn = getBreakdownColumn({
-        options: layer.xAxis,
-        dataView,
-      });
-      addLayerColumn(resultLayer, columnName, breakdownColumn, true);
-    }
-
-    const layerBreakdown = normalizeBreakdown(layer.breakdown);
-    if (layerBreakdown.length > 0) {
-      layerBreakdown.forEach((breakdown, breakdownIndex) => {
-        const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
-        const breakdownColumn = getBreakdownColumn({
-          options: breakdown,
-          dataView,
-        });
-        addLayerColumn(resultLayer, columnName, breakdownColumn, true);
-      });
-    }
-
-    return resultLayer;
-  } else if (layer.type === 'annotation') {
-    // nothing ?
-  } else if (layer.type === 'reference') {
+  if (layer.type === 'reference') {
     return buildAllFormulasInLayer(layer, i, dataView);
   }
 
-  return {
-    columns: {},
-    columnOrder: [],
-  };
+  // layer.type === 'series'
+  const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
+
+  if (layer.xAxis) {
+    const columnName = `x_${ACCESSOR}${i}`;
+    const breakdownColumn = getBreakdownColumn({
+      options: layer.xAxis,
+      dataView,
+    });
+    addLayerColumn(resultLayer, columnName, breakdownColumn, true);
+  }
+
+  const layerBreakdown = normalizeBreakdown(layer.breakdown);
+  layerBreakdown.forEach((breakdown, breakdownIndex) => {
+    const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
+    const breakdownColumn = getBreakdownColumn({
+      options: breakdown,
+      dataView,
+    });
+    addLayerColumn(resultLayer, columnName, breakdownColumn, true);
+  });
+
+  return resultLayer;
 }
 
 export async function buildXY(
@@ -291,8 +282,11 @@ export async function buildXY(
   );
   const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
+  const visualization = buildVisualizationState(config);
+
   return {
     title: config.title,
+    description: config.description,
     visualizationType: 'lnsXY',
     references,
     state: {
@@ -300,7 +294,7 @@ export async function buildXY(
       internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: buildVisualizationState(config),
+      visualization,
       adHocDataViews,
     },
   };

@@ -98,6 +98,9 @@ export const EntityConfig: FC<EntityConfigProps> = ({
       closePopover={() => {
         setIsEntityConfigPopoverOpen(false);
       }}
+      aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.entityConfig.popoverAriaLabel', {
+        defaultMessage: 'Entity field configuration',
+      })}
     >
       <div data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}>
         <EuiFormRow

@@ -11,8 +11,6 @@ import { EuiCallOut, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { normaliseEntityAttachment } from './payload';
 import type { EntityAttachment } from './types';
@@ -23,13 +21,6 @@ import { entityAttachmentQueryClient } from './query_client';
 export interface EntityAttachmentInlineContentProps
   extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
-  /**
-   * Optional navigation context. When provided, `EntityTable` adds per-row Explore icons that
-   * deep-link into the Security Solution Hosts/Users/Services pages (mirrors the dashboard's
-   * `EntityListTable`). Without them the table renders without per-row navigation.
-   */
-  application?: ApplicationStart;
-  searchSession?: ISessionService;
 }
 
 /**
@@ -48,8 +39,6 @@ export const ENTITY_ATTACHMENT_ROOT_CLASS = 'securitySolutionEntityAttachment__r
 export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineContentProps> = ({
   attachment,
   experimentalFeatures,
-  application,
-  searchSession,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
   const { euiTheme } = useEuiTheme();
@@ -124,15 +113,9 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
               resolutionRiskStats={parsed.resolutionRiskStats}
               watchlistsEnabled={watchlistsEnabled}
               privmonModifierEnabled={privmonModifierEnabled}
-              application={application}
-              searchSession={searchSession}
             />
           ) : (
-            <EntityTable
-              entities={parsed.entities}
-              application={application}
-              searchSession={searchSession}
-            />
+            <EntityTable entities={parsed.entities} />
           )}
         </QueryClientProvider>
       </div>

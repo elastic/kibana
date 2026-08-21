@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,13 +14,14 @@ project:
   title: '@kbn/ml-plugin'
   description: Moon project for @kbn/ml-plugin
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/plugins/shared/ml
 dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
   - '@kbn/aiops-change-point-detection'
   - '@kbn/aiops-common'
+  - '@kbn/aiops-components'
   - '@kbn/aiops-plugin'
   - '@kbn/alerting-plugin'
   - '@kbn/alerts-as-data-utils'
@@ -41,10 +42,13 @@ dependsOn:
   - '@kbn/dashboard-plugin'
   - '@kbn/data-plugin'
   - '@kbn/data-view-editor-plugin'
+  - '@kbn/data-view-field-editor-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/data-visualizer-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-ml'
+  - '@kbn/content-management-utils'
   - '@kbn/embeddable-plugin'
   - '@kbn/es-query'
   - '@kbn/es-types'
@@ -93,6 +97,7 @@ dependsOn:
   - '@kbn/ml-ui-actions'
   - '@kbn/ml-url-state'
   - '@kbn/ml-validators'
+  - '@kbn/ml-cps'
   - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/presentation-publishing'
@@ -113,11 +118,13 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-utility'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/std'
   - '@kbn/task-manager-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/unified-field-list'
   - '@kbn/unified-search-plugin'
   - '@kbn/usage-collection-plugin'
@@ -144,9 +151,17 @@ dependsOn:
   - '@kbn/file-upload-common'
   - '@kbn/kql'
   - '@kbn/as-code-filters-transforms'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/zod'
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/lens-common'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
+  - '@kbn/core-rendering-browser'
+  - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -160,6 +175,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json

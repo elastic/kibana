@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLCommand } from '@elastic/esql/types';
 import { EsqlQuery } from '@elastic/esql';
-import { walk } from '@elastic/esql';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
@@ -21,6 +20,7 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 import type { ESQLMessage } from '../../commands';
 
@@ -70,43 +70,29 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
-    shouldValidateCallback(callbacks, 'getSources')
-      ? retrieveSources(rootCommands, callbacks)
-      : new Set<string>(),
-    shouldValidateCallback(callbacks, 'getPolicies')
-      ? retrievePolicies(rootCommands, callbacks)
-      : new Map(),
-    shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
-    shouldValidateCallback(callbacks, 'getTimeseriesIndices')
-      ? callbacks?.getTimeseriesIndices?.()
-      : undefined,
-    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
-  ]);
-
-  const sourceQuery = queryString.split('|')[0];
-  const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(
-        EsqlQuery.fromSrc(sourceQuery).ast,
-        sourceQuery,
-        callbacks,
-        options
-      ).asMap()
-    : new Map();
-
-  if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
-    messages.push(
-      ...validateUnsupportedTypeFields(
-        sourceFields as Map<string, ESQLFieldWithMetadata>,
-        rootCommands
-      )
-    );
-  }
-
-  const license = await callbacks?.getLicense?.();
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
+    await Promise.all([
+      shouldValidateCallback(callbacks, 'getSources')
+        ? retrieveSources(rootCommands, callbacks)
+        : new Set<string>(),
+      shouldValidateCallback(callbacks, 'getPolicies')
+        ? retrievePolicies(rootCommands, callbacks)
+        : new Map(),
+      shouldValidateCallback(callbacks, 'getJoinIndices')
+        ? callbacks?.getJoinIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getTimeseriesIndices')
+        ? callbacks?.getTimeseriesIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
+      shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+      callbacks?.getLicense?.(),
+    ]);
   const hasMinimumLicenseRequired = license
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
+
+  const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
 
   // Validate the header commands
   for (const command of headerCommands) {
@@ -118,9 +104,10 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
-    const commandMessages = validateCommand(command, references, rootCommands, {
+    const commandMessages = validateCommand(command, references, rootCommands, isRootTimeseries, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -161,6 +148,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -171,6 +159,7 @@ async function validateAst(
       currentCommand,
       references,
       rootCommands,
+      isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,
         hasMinimumLicenseRequired,
@@ -203,6 +192,7 @@ function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
+  isTimeseriesSource: boolean,
   callbacks?: ICommandCallbacks,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLMessage[] {
@@ -242,7 +232,9 @@ function validateCommand(
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,
+    datasets: references.datasets,
     unmappedFieldsStrategy,
+    isTimeseriesSource,
   };
 
   if (commandDefinition.methods.validate) {
@@ -262,31 +254,5 @@ function validateCommand(
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateUnsupportedTypeFields(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  commands: ESQLAstAllCommands[]
-) {
-  const usedColumnsInQuery: string[] = [];
-
-  walk(commands, {
-    visitColumn: (node) => usedColumnsInQuery.push(node.name),
-  });
-  const messages: ESQLMessage[] = [];
-  for (const column of usedColumnsInQuery) {
-    if (fields.has(column) && fields.get(column)!.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: column,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
-    }
-  }
   return messages;
 }

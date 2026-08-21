@@ -17,6 +17,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -29,6 +30,7 @@ import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
@@ -71,10 +73,6 @@ import type {
 } from '../routes/get_oauth_access_token';
 import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
-import type {
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   getOAuthAuthorizationCodeAccessToken,
@@ -127,6 +125,7 @@ export interface ConstructorOptions {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  evictClientPool?: (connectorId: string) => Promise<void>;
 }
 
 export interface ActionsClientContext {
@@ -154,6 +153,7 @@ export interface ActionsClientContext {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  evictClientPool?: (connectorId: string) => Promise<void>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -184,6 +184,7 @@ export class ActionsClient {
     isESOCanEncrypt,
     connectorLifecycleListeners,
     getCurrentUserProfileId,
+    evictClientPool,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -208,6 +209,7 @@ export class ActionsClient {
       isESOCanEncrypt,
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
+      evictClientPool,
     };
   }
 
@@ -265,6 +267,20 @@ export class ActionsClient {
    */
   public async getAuthStatus(): Promise<GetAuthStatusResult> {
     return getAuthStatus({ context: this.context });
+  }
+
+  public async getConnectorSpec({
+    id,
+    configurationUtilities,
+  }: {
+    id: string;
+    configurationUtilities: ActionsConfigurationUtilities;
+  }) {
+    return getConnectorSpecAsJsonSchema({
+      context: this.context,
+      id,
+      configurationUtilities,
+    });
   }
 
   /**
@@ -334,19 +350,19 @@ export class ActionsClient {
       bulkGetOpts
     );
 
-    bulkGetResult.saved_objects.forEach(({ id, error }) => {
-      if (!error && this.context.auditLogger) {
+    bulkGetResult.saved_objects.forEach((so) => {
+      if (!isSavedObjectErrorResult(so) && this.context.auditLogger) {
         this.context.auditLogger.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
-            savedObject: { type: 'action', id },
+            savedObject: { type: 'action', id: so.id },
           })
         );
       }
     });
 
     for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
+      if (isSavedObjectErrorResult(action)) {
         throw Boom.badRequest(
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
@@ -429,8 +445,9 @@ export class ActionsClient {
           logger: this.context.logger,
           configurationUtilities,
           credentials: {
-            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+            type: 'client_secret',
+            config: { clientId: tokenOpts.config.clientId },
+            secrets: { clientSecret: tokenOpts.secrets.clientSecret },
           },
           tokenUrl: tokenOpts.tokenUrl,
           oAuthScope: tokenOpts.scope,
@@ -571,6 +588,14 @@ export class ActionsClient {
       );
     }
 
+    // Must run before deleting credentials or the saved object because client termination may
+    // need the connector's current credentials.
+    await this.context.evictClientPool?.(id);
+
+    // Must run before the saved-object delete below — needs the connector's secrets to revoke its
+    // OAuth grant.
+    await this.deleteConnectorAuthTokens(id, authMode);
+
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
     const hookServices: HookServices = {
@@ -609,18 +634,18 @@ export class ActionsClient {
       this.context.logger
     );
 
+    return result;
+  }
+
+  private async deleteConnectorAuthTokens(id: string, authMode?: AuthMode) {
     try {
       await this.context.connectorTokenClient.deleteConnectorTokens({
         connectorId: id,
         authMode,
       });
     } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
-      );
+      this.context.logger.error(`Failed to delete auth tokens for connector "${id}": ${e.message}`);
     }
-
-    return result;
   }
 
   public async execute(
@@ -790,5 +815,9 @@ export class ActionsClient {
       );
       throw err;
     }
+  }
+
+  public async evictClientPool(connectorId: string): Promise<void> {
+    await this.context.evictClientPool?.(connectorId);
   }
 }

@@ -853,7 +853,6 @@ export function FormulaEditor({
                             defaultMessage: 'Show function reference',
                           })
                     }
-                    delay="long"
                     position="top"
                   >
                     <EuiLink

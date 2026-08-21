@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -57,6 +57,7 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { ruleQueryInspectorRoute } from './routes/rule/apis/rule_query_inspector/rule_query_inspector_route';
 import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
   RulesSettingsClientFactory,
@@ -118,6 +119,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
 import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -365,6 +367,7 @@ export class AlertingPlugin {
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
+          totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
         });
       }
     }
@@ -427,6 +430,9 @@ export class AlertingPlugin {
     );
 
     uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    ruleCreateTelemetryEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
@@ -482,6 +488,14 @@ export class AlertingPlugin {
       alertingConfig: this.config,
       core,
     });
+
+    ruleQueryInspectorRoute(
+      router,
+      this.licenseState,
+      this.ruleTypeRegistry!,
+      createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      core
+    );
 
     return {
       registerConnectorAdapter: <
@@ -578,6 +592,7 @@ export class AlertingPlugin {
           if (this.changeTrackingService) {
             const { scope } = this.config.ruleChangeTracking;
             if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              ruleType.trackChanges = true;
               this.changeTrackingService.register(ruleType.solution);
             }
           }
@@ -597,12 +612,18 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
+          ...pick(this.config.rules, [
+            'minimumScheduleInterval',
+            'maxScheduledPerMinute',
+            'run',
+            'apiKeyType',
+          ]),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
+        getTotalFieldsLimit: () => this.config.alertsService.totalFieldsLimit,
         getContextInitializationPromise: (
           context: string,
           namespace: string
@@ -697,6 +718,7 @@ export class AlertingPlugin {
       shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
+      analytics: core.analytics,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -752,8 +774,8 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
+      auditService: core.security.audit,
       backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       data: plugins.data,
@@ -786,6 +808,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      uiamConvert: core.security.authc.apiKeys.uiam?.convert,
     });
 
     this.eventLogService!.registerSavedObjectProvider(

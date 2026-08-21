@@ -16,12 +16,17 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -41,19 +46,33 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+    class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+    data-size="m"
+    style="--euiCallOutTypeColor: #0B64DD;"
   >
-    <p
-      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+    <div
+      class="css-1slkmya-wrapper"
     >
-      <span
-        aria-hidden="true"
-        class="emotion-euiCallOut__icon"
-        color="inherit"
-        data-euiicon-type="gear"
-      />
-      You do not have permission to view filter lists
-    </p>
+      <div
+        class="css-wlziyu-body"
+      >
+        <span
+          aria-hidden="true"
+          class="css-1cmanx3-icon-l-icon"
+          color="#0B64DD"
+          data-euiicon-type="gear"
+        />
+        <div
+          class="css-ak2bmi-content"
+        >
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+          >
+            You do not have permission to view filter lists
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
   <div
     class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
@@ -75,12 +94,17 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -109,12 +133,17 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="empty"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="empty"
+              role="presentation"
+            />
+          </span>
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
             data-test-subj="mlScopeCheckbox_domain"
@@ -189,12 +218,17 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -223,12 +257,17 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="check"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="check"
+              role="presentation"
+            />
+          </span>
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -304,12 +343,17 @@ exports[`ScopeSection renders when not enabled 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="empty"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="empty"
+          role="presentation"
+        />
+      </span>
       <input
         class="euiCheckbox__input emotion-euiCheckbox__input"
         data-test-subj="mlScopeEnableCheckbox"
@@ -347,12 +391,17 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -372,36 +421,47 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+    class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+    data-size="m"
+    style="--euiCallOutTypeColor: #0B64DD;"
   >
-    <p
-      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
-    >
-      <span
-        aria-hidden="true"
-        class="emotion-euiCallOut__icon"
-        color="inherit"
-        data-euiicon-type="gear"
-      />
-      No filter lists configured
-    </p>
     <div
-      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-    />
-    <div
-      class="euiText emotion-euiText-s-euiTextColor-default"
+      class="css-1slkmya-wrapper"
     >
-      <p>
-        To configure scope, you must first use the 
-        <button
-          class="euiLink emotion-euiLink-primary"
-          data-test-subj="mlScopeNoFilterListsLink"
-          type="button"
+      <div
+        class="css-wlziyu-body"
+      >
+        <span
+          aria-hidden="true"
+          class="css-1cmanx3-icon-l-icon"
+          color="#0B64DD"
+          data-euiicon-type="gear"
+        />
+        <div
+          class="css-ak2bmi-content"
         >
-          Filter Lists
-        </button>
-         settings page to create the list of values you want to include or exclude in the job rule.
-      </p>
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+          >
+            No filter lists configured
+          </p>
+          <div
+            class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+          >
+            <p>
+              To configure scope, you must first use the 
+              <button
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="mlScopeNoFilterListsLink"
+                type="button"
+              >
+                Filter Lists
+              </button>
+               settings page to create the list of values you want to include or exclude in the job rule.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div

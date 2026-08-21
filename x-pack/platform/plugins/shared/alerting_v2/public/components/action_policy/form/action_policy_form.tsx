@@ -17,11 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
 import { QuickFilters } from './components/quick_filters';
+import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
@@ -36,7 +37,8 @@ const optionalLabel = (
 
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const { data: dataFieldNames } = useFetchDataFields();
+  const matcher = useWatch({ control, name: 'matcher' });
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
 
   return (
     <>
@@ -235,6 +237,8 @@ export const ActionPolicyForm = () => {
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
           <WorkflowSelector />
+          <EuiSpacer size="m" />
+          <SimpleWorkflowBuilder />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>

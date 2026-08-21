@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
+import {
+  getRoot,
+  isDraftStream,
+  isEnabledFailureStore,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
@@ -13,8 +19,12 @@ import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
+  conditionToESQL,
+  convertUIStepsToDSL,
+  isConditionBlock,
   validateStreamlang,
   validateStreamlangModeCompatibility,
+  type StreamlangDSLWithUpdatedAt,
 } from '@kbn/streamlang';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
@@ -22,6 +32,7 @@ import {
   streamlangDSLSchemaStrict,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
+import { isEqual } from 'lodash';
 import type {
   EnrichmentDataSource,
   EnrichmentUrlState,
@@ -43,6 +54,7 @@ import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
+import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -143,7 +155,7 @@ export const streamEnrichmentMachine = setup({
     // When the definition is refreshed (outside of the machine), this resets state back to match it.
     resetStateFromDefinition: assign(({ context }) => {
       const dslWithIdentifiers = addDeterministicCustomIdentifiersFromIngestProcessing(
-        context.definition.stream.ingest.processing
+        getStreamlangProcessing(context.definition.stream.ingest.processing)
       );
       return {
         previousStreamlangDSL: dslWithIdentifiers,
@@ -220,20 +232,30 @@ export const streamEnrichmentMachine = setup({
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => {
       const { definition, urlState } = assignArgs.context;
-      const dataSources = [...urlState.dataSources];
 
-      // Add failure store data source by default if available and not already present
-      const isFailureStoreAvailable =
-        isEnabledFailureStore(definition.effective_failure_store) &&
-        definition.privileges?.read_failure_store;
-      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+      const isWiredDraft = isDraftStream(definition.stream);
 
-      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
-        // Add with enabled: false since there's already an active data source
-        dataSources.push({
-          ...createFailureStoreDataSource(definition.stream.name),
-          enabled: false,
-        });
+      const dataSources = isWiredDraft
+        ? urlState.dataSources.filter(
+            (ds) => ds.type !== 'kql-samples' && ds.type !== 'failure-store'
+          )
+        : [...urlState.dataSources];
+
+      // Add failure store data source by default if available and not already present.
+      // Draft streams have no backing data stream so failure store is not applicable.
+      if (!isWiredDraft) {
+        const isFailureStoreAvailable =
+          isEnabledFailureStore(definition.effective_failure_store) &&
+          definition.privileges?.read_failure_store;
+        const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+
+        if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+          // Add with enabled: false since there's already an active data source
+          dataSources.push({
+            ...createFailureStoreDataSource(definition.stream.name),
+            enabled: false,
+          });
+        }
       }
 
       return {
@@ -279,6 +301,8 @@ export const streamEnrichmentMachine = setup({
 
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+
+    fetchMoreSamples: getPlaceholderFor(createFetchMoreSamplesAction),
 
     filterByCondition: ({ context }, params: { conditionId: string }) => {
       context.interactiveModeRef?.send({
@@ -334,10 +358,10 @@ export const streamEnrichmentMachine = setup({
     return {
       definition: input.definition,
       previousStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       nextStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       hasChanges: false,
       schemaErrors: [], // Schema errors from Zod parsing
@@ -478,6 +502,9 @@ export const streamEnrichmentMachine = setup({
               on: {
                 'simulation.refresh': {
                   actions: [{ type: 'refreshDataSources' }],
+                },
+                'simulation.fetchMore': {
+                  actions: [{ type: 'fetchMoreSamples' }],
                 },
               },
               states: {
@@ -695,6 +722,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   actions: {
     refreshDefinition,
     syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
+    fetchMoreSamples: createFetchMoreSamplesAction(),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
@@ -704,6 +732,39 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
 });
 
+function createFetchMoreSamplesAction() {
+  return ({ context }: { context: StreamEnrichmentContextType }) => {
+    const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
+    if (!selectedConditionId) return;
+
+    const steps = context.simulatorRef.getSnapshot().context.steps;
+    const condition = findConditionById(steps, selectedConditionId);
+    if (!condition) return;
+
+    const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+    if (!activeDataSourceRef) return;
+
+    const conditionIndex = steps.findIndex(
+      (s) => isConditionBlock(s) && s.customIdentifier === selectedConditionId
+    );
+    const stepsBeforeCondition = conditionIndex > 0 ? steps.slice(0, conditionIndex) : [];
+    const processingSteps = convertUIStepsToDSL(stepsBeforeCondition);
+    const conditionEsql = conditionToESQL(condition);
+
+    activeDataSourceRef.send({
+      type: 'dataSource.fetchMore',
+      conditionEsql,
+      processingSteps,
+    });
+  };
+}
+
+const getStreamlangProcessing = (
+  processing: StreamEnrichmentContextType['definition']['stream']['ingest']['processing']
+): StreamlangDSLWithUpdatedAt => {
+  return 'steps' in processing ? processing : { steps: [], updated_at: processing.updated_at };
+};
+
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
   const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);
 
@@ -712,9 +773,9 @@ const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: Str
   if (!isValidSchema) {
     return true;
   } else {
-    return (
-      JSON.stringify(sanitiseForEditing(nextStreamlangDSL)) !==
-      JSON.stringify(sanitiseForEditing(previousStreamlangDSL))
+    return !isEqual(
+      sanitiseForEditing(nextStreamlangDSL),
+      sanitiseForEditing(previousStreamlangDSL)
     );
   }
 };
