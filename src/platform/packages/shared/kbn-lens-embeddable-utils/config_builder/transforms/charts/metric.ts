@@ -236,8 +236,8 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          // `secondaryLabel`/`secondaryPrefix` are legacy state kept as a fallback: attributes
-          // already stored at the latest version skip the transform that drops them
+          // `secondaryLabel`/`secondaryPrefix` are legacy state kept as a runtime fallback
+          // until a future CM version copies the custom label onto the secondary column
           ...(visualization.secondaryNameVisibility === 'hidden' ||
           visualization.secondaryLabel === '' ||
           visualization.secondaryPrefix === ''

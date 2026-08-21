@@ -794,7 +794,7 @@ export const formulaColumns: LensAttributes = {
   },
   title: 'Heatmap with formula',
   description: '',
-  version: 3,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [
     {

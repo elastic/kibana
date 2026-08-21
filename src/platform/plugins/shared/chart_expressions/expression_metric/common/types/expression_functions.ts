@@ -70,7 +70,10 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  /** Legacy fallback for by-value dashboards that have not run full attribute migrations. */
+  /**
+   * Runtime fallback for a legacy custom secondary label until a future CM version
+   * copies it onto the secondary column and deletes this field.
+   */
   secondaryLabel?: string;
   secondaryNameVisibility: SecondaryNameVisibility;
   applyColorTo?: 'background' | 'value';

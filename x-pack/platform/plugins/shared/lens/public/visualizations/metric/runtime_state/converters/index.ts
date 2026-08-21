@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { getUpdatedMetricState } from '../../../../../common/content_management/v3/transforms/metric';
+import { convertSecondaryNameVisibility } from './secondary_name_visibility';
 import { removeLegacyTitleWeight } from './remove_legacy_title_weight';
 import { convertApplyColorTo } from './apply_color_to';
 import { convertDensity } from './density';
 
 export const getRuntimeConverters = () => [
-  // v3 CM transform (idempotent): secondaryPrefix/secondaryLabel → secondaryNameVisibility
-  // (content-management v3 migration copies custom label text onto the secondary column for
-  // persisted objects; runtime conversion keeps it as a legacy render fallback for
-  // by-value state), valuesTextAlign → primaryAlign/secondaryAlign
-  getUpdatedMetricState,
+  // secondaryPrefix/secondaryLabel → secondaryNameVisibility (keeps a non-empty
+  // secondaryLabel as a render fallback until a future CM version), valuesTextAlign →
+  // primaryAlign/secondaryAlign
+  convertSecondaryNameVisibility,
   removeLegacyTitleWeight,
   convertApplyColorTo,
   convertDensity,

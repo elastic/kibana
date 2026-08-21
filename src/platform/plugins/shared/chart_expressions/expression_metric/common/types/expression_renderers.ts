@@ -49,7 +49,10 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
-  /** Legacy fallback for by-value dashboards that have not run full attribute migrations. */
+  /**
+   * Runtime fallback for a legacy custom secondary label until a future CM version
+   * copies it onto the secondary column and deletes this field.
+   */
   secondaryLabel?: string;
   secondaryNameVisibility: SecondaryNameVisibility;
   /**

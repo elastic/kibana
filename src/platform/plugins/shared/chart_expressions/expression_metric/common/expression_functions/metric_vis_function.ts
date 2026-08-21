@@ -193,7 +193,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
         defaultMessage:
-          'Legacy custom label for the Secondary Metric, used as a fallback for unmigrated by-value state',
+          'Legacy custom label for the Secondary Metric, used as a runtime fallback until a future migration copies it onto the column',
       }),
       required: false,
     },

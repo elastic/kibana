@@ -1809,10 +1809,25 @@ describe('metric visualization', () => {
       });
     };
 
-    it('returns state unchanged when both metrics are numeric', () => {
+    it('clears legacy secondaryLabel when the secondary column has a custom name', () => {
+      const frame = createFrame(() => ({
+        ...createOperationByType('number'),
+        customLabel: true,
+      }));
+      const result = visualization.onDatasourceUpdate!(
+        { ...fullState, secondaryLabel: 'legacy-custom' },
+        frame
+      );
+      expect(result).not.toHaveProperty('secondaryLabel');
+    });
+
+    it('keeps legacy secondaryLabel when the secondary column name is not custom', () => {
       const frame = createFrame(() => createOperationByType('number'));
-      const result = visualization.onDatasourceUpdate!(fullState, frame);
-      expect(result).toBe(fullState);
+      const result = visualization.onDatasourceUpdate!(
+        { ...fullState, secondaryLabel: 'legacy-custom' },
+        frame
+      );
+      expect(result.secondaryLabel).toBe('legacy-custom');
     });
 
     it('clears palette when primary metric becomes non-numeric', () => {

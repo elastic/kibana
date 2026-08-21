@@ -400,10 +400,21 @@ const cleanupMetricState = (
   if (
     isSecondaryTrendConfigInvalid(updatedState.secondaryTrend, colorMode, isPrimaryMetricNumeric)
   ) {
-    return {
+    updatedState = {
       ...updatedState,
       secondaryTrend: getDefaultConfigForMode(colorMode),
     };
+  }
+
+  // Once the user sets a custom Name on the secondary column, stop shadowing it
+  // with the legacy visualization-level secondaryLabel.
+  if (
+    updatedState.secondaryLabel &&
+    updatedState.secondaryMetricAccessor &&
+    datasource.getOperationForColumnId(updatedState.secondaryMetricAccessor)?.customLabel
+  ) {
+    updatedState = { ...updatedState };
+    delete updatedState.secondaryLabel;
   }
 
   return updatedState;

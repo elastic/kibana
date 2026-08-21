@@ -8,13 +8,12 @@
 import type { LensSerializedState } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
-import { LENS_ITEM_VERSION_V3 } from '@kbn/lens-common/content_management/constants';
+import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
-import { transformToV3LensItemAttributes } from '../content_management/v3';
 import { injectLensReferences } from '../references';
 import type {
   LensByRefTransformOutResult,
@@ -25,7 +24,6 @@ import { findLensReference } from './utils';
 import {
   isLensAttributesV0,
   isLensAttributesV1,
-  isLensAttributesV2,
 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
 
@@ -150,20 +148,10 @@ export function migrateAttributes(
   if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
     const v1Attributes = transformToV1LensItemAttributes(newAttributes);
     const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
-    const v3Attributes = transformToV3LensItemAttributes({ ...v2Attributes, visualizationType });
     return {
       ...attributes,
-      ...v3Attributes,
-      version: LENS_ITEM_VERSION_V3 as LensAttributes['version'],
-    };
-  }
-
-  if (isLensAttributesV2(newAttributes)) {
-    const v3Attributes = transformToV3LensItemAttributes(newAttributes);
-    return {
-      ...attributes,
-      ...v3Attributes,
-      version: LENS_ITEM_VERSION_V3 as LensAttributes['version'],
+      ...v2Attributes,
+      version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
     };
   }
 

@@ -10,11 +10,9 @@ import type { ContentManagementServicesDefinition, Version } from '@kbn/object-v
 import { serviceDefinition as v0 } from './v0/service';
 import { serviceDefinition as v1 } from './v1/service';
 import { serviceDefinition as v2 } from './v2/service';
-import { serviceDefinition as v3 } from './v3/service';
 
 export const servicesDefinitions: { [version: Version]: ContentManagementServicesDefinition } = {
   0: v0,
   1: v1,
   2: v2,
-  3: v3,
 };

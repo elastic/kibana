@@ -12,4 +12,3 @@ export * from './latest';
 
 export type * as LensV1 from './v1';
 export type * as LensV2 from './v2';
-export type * as LensV3 from './v3';
