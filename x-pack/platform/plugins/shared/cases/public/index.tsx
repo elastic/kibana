@@ -34,7 +34,7 @@ export type {
   UnifiedHybridAttachmentType,
   UnifiedReferenceAttachmentType,
   UnifiedValueAttachmentType,
-  CommonAttachmentTabViewProps,
+  CommonAttachmentListViewProps,
   UnifiedHybridAttachmentViewProps,
   UnifiedReferenceAttachmentViewProps,
   UnifiedValueAttachmentViewProps,
