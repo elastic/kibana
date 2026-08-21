@@ -40,7 +40,7 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
+# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai or reviewer:libra is present.
 # - Draft PR events activate only when the ci:draft-checks label is present.
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
@@ -53,6 +53,7 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:libra') &&
       github.event_name == 'pull_request_target' &&
       (
         (

@@ -26,7 +26,7 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: false;
-      reason: 'duplicate_within_window' | 'bulk_error' | 'duplicate_key';
+      reason: 'existing_active_event' | 'bulk_error' | 'duplicate_in_batch' | 'unchanged_outcome';
       existing_event_id?: string;
     };
 
@@ -80,7 +80,7 @@ const parseEventsWriteStep = (
 
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.
- * Includes duplicate_within_window outcomes so follow-up cycles can resolve the episode.
+ * Includes existing_active_event outcomes so follow-up cycles can resolve the episode.
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
@@ -92,7 +92,7 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Significa
     const { items, results } = parsed;
     return results
       .map((result, index) =>
-        !result.written && result.reason !== 'duplicate_within_window'
+        !result.written && result.reason !== 'existing_active_event'
           ? undefined
           : ({
               ...items[index],
