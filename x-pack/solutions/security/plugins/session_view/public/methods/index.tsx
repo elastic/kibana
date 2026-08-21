@@ -86,7 +86,7 @@ const CrossProjectUnsupportedPrompt = () => (
       <p>
         <FormattedMessage
           id="xpack.sessionView.crossProjectUnsupportedBody"
-          defaultMessage="This session is stored in a linked project. Session View does not yet support cross-project search, so its process tree and alerts cannot be shown here."
+          defaultMessage="This session is in a linked project. Open it from that project to view it (cross-project search isn't supported yet)."
         />
       </p>
     }
