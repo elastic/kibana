@@ -2869,6 +2869,31 @@ describe('softDeleteByQuery', () => {
     });
   });
 
+  test('builds a script for a flat single-segment field', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'deleted' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0] as [estypes.UpdateByQueryRequest];
+    expect(call.script).toEqual({
+      source: 'ctx._source.deleted = true;',
+      lang: 'painless',
+    });
+  });
+
+  test.each([
+    ['an injection attempt', 'deleted = true; ctx._source.other'],
+    ['an empty field', ''],
+    ['a leading dot', '.deleted'],
+    ['a trailing dot', 'deleted.'],
+    ['consecutive dots', 'a..b'],
+    ['a disallowed character', 'kibana.alert-rule.deleted'],
+  ])('rejects %s without issuing a request', async (_label, field) => {
+    await expect(
+      clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field })
+    ).rejects.toThrow(/invalid field/);
+
+    expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+  });
+
   test('does not pass wait_for_completion (blocking)', async () => {
     await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });
 

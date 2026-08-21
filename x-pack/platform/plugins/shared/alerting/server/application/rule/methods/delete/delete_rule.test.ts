@@ -43,8 +43,8 @@ const {
 });
 
 beforeEach(() => {
+  jest.clearAllMocks();
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
-  (auditLogger.log as jest.Mock).mockClear();
 });
 
 const fakeRuleName = 'fakeRuleName';
@@ -236,6 +236,29 @@ describe('delete()', () => {
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to soft delete gaps for rule 1: Boom!'
     );
+  });
+
+  // `softDeleteGapsByQuery` swallows its own errors, so a rejecting
+  // `getEventLogClient` is the only way the outer try/catch is reached in
+  // production — e.g. when the ES or saved objects client is unavailable.
+  test('still deletes the rule when getEventLogClient throws', async () => {
+    rulesClientParams.getEventLogClient.mockRejectedValueOnce(new Error('No event log client'));
+
+    const result = await rulesClient.delete({ id: '1' });
+
+    expect(result).toEqual({ success: true });
+    expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rule 1: No event log client'
+    );
+  });
+
+  test('does not soft-delete gaps when the SO deletion fails', async () => {
+    unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
+
+    await expect(rulesClient.delete({ id: '1' })).rejects.toThrow('SO delete failed');
+
+    expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
   });
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {

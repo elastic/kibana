@@ -21,7 +21,10 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
-import { generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
+import {
+  generateGapsForRule,
+  generateMalformedGapEventsForRule,
+} from '../../../utils/event_log/generate_gaps_for_rule';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -157,6 +160,31 @@ export default ({ getService }: FtrProviderContext): void => {
         await retry.tryForTime(30_000, async () => {
           expect(await countGapsForRule(createdRule.id, { softDeleted: true })).to.equal(5);
           expect(await countGapsForRule(createdRule.id, { softDeleted: false })).to.equal(0);
+        });
+      });
+
+      it('should soft-delete well-formed gaps even when a malformed gap document matches', async () => {
+        const createdRule = await createRule(supertest, log, getSimpleRule('rule-malformed-gaps'));
+        const ruleRef = { id: createdRule.id, name: createdRule.name };
+
+        const { gapEvents } = await generateGapsForRule(es, ruleRef, 5);
+        const malformedCount = await generateMalformedGapEventsForRule(es, ruleRef);
+
+        expect(gapEvents.length).to.equal(5);
+        expect(await countGapsForRule(createdRule.id, { softDeleted: false })).to.equal(
+          5 + malformedCount
+        );
+
+        await detectionsApi.deleteRule({ query: { rule_id: 'rule-malformed-gaps' } }).expect(200);
+
+        // The script's null guard skips documents without `kibana.alert.rule.gap` rather
+        // than raising a script error, which would abort the whole update_by_query and
+        // leave well-formed gaps active. The malformed documents stay untouched.
+        await retry.tryForTime(30_000, async () => {
+          expect(await countGapsForRule(createdRule.id, { softDeleted: true })).to.equal(5);
+          expect(await countGapsForRule(createdRule.id, { softDeleted: false })).to.equal(
+            malformedCount
+          );
         });
       });
     });

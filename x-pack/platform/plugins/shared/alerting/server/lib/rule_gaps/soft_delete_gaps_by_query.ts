@@ -8,11 +8,11 @@
 import { chunk } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { GAP_DELETED_FIELD, GAP_EVENT_ACTION, GAP_EVENT_PROVIDER } from './constants';
 
 // Chunk rule IDs to stay well below `index.max_terms_count` (default 65,536)
 // when building the `terms` filter.
 const MAX_RULE_IDS_PER_QUERY = 10_000;
-const GAP_DELETED_FIELD = 'kibana.alert.rule.gap.deleted';
 
 export interface SoftDeleteGapsByQueryParams {
   ruleIds: string[];
@@ -39,8 +39,8 @@ export const softDeleteGapsByQuery = async ({
         query: {
           bool: {
             must: [
-              { term: { 'event.action': 'gap' } },
-              { term: { 'event.provider': 'alerting' } },
+              { term: { 'event.action': GAP_EVENT_ACTION } },
+              { term: { 'event.provider': GAP_EVENT_PROVIDER } },
               { terms: { 'rule.id': ruleIdChunk } },
             ],
             must_not: [{ term: { [GAP_DELETED_FIELD]: true } }],

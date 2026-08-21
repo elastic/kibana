@@ -319,6 +319,33 @@ describe('bulkDelete', () => {
     expect(result.errors).toEqual([]);
   });
 
+  // `softDeleteGapsByQuery` swallows its own errors, so a rejecting
+  // `getEventLogClient` is the only way the outer try/catch is reached in
+  // production — e.g. when the ES or saved objects client is unavailable.
+  test('still returns deleted rules when getEventLogClient throws', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    rulesClientParams.getEventLogClient.mockRejectedValueOnce(new Error('No event log client'));
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rules: id1,id2: No event log client'
+    );
+    expect(result.rules).toHaveLength(2);
+    expect(result.errors).toEqual([]);
+  });
+
   test('should try to delete rules, two successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [

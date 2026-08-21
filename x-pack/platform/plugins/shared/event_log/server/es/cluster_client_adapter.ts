@@ -41,10 +41,20 @@ export interface SoftDeleteByQueryParams {
   requestsPerSecond?: number;
 }
 
+// `field` is spliced directly into Painless source, so it must be a
+// dot-delimited path of plain identifiers — nothing that could terminate the
+// expression and append script of its own.
+const VALID_FIELD_PATH = /^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*$/;
+
 // Builds a null-safe Painless assignment that sets a nested boolean field to
 // `true`, but only when the field's parent object exists (a no-op otherwise), so
 // a malformed document cannot fail the batch.
 const buildSetFieldTrueScript = (field: string): string => {
+  if (!VALID_FIELD_PATH.test(field)) {
+    throw new Error(
+      `softDeleteByQuery: invalid field "${field}", expected a dot-delimited path of [a-zA-Z0-9_] segments`
+    );
+  }
   const segments = field.split('.');
   const assignPath = `ctx._source.${segments.join('.')}`;
   const parents = segments.slice(0, -1);
@@ -745,6 +755,7 @@ export class ClusterClientAdapter<
     slices = 'auto',
     requestsPerSecond = DEFAULT_UPDATE_BY_QUERY_REQUESTS_PER_SECOND,
   }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
+    const source = buildSetFieldTrueScript(field);
     const esClient = await this.elasticsearchClientPromise;
     return esClient.updateByQuery({
       index: this.esNames.dataStream,
@@ -753,7 +764,7 @@ export class ClusterClientAdapter<
       requests_per_second: requestsPerSecond,
       query,
       script: {
-        source: buildSetFieldTrueScript(field),
+        source,
         lang: 'painless',
       },
     });

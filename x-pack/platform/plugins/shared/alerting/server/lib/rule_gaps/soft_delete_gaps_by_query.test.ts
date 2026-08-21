@@ -83,6 +83,16 @@ describe('softDeleteGapsByQuery', () => {
     );
   });
 
+  // The callers wrap this helper in a try/catch, but they rely on it never
+  // rejecting; pinning that keeps the contract explicit.
+  test('resolves rather than rejecting when every chunk fails', async () => {
+    eventLogClient.softDeleteByQuery.mockRejectedValue(new Error('boom'));
+
+    await expect(
+      softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger })
+    ).resolves.toBeUndefined();
+  });
+
   test('warns when the response reports version conflicts or failures', async () => {
     eventLogClient.softDeleteByQuery.mockResolvedValue({
       updated: 1,

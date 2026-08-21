@@ -114,8 +114,11 @@ Given 3 rules exist with gap documents
 And saved-object deletion succeeds for rule 1 and rule 3 but fails for rule 2
 When the user bulk-deletes all 3 rules
 Then softDeleteGapsByQuery is called with [rule 1, rule 3] only
-And rule 2's gap documents remain unchanged
 ```
+
+> The unit test asserts the rule IDs passed to `softDeleteGapsByQuery`; that rule 2's gap
+> documents are consequently untouched follows from the query scope rather than being
+> asserted directly. No integration test currently inspects rule 2's documents.
 
 #### **Scenario: Already soft-deleted gaps are left untouched**
 
@@ -152,29 +155,39 @@ Then the saved-object deletion happens before softDeleteGapsByQuery is called
 
 #### **Scenario: Gaps are preserved when saved-object deletion fails**
 
-**Automation**: 1 unit test.
+**Automation**: 2 unit tests (bulk and single delete).
 
 ```Gherkin
 Given rules exist with gap documents
-And saved-object deletion fails for every rule
-When the user bulk-deletes the rules
+And saved-object deletion fails
+When the user deletes the rules
 Then softDeleteGapsByQuery is never called
-And the gap documents remain unchanged
 ```
+
+> Both unit tests assert that `softDeleteGapsByQuery` is not called; because the helper is
+> the only writer of the `deleted` flag on this path, the gap documents are necessarily left
+> active. That outcome is not asserted against real documents — no integration test forces a
+> saved-object deletion failure and then counts active gaps.
 
 ### Error handling
 
 #### **Scenario: Gap soft-deletion failure does not block rule deletion**
 
-**Automation**: 2 unit tests (bulk and single delete).
+**Automation**: 4 unit tests (bulk and single delete, for each of the two failure sources).
 
 ```Gherkin
 Given rules exist with gap documents
-And softDeleteGapsByQuery throws
+And obtaining the event log client fails
 When the user deletes the rules
 Then the API returns 200 with the rules deleted
 And the failure is logged
+And softDeleteGapsByQuery is never called
 ```
+
+> `softDeleteGapsByQuery` swallows its own per-chunk errors and never rejects — a behaviour
+> pinned by its own unit test — so a failing `getEventLogClient()` is the only way the
+> callers' `try/catch` is reached in production. Two further unit tests drive the helper
+> itself to reject in order to pin the callers' suppression behaviour directly.
 
 #### **Scenario: Version conflicts are tolerated and logged**
 
@@ -187,3 +200,28 @@ Then the update_by_query uses conflicts: 'proceed'
 And version_conflicts and failures reported in the response are logged
 And rule deletion still succeeds
 ```
+
+#### **Scenario: A malformed gap document does not fail the batch**
+
+**Automation**: 1 integration test + 3 unit tests (script generation, including the flat-field case).
+
+```Gherkin
+Given a rule has 5 well-formed gap documents
+And it also has gap documents missing the kibana.alert.rule.gap object
+When the user deletes the rule
+Then all 5 well-formed gap documents are soft-deleted
+And the malformed documents are left untouched rather than failing the update_by_query
+```
+
+#### **Scenario: The soft-delete field name is validated before use**
+
+**Automation**: 6 unit tests.
+
+```Gherkin
+Given a caller passes a field that is not a dot-delimited path of [a-zA-Z0-9_] segments
+When softDeleteByQuery is called
+Then it throws before issuing any request to Elasticsearch
+```
+
+> The field is interpolated into Painless source, so the guard exists to make script
+> injection through this platform contract impossible.
