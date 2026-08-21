@@ -48,10 +48,6 @@ export const CHART_LAYOUTS: Partial<Record<ApmRuleType | AnomalyDetectorType, Ch
     primary: 'throughput',
     secondary: ['latency', 'failedTransactionRate'],
   },
-  [AnomalyDetectorType.txLowCount]: {
-    primary: 'throughput',
-    secondary: ['latency', 'failedTransactionRate'],
-  },
   [AnomalyDetectorType.txFailureRate]: {
     primary: 'failedTransactionRate',
     secondary: ['throughput', 'latency'],
