@@ -48,7 +48,11 @@ describe('Inbound events HTTP API', () => {
     }
   });
 
-  const postHub = (connectorId: string, token: string) =>
+  const postHub = (
+    connectorId: string,
+    token: string,
+    body: Record<string, unknown> = { eventType: 'order.created', orderId: '1' }
+  ) =>
     getSupertest(
       kibanaServer.root,
       'post',
@@ -60,7 +64,7 @@ describe('Inbound events HTTP API', () => {
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
       .set('kbn-xsrf', 'kibana')
       .set('Authorization', `Bearer ${token}`)
-      .send({ eventType: 'order.created', orderId: '1' });
+      .send(body);
 
   it('serves the versioned public route and returns 404 fail-closed for unknown connector', async () => {
     await getSupertest(
@@ -95,6 +99,11 @@ describe('Inbound events HTTP API', () => {
     expect(created.connector_type_id).toBe(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID);
     expect(ingestToken).toEqual(expect.any(String));
     expect(created.config?.ingestTokenHash).toMatch(/^[a-f0-9]{64}$/);
+
+    await postHub(created.id, ingestToken!, {
+      type: 'url_verification',
+      challenge: 'abc',
+    }).expect(200, { challenge: 'abc' });
 
     await postHub(created.id, ingestToken!).expect(202, { ok: true });
 

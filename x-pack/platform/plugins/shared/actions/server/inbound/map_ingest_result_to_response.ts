@@ -6,6 +6,7 @@
  */
 
 import type { HttpResponsePayload, KibanaResponseFactory } from '@kbn/core/server';
+import { isJsonSerializableSpokeBody } from '@kbn/connector-specs';
 
 import type { IngestInboundEventResult } from './ingest';
 
@@ -13,7 +14,13 @@ const spokeHttpBody = (body: unknown): HttpResponsePayload | undefined => {
   if (body === undefined || body === null) {
     return undefined;
   }
-  return body as HttpResponsePayload;
+  if (typeof body === 'string') {
+    return body;
+  }
+  if (isJsonSerializableSpokeBody(body)) {
+    return body as HttpResponsePayload;
+  }
+  return undefined;
 };
 
 export const mapIngestResultToResponse = (

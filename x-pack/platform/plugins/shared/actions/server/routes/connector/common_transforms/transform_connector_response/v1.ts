@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
+import type { ConnectorResponseWithMintedSecretsV1 } from '../../../../../common/routes/connector/response';
 import type { Connector } from '../../../../application/connector/types';
 
 export const transformConnectorResponse = ({
@@ -18,7 +18,7 @@ export const transformConnectorResponse = ({
   authMode,
   secrets,
   ...res
-}: Connector): ConnectorResponseV1 => ({
+}: Connector): ConnectorResponseWithMintedSecretsV1 => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,

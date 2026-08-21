@@ -18,6 +18,7 @@ import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_KEY,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './constants';
 
 describe('InboundWebhook', () => {
@@ -33,6 +34,10 @@ describe('InboundWebhook', () => {
     expect(InboundWebhook.metadata.icon).toBe('plugs');
     expect(Object.keys(InboundWebhook.actions)).toEqual([]);
     expect(InboundWebhook.test.enabled).toBe(false);
+  });
+
+  it('does not declare ingestTokenHash (factory injects it)', () => {
+    expect(InboundWebhook.schema?.shape).not.toHaveProperty('ingestTokenHash');
   });
 
   it('is allowlisted to declare events', () => {
@@ -130,7 +135,24 @@ describe('InboundWebhook', () => {
 
     it('emits when the challenge string is empty or too long', async () => {
       expectEmit(await events.handleEvents(createContext({ challenge: '' })));
-      expectEmit(await events.handleEvents(createContext({ challenge: 'x'.repeat(1025) })));
+      expectEmit(
+        await events.handleEvents(
+          createContext({ challenge: 'x'.repeat(MAX_HANDSHAKE_CHALLENGE_LENGTH + 1) })
+        )
+      );
+    });
+
+    it('does not log the raw body at info', async () => {
+      const log = loggerMock.create();
+      await events.handleEvents({
+        ...createContext({ challenge: 'ping-1', token: 'should-not-be-logged' }),
+        log,
+      });
+      await events.handleEvents({
+        ...createContext({ eventType: 'order.created' }),
+        log,
+      });
+      expect(log.info).not.toHaveBeenCalled();
     });
   });
 });

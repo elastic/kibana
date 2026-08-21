@@ -10,7 +10,7 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 import { getInboundIngestToken, isInboundIngressConnector } from './inbound_ingress';
 
 describe('inbound ingress helpers', () => {
-  it('treats connectors with events or a stored hash as inbound ingress', () => {
+  it('treats connectors with inbound events as inbound ingress', () => {
     expect(
       isInboundIngressConnector(
         createMockActionConnector({ actionTypeId: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID })
@@ -23,7 +23,7 @@ describe('inbound ingress helpers', () => {
           config: { ingestTokenHash: 'a'.repeat(64) },
         })
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(isInboundIngressConnector(createMockActionConnector({ actionTypeId: '.http' }))).toBe(
       false
     );

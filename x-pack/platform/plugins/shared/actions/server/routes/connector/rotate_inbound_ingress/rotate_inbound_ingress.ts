@@ -11,7 +11,7 @@ import type { ILicenseState } from '../../../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { connectorResponseWithMintedSecretsSchemaV1 } from '../../../../common/routes/connector/response';
 import { transformConnectorResponseV1 } from '../common_transforms';
 import type { RotateInboundIngressParamsV1 } from '../../../../common/routes/connector/apis/rotate_inbound_ingress';
 import { rotateInboundIngressParamsSchemaV1 } from '../../../../common/routes/connector/apis/rotate_inbound_ingress';
@@ -45,7 +45,7 @@ export const rotateInboundIngressRoute = (
                   'Indicates a successful call. The new ingest token is returned once in secrets.ingest_token.',
               }
             ),
-            body: () => connectorResponseSchemaV1,
+            body: () => connectorResponseWithMintedSecretsSchemaV1,
           },
           400: {
             description: i18n.translate(

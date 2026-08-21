@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ingestEventsResponseSchema } from './v1';
+export { ingestEventsResponseSchema, ingestEventsAckResponseSchema } from './v1';

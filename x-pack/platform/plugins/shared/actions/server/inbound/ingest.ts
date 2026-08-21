@@ -10,9 +10,8 @@ import {
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
+  parseHandleEventsResult,
   validateEmittedEvents,
-  type HandleEventsHttpResponse,
-  type HandleEventsResult,
 } from '@kbn/connector-specs';
 
 import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
@@ -25,6 +24,7 @@ import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadInboundConnector } from './load_inbound_connector';
+import { sanitizeSpokeHttpHeaders } from './spoke_http';
 
 export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
@@ -63,47 +63,8 @@ const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, u
   return spokeConfig;
 };
 
-const SPOKE_HTTP_STATUS_MIN = 200;
-const SPOKE_HTTP_STATUS_MAX = 599;
-
-const isValidSpokeHttpHeaders = (
-  headers: HandleEventsHttpResponse['headers']
-): headers is Record<string, string> | undefined => {
-  if (headers === undefined) {
-    return true;
-  }
-  return Object.entries(headers).every(
-    ([key, value]) => key.length > 0 && typeof value === 'string'
-  );
-};
-
 /**
- * Validates a spoke `type: 'http'` result. Invalid shapes fail closed (500)
- * rather than forwarding an unbounded status to the caller.
- */
-const parseSpokeHttpResponse = (
-  result: HandleEventsResult
-): HandleEventsHttpResponse | 'not_http' | 'invalid' => {
-  if (result.type === 'emit') {
-    return 'not_http';
-  }
-  if (result.type !== 'http' || result.httpResponse === undefined) {
-    return 'invalid';
-  }
-  const { httpResponse } = result;
-  if (
-    !Number.isInteger(httpResponse.status) ||
-    httpResponse.status < SPOKE_HTTP_STATUS_MIN ||
-    httpResponse.status > SPOKE_HTTP_STATUS_MAX ||
-    !isValidSpokeHttpHeaders(httpResponse.headers)
-  ) {
-    return 'invalid';
-  }
-  return httpResponse;
-};
-
-/**
- * Orchestrates inbound connector event ingest (no HTTP mapping).
+ * Orchestrates inbound connector event ingest and maps spoke HTTP acks to the caller.
  */
 export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
@@ -198,21 +159,21 @@ export async function ingestInboundEvent({
   }
 
   try {
-    const result = await spec.events.handleEvents({
-      connectorId,
-      connectorTypeId,
-      spaceId,
-      config: stripIngestTokenHash(connector.config),
-      rawBody: body,
-      log: logger,
-    });
-
-    const spokeHttp = parseSpokeHttpResponse(result);
-    if (spokeHttp === 'invalid') {
+    const parsed = parseHandleEventsResult(
+      await spec.events.handleEvents({
+        connectorId,
+        connectorTypeId,
+        spaceId,
+        config: stripIngestTokenHash(connector.config),
+        rawBody: body,
+        log: logger,
+      })
+    );
+    if (!parsed.ok) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'handle_fail',
-        detail: 'unexpected_handleEvents_type',
+        detail: `invalid_handleEvents_result ${parsed.message}`,
       });
       return {
         status: 'error',
@@ -220,30 +181,33 @@ export async function ingestInboundEvent({
         body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
       };
     }
-    if (spokeHttp !== 'not_http') {
+    const result = parsed.data;
+
+    if (result.type === 'http') {
+      const spokeHeaders = sanitizeSpokeHttpHeaders(result.httpResponse.headers);
+      if (spokeHeaders === 'invalid') {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'handle_fail',
+          detail: 'invalid_spoke_http',
+        });
+        return {
+          status: 'error',
+          statusCode: 500,
+          body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+        };
+      }
+      const { status, body: spokeBody } = result.httpResponse;
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'http_ack',
-        detail: `status=${spokeHttp.status}`,
+        detail: `status=${status}`,
       });
       return {
         status: 'spoke_http',
-        statusCode: spokeHttp.status,
-        ...(spokeHttp.body !== undefined ? { body: spokeHttp.body } : {}),
-        ...(spokeHttp.headers !== undefined ? { headers: spokeHttp.headers } : {}),
-      };
-    }
-
-    if (result.type !== 'emit') {
-      logInboundIngressOutcome(logger, {
-        ...baseLog,
-        outcome: 'handle_fail',
-        detail: 'unexpected_handleEvents_type',
-      });
-      return {
-        status: 'error',
-        statusCode: 500,
-        body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+        statusCode: status,
+        ...(spokeBody !== undefined ? { body: spokeBody } : {}),
+        ...(spokeHeaders !== undefined ? { headers: spokeHeaders } : {}),
       };
     }
 
@@ -275,6 +239,7 @@ export async function ingestInboundEvent({
     }
 
     let emitFailures = 0;
+    const emitFailureDetails: string[] = [];
     for (const event of result.events) {
       try {
         const emitResult = await emitConnectorEvents({
@@ -285,16 +250,15 @@ export async function ingestInboundEvent({
           connectorTypeId,
           correlationKey: event.correlationKey,
         });
-        // HTTP stays 202; count failures for emit_partial (dispatch warns once on Result).
+        // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {
           emitFailures += 1;
+          emitFailureDetails.push(`${event.eventId} ${emitResult.reason}: ${emitResult.message}`);
         }
       } catch (error) {
         emitFailures += 1;
-        logger.warn(
-          `Inbound connector ${connectorId} type ${connectorTypeId} space ${spaceId} event emitter threw for ${
-            event.eventId
-          }: ${error instanceof Error ? error.message : String(error)}`
+        emitFailureDetails.push(
+          `${event.eventId} threw: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
@@ -303,7 +267,9 @@ export async function ingestInboundEvent({
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'emit_partial',
-        detail: `emit_failures=${emitFailures}_of=${result.events.length}`,
+        detail: `emit_failures=${emitFailures}_of=${result.events.length} ${emitFailureDetails.join(
+          '; '
+        )}`,
       });
     } else {
       logInboundIngressOutcome(logger, {

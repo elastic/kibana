@@ -17,3 +17,6 @@ export const INBOUND_WEBHOOK_RECEIVED_EVENT_ID = buildEventId(
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_KEY
 );
+
+/** Bound echoed challenge so a handshake cannot become an unbounded response. */
+export const MAX_HANDSHAKE_CHALLENGE_LENGTH = 1024;

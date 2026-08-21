@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
@@ -33,20 +32,18 @@ export function resetConnectorEventEmitFailureCountForTests(): void {
 export function registerWorkflowsConnectorEventEmitter({
   actions,
   getWorkflowsExtensionsStart,
-  logger,
 }: {
   actions: ActionsPluginSetupContract;
   getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
-  logger: Logger;
 }): void {
   const emitter: ConnectorEventEmitter = {
     emit: async ({ eventId, payload, spaceId, connectorId, connectorTypeId, correlationKey }) => {
       const workflowsExtensions = await getWorkflowsExtensionsStart();
       if (!workflowsExtensions) {
-        logger.warn(
-          `Workflows extensions unavailable; skipping connector event emit for ${eventId} connector ${connectorId} space ${spaceId}`
+        emitFailureCount += 1;
+        throw new Error(
+          `Workflows extensions unavailable; dropping connector event ${eventId} for connector ${connectorId} space ${spaceId}`
         );
-        return;
       }
 
       // Momentary attribution request — space only.
@@ -68,11 +65,6 @@ export function registerWorkflowsConnectorEventEmitter({
         await client.emitEvent(eventId, enriched);
       } catch (error) {
         emitFailureCount += 1;
-        logger.warn(
-          `Failed to emit connector event ${eventId} for connector ${connectorId} type ${connectorTypeId} space ${spaceId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
         throw error;
       }
     },

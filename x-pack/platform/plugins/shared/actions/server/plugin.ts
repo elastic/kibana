@@ -509,7 +509,6 @@ export class ActionsPlugin
               dispatchConnectorEvents({
                 emitter: this.connectorEventEmitter,
                 params,
-                logger: this.logger,
               }),
           }),
           getSpaceId: (request: KibanaRequest) =>

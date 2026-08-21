@@ -17,15 +17,5 @@ export const getInboundIngestToken = (connector: ActionConnector): string | unde
   return typeof token === 'string' && token.length > 0 ? token : undefined;
 };
 
-export const isInboundIngressConnector = (connector: ActionConnector): boolean => {
-  if (connectorTypeHasInboundEvents(connector.actionTypeId)) {
-    return true;
-  }
-  if ('config' in connector) {
-    const hash = connector.config?.ingestTokenHash;
-    if (typeof hash === 'string' && hash.length > 0) {
-      return true;
-    }
-  }
-  return getInboundIngestToken(connector) !== undefined;
-};
+export const isInboundIngressConnector = (connector: ActionConnector): boolean =>
+  connectorTypeHasInboundEvents(connector.actionTypeId);

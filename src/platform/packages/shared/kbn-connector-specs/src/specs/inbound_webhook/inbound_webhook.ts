@@ -12,16 +12,13 @@ import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
-import { ingestTokenHashSchema } from '../../ingest_token_hash_schema';
 import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_KEY,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './constants';
 import { InboundWebhookReceivedEventSchema } from './types';
-
-/** Bound echoed challenge so a handshake cannot become an unbounded response. */
-const MAX_HANDSHAKE_CHALLENGE_LENGTH = 1024;
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -44,32 +41,11 @@ const getHandshakeChallenge = (rawBody: unknown): string | undefined => {
   return challenge;
 };
 
-const BODY_PREVIEW_MAX_LENGTH = 512;
-
-const previewBody = (rawBody: unknown): string => {
-  try {
-    const serialized = JSON.stringify(rawBody);
-    if (serialized === undefined) {
-      return String(rawBody);
-    }
-    return serialized.length <= BODY_PREVIEW_MAX_LENGTH
-      ? serialized
-      : `${serialized.slice(0, BODY_PREVIEW_MAX_LENGTH)}…`;
-  } catch {
-    return '[unserializable body]';
-  }
-};
-
 const handleInboundWebhookEvents = async (
   ctx: ConnectorIngressContext
 ): Promise<HandleEventsResult> => {
   const challenge = getHandshakeChallenge(ctx.rawBody);
   if (challenge !== undefined) {
-    ctx.log.info(
-      `inboundWebhook handshake ack connectorId=${ctx.connectorId} spaceId=${
-        ctx.spaceId
-      } body=${previewBody(ctx.rawBody)}`
-    );
     return {
       type: 'http',
       httpResponse: {
@@ -80,11 +56,6 @@ const handleInboundWebhookEvents = async (
   }
 
   const correlationKey = uuidv4();
-  ctx.log.info(
-    `inboundWebhook emit ${INBOUND_WEBHOOK_RECEIVED_EVENT_ID} connectorId=${
-      ctx.connectorId
-    } spaceId=${ctx.spaceId} correlationKey=${correlationKey} body=${previewBody(ctx.rawBody)}`
-  );
 
   return {
     type: 'emit',
@@ -120,9 +91,8 @@ export const InboundWebhook: ConnectorSpec = {
     types: ['none'],
   },
 
-  schema: z.object({
-    ingestTokenHash: ingestTokenHashSchema,
-  }),
+  // ingestTokenHash is factory-injected for every spec with events.
+  schema: z.object({}),
 
   actions: {},
 

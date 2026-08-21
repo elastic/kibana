@@ -17,7 +17,10 @@ import {
   ingestEventsRequestParamsSchemaV1,
   ingestEventsRequestQuerySchemaV1,
 } from '../../../common/routes/events/apis/ingest';
-import { ingestEventsResponseSchemaV1 } from '../../../common/routes/events/response';
+import {
+  ingestEventsAckResponseSchemaV1,
+  ingestEventsResponseSchemaV1,
+} from '../../../common/routes/events/response';
 import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
@@ -53,7 +56,7 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Registered only when `xpack.actions.inboundEvents.enabled` is true. A successful emit returns 202; a spoke `handleEvents` HTTP ack (challenge / handshake) is forwarded as a custom status and does not emit.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A spoke HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
       options: {
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
@@ -77,6 +80,11 @@ export function inboundEventsRoute({
             body: ingestEventsRequestBodySchemaV1,
           },
           response: {
+            200: {
+              description:
+                'Spoke HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`; other connector types may return a different JSON object.',
+              body: () => ingestEventsAckResponseSchemaV1,
+            },
             202: {
               description:
                 'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',

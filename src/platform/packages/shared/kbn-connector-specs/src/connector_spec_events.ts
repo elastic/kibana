@@ -9,6 +9,13 @@
 
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
+import type { HandleEventsResult } from './handle_events_result';
+
+export type {
+  EventPayload,
+  HandleEventsHttpResponse,
+  HandleEventsResult,
+} from './handle_events_result';
 
 /**
  * Context passed to ConnectorSpecEvents.handleEvents after hub verification.
@@ -24,34 +31,6 @@ export interface ConnectorIngressContext {
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
 }
-
-export interface EventPayload {
-  readonly eventId: string;
-  readonly correlationKey: string;
-  readonly payload: Record<string, unknown>;
-}
-
-/**
- * Spoke-defined HTTP ack (challenge / handshake). The hub returns this to the
- * caller and does **not** call emitters.
- */
-export interface HandleEventsHttpResponse {
-  readonly status: number;
-  readonly body?: unknown;
-  readonly headers?: Record<string, string>;
-}
-
-/**
- * Result of handleEvents: either publish payloads or return a custom HTTP ack.
- *
- * - `emit`: hub runs `validateEmittedEvents` then dispatches; HTTP 202.
- * - `http`: hub returns `httpResponse` as-is (no emitters). Use for vendor
- *   challenge / handshake replies when a generic webhook must ack instead of
- *   emitting.
- */
-export type HandleEventsResult =
-  | { type: 'http'; httpResponse: HandleEventsHttpResponse }
-  | { type: 'emit'; events: EventPayload[] };
 
 /**
  * Declared event on a connector spec.
@@ -69,6 +48,12 @@ export interface EventDefinition {
   readonly eventSchema: z.ZodObject;
 }
 
+/**
+ * Spoke events contract.
+ *
+ * `handleEvents` returns emit or HTTP ack. The hub must run
+ * `parseHandleEventsResult` (and `validateEmittedEvents` on emit).
+ */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;
   handleEvents(ctx: ConnectorIngressContext): Promise<HandleEventsResult>;

@@ -7,6 +7,8 @@
 
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 
+export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
+
 /**
  * Hub path for inbound connector events. Must stay aligned with
  * `INBOUND_EVENTS_API_PATH`.

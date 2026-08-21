@@ -6,7 +6,17 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { buildInboundEventsPath, buildInboundEventsUrl } from './inbound_events';
+import {
+  buildInboundEventsPath,
+  buildInboundEventsUrl,
+  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
+} from './inbound_events';
+
+describe('INBOUND_EVENTS_TOKEN_MAX_LENGTH', () => {
+  it('bounds ingest tokens', () => {
+    expect(INBOUND_EVENTS_TOKEN_MAX_LENGTH).toBe(128);
+  });
+});
 
 describe('buildInboundEventsPath', () => {
   it('builds the hub path with encoded ids', () => {

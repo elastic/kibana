@@ -376,6 +376,11 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expectOutcome('warn', 'emit_partial');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('bridge down'),
+      expect.anything()
+    );
   });
 
   it('returns 202 with emit_partial when emitConnectorEvents throws', async () => {
@@ -392,8 +397,12 @@ describe('ingestInboundEvent', () => {
 
     const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('adapter threw'));
     expectOutcome('warn', 'emit_partial');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('adapter threw'),
+      expect.anything()
+    );
     expect(res.customError).not.toHaveBeenCalled();
   });
 
@@ -417,6 +426,7 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expect(emitConnectorEvents).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('emit_failures=1_of=2'),
       expect.anything()
@@ -435,12 +445,14 @@ describe('ingestInboundEvent', () => {
     );
 
     const { response: res } = await run({
-      emit: (params) => dispatchConnectorEvents({ emitter: undefined, params, logger }),
+      emit: (params) => dispatchConnectorEvents({ emitter: undefined, params }),
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expectOutcome('warn', 'emit_partial');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('No connector event emitter registered')
+      expect.stringContaining('No connector event emitter registered'),
+      expect.anything()
     );
   });
 
@@ -459,10 +471,15 @@ describe('ingestInboundEvent', () => {
     );
 
     const { response: res } = await run({
-      emit: (params) => dispatchConnectorEvents({ emitter, params, logger }),
+      emit: (params) => dispatchConnectorEvents({ emitter, params }),
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expectOutcome('warn', 'emit_partial');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('bridge down'),
+      expect.anything()
+    );
   });
 
   it('returns 500 when handleEvents throws', async () => {
@@ -500,6 +517,49 @@ describe('ingestInboundEvent', () => {
     expect(res.customError).not.toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
     expectOutcome('info', 'http_ack');
+  });
+
+  it('returns 500 when handleEvents http includes Location', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: {
+            status: 200,
+            body: { challenge: 'abc' },
+            headers: { Location: 'https://evil.example' },
+          },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(res.custom).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
+
+  it('returns 500 when handleEvents http body is not JSON-serializable', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: {
+            status: 200,
+            body: () => 'nope',
+          },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(res.custom).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('invalid_handleEvents_result'),
+      expect.anything()
+    );
   });
 
   it('returns 500 when handleEvents http status is out of range', async () => {
