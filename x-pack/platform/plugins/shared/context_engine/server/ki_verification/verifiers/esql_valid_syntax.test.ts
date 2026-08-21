@@ -34,26 +34,28 @@ describe('esql-valid-syntax verifier', () => {
 
   describe('applies', () => {
     it('is false for a KI without attributes', () => {
-      expect(verifier.applies({ title: 'no attributes' })).toBe(false);
+      expect(verifier.applies({ title: 'no attributes' }, context)).toBe(false);
     });
 
     it('is false for a KI without an esql attribute', () => {
-      expect(verifier.applies({ attributes: { severity: 'high' } })).toBe(false);
+      expect(verifier.applies({ attributes: { severity: 'high' } }, context)).toBe(false);
     });
 
     it('is true whenever the esql attribute is present, even when malformed', () => {
-      expect(verifier.applies(makeKi(''))).toBe(true);
-      expect(verifier.applies(makeKi([]))).toBe(true);
-      expect(verifier.applies(makeKi(42))).toBe(true);
-      expect(verifier.applies(makeKi([42, true]))).toBe(true);
+      expect(verifier.applies(makeKi(''), context)).toBe(true);
+      expect(verifier.applies(makeKi([]), context)).toBe(true);
+      expect(verifier.applies(makeKi(42), context)).toBe(true);
+      expect(verifier.applies(makeKi([42, true]), context)).toBe(true);
     });
 
     it('is true for a query string', () => {
-      expect(verifier.applies(makeKi(VALID_QUERY))).toBe(true);
+      expect(verifier.applies(makeKi(VALID_QUERY), context)).toBe(true);
     });
 
     it('is true for an array of query strings', () => {
-      expect(verifier.applies(makeKi([VALID_QUERY, 'FROM metrics-* | LIMIT 1']))).toBe(true);
+      expect(verifier.applies(makeKi([VALID_QUERY, 'FROM metrics-* | LIMIT 1']), context)).toBe(
+        true
+      );
     });
   });
 
@@ -202,6 +204,65 @@ describe('esql-valid-syntax verifier', () => {
 
       expect(context.esClient.esql.query).not.toHaveBeenCalled();
       expect(context.esClient.transport.request).not.toHaveBeenCalled();
+    });
+
+    describe('with custom esql attributes configured', () => {
+      const INVALID_QUERY = 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)';
+
+      it('validates the queries from every configured attribute', async () => {
+        const ki: KnowledgeIndicator = {
+          attributes: { aggregation_query: VALID_QUERY, sampling_query: INVALID_QUERY },
+        };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['aggregation_query', 'sampling_query'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('attributes.sampling_query');
+          expect(outcome.reason).not.toContain('attributes.aggregation_query');
+        }
+      });
+
+      it('skips a configured attribute the KI does not carry instead of failing it', async () => {
+        const ki: KnowledgeIndicator = { attributes: { aggregation_query: VALID_QUERY } };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['aggregation_query', 'typo_query'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+      });
+
+      it('ignores the default esql attribute once attributes are configured', async () => {
+        const ki: KnowledgeIndicator = {
+          attributes: { esql: INVALID_QUERY, aggregation_query: VALID_QUERY },
+        };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['aggregation_query'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+      });
+
+      it('still fails a configured attribute carrying a malformed value', async () => {
+        const ki: KnowledgeIndicator = { attributes: { aggregation_query: 42 } };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['aggregation_query'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('attributes.aggregation_query');
+        }
+      });
     });
   });
 });

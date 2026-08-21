@@ -36,6 +36,7 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
         esClient,
         logger,
         abortSignal: context.abortSignal,
+        esqlAttributes: context.input.esql_attributes,
       });
 
       return { output: summary };

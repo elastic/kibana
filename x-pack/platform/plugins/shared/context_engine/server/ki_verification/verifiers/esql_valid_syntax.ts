@@ -27,26 +27,27 @@ const formatValidationError = (error: ESQLMessage | EditorError): string =>
 export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
   id: ESQL_VALID_SYNTAX_VERIFIER_ID,
   applies: hasEsqlAttribute,
-  async verify(ki, { abortSignal }) {
-    const extracted = getEsqlQueries(ki);
+  async verify(ki, context) {
+    const extracted = getEsqlQueries(ki, context);
     if (!extracted.ok) {
       return { passed: false, reason: extracted.reason };
     }
 
     const failures: string[] = [];
-    for (const query of extracted.queries) {
-      abortSignal?.throwIfAborted();
+    for (const queryRef of extracted.queries) {
+      context.abortSignal?.throwIfAborted();
 
-      const oversized = getOversizedQueryFailure(query);
+      const oversized = getOversizedQueryFailure(queryRef);
       if (oversized) {
         failures.push(oversized);
         continue;
       }
 
+      const { source, query } = queryRef;
       const { errors } = await validateQuery(query);
       if (errors.length > 0) {
         failures.push(
-          `ES|QL query "${previewQuery(query)}" is invalid: ${errors
+          `${source}: ES|QL query "${previewQuery(query)}" is invalid: ${errors
             .map(formatValidationError)
             .join('; ')}`
         );

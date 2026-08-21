@@ -25,6 +25,12 @@ export interface KiVerifierContext {
   esClient: ElasticsearchClient;
   logger: Logger;
   abortSignal?: AbortSignal;
+  /**
+   * Names of the KI attributes carrying ES|QL, defaulting to `esql` when
+   * omitted. Consumed only by the ES|QL verifiers; other verifiers ignore it.
+   * A configured attribute the KI does not carry is skipped, not failed.
+   */
+  esqlAttributes?: string[];
 }
 
 /**
@@ -43,8 +49,12 @@ export type KiVerifierResult = KiVerifierOutcome & { verifier: string };
 
 export interface KiVerifier {
   readonly id: string;
-  /** Whether this verifier has anything to check for the given KI. */
-  applies(ki: KnowledgeIndicator): boolean;
+  /**
+   * Whether this verifier has anything to check for the given KI. Receives the
+   * same context as {@link KiVerifier.verify} so that applicability can depend
+   * on run configuration, such as which fields carry ES|QL.
+   */
+  applies(ki: KnowledgeIndicator, context: KiVerifierContext): boolean;
   verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierOutcome>;
 }
 

@@ -56,22 +56,24 @@ const formatEsError = (error: errors.ResponseError): string => {
 export const createEsqlExecutesVerifier = (): KiVerifier => ({
   id: ESQL_EXECUTES_VERIFIER_ID,
   applies: hasEsqlAttribute,
-  async verify(ki, { esClient, abortSignal }) {
-    const extracted = getEsqlQueries(ki);
+  async verify(ki, context) {
+    const { esClient, abortSignal } = context;
+    const extracted = getEsqlQueries(ki, context);
     if (!extracted.ok) {
       return { passed: false, reason: extracted.reason };
     }
 
     const failures: string[] = [];
-    for (const query of extracted.queries) {
+    for (const queryRef of extracted.queries) {
       abortSignal?.throwIfAborted();
 
-      const oversized = getOversizedQueryFailure(query);
+      const oversized = getOversizedQueryFailure(queryRef);
       if (oversized) {
         failures.push(oversized);
         continue;
       }
 
+      const { source, query } = queryRef;
       try {
         const { is_partial: isPartial } = await esClient.esql.query(
           {
@@ -87,7 +89,7 @@ export const createEsqlExecutesVerifier = (): KiVerifier => ({
         // not told us the query runs.
         if (isPartial) {
           failures.push(
-            `ES|QL query "${previewQuery(
+            `${source}: ES|QL query "${previewQuery(
               query
             )}" returned partial results, so it did not run against every shard`
           );
@@ -100,7 +102,9 @@ export const createEsqlExecutesVerifier = (): KiVerifier => ({
           throw error;
         }
         failures.push(
-          `ES|QL query "${previewQuery(query)}" failed to execute: ${formatEsError(error)}`
+          `${source}: ES|QL query "${previewQuery(query)}" failed to execute: ${formatEsError(
+            error
+          )}`
         );
       }
     }

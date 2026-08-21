@@ -44,22 +44,22 @@ describe('esql-executes verifier', () => {
 
   describe('applies', () => {
     it('is false for a KI without attributes', () => {
-      expect(verifier.applies({ title: 'no attributes' })).toBe(false);
+      expect(verifier.applies({ title: 'no attributes' }, context)).toBe(false);
     });
 
     it('is false for a KI without an esql attribute', () => {
-      expect(verifier.applies({ attributes: { severity: 'high' } })).toBe(false);
+      expect(verifier.applies({ attributes: { severity: 'high' } }, context)).toBe(false);
     });
 
     it('is true whenever the esql attribute is present, even when malformed', () => {
-      expect(verifier.applies(makeKi(''))).toBe(true);
-      expect(verifier.applies(makeKi([]))).toBe(true);
-      expect(verifier.applies(makeKi(42))).toBe(true);
+      expect(verifier.applies(makeKi(''), context)).toBe(true);
+      expect(verifier.applies(makeKi([]), context)).toBe(true);
+      expect(verifier.applies(makeKi(42), context)).toBe(true);
     });
 
     it('is true for a query string and for an array of query strings', () => {
-      expect(verifier.applies(makeKi(VALID_QUERY))).toBe(true);
-      expect(verifier.applies(makeKi([VALID_QUERY, OTHER_QUERY]))).toBe(true);
+      expect(verifier.applies(makeKi(VALID_QUERY), context)).toBe(true);
+      expect(verifier.applies(makeKi([VALID_QUERY, OTHER_QUERY]), context)).toBe(true);
     });
   });
 
@@ -255,6 +255,106 @@ describe('esql-executes verifier', () => {
         verifier.verify(makeKi(VALID_QUERY), { ...context, abortSignal: abortController.signal })
       ).rejects.toThrow('Aborted');
       expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    describe('with custom esql attributes configured', () => {
+      const customKi: KnowledgeIndicator = {
+        type: 'detection',
+        title: 'custom attributes',
+        attributes: { aggregation_query: VALID_QUERY, sampling_query: OTHER_QUERY },
+      };
+
+      it('is not applicable when the KI carries none of the configured attributes', () => {
+        expect(verifier.applies(customKi, { ...context, esqlAttributes: ['not_present'] })).toBe(
+          false
+        );
+      });
+
+      it('is applicable when the KI carries at least one configured attribute', () => {
+        expect(
+          verifier.applies(customKi, {
+            ...context,
+            esqlAttributes: ['not_present', 'sampling_query'],
+          })
+        ).toBe(true);
+      });
+
+      it('ignores the default esql attribute once attributes are configured', async () => {
+        const ki: KnowledgeIndicator = {
+          attributes: { esql: VALID_QUERY, sampling_query: OTHER_QUERY },
+        };
+
+        await verifier.verify(ki, { ...context, esqlAttributes: ['sampling_query'] });
+
+        expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+        expect(sentQueries()[0]).toContain('metrics-*');
+      });
+
+      it('executes the queries from every configured attribute', async () => {
+        const outcome = await verifier.verify(customKi, {
+          ...context,
+          esqlAttributes: ['aggregation_query', 'sampling_query'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+        expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+      });
+
+      it('skips a configured attribute the KI does not carry instead of failing it', async () => {
+        const outcome = await verifier.verify(customKi, {
+          ...context,
+          esqlAttributes: ['aggregation_query', 'typo_query'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+        expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+      });
+
+      it('passes when every configured attribute is absent, without calling the cluster', async () => {
+        const outcome = await verifier.verify(customKi, {
+          ...context,
+          esqlAttributes: ['nope', 'also_nope'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+        expect(esClient.esql.query).not.toHaveBeenCalled();
+      });
+
+      it('names the offending attribute in the failure reason', async () => {
+        esClient.esql.query.mockRejectedValue(
+          esResponseError('verification_exception', 'Unknown index [nope]')
+        );
+
+        const outcome = await verifier.verify(customKi, {
+          ...context,
+          esqlAttributes: ['sampling_query'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('attributes.sampling_query');
+        }
+      });
+
+      it('bounds the query count across all attributes, not per attribute', async () => {
+        const ki: KnowledgeIndicator = {
+          attributes: {
+            first: Array.from({ length: 60 }, () => VALID_QUERY),
+            second: Array.from({ length: 60 }, () => VALID_QUERY),
+          },
+        };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['first', 'second'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('the maximum is 100');
+        }
+        expect(esClient.esql.query).not.toHaveBeenCalled();
+      });
     });
 
     it('stops between queries once the abort signal fires', async () => {
