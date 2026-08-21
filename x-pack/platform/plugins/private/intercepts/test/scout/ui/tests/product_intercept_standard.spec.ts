@@ -33,9 +33,7 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
     await pageObjects.intercepts.waitForInterceptDisplayed(TRIGGER_DEF_ID);
 
     await pageObjects.intercepts.clickProgressionButton();
-    await pageObjects.intercepts.clickRandomNpsButton();
-    await pageObjects.intercepts.clickRandomNpsButton();
-    await pageObjects.intercepts.waitForCompletionStep();
+    await pageObjects.intercepts.completeNpsQuestionsUntilCompletion();
 
     const interceptText = await pageObjects.intercepts.getInterceptText(TRIGGER_DEF_ID);
     expect(interceptText).toMatch(/Thanks for the feedback!/);
@@ -70,8 +68,13 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
     });
 
     await test.step('verify participate button links to User Interviews opt-in form', async () => {
+      await pageObjects.intercepts.waitForCompletionStep();
       const href = await pageObjects.intercepts.getSurveyLinkHref();
-      expect(href).toBe('https://ela.st/user-interviews-opt-in');
+      const surveyUrl = new URL(href);
+
+      expect(surveyUrl.origin + surveyUrl.pathname).toBe('https://ela.st/user-interviews-opt-in');
+      expect(surveyUrl.searchParams.get('satisfaction')).toBe('3');
+      expect(surveyUrl.searchParams.get('ease')).toBe('4');
     });
   });
 

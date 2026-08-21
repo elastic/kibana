@@ -22,6 +22,7 @@ import { NPSScoreInput } from './components';
 
 interface ProductInterceptRegistrationHandlerParams {
   productOffering: string;
+  surveyUrl: URL;
   eventReporter: ReturnType<PromptTelemetry['start']>;
 }
 
@@ -32,6 +33,7 @@ interface ProductInterceptRegistrationHandlerParams {
  */
 export const productInterceptRegistrationConfig = ({
   eventReporter,
+  surveyUrl,
   productOffering,
 }: ProductInterceptRegistrationHandlerParams): Omit<Intercept, 'id'> => {
   const startInterceptStep = {
@@ -128,55 +130,65 @@ export const productInterceptRegistrationConfig = ({
     ),
     content: ({
       onValue,
+      responseMap,
     }: {
       onValue: (v: unknown) => void;
       responseMap: Record<string, unknown>;
-    }) => (
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="empty" size="m" aria-hidden />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="productIntercept.prompter.step.completion.body"
-                  defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="success"
-                    iconType="external"
-                    iconSide="right"
-                    href="https://ela.st/user-interviews-opt-in"
-                    target="_blank"
-                    data-test-subj="productInterceptSurveyLink"
-                  >
-                    <FormattedMessage
-                      id="productIntercept.prompter.step.completion.participateButton"
-                      defaultMessage="Participate"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="success" onClick={() => onValue(null)}>
-                    <FormattedMessage
-                      id="productIntercept.prompter.step.completion.maybeLaterButton"
-                      defaultMessage="Maybe later"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    }) => {
+      const href = new URL(surveyUrl.toString());
+      Object.entries(responseMap).forEach(([key, value]) => {
+        if (key === satisfactionInterceptStep.id || key === easeInterceptStep.id) {
+          href.searchParams.set(key, String(value));
+        }
+      });
+
+      return (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" size="m" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="productIntercept.prompter.step.completion.body"
+                    defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="success"
+                      iconType="external"
+                      iconSide="right"
+                      href={href.toString()}
+                      target="_blank"
+                      data-test-subj="productInterceptSurveyLink"
+                    >
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.participateButton"
+                        defaultMessage="Participate"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="success" onClick={() => onValue(null)}>
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.maybeLaterButton"
+                        defaultMessage="Maybe later"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
   } satisfies Extract<Intercept['steps'][number], { id: 'completion' }>;
 
   return {

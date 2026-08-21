@@ -169,7 +169,12 @@ function InterceptDisplayManager({
   }, [handleTerminationInteraction]);
 
   const isLastStep = useMemo(() => {
-    return !!currentIntercept && currentStepIndex === currentIntercept.steps.length - 1;
+    if (!currentIntercept) {
+      return false;
+    }
+
+    const lastStep = currentIntercept.steps[currentIntercept.steps.length - 1];
+    return currentStepIndex === currentIntercept.steps.length - 1 && lastStep.id === 'completion';
   }, [currentIntercept, currentStepIndex]);
 
   const onInterceptStepInput = useCallback(
@@ -209,7 +214,7 @@ function InterceptDisplayManager({
               css={css([
                 styles.stepContentBox,
                 isStartStep && styles.startIllustration,
-                currentInterceptStep?.id === 'completion' && styles.completionContentBox,
+                isLastStep && styles.completionContentBox,
               ])}
               data-test-subj={`interceptStep-${currentInterceptStep.id}`}
             >
@@ -227,19 +232,18 @@ function InterceptDisplayManager({
                         <h2>{currentInterceptStep!.title}</h2>
                       </EuiTitle>
                     </EuiFlexItem>
-                    {currentStepIndex > 0 &&
-                      (!isLastStep || currentInterceptStep?.id === 'completion') && (
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip content="Close dialog" disableScreenReaderOutput>
-                            <EuiButtonIcon
-                              iconType="cross"
-                              aria-label="Close dialog"
-                              onClick={dismissProductIntercept}
-                              color="text"
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      )}
+                    {currentStepIndex > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content="Close dialog" disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="cross"
+                            aria-label="Close dialog"
+                            onClick={dismissProductIntercept}
+                            color="text"
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -260,36 +264,30 @@ function InterceptDisplayManager({
                     currentStep={currentStepIndex}
                   />
                 </EuiFlexItem>
-                {(isStartStep || (isLastStep && currentInterceptStep?.id !== 'completion')) && (
+                {isStartStep && (
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs">
-                      {isStartStep && (
-                        <EuiFlexItem>
-                          <EuiButtonEmpty
-                            size="s"
-                            data-test-subj="productInterceptDismissButton"
-                            onClick={dismissProductIntercept}
-                            color="text"
-                          >
-                            {i18n.translate('core.notifications.productIntercept.dismiss', {
-                              defaultMessage: 'Not now',
-                            })}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      )}
+                      <EuiFlexItem>
+                        <EuiButtonEmpty
+                          size="s"
+                          data-test-subj="productInterceptDismissButton"
+                          onClick={dismissProductIntercept}
+                          color="text"
+                        >
+                          {i18n.translate('core.notifications.productIntercept.dismiss', {
+                            defaultMessage: 'Not now',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiButton
                           size="s"
                           data-test-subj="productInterceptProgressionButton"
-                          onClick={() => seekNextStep(isLastStep)}
+                          onClick={() => seekNextStep()}
                         >
-                          {isLastStep
-                            ? i18n.translate('core.notifications.productIntercept.nextStep', {
-                                defaultMessage: 'Close',
-                              })
-                            : i18n.translate('core.notifications.productIntercept.nextStep', {
-                                defaultMessage: 'Next',
-                              })}
+                          {i18n.translate('core.notifications.productIntercept.nextStep', {
+                            defaultMessage: 'Next',
+                          })}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
