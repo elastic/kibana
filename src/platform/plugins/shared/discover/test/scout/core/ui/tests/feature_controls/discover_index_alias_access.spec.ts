@@ -9,7 +9,10 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../../common/ui/fixtures';
-import { DEFAULT_TIME_RANGE, DISCOVER_KBN_ARCHIVE } from '../../../../common/ui/fixtures/common/constants';
+import {
+  DEFAULT_TIME_RANGE,
+  DISCOVER_KBN_ARCHIVE,
+} from '../../../../common/ui/fixtures/common/constants';
 import { DISCOVER_ONLY_DATA_VIEWS_ROLE } from '../../fixtures/feature_controls/constants';
 
 const LOGSTASH_INDEX_NAME = 'logstash-2015.09.22';

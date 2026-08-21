@@ -22,13 +22,7 @@
 // user; the spec will silently lose its subject.
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_CONFIG,
-  PAGINATION,
-} from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG, PAGINATION } from '../fixtures';
 
 const { PAGE_SIZE } = PAGINATION;
 

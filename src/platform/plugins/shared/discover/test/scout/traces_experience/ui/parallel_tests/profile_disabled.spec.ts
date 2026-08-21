@@ -10,12 +10,7 @@
 import type { SpaceSolutionView } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  TRACES,
-  setupTracesExperience,
-  teardownTracesExperience,
-} from '../fixtures';
+import { spaceTest, TRACES, setupTracesExperience, teardownTracesExperience } from '../fixtures';
 
 const NON_OBLT_VIEWS: Array<{ name: string; solutionView: SpaceSolutionView }> = [
   { name: 'Classic', solutionView: 'classic' },
