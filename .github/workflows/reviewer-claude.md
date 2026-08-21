@@ -139,6 +139,48 @@ jobs:
 
             try {
               const { owner, repo } = context.repo;
+              const selectionCommentMarker = '<!-- libra-review-selection -->';
+              const selectionCommentBody = [
+                '### Selected for Libra review',
+                '',
+                `This PR was selected for [Libra](https://github.com/elastic/libra) review as part of the temporary 10% trial because PR #${prNumber} is divisible by 10.`,
+                '',
+                'To opt out permanently, remove the `reviewer:libra` label. It will not be added again to this PR.',
+                '',
+                selectionCommentMarker,
+              ].join('\n');
+              const ensureSelectionComment = async () => {
+                try {
+                  const comments = await github.paginate(github.rest.issues.listComments, {
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    per_page: 100,
+                  });
+                  const commentAlreadyExists = comments.some(
+                    (comment) =>
+                      comment.user?.login?.toLowerCase() === 'kibanamachine' &&
+                      comment.body?.includes(selectionCommentMarker)
+                  );
+                  if (commentAlreadyExists) {
+                    core.info('The Libra selection comment is already present.');
+                    return;
+                  }
+
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    body: selectionCommentBody,
+                  });
+                  core.info('Posted the Libra selection comment.');
+                } catch (commentError) {
+                  core.warning(
+                    `PR #${prNumber} was routed to Libra, but the selection comment could not be posted: ${commentError.message}`
+                  );
+                }
+              };
+
               const { data: currentPullRequest } = await github.rest.pulls.get({
                 owner,
                 repo,
@@ -150,6 +192,7 @@ jobs:
               if (currentLabels.includes('reviewer:libra')) {
                 core.info('reviewer:libra is already present; keeping the PR routed to Libra.');
                 core.setOutput('diverted', 'true');
+                await ensureSelectionComment();
                 return;
               }
 
@@ -176,6 +219,7 @@ jobs:
               });
               core.info('Added reviewer:libra; PR routed to Libra.');
               core.setOutput('diverted', 'true');
+              await ensureSelectionComment();
             } catch (error) {
               core.warning(`Unable to route PR #${prNumber} to Libra: ${error.message}`);
             }
