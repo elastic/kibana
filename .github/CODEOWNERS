@@ -371,9 +371,11 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
+src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
+src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
 src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
@@ -797,6 +799,7 @@ src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/info-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/meta-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/sections @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/template @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
@@ -1354,7 +1357,7 @@ x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/slo @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team
+x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
 x-pack/solutions/observability/test
@@ -2155,6 +2158,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/api_integration/apis/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional/apps/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/fixtures/es_archives/ml/  @elastic/search-ml-ux
+/x-pack/platform/test/fixtures/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/functional/services/ml @elastic/search-ml-ux
 /x-pack/platform/test/functional_basic/apps/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/search-ml-ux
@@ -3714,8 +3718,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/app-header @elastic/appex-sharedux
 /src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 /src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
+/src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
@@ -3794,9 +3800,9 @@ x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/re
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anonymization_salt_saved_object_type.ts @elastic/workchat-eng @elastic/security-threat-hunting @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
@@ -3827,6 +3833,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.claude/ @elastic/kibana-tech-leads
 /.agents/skills/ @elastic/kibana-tech-leads
 /.github/agents/ @elastic/kibana-tech-leads @elastic/kibana-operations
+/.libra/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
@@ -3878,6 +3885,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/agents/scout-reviewer.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+/.libra/specialists/scout.md @elastic/appex-qa
 /.github/workflows/label-scout-prs.yml @elastic/appex-qa
 /.github/labeler-scout.yml @elastic/appex-qa
 

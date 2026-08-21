@@ -12,13 +12,14 @@ Prefer inline rendering when the page owns its header placement. Use Chrome-owne
 Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
 Discover, Dashboard, and Lens.
 
+Presentation (shell, title, tabs, badges, menu rendering, stories) lives in private
+`@kbn/ui-app-header`. This package is the stable plugin facade: it keeps registration semantics,
+Chrome-connected adapters, and the public `@kbn/app-header` imports.
+
 ## Folder layout
 
-Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
-live as flat files directly in `src/app_header/`, with shared data resolution in
-`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
-its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
-that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
+Connected adapters and Chrome hooks live in `src/app_header/`. Presentation components live in
+`@kbn/ui-app-header`. Do not import the UI package from plugins.
 
 ## Which API should I use?
 

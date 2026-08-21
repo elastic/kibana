@@ -120,7 +120,7 @@ describe('Cases Ui Plugin', () => {
       expect(setup).toMatchInlineSnapshot(`
         Object {
           "attachmentFramework": Object {
-            "registerUnified": [Function],
+            "registerAttachment": [Function],
           },
         }
       `);
