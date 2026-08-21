@@ -13,6 +13,7 @@ import {
   createLogstashLensEditorSuiteSetup,
   createXyLensPanelFromDashboard,
   getDashboardChartDebugState,
+  openPanelInlineEditorAndWaitVisible,
   saveLensAsNewCopyToNewDashboard,
   spaceTest,
 } from '../fixtures';
@@ -61,8 +62,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
     });
 
     await spaceTest.step('add a secondary dimension in the inline editor', async () => {
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-      await expect(lens.workspace.inlineEditor).toBeVisible();
+      await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
       await lens.configureDimension({
         dimension: `${SECONDARY_METRIC_PANEL} > lns-empty-dimension`,
@@ -104,8 +104,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
     );
 
     await spaceTest.step('remove the breakdown dimension inline and apply', async () => {
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-      await expect(lens.workspace.inlineEditor).toBeVisible();
+      await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
       await lens.workspace.removeAllDimensions(XY_SPLIT_PANEL);
       await applyLensInlineEditorAndWaitClosed({ lens });
@@ -128,8 +127,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
     });
 
     await spaceTest.step('add a secondary dimension inline, then cancel', async () => {
-      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-      await expect(lens.workspace.inlineEditor).toBeVisible();
+      await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
       await lens.configureDimension({
         dimension: `${SECONDARY_METRIC_PANEL} > lns-empty-dimension`,
@@ -162,8 +160,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
       );
 
       await spaceTest.step('remove the breakdown inline, then cancel', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.workspace.inlineEditor).toBeVisible();
+        await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
         await lens.workspace.removeAllDimensions(XY_SPLIT_PANEL);
         await cancelLensInlineEditorAndWaitClosed({ lens });
@@ -176,8 +173,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
       });
 
       await spaceTest.step('reopening the editor still shows the breakdown dimension', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.workspace.inlineEditor).toBeVisible();
+        await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
         await expect(page.testSubj.locator(XY_SPLIT_PANEL)).toBeVisible();
         await cancelLensInlineEditorAndWaitClosed({ lens });
       });
@@ -195,8 +191,7 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
       });
 
       await spaceTest.step('cancel keeps the breakdown', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.workspace.inlineEditor).toBeVisible();
+        await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
         await lens.workspace.removeAllDimensions(XY_SPLIT_PANEL);
         await cancelLensInlineEditorAndWaitClosed({ lens });
@@ -205,15 +200,13 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
         const debugState = await getDashboardChartDebugState(page, 'xyVisChart');
         expect((debugState.bars ?? []).length).toBeGreaterThan(1);
 
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.workspace.inlineEditor).toBeVisible();
+        await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
         await expect(page.testSubj.locator(XY_SPLIT_PANEL)).toBeVisible();
         await cancelLensInlineEditorAndWaitClosed({ lens });
       });
 
       await spaceTest.step('apply removes the breakdown', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.workspace.inlineEditor).toBeVisible();
+        await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 
         await lens.workspace.removeAllDimensions(XY_SPLIT_PANEL);
         await applyLensInlineEditorAndWaitClosed({ lens });
