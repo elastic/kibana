@@ -196,6 +196,47 @@ export const createAdManageJobStateTool = (
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
+        case 'delete_job': {
+          // "Scratch" jobs are temporary batch jobs created for the user to initially preview/confirm configurations with historical data
+          // before creating a permanent job, real time job
+          // So in specific operations, we only want agent to only be able to delete these temporary "scratch" jobs
+          if (!allowNonScratch) {
+            const jobInfo = await ml.getJobs({ job_id: jobId });
+            const job = jobInfo.jobs?.[0];
+            const groups: string[] = Array.isArray(job?.groups) ? job.groups : [];
+            if (!groups.includes(SCRATCH_GROUP)) {
+              return {
+                results: [
+                  createErrorResult(
+                    `Job "${jobId}" is not in the "${SCRATCH_GROUP}" group. Only scratch jobs may be deleted. Pass allow_non_scratch: true to override.`
+                  ),
+                ],
+              };
+            }
+          }
+
+          // Stop datafeed (ignore 404 — may already be stopped or never created)
+          try {
+            await ml.stopDatafeed({ datafeed_id: datafeedId, body: { force: true } as any });
+          } catch {
+            // datafeed not running or does not exist — proceed
+          }
+
+          // Delete datafeed (ignore 404)
+          try {
+            await ml.deleteDatafeed({ datafeed_id: datafeedId });
+          } catch {
+            // datafeed does not exist — proceed
+          }
+
+          // Delete the job; ES API enforces user permissions
+          const response = await ml.deleteJob({
+            job_id: jobId,
+            delete_user_annotations: deleteUserAnnotations,
+          });
+          return { results: [{ type: ToolResultType.other, data: response }] };
+        }
+
         default:
           return {
             results: [createErrorResult(`Unknown operation: ${operation}`)],

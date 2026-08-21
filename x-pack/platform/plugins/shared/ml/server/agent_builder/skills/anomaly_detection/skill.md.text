@@ -367,7 +367,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 
 #### Phase 3 — Validate spec and confirm batch run
 
-1. **Validate** — `ml.ad_create_job` (`operation=validate_full`). Fix errors and re-validate (max 3 attempts).
+1. **Validate** — `ml.ad_create_job` (`operation=validate_full`). Fix errors and re-validate (max 3 attempts). Add `"groups": ["ml-agent-scratch"]` to the batch job config before validation so the job is tagged as a scratch job and can be cleaned up later.
 2. **Estimate memory** — `ml.ad_create_job` (`operation=estimate_memory`). Report in plain terms (e.g. "this job will use about 50 MB").
 3. **Pre-run summary** — before showing any config, state in plain language:
    - Time range to be analysed (e.g. "the last 90 days of data")
@@ -402,8 +402,10 @@ Ask: *"Do these results look right to you?"*
 
 **If yes:**
 1. Create a new job set with the same configuration but without a historical `end` — running from now onwards. Use a distinct `job_id` (append `-realtime` or similar).
-2. Immediately offer alerting: *"Would you like to set up an alert so you're notified when anomaly scores exceed a threshold?"*
-3. Set expectation: *"The model will keep learning your data's normal patterns over the coming weeks and will become more accurate over time."*
+2. **Update the dashboard** — regenerate the inline dashboard (from Phase 4) replacing the batch job IDs with the new realtime job IDs. Keep the same three-panel layout but omit `time_range` on each panel so they track the live time range.
+3. **Offer batch job cleanup** — the batch/historical jobs created during this session are now superseded. Ask the user to confirm before deleting them, naming each job ID explicitly. This is a destructive action — do not delete without explicit approval. If approved, `ml.ad_manage_job_state` (`stop_datafeed`) → `ml.ad_manage_job_state` (`close_job`) → `ml.ad_manage_job_state` (`delete_job`) for each batch job. Batch jobs are tagged `ml-agent-scratch` (set in Phase 3) so no special flags are needed for deletion.
+4. **Offer alerting** — ask: *"Would you like to set up alerting rules so you're notified when anomaly scores exceed a threshold on the new jobs?"*
+5. Set expectation: *"The model will keep learning your data's normal patterns over the coming weeks and will become more accurate over time."*
 
 **If no:**
 - Ask what looked wrong (too many false alerts, wrong entities, missing events, wrong time scale).
@@ -453,14 +455,15 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 2. **Never use ML jargon with users.** Translate `bucket_span` → detection frequency, `query_delay` → data latency, `by_field_name` → "split by entity". Users decide the business goal; you decide the config.
 3. **Never ask the user about job structure.** "One job per metric or one combined job?", "partition vs. population?", "split by service or by host?" are architecture decisions — make them based on Phase 1 data and the user's stated goal. State the choice and the reason; don't make it a question.
 4. **Always run batch before realtime.** Historical analysis lets the user validate the configuration before committing to a live job.
-5. **Plain-language summary before dashboard.** Raw charts without context confuse non-ML users; state the key finding in one sentence first.
-6. **Handle the no-anomaly path explicitly.** Zero results is not the same as success — explain it and offer adjustments.
-7. **Create job before datafeed.** Datafeed references job by ID.
-8. **Open job before starting datafeed.** Start on a closed job is rejected.
-9. **`query_delay` = P95 ingest latency + buffer** (60s–120s safe default).
-10. **Forecasts require non-population jobs** — `over_field_name` jobs cannot be forecasted; warn before attempting.
-11. **`by_field_name` vs `over_field_name`:** `by` compares entity to its own history; `over` compares to peer group in the same bucket. `partition_field_name` = fully independent sub-model with its own normalization.
-12. **High-cardinality split fields (>10k values) require memory estimate before creating.** Warn the user if cardinality is extreme.
+5. **Never delete batch jobs without explicit user confirmation.** Name every job ID in the confirmation prompt. Batch jobs must carry the `ml-agent-scratch` group (set in Phase 3) — only scratch jobs may be deleted; never pass `allow_non_scratch: true`.
+6. **Plain-language summary before dashboard.** Raw charts without context confuse non-ML users; state the key finding in one sentence first.
+7. **Handle the no-anomaly path explicitly.** Zero results is not the same as success — explain it and offer adjustments.
+8. **Create job before datafeed.** Datafeed references job by ID.
+9. **Open job before starting datafeed.** Start on a closed job is rejected.
+10. **`query_delay` = P95 ingest latency + buffer** (60s–120s safe default).
+11. **Forecasts require non-population jobs** — `over_field_name` jobs cannot be forecasted; warn before attempting.
+12. **`by_field_name` vs `over_field_name`:** `by` compares entity to its own history; `over` compares to peer group in the same bucket. `partition_field_name` = fully independent sub-model with its own normalization.
+13. **High-cardinality split fields (>10k values) require memory estimate before creating.** Warn the user if cardinality is extreme.
 
 ---
 
