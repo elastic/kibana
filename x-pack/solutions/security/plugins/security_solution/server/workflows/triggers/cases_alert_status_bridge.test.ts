@@ -7,12 +7,12 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SecuritySolutionEventBus } from '../../events/event_bus';
-import { forwardCasesAlertStatusToSS } from './cases_alert_status_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './cases_alert_status_bridge';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../common/workflows/triggers';
 
 const mockRequest = {} as KibanaRequest;
 
-describe('forwardCasesAlertStatusToSS', () => {
+describe('forwardCasesAlertStatusToSecuritySolution', () => {
   let bus: SecuritySolutionEventBus;
   let mockLogger: Pick<Logger, 'warn'>;
 
@@ -34,7 +34,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['a1', 'a2'],
       status: 'acknowledged',
       previousStatuses: [
@@ -60,7 +60,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['a1'],
       status: 'acknowledged',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
@@ -75,7 +75,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['ss1', 'obs1', 'ss2'],
       status: 'closed',
       previousStatuses: [
@@ -105,7 +105,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     bus.onAlertStatusChanged(listener);
 
     // indices list says security, but alertIdToIndex shows all IDs are in obs index
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['obs1'],
       status: 'closed',
       previousStatuses: [{ id: 'obs1', previousStatus: 'open' }],
@@ -120,7 +120,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['a1'],
       status: 'closed',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
@@ -136,7 +136,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: ['a1'],
       status: 'closed',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
@@ -154,7 +154,7 @@ describe('forwardCasesAlertStatusToSS', () => {
 
     const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 5 }, (_, i) => `id-${i}`);
     const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: oversizedIds,
       status: 'closed',
       previousStatuses: [],
@@ -177,7 +177,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     }));
     const oversizedIds = oversizedPrev.map((p) => p.id);
     const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
-    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: oversizedIds,
       status: 'open',
       previousStatuses: oversizedPrev,
@@ -195,7 +195,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     });
 
     expect(() =>
-      forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
         alertIds: ['a1'],
         status: 'open',
         previousStatuses: [],

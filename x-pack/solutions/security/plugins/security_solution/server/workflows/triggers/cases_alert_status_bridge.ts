@@ -34,8 +34,8 @@ const isSecurityIndex = (index: string): boolean =>
   index.startsWith(SECURITY_ALERT_BACKING_INDEX_PREFIX) ||
   index.startsWith(SIEM_SIGNALS_INDEX_PREFIX);
 
-export const forwardCasesAlertStatusToSS = (
-  securityEventBus: SecuritySolutionEventBus,
+export const forwardCasesAlertStatusToSecuritySolution = (
+  securitySolutionEventBus: SecuritySolutionEventBus,
   logger: Logger,
   request: KibanaRequest,
   payload: CasesAlertStatusPayload
@@ -49,7 +49,7 @@ export const forwardCasesAlertStatusToSS = (
   }
   const securityIdSet = new Set(securityAlertIds);
   try {
-    void securityEventBus.emitAlertStatusChanged(request, {
+    void securitySolutionEventBus.emitAlertStatusChanged(request, {
       alertIds: securityAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
       status: payload.status,
       previousStatuses: payload.previousStatuses

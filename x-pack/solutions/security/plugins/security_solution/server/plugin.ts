@@ -178,7 +178,7 @@ import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/al
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
-import { forwardCasesAlertStatusToSS } from './workflows/triggers/cases_alert_status_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -905,7 +905,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (this.securityEventBus && plugins.cases) {
       const securityEventBus = this.securityEventBus;
       plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
-        forwardCasesAlertStatusToSS(securityEventBus, logger, request, payload);
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
       });
     }
 
