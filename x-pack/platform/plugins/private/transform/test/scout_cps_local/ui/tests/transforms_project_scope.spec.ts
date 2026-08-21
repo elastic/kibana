@@ -15,8 +15,19 @@ import { test, testData } from '../fixtures';
 
 const CREATED_TRANSFORM_ID = 'scout_cps_ui_create_project_scope';
 const EDITED_TRANSFORM_ID = 'scout_cps_ui_edit_project_scope';
-const TRANSFORM_IDS = [CREATED_TRANSFORM_ID, EDITED_TRANSFORM_ID];
+const LINKED_ONLY_TRANSFORM_ID = 'scout_cps_ui_linked_only_project_scope';
+const BULK_EDITED_TRANSFORM_IDS = [
+  'scout_cps_ui_bulk_edit_project_scope_1',
+  'scout_cps_ui_bulk_edit_project_scope_2',
+];
+const TRANSFORM_IDS = [
+  CREATED_TRANSFORM_ID,
+  EDITED_TRANSFORM_ID,
+  LINKED_ONLY_TRANSFORM_ID,
+  ...BULK_EDITED_TRANSFORM_IDS,
+];
 const ORIGIN_PROJECT_ROUTING = `_id:${testData.ORIGIN_PROJECT_ID}`;
+const LINKED_PROJECT_ROUTING = `_id:${testData.LINKED_PROJECT_ID}`;
 
 const DATA_VIEW_API_PATH = 'api/data_views/data_view';
 
@@ -110,6 +121,7 @@ const createTransform = async (
   await deleteTransform(esClient, transformId);
   await esClient.transform.putTransform({
     transform_id: transformId,
+    defer_validation: true,
     ...getTransformConfig(transformId, projectRouting),
   });
 };
@@ -182,7 +194,7 @@ test.describe(
 
         await expect(page.testSubj.locator('transformListColumnProjectScope')).toBeVisible();
         await expect(row).toBeVisible();
-        await expect(row.getByTestId('transformListProjectScopeButton')).toHaveText('1/2');
+        await expect(row.getByTestId('transformListProjectScopeButton')).toHaveText('This project');
 
         await transform.expandTransformRow(CREATED_TRANSFORM_ID);
         await expect(page.testSubj.locator('transformExpandedRowTabbedContent')).toContainText(
@@ -191,6 +203,27 @@ test.describe(
         await expect(page.testSubj.locator('transformExpandedRowTabbedContent')).toContainText(
           ORIGIN_PROJECT_ROUTING
         );
+      });
+    });
+
+    test('shows linked-only project scope as a custom subset in the table', async ({
+      esClient,
+      page,
+      pageObjects,
+    }) => {
+      const { transform } = pageObjects;
+
+      await test.step('set up a transform with only the linked project selected', async () => {
+        await createTransform(esClient, LINKED_ONLY_TRANSFORM_ID, LINKED_PROJECT_ROUTING);
+      });
+
+      await test.step('verify the linked-only project scope column label', async () => {
+        await transform.gotoManagement();
+        const row = transform.getTransformRow(LINKED_ONLY_TRANSFORM_ID);
+
+        await expect(page.testSubj.locator('transformListColumnProjectScope')).toBeVisible();
+        await expect(row).toBeVisible();
+        await expect(row.getByTestId('transformListProjectScopeButton')).toHaveText('1/2');
       });
     });
 
@@ -230,8 +263,60 @@ test.describe(
       });
     });
 
-    test.skip('edits multiple transform project scopes from the bulk action', () => {
-      // Blocked until https://github.com/elastic/kibana/pull/285798 is merged.
+    test('edits multiple transform project scopes from the bulk action', async ({
+      esClient,
+      page,
+      pageObjects,
+    }) => {
+      const { transform } = pageObjects;
+
+      await test.step('set up transforms with all projects selected', async () => {
+        for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await createTransform(esClient, transformId, PROJECT_ROUTING.ALL);
+        }
+      });
+
+      await test.step('change the project scope from the bulk action', async () => {
+        await transform.gotoManagement();
+
+        for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await expect(transform.getTransformRow(transformId)).toBeVisible();
+        }
+
+        await transform.selectTransformRows(BULK_EDITED_TRANSFORM_IDS);
+        await expect(page.testSubj.locator('transformBulkActionsMenuButton')).toHaveText(
+          `${BULK_EDITED_TRANSFORM_IDS.length} selected`
+        );
+
+        await transform.openBulkProjectScopeFlyout();
+        await transform.selectBulkProjectScope(testData.ORIGIN_PROJECT_ID, testData.PROJECT_IDS);
+
+        for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await expect(
+            page.testSubj.locator('transformBulkProjectScopeModalTransformList')
+          ).toContainText(transformId);
+        }
+
+        await transform.confirmBulkProjectScopeUpdate();
+
+        for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await expect(
+            transform.getTransformRow(transformId).getByTestId('transformListProjectScopeButton')
+          ).toHaveText('This project');
+        }
+      });
+
+      await test.step('verify the updated project routing for all selected transforms', async () => {
+        await expect
+          .poll(async () =>
+            Promise.all(
+              BULK_EDITED_TRANSFORM_IDS.map((transformId) =>
+                getProjectRouting(esClient, transformId)
+              )
+            )
+          )
+          .toStrictEqual(BULK_EDITED_TRANSFORM_IDS.map(() => ORIGIN_PROJECT_ROUTING));
+      });
     });
   }
 );

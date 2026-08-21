@@ -58,6 +58,40 @@ export class TransformPage {
     await this.page.testSubj.locator('projectPickerFlyoutApplyButton').click();
   }
 
+  async selectTransformRows(transformIds: string[]): Promise<void> {
+    for (const transformId of transformIds) {
+      await this.getTransformRow(transformId)
+        .locator('.euiTableRowCellCheckbox .euiCheckbox__input')
+        .click();
+    }
+    await this.page.testSubj.locator('transformBulkActionsMenuButton').waitFor({
+      state: 'visible',
+    });
+  }
+
+  async openBulkProjectScopeFlyout(): Promise<void> {
+    await this.page.testSubj.locator('transformBulkActionsMenuButton').click();
+    await this.page.getByRole('button', { name: 'Change project scope' }).click();
+    await this.page.testSubj
+      .locator('projectPickerFlyoutApplyButton')
+      .waitFor({ state: 'visible' });
+  }
+
+  async selectBulkProjectScope(projectId: string, projectIds: string[]): Promise<void> {
+    await this.selectOnlyProject(projectId, projectIds);
+    await this.page.testSubj.locator('projectPickerFlyoutApplyButton').click();
+    await this.page.testSubj.locator('transformBulkProjectScopeModal').waitFor({
+      state: 'visible',
+    });
+  }
+
+  async confirmBulkProjectScopeUpdate(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Yes, save' }).click();
+    await this.page.testSubj.locator('transformBulkProjectScopeModal').waitFor({
+      state: 'hidden',
+    });
+  }
+
   async configureBasicPivot(): Promise<void> {
     await this.selectDropDownOption('transformGroupBySelection', 'terms(airline)');
     await this.page.testSubj.locator('transformGroupByEntry 0').waitFor({ state: 'visible' });
