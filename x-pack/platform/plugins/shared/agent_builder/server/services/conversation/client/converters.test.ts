@@ -139,7 +139,12 @@ describe('conversation model converters', () => {
             },
           },
         ],
+        // Derived from rounds on read; content covered by rounds_to_events.test.ts.
+        events: expect.any(Array),
       });
+
+      // Wiring check: events are derived from these rounds.
+      expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
 
     it('deserializes the conversation with legacy rounds field', () => {
@@ -210,7 +215,11 @@ describe('conversation model converters', () => {
           },
         ],
         state: createTestState(),
+        events: expect.any(Array),
       });
+
+      // Wiring check: events are derived from these rounds.
+      expect(deserialized.events?.[0]?.id).toBe('round-legacy::user_message');
     });
 
     it('deserializes the steps', () => {
