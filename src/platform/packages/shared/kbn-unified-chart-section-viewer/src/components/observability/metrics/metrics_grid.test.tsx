@@ -29,13 +29,14 @@ import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_SETTINGS_DEFAULTS } = jest.requireActual(
+  const { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } = jest.requireActual(
     '@kbn/discover-utils/src/data_types/metrics'
   );
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
     METRICS_GRID_SETTINGS_DEFAULTS,
+    METRICS_GRID_SORT_DEFAULTS,
     dismissAllFlyoutsExceptFor: jest.fn(),
   };
 });
@@ -172,6 +173,21 @@ describe('MetricsGrid', () => {
         expect.anything()
       );
     });
+  });
+
+  it.each([
+    ['system util', ['system', 'util']],
+    ['system*util', ['system', 'util']],
+    ['utilizaton', ['utilization']],
+    ['not-a-match', []],
+  ])('passes precise title highlights for the search term %s', (searchTerm, titleHighlight) => {
+    renderMetricsGrid({ searchTerm });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ titleHighlight }),
+      expect.anything()
+    );
   });
 
   it('passes the correct size prop', () => {
