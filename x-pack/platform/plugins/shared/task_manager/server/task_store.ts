@@ -771,6 +771,7 @@ export class TaskStore {
     }
 
     const bulkBody = [];
+    const updatedDocs: PartialConcreteTaskInstance[] = [];
     for (const doc of docs) {
       if (doc.schedule?.interval && !isInterval(doc.schedule.interval)) {
         this.logger.error(
@@ -778,6 +779,7 @@ export class TaskStore {
         );
         continue;
       }
+      updatedDocs.push(doc);
       bulkBody.push({
         update: {
           _id: `task:${doc.id}`,
@@ -799,7 +801,7 @@ export class TaskStore {
       throw e;
     }
 
-    return result.items.map((item) => {
+    return result.items.map((item, index) => {
       const malformedResponseType = 'malformed response';
 
       if (!item.update || !item.update._id) {
@@ -835,7 +837,10 @@ export class TaskStore {
         });
       }
 
-      const doc = docs.find((d) => d.id === docId);
+      // Map by position (ES returns items in request order), not by id: all runners
+      // share one BufferedTaskStore, so multiple updates for the same task id can be
+      // batched here and an id lookup would return the first doc for every one of them.
+      const doc = updatedDocs[index];
 
       return asOk({
         ...doc,
