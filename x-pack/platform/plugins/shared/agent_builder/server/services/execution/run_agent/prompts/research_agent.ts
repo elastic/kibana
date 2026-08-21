@@ -191,7 +191,7 @@ ${
 
 ${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
 
-${getAiIndicesInstructions({ aiIndices, spaceId })}
+${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
 
 ## INSTRUCTIONS
 

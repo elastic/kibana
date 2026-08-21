@@ -30,16 +30,18 @@ const knownAiIndices: Record<string, KnownAiIndex> = {
 
 /**
  * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
- * limit results to the current space. Returns an empty string when the agent has none.
+ * limit results to the current space. Returns an empty string when disabled or the agent has none.
  */
 export const getAiIndicesInstructions = ({
+  enabled,
   aiIndices,
   spaceId,
 }: {
+  enabled: boolean;
   aiIndices: string[];
   spaceId: string;
 }): string => {
-  if (aiIndices.length === 0) {
+  if (!enabled || aiIndices.length === 0) {
     return '';
   }
 

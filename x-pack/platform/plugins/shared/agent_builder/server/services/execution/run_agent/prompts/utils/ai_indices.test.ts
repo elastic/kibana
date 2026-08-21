@@ -10,12 +10,23 @@ import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import { getAiIndicesInstructions } from './ai_indices';
 
 describe('getAiIndicesInstructions', () => {
+  it('renders nothing when AI index instructions are disabled', () => {
+    expect(
+      getAiIndicesInstructions({
+        enabled: false,
+        aiIndices: [agentBuilderDefaultAiIndexId],
+        spaceId: 'default',
+      })
+    ).toBe('');
+  });
+
   it('renders nothing for an agent with no AI indices', () => {
-    expect(getAiIndicesInstructions({ aiIndices: [], spaceId: 'default' })).toBe('');
+    expect(getAiIndicesInstructions({ enabled: true, aiIndices: [], spaceId: 'default' })).toBe('');
   });
 
   it('explains what an AI index is and how it is named', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -27,6 +38,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('sends the agent to the underlying data when no KI covers the question', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -36,6 +48,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('warns that a value written into a KI may be out of date', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -45,6 +58,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('names the backing index of the default AI index and what it holds', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -56,6 +70,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('tells the agent that entries have to be attached before they can be acted on', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -65,6 +80,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('names no SML tool, so the section survives their replacement by ES|QL', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
@@ -74,6 +90,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('names the space the conversation runs in', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'marketing',
     });
@@ -83,6 +100,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('renders a filter that also matches indices without a spaces field', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'marketing',
     });
@@ -102,6 +120,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('does not leak the Context Engine ids of the declared indices', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
       spaceId: 'default',
     });
@@ -111,6 +130,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('points at index discovery for declared indices it cannot name', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
       spaceId: 'default',
     });
@@ -120,6 +140,7 @@ describe('getAiIndicesInstructions', () => {
 
   it('omits the catalog heading when no declared index can be named', () => {
     const instructions = getAiIndicesInstructions({
+      enabled: true,
       aiIndices: ['some-private-id'],
       spaceId: 'default',
     });

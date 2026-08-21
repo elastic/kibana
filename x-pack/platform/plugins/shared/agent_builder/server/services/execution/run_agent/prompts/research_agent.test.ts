@@ -42,7 +42,7 @@ describe('getResearchAgentPrompt', () => {
       skills: [],
       actions: [],
       cycleLimit: 1,
-      experimentalFeatures: { bash: false, skills: false },
+      experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
       toolManager: {} as any,
       resultTransformer: jest.fn(),
@@ -150,7 +150,22 @@ describe('getResearchAgentPrompt', () => {
   });
 
   it('omits the AI indices section when the agent declares no AI indices', async () => {
-    const messages = await getResearchAgentPrompt(makeParams());
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+      })
+    );
+
+    expect(asText(messages[0])).not.toContain('## AI INDICES');
+  });
+
+  it('omits the AI indices section when AI index instructions are disabled', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: { instructions: '', aiIndices: ['elastic'] },
+        experimentalFeatures: { aiIndices: false, bash: false, skills: false },
+      })
+    );
 
     expect(asText(messages[0])).not.toContain('## AI INDICES');
   });
@@ -159,6 +174,7 @@ describe('getResearchAgentPrompt', () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         configuration: { instructions: '', aiIndices: ['elastic'] },
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
         spaceId: 'marketing',
       })
     );
@@ -195,7 +211,7 @@ describe('getResearchAgentPrompt', () => {
       skills: [],
       actions: [],
       cycleLimit: 1,
-      experimentalFeatures: { bash: false, skills: false },
+      experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),
     } as any;
