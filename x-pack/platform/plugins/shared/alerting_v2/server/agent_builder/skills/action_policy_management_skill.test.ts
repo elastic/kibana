@@ -125,7 +125,7 @@ describe('createActionPolicyManagementSkill', () => {
     expect(byName['action-policy-multi-rule']).toContain('Catch-all');
     expect(byName['action-policy-schema']).toBeUndefined();
     expect(byName['action-policy-operations-schema']).toBeUndefined();
-    expect(byName['concepts']).toBeUndefined();
+    expect(byName.concepts).toBeUndefined();
   });
 
   it('defers throttle strategy details to referenced content instead of teaching a two-strategy model', () => {
