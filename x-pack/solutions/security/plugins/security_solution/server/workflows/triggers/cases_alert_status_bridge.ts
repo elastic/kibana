@@ -12,10 +12,10 @@ import type { SecuritySolutionEventBus } from '../../events/event_bus';
 
 // Cases is multi-owner; only forward events for alerts that live in Security indices.
 const SECURITY_ALERT_INDEX_PREFIX = '.alerts-security.';
-// RAC detection alerts land in a concrete backing index (.internal.alerts-security.*),
+// Detection alerts land in a concrete backing index (.internal.alerts-security.*),
 // not the read alias (.alerts-security.*), so we need to match both.
 const SECURITY_ALERT_BACKING_INDEX_PREFIX = '.internal.alerts-security.';
-// Legacy pre-RAC signals.
+// Legacy pre-rules-framework signals.
 const SIEM_SIGNALS_INDEX_PREFIX = '.siem-signals';
 
 interface CasesAlertStatusPayload {

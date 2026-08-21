@@ -173,8 +173,8 @@ export const setAttacksStatusRoute = (
 
             const attackPreviousStatuses = attackDocs.hits.hits.flatMap((hit) => {
               if (hit._id == null) return [];
-              const ps = extractWorkflowStatus(hit._source);
-              return ps !== undefined ? [{ id: hit._id, previousStatus: ps }] : [];
+              const previousStatus = extractWorkflowStatus(hit._source);
+              return previousStatus !== undefined ? [{ id: hit._id, previousStatus }] : [];
             });
 
             const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {

@@ -48,9 +48,9 @@ export const prefetchPreviousStatusesByIds = async (
   const idToIndex = new Map<string, string>();
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
-      const ps = extractWorkflowStatus(hit._source);
-      if (ps !== undefined) {
-        previousStatuses.push({ id: hit._id, previousStatus: ps });
+      const previousStatus = extractWorkflowStatus(hit._source);
+      if (previousStatus !== undefined) {
+        previousStatuses.push({ id: hit._id, previousStatus });
       }
       if (hit._index != null) {
         idToIndex.set(hit._id, hit._index);
@@ -91,9 +91,9 @@ export const prefetchPreviousStatusesByQuery = async (
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
       ids.push(hit._id);
-      const ps = extractWorkflowStatus(hit._source);
-      if (ps !== undefined) {
-        previousStatuses.push({ id: hit._id, previousStatus: ps });
+      const previousStatus = extractWorkflowStatus(hit._source);
+      if (previousStatus !== undefined) {
+        previousStatuses.push({ id: hit._id, previousStatus });
       }
       if (hit._index != null) {
         idToIndex.set(hit._id, hit._index);

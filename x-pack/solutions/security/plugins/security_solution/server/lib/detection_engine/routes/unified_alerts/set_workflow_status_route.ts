@@ -33,7 +33,7 @@ import {
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 const isAttackDiscoveryIndex = (index: string): boolean => {
-  // ES returns the concrete backing index for RAC alerts (`.internal.alerts-security.*`),
+  // ES returns the concrete backing index (`.internal.alerts-security.*`),
   // not the read alias, so normalise the prefix before matching.
   const normalized = index.startsWith('.internal.') ? index.replace('.internal.', '.') : index;
   return (
@@ -98,17 +98,17 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
               index,
               ids
             );
-            const psMap = new Map(previousStatuses.map((s) => [s.id, s]));
+            const previousStatusMap = new Map(previousStatuses.map((s) => [s.id, s]));
             for (const id of ids) {
               const docIndex = idToIndex.get(id);
               if (docIndex != null) {
-                const ps = psMap.get(id);
+                const previousStatus = previousStatusMap.get(id);
                 if (isAttackDiscoveryIndex(docIndex)) {
                   attackIds.push(id);
-                  if (ps) attackPreviousStatuses.push(ps);
+                  if (previousStatus) attackPreviousStatuses.push(previousStatus);
                 } else {
                   alertIds.push(id);
-                  if (ps) alertPreviousStatuses.push(ps);
+                  if (previousStatus) alertPreviousStatuses.push(previousStatus);
                 }
               }
             }

@@ -328,7 +328,7 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
     });
 
-    test('emits attackStatusChanged when _index is the concrete RAC backing index (.internal.* prefix)', async () => {
+    test('emits attackStatusChanged when _index is the concrete backing index (.internal.* prefix)', async () => {
       context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
         docs: [
           {

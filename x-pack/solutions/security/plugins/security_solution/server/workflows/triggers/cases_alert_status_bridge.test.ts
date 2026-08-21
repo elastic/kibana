@@ -71,7 +71,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('emits only security alertIds when case has mixed SS and obs alerts', () => {
+  it('emits only security alertIds when case has mixed Security Solution and observability alerts', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
@@ -116,7 +116,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('emits when index is a RAC backing index (.internal.alerts-security.*)', () => {
+  it('emits when index is a concrete backing index (.internal.alerts-security.*)', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
