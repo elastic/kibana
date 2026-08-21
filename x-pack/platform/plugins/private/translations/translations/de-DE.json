@@ -57811,7 +57811,6 @@
     "xpack.transform.models.transformService.allOtherRequestsCancelledDescription": "Alle anderen Anfragen wurden storniert.",
     "xpack.transform.models.transformService.requestToActionTimedOutErrorMessage": "Bei der Anforderung an {action} ''{id}'' ist eine Zeitüberschreitung aufgetreten. {extra}",
     "xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel": "Massenaktionen",
-    "xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel": "Managementmaßnahmen",
     "xpack.transform.multiTransformActionsMenu.transformsCount": "{count} {count, plural, one {transform} other {Transformationen}} ausgewählt",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "Kopieren Sie die Anweisung der Dev-Konsole zur Transformationsvorschau in die Zwischenablage.",
     "xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody": "Bitte wählen Sie mindestens ein Gruppierungsfeld und eine Aggregation aus.",
