@@ -288,6 +288,13 @@ export class AgentBuilderPlugin
       logger: this.logger.get('model-provider'),
     });
 
+    this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
+      logger: this.logger.get('recommended-endpoints-poller'),
+      esClient: elasticsearch.client.asInternalUser,
+      features: searchInferenceEndpoints.features,
+    });
+    setTimeout(() => this.recommendedEndpointsPoller?.start(), 5_000);
+
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),

@@ -19,7 +19,7 @@ import {
 } from '@kbn/agent-builder-common/constants';
 import { isAbValidated } from './ab_model_compatibility';
 
-const DEFAULT_POLLING_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+const DEFAULT_POLLING_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const MAIN_CAPABILITIES = ['capable', 'balanced'];
 const FAST_CAPABILITIES = ['efficient'];
@@ -140,8 +140,6 @@ export class RecommendedEndpointsPoller {
     'updateRecommendedEndpoints'
   >;
   private readonly pollingIntervalMs: number;
-  // TODO(dev-only): remove before merging — used to inject fake EIS metadata locally
-  private readonly debugEndpoints?: InferenceInferenceEndpointInfo[];
   private readonly polling$: Observable<unknown>;
   private subscription: Subscription | undefined;
 
@@ -150,20 +148,16 @@ export class RecommendedEndpointsPoller {
     esClient,
     features,
     pollingIntervalMs = DEFAULT_POLLING_INTERVAL_MS,
-    debugEndpoints,
   }: {
     logger: Logger;
     esClient: ElasticsearchClient;
     features: Pick<InferenceFeatureRegistryStartContract, 'updateRecommendedEndpoints'>;
     pollingIntervalMs?: number;
-    /** Dev-only: inject fake endpoints instead of calling ES. Remove before merging. */
-    debugEndpoints?: InferenceInferenceEndpointInfo[];
   }) {
     this.logger = logger;
     this.esClient = esClient;
     this.features = features;
     this.pollingIntervalMs = pollingIntervalMs;
-    this.debugEndpoints = debugEndpoints;
     this.polling$ = this.createPollingObservable();
   }
 
@@ -203,10 +197,6 @@ export class RecommendedEndpointsPoller {
   }
 
   private fetchEndpoints() {
-    if (this.debugEndpoints) {
-      this.logger.warn('Using debugEndpoints stub — remove before merging');
-      return from(Promise.resolve({ endpoints: this.debugEndpoints }));
-    }
     return from(this.esClient.inference.get());
   }
 
