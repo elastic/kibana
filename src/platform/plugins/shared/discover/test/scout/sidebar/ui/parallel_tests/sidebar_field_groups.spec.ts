@@ -7,18 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
+
+// Sets popularity counts on the default data view via the data views fields API so tests
+// don't have to replay UI column toggles (each toggle costs a save + search roundtrip).
+// `null` removes a previously persisted count, keeping retries idempotent.
+const setFieldPopularity = async (
+  kbnClient: KbnClient,
+  discoverScoutSpace: DiscoverScoutSpace,
+  fieldCounts: Record<string, number | null>
+) => {
+  const dataViewId = discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW);
+  await kbnClient.request({
+    method: 'POST',
+    path: `/s/${discoverScoutSpace.id}/api/data_views/data_view/${dataViewId}/fields`,
+    body: {
+      fields: Object.fromEntries(
+        Object.entries(fieldCounts).map(([fieldName, count]) => [fieldName, { count }])
+      ),
+    },
+  });
+};
 
 spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
-  });
-
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterEach(async ({ pageObjects }) => {
@@ -30,8 +46,12 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('shows available and meta field groups', async ({ pageObjects }) => {
-    const { unifiedFieldList } = pageObjects;
+  spaceTest('shows available and meta field groups', async ({ browserAuth, pageObjects }) => {
+    const { discover, unifiedFieldList } = pageObjects;
+
+    await browserAuth.loginAsPrivilegedUser();
+    await discover.goto({ queryMode: 'classic' });
+    await discover.waitUntilTabIsLoaded();
 
     expect(await unifiedFieldList.doesSidebarShowFields()).toBe(true);
 
@@ -51,14 +71,42 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     expect(metaFields).toContain('_score');
   });
 
+  spaceTest('passes filters down to field stats', async ({ browserAuth, pageObjects }) => {
+    const { discover, filterBar, unifiedFieldList } = pageObjects;
+
+    await browserAuth.loginAsPrivilegedUser();
+    await discover.goto({ queryMode: 'classic' });
+    await discover.waitUntilTabIsLoaded();
+
+    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
+    await discover.waitUntilSearchingHasFinished();
+
+    await unifiedFieldList.clickFieldListItem('extension');
+    await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
+    // Unfiltered top values are css/png/gif/php — jpg proves the filter applied.
+    await expect(unifiedFieldList.getFieldStatsTopValues()).toContainText('jpg');
+    await unifiedFieldList.closeFieldPopover();
+  });
+
+  // The two popularity tests below select columns, which calls popularizeField. That
+  // requires indexPatterns.save and persists counts on the data view; Security editor
+  // lacks that capability, so they log in as admin. Each test performs its own login and
+  // navigation (there is no shared beforeEach) because API seeding must happen before
+  // the data view is loaded, and Scout's 60s per-test timeout includes hooks — a
+  // duplicated Discover load is enough to push a marginal test over budget.
   spaceTest(
     'tracks selected and popular fields across refresh',
-    async ({ apiServices, browserAuth, discoverScoutSpace, page, pageObjects }) => {
+    async ({ browserAuth, discoverScoutSpace, kbnClient, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
-      const runtimeFieldName = '_popularity_runtimefield';
 
-      // Selecting columns calls popularizeField, which requires indexPatterns.save and
-      // persists counts on the data view. Security editor lacks that capability.
+      // Clear any popularity counts left behind by a previous attempt so the
+      // expected counts below hold on retries too.
+      await setFieldPopularity(kbnClient, discoverScoutSpace, {
+        extension: null,
+        '@message': null,
+        bytes: null,
+      });
+
       await browserAuth.loginAsAdmin();
       await discover.goto({ queryMode: 'classic' });
       await discover.waitUntilTabIsLoaded();
@@ -112,11 +160,32 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
         popularBeforeRefresh
       );
+    }
+  );
 
-      await unifiedFieldList.clickFieldListItemRemove('@message');
+  spaceTest(
+    'ranks a high-popularity runtime field above other popular fields',
+    async ({ apiServices, browserAuth, discoverScoutSpace, kbnClient, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
+      const runtimeFieldName = '_popularity_runtimefield';
+
+      // Seed the popularity counts the previous test produced via UI toggles through
+      // the API instead, so this test stays independent and within the time budget.
+      // `clientip` is cleared for retry idempotence: this test popularizes it below.
+      await setFieldPopularity(kbnClient, discoverScoutSpace, {
+        extension: 1,
+        '@message': 3,
+        bytes: 1,
+        clientip: null,
+      });
+
+      await browserAuth.loginAsAdmin();
+      await discover.goto({ queryMode: 'classic' });
+      await discover.waitUntilTabIsLoaded();
+
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       await discover.waitUntilSearchingHasFinished();
-      await unifiedFieldList.clickFieldListItemRemove('extension');
-      await discover.waitUntilSearchingHasFinished();
+
       // FTR set popularity: 30 so the new runtime field ranks above selected fields.
       // createRuntimeField already waits for the tab/search to settle.
       await discover.createRuntimeField({
@@ -167,17 +236,4 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       }
     }
   );
-
-  spaceTest('passes filters down to field stats', async ({ pageObjects }) => {
-    const { discover, filterBar, unifiedFieldList } = pageObjects;
-
-    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
-    await discover.waitUntilSearchingHasFinished();
-
-    await unifiedFieldList.clickFieldListItem('extension');
-    await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
-    // Unfiltered top values are css/png/gif/php — jpg proves the filter applied.
-    await expect(unifiedFieldList.getFieldStatsTopValues()).toContainText('jpg');
-    await unifiedFieldList.closeFieldPopover();
-  });
 });
