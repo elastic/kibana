@@ -23,6 +23,16 @@ import {
   projectWorkflowToWatch,
 } from './project_watch';
 
+const getManagedYaml = (workflowId: string): string => {
+  const definition = getManagedWorkflowDefinition(workflowId);
+  if (!definition) throw new Error(`Missing managed workflow definition for "${workflowId}"`);
+  if ('yaml' in definition && definition.yaml) return definition.yaml;
+  if ('yamlTemplate' in definition && definition.yamlTemplate) {
+    return definition.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' });
+  }
+  throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
+};
+
 describe('project watch', () => {
   describe('extractWatchPolicy', () => {
     it('reads static policy from consts.watch_policy', () => {
@@ -117,8 +127,7 @@ describe('project watch', () => {
   });
 
   describe('detection watch definition', () => {
-    const managed = getManagedWorkflowDefinition(PND_WATCH_DETECTION_WORKFLOW_ID);
-    const definition = parse(managed!.yaml!) as WorkflowYaml;
+    const definition = parse(getManagedYaml(PND_WATCH_DETECTION_WORKFLOW_ID)) as WorkflowYaml;
 
     interface NestedStep {
       name: string;
@@ -199,8 +208,8 @@ describe('project watch', () => {
       ];
 
       for (const id of ids) {
-        const withoutComments = getManagedWorkflowDefinition(id)!
-          .yaml!.split('\n')
+        const withoutComments = getManagedYaml(id)
+          .split('\n')
           .filter((line) => !line.trimStart().startsWith('#'))
           .join('\n');
 
@@ -219,7 +228,7 @@ describe('project watch', () => {
       ];
 
       for (const id of ids) {
-        const { steps } = parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml;
+        const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         const conditions = flattenSteps(steps as unknown as NestedStep[]).flatMap(
           ({ name, if: stepIf, condition }) =>
             [stepIf, condition].filter(Boolean).map((expr) => [name, expr] as const)
@@ -243,7 +252,7 @@ describe('project watch', () => {
       ];
 
       for (const id of ids) {
-        const { outputs } = parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml;
+        const { outputs } = parse(getManagedYaml(id)) as WorkflowYaml;
         const declared = Array.isArray(outputs) ? (outputs as Array<{ type?: string }>) : [];
 
         expect(declared.map(({ type }) => type)).not.toContain('array');
@@ -254,8 +263,8 @@ describe('project watch', () => {
     // UTC offset and only accepts a `Z` suffix.
     it('sends every preview timeframeEnd as UTC', () => {
       for (const id of [PND_RULE_TUNING_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
-        const lines = getManagedWorkflowDefinition(id)!
-          .yaml!.split('\n')
+        const lines = getManagedYaml(id)
+          .split('\n')
           .filter((line) => line.includes('timeframeEnd'));
 
         expect(lines.length).toBeGreaterThan(0);
@@ -269,7 +278,7 @@ describe('project watch', () => {
     // makes an analyst hand-author the resume payload as JSON instead.
     it('gates both workers on an approval step that reads response.approved', () => {
       for (const id of [PND_RULE_TUNING_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
-        const { steps } = parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml;
+        const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         const all = flattenSteps(steps as unknown as NestedStep[]);
         const gates = all.filter(({ type }) => type === 'waitForApproval');
 
@@ -290,10 +299,7 @@ describe('project watch', () => {
 
     it('keeps the skills and the preview worker inside the workers themselves', () => {
       const workerCallables = (id: string) =>
-        projectCallablesFromDefinition(
-          parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml,
-          undefined
-        );
+        projectCallablesFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
 
       expect(workerCallables(PND_RULE_TUNING_WORKFLOW_ID)).toEqual(
         expect.arrayContaining([

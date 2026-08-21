@@ -9,18 +9,18 @@ import type { KibanaResponseFactory, IKibanaResponse } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 /**
- * Some mock-only worker, skill, and unconverted watch settings have no live backing. Refuse those
- * operations rather than serving or accepting data that would look durable.
+ * Some mock-only worker and skill operations have no live backing. Refuse those operations rather
+ * than serving or accepting data that would look durable.
  *
  * Reading a watch is deliberately not gated: `get_watch` still serves the live projection and simply
- * omits `settings`.
+ * omits settings when their durable state cannot be read.
  */
 export const storeUnavailableResponse = (response: KibanaResponseFactory): IKibanaResponse =>
   response.customError({
     statusCode: 501,
     body: {
       message: i18n.translate('xpack.pnd.watchOperationUnavailableErrorMessage', {
-        defaultMessage: 'This watch does not have a durable settings extension yet.',
+        defaultMessage: 'This operation does not have durable storage yet.',
       }),
     },
   });

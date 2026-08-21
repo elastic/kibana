@@ -11,7 +11,7 @@ xpack.pnd.enabled: true
 ```
 
 - **`xpack.pnd.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for PND are omitted automatically.
-- **`xpack.pnd.ui.useMockData`** — optional presentation-source toggle (default `true`). Watch Floor settings use managed workflow template values in both modes; the flag controls whether the rest of the watch projection comes from fixtures or live Workflows data.
+- **`xpack.pnd.ui.useMockData`** — optional presentation-source toggle (default `true`). Watch settings use managed workflow template values in both modes; the flag controls whether the rest of the watch projection comes from fixtures or live Workflows data.
 - **`pnd:watchesEnabled`** — space-scoped Advanced Setting (default `false`). After the required page reload, a versioned internal synchronization request installs all registered watches in that space. Turning it off disables and cancels every watch, attempts every uninstall even if one execution is still draining, and retries incomplete removal on the next synchronization. Re-enabling starts from defaults.
 
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
@@ -37,7 +37,7 @@ Before enabling live projection in shared or production environments:
 
 - Watch reads require only `pnd_read`; PND owns the catalog projection and its managed definitions. Recent-run enrichment soft-fails when execution history is unavailable.
 - Settings writes require `pnd_write`; managed install is requestless, so the PND route is the authorization boundary.
-- Watch Floor autonomy is the first durable settings extension. Trigger, scope-routing, worker, skill, and approval-gate mutations remain outside the live extension.
+- Autonomy is the common durable setting for every managed Watch. Trigger, scope-routing, worker, skill, and approval-gate mutations remain outside the live extension.
 
 ## Chrome strategy (PR1)
 
@@ -108,7 +108,7 @@ Owner plugin id: `pnd`. Catalog definitions:
 
 Central PND watch definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`, with one module per Watch. The platform package owns the static managed-workflow metadata, YAML, template function, and template value type. PND owns each Watch's settings defaults, migrations, patch behavior, and API projection under `server/managed_workflows/watches/`. The PND catalog comes from the PND registry rather than managed-workflow selector visibility.
 
-Watch definitions are `dynamic` + `auto` + `restorable`. They are installed on enable with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Watch Floor is a `yamlTemplate` whose versioned template values persist autonomy settings and are re-used during definition upgrades. The remaining four watches stay registered in the catalog and follow the same conversion path: add a versioned settings extension and convert their definition to `yamlTemplate` before exposing live settings.
+Watch definitions are `dynamic` + `auto` + `restorable`. They are installed on enable with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Every built-in Watch is a `yamlTemplate` whose versioned template values persist autonomy settings and are re-used during definition upgrades.
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs. A Watch reaches them with `workflow.execute`, and they surface on the Watch detail page as callables of kind `workflow`:
 
@@ -135,15 +135,14 @@ For now, every built-in Watch is registered centrally:
 
 1. Define the stable Watch id and catalog presentation in `@kbn/pnd-common`. The id is the managed definition id presented by the PND Watch API; per-space document ids are produced later by `workflowIdSuffix: spaceId`.
 2. Add a per-Watch managed definition module under `kbn-workflows/managed/definitions/pnd` and include it in the platform `managedWorkflowDefinitions` registry. Keep `pluginId: 'pnd'`, `lifecycle: 'dynamic'`, `versionStrategy: 'auto'`, and `enablement: 'restorable'`. Watch teams do not call managed `install()` directly.
-3. Register settled settings behavior in PND's `server/managed_workflows/watches/` registry. The registry joins PND settings behavior to the platform definition by stable Watch id and rejects a template without settings behavior or settings behavior without a template.
-4. A Watch without settled live settings stays on plain `yaml` and has no `settings` extension. It remains visible in the catalog but does not claim a durable settings surface.
-5. Workflow enablement is lifecycle state: templates start with `enabled: false`, and PND enables the installed per-space document through the request-authorized Workflows update API.
-6. Treat stored values as untrusted old data. `migrate` validates the shape, returns the complete current value set, removes obsolete keys, and sets `migrated: true` whenever PND must reinstall it. PND runs all settings migrations before Workflows reconciliation; an unsafe migration prevents reconciliation for that boot.
-7. Keep `applyPatch` limited to fields already present in the shared PND Watch API. New trigger, schedule, identity, approval, worker, skill, or watch-specific shapes require agreement with the Experience UX and owning working groups before extending the OpenAPI contract.
-8. `toSettings` projects stored values into the sectioned `WatchSettings` response. Omit sections the Watch does not genuinely support; do not populate them with fixture identities, schedules, runtime state, or other invented values.
-9. Add settings-module tests for defaults, every supported patch, migration from the immediately preceding shape, and rejection of invalid stored data. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Test unresolved placeholder tokens and that every supported persisted setting changes the rendered definition. Imported YAML changes require an explicit managed-definition version decision.
+3. Register every built-in Watch with the common settings behavior in PND's `server/managed_workflows/watches/` registry. The registry joins PND settings behavior to the platform definition by stable Watch id and rejects a template without settings behavior or settings behavior without a template.
+4. Workflow enablement is lifecycle state: templates start with `enabled: false`, and PND enables the installed per-space document through the request-authorized Workflows update API.
+5. Treat stored values as untrusted old data. `migrate` validates the shape, returns the complete current value set, removes obsolete keys, and sets `migrated: true` whenever PND must reinstall it. PND runs all settings migrations before Workflows reconciliation; an unsafe migration prevents reconciliation for that boot.
+6. Keep `applyPatch` limited to fields already present in the shared PND Watch API. New trigger, schedule, identity, approval, worker, skill, or watch-specific shapes require agreement with the Experience UX and owning working groups before extending the OpenAPI contract.
+7. `toSettings` projects stored values into the sectioned `WatchSettings` response. Omit sections the Watch does not genuinely support; do not populate them with fixture identities, schedules, runtime state, or other invented values.
+8. Add settings-module tests for defaults, every supported patch, migration from the immediately preceding shape, and rejection of invalid stored data. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Test unresolved placeholder tokens and that every supported persisted setting changes the rendered definition. Imported YAML changes require an explicit managed-definition version decision.
 
-To add a setting, add it to the managed template-values type in the Watch's platform module. Add a placeholder in the Watch YAML and have `yamlTemplate` replace it, so changing the value changes the rendered definition. Declare its default, migration, patch behavior, and API projection in the Watch's PND settings registration.
+To add a common setting, add it to the managed template-values type shared by the Watch platform modules. Add a placeholder to every Watch YAML and have each `yamlTemplate` replace it, so changing the value changes the rendered definition. Declare its default, migration, patch behavior, and API projection in the shared PND settings registration. Watch-specific settings should extend that common behavior only after their API and runtime semantics are settled.
 
 The lifecycle service owns the rest: per-space installation, reading persisted values, enable/disable, startup migration, upgrades, and space-wide uninstall. Settings responses carry the logical workflow version, and settings patches return HTTP 409 when a fresh read shows that version was already stale. This is best-effort detection rather than an atomic write guard: overlapping requests can both pass the comparison and remain last-write-wins. The atomic conflict behavior remains open.
 

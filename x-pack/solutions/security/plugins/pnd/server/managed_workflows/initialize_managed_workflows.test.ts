@@ -133,7 +133,9 @@ describe('initializeManagedWorkflows', () => {
 
     expect(client.ready).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Unsupported Watch Floor settings version: 2')
+      expect.stringContaining(
+        `Unsupported settings version for PND watch "${PND_WATCH_FLOOR_WORKFLOW_ID}": 2`
+      )
     );
   });
 

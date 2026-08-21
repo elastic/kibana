@@ -41,6 +41,9 @@ triggers:
       additionalProperties: false
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Detection engineering
     ui:
       color: "#e7664c"
