@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 import { buildCommandUsageList } from '../../../service/utils';
 import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
@@ -30,7 +31,8 @@ export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
   'xpack.securitySolution.useInputHints.viewInputHistory',
   {
     defaultMessage:
-      'Press [ALT][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+      'Press [{isMac, select, true {⌘} other {ALT}}][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+    values: { isMac },
   }
 );
 

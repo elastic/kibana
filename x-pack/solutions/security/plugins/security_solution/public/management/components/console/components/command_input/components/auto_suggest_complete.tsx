@@ -134,7 +134,7 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
         <EuiTextColor color="subdued">{suggestionValue}</EuiTextColor>
         <EuiIcon
           type="kqlFunction"
-          size="m"
+          size="s"
           color="subdued"
           aria-hidden={true}
           css={css`

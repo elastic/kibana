@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 
 export const consoleTranslations = Object.freeze({
   escapeDoubleDashesInfo: i18n.translate(
@@ -29,7 +30,8 @@ export const consoleTranslations = Object.freeze({
     'xpack.securitySolution.management.console.keyAvailbleAutoCompleteValues',
     {
       defaultMessage:
-        'Pressing [ALT][SPACE] keys will show list of available commands or list of available command arguments, if a command has already been entered.',
+        'Pressing [{isMac, select, true {⌘} other {ALT}}][SPACE] keys will show list of available commands or list of available command arguments, if a command has already been entered.',
+      values: { isMac },
     }
   ),
 });
