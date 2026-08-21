@@ -11,11 +11,33 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 
+jest.mock('@elastic/apm-rum');
+
 const noop = () => {};
 
 const renderTemplate = (ui: React.ReactElement) => render(ui);
 
+const ThrowOnRender = () => {
+  throw new Error('intentional render error');
+};
+
 describe('FlyoutTemplate header title icon and description', () => {
+  it('catches a throwing header child and shows the error fallback without crashing the flyout', () => {
+    jest.spyOn(console, 'error').mockImplementation(noop);
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Header title="Service inventory" description={<ThrowOnRender />} />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('errorBoundaryFatalHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('myFlyoutBody')).toBeInTheDocument();
+    jest.restoreAllMocks();
+  });
+
   it('renders the header title as an H3', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">

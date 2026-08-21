@@ -11,9 +11,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 
+jest.mock('@elastic/apm-rum');
+
 const noop = () => {};
 
 const renderTemplate = (ui: React.ReactElement) => render(ui);
+
+const ThrowOnRender = () => {
+  throw new Error('intentional render error');
+};
 
 describe('FlyoutTemplate body', () => {
   it('renders unstructured body content with no title, outline, or divider', () => {
@@ -31,6 +37,22 @@ describe('FlyoutTemplate body', () => {
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
     expect(screen.getByText('filter bar').closest('.euiPanel')).toBeNull();
     expect(container.querySelectorAll('hr.euiHorizontalRule')).toHaveLength(0);
+  });
+
+  it('catches a throwing body child and shows the error fallback without crashing the flyout', () => {
+    jest.spyOn(console, 'error').mockImplementation(noop);
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Header title="Service inventory" />
+        <FlyoutTemplate.Body>
+          <ThrowOnRender />
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('errorBoundaryFatalHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('myFlyoutHeader')).toBeInTheDocument();
+    jest.restoreAllMocks();
   });
 
   it('warns in development when the body zone is missing', () => {
