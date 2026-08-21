@@ -114,7 +114,7 @@ describe('registerAutocompleteRoute', () => {
         origin: { uri: 'v-1' },
         permissions: {
           kibana: {
-            privileges: [{ space: 'default', name: ['saved_object:visualization/get'], count: 1 }],
+            privileges: [{ space: 'default', name: ['ai_index:visualization/read'], count: 1 }],
           },
         },
       },

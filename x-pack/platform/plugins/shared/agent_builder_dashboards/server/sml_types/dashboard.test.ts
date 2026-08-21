@@ -307,9 +307,6 @@ describe('dashboardSmlType', () => {
   });
 
   it('getPermissions returns the ai_index:dashboard/read action', () => {
-    // The kiType MUST be the SML type id. It happens to equal the `dashboard` saved object type
-    // here, but the Dashboard feature declares `aiIndex: { read: ['dashboard'] }`
-    // (oss_features.ts) and it is that declaration this must match — not the saved object type.
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => createDashboardClient(),
     });

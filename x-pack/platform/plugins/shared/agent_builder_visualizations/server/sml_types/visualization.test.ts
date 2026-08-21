@@ -261,10 +261,6 @@ describe('visualizationSmlType', () => {
 
   describe('getPermissions', () => {
     it('returns the ai_index:visualization/read action (via the kibanaPermissions helper)', () => {
-      // The kiType MUST be the SML type id, not the `lens` saved object type: the Visualize
-      // feature declares `aiIndex: { read: ['visualization'] }` (oss_features.ts), and only the
-      // action that declaration produces is ever granted to a user. Stamping
-      // `ai_index:lens/read` here would make every visualization entry invisible to everyone.
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: { name: ['ai_index:visualization/read'] } },

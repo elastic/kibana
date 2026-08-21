@@ -107,7 +107,7 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_SML_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
 
   toAttachment: async (item, context) => {
     try {

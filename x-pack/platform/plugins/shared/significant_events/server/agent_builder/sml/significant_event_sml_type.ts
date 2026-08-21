@@ -103,12 +103,6 @@ export const createSignificantEventSmlType = ({
       }
     },
 
-    /**
-     * Significant events are gated by the dedicated `ai_index:significant_event/read` action, not
-     * by the Streams read API action the Streams API itself checks. The Streams feature grants it
-     * by declaring `aiIndex: { read: ['significant_event'] }` (see `streams/server/plugin.ts`),
-     * so the `kiType` here must stay in step with that declaration.
-     */
     getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {

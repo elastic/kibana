@@ -375,10 +375,6 @@ describe('connectorSmlType', () => {
 
   describe('getPermissions', () => {
     it('returns the ai_index:connector/read action', () => {
-      // The kiType MUST be the SML type id, not the `action` saved object type: the Actions
-      // feature declares `aiIndex: { read: ['connector'] }` (actions/server/feature.ts), and only
-      // the action that declaration produces is ever granted to a user. Stamping
-      // `ai_index:action/read` here would make every connector entry invisible to everyone.
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: { name: ['ai_index:connector/read'] } },
