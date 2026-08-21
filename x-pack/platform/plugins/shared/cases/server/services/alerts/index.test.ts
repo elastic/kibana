@@ -472,6 +472,45 @@ describe('updateAlertsStatus', () => {
     });
   });
 
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        getName: () => 'hosts',
+        build: () => ({ hosts_total: { cardinality: { field: 'host.id' } } }),
+        formatResponse: () => ({}),
+      },
+    ];
+
+    it('searches unique alert ids and indices with ignore_unavailable', async () => {
+      const aggregations = { hosts_total: { value: 2 } };
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations,
+      });
+
+      const res = await alertService.executeAggregations({
+        aggregationBuilders,
+        alerts: [
+          { id: 'alert-1', index: '.alerts-security.alerts-default' },
+          { id: 'alert-2', index: '.alerts-security.alerts-default' },
+          { id: 'alert-3', index: '.alerts-observability.alerts-default' },
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ['.alerts-security.alerts-default', '.alerts-observability.alerts-default'],
+        ignore_unavailable: true,
+        query: { ids: { values: ['alert-1', 'alert-2', 'alert-3'] } },
+        size: 0,
+        aggregations: { hosts_total: { cardinality: { field: 'host.id' } } },
+      });
+      expect(res).toEqual(aggregations);
+    });
+  });
+
   describe('getAlerts', () => {
     const docs = [
       {
