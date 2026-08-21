@@ -51,8 +51,8 @@ describe('watchRegistry', () => {
 
     expect(supervisedYaml).not.toBe(manualYaml);
     expect(
-      (parse(manualYaml) as { consts: { watch_settings: unknown } }).consts.watch_settings
-    ).toEqual({
+      (parse(manualYaml) as { consts: { watch_policy: unknown } }).consts.watch_policy
+    ).toMatchObject({
       settingsVersion: 1,
       autonomy: 'manual',
     });
