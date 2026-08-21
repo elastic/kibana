@@ -8,7 +8,7 @@
 import type { Matrix, MatrixRow, MatrixDisplayColumn } from './build_matrix';
 import type { MatrixConfig } from './load_matrix_config';
 import type { MatrixProvenance } from './render_matrix';
-import type { MatrixTraceData, TraceStep } from './trace_types';
+import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey } from './trace_types';
 
 /** CSS copied from the reference agent_eval_smoke.html report. */
@@ -369,7 +369,22 @@ const renderModelCard = (
               : '<span class="status err">missing</span>';
 
           const column = config.columns.find((c) => c.id === col.id);
-          const trace =
+          // Per-VARIANT cards: a category column aggregates a/b/c variants, so
+          // render one expandable card per variant that has a trace, not just
+          // the first-wins representative. Without this, 2/3 of the suite's
+          // 21 prompts are invisible in the report.
+          const variantTraces: Array<{ label: string; trace: MatrixTraceEntry | undefined }> = [];
+          if (column?.examplePrefixes?.length) {
+            for (const p of column.examplePrefixes) {
+              for (const suffix of ['-a', '-b', '-c']) {
+                const key = traceKey(row.modelId, `${p}${suffix}`);
+                if (traces?.[key] !== undefined) {
+                  variantTraces.push({ label: `${p}${suffix}`, trace: traces[key] });
+                }
+              }
+            }
+          }
+          const fallbackTrace =
             traces?.[traceKey(row.modelId, col.id)] ??
             // examplePrefixes columns consume synthetic `prefix:<p>` datasets;
             // resolve the trace for that prefix's own example.
@@ -380,40 +395,48 @@ const renderModelCard = (
             // 'security-alert-triage'). Fall back to the current column's
             // configured suite IDs to find the first matching trace.
             column?.suites.map((s) => traces?.[traceKey(row.modelId, s)]).find((t) => t != null);
-          const scoreStr = cell.kind === 'score' ? `score ${cell.value}` : '';
-          const metaParts = [
-            scoreStr,
-            trace?.stepCount ? `${trace.stepCount} steps` : '',
-            trace?.toolCount ? `${trace.toolCount} tools` : '',
-          ].filter(Boolean);
+          // The card body/meta use the per-variant traces when present, else
+          // the resolved representative (overall columns have no variants).
+          const cards =
+            variantTraces.length > 0 ? variantTraces : [{ label: col.id, trace: fallbackTrace }];
+          return cards
+            .map(({ label, trace }) => {
+              const scoreStr = cell.kind === 'score' ? `score ${cell.value}` : '';
+              const metaParts = [
+                scoreStr,
+                trace?.stepCount ? `${trace.stepCount} steps` : '',
+                trace?.toolCount ? `${trace.toolCount} tools` : '',
+              ].filter(Boolean);
 
-          let body = '';
-          if (trace?.question) {
-            body += `<div class="question">${esc(trace.question)}</div>`;
-          }
-          if (trace?.toolTrail?.length) {
-            body += `<p class="tool-trail"><strong>Tools called:</strong> <code>${esc(
-              trace.toolTrail.join(', ')
-            )}</code></p>`;
-          }
-          if (trace?.answer) {
-            body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
-          } else if (trace) {
-            body +=
-              '<div class="answer"><p class="empty">No final answer message captured.</p></div>';
-          } else {
-            body += '<p class="empty">Trace unavailable.</p>';
-          }
-          if (trace?.steps?.length) {
-            const stepsHtml = trace.steps.map((s, i) => stepHtml(s, i + 1)).join('\n');
-            body += `<details class="trace"><summary>🔍 Step trace — ${trace.steps.length} steps</summary><div class="trace-body">${stepsHtml}</div></details>`;
-          }
+              let body = '';
+              if (trace?.question) {
+                body += `<div class="question">${esc(trace.question)}</div>`;
+              }
+              if (trace?.toolTrail?.length) {
+                body += `<p class="tool-trail"><strong>Tools called:</strong> <code>${esc(
+                  trace.toolTrail.join(', ')
+                )}</code></p>`;
+              }
+              if (trace?.answer) {
+                body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
+              } else if (trace) {
+                body +=
+                  '<div class="answer"><p class="empty">No final answer message captured.</p></div>';
+              } else {
+                body += '<p class="empty">Trace unavailable.</p>';
+              }
+              if (trace?.steps?.length) {
+                const stepsHtml = trace.steps.map((s, i) => stepHtml(s, i + 1)).join('\n');
+                body += `<details class="trace"><summary>🔍 Step trace — ${trace.steps.length} steps</summary><div class="trace-body">${stepsHtml}</div></details>`;
+              }
 
-          return `<details class="prompt"><summary>${status}<span class="prompt-id">${esc(
-            col.label
-          )}</span><span class="skill-chip">${esc(col.id)}</span><span class="p-meta">${esc(
-            metaParts.join(' · ')
-          )}</span></summary><div class="prompt-body">${body}</div></details>`;
+              return `<details class="prompt"><summary>${status}<span class="prompt-id">${esc(
+                col.label
+              )}</span><span class="skill-chip">${esc(label)}</span><span class="p-meta">${esc(
+                metaParts.join(' · ')
+              )}</span></summary><div class="prompt-body">${body}</div></details>`;
+            })
+            .join('\n');
         })
         .join('\n');
 
