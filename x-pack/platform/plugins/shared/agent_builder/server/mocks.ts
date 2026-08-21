@@ -80,6 +80,13 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
+      getScopedWriterClient: jest.fn().mockResolvedValue({
+        get: jest.fn(),
+        list: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      }),
     },
     conversationTemplates: {
       get: jest.fn(),

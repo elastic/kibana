@@ -16,6 +16,22 @@ export const NAV_CHATS = i18n.translate('xpack.pnd.chrome.nav.chats', {
   defaultMessage: 'Chats',
 });
 
+export const NAV_WATCH_FLOOR = i18n.translate('xpack.pnd.chrome.nav.watchFloor', {
+  defaultMessage: 'Watch Floor',
+});
+
+export const NAV_GROUP_OPERATE = i18n.translate('xpack.pnd.chrome.nav.group.operate', {
+  defaultMessage: 'Operate',
+});
+
+export const NAV_GROUP_AGENT = i18n.translate('xpack.pnd.chrome.nav.group.agent', {
+  defaultMessage: 'Autonomous',
+});
+
+export const NAV_DASHBOARDS = i18n.translate('xpack.pnd.chrome.nav.dashboards', {
+  defaultMessage: 'Dashboards',
+});
+
 export const NAV_ALERTS = i18n.translate('xpack.pnd.chrome.nav.alerts', {
   defaultMessage: 'Alerts',
 });

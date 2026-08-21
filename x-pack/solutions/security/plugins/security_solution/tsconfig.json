@@ -19,7 +19,11 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -65,6 +69,7 @@
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-t-grid",
     "@kbn/rule-registry-plugin",
+    "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-utils",
     "@kbn/securitysolution-list-constants",
     "@kbn/config-schema",
@@ -311,5 +316,6 @@
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
+    "@kbn/core-ui-settings-common",
   ]
 }

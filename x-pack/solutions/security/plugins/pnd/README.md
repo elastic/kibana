@@ -13,6 +13,8 @@ xpack.pnd.enabled: true
 - **`xpack.pnd.enabled`** — sole enablement switch (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for PND are omitted automatically.
 - **`xpack.pnd.ui.useMockData`** — optional data-source toggle (default `true`). Not required for enablement; leave unset for mock fixtures. Set `false` later when wiring live Workflows / Agent Builder projection.
 
+PR cloud deploys set `xpack.pnd.enabled: true` via `.buildkite/scripts/steps/cloud/deploy.json` (label `ci:cloud-deploy`).
+
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
 
 ### When disabled (`xpack.pnd.enabled: false`) — no production pollution
@@ -47,7 +49,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 - Slots Throughline-ordered destinations into the **Security solution nav** (ESS + serverless trees)
 - Platform footer stays as on Security `main`: Launchpad, Developer tools, Settings / stack management, collapse
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
-- **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no PND stub)
+- **Dashboards** uses Security's real dashboards destination (same Throughline slot; no PND stub)
 - **Chats** stays in-app and embeds Agent Builder
 - Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
 - Ask PND FAB routes to Chats (hidden on `/chats`)
@@ -70,6 +72,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | `/app/pnd/watches/workflows` … `/guardrails` | Watches section stubs |
 | `/app/pnd/investigations/:id` | Investigation inspector shell |
 | `/app/pnd/investigations/:id/proposals/:proposalId` | Proposal detail shell |
+| `/app/pnd/investigations` | Redirects to `/app/pnd` — no dedicated list page, Brief *is* the queue |
 | `/app/pnd/settings` | Settings stub (no dedicated nav item) |
 
 ### Security left-rail order (when PND enabled)
@@ -101,17 +104,10 @@ Owner plugin id: `pnd`. Catalog definitions:
 - `system-security-watch-officer`
 - `system-security-watch-dark`
 - `system-security-watch-deep`
-- `system-security-watch-detection`
 
 YAML + registry entries: `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`. Visibility: `selector:watch` + `solution:security`.
 
-Workers are installed alongside the watches but carry no `watch` selector, so they stay out of the catalog. A Watch reaches them with `workflow.execute`, and they surface on the Watch detail page as callables of kind `workflow`:
-
-- `system-security-rule-tuning` — called by Detection Watch on its scheduled sweep
-- `system-security-rule-creation` — called by Detection Watch when a caller supplies an ATT&CK technique
-- `system-security-rule-preview` — called by both of the above
-
-### Managed definition `version` vs product “v1”
+### Managed definition `version` vs product "v1"
 
 Two different version fields:
 
@@ -120,7 +116,7 @@ Two different version fields:
 | YAML `version: "1"` | Top of each `watch_*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
 | Definition `version: N` | `managed/definitions/pnd/index.ts` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
 
-POC bumps (4, 5, …) are expected while iterating — they are not a product SemVer and do **not** mean “Watch Floor v5”. Keep bumping on intentional definition changes; do not reset counters on clusters that already installed higher versions unless you intentionally wipe those managed docs.
+POC bumps (4, 5, …) are expected while iterating — they are not a product SemVer and do **not** mean "Watch Floor v5". Keep bumping on intentional definition changes; do not reset counters on clusters that already installed higher versions unless you intentionally wipe those managed docs.
 
 ## Working-group contribution map
 

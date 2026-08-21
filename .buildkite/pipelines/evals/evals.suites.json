@@ -367,6 +367,50 @@
       ]
     },
     {
+      "id": "security-threat-intel-hunt",
+      "name": "Security Threat Intelligence Hunt",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt/playwright.config.ts",
+      "serverConfigSet": "evals_pnd",
+      "tags": [
+        "security",
+        "threat-intel-hunt"
+      ],
+      "ciLabels": [
+        "evals:security-threat-intel-hunt"
+      ]
+    },
+    {
+      "id": "security-watch-escalation-chain",
+      "name": "Security Watch Escalation Chain (Floor → Dark → Deep → Detection)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts",
+      "serverConfigSet": "evals_pnd",
+      "tags": [
+        "security",
+        "watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-watch-escalation-chain"
+      ]
+    },
+    {
+      "id": "security-deep-watch-forensics",
+      "name": "Security Deep Watch Forensics",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics/playwright.config.ts",
+      "serverConfigSet": "evals_pnd",
+      "tags": [
+        "security",
+        "deep-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-deep-watch-forensics"
+      ]
+    },
+    {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
       "slackChannel": "#kibana-presentation-reminders",

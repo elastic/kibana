@@ -1,0 +1,145 @@
+version: '1'
+name: Dark Watch
+description: >
+  Dark Watch Orchestrator (D10). Continuous threat hunting. Runs on a schedule
+  or on escalation from Watch Floor. Runs the Dark Worker under the demo service
+  identity, emits proposals, and escalates high-confidence findings to Deep Watch
+  for forensic investigation.
+enabled: true
+tags:
+  - watch
+  - watch-dark
+settings:
+  timeout: '20m'
+  concurrency:
+    key: 'watch-dark-orchestrator'
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '60m'
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Continuous threat hunting & IoC correlation
+        autonomyLevel: 5
+        handoff: brief
+        onDemand: false
+        draft: false
+        cadence: sweep
+        every: 60
+        from: 22
+        to: 6
+        mode: window
+        runAs: pnd-watch-service
+        escalateThreshold: 0.8
+        escalateTo: system-security-watch-deep
+        ui:
+          color: '#f59e0b'
+          icon: bolt
+          order: 30
+        scopeSummary: Threat intel - Security indices - EDR - network
+        scopes:
+          - name: Threat intelligence
+            access: full
+            label: Read
+          - name: Security indices
+            access: full
+            label: Read
+          - name: EDR - network
+            access: full
+            label: Read
+        callables:
+          - id: threat-intelligence
+            name: Threat intel hunt
+            kind: skill
+            summary: Scheduled - correlates threat reports with environment telemetry
+            gated: false
+            enabled: true
+          - id: alert-analysis
+            name: Alert analysis
+            kind: skill
+            summary: On alert - classifies FP / TP / inconclusive
+            gated: false
+            enabled: true
+  - name: run_continuous_hunt_worker
+    # D10 + mvp-slice: the Dark Orchestrator invokes the continuous_threat_hunt
+    # Worker (lifted from kibana#278905) on its scheduled sweep. The Worker
+    # selects <=10 candidate threat reports, runs Tier 1 -> Tier 2 per report,
+    # and writes hunt feedback back onto .kibana-threat-reports. Reviewable
+    # findings are persisted by the hunt_orchestrator service; clean runs write
+    # feedback only. Runs before the domain worker so its corroboration context
+    # is fresh for the sweep.
+    if: '{{ inputs.escalation == null }}'
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-dark-continuous-hunt-worker'
+      inputs:
+        investigationId: '{{ inputs.escalation.investigationId }}'
+        escalation: '${{ inputs.escalation }}'
+  - name: run_dark_worker
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-dark-worker'
+      inputs:
+        # Dark Watch is invoked via workflow.execute (from Floor's escalate_to_dark step, or
+        # directly on a manual/scheduled trigger) which populates context.inputs, not
+        # context.event -- event.escalation is always undefined for a workflow-triggered
+        # child (confirmed: buildWorkflowExecutionDocument only ever sets context.event from
+        # an *event-driven* trigger, never from workflow.execute's inputs argument). Read
+        # inputs.escalation to match how run_floor_worker reads inputs.alertId /
+        # inputs.investigationId from its own invocation. There is no `trigger` context key
+        # at all (buildWorkflowContext only exposes event/inputs/output/workflow/consts —
+        # see workflows_execution_engine build_workflow_context.ts), so the prior
+        # `default: trigger.context` fallback never resolved; dropped rather than replaced,
+        # since a bare manual/scheduled Dark Watch run has no escalation payload to fall back to.
+        escalation: '${{ inputs.escalation }}'
+  - name: emit_proposal
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: '/internal/pnd/investigations/_emit_proposal'
+      headers:
+        kbn-xsrf: 'true'
+        Elastic-Api-Version: '1'
+      body:
+        sourceWatch: watch-dark
+        workerRun: '${{ steps.run_dark_worker.output.workerRun }}'
+  - name: escalate_to_deep
+    if: '{{ steps.run_dark_worker.output.workerRun.confidence >= steps.watch_policy.output.watch.escalateThreshold }}'
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-deep'
+      inputs:
+        escalation:
+          fromWatch: watch-dark
+          toWatch: watch-deep
+          reason: '{{ steps.run_dark_worker.output.workerRun.finding }}'
+          confidence: '{{ steps.run_dark_worker.output.workerRun.confidence }}'
+          investigationId: '{{ steps.run_dark_worker.output.workerRun.investigationId }}'
+          indicators: '{{ steps.run_dark_worker.output.workerRun.indicators }}'
+  # Route a surfaced detection coverage gap to the Detection Watch (5th tier). Conditional:
+  # only dispatched when the worker actually surfaced a gap (non-empty gaps signal). Detection
+  # Watch drafts a rule-creation proposal (gated); this orchestrator never creates rules itself.
+  - name: dispatch_detection_watch
+    if: "{{ steps.run_dark_worker.output.workerRun.detectionChangeSignalGaps and steps.run_dark_worker.output.workerRun.detectionChangeSignalGaps != '' and steps.run_dark_worker.output.workerRun.detectionChangeSignalGaps != '[]' and steps.run_dark_worker.output.workerRun.detectionChangeSignalGaps != 'null' }}"
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-detection'
+      inputs:
+        investigationId: '{{ steps.run_dark_worker.output.workerRun.investigationId }}'
+        detectionChangeSignal:
+          sourceWatch: watch-dark
+          runId: '{{ steps.run_dark_worker.output.workerRun.runId | default: execution.id }}'
+          investigationId: '{{ steps.run_dark_worker.output.workerRun.investigationId }}'
+          gaps: '{{ steps.run_dark_worker.output.workerRun.detectionChangeSignalGaps }}'

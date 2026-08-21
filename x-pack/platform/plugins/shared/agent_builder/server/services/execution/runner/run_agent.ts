@@ -151,6 +151,13 @@ export const runAgent = async ({
   const agent = await agentRegistry.get(agentId, { access: 'use' });
 
   // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  // skill_ids is treated the same as tools: a straight replace, not an intersection against
+  // the agent's stored skill_ids. Any agent using a 'type' (code configuration) brings its own
+  // base skill_ids, and that type merge runs AFTER this layer (see resolveAgentConfiguration
+  // below / mergeAgentConfiguration), re-adding the type's base skills regardless of what this
+  // override said — so intersecting here bought no real containment, it just silently dropped
+  // legitimate overrides that named an elastic-capability built-in when the agent also had a
+  // non-empty explicit skill_ids (see PR #280617 review).
   const agentWithOverrides = {
     ...agent,
     configuration: {
@@ -158,6 +165,7 @@ export const runAgent = async ({
       ...(agentParams.configurationOverrides || {}),
     },
   };
+
   const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
     agent: agentWithOverrides,
     request,

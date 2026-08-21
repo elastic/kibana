@@ -1,0 +1,123 @@
+version: '1'
+name: Watch Floor
+description: >
+  Watch Floor Orchestrator (D10). Tier-1 frontline Watch. On a Defend-originated
+  detection alert it creates the Investigation Conversation, runs the Floor
+  Worker under the demo service identity, emits a canonical Proposal, and
+  escalates high-confidence true positives to Dark Watch.
+enabled: true
+tags:
+  - watch
+  - watch-floor
+settings:
+  timeout: '20m'
+  concurrency:
+    key: 'watch-floor-orchestrator'
+    strategy: drop
+    max: 1
+triggers:
+  - type: alert
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Frontline triage
+        autonomyLevel: 3
+        handoff: officer
+        onDemand: false
+        draft: false
+        cadence: stream
+        mode: always
+        runAs: pnd-watch-service
+        escalateThreshold: 0.75
+        escalateTo: system-security-watch-dark
+        ui:
+          color: '#16b3a6'
+          icon: alert
+          order: 10
+        scopeSummary: Security indices - APM - logs
+        scopes:
+          - name: Security indices
+            access: full
+            label: Read
+          - name: APM - logs - SLOs
+            access: full
+            label: Read
+          - name: Finance PII
+            access: masked
+            label: Masked
+        callables:
+          - id: alert-analysis
+            name: Alert analysis
+            kind: skill
+            summary: On alert - classifies FP / TP / inconclusive
+            gated: false
+            enabled: true
+  - name: run_floor_worker
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-floor-worker'
+      inputs:
+        # Real alert-trigger events carry `event.alerts[]` (AlertEventSchema:
+        # { _id, _index, kibana.alert, '@timestamp' }[]), not a flat
+        # `event.alertId` — there is no such field on the real trigger event.
+        # Manual / on-demand invocations supply `inputs.alertId` instead:
+        # buildWorkflowContext only exposes event/inputs/output/workflow/consts
+        # (see workflows_execution_engine build_workflow_context.ts), so there
+        # is no `trigger` context key to fall back to.
+        alertId: '{{ event.alerts[0]._id | default: inputs.alertId }}'
+        # Floor Watch is the sole entry point into the escalation chain (Dark/Deep/Detection
+        # all inherit investigationId from Floor via the escalation.investigationId payload —
+        # see watch_dark_worker.yaml / watch_deep_worker.yaml). Nothing upstream of Floor ever
+        # supplies a real investigationId (the alert trigger only carries the alert doc itself
+        # in event.alerts[]), so mint one here, deterministically derived from the alert (not
+        # uuidv4) so a re-triggered run against the same alert lands on the same Investigation
+        # instead of opening a duplicate one each time.
+        investigationId: "inv-floor-{{ event.alerts[0]._id | default: inputs.alertId }}"
+        event: '{{ event | json }}'
+  - name: emit_proposal
+    # Turn the worker classification into a canonical Proposal + evidence + eval record.
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: '/internal/pnd/investigations/_emit_proposal'
+      headers:
+        kbn-xsrf: 'true'
+        Elastic-Api-Version: '1'
+      body:
+        sourceWatch: watch-floor
+        workerRun: '${{ steps.run_floor_worker.output.workerRun }}'
+  - name: escalate_to_dark
+    # Real workflow.execute escalation (replaces prose). Gated by confidence.
+    if: "{{ steps.run_floor_worker.output.workerRun.classification == 'true_positive' and steps.run_floor_worker.output.workerRun.confidence >= steps.watch_policy.output.watch.escalateThreshold }}"
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-dark'
+      inputs:
+        escalation:
+          fromWatch: watch-floor
+          toWatch: watch-dark
+          reason: '{{ steps.run_floor_worker.output.workerRun.rationale }}'
+          confidence: '{{ steps.run_floor_worker.output.workerRun.confidence }}'
+          investigationId: '{{ steps.run_floor_worker.output.workerRun.investigationId }}'
+          alertId: '{{ steps.run_floor_worker.output.workerRun.alertId }}'
+  # Route a false-positive disposition to the Detection Watch (5th tier) for rule tuning.
+  # Conditional: only on an FP classification. Detection Watch drafts a gated tuning proposal.
+  - name: dispatch_detection_watch_tuning
+    if: "{{ steps.run_floor_worker.output.workerRun.ruleTuningTriggerReason == 'false_positive' }}"
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-detection'
+      inputs:
+        investigationId: '{{ steps.run_floor_worker.output.workerRun.investigationId }}'
+        ruleTuningTrigger:
+          reason: false_positive
+          alertId: '{{ steps.run_floor_worker.output.workerRun.alertId }}'
+          confidence: '{{ steps.run_floor_worker.output.workerRun.confidence }}'
+          investigationId: '{{ steps.run_floor_worker.output.workerRun.investigationId }}'

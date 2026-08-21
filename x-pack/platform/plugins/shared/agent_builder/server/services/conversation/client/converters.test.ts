@@ -589,6 +589,29 @@ describe('conversation model converters', () => {
         username: 'jane',
       });
     });
+
+    it('deserializes template metadata and extended fields', () => {
+      const serialized = documentBase();
+      serialized._source!.template = {
+        id: 'triage-template',
+        version: 3,
+      };
+      serialized._source!.extended_fields = {
+        priority_as_keyword: 'high',
+        risk_score_as_long: '42',
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.template).toEqual({
+        id: 'triage-template',
+        version: 3,
+      });
+      expect(deserialized.extended_fields).toEqual({
+        priority_as_keyword: 'high',
+        risk_score_as_long: '42',
+      });
+    });
   });
 
   describe('toEs', () => {
@@ -878,6 +901,29 @@ describe('conversation model converters', () => {
         username: 'jane',
       });
     });
+
+    it('serializes template metadata and extended fields', () => {
+      const conversation = conversationBase();
+      conversation.template = {
+        id: 'triage-template',
+        version: 3,
+      };
+      conversation.extended_fields = {
+        priority_as_keyword: 'high',
+        risk_score_as_long: '42',
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.template).toEqual({
+        id: 'triage-template',
+        version: 3,
+      });
+      expect(serialized.extended_fields).toEqual({
+        priority_as_keyword: 'high',
+        risk_score_as_long: '42',
+      });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -1014,6 +1060,38 @@ describe('conversation model converters', () => {
 
       expect(serialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes template metadata and extended fields when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        template: {
+          id: 'triage-template',
+          version: 3,
+        },
+        extended_fields: {
+          priority_as_keyword: 'high',
+          risk_score_as_long: '42',
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.template).toEqual({
+        id: 'triage-template',
+        version: 3,
+      });
+      expect(serialized.extended_fields).toEqual({
+        priority_as_keyword: 'high',
+        risk_score_as_long: '42',
       });
     });
   });

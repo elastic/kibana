@@ -180,17 +180,20 @@ Even the simple case of updating the Elasticsearch index using data from a datab
   },
   paramsSchema: z.union([
     z.strictObject({
-      document: index_request.shape.body.optional(),
+      // z.string() branch: ${{ }} template expressions resolve to an object at runtime but are
+      // strings at schema-validation time. This is a general workflow-engine gap — any object-typed
+      // field that receives a whole-object template expression needs this union escape hatch.
+      document: z.union([index_request.shape.body, z.string()]).optional(),
       ...getShapeAt(index_request, 'path'),
       ...getShapeAt(index_request, 'query'),
     }),
     z.strictObject({
-      document: index1_request.shape.body.optional(),
+      document: z.union([index1_request.shape.body, z.string()]).optional(),
       ...getShapeAt(index1_request, 'path'),
       ...getShapeAt(index1_request, 'query'),
     }),
     z.strictObject({
-      document: index2_request.shape.body.optional(),
+      document: z.union([index2_request.shape.body, z.string()]).optional(),
       ...getShapeAt(index2_request, 'path'),
       ...getShapeAt(index2_request, 'query'),
     }),

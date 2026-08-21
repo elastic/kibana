@@ -5,9 +5,14 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+      # Docker cloud image build OOMs the default ~105GB disk (gzip: No space left on device).
+      # Match .buildkite/pipelines/build_pr_and_deploy_cloud.yml.
+      diskSizeGb: 150
     depends_on:
       - build
-    timeout_in_minutes: 30
+    # Image build (~10m) + shutdown + create --track + stack monitoring sleep/retries
+    # routinely exceeds 30m on n2-standard-2; bump so create is not SIGTERM'd mid-track.
+    timeout_in_minutes: 60
     soft_fail: true
     retry:
       automatic:

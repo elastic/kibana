@@ -101,6 +101,9 @@
     "@kbn/core-security-server",
     "@kbn/rrule",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/logging-mocks"
   ]
 }

@@ -1,0 +1,138 @@
+version: '1'
+name: Dark Watch Worker
+description: >
+  Dark Watch domain worker. Continuous hunt-style sweep with threat-intelligence
+  correlation and IoC validation against environment telemetry. Emits a typed
+  finding the Dark Orchestrator turns into a proposal + escalation decision.
+enabled: true
+tags:
+  - watch-worker
+  - watch-dark-worker
+# CWL skill-customization: Option 2 (WG decided 2026-07-23, Slack C0BHGGA6PHC/p1784742716537469).
+# Watch-level skill allowlist authored on the `watch_policy` data.set step (CWL policy bag — the
+# top-level workflow schema is non-strict and strips unknown top-level keys). Passed into the
+# ai.agent step as a runtime override; effective skills = the allowlist verbatim (straight
+# replace of the agent's configured skill_ids — elastic/kibana#280617, confirmed in review;
+# there is no intersection with the agent's stored skill_ids at runtime). This means Option 2
+# does NOT give a hard allowlist boundary today: WG open question P5 (subset-validation for
+# managed Watches) is still open upstream — see
+# docs/working-groups/common-worker-layer/artifacts/2026-07-22-watch-skill-customization-research.md.
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    # CWL policy bag. Dark Watch runs continuous threat-intel hunt sweeps only.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - threat-intelligence
+  - name: threat_intel_hunt
+    type: ai.agent
+    timeout: '10m'
+    with:
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
+      message: >
+        Use the [/threat-intelligence](skill://threat-intelligence) skill to
+        perform a threat-intelligence hunt sweep. You already have the escalation
+        context and telemetry access you need; reason from the evidence and return
+        a single structured finding. Do NOT ask questions.
+
+        1. Scan indexed threat reports for newly published IoCs and TTPs
+        2. Correlate IoCs (IPs, hashes, domains) against environment telemetry
+           using ES|QL over endpoint events, network flows, and alerts
+        3. Identify coverage gaps - MITRE techniques without matching detections
+        4. Produce a finding with a confidence score and recommended hunt
+
+        Detection Change Signal (CONDITIONAL): if — and ONLY if — you find a real
+        detection coverage gap (a MITRE technique observed with no matching
+        detection rule, or a rule that clearly needs tuning), populate
+        `detection_change_signal.gaps` with one entry per gap. If there is NO
+        coverage gap, OMIT `detection_change_signal` entirely — do not emit an
+        empty object. You never create or tune rules yourself; you only surface
+        the gap for the Detection Watch.
+
+        Escalation context:
+        {{ inputs.escalation | json }}
+      schema:
+        type: object
+        properties:
+          finding:
+            type: string
+            description: Synthesized significant-event finding
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+          indicators:
+            type: array
+            items:
+              type: object
+              properties:
+                type: { type: string }
+                name: { type: string }
+                confidence: { type: number }
+          recommended_action:
+            type: string
+          detection_change_signal:
+            type: object
+            description: >
+              OPTIONAL. Present only when a real detection coverage gap is found;
+              omit entirely when there is no gap.
+            properties:
+              gaps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    technique:
+                      type: string
+                      description: MITRE ATT&CK technique id, e.g. T1003.001
+                    ruleRef:
+                      type: string
+                      description: Existing rule id/name if this is a tuning target
+                    evidence:
+                      type: string
+                      description: Observation motivating the gap
+                    confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                  required:
+                    - technique
+                    - evidence
+                    - confidence
+            required:
+              - gaps
+        required:
+          - finding
+          - confidence_score
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-dark
+        finding: "{{ steps.threat_intel_hunt.output.structured_output.finding | default: 'Dark Watch sweep complete.' }}"
+        confidence: '${{ steps.threat_intel_hunt.output.structured_output.confidence_score | default: 0 }}'
+        indicators: '${{ steps.threat_intel_hunt.output.structured_output.indicators | default: [] }}'
+        recommendedAction: "{{ steps.threat_intel_hunt.output.structured_output.recommended_action | default: '' }}"
+        investigationId: '{{ inputs.escalation.investigationId }}'
+        # Detection Change Signal (delta #1/#2) — CONDITIONAL. Renders to the structured signal JSON
+        # only when the model returned `detection_change_signal`; otherwise renders empty/null and the
+        # server (WorkerRunSchema.detectionChangeSignal is optional) drops it — nothing is attached to
+        # the Investigation. sourceWatch/runId/investigationId are stamped by the server on attach.
+        detectionChangeSignalGaps: '{{ steps.threat_intel_hunt.output.structured_output.detection_change_signal.gaps | json }}'
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed.
+        modelId: '{{ steps.threat_intel_hunt.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.threat_intel_hunt.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.threat_intel_hunt.output.metadata.usage.latencyMs | default: 0 }}'
+        # LLM token usage (gap #6) — real counts from the ai.agent step's own usage
+        # metadata (input_tokens/output_tokens from model_usage events), not guessed.
+        inputTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.inputTokens | default: 0 }}'
+        outputTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.outputTokens | default: 0 }}'
+        totalTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.totalTokens | default: 0 }}'

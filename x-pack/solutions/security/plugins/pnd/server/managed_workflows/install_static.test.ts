@@ -41,9 +41,9 @@ describe('installStatic', () => {
         }
       });
 
-      await expect(installStatic({ enabled: true, workflowsExtensions, logger })).rejects.toThrow(
-        PND_WATCH_WORKFLOW_IDS[1]
-      );
+      const result = await installStatic({ enabled: true, workflowsExtensions, logger });
+
+      expect(result.failedIds).toEqual([PND_WATCH_WORKFLOW_IDS[1]]);
       expect(client.ready).not.toHaveBeenCalled();
     });
   });

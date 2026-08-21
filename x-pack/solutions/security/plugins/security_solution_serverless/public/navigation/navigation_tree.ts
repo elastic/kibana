@@ -65,6 +65,36 @@ export const createNavigationTree = async (
         link: 'discover',
         icon: 'productDiscover',
       },
+      {
+        link: 'pnd:dashboards' as AppDeepLinkId,
+        icon: 'dashboardApp',
+      },
+      {
+        link: 'pnd:alerts' as AppDeepLinkId,
+        icon: 'bell',
+      },
+      {
+        link: 'pnd:attacks' as AppDeepLinkId,
+        icon: 'warning',
+      },
+      {
+        link: 'pnd:records' as AppDeepLinkId,
+        icon: 'documents',
+      },
+      {
+        link: 'pnd:threat_hunt' as AppDeepLinkId,
+        icon: 'inspect',
+      },
+      {
+        link: 'pnd:streams' as AppDeepLinkId,
+        icon: 'aggregate',
+      },
+      {
+        link: 'pnd:watches' as AppDeepLinkId,
+        icon: 'eye',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
+      },
       defaultNavigationTree.dashboards(),
       ...defaultNavigationTree.pndSecondary(),
       defaultNavigationTree.rules(),

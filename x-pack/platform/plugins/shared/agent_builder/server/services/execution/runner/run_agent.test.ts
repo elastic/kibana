@@ -163,6 +163,80 @@ describe('runAgent', () => {
     });
   });
 
+  describe('agentWithOverrides configuration merging', () => {
+    const runWithOverrides = (
+      agentConfig: Record<string, any>,
+      configurationOverrides?: Record<string, any>
+    ) => {
+      agent = createMockedInternalAgent({ configuration: { tools: [], ...agentConfig } });
+      agentClient.get.mockResolvedValue(agent);
+      return runAgent({
+        agentExecutionParams: {
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'hi' }, configurationOverrides } as any,
+        },
+        parentManager: runnerManager,
+      });
+    };
+
+    const resolveArg = () =>
+      runnerDeps.agentsService.resolveAgentConfiguration.mock.calls[0][0].agent.configuration;
+
+    it('passes the agent config unchanged when no overrides are provided', async () => {
+      await runWithOverrides({ instructions: 'original', skill_ids: ['s1'] });
+      expect(resolveArg()).toEqual({ tools: [], instructions: 'original', skill_ids: ['s1'] });
+    });
+
+    it('replaces instructions when an instructions override is provided', async () => {
+      await runWithOverrides({ instructions: 'original' }, { instructions: 'overridden' });
+      expect(resolveArg().instructions).toBe('overridden');
+    });
+
+    it('replaces tools when a tools override is provided', async () => {
+      const overrideTools = [{ tool_ids: ['new-tool'] }];
+      await runWithOverrides({ tools: [{ tool_ids: ['old-tool'] }] }, { tools: overrideTools });
+      expect(resolveArg().tools).toEqual(overrideTools);
+    });
+
+    describe('skill_ids override (straight replace, no intersection)', () => {
+      it('replaces skill_ids with the override when agent skill_ids is undefined (all skills allowed)', async () => {
+        await runWithOverrides({}, { skill_ids: ['elastic-builtin', 'custom'] });
+        expect(resolveArg().skill_ids).toEqual(['elastic-builtin', 'custom']);
+      });
+
+      it('replaces skill_ids with the override when agent skill_ids is an empty list', async () => {
+        await runWithOverrides({ skill_ids: [] }, { skill_ids: ['elastic-builtin'] });
+        expect(resolveArg().skill_ids).toEqual(['elastic-builtin']);
+      });
+
+      it("replaces skill_ids with the override verbatim, even when it names IDs outside the agent's explicit list — the type merge downstream (mergeAgentConfiguration) re-adds any base skill_ids regardless, so intersecting here bought no containment (PR #280617 review)", async () => {
+        await runWithOverrides(
+          { skill_ids: ['allowed-1', 'allowed-2'] },
+          { skill_ids: ['allowed-1', 'rogue'] }
+        );
+        expect(resolveArg().skill_ids).toEqual(['allowed-1', 'rogue']);
+      });
+
+      it('does not change agent skill_ids when no skill_ids override is provided', async () => {
+        await runWithOverrides(
+          { skill_ids: ['s1', 's2'] },
+          { instructions: 'override instructions' }
+        );
+        expect(resolveArg().skill_ids).toEqual(['s1', 's2']);
+      });
+
+      it('applies instructions and skill_ids overrides independently in the same call', async () => {
+        await runWithOverrides(
+          { instructions: 'original', skill_ids: ['s1', 's2'] },
+          { instructions: 'new', skill_ids: ['s1', 'not-allowed'] }
+        );
+        const config = resolveArg();
+        expect(config.instructions).toBe('new');
+        expect(config.skill_ids).toEqual(['s1', 'not-allowed']);
+      });
+    });
+  });
+
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
