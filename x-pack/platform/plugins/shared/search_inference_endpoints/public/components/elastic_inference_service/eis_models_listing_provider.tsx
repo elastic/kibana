@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ContentListProvider } from '@kbn/content-list-provider';
-import type { GroupedModel } from '../../utils/eis_utils';
+import { getProviderOptions, type GroupedModel } from '../../utils/eis_utils';
 import {
   createEisFieldDefinitions,
   createEisFindItems,
@@ -17,6 +17,7 @@ import {
   EIS_PROVIDER_FILTER_ID,
 } from '../../utils/eis_content_list_utils';
 import { EisModelsListing } from './eis_models_listing';
+import { ModelFamilyOptionsProvider } from './eis_model_filters';
 
 interface EisModelsListingProviderProps {
   models: GroupedModel[];
@@ -60,6 +61,10 @@ export const EisModelsListingProvider = ({
 }: EisModelsListingProviderProps) => {
   const dataSource = useMemo(() => ({ findItems: createEisFindItems(models) }), [models]);
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
+  const modelFamilyOptions = useMemo(
+    () => getProviderOptions(models).map(({ key, label }) => ({ key, label })),
+    [models]
+  );
 
   const features = useMemo(
     () => ({
@@ -84,7 +89,9 @@ export const EisModelsListingProvider = ({
       isReadOnly={!canManage}
       {...{ dataSource, features }}
     >
-      <EisModelsListing {...{ onViewModelDetails }} />
+      <ModelFamilyOptionsProvider value={modelFamilyOptions}>
+        <EisModelsListing {...{ onViewModelDetails }} />
+      </ModelFamilyOptionsProvider>
     </ContentListProvider>
   );
 };

@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import { EuiFilterButton, type Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useContentListItems } from '@kbn/content-list-provider';
 import {
   filter,
   SelectableFilterPopover,
   StandardFilterOption,
   useFieldQueryFilter,
 } from '@kbn/content-list-toolbar';
-import { getProviderOptions, TASK_TYPE_FILTERS } from '../../utils/eis_utils';
+import { TASK_TYPE_FILTERS } from '../../utils/eis_utils';
 import {
   EIS_CATEGORY_FILTER_ID,
   EIS_PROVIDER_FILTER_ID,
-  toGroupedModel,
 } from '../../utils/eis_content_list_utils';
 
 interface FilterControlProps {
@@ -33,13 +31,12 @@ const MODEL_FAMILY_FILTER_TITLE = i18n.translate(
   { defaultMessage: 'Model family' }
 );
 
-const ModelFamilyFilterControl = ({ query, onChange }: FilterControlProps) => {
-  const { items } = useContentListItems();
+const ModelFamilyOptionsContext = createContext<Array<{ key: string; label: string }>>([]);
 
-  const options = useMemo(
-    () => getProviderOptions(items.map(toGroupedModel)).map(({ key, label }) => ({ key, label })),
-    [items]
-  );
+export const ModelFamilyOptionsProvider = ModelFamilyOptionsContext.Provider;
+
+const ModelFamilyFilterControl = ({ query, onChange }: FilterControlProps) => {
+  const options = useContext(ModelFamilyOptionsContext);
 
   return (
     <SelectableFilterPopover

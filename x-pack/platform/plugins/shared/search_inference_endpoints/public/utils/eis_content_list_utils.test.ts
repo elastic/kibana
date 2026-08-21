@@ -114,9 +114,25 @@ describe('createEisFindItems', () => {
     expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder']);
   });
 
+  it('excludes models by the provider dimension', async () => {
+    const { items } = await findItems(
+      findParams({ filters: { [EIS_PROVIDER_FILTER_ID]: { exclude: ['Anthropic'] } } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);
+  });
+
   it('filters by the task-type category dimension', async () => {
     const { items } = await findItems(
       findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { include: ['Rerank', 'Embedding'] } } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);
+  });
+
+  it('excludes models by the task-type category dimension', async () => {
+    const { items } = await findItems(
+      findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { exclude: ['LLM'] } } })
     );
 
     expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);

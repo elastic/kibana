@@ -55,10 +55,20 @@ export const toGroupedModel = (item: ContentListItem): GroupedModel =>
 export const getItemModelId = (item: ContentListItem): string | undefined =>
   (item as EisContentListItem).modelId;
 
-const getIncluded = (value: ActiveFilters[string]): string[] =>
-  (value && typeof value === 'object' && 'include' in value
-    ? (value as IncludeExcludeFilter).include
-    : undefined) ?? [];
+const getIncludeExclude = (
+  value: ActiveFilters[string]
+): Required<IncludeExcludeFilter> => {
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    (!('include' in value) && !('exclude' in value))
+  ) {
+    return { include: [], exclude: [] };
+  }
+
+  const { include = [], exclude = [] } = value as IncludeExcludeFilter;
+  return { include, exclude };
+};
 
 const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): GroupedModel[] => {
   if (sort?.field === EIS_PROVIDER_FILTER_ID) {
@@ -79,13 +89,22 @@ const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): Grou
 export const createEisFindItems =
   (models: GroupedModel[]): FindItemsFn =>
   async ({ searchQuery, filters, sort }) => {
-    const selectedProviders = getIncluded(filters[EIS_PROVIDER_FILTER_ID]);
+    const providerFilter = getIncludeExclude(filters[EIS_PROVIDER_FILTER_ID]);
+    const categoryFilter = getIncludeExclude(filters[EIS_CATEGORY_FILTER_ID]);
     const selectedTaskTypes = new Set(
-      getIncluded(filters[EIS_CATEGORY_FILTER_ID]) as TaskTypeCategory[]
+      categoryFilter.include as TaskTypeCategory[]
     );
 
     const matched = sortModels(
-      filterGroupedModels(models, { searchQuery, selectedProviders, selectedTaskTypes }),
+      filterGroupedModels(models, {
+        searchQuery,
+        selectedProviders: providerFilter.include,
+        selectedTaskTypes,
+      }).filter(
+        ({ modelCreator, categories }) =>
+          !providerFilter.exclude.includes(modelCreator) &&
+          !categories.some((category) => categoryFilter.exclude.includes(category))
+      ),
       sort
     );
 

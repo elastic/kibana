@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ContentListTable, type ContentListItem } from '@kbn/content-list';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
+import { getProviderKeyForCreator } from '../../utils/eis_utils';
 import {
   EIS_PROVIDER_FILTER_ID,
   getItemModelId,
@@ -54,14 +54,6 @@ const renderProvider = (item: ContentListItem) => {
   );
 };
 
-const renderTaskTypes = (item: ContentListItem) => (
-  <EuiText size="xs" color="subdued">
-    {toGroupedModel(item)
-      .taskTypes.map((taskType) => TASK_TYPE_DISPLAY_NAME[taskType] ?? taskType)
-      .join(', ')}
-  </EuiText>
-);
-
 const renderCategories = (item: ContentListItem) => (
   <EuiBadgeGroup>
     {toGroupedModel(item).categories.map((category) => (
@@ -78,15 +70,6 @@ export const EisTable = ({ onViewModelDetails }: EisTableProps) => (
       defaultMessage: 'Elastic Inference Service models',
     })}
   >
-    <Column
-      id={EIS_PROVIDER_FILTER_ID}
-      name={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.provider', {
-        defaultMessage: 'Provider',
-      })}
-      width="16em"
-      sortable
-      render={renderProvider}
-    />
     <Column.Name
       columnTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.model', {
         defaultMessage: 'Model',
@@ -99,17 +82,18 @@ export const EisTable = ({ onViewModelDetails }: EisTableProps) => (
       }}
     />
     <Column
-      id="taskTypes"
-      name={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.taskTypes', {
-        defaultMessage: 'Supported tasks',
+      id={EIS_PROVIDER_FILTER_ID}
+      name={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.provider', {
+        defaultMessage: 'Provider',
       })}
-      width="20em"
-      render={renderTaskTypes}
+      width="16em"
+      sortable
+      render={renderProvider}
     />
     <Column
       id="categories"
-      name={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.categories', {
-        defaultMessage: 'Categories',
+      name={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.column.type', {
+        defaultMessage: 'Type',
       })}
       width="12em"
       render={renderCategories}

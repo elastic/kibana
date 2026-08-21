@@ -150,14 +150,19 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(countCards(container)).toBeGreaterThan(0);
+    expect(getByText('Elastic')).toBeInTheDocument();
   });
 
   it('renders the table view when the view mode is switched', async () => {
-    const { getByTestId, getByRole } = await renderPopulatedPage();
+    const { getByTestId, getByRole, getByText, queryByText } = await renderPopulatedPage();
 
     fireEvent.click(getByRole('button', { name: 'Table view' }));
 
     await waitFor(() => expect(getByTestId('content-list-table')).toBeInTheDocument());
+    expect(getByText('Model')).toBeInTheDocument();
+    expect(getByText('Provider')).toBeInTheDocument();
+    expect(getByText('Type')).toBeInTheDocument();
+    expect(queryByText('Supported tasks')).not.toBeInTheDocument();
   });
 
   it('opens model detail flyout when clicking a card with valid model_id', async () => {
