@@ -23,6 +23,7 @@ import {
   MAX_EXAMPLES_PER_DATASET,
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_DATASET,
+  buildSpaceFilter,
   getDatasetId,
   type DatasetMaturity,
 } from '@kbn/evals-common';
@@ -225,7 +226,7 @@ export class DatasetClient {
     this.examplesStorage = examplesStorageAdapter.getClient();
     this.logger = logger;
     this.spaceId = spaceId;
-    this.spaceFilter = buildDatasetSpaceFilter(spaceId);
+    this.spaceFilter = buildSpaceFilter(spaceId);
 
     // Every dataset write is a read-modify-write of the whole document, because the
     // storage adapter can only replace documents outright. Without a conditional write
@@ -409,9 +410,7 @@ export class DatasetClient {
     const matchesName: QueryDslQueryContainer = {
       bool: {
         must: [{ term: { name } }],
-        filter: [
-          { bool: { should: spaceIds.map(buildDatasetSpaceFilter), minimum_should_match: 1 } },
-        ],
+        filter: [{ bool: { should: spaceIds.map(buildSpaceFilter), minimum_should_match: 1 } }],
       },
     };
 
@@ -1308,23 +1307,6 @@ const normalizeSpaceIds = (
   }
 
   return normalized;
-};
-
-/**
- * Matches datasets visible in a space: those assigned to it and — in the
- * default space only — those predating the field.
- *
- * Restates `buildSpaceFilter` from `@kbn/evals-common`, which does the same for
- * scores untyped; `dataset_client.test.ts` asserts the two agree.
- */
-const buildDatasetSpaceFilter = (spaceId: string): QueryDslQueryContainer => {
-  const should: QueryDslQueryContainer[] = [{ terms: { space_ids: [spaceId] } }];
-
-  if (spaceId === DEFAULT_SPACE_ID) {
-    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
-  }
-
-  return { bool: { should, minimum_should_match: 1 } };
 };
 
 /**
