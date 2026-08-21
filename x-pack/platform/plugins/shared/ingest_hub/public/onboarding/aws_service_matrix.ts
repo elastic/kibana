@@ -66,8 +66,6 @@ export interface AwsServiceMatrixEntry {
   requiredConfig?: string[];
   /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
   optionalConfig?: string[];
-  /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
-  varTypes?: Record<string, string>;
   /**
    * Manifest var definitions grouped by stream input type, then by var name.
    * Mirrors Fleet's positional scoping — a var's input is where it sits in the manifest,
@@ -112,7 +110,7 @@ type AwsServiceStaticEntry = Omit<
   | 'showInUI'
   | 'optionalConfig'
   | 'name'
-  | 'varDefs'
+  | 'varDefsByInput'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
@@ -499,7 +497,6 @@ export function buildAwsServiceMatrix(
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
     let pt: any;
-    const varTypes: Record<string, string> = {};
     const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
 
     const packageInfo = packages[entry.packageName];
@@ -557,10 +554,6 @@ export function buildAwsServiceMatrix(
       const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
         Object.values(byName)
       );
-
-      for (const v of allVars) {
-        if (v.name && v.type) varTypes[v.name] = v.type;
-      }
 
       // All required vars (shown or hidden) go into requiredConfig. field_config functions
       // use show_user from varDefs to split them into user-visible and mandatory-hidden sections.
@@ -656,7 +649,6 @@ export function buildAwsServiceMatrix(
       inputs,
       requiredConfig,
       optionalConfig,
-      varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
       varDefsByInput: Object.keys(varDefsByInput).length > 0 ? varDefsByInput : undefined,
       defaultEnabled,
       defaultEnabledInputs,
