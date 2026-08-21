@@ -27,6 +27,7 @@ import {
   dataViewMock,
   createDataViewWithBytesField,
   columnsMetaOverridingBytesType,
+  columnsMetaWithCustomField,
   createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -334,6 +335,35 @@ describe('SummaryColumn with columnsMeta', () => {
     );
 
     expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueReactSpy.mockRestore();
+  });
+
+  it('should format a computed ES|QL column absent from the data view when message is dropped', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    // Mirrors `FROM logs-* | eval custom_esql_field = ... | drop message`: the field exists only
+    // in columnsMeta, and there is no `message` for the summary to fall back on.
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          custom_esql_field: [200],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: columnsMetaWithCustomField,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
     formatFieldValueReactSpy.mockRestore();
   });
 });
