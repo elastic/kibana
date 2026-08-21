@@ -23,14 +23,7 @@ interface BulkUpdateRulesOptions {
 export const bulkUpdateRules = async ({
   actionsClient,
   rulesClient,
-  args: {
-    rules,
-    batchSize,
-    exitEarlyOnError,
-    skipIfUnchanged,
-    allowMissingConnectorSecrets,
-    changeTracking,
-  },
+  args: { rules, batchSize, exitEarlyOnError, allowMissingConnectorSecrets, changeTracking },
 }: BulkUpdateRulesOptions): Promise<BulkUpdateRulesResult> => {
   if (rules.length === 0) {
     return { successfulIds: [], errors: [], total: 0 };
@@ -61,7 +54,6 @@ export const bulkUpdateRules = async ({
     rules: bulkInputs,
     batchSize,
     exitEarlyOnError,
-    skipIfUnchanged,
     allowMissingConnectorSecrets,
     changeTracking,
   });

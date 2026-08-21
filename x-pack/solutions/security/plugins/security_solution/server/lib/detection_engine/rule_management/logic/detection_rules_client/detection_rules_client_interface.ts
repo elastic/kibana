@@ -156,7 +156,6 @@ export interface BulkUpdateRulesArgs {
   rules: RuleResponse[];
   batchSize?: number;
   exitEarlyOnError?: boolean;
-  skipIfUnchanged?: boolean;
   allowMissingConnectorSecrets?: boolean;
   changeTracking?: SecurityRuleChangeTracking;
 }

@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
   BulkCreateRulesParams,
+  BulkOperationError,
   BulkUpdateRulesParams,
   RulesClient,
 } from '@kbn/alerting-plugin/server';
@@ -38,6 +39,7 @@ import {
 } from '../../import/fetch_prebuilt_import_context';
 import { findInstalledRulesByRuleIds } from '../../import/find_installed_rules_by_rule_ids';
 import { calculateRuleSourceForImport } from '../../import/calculate_rule_source_for_import';
+import { getChanges } from './utils/get_changes';
 import {
   createPrebuiltRuleAssetsClient,
   type IPrebuiltRuleAssetsClient,
@@ -333,6 +335,7 @@ const updateRules = async ({
   const responses: Array<ImportRuleSuccess | RuleImportErrorObject> = [];
   const bulkInputs: BulkUpdateRulesParams<RuleParams>['rules'] = [];
   const inputById = new Map<string, PreparedImport>();
+  const skippedIds: string[] = [];
   const toEnable: string[] = [];
   const toDisable: string[] = [];
 
@@ -367,10 +370,17 @@ const updateRules = async ({
         }
 
         inputById.set(existingRule.id, p);
-        bulkInputs.push({
-          id: existingRule.id,
-          data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
-        });
+        // TODO: Evaluate if change detection should be a flag
+        // passed in with the import.
+        const changes = getChanges(existingRule, ruleWithUpdates, ['enabled']);
+        if (changes.length > 0) {
+          bulkInputs.push({
+            id: existingRule.id,
+            data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+          });
+        } else {
+          skippedIds.push(existingRule.id);
+        }
       } catch (e) {
         responses.push(
           createRuleImportErrorObject({
@@ -382,17 +392,19 @@ const updateRules = async ({
     }
   }
 
-  if (bulkInputs.length === 0) {
-    return responses;
-  }
+  let successfulIds: string[] = skippedIds;
+  let bulkErrors: BulkOperationError[] = [];
 
-  const { successfulIds, errors: bulkErrors } = await rulesClient.bulkUpdateRules<RuleParams>({
-    rules: bulkInputs,
-    batchSize: RULE_IMPORT_BATCH_SIZE,
-    skipIfUnchanged: true,
-    allowMissingConnectorSecrets,
-    changeTracking,
-  });
+  if (bulkInputs.length > 0) {
+    const result = await rulesClient.bulkUpdateRules<RuleParams>({
+      rules: bulkInputs,
+      batchSize: RULE_IMPORT_BATCH_SIZE,
+      allowMissingConnectorSecrets,
+      changeTracking,
+    });
+    successfulIds = [...skippedIds, ...result.successfulIds];
+    bulkErrors = result.errors;
+  }
 
   const successIds = new Set(successfulIds);
   const enableIds = toEnable.filter((id) => successIds.has(id));

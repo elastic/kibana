@@ -23,10 +23,15 @@ import { createProductFeaturesServiceMock } from '../../../../product_features_s
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 import { createRuleImportErrorObject, isRuleImportError } from '../import/errors';
 import { RULE_IMPORT_BATCH_SIZE } from '../../api/constants';
+import { getChanges } from './methods/utils/get_changes';
 
 jest.mock('../import/check_rule_exception_references');
 jest.mock('../import/fetch_prebuilt_import_context');
 jest.mock('../import/find_installed_rules_by_rule_ids');
+jest.mock('./methods/utils/get_changes', () => {
+  const actual = jest.requireActual('./methods/utils/get_changes');
+  return { ...actual, getChanges: jest.fn(actual.getChanges) };
+});
 
 const emptyPrebuiltContext = () => ({
   matchingAssetsByRuleId: {},
@@ -196,13 +201,58 @@ describe('detectionRulesClient.importRules', () => {
     expect(rulesClient.bulkUpdateRules.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         batchSize: RULE_IMPORT_BATCH_SIZE,
-        skipIfUnchanged: true,
       })
     );
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
     expect(responses).toEqual(
       expect.arrayContaining([{ rule_id: 'existing-rule' }, { rule_id: 'new-rule' }])
     );
+  });
+
+  it('overwrite of an unchanged rule skips bulkUpdateRules and still returns { rule_id }', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule' };
+    const existing = { ...getRulesSchemaMock(), rule_id: 'existing-rule', id: 'existing-id' };
+    (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existing,
+    });
+    (getChanges as jest.Mock).mockReturnValueOnce([]);
+
+    const { responses } = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [ruleToImport],
+    });
+
+    expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
+    expect(responses).toEqual([{ rule_id: 'existing-rule' }]);
+  });
+
+  it('overwrite that only flips enabled skips the write and still calls bulkEnableRules', async () => {
+    const ruleToImport = {
+      ...getImportRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      enabled: true,
+    };
+    const existing = {
+      ...getRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      id: 'existing-id',
+      enabled: false,
+    };
+    (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existing,
+    });
+    (getChanges as jest.Mock).mockReturnValueOnce([]);
+
+    const { responses } = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [ruleToImport],
+    });
+
+    expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
+    expect(rulesClient.bulkEnableRules).toHaveBeenCalledWith({ ids: ['existing-id'] });
+    expect(responses).toEqual([{ rule_id: 'existing-rule' }]);
   });
 
   it('per-row bulk error is re-paired to its source rule_id via uuid', async () => {
