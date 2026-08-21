@@ -14,7 +14,7 @@ import http from 'http';
 import sinon from 'sinon';
 import nock from 'nock';
 import { globbySync } from 'globby';
-import { deleteSync as del } from 'del';
+import { deleteSync } from 'del';
 
 import { Logger } from '../../logger';
 import { UnsupportedProtocolError } from '../lib/errors';
@@ -74,14 +74,14 @@ describe('kibana cli', function () {
     beforeEach(function () {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del(testWorkingPath);
+      deleteSync(testWorkingPath);
       Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      del(testWorkingPath);
+      deleteSync(testWorkingPath);
     });
 
     describe('_downloadSingle', function () {

@@ -16,7 +16,7 @@ import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { globby } from 'globby';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 // Function to remove specific fields from an XML object in order to
 // compare them as strings.
@@ -215,7 +215,7 @@ ${boilerplate}
     if ('error' in maybeValidationResult) {
       logError(maybeValidationResult.error);
       // Sending broken XML to Failed Test Reporter will cause a job to fail
-      await del(path, { force: true });
+      await deleteAsync(path, { force: true });
       log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
@@ -228,7 +228,7 @@ ${boilerplate}
       log.warning(`${path} had no test cases.
 ${boilerplate}
 `);
-      await del(path, { force: true });
+      await deleteAsync(path, { force: true });
       log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
@@ -247,7 +247,7 @@ ${boilerplate}
     if ('error' in maybeSpecFilePath) {
       logError(maybeSpecFilePath.error);
       // Sending broken XML to Failed Test Reporter will cause a job to fail
-      await del(path, { force: true });
+      await deleteAsync(path, { force: true });
       log.warning(`${path} file was deleted.`);
       // If there is an error, continue trying to process other files.
       continue;
@@ -275,7 +275,7 @@ ${boilerplate}
     if (xmlResultFiles.includes(rebuildComparableReport)) {
       // If the report is a duplicate, we need to remove the file
       // in order to be excluded from the uploaded results.
-      await del(path, { force: true });
+      await deleteAsync(path, { force: true });
       continue;
     }
     xmlResultFiles.push(rebuildComparableReport);

@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import { format } from 'url';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import { v4 as uuidv4 } from 'uuid';
 import { glob } from 'fast-glob';
 import createArchiver from 'archiver';
@@ -461,7 +461,7 @@ export function createTestEsCluster<
       );
 
       await this.captureDebugFiles();
-      await del(config.installPath, { force: true });
+      await deleteAsync(config.installPath, { force: true });
       log.info('[es] cleanup complete');
       this.handleStopResults(results);
     }

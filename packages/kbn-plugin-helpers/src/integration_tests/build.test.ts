@@ -15,7 +15,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import { globby } from 'globby';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
@@ -30,10 +30,10 @@ expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 describe('scripts/generate_plugin', () => {
   beforeEach(async () => {
-    await del([PLUGIN_DIR, TMP_DIR]);
+    await deleteAsync([PLUGIN_DIR, TMP_DIR]);
     Fs.mkdirSync(TMP_DIR);
   });
-  afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
+  afterEach(async () => await deleteAsync([PLUGIN_DIR, TMP_DIR]));
 
   it('builds a generated plugin into a viable archive', async () => {
     // extendEnv merges process.env then this object; must override CI's KBN_USE_RSPACK=true

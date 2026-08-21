@@ -11,7 +11,7 @@ import { resolve, dirname } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { comparePngs } from '../lib/compare_pngs';
@@ -38,7 +38,7 @@ export class ScreenshotsService extends FtrService {
 
     if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
       ctx.getService('lifecycle').beforeTests.add(async () => {
-        await del([this.SESSION_DIRECTORY, this.FAILURE_DIRECTORY]);
+        await deleteAsync([this.SESSION_DIRECTORY, this.FAILURE_DIRECTORY]);
       });
     }
   }

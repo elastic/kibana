@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as del from 'del';
+import { deleteSync } from 'del';
 import fs from 'fs';
 
 export function cleanPrevious(settings, logger) {
@@ -17,7 +17,7 @@ export function cleanPrevious(settings, logger) {
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        del.deleteSync(settings.workingPath, { force: true });
+        deleteSync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }
@@ -34,6 +34,6 @@ export function cleanArtifacts(settings) {
   // delete the working directory.
   // At this point we're bailing, so swallow any errors on delete.
   try {
-    del.deleteSync(settings.workingPath);
+    deleteSync(settings.workingPath);
   } catch (e) {} // eslint-disable-line no-empty
 }

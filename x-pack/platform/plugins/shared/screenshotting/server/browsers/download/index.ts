@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import { access } from 'fs/promises';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';
@@ -24,7 +24,7 @@ export async function download(
   pkg: PackageInfo,
   logger?: Logger
 ): Promise<ValidChecksum | undefined> {
-  const removedFiles = await del(`${paths.archivesPath}/**/*`, {
+  const removedFiles = await deleteAsync(`${paths.archivesPath}/**/*`, {
     force: true,
     onlyFiles: true,
     ignore: paths.getAllArchiveFilenames(),

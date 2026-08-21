@@ -11,7 +11,7 @@ import type { ConfigType } from '@kbn/screenshotting-server';
 import { args } from '@kbn/screenshotting-server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
@@ -271,7 +271,7 @@ export class HeadlessChromiumDriverFactory {
           logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.
-          del(userDataDir, { force: true }).catch((error) => {
+          deleteAsync(userDataDir, { force: true }).catch((error) => {
             logger.error(`error deleting user data directory at [${userDataDir}]!`);
             logger.error(error);
           });
@@ -449,7 +449,7 @@ export class HeadlessChromiumDriverFactory {
         browserProcess.removeAllListeners();
         rl.removeAllListeners();
         rl.close();
-        del(this.userDataDir, { force: true }).catch((error) => {
+        deleteAsync(this.userDataDir, { force: true }).catch((error) => {
           this.logger.error(`Error deleting user data directory at [${this.userDataDir}]!`);
           this.logger.error(error);
         });

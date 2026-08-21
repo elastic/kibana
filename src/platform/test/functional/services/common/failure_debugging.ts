@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,7 +30,7 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   const browser = getService('browser');
 
   if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
-    await del(config.get('failureDebugging.htmlDirectory'));
+    await deleteAsync(config.get('failureDebugging.htmlDirectory'));
   }
 
   async function logCurrentUrl() {

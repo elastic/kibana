@@ -11,7 +11,7 @@ import Fs from 'fs';
 import { promisify } from 'util';
 import path from 'path';
 
-import { deleteSync as del } from 'del';
+import { deleteSync } from 'del';
 
 import { download } from './download';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
@@ -36,7 +36,7 @@ export async function install(settings, logger) {
 
     await extract(settings, logger);
 
-    del(settings.tempArchiveFile, { force: true });
+    deleteSync(settings.tempArchiveFile, { force: true });
 
     existingInstall(settings, logger);
 

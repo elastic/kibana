@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import path from 'path';
 import { download } from './download';
 import { sha256 } from './download/checksum';
@@ -40,7 +40,7 @@ export async function install(
       ` is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
   );
   try {
-    await del(chromiumPath);
+    await deleteAsync(chromiumPath);
   } catch (error) {
     logger.error(error);
   }

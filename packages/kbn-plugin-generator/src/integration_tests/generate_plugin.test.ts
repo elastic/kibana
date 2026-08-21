@@ -10,7 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
@@ -21,11 +21,11 @@ const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 beforeEach(async () => {
-  await del(GENERATED_DIR, { force: true });
+  await deleteAsync(GENERATED_DIR, { force: true });
 });
 
 afterEach(async () => {
-  await del(GENERATED_DIR, { force: true });
+  await deleteAsync(GENERATED_DIR, { force: true });
 });
 
 it('generates a classic plugin by default', async () => {

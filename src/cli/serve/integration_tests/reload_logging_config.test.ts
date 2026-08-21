@@ -11,7 +11,7 @@ import Child from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 import Os from 'os';
-import { deleteSync as Del } from 'del';
+import { deleteSync } from 'del';
 
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs';
@@ -86,7 +86,7 @@ describe.skip('Server logging configuration', function () {
       await exitPromise;
     }
 
-    Del(tempDir, { force: true });
+    deleteSync(tempDir, { force: true });
   });
 
   if (process.platform.startsWith('win')) {

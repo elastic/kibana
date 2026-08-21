@@ -10,7 +10,7 @@
 import { readdirSync } from 'fs';
 import { relative, resolve } from 'path';
 
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 // @ts-ignore
 import { mkdirp, write } from './fs';
@@ -20,7 +20,7 @@ const TMP = resolve(__dirname, '__tests__/__tmp__');
 
 // clean and recreate TMP directory
 beforeEach(async () => {
-  await del(TMP);
+  await deleteAsync(TMP);
   await mkdirp(resolve(TMP, 'foo/bar/baz'));
   await mkdirp(resolve(TMP, 'foo/bar/box'));
   await mkdirp(resolve(TMP, 'a/b/c/d/e'));
@@ -29,7 +29,7 @@ beforeEach(async () => {
 
 // cleanup TMP directory
 afterAll(async () => {
-  await del(TMP);
+  await deleteAsync(TMP);
 });
 
 it('requires absolute paths', async () => {

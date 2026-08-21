@@ -10,7 +10,7 @@
 import { chmodSync, statSync } from 'fs';
 import { resolve } from 'path';
 
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 import { getChildPaths } from '../fs';
 import { scanCopy } from '../scan_copy';
@@ -29,7 +29,7 @@ beforeAll(async () => {
 
 // cleanup TMP directory
 afterEach(async () => {
-  await del(TMP);
+  await deleteAsync(TMP);
 });
 
 it('rejects if source path is not absolute', async () => {

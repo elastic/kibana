@@ -12,7 +12,7 @@ import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import expect from '@kbn/expect';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -31,7 +31,7 @@ export class SnapshotsService extends FtrService {
 
     if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
       ctx.getService('lifecycle').beforeTests.add(async () => {
-        await del([this.SESSION_DIRECTORY]);
+        await deleteAsync([this.SESSION_DIRECTORY]);
       });
     }
   }

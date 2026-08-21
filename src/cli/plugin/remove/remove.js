@@ -9,7 +9,7 @@
 
 import { statSync } from 'fs';
 
-import { deleteSync as del } from 'del';
+import { deleteSync } from 'del';
 
 import { errorIfXPackRemove } from '../lib/error_if_x_pack';
 
@@ -28,7 +28,7 @@ export function remove(settings, logger) {
     }
 
     logger.log(`Removing ${settings.plugin}...`);
-    del(settings.pluginPath, { force: true });
+    deleteSync(settings.pluginPath, { force: true });
     logger.log('Plugin removal complete');
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);

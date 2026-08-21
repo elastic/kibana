@@ -12,7 +12,7 @@ import { readFile } from 'fs/promises';
 import { promisify } from 'util';
 
 import { parseString } from 'xml2js';
-import { deleteSync as del } from 'del';
+import { deleteSync } from 'del';
 import Mocha from 'mocha';
 import { getUniqueJunitReportPath } from '../report_path';
 
@@ -27,7 +27,7 @@ const parseStringAsync = promisify(parseString);
 
 describe('dev/mocha/junit report generation', () => {
   afterEach(() => {
-    del(resolve(PROJECT_DIR, 'target'));
+    deleteSync(resolve(PROJECT_DIR, 'target'));
   });
 
   it('reports on failed setup hooks', async () => {

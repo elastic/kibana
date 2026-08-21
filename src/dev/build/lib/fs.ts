@@ -20,7 +20,7 @@ import { inspect } from 'util';
 import archiver from 'archiver';
 import { globby } from 'globby';
 import pMap from 'p-map';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 import * as tar from 'tar';
 import { pack as tarFsPack } from 'tar-fs';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -92,7 +92,7 @@ export async function deleteAll(patterns: string[], log: ToolingLog) {
     assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
   }
 
-  const files = await del(patterns, {
+  const files = await deleteAsync(patterns, {
     concurrency: 4,
   });
 

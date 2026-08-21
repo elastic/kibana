@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { deleteSync: del } = require('del');
+const { deleteSync } = require('del');
 const { join } = require('path');
 const { readdirSync, readFileSync, writeFileSync } = require('fs');
 const minimist = require('minimist');
@@ -44,8 +44,7 @@ function start(opts) {
   );
 
   log.text = 'Cleaning autocomplete definitions folder';
-  del([`${autocompleteOutputFolder}/**`]);
-
+  deleteSync([`${autocompleteOutputFolder}/**`]);
   cloneAndCheckout(
     { log, tag: opts.tag, branch: opts.branch },
     (err, { esPainlessContextFolder }) => {

@@ -20,7 +20,7 @@ import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { globby, globbySync } from 'globby';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
@@ -40,7 +40,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
   log.indent(4);
   try {
     log.debug('Remove Pre Minify Sourcemaps');
-    await del(['**/*.map'], { cwd: assetDir });
+    await deleteAsync(['**/*.map'], { cwd: assetDir });
 
     log.debug('Minify CSS with Lightning CSS');
     const cssFiles = await globby(['**/*.css'], { cwd: assetDir, absolute: true });

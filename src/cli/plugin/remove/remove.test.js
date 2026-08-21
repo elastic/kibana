@@ -12,7 +12,7 @@ import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
 import sinon from 'sinon';
 import { globbySync } from 'globby';
-import { deleteSync as del } from 'del';
+import { deleteSync } from 'del';
 
 import { Logger } from '../../logger';
 import { remove } from './remove';
@@ -30,7 +30,7 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del(pluginDir);
+      deleteSync(pluginDir);
       mkdirSync(pluginDir, { recursive: true });
     });
 
@@ -38,7 +38,7 @@ describe('kibana cli', function () {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      del(pluginDir);
+      deleteSync(pluginDir);
     });
 
     it('throw an error if the plugin is not installed.', function () {

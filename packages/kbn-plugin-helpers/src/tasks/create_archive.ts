@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import archiver from 'archiver';
-import { deleteAsync as del } from 'del';
+import { deleteAsync } from 'del';
 
 import type { TaskContext } from '../task_context';
 
@@ -37,6 +37,6 @@ export async function createArchive({ kibanaVersion, plugin, log }: TaskContext)
   await archive.directory(directoryToAdd, directoryNameOnZip).finalize();
 
   // delete the files that were zipped
-  await del(Path.resolve(buildDir, 'kibana'));
+  await deleteAsync(Path.resolve(buildDir, 'kibana'));
   log.success('plugin archive created');
 }
