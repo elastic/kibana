@@ -10,7 +10,7 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 
 import type { DataSetWithName } from '../common';
-import type { DataSetListRow } from './datasets_table';
+import type { DataSetListRow, DatasetsTableProps } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
 
 const createDataSetRow = ({
@@ -27,6 +27,27 @@ const createDataSetRow = ({
     description: '',
   } as DataSetWithName);
 
+const renderTable = (overrides: Partial<DatasetsTableProps> = {}) =>
+  render(
+    <EuiProvider>
+      <DatasetsTable
+        filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+        selectedItems={[]}
+        dataSourceNames={['ds1']}
+        dataSourceFilter={[]}
+        onSelectionChange={jest.fn()}
+        onDataSourceFilterChange={jest.fn()}
+        onCreate={jest.fn()}
+        onEdit={jest.fn()}
+        onClone={jest.fn()}
+        onOpenInDiscover={jest.fn()}
+        onDelete={jest.fn()}
+        onDeleteSelected={jest.fn()}
+        {...overrides}
+      />
+    </EuiProvider>
+  );
+
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
@@ -42,22 +63,7 @@ describe('DatasetsTable', () => {
   it('calls onCreate with the selected flow when a menu item is chosen', async () => {
     const onCreate = jest.fn();
 
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceNames={['ds1']}
-          dataSourceFilter={[]}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({ onCreate });
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
     fireEvent.click(getByTestId('dataSetsSetsCreateFlow2Button'));
@@ -66,35 +72,17 @@ describe('DatasetsTable', () => {
     expect(onCreate).toHaveBeenCalledWith('flow_2');
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3aButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3Button'));
 
     expect(onCreate).toHaveBeenCalledTimes(2);
-    expect(onCreate).toHaveBeenLastCalledWith('flow_3a');
-
-    fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3bButton'));
-
-    expect(onCreate).toHaveBeenCalledTimes(3);
-    expect(onCreate).toHaveBeenLastCalledWith('flow_3b');
+    expect(onCreate).toHaveBeenLastCalledWith('flow_3');
   });
 
   it('renders the data source filter button', () => {
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceNames={['ds1', 'ds2']}
-          dataSourceFilter={['ds1']}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({
+      dataSourceNames: ['ds1', 'ds2'],
+      dataSourceFilter: ['ds1'],
+    });
 
     expect(getByTestId('dataSetsSetsDataSourceFilter')).toBeInTheDocument();
   });
@@ -103,63 +91,78 @@ describe('DatasetsTable', () => {
     const onEdit = jest.fn();
     const onDelete = jest.fn();
 
-    const { getAllByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[
-            createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-            createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-          ]}
-          selectedItems={[]}
-          dataSourceNames={['ds1']}
-          dataSourceFilter={[]}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({
+      filteredItems: [createDataSetRow({ name: 'set1', dataSource: 'ds1' })],
+      onEdit,
+      onDelete,
+    });
 
-    const editButtons = getAllByTestId('dataSetsSetsEditButton');
-    const deleteButtons = getAllByTestId('dataSetsSetsDeleteIconButton');
-    expect(editButtons).toHaveLength(2);
-    expect(deleteButtons).toHaveLength(2);
-
-    fireEvent.click(editButtons[0]);
+    fireEvent.click(getByTestId('euiCollapsedItemActionsButton'));
+    fireEvent.click(getByTestId('dataSetsSetsEditButton'));
     expect(onEdit).toHaveBeenCalledTimes(1);
     expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
 
-    fireEvent.click(deleteButtons[1]);
+    fireEvent.click(getByTestId('euiCollapsedItemActionsButton'));
+    fireEvent.click(getByTestId('dataSetsSetsDeleteIconButton'));
     expect(onDelete).toHaveBeenCalledTimes(1);
-    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set2' }));
+    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
     const onDeleteSelected = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
 
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
-          selectedItems={selectedItems}
-          dataSourceNames={['ds1']}
-          dataSourceFilter={[]}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-        />
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({
+      filteredItems: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })],
+      selectedItems,
+      onDeleteSelected,
+    });
 
     fireEvent.click(getByTestId('dataSetsSetsDeleteButton'));
     expect(onDeleteSelected).toHaveBeenCalledTimes(1);
     expect(onDeleteSelected).toHaveBeenCalledWith(selectedItems);
+  });
+
+  it('calls onClone from the collapsed row actions menu', () => {
+    const onClone = jest.fn();
+
+    const { getByTestId } = renderTable({
+      filteredItems: [createDataSetRow({ name: 'set1', dataSource: 'ds1' })],
+      onClone,
+    });
+
+    fireEvent.click(getByTestId('euiCollapsedItemActionsButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCloneButton'));
+    expect(onClone).toHaveBeenCalledTimes(1);
+    expect(onClone).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
+  });
+
+  it('calls onOpenInDiscover from the visible row action', () => {
+    const onOpenInDiscover = jest.fn();
+
+    const { getByTestId } = renderTable({
+      filteredItems: [createDataSetRow({ name: 'set1', dataSource: 'ds1' })],
+      onOpenInDiscover,
+      isOpenInDiscoverEnabled: true,
+    });
+
+    fireEvent.click(getByTestId('dataSetsSetsOpenInDiscoverButton'));
+    expect(onOpenInDiscover).toHaveBeenCalledTimes(1);
+    expect(onOpenInDiscover).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
+  });
+
+  it('disables Open in Discover when the locator is unavailable', () => {
+    const onOpenInDiscover = jest.fn();
+
+    const { getByTestId } = renderTable({
+      onOpenInDiscover,
+      isOpenInDiscoverEnabled: false,
+    });
+
+    const discoverButton = getByTestId('dataSetsSetsOpenInDiscoverButton');
+    expect(discoverButton).toBeDisabled();
+
+    fireEvent.click(discoverButton);
+    expect(onOpenInDiscover).not.toHaveBeenCalled();
   });
 });

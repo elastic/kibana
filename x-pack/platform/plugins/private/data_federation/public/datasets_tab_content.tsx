@@ -13,7 +13,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
-import { buildCreateDatasetWizardPath } from './create_dataset_wizard/dataset_wizard_flow_variant';
+import {
+  buildCloneDatasetWizardPath,
+  buildCreateDatasetWizardPath,
+} from './create_dataset_wizard/dataset_wizard_flow_variant';
 import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
@@ -37,7 +40,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
 }) => {
   const history = useHistory();
   const {
-    services: { datasetsClient, toasts },
+    services: { datasetsClient, toasts, share },
   } = useKibana<DataFederationKibanaServices>();
 
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -58,10 +61,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }));
   }, [dataSets, dataSources]);
 
-  const dataSourceNames = useMemo(
-    () => dataSources.map((ds) => ds.name).sort(),
-    [dataSources]
-  );
+  const dataSourceNames = useMemo(() => dataSources.map((ds) => ds.name).sort(), [dataSources]);
 
   useEffect(() => {
     if (dataSourceFilter.length === 0) {
@@ -176,6 +176,24 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     [history]
   );
 
+  const handleClone = useCallback(
+    (item: DataSetListRow) => {
+      history.push(buildCloneDatasetWizardPath(item.name));
+    },
+    [history]
+  );
+
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+
+  const handleOpenInDiscover = useCallback(
+    (item: DataSetListRow) => {
+      void discoverLocator?.navigate({
+        query: { esql: `FROM ${item.name}` },
+      });
+    },
+    [discoverLocator]
+  );
+
   return (
     <>
       <DatasetsTable
@@ -187,6 +205,9 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         onDataSourceFilterChange={onDataSourceFilterChange}
         onCreate={handleCreate}
         onEdit={handleEdit}
+        onClone={handleClone}
+        onOpenInDiscover={handleOpenInDiscover}
+        isOpenInDiscoverEnabled={Boolean(discoverLocator)}
         onDelete={handleDeleteDataSet}
         onDeleteSelected={handleDeleteSelectedDataSets}
       />

@@ -18,12 +18,7 @@ import type {
 } from './create_dataset_flyout_form_state';
 import { DatasetSettingsAdvancedViewToggle } from './dataset_settings_advanced_view_toggle';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
-import {
-  getFlow3AdvancedFields,
-  getFlow3CommonFields,
-} from './dataset_settings_flow3_layout';
-import type { DatasetWizardFlowVariant } from '../create_dataset_wizard/dataset_wizard_flow_variant';
-import { isDatasetWizardFlow3B } from '../create_dataset_wizard/dataset_wizard_flow_variant';
+import { getFlow3CommonFields } from './dataset_settings_flow3_layout';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 
 const accordionButtonCss = css`
@@ -34,10 +29,9 @@ const accordionButtonCss = css`
 
 export interface DatasetSettingsFlow3SettingsPanelProps {
   control: Control<DatasetWizardFormValues>;
-  getValues?: UseFormGetValues<DatasetWizardFormValues>;
-  setValue?: UseFormSetValue<DatasetWizardFormValues>;
+  getValues: UseFormGetValues<DatasetWizardFormValues>;
+  setValue: UseFormSetValue<DatasetWizardFormValues>;
   format: Exclude<DatasetFormatFormValue, ''>;
-  flowVariant: DatasetWizardFlowVariant;
   commonSettingsTitle: string;
   advancedSettingsTitle: string;
   testSubjPrefix?: string;
@@ -50,30 +44,17 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   getValues,
   setValue,
   format,
-  flowVariant,
   commonSettingsTitle,
   advancedSettingsTitle,
   testSubjPrefix = 'datasetWizard',
 }) => {
-  const isFlow3b = isDatasetWizardFlow3B(flowVariant);
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
 
-  const commonFields = useMemo(
-    () => getFlow3CommonFields(format, errorMode),
-    [errorMode, format]
-  );
-  const advancedFields = useMemo(
-    () => getFlow3AdvancedFields(format, errorMode),
-    [errorMode, format]
-  );
+  const commonFields = useMemo(() => getFlow3CommonFields(format, errorMode), [errorMode, format]);
 
   const advancedSettingsAccordionId = useGeneratedHtmlId({
-    prefix: isFlow3b
-      ? 'datasetWizardFlow3bAdvancedSettingsAccordion'
-      : 'datasetWizardFlow3AdvancedSettingsAccordion',
+    prefix: 'datasetWizardFlow3AdvancedSettingsAccordion',
   });
-
-  const showAdvancedSection = isFlow3b || advancedFields.length > 0;
 
   return (
     <>
@@ -96,49 +77,32 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         />
       </EuiPanel>
 
-      {showAdvancedSection ? (
-        <>
-          <EuiSpacer size="l" />
-          <EuiAccordion
-            id={advancedSettingsAccordionId}
-            element="fieldset"
-            borders="horizontal"
-            buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
-            buttonContent={
-              <EuiTitle size="xs">
-                <h3>{advancedSettingsTitle}</h3>
-              </EuiTitle>
-            }
-            data-test-subj={
-              isFlow3b
-                ? `${testSubjPrefix}Flow3bAdvancedSettingsAccordion`
-                : `${testSubjPrefix}Flow3AdvancedSettingsAccordion`
-            }
-            initialIsOpen={false}
-            paddingSize="none"
-          >
-            <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
-              {isFlow3b && getValues && setValue ? (
-                <DatasetSettingsAdvancedViewToggle
-                  control={control}
-                  getValues={getValues}
-                  setValue={setValue}
-                  format={format}
-                  errorMode={errorMode}
-                  testSubjPrefix={testSubjPrefix}
-                />
-              ) : advancedFields.length > 0 ? (
-                <DatasetSettingsFieldsLayout
-                  control={control}
-                  fields={advancedFields}
-                  testSubjPrefix={testSubjPrefix}
-                  columns={2}
-                />
-              ) : null}
-            </EuiPanel>
-          </EuiAccordion>
-        </>
-      ) : null}
+      <EuiSpacer size="l" />
+      <EuiAccordion
+        id={advancedSettingsAccordionId}
+        element="fieldset"
+        borders="horizontal"
+        buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
+        buttonContent={
+          <EuiTitle size="xs">
+            <h3>{advancedSettingsTitle}</h3>
+          </EuiTitle>
+        }
+        data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
+        initialIsOpen={false}
+        paddingSize="none"
+      >
+        <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
+          <DatasetSettingsAdvancedViewToggle
+            control={control}
+            getValues={getValues}
+            setValue={setValue}
+            format={format}
+            errorMode={errorMode}
+            testSubjPrefix={testSubjPrefix}
+          />
+        </EuiPanel>
+      </EuiAccordion>
     </>
   );
 };

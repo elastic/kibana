@@ -29,7 +29,6 @@ import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
-  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -93,7 +92,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat);
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
 
-      if (isDatasetWizardFlow3B(flowVariant)) {
+      if (isDatasetWizardFlow3(flowVariant)) {
         setDefaultCustomJson(nextFormat, withDefaults.error_mode);
         previousErrorModeRef.current = withDefaults.error_mode;
       }
@@ -115,7 +114,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   );
 
   useEffect(() => {
-    if (!isDatasetWizardFlow3B(flowVariant) || !hasFormatSelected) {
+    if (!isDatasetWizardFlow3(flowVariant) || !hasFormatSelected) {
       previousErrorModeRef.current = errorMode;
       return;
     }
@@ -171,7 +170,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       shouldDirty: true,
       shouldValidate: true,
     });
-    if (isDatasetWizardFlow3B(flowVariant)) {
+    if (isDatasetWizardFlow3(flowVariant)) {
       setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
         shouldDirty: true,
         shouldValidate: true,
@@ -208,8 +207,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         ...option,
         inputDisplay: (
           <>
-            {option.inputDisplay}
-            {' '}
+            {option.inputDisplay}{' '}
             {flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
               autoDetectedSuffix
             ) : (
@@ -273,7 +271,6 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
               getValues={getValues}
               setValue={setValue}
               format={format}
-              flowVariant={flowVariant}
               commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
               advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
               testSubjPrefix="datasetWizard"

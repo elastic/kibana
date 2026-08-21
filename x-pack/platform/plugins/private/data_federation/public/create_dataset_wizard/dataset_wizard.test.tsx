@@ -14,6 +14,7 @@ import { Router } from 'react-router-dom';
 import type { DataSource } from '../../common';
 import {
   ADDITIONAL_SETTINGS_STEP,
+  PREVIEW_RESULTS_STEP,
   REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
@@ -21,8 +22,7 @@ import { DatasetWizard } from './dataset_wizard';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3A,
-  DATASET_WIZARD_FLOW_VARIANT_3B,
+  DATASET_WIZARD_FLOW_VARIANT_3,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -291,15 +291,11 @@ describe('DatasetWizard step navigation', () => {
     jest.useRealTimers();
   });
 
-  it.each([
-    DATASET_WIZARD_FLOW_VARIANT_2,
-    DATASET_WIZARD_FLOW_VARIANT_3A,
-    DATASET_WIZARD_FLOW_VARIANT_3B,
-  ])('shows the data preview in the review step preview results tab in %s', (flowVariant) => {
+  it('shows the data preview in the review step preview results tab in flow 2', () => {
     const { getByTestId, getByText, queryByTestId } = renderWizard(
       `/create?step=${REVIEW_STEP}`,
       testConfigurationDraft,
-      flowVariant
+      DATASET_WIZARD_FLOW_VARIANT_2
     );
 
     expect(queryByTestId('datasetWizardTestConfiguration')).toBeNull();
@@ -310,92 +306,140 @@ describe('DatasetWizard step navigation', () => {
     expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
   });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
-    'places region on additional settings in %s and allows leaving logistics without it',
-    async (flowVariant) => {
-      const { getByRole, getByTestId } = renderWizard(
-        '/create',
-        emptyDatasetWizardFormValues(),
-        flowVariant
-      );
+  it('shows preview results as its own optional step in flow 3', async () => {
+    jest.useFakeTimers();
 
-      const additionalSettings = getByTestId('datasetWizardAdditionalSettingsStep');
-      expect(within(additionalSettings).getByTestId('datasetWizardRegion')).toBeInTheDocument();
-      expect(additionalSettings).not.toBeVisible();
+    const { getByTestId, queryByTestId, history } = renderWizard(
+      `/create?flow=flow_3&step=${PREVIEW_RESULTS_STEP}`,
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
 
-      fireEvent.click(getByTestId('datasetWizardDataSource'));
-      fireEvent.click(getByRole('option', { name: /source-1/ }));
-      fireEvent.change(getByTestId('datasetWizardName'), {
-        target: { value: 'my-dataset' },
-      });
-      fireEvent.change(getByTestId('datasetWizardResource'), {
-        target: { value: 's3://logs/us-east-1/**/*.parquet' },
-      });
-      fireEvent.blur(getByTestId('datasetWizardResource'));
-      fireEvent.click(getByTestId('datasetWizardNext'));
+    expect(getByTestId('datasetWizardPreviewResultsStep')).toBeVisible();
+    expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
+    expect(history.location.search).toContain('step=4');
 
-      await waitFor(() => {
-        expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
-      });
+    fireEvent.click(getByTestId('datasetWizardPreviewResultsButton'));
+    expect(getByTestId('datasetWizardTestConfigurationLoading')).toBeInTheDocument();
 
-      const region = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
-        'datasetWizardRegion'
-      );
-      const format = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
-        'datasetWizardSettingsFormat'
-      );
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
 
-      expect(region).toBeVisible();
-      expect(region).toHaveTextContent('US East (N. Virginia)');
-      expect(
-        region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING
-      ).toBeTruthy();
-    }
-  );
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
-    'validates region on additional settings in %s, not on logistics',
-    async (flowVariant) => {
-      const { getByRole, getByTestId } = renderWizard(
-        '/create',
-        emptyDatasetWizardFormValues(),
-        flowVariant
-      );
+    fireEvent.click(getByTestId('datasetWizardNext'));
 
-      fireEvent.click(getByTestId('datasetWizardDataSource'));
-      fireEvent.click(getByRole('option', { name: /source-1/ }));
-      fireEvent.change(getByTestId('datasetWizardName'), {
-        target: { value: 'my-dataset' },
-      });
-      fireEvent.change(getByTestId('datasetWizardResource'), {
-        target: { value: 's3://bucket/data.csv' },
-      });
-      fireEvent.click(getByTestId('datasetWizardNext'));
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardReviewStep')).toBeVisible();
+    });
 
-      await waitFor(() => {
-        expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
-      });
+    expect(queryByTestId('datasetWizardReviewPreviewResultsTabButton')).toBeNull();
+    expect(history.location.search).toContain('step=5');
 
-      const region = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
-        'datasetWizardRegion'
-      );
-      expect(region).not.toHaveClass('euiSuperSelectControl-isInvalid');
-      expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
-        'Region is required.'
-      );
+    jest.useRealTimers();
+  });
 
-      fireEvent.click(getByTestId('datasetWizardNext'));
+  it('allows skipping preview results in flow 3 without fetching rows', async () => {
+    const { getByTestId, queryByTestId, history } = renderWizard(
+      `/create?flow=flow_3&step=${PREVIEW_RESULTS_STEP}`,
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
 
-      await waitFor(() => {
-        expect(region).toHaveClass('euiSuperSelectControl-isInvalid');
-      });
+    expect(getByTestId('datasetWizardPreviewResultsButton')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
 
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardReviewStep')).toBeVisible();
+    });
+
+    expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
+    expect(history.location.search).toContain('step=5');
+  });
+
+  it('places region on additional settings in flow 3 and allows leaving logistics without it', async () => {
+    const { getByRole, getByTestId } = renderWizard(
+      '/create',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
+
+    const additionalSettings = getByTestId('datasetWizardAdditionalSettingsStep');
+    expect(within(additionalSettings).getByTestId('datasetWizardRegion')).toBeInTheDocument();
+    expect(additionalSettings).not.toBeVisible();
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://logs/us-east-1/**/*.parquet' },
+    });
+    fireEvent.blur(getByTestId('datasetWizardResource'));
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
       expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
-      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
-        'Region is required.'
-      );
-    }
-  );
+    });
+
+    const region = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
+      'datasetWizardRegion'
+    );
+    const format = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
+      'datasetWizardSettingsFormat'
+    );
+
+    expect(region).toBeVisible();
+    expect(region).toHaveTextContent('US East (N. Virginia)');
+    expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('validates region on additional settings in flow 3, not on logistics', async () => {
+    const { getByRole, getByTestId } = renderWizard(
+      '/create',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://bucket/data.csv' },
+    });
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+    });
+
+    const region = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
+      'datasetWizardRegion'
+    );
+    expect(region).not.toHaveClass('euiSuperSelectControl-isInvalid');
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
+      'Region is required.'
+    );
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(region).toHaveClass('euiSuperSelectControl-isInvalid');
+    });
+
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
+      'Region is required.'
+    );
+  });
 
   it('blocks advancing from logistics when region is not selected', async () => {
     const { getByRole, getByTestId, history } = renderWizard();
@@ -453,7 +497,7 @@ describe('DatasetWizard step navigation', () => {
     expect(history.location.search).toBe('');
   });
 
-  it('shows JSON partition detection changes in the flow 3b review summary', async () => {
+  it('shows JSON partition detection changes in the flow 3 review summary', async () => {
     const draft = {
       ...emptyDatasetWizardFormValues(),
       data_source: 'source-1',
@@ -467,7 +511,7 @@ describe('DatasetWizard step navigation', () => {
     const { getByTestId } = renderWizard(
       `/create?step=${ADDITIONAL_SETTINGS_STEP}`,
       draft,
-      DATASET_WIZARD_FLOW_VARIANT_3B
+      DATASET_WIZARD_FLOW_VARIANT_3
     );
 
     await waitFor(() => {
@@ -489,6 +533,12 @@ describe('DatasetWizard step navigation', () => {
 
     await waitFor(() => {
       expect(getByTestId('datasetWizardSchemaMappingsStep')).toBeVisible();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardPreviewResultsStep')).toBeVisible();
     });
 
     fireEvent.click(getByTestId('datasetWizardNext'));

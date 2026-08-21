@@ -66,4 +66,20 @@ describe('Main', () => {
     const { getByTestId } = renderMain();
     expect(getByTestId('dataFederationHome')).toBeInTheDocument();
   });
+
+  it('renders the clone wizard route', () => {
+    const history = createMemoryHistory({ initialEntries: ['/clone/my-dataset?flow=flow_3'] });
+
+    const { getByTestId } = render(
+      <EuiProvider>
+        <Router history={history}>
+          <KibanaContextProvider services={createServicesMock({ dataSources: [], dataSets: [] })}>
+            <Main />
+          </KibanaContextProvider>
+        </Router>
+      </EuiProvider>
+    );
+
+    expect(getByTestId('datasetWizardPage')).toBeInTheDocument();
+  });
 });

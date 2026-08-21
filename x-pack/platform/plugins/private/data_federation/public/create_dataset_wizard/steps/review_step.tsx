@@ -306,12 +306,16 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
       content: <PreviewTab />,
       'data-test-subj': 'datasetWizardReviewPreviewTabButton',
     },
-    {
-      id: 'preview_results',
-      name: datasetWizardStrings.reviewPreviewResultsTabTitle(),
-      content: <PreviewResultsTab />,
-      'data-test-subj': 'datasetWizardReviewPreviewResultsTabButton',
-    },
+    ...(flowVariant === DATASET_WIZARD_FLOW_VARIANT_2
+      ? [
+          {
+            id: 'preview_results',
+            name: datasetWizardStrings.reviewPreviewResultsTabTitle(),
+            content: <PreviewResultsTab />,
+            'data-test-subj': 'datasetWizardReviewPreviewResultsTabButton',
+          },
+        ]
+      : []),
     {
       id: 'request',
       name: datasetWizardStrings.reviewRequestTabTitle(),

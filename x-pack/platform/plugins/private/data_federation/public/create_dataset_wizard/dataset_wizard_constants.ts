@@ -8,6 +8,11 @@
 export const LOGISTICS_STEP = 1;
 export const ADDITIONAL_SETTINGS_STEP = 2;
 export const SCHEMA_MAPPINGS_STEP = 3;
+/** Flow 3 only. Same URL index as Review in flows 1 and 2. */
+export const PREVIEW_RESULTS_STEP = 4;
+/** Review in flows 1 and 2. */
 export const REVIEW_STEP = 4;
+/** Review in flow 3, after Preview results. */
+export const FLOW_3_REVIEW_STEP = 5;
 
 export const DATASET_WIZARD_FORM_MAX_WIDTH = 850;

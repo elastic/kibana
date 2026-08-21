@@ -141,6 +141,27 @@ export const mainTranslations = {
           defaultMessage: 'Delete dataset',
         }
       ),
+      cloneAction: i18n.translate('xpack.dataFederation.setsTable.cloneAction', {
+        defaultMessage: 'Clone',
+      }),
+      cloneActionDescription: i18n.translate(
+        'xpack.dataFederation.setsTable.cloneActionDescription',
+        {
+          defaultMessage: 'Clone dataset',
+        }
+      ),
+      openInDiscoverAction: i18n.translate('xpack.dataFederation.setsTable.openInDiscoverAction', {
+        defaultMessage: 'Open in Discover',
+      }),
+      openInDiscoverActionDescription: i18n.translate(
+        'xpack.dataFederation.setsTable.openInDiscoverActionDescription',
+        {
+          defaultMessage: 'Open this dataset in Discover',
+        }
+      ),
+      moreActions: i18n.translate('xpack.dataFederation.setsTable.moreActions', {
+        defaultMessage: 'More actions',
+      }),
       caption: i18n.translate('xpack.dataFederation.setsTable.caption', {
         defaultMessage: 'Datasets',
       }),
@@ -162,11 +183,8 @@ export const mainTranslations = {
       addFlow2Label: i18n.translate('xpack.dataFederation.setsAddFlow2Label', {
         defaultMessage: 'Flow 2',
       }),
-      addFlow3aLabel: i18n.translate('xpack.dataFederation.setsAddFlow3aLabel', {
-        defaultMessage: 'Flow 3a',
-      }),
-      addFlow3bLabel: i18n.translate('xpack.dataFederation.setsAddFlow3bLabel', {
-        defaultMessage: 'Flow 3b',
+      addFlow3Label: i18n.translate('xpack.dataFederation.setsAddFlow3Label', {
+        defaultMessage: 'Flow 3',
       }),
     },
   },

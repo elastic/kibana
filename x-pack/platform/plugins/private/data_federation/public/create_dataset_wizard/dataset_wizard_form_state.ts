@@ -34,7 +34,7 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   glue_catalog_region: string;
   /** Prototype-only field; not persisted to the API yet. */
   glue_aws_account_id: string;
-  /** Flow 3b optional JSON overrides for dataset settings. */
+  /** Flow 3 optional JSON overrides for dataset settings. */
   settings_custom_json: string;
 }
 

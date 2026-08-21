@@ -13,8 +13,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3A,
-  DATASET_WIZARD_FLOW_VARIANT_3B,
+  DATASET_WIZARD_FLOW_VARIANT_3,
   type DatasetWizardFlowVariant,
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { mainTranslations } from './main_i18n';
@@ -58,14 +57,9 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
             'data-test-subj': 'dataSetsSetsCreateFlow2Button',
           },
           {
-            name: mainTranslations.columns.dataSets.addFlow3aLabel,
-            onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3A),
-            'data-test-subj': 'dataSetsSetsCreateFlow3aButton',
-          },
-          {
-            name: mainTranslations.columns.dataSets.addFlow3bLabel,
-            onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3B),
-            'data-test-subj': 'dataSetsSetsCreateFlow3bButton',
+            name: mainTranslations.columns.dataSets.addFlow3Label,
+            onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3),
+            'data-test-subj': 'dataSetsSetsCreateFlow3Button',
           },
         ],
       },

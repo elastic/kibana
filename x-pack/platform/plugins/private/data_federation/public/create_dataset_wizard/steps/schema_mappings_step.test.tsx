@@ -16,7 +16,7 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3A,
+  DATASET_WIZARD_FLOW_VARIANT_3,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { SchemaMappingsStep } from './schema_mappings_step';
@@ -257,7 +257,7 @@ describe('SchemaMappingsStep flow 3', () => {
       <TestHarness
         dataSources={[s3DataSource]}
         dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A}
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
         defaultValues={{
           ...emptyDatasetWizardFormValues(),
           settings: {

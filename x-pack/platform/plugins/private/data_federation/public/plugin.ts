@@ -86,6 +86,7 @@ export class DataFederationPlugin
             cloudInfo,
             isCloudEnabled,
             indexManagement: pluginsStart.indexManagement,
+            share: pluginsStart.share,
             featureFlags: {
               enableFederatedIdentityAuth,
               enableGoogleCloudStorageDataSourceType,

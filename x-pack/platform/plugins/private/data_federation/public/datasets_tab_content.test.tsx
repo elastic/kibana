@@ -38,10 +38,7 @@ jest.mock('./datasets_table', () => ({
         <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
         <div data-test-subj="mockFilterValue">{JSON.stringify(props.dataSourceFilter ?? [])}</div>
 
-        <button
-          data-test-subj="mockCreate"
-          onClick={() => (props.onCreate as any)('flow_1')}
-        />
+        <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)('flow_1')} />
         <button
           data-test-subj="mockSelectFirst"
           onClick={() => (props.onSelectionChange as any)([filteredItems[0]])}
@@ -53,6 +50,14 @@ jest.mock('./datasets_table', () => ({
         <button
           data-test-subj="mockChangeFilterToMissing"
           onClick={() => (props.onDataSourceFilterChange as any)(['missing'])}
+        />
+        <button
+          data-test-subj="mockCloneFirst"
+          onClick={() => (props.onClone as any)(filteredItems[0])}
+        />
+        <button
+          data-test-subj="mockOpenInDiscoverFirst"
+          onClick={() => (props.onOpenInDiscover as any)(filteredItems[0])}
         />
         <button
           data-test-subj="mockDeleteFirst"
@@ -121,13 +126,16 @@ const createDataSet = ({
 
 const createServicesMock = ({
   datasetsClient,
+  share,
 }: {
   datasetsClient: MockDatasetsClient;
+  share?: DataFederationKibanaServices['share'];
 }): DataFederationKibanaServices =>
   ({
     dataSourcesClient: { get: jest.fn() },
     datasetsClient,
     toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    share,
   } as unknown as DataFederationKibanaServices);
 
 const renderComponent = async ({
@@ -136,12 +144,14 @@ const renderComponent = async ({
   datasetsClient,
   loadDataSets,
   initialDataSourceFilter = [] as string[],
+  share,
 }: {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   datasetsClient: MockDatasetsClient;
   loadDataSets: () => Promise<void>;
   initialDataSourceFilter?: string[];
+  share?: DataFederationKibanaServices['share'];
 }) => {
   const Harness = () => {
     const [dataSourceFilter, setDataSourceFilter] = useState(initialDataSourceFilter);
@@ -159,7 +169,7 @@ const renderComponent = async ({
 
   return render(
     <EuiProvider>
-      <KibanaContextProvider services={createServicesMock({ datasetsClient })}>
+      <KibanaContextProvider services={createServicesMock({ datasetsClient, share })}>
         <Harness />
       </KibanaContextProvider>
     </EuiProvider>
@@ -195,6 +205,46 @@ describe('DatasetsTabContent', () => {
     fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
 
     expect(mockHistoryPush).toHaveBeenCalledWith('/create?flow=flow_1');
+  });
+
+  it('navigates to clone wizard when clone is clicked', async () => {
+    await renderComponent({
+      dataSources: [createDataSource('ds1')],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+      datasetsClient: { add: jest.fn(), delete: jest.fn() },
+      loadDataSets: jest.fn().mockResolvedValue(undefined),
+    });
+
+    fireEvent.click(document.querySelector('[data-test-subj="mockCloneFirst"]') as Element);
+
+    expect(mockHistoryPush).toHaveBeenCalledWith('/clone/set1?flow=flow_3');
+  });
+
+  it('navigates to Discover when open in Discover is clicked', async () => {
+    const navigate = jest.fn().mockResolvedValue(undefined);
+    const share = {
+      url: {
+        locators: {
+          get: jest.fn().mockReturnValue({ navigate }),
+        },
+      },
+    } as unknown as DataFederationKibanaServices['share'];
+
+    await renderComponent({
+      dataSources: [createDataSource('ds1')],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+      datasetsClient: { add: jest.fn(), delete: jest.fn() },
+      loadDataSets: jest.fn().mockResolvedValue(undefined),
+      share,
+    });
+
+    fireEvent.click(
+      document.querySelector('[data-test-subj="mockOpenInDiscoverFirst"]') as Element
+    );
+
+    expect(navigate).toHaveBeenCalledWith({
+      query: { esql: 'FROM set1' },
+    });
   });
 
   it('confirms single delete via client and reloads', async () => {

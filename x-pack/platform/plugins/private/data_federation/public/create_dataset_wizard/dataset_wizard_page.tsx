@@ -13,6 +13,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID, type DataSetWithName, type DataSource } from '../../common';
+import { getClonedDatasetName } from '../get_cloned_dataset_name';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { mainTranslations } from '../main_i18n';
 import type { DataFederationKibanaServices } from '../types';
@@ -37,7 +38,8 @@ export const DatasetWizardPage: FunctionComponent = () => {
   const location = useLocation();
   const { datasetName: encodedDatasetName } = useParams<{ datasetName?: string }>();
   const datasetName = encodedDatasetName ? decodeURIComponent(encodedDatasetName) : undefined;
-  const isEditMode = datasetName !== undefined;
+  const isCloneMode = location.pathname.startsWith('/clone/');
+  const isEditMode = datasetName !== undefined && !isCloneMode;
 
   const {
     services: { dataSourcesClient, datasetsClient, toasts },
@@ -59,28 +61,35 @@ export const DatasetWizardPage: FunctionComponent = () => {
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
-  const initialDataSet = useMemo(
-    () => (isEditMode ? dataSets.find((ds) => ds.name === datasetName) : undefined),
-    [dataSets, datasetName, isEditMode]
+  const sourceDataSet = useMemo(
+    () => (datasetName !== undefined ? dataSets.find((ds) => ds.name === datasetName) : undefined),
+    [dataSets, datasetName]
   );
 
   const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
 
   const defaultValues = useMemo(() => {
-    const base = initialDataSet
-      ? dataSetToWizardFormValues(initialDataSet)
-      : emptyDatasetWizardFormValues();
+    if (isCloneMode && sourceDataSet) {
+      return {
+        ...dataSetToWizardFormValues(sourceDataSet),
+        name: getClonedDatasetName(sourceDataSet.name, existingDataSetNames),
+      };
+    }
+
+    const base =
+      isEditMode && sourceDataSet
+        ? dataSetToWizardFormValues(sourceDataSet)
+        : emptyDatasetWizardFormValues();
     const draft = loadWizardFormDraft(getWizardFormDraftStorageKey(isEditMode, datasetName));
 
     return draft ? mergeWizardFormValues(base, draft) : base;
-  }, [datasetName, initialDataSet, isEditMode]);
+  }, [datasetName, existingDataSetNames, isCloneMode, isEditMode, sourceDataSet]);
 
-  const flowVariant = useMemo(
-    () => resolveWizardFlowVariant(location.search),
-    [location.search]
-  );
+  const flowVariant = useMemo(() => resolveWizardFlowVariant(location.search), [location.search]);
 
-  const pageTitle = isEditMode
+  const pageTitle = isCloneMode
+    ? datasetWizardStrings.clonePageTitle(datasetName ?? '')
+    : isEditMode
     ? datasetWizardStrings.editPageTitle(datasetName ?? '')
     : datasetWizardStrings.createPageTitle();
 
@@ -123,9 +132,7 @@ export const DatasetWizardPage: FunctionComponent = () => {
       } catch (e) {
         const message = getFlyoutSaveErrorMessage(e);
         toasts.addDanger({
-          title: isEditMode
-            ? datasetWizardStrings.saveButton()
-            : datasetWizardStrings.addButton(),
+          title: isEditMode ? datasetWizardStrings.saveButton() : datasetWizardStrings.addButton(),
           text: message,
         });
         return message;
@@ -134,17 +141,19 @@ export const DatasetWizardPage: FunctionComponent = () => {
     [datasetsClient, history, isEditMode, reloadDataSets, toasts]
   );
 
+  const requiresSourceDataSet = isEditMode || isCloneMode;
+
   useEffect(() => {
-    if (isEditMode && hasLoadedDataSets && !initialDataSet) {
+    if (requiresSourceDataSet && hasLoadedDataSets && !sourceDataSet) {
       history.replace('/');
     }
-  }, [hasLoadedDataSets, history, initialDataSet, isEditMode]);
+  }, [hasLoadedDataSets, history, requiresSourceDataSet, sourceDataSet]);
 
   if (!hasLoadedDataSources || !hasLoadedDataSets) {
     return null;
   }
 
-  if (isEditMode && !initialDataSet) {
+  if (requiresSourceDataSet && !sourceDataSet) {
     return null;
   }
 
@@ -153,9 +162,15 @@ export const DatasetWizardPage: FunctionComponent = () => {
       <AppHeader title={pageTitle} back={back} spacing="bleed" />
       <EuiSpacer size="l" />
       <DatasetWizard
-        key={isEditMode ? initialDataSet?.name : `create-${flowVariant}`}
+        key={
+          isCloneMode
+            ? `clone-${sourceDataSet?.name}`
+            : isEditMode
+            ? sourceDataSet?.name
+            : `create-${flowVariant}`
+        }
         isEditMode={isEditMode}
-        initialDataSet={initialDataSet}
+        initialDataSet={isEditMode ? sourceDataSet : undefined}
         existingDataSetNames={existingDataSetNames}
         dataSources={dataSources}
         defaultValues={defaultValues}

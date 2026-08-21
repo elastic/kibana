@@ -22,7 +22,8 @@
     "@kbn/index-management-plugin",
     "@kbn/index-management-shared-types",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/react-field"
+    "@kbn/react-field",
+    "@kbn/share-plugin"
   ],
   "exclude": [
     "target/**/*",

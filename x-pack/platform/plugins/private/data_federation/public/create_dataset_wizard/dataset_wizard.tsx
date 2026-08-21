@@ -32,7 +32,9 @@ import type { DataFederationKibanaServices } from '../types';
 import {
   ADDITIONAL_SETTINGS_STEP,
   DATASET_WIZARD_FORM_MAX_WIDTH,
+  FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
+  PREVIEW_RESULTS_STEP,
   REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
@@ -40,6 +42,7 @@ import { datasetWizardStrings } from './dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildWizardStepSearch,
+  getReviewStep,
   parseWizardStepFromSearch,
   type DatasetWizardStep,
 } from './dataset_wizard_step_url';
@@ -54,10 +57,10 @@ import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { SchemaMappingsStep } from './steps/schema_mappings_step';
 import { ReviewStep } from './steps/review_step';
+import { PreviewResultsStep } from './steps/preview_results_step';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
-  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { TestConfigurationPreview } from './test_configuration_preview';
@@ -111,6 +114,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const testConfigLoadingTimeoutRef = useRef<number | undefined>();
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
+  const reviewStep = getReviewStep(flowVariant);
 
   const { control, getValues, setValue, trigger, watch } = useForm<DatasetWizardFormValues>({
     defaultValues,
@@ -267,8 +271,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   useEffect(() => {
     const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
+    const normalizedStepFromUrl =
+      !isFlow3 && stepFromUrl === FLOW_3_REVIEW_STEP ? REVIEW_STEP : stepFromUrl;
 
-    if (stepFromUrl === LOGISTICS_STEP) {
+    if (normalizedStepFromUrl === LOGISTICS_STEP) {
       setCurrentStep(LOGISTICS_STEP);
       return;
     }
@@ -278,7 +284,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     const syncStepFromUrl = async () => {
       const values = getValues();
       const firstInvalidStep = await findFirstInvalidWizardStep({
-        targetStep: stepFromUrl,
+        targetStep: normalizedStepFromUrl,
         values,
         trigger,
         flowVariant,
@@ -288,7 +294,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         return;
       }
 
-      const nextStep = firstInvalidStep ?? stepFromUrl;
+      const nextStep = firstInvalidStep ?? normalizedStepFromUrl;
       setCurrentStep(nextStep);
 
       if (nextStep !== stepFromUrl) {
@@ -304,7 +310,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     return () => {
       isCancelled = true;
     };
-  }, [flowVariant, getValues, history, location.pathname, location.search, trigger]);
+  }, [flowVariant, getValues, history, isFlow3, location.pathname, location.search, trigger]);
 
   const isStepDisabled = useCallback(
     (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
@@ -323,7 +329,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   );
 
   const persistCustomJsonToForm = useCallback(() => {
-    if (!isDatasetWizardFlow3B(flowVariant)) {
+    if (!isDatasetWizardFlow3(flowVariant)) {
       return;
     }
 
@@ -407,15 +413,30 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(SCHEMA_MAPPINGS_STEP),
       },
+      ...(isFlow3
+        ? [
+            {
+              step: PREVIEW_RESULTS_STEP,
+              title: datasetWizardStrings.stepPreviewResults(),
+              disabled: isStepDisabled(PREVIEW_RESULTS_STEP),
+              status: (currentStep === PREVIEW_RESULTS_STEP
+                ? 'current'
+                : currentStep > PREVIEW_RESULTS_STEP
+                ? 'complete'
+                : 'incomplete') as EuiStepStatus,
+              onClick: () => void attemptGoToStep(PREVIEW_RESULTS_STEP),
+            },
+          ]
+        : []),
       {
-        step: REVIEW_STEP,
+        step: reviewStep,
         title: datasetWizardStrings.stepReview(),
-        disabled: isStepDisabled(REVIEW_STEP),
-        status: (currentStep === REVIEW_STEP ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => void attemptGoToStep(REVIEW_STEP),
+        disabled: isStepDisabled(reviewStep),
+        status: (currentStep === reviewStep ? 'current' : 'incomplete') as EuiStepStatus,
+        onClick: () => void attemptGoToStep(reviewStep),
       },
     ],
-    [attemptGoToStep, currentStep, isStepDisabled, logisticsStepComplete]
+    [attemptGoToStep, currentStep, isFlow3, isStepDisabled, logisticsStepComplete, reviewStep]
   );
 
   const handleNext = async () => {
@@ -444,12 +465,21 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }
 
     if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      goToStep(REVIEW_STEP);
+      goToStep(isFlow3 ? PREVIEW_RESULTS_STEP : reviewStep);
+      return;
+    }
+
+    if (currentStep === PREVIEW_RESULTS_STEP) {
+      goToStep(FLOW_3_REVIEW_STEP);
     }
   };
 
   const handleBack = () => {
-    if (currentStep === REVIEW_STEP) {
+    if (currentStep === reviewStep) {
+      goToStep(isFlow3 ? PREVIEW_RESULTS_STEP : SCHEMA_MAPPINGS_STEP);
+      return;
+    }
+    if (currentStep === PREVIEW_RESULTS_STEP) {
       goToStep(SCHEMA_MAPPINGS_STEP);
       return;
     }
@@ -468,7 +498,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
     const values = getValues();
     const firstInvalidStep = await findFirstInvalidWizardStep({
-      targetStep: REVIEW_STEP,
+      targetStep: reviewStep,
       values,
       trigger,
       flowVariant,
@@ -494,7 +524,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   };
 
   const showBackButton = currentStep > LOGISTICS_STEP;
-  const isLastStep = currentStep === REVIEW_STEP;
+  const isLastStep = currentStep === reviewStep;
   const showTestConfiguration = isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (
@@ -529,7 +559,12 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           flowVariant={flowVariant}
         />
       </div>
-      <div hidden={currentStep !== REVIEW_STEP}>
+      {isFlow3 ? (
+        <div hidden={currentStep !== PREVIEW_RESULTS_STEP}>
+          <PreviewResultsStep values={wizardFormValues} />
+        </div>
+      ) : null}
+      <div hidden={currentStep !== reviewStep}>
         <ReviewStep values={wizardFormValues} dataSources={dataSources} flowVariant={flowVariant} />
       </div>
     </>

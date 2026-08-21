@@ -6,14 +6,19 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiPopover,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { DataSetWithName, DataSource } from '../common';
@@ -35,9 +40,111 @@ export interface DatasetsTableProps {
   onDataSourceFilterChange: (next: string[]) => void;
   onCreate: (flowVariant: DatasetWizardFlowVariant) => void;
   onEdit: (item: DataSetListRow) => void;
+  onClone: (item: DataSetListRow) => void;
+  onOpenInDiscover: (item: DataSetListRow) => void;
+  isOpenInDiscoverEnabled?: boolean;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
 }
+
+interface DatasetsTableActionsCellProps {
+  item: DataSetListRow;
+  isOpenInDiscoverEnabled: boolean;
+  onOpenInDiscover: (item: DataSetListRow) => void;
+  onClone: (item: DataSetListRow) => void;
+  onEdit: (item: DataSetListRow) => void;
+  onDelete: (item: DataSetListRow) => void;
+}
+
+const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps> = ({
+  item,
+  isOpenInDiscoverEnabled,
+  onOpenInDiscover,
+  onClone,
+  onEdit,
+  onDelete,
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={mainTranslations.columns.dataSets.openInDiscoverActionDescription}>
+          <EuiButtonIcon
+            iconType="discoverApp"
+            color="text"
+            aria-label={mainTranslations.columns.dataSets.openInDiscoverAction}
+            disabled={!isOpenInDiscoverEnabled}
+            onClick={() => onOpenInDiscover(item)}
+            data-test-subj="dataSetsSetsOpenInDiscoverButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiToolTip
+              content={mainTranslations.columns.dataSets.moreActions}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="boxesHorizontal"
+                color="text"
+                aria-label={mainTranslations.columns.dataSets.moreActions}
+                onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+                data-test-subj="euiCollapsedItemActionsButton"
+              />
+            </EuiToolTip>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftCenter"
+        >
+          <EuiContextMenuPanel
+            size="s"
+            items={[
+              <EuiContextMenuItem
+                key="clone"
+                icon="copy"
+                data-test-subj="dataSetsSetsCloneButton"
+                onClick={() => {
+                  closePopover();
+                  onClone(item);
+                }}
+              >
+                {mainTranslations.columns.dataSets.cloneAction}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="edit"
+                icon="pencil"
+                data-test-subj="dataSetsSetsEditButton"
+                onClick={() => {
+                  closePopover();
+                  onEdit(item);
+                }}
+              >
+                {mainTranslations.columns.dataSets.editAction}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="delete"
+                icon="trash"
+                data-test-subj="dataSetsSetsDeleteIconButton"
+                onClick={() => {
+                  closePopover();
+                  onDelete(item);
+                }}
+              >
+                {mainTranslations.columns.dataSets.deleteAction}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   filteredItems,
@@ -48,6 +155,9 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   onDataSourceFilterChange,
   onCreate,
   onEdit,
+  onClone,
+  onOpenInDiscover,
+  isOpenInDiscoverEnabled = false,
   onDelete,
   onDeleteSelected,
 }) => {
@@ -94,33 +204,21 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
       },
       {
         name: mainTranslations.columns.dataSets.actions,
-        width: '8%',
-        actions: [
-          {
-            name: mainTranslations.columns.dataSets.editAction,
-            description: mainTranslations.columns.dataSets.editActionDescription,
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (item) => {
-              onEdit(item);
-            },
-            'data-test-subj': 'dataSetsSetsEditButton',
-          },
-          {
-            name: mainTranslations.columns.dataSets.deleteAction,
-            description: mainTranslations.columns.dataSets.deleteActionDescription,
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            onClick: (item) => {
-              onDelete(item);
-            },
-            'data-test-subj': 'dataSetsSetsDeleteIconButton',
-          },
-        ],
+        width: '12%',
+        align: 'right',
+        render: (item: DataSetListRow) => (
+          <DatasetsTableActionsCell
+            item={item}
+            isOpenInDiscoverEnabled={isOpenInDiscoverEnabled}
+            onOpenInDiscover={onOpenInDiscover}
+            onClone={onClone}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ),
       },
     ],
-    [onDelete, onEdit]
+    [isOpenInDiscoverEnabled, onClone, onDelete, onEdit, onOpenInDiscover]
   );
 
   return (

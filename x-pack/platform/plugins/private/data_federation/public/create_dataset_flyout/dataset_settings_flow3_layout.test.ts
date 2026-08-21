@@ -6,11 +6,11 @@
  */
 
 import {
-  buildFlow3bSettingsCustomJsonExample,
+  buildFlow3SettingsCustomJsonExample,
   getFlow3AdvancedFields,
   getFlow3CommonFields,
-  getFlow3bAdvancedFields,
-  getFlow3bJsonExampleFieldIds,
+  getFlow3JsonExampleFieldIds,
+  getFlow3ListAdvancedFields,
 } from './dataset_settings_flow3_layout';
 
 describe('dataset_settings_flow3_layout', () => {
@@ -93,9 +93,9 @@ describe('dataset_settings_flow3_layout', () => {
     });
   });
 
-  describe('flow 3b layout', () => {
+  describe('flow 3 list and json example layout', () => {
     it('returns trimmed advanced fields for csv', () => {
-      expect(getFlow3bAdvancedFields('csv', 'fail_fast')).toEqual([
+      expect(getFlow3ListAdvancedFields('csv', 'fail_fast')).toEqual([
         'partition_path',
         'error_mode',
         'null_value',
@@ -103,18 +103,18 @@ describe('dataset_settings_flow3_layout', () => {
     });
 
     it('returns trimmed advanced fields for ndjson', () => {
-      expect(getFlow3bAdvancedFields('ndjson', 'fail_fast')).toEqual([
+      expect(getFlow3ListAdvancedFields('ndjson', 'fail_fast')).toEqual([
         'partition_path',
         'segment_size',
       ]);
     });
 
     it('builds commented json examples for removed csv fields', () => {
-      expect(buildFlow3bSettingsCustomJsonExample('csv', 'fail_fast')).toContain(
+      expect(buildFlow3SettingsCustomJsonExample('csv', 'fail_fast')).toContain(
         '// "quote": "\\""'
       );
-      expect(getFlow3bJsonExampleFieldIds('csv', 'fail_fast')).toContain('quote');
-      expect(getFlow3bJsonExampleFieldIds('csv', 'fail_fast')).not.toContain('null_value');
+      expect(getFlow3JsonExampleFieldIds('csv', 'fail_fast')).toContain('quote');
+      expect(getFlow3JsonExampleFieldIds('csv', 'fail_fast')).not.toContain('null_value');
     });
   });
 });

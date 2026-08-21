@@ -7,13 +7,11 @@
 
 import {
   ADDITIONAL_SETTINGS_STEP,
+  FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
   REVIEW_STEP,
 } from './dataset_wizard_constants';
-import {
-  buildWizardStepSearch,
-  parseWizardStepFromSearch,
-} from './dataset_wizard_step_url';
+import { buildWizardStepSearch, parseWizardStepFromSearch } from './dataset_wizard_step_url';
 
 describe('dataset_wizard_step_url', () => {
   describe('parseWizardStepFromSearch', () => {
@@ -29,6 +27,10 @@ describe('dataset_wizard_step_url', () => {
       expect(parseWizardStepFromSearch('?step=9')).toBeUndefined();
       expect(parseWizardStepFromSearch('?step=abc')).toBeUndefined();
     });
+
+    it('parses the flow 3 review step', () => {
+      expect(parseWizardStepFromSearch('?step=5')).toBe(FLOW_3_REVIEW_STEP);
+    });
   });
 
   describe('buildWizardStepSearch', () => {
@@ -42,6 +44,7 @@ describe('dataset_wizard_step_url', () => {
 
     it('updates an existing step while preserving other params', () => {
       expect(buildWizardStepSearch('?step=2&foo=bar', REVIEW_STEP)).toBe('?step=4&foo=bar');
+      expect(buildWizardStepSearch('?step=2&foo=bar', FLOW_3_REVIEW_STEP)).toBe('?step=5&foo=bar');
     });
   });
 });

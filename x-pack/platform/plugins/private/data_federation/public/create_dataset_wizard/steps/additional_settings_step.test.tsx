@@ -7,7 +7,7 @@
 
 import React, { useRef } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -15,8 +15,7 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3A,
-  DATASET_WIZARD_FLOW_VARIANT_3B,
+  DATASET_WIZARD_FLOW_VARIANT_3,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
@@ -80,7 +79,7 @@ describe('AdditionalSettingsStep', () => {
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
 
     rerender(
-      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
+      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
     );
 
     const region = getByTestId('datasetWizardRegion');
@@ -95,9 +94,7 @@ describe('AdditionalSettingsStep', () => {
   });
 
   it('renders format field and accordions when format is auto-detected', async () => {
-    const { getByTestId, getByText } = render(
-      <TestHarness resource="s3://bucket/data.csv" />
-    );
+    const { getByTestId, getByText } = render(<TestHarness resource="s3://bucket/data.csv" />);
 
     expect(getByText('Additional settings (optional)')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
@@ -111,9 +108,7 @@ describe('AdditionalSettingsStep', () => {
   });
 
   it('leaves format empty and hides accordions when extension is not recognized', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestHarness resource="s3://bucket/data.json" />
-    );
+    const { getByTestId, queryByTestId } = render(<TestHarness resource="s3://bucket/data.json" />);
 
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
     expect(queryByTestId('datasetWizardAccordionStructureAndSchema')).toBeNull();
@@ -392,7 +387,7 @@ describe('AdditionalSettingsStep', () => {
   describe('flow 3 settings layout', () => {
     it('uses common panel and single advanced accordion instead of grouped accordions', async () => {
       const { getByTestId, queryByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
       );
 
       await waitFor(() => {
@@ -407,7 +402,7 @@ describe('AdditionalSettingsStep', () => {
 
     it('shows expanded csv common fields in flow 3', async () => {
       const { getByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
       );
 
       await waitFor(() => {
@@ -417,7 +412,7 @@ describe('AdditionalSettingsStep', () => {
         expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsHeaderRow'));
         expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsDatetimeFormat'));
         expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsEncoding'));
-        expect(commonPanel).not.toContainElement(getByTestId('datasetWizardSettingsQuote'));
+        expect(within(commonPanel).queryByTestId('datasetWizardSettingsQuote')).toBeNull();
       });
     });
 
@@ -444,7 +439,7 @@ describe('AdditionalSettingsStep', () => {
               resource="s3://bucket/data.ndjson"
               syncedResourceRef={syncedResourceRef}
               isEditMode={true}
-              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
             />
           </EuiProvider>
         );
@@ -457,14 +452,14 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardSettingsMaxErrorRatio')).toBeInTheDocument();
       });
     });
-    it('uses flow 3b layout with view toggle defaulting to JSON', async () => {
+    it('uses the JSON/list view toggle in advanced settings', async () => {
       const { getByTestId, queryByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
       );
 
       await waitFor(() => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsPanel')).toBeInTheDocument();
-        expect(getByTestId('datasetWizardFlow3bAdvancedSettingsAccordion')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
         expect(getByTestId('datasetWizardAdvancedSettingsViewToggle')).toBeInTheDocument();
         expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
         expect(getByTestId('datasetWizardSettingsCustomJsonDocsLink')).toBeInTheDocument();
@@ -478,7 +473,7 @@ describe('AdditionalSettingsStep', () => {
 
     it('switches to list view showing advanced fields in a single column', async () => {
       const { getByTestId, queryByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
       );
 
       await waitFor(() => {
@@ -513,7 +508,7 @@ describe('AdditionalSettingsStep', () => {
               resource="s3://bucket/data.csv"
               syncedResourceRef={syncedResourceRef}
               isEditMode={false}
-              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
             />
             <div data-test-subj="customJsonSnapshot">{customJson}</div>
           </EuiProvider>
@@ -562,7 +557,7 @@ describe('AdditionalSettingsStep', () => {
               resource="s3://bucket/data.csv"
               syncedResourceRef={syncedResourceRef}
               isEditMode={false}
-              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
             />
             <span data-test-subj="hivePartitioningValue">{hivePartitioning}</span>
           </EuiProvider>

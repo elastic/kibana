@@ -53,7 +53,7 @@ describe('review_step_utils', () => {
     });
   });
 
-  it('merges flow 3b custom json overrides into the dataset payload', () => {
+  it('merges flow 3 custom json overrides into the dataset payload', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       name: 'dataset-obs-prod-s3',

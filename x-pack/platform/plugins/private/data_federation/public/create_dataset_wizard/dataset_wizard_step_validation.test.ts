@@ -10,8 +10,7 @@ import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/c
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
-  DATASET_WIZARD_FLOW_VARIANT_3A,
-  DATASET_WIZARD_FLOW_VARIANT_3B,
+  DATASET_WIZARD_FLOW_VARIANT_3,
 } from './dataset_wizard_flow_variant';
 import {
   findFirstInvalidWizardStep,
@@ -21,7 +20,9 @@ import {
 } from './dataset_wizard_step_validation';
 import {
   ADDITIONAL_SETTINGS_STEP,
+  FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
+  PREVIEW_RESULTS_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
 
@@ -35,20 +36,19 @@ describe('dataset_wizard_step_validation', () => {
     ]);
   });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
-    'moves region to additional settings fields in %s',
-    (flowVariant) => {
+  it('moves region to additional settings fields in flow 3', () => {
     const values = emptyDatasetWizardFormValues();
 
-    expect(getWizardStepFields(LOGISTICS_STEP, values, flowVariant)).toEqual([
+    expect(getWizardStepFields(LOGISTICS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)).toEqual([
       'data_source',
       'name',
       'resource',
     ]);
-    expect(getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, flowVariant)).toEqual(['region']);
+    expect(
+      getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)
+    ).toEqual(['region']);
     expect(getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_1)).toEqual([]);
-    }
-  );
+  });
 
   it('returns visible settings fields for step 2', () => {
     const values = {
@@ -85,9 +85,7 @@ describe('dataset_wizard_step_validation', () => {
     );
   });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
-    'does not validate region when landing on additional settings in %s',
-    async (flowVariant) => {
+  it('does not validate region when landing on additional settings in flow 3', async () => {
     const trigger = jest.fn(async (fields: string[]) => !fields.includes('region'));
     const values = {
       ...emptyDatasetWizardFormValues(),
@@ -101,17 +99,14 @@ describe('dataset_wizard_step_validation', () => {
         targetStep: ADDITIONAL_SETTINGS_STEP,
         values,
         trigger,
-        flowVariant,
+        flowVariant: DATASET_WIZARD_FLOW_VARIANT_3,
       })
     ).resolves.toBeUndefined();
 
     expect(trigger).not.toHaveBeenCalledWith(expect.arrayContaining(['region']));
-    }
-  );
+  });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
-    'validates region when leaving additional settings in %s',
-    async (flowVariant) => {
+  it('validates region when leaving additional settings in flow 3', async () => {
     const trigger = jest.fn(async (fields: string[]) => !fields.includes('region'));
     const values = {
       ...emptyDatasetWizardFormValues(),
@@ -125,11 +120,21 @@ describe('dataset_wizard_step_validation', () => {
         targetStep: SCHEMA_MAPPINGS_STEP,
         values,
         trigger,
-        flowVariant,
+        flowVariant: DATASET_WIZARD_FLOW_VARIANT_3,
       })
     ).resolves.toBe(ADDITIONAL_SETTINGS_STEP);
 
     expect(trigger).toHaveBeenCalledWith(expect.arrayContaining(['region']));
-    }
-  );
+  });
+
+  it('does not require fields on the flow 3 preview results step', () => {
+    const values = emptyDatasetWizardFormValues();
+
+    expect(
+      getWizardStepFields(PREVIEW_RESULTS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)
+    ).toEqual([]);
+    expect(getWizardStepFields(FLOW_3_REVIEW_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)).toEqual(
+      expect.arrayContaining(['data_source', 'name', 'resource', 'region'])
+    );
+  });
 });

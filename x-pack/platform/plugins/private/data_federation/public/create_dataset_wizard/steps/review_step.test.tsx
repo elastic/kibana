@@ -16,7 +16,7 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3B,
+  DATASET_WIZARD_FLOW_VARIANT_3,
 } from '../dataset_wizard_flow_variant';
 import { getReviewSettingsRows } from '../review_step_utils';
 import { ReviewStep } from './review_step';
@@ -204,7 +204,7 @@ describe('ReviewStep flow 2', () => {
   });
 });
 
-describe('ReviewStep flow 3b', () => {
+describe('ReviewStep flow 3', () => {
   it('does not show a custom settings JSON block on the summary tab', () => {
     render(
       <EuiProvider>
@@ -218,7 +218,7 @@ describe('ReviewStep flow 3b', () => {
             settings_custom_json: '{ "hive_partitioning": true }',
           }}
           dataSources={[s3DataSource]}
-          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
         />
       </EuiProvider>
     );
@@ -240,12 +240,28 @@ describe('ReviewStep flow 3b', () => {
             settings_custom_json: '{ "partition_detection": "hive" }',
           }}
           dataSources={[s3DataSource]}
-          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
         />
       </EuiProvider>
     );
 
     expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Hive');
     expect(screen.getByTestId('datasetWizardReviewSettings')).not.toHaveTextContent('Auto');
+  });
+
+  it('does not show the Preview results tab', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.queryByText('Preview results')).not.toBeInTheDocument();
+    expect(screen.getByText('Preview configuration')).toBeInTheDocument();
+    expect(screen.getByText('Request')).toBeInTheDocument();
   });
 });

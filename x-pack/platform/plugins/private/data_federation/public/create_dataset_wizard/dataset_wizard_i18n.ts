@@ -19,6 +19,12 @@ export const datasetWizardStrings = {
       values: { datasetName },
     }),
 
+  clonePageTitle: (datasetName: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.clonePageTitle', {
+      defaultMessage: 'Clone dataset: {datasetName}',
+      values: { datasetName },
+    }),
+
   backAriaLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.backAriaLabel', {
       defaultMessage: 'Back to datasets',
@@ -37,6 +43,11 @@ export const datasetWizardStrings = {
   stepSchemaMappings: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.stepSchemaMappings', {
       defaultMessage: 'Schema mappings',
+    }),
+
+  stepPreviewResults: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.stepPreviewResults', {
+      defaultMessage: 'Preview results',
     }),
 
   stepReview: () =>
@@ -689,6 +700,11 @@ export const datasetWizardStrings = {
     i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationPreviewDescription', {
       defaultMessage:
         'Shows the first 10 rows read from your dataset using the current configuration.',
+    }),
+
+  previewResultsButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsButton', {
+      defaultMessage: 'Preview results',
     }),
 
   testConfigurationPreviewTableCaption: (rowCount: number) =>

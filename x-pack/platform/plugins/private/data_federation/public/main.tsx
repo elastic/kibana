@@ -16,6 +16,7 @@ export const Main: FunctionComponent = () => (
   <Routes>
     <Route path="/create" component={DatasetWizardPage} />
     <Route path="/edit/:datasetName" component={DatasetWizardPage} />
+    <Route path="/clone/:datasetName" component={DatasetWizardPage} />
     <Route path="/" component={DataFederationHome} />
   </Routes>
 );

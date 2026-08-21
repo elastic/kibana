@@ -7,10 +7,13 @@
 
 import {
   ADDITIONAL_SETTINGS_STEP,
+  FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
+  PREVIEW_RESULTS_STEP,
   REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
+import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from './dataset_wizard_flow_variant';
 
 export const WIZARD_STEP_SEARCH_PARAM = 'step';
 
@@ -18,17 +21,34 @@ export type DatasetWizardStep =
   | typeof LOGISTICS_STEP
   | typeof ADDITIONAL_SETTINGS_STEP
   | typeof SCHEMA_MAPPINGS_STEP
-  | typeof REVIEW_STEP;
+  | typeof PREVIEW_RESULTS_STEP
+  | typeof REVIEW_STEP
+  | typeof FLOW_3_REVIEW_STEP;
 
 const WIZARD_STEPS: DatasetWizardStep[] = [
   LOGISTICS_STEP,
   ADDITIONAL_SETTINGS_STEP,
   SCHEMA_MAPPINGS_STEP,
-  REVIEW_STEP,
+  PREVIEW_RESULTS_STEP,
+  FLOW_3_REVIEW_STEP,
 ];
 
 export const isDatasetWizardStep = (value: number): value is DatasetWizardStep =>
   WIZARD_STEPS.includes(value as DatasetWizardStep);
+
+export const getReviewStep = (flowVariant: DatasetWizardFlowVariant): DatasetWizardStep =>
+  isDatasetWizardFlow3(flowVariant) ? FLOW_3_REVIEW_STEP : REVIEW_STEP;
+
+export const getWizardSteps = (flowVariant: DatasetWizardFlowVariant): DatasetWizardStep[] =>
+  isDatasetWizardFlow3(flowVariant)
+    ? [
+        LOGISTICS_STEP,
+        ADDITIONAL_SETTINGS_STEP,
+        SCHEMA_MAPPINGS_STEP,
+        PREVIEW_RESULTS_STEP,
+        FLOW_3_REVIEW_STEP,
+      ]
+    : [LOGISTICS_STEP, ADDITIONAL_SETTINGS_STEP, SCHEMA_MAPPINGS_STEP, REVIEW_STEP];
 
 export const parseWizardStepFromSearch = (search: string): DatasetWizardStep | undefined => {
   const params = new URLSearchParams(search);
