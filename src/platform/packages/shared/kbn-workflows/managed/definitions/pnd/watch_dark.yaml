@@ -28,17 +28,14 @@ triggers:
         byminute: [0]
   - type: manual
 consts:
-  # managedTemplateValues surface (RFC): CommonWatchSettings + Dark extension.
-  # Tokens substituted by yamlTemplate / install({ values }).
+  # managedTemplateValues surface: CommonWatchSettings (autonomy, triggers,
+  # scopes) plus the Dark-owned dials. Tokens are substituted on install.
   watch_settings:
-    # --- CommonWatchSettings (CWL) ---
     autonomy: "__WATCH_AUTONOMY_LEVEL__"
     triggers:
       scheduleId: "__WATCH_SCHEDULE_ID__"
       allowManualRun: __WATCH_ALLOW_MANUAL_RUN__
     scopes: __WATCH_SCOPES_JSON__
-    # --- DarkWatchSettings ---
-    settingsVersion: __WATCH_SETTINGS_VERSION__
     connectorId: "__WATCH_CONNECTOR_ID__"
     tier2When: __WATCH_TIER2_WHEN__
     candidateLimit: __WATCH_CANDIDATE_LIMIT__
@@ -48,10 +45,11 @@ consts:
     leadPollIntervalMinutes: __WATCH_LEAD_POLL_INTERVAL_MINUTES__
     leadMinPriority: __WATCH_LEAD_MIN_PRIORITY__
     intelEventTriggerEnabled: __WATCH_INTEL_EVENT_TRIGGER_ENABLED__
-  # Catalog / mandate / handoff / UI — not yet in CommonWatchSettings.
   watch_policy:
-    mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
     autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
     handoff: brief
     onDemand: true
     draft: false
@@ -82,7 +80,9 @@ steps:
     if: "${{ steps.check_ti_readiness.output.ready == true }}"
     with:
       index: ".kibana-threat-reports"
-      size: "{{ consts.watch_settings.candidateLimit }}"
+      # Rendered as a literal: `size` and `concurrency.max` are numbers in the
+      # workflow schema, so they can't be Liquid references to consts.
+      size: __WATCH_CANDIDATE_LIMIT__
       query:
         bool:
           filter:
@@ -90,7 +90,7 @@ steps:
                 reportable: true
             - range:
                 last_hunted_at:
-                  lte: "now-{{ consts.watch_settings.scheduleEveryMinutes }}m"
+                  lte: "now-__WATCH_SCHEDULE_EVERY_MINUTES__m"
 
   # --- Stage 1-5: one straight-line branch per selected report --------
   # Branch body must be straight-line, atomic steps only (no nested
@@ -100,7 +100,7 @@ steps:
     type: parallel
     foreach: "{{ steps.select_candidate_reports.output.hits.hits | json }}"
     concurrency:
-      max: "{{ consts.watch_settings.fanOutMax }}"
+      max: __WATCH_FAN_OUT_MAX__
     steps:
       - name: find_or_create_investigation
         type: kibana.request

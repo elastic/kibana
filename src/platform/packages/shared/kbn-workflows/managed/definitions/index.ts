@@ -120,8 +120,7 @@ export {
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
 export type {
-  CommonWatchSettings,
-  DarkWatchSettings,
+  CommonWatchTemplateValues,
   DarkWatchTemplateValues,
   PndWatchTemplateValues,
 } from './pnd';

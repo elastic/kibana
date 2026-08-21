@@ -19,10 +19,10 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   WatchAutonomyLevel,
   ApprovalRequirement,
-  WatchSettings,
   DarkWatchTier2When,
   DarkWatchTargetTechnology,
   DarkWatchScope,
+  WatchSettings,
 } from '../components/watch_settings.gen';
 import { Watch } from '../components/watch.gen';
 
@@ -97,7 +97,7 @@ export const UpdateWatchRequestBody = lazySchema(() =>
         connectorId: z.string().max(256).optional(),
         tier2When: DarkWatchTier2When.optional(),
         candidateLimit: z.number().int().min(1).max(100).optional(),
-        fanOutMax: z.number().int().min(1).max(100).optional(),
+        fanOutMax: z.number().int().min(1).max(20).optional(),
         scheduleEveryMinutes: z.number().int().min(1).max(10080).optional(),
         targetTechnology: DarkWatchTargetTechnology.optional(),
         leadPollIntervalMinutes: z.number().int().min(1).max(10080).optional(),

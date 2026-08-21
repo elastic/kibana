@@ -226,48 +226,6 @@ components:
         outcome:
           $ref: '#/components/schemas/WatchRunOutcome'
 
-    WatchSettings:
-      type: object
-      description: >-
-        Per-watch settings. Optional sections are absent when a watch does not offer them, which is
-        what lets each watch legitimately render a different set of sections.
-      required:
-        - watchId
-        - autonomy
-      properties:
-        watchId:
-          type: string
-        autonomy:
-          $ref: '#/components/schemas/WatchAutonomyLevel'
-          description: >-
-            The selected level. The scale itself is shared across every watch, so it is not repeated
-            per watch — see WATCH_AUTONOMY_LEVELS.
-        triggers:
-          $ref: '#/components/schemas/WatchTriggersSettings'
-        scopeRouting:
-          $ref: '#/components/schemas/WatchScopeRoutingSettings'
-        workers:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchWorkerAttachment'
-        skills:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchSkillAttachment'
-        approvalGates:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchApprovalGate'
-        runsLedger:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchLedgerEntry'
-        dark:
-          $ref: '#/components/schemas/DarkWatchSettings'
-          description: >-
-            Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy).
-            Present only for system-security-watch-dark.
-
     DarkWatchTier2When:
       type: string
       enum: [on_hits, always]
@@ -324,10 +282,12 @@ components:
           type: integer
           minimum: 1
           maximum: 100
+          description: Reports selected per sweep. Bounded by the parallel fan-out ceiling.
         fanOutMax:
           type: integer
           minimum: 1
-          maximum: 100
+          maximum: 20
+          description: Concurrent report branches. Bounded by the parallel concurrency ceiling.
         scheduleEveryMinutes:
           type: integer
           minimum: 1
@@ -356,3 +316,45 @@ components:
           maxItems: 32
           items:
             $ref: '#/components/schemas/DarkWatchScope'
+
+    WatchSettings:
+      type: object
+      description: >-
+        Per-watch settings. Optional sections are absent when a watch does not offer them, which is
+        what lets each watch legitimately render a different set of sections.
+      required:
+        - watchId
+        - autonomy
+      properties:
+        watchId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+          description: >-
+            The selected level. The scale itself is shared across every watch, so it is not repeated
+            per watch — see WATCH_AUTONOMY_LEVELS.
+        triggers:
+          $ref: '#/components/schemas/WatchTriggersSettings'
+        scopeRouting:
+          $ref: '#/components/schemas/WatchScopeRoutingSettings'
+        workers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchWorkerAttachment'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchSkillAttachment'
+        approvalGates:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchApprovalGate'
+        runsLedger:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchLedgerEntry'
+        dark:
+          $ref: '#/components/schemas/DarkWatchSettings'
+          description: >-
+            Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy).
+            Present only for system-security-watch-dark.

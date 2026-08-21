@@ -20,3 +20,10 @@ export const PND_RULE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
 } as const;
+
+/** Workers are installed once globally, not per space like the watches that call them. */
+export const PND_WATCH_WORKER_MANAGEMENT = {
+  enablement: 'restorable',
+  lifecycle: 'static',
+  versionStrategy: 'auto',
+} as const;

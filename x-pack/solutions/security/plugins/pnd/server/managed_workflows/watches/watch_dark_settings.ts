@@ -17,8 +17,18 @@ const DEFAULT_SCOPES: DarkWatchTemplateValues['scopes'] = [
   { name: 'Customer data', access: 'denied', label: 'No access' },
 ];
 
-const TIER2_WHEN = new Set(['on_hits', 'always']);
-const TARGET_TECHNOLOGY = new Set(['aws_iam', 'fortigate']);
+const TIER2_WHEN: ReadonlyArray<DarkWatchTemplateValues['tier2When']> = ['on_hits', 'always'];
+const TARGET_TECHNOLOGY: ReadonlyArray<DarkWatchTemplateValues['targetTechnology']> = [
+  'aws_iam',
+  'fortigate',
+];
+
+// Concurrent report branches cannot exceed the workflow engine's parallel
+// concurrency ceiling, and one sweep cannot select more reports than the
+// parallel fan-out cap.
+const MAX_FAN_OUT_MAX = 20;
+const MAX_CANDIDATE_LIMIT = 100;
+const MAX_INTERVAL_MINUTES = 10080;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -116,12 +126,14 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid connectorId`
     );
   }
-  if (typeof tier2When !== 'string' || !TIER2_WHEN.has(tier2When)) {
+  const parsedTier2When = TIER2_WHEN.find((value) => value === tier2When);
+  if (!parsedTier2When) {
     throw new Error(
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid tier2When`
     );
   }
-  if (typeof targetTechnology !== 'string' || !TARGET_TECHNOLOGY.has(targetTechnology)) {
+  const parsedTargetTechnology = TARGET_TECHNOLOGY.find((value) => value === targetTechnology);
+  if (!parsedTargetTechnology) {
     throw new Error(
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid targetTechnology`
     );
@@ -139,37 +151,24 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     allowManualRun,
     scopes: parseScopes(scopes),
     connectorId,
-    tier2When: tier2When as DarkWatchTemplateValues['tier2When'],
-    candidateLimit: parsePositiveInt(candidateLimit, 'candidateLimit', 100),
-    fanOutMax: parsePositiveInt(fanOutMax, 'fanOutMax', 100),
-    scheduleEveryMinutes: parsePositiveInt(scheduleEveryMinutes, 'scheduleEveryMinutes', 10080),
-    targetTechnology: targetTechnology as DarkWatchTemplateValues['targetTechnology'],
+    tier2When: parsedTier2When,
+    candidateLimit: parsePositiveInt(candidateLimit, 'candidateLimit', MAX_CANDIDATE_LIMIT),
+    fanOutMax: parsePositiveInt(fanOutMax, 'fanOutMax', MAX_FAN_OUT_MAX),
+    scheduleEveryMinutes: parsePositiveInt(
+      scheduleEveryMinutes,
+      'scheduleEveryMinutes',
+      MAX_INTERVAL_MINUTES
+    ),
+    targetTechnology: parsedTargetTechnology,
     leadPollIntervalMinutes: parsePositiveInt(
       leadPollIntervalMinutes,
       'leadPollIntervalMinutes',
-      10080
+      MAX_INTERVAL_MINUTES
     ),
     leadMinPriority: parseNonNegativeInt(leadMinPriority, 'leadMinPriority', 100),
     intelEventTriggerEnabled,
   };
 };
-
-const darkValuesKeys: Array<keyof DarkWatchTemplateValues> = [
-  'settingsVersion',
-  'autonomyLevel',
-  'scheduleId',
-  'allowManualRun',
-  'scopes',
-  'connectorId',
-  'tier2When',
-  'candidateLimit',
-  'fanOutMax',
-  'scheduleEveryMinutes',
-  'targetTechnology',
-  'leadPollIntervalMinutes',
-  'leadMinPriority',
-  'intelEventTriggerEnabled',
-];
 
 const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   settingsVersion: WATCH_SETTINGS_VERSION,
@@ -188,27 +187,31 @@ const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   intelEventTriggerEnabled: false,
 };
 
+const createDefaultDarkWatchValues = (): DarkWatchTemplateValues => ({
+  ...DEFAULT_DARK_WATCH_VALUES,
+  scopes: DEFAULT_SCOPES.map((scope) => ({ ...scope })),
+});
+
 export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration => ({
-  createDefaultValues: (): DarkWatchTemplateValues => ({
-    ...DEFAULT_DARK_WATCH_VALUES,
-    scopes: DEFAULT_SCOPES.map((scope) => ({ ...scope })),
-  }),
-  migrate: (raw: Record<string, unknown>) => {
-    const values = parseDarkWatchValues({
-      ...DEFAULT_DARK_WATCH_VALUES,
-      ...raw,
-    });
+  createDefaultValues: createDefaultDarkWatchValues,
+  // Dials added since a document was last installed fall back to their default
+  // rather than failing the whole reconciliation pass. Any added or dropped key
+  // is a migration, since settingsVersion alone cannot tell those documents
+  // apart while the watch is still on its first version.
+  migrate: (raw) => {
+    const values = parseDarkWatchValues({ ...createDefaultDarkWatchValues(), ...raw });
+    const storedKeys = Object.keys(raw);
+    const expectedKeys = Object.keys(values);
     return {
       values,
       migrated:
         raw.settingsVersion !== WATCH_SETTINGS_VERSION ||
-        Object.keys(raw).some(
-          (key) => !darkValuesKeys.includes(key as keyof DarkWatchTemplateValues)
-        ),
+        storedKeys.length !== expectedKeys.length ||
+        expectedKeys.some((key) => !(key in raw)),
     };
   },
   applyPatch: (raw, patch) => {
-    const values = parseDarkWatchValues(raw as Record<string, unknown>);
+    const values = parseDarkWatchValues(raw);
     if (patch.scopeRouting) return { rejected: 'scope and routing settings' };
     if (patch.approvalGate) {
       return { rejected: `approval gate "${patch.approvalGate.gateId}"` };
@@ -239,7 +242,7 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
     return { values: parseDarkWatchValues(next) };
   },
   toSettings: (raw) => {
-    const values = parseDarkWatchValues(raw as Record<string, unknown>);
+    const values = parseDarkWatchValues(raw);
     return {
       watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
       autonomy: values.autonomyLevel,
