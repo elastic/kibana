@@ -24,17 +24,19 @@ describe('CasesWorkflowRunService', () => {
   const casesClient = createCasesClientMock();
   const onWorkflowStarted = jest.fn();
   let workflowsAvailable = true;
+  let licenseValid = true;
   const management = {
     get isWorkflowsAvailable() {
       return workflowsAvailable;
     },
     getWorkflow: jest.fn(),
-    executeWorkflow: jest.fn(),
+    runWorkflow: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
   const service = new CasesWorkflowRunService({
     management,
     logger,
     audit,
+    isLicenseValid: () => licenseValid,
     onWorkflowStarted,
   });
   const theCase = {
@@ -61,6 +63,7 @@ describe('CasesWorkflowRunService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     workflowsAvailable = true;
+    licenseValid = true;
     casesClient.cases.ensureAuthorizedToUpdate.mockResolvedValue();
     casesClient.cases.get.mockResolvedValue(theCase);
     management.getWorkflow.mockResolvedValue({
@@ -69,7 +72,7 @@ describe('CasesWorkflowRunService', () => {
       valid: true,
       enabled: true,
     } as Awaited<ReturnType<typeof management.getWorkflow>>);
-    management.executeWorkflow.mockResolvedValue({ workflowExecutionId: 'execution-1' });
+    management.runWorkflow.mockResolvedValue('execution-1');
     onWorkflowStarted.mockResolvedValue(undefined);
   });
 
@@ -78,21 +81,23 @@ describe('CasesWorkflowRunService', () => {
 
     expect(casesClient.cases.ensureAuthorizedToUpdate).toHaveBeenCalledWith({ id: 'case-1' });
     expect(casesClient.cases.ensureAuthorizedToUpdate.mock.invocationCallOrder[0]).toBeLessThan(
-      management.executeWorkflow.mock.invocationCallOrder[0]
+      management.runWorkflow.mock.invocationCallOrder[0]
     );
-    expect(management.executeWorkflow).toHaveBeenCalledWith({
-      workflowId: 'workflow-1',
-      spaceId: 'default',
+    // Passes the converted model, space, processed inputs, and server-owned metadata.
+    // Does NOT pass waitForCompletion — runWorkflow schedules immediately without polling.
+    expect(management.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
+      'default',
+      defaultBody.inputs,
       request,
-      inputs: defaultBody.inputs,
-      waitForCompletion: false,
-      metadata: {
+      undefined,
+      {
         schemaVersion: 1,
         source: 'cases',
         caseId: 'case-1',
         origin: defaultBody.origin,
-      },
-    });
+      }
+    );
     expect(onWorkflowStarted).toHaveBeenCalledWith({
       caseId: 'case-1',
       inputs: defaultBody.inputs,
@@ -117,28 +122,35 @@ describe('CasesWorkflowRunService', () => {
     workflowsAvailable = false;
 
     await expect(run()).rejects.toThrow('Workflows are not available.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects execution when the license is insufficient', async () => {
+    licenseValid = false;
+
+    await expect(run()).rejects.toThrow('Workflows require an active Enterprise license.');
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects execution when the case update is unauthorized', async () => {
     casesClient.cases.ensureAuthorizedToUpdate.mockRejectedValue(new Error('not authorized'));
 
     await expect(run()).rejects.toThrow('not authorized');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects a case origin that does not match the route case', async () => {
     await expect(run({ inputs: {}, origin: { type: 'cases.case', id: 'case-2' } })).rejects.toThrow(
       'Workflow origin id must match case id "case-1".'
     );
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects an observable that does not belong to the case', async () => {
     await expect(
       run({ inputs: {}, origin: { type: 'cases.observable', id: 'observable-1' } })
     ).rejects.toThrow('Observable "observable-1" does not belong to case "case-1".');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('accepts an observable that belongs to the case', async () => {
@@ -155,10 +167,43 @@ describe('CasesWorkflowRunService', () => {
     ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
   });
 
+  it('rejects alert inputs for a case origin when alerts are not attached', async () => {
+    // A cases.case origin must not bypass alert-membership validation — an attacker
+    // could otherwise inject arbitrary alerts by switching to a non-alert origin type.
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      comments: [{ type: 'alert', alertId: 'alert-1', index: '.alerts' }],
+    } as unknown as Case);
+
+    await expect(
+      run({
+        inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
+        origin: { type: 'cases.case', id: 'case-1' },
+      })
+    ).rejects.toThrow('All selected alerts must belong to the case.');
+    expect(management.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects alert inputs for an observable origin when alerts are not attached', async () => {
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      observables: [{ id: 'observable-1' }],
+      comments: [{ type: 'alert', alertId: 'alert-1', index: '.alerts' }],
+    } as unknown as Case);
+
+    await expect(
+      run({
+        inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
+        origin: { type: 'cases.observable', id: 'observable-1' },
+      })
+    ).rejects.toThrow('All selected alerts must belong to the case.');
+    expect(management.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('rejects a selected alert that is not attached to the case', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,
-      comments: [{ type: 'alert', alertId: 'alert-1' }],
+      comments: [{ type: 'alert', alertId: 'alert-1', index: '.alerts' }],
     } as unknown as Case);
 
     await expect(
@@ -167,15 +212,32 @@ describe('CasesWorkflowRunService', () => {
         origin: { type: 'cases.alert', id: 'alert-2' },
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects a selected alert with a matching id but wrong index', async () => {
+    // Alert membership is validated as (id, index) pairs so that an alert id from
+    // one index cannot be used to access data from a different index.
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      comments: [{ type: 'alert', alertId: 'alert-1', index: '.alerts-real' }],
+    } as unknown as Case);
+
+    await expect(
+      run({
+        inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
+        origin: { type: 'cases.alert', id: 'alert-1' },
+      })
+    ).rejects.toThrow('All selected alerts must belong to the case.');
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects a single-alert origin that is not selected', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,
       comments: [
-        { type: 'alert', alertId: 'alert-1' },
-        { type: 'alert', alertId: 'alert-2' },
+        { type: 'alert', alertId: 'alert-1', index: '.alerts' },
+        { type: 'alert', alertId: 'alert-2', index: '.alerts' },
       ],
     } as unknown as Case);
 
@@ -185,15 +247,15 @@ describe('CasesWorkflowRunService', () => {
         origin: { type: 'cases.alert', id: 'alert-2' },
       })
     ).rejects.toThrow('Alert workflow origin "alert-2" is not selected.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('accepts selected alerts that are attached to the case', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,
       comments: [
-        { type: 'alert', alertId: 'alert-1' },
-        { type: 'alert', alertId: 'alert-2' },
+        { type: 'alert', alertId: 'alert-1', index: '.alerts' },
+        { type: 'alert', alertId: 'alert-2', index: '.alerts' },
       ],
     } as unknown as Case);
 
@@ -216,7 +278,7 @@ describe('CasesWorkflowRunService', () => {
     management.getWorkflow.mockResolvedValue(null);
 
     await expect(run()).rejects.toThrow('Workflow "workflow-1" was not found.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid workflow', async () => {
@@ -228,7 +290,7 @@ describe('CasesWorkflowRunService', () => {
     } as Awaited<ReturnType<typeof management.getWorkflow>>);
 
     await expect(run()).rejects.toThrow('Workflow is not valid.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects a disabled workflow', async () => {
@@ -240,7 +302,7 @@ describe('CasesWorkflowRunService', () => {
     } as Awaited<ReturnType<typeof management.getWorkflow>>);
 
     await expect(run()).rejects.toThrow('Workflow is disabled. Enable it to run it.');
-    expect(management.executeWorkflow).not.toHaveBeenCalled();
+    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('preserves the execution result when the post-execution callback fails', async () => {
@@ -253,7 +315,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('audits execution failures', async () => {
-    management.executeWorkflow.mockRejectedValue(new Error('execution failed'));
+    management.runWorkflow.mockRejectedValue(new Error('execution failed'));
 
     await expect(run()).rejects.toThrow('execution failed');
     expect(auditLog).toHaveBeenCalledWith(

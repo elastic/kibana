@@ -19,7 +19,17 @@ import { isAlertAttachmentType, toStringArray } from '../../../common/utils/atta
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
 
-const getSelectedAlertIds = (inputs: Record<string, unknown>): string[] => {
+interface AlertPair {
+  _id: string;
+  _index: string;
+}
+
+/**
+ * Reads the (id, index) pairs from `inputs.event.alertIds`. Both fields are
+ * required: entries missing either value are silently dropped so they can
+ * never accidentally match an attached pair.
+ */
+const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
   const event = getRecord(inputs.event);
   if (!event || !Array.isArray(event.alertIds)) {
     return [];
@@ -27,27 +37,59 @@ const getSelectedAlertIds = (inputs: Record<string, unknown>): string[] => {
 
   return event.alertIds
     .map(getRecord)
-    .map((alert) => alert?._id)
-    .filter((id): id is string => typeof id === 'string');
+    .filter(
+      (alert): alert is Record<string, unknown> =>
+        alert !== undefined && typeof alert._id === 'string' && typeof alert._index === 'string'
+    )
+    .map((alert) => ({ _id: alert._id as string, _index: alert._index as string }));
 };
 
-const getAttachedAlertIds = (comments: NonNullable<Case['comments']>): Set<string> =>
-  comments.reduce((alertIds, comment) => {
+/**
+ * Builds the set of `"id|index"` pairs that are attached to the case as alerts.
+ * Both legacy (`alertId` + `index`) and unified (`attachmentId` + `metadata.index`)
+ * attachment shapes are handled. Parallel arrays are zipped positionally.
+ */
+const getAttachedAlertPairSet = (comments: NonNullable<Case['comments']>): Set<string> => {
+  const pairs = new Set<string>();
+
+  for (const comment of comments) {
     if (!isAlertAttachmentType(comment.type)) {
-      return alertIds;
+      continue;
     }
 
     let ids: string[] = [];
-    if ('alertId' in comment) {
-      ids = toStringArray(comment.alertId);
-    } else if ('attachmentId' in comment) {
-      ids = toStringArray(comment.attachmentId);
-    }
-    ids.forEach((id) => alertIds.add(id));
-    return alertIds;
-  }, new Set<string>());
+    let indices: string[] = [];
 
-export const validateOrigin = async ({
+    if ('alertId' in comment) {
+      // Legacy v1 alert attachment: alertId and index are parallel fields.
+      ids = toStringArray(comment.alertId);
+      indices = toStringArray((comment as Record<string, unknown>).index ?? []);
+    } else if ('attachmentId' in comment) {
+      // Unified v2 alert attachment: id is attachmentId, index lives in metadata.index.
+      ids = toStringArray(comment.attachmentId);
+      const meta = getRecord((comment as Record<string, unknown>).metadata);
+      indices = meta ? toStringArray(meta.index) : [];
+    }
+
+    for (let i = 0; i < ids.length; i++) {
+      pairs.add(`${ids[i]}|${indices[i] ?? ''}`);
+    }
+  }
+
+  return pairs;
+};
+
+/**
+ * Validates that the requested workflow `origin` is consistent with `caseId`
+ * and, when alert inputs are present, that every selected alert is attached
+ * to the case.
+ *
+ * The alert-membership check (fix: was previously skipped for non-alert
+ * origins) is enforced regardless of `origin.type` so callers cannot bypass
+ * it by using a `cases.case` or `cases.observable` origin type while still
+ * injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
+ */
+export const validateOrigin = ({
   origin,
   caseId,
   inputs,
@@ -57,28 +99,38 @@ export const validateOrigin = async ({
   caseId: string;
   inputs: Record<string, unknown>;
   theCase: Case;
-}): Promise<void> => {
+}): void => {
+  // Step 1 — origin-entity membership checks
   if (origin.type === CASE_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
     if (origin.id !== caseId) {
       throw Boom.badRequest(`Workflow origin id must match case id "${caseId}".`);
     }
-  }
-
-  if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
+  } else if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
     if (!theCase.observables.some(({ id }) => id === origin.id)) {
       throw Boom.badRequest(`Observable "${origin.id}" does not belong to case "${caseId}".`);
     }
-    return;
   }
 
-  if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
-    const attachedAlertIds = getAttachedAlertIds(theCase.comments ?? []);
-    const selectedAlertIds = getSelectedAlertIds(inputs);
-    if (selectedAlertIds.length === 0 || selectedAlertIds.some((id) => !attachedAlertIds.has(id))) {
+  // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
+  // regardless of origin type, using (id, index) pairs for precise matching.
+  const selectedPairs = getSelectedAlertPairs(inputs);
+  if (selectedPairs.length > 0) {
+    const attachedPairs = getAttachedAlertPairSet(theCase.comments ?? []);
+    if (selectedPairs.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
       throw Boom.badRequest('All selected alerts must belong to the case.');
     }
-    if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE && !selectedAlertIds.includes(origin.id)) {
+    // For a single-alert origin the named alert must also be among the selected ones.
+    if (
+      origin.type === ALERT_WORKFLOW_ORIGIN_TYPE &&
+      !selectedPairs.some(({ _id }) => _id === origin.id)
+    ) {
       throw Boom.badRequest(`Alert workflow origin "${origin.id}" is not selected.`);
     }
+  } else if (
+    origin.type === ALERT_WORKFLOW_ORIGIN_TYPE ||
+    origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE
+  ) {
+    // Alert-based origins require at least one selected alert in inputs.
+    throw Boom.badRequest('All selected alerts must belong to the case.');
   }
 };

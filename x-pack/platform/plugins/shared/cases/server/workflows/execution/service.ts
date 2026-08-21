@@ -10,6 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { preprocessAlertInputs } from '@kbn/workflows-management-plugin/server';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -39,6 +40,12 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
+  /**
+   * Returns true when the current license is active and meets the minimum
+   * tier required by Workflows Management (Enterprise). Evaluated on every
+   * request so that mid-session license changes are reflected immediately.
+   */
+  isLicenseValid: () => boolean;
   onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 }
 
@@ -57,12 +64,20 @@ export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
+  private readonly isLicenseValid: () => boolean;
   private readonly onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 
-  constructor({ management, logger, audit, onWorkflowStarted }: CasesWorkflowRunServiceDeps) {
+  constructor({
+    management,
+    logger,
+    audit,
+    isLicenseValid,
+    onWorkflowStarted,
+  }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
+    this.isLicenseValid = isLicenseValid;
     this.onWorkflowStarted = onWorkflowStarted;
   }
 
@@ -114,9 +129,15 @@ export class CasesWorkflowRunService {
       throw Boom.forbidden('Workflows are not available.');
     }
 
+    // Require an active Enterprise license — matches the gate on the Workflows Management
+    // public execution route (withAvailabilityCheck → wrapRouteWithLicenseCheck).
+    if (!this.isLicenseValid()) {
+      throw Boom.forbidden('Workflows require an active Enterprise license.');
+    }
+
     await casesClient.cases.ensureAuthorizedToUpdate({ id: caseId });
     const theCase = await casesClient.cases.get({ id: caseId, includeComments: true });
-    await validateOrigin({
+    validateOrigin({
       origin: body.origin,
       caseId,
       inputs: body.inputs,
@@ -141,14 +162,19 @@ export class CasesWorkflowRunService {
       caseId,
       origin: body.origin,
     });
-    const { workflowExecutionId } = await this.management.executeWorkflow({
-      workflowId,
+
+    // Use runWorkflow instead of executeWorkflow so the call returns as soon as the execution
+    // is scheduled (truly fire-and-forget). executeWorkflow always waits ≥1 s for the execution
+    // document to appear even when waitForCompletion=false, which adds measurable latency to
+    // every interactive "run workflow from a case" click.
+    const workflowExecutionId = await this.management.runWorkflow(
+      toWorkflowExecutionEngineModel(workflow),
       spaceId,
+      processedInputs,
       request,
-      inputs: processedInputs,
-      waitForCompletion: false,
-      metadata,
-    });
+      undefined,
+      metadata
+    );
     this.logWorkflowRunAuditEvent({
       auditLogger,
       caseId,
