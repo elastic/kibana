@@ -469,9 +469,6 @@ export const getEpisodeStatusValues = (): string[] =>
     ({ value }) => value
   );
 
-const getGroupingModeValues = (): string[] =>
-  getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema').map(({ value }) => value);
-
 /** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
 const getStateTransitionFields = (): string[] =>
   Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
@@ -518,29 +515,46 @@ const formatStrategySet = (strategies: Set<string>): string =>
 
 /**
  * Generates standalone markdown for throttle / grouping compatibility from
- * `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and `STRATEGIES_REQUIRING_INTERVAL`.
+ * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
-  const groupingModes = getGroupingModeValues();
-  const perEpisodeMode = groupingModes.find((m) => m === 'per_episode');
-  if (!perEpisodeMode) {
-    throw new SchemaTranslationError(
-      'Missing grouping mode "per_episode". Add it to groupingModeSchema.'
+  const groupingModesList = generateEnumList({
+    schema: groupingModeSchema,
+    schemaName: 'groupingModeSchema',
+  });
+
+  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+    (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
+  );
+  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  );
+
+  const caveats: string[] = [];
+  if (perEpisodeOnlyStrategies.length > 0) {
+    caveats.push(
+      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
     );
   }
-  const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
+  if (notPerEpisodeStrategies.length > 0) {
+    caveats.push(
+      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
+    );
+  }
+  caveats.push(
+    `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
+      STRATEGIES_REQUIRING_INTERVAL
+    )}.`
+  );
 
   return [
     '# Throttle / Grouping Compatibility',
     '',
-    'The throttle strategy must be compatible with the grouping mode:',
-    `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
-    `- For ${aggregateModes.map((m) => `\`${m}\``).join(' / ')}: ${formatStrategySet(
-      AGGREGATE_STRATEGIES
-    )}.`,
-    `- ${formatStrategySet(
-      STRATEGIES_REQUIRING_INTERVAL
-    )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
+    groupingModesList,
+    '',
+    'Caveats:',
+    ...caveats,
     '',
     'If you set both in one request, put `set_grouping` before `set_throttle`. The tool',
     'validates compatibility after all operations run.',

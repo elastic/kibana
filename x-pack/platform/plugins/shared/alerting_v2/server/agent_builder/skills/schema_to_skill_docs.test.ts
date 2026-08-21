@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
+import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
@@ -521,12 +521,16 @@ describe('schema_to_skill_docs', () => {
       expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
     });
 
-    it('is a standalone reference covering grouping modes and interval strategies', () => {
+    it('documents every grouping mode from the schema, then lists caveats', () => {
       const doc = generateThrottleGroupingCompatibilityDoc();
       expect(doc).toContain('# Throttle / Grouping Compatibility');
-      expect(doc).toContain('`per_episode`');
+      expect(doc).toContain('Caveats:');
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_throttle');
+
+      for (const { value } of getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')) {
+        expect(doc).toContain(`- \`${value}\`:`);
+      }
     });
   });
 

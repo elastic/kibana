@@ -486,10 +486,14 @@ If the user explicitly requests a cross-rule or shared policy, consult the
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Throttle / Grouping Compatibility
 
-The throttle strategy must be compatible with the grouping mode:
-- For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
-- For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
-- \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`).
+- \`per_episode\`: one notification per alert episode lifecycle (default).
+- \`all\`: a single notification for all matching episodes.
+- \`per_field\`: group by specified \`groupBy\` fields.
+
+Caveats:
+- Only valid with \`per_episode\`: \`on_status_change\`, \`per_status_interval\`.
+- Not valid with \`per_episode\`: \`time_interval\`.
+- Require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`): \`per_status_interval\`, \`time_interval\`.
 
 If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool
 validates compatibility after all operations run.
