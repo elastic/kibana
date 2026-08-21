@@ -83,11 +83,16 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
-    MockManagedIntegrationsSection.mockImplementation(({ onDeploy }: { onDeploy: () => void }) => (
-      <button data-test-subj="mock-deploy-btn" onClick={onDeploy}>
-        Deploy
-      </button>
-    ));
+    MockManagedIntegrationsSection.mockImplementation(
+      ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
+        <div>
+          <button data-test-subj="mock-deploy-btn" onClick={onDeploy}>
+            Deploy
+          </button>
+          {hasFailed && <span data-test-subj="mock-failed">Failed</span>}
+        </div>
+      )
+    );
   });
 
   describe('Next button gating — MI services present', () => {
@@ -114,6 +119,13 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('passes hasFailed=true to section after failed deploy', () => {
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ failedInstances: ['guardduty'] }));
+      renderStep();
+      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
+      expect(screen.getByTestId('mock-failed')).toBeInTheDocument();
     });
   });
 

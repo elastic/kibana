@@ -71,6 +71,7 @@ function renderSection(
     onDeploy?: () => void;
     isDeploying?: boolean;
     isDone?: boolean;
+    hasFailed?: boolean;
   } = {}
 ) {
   return render(
@@ -82,6 +83,7 @@ function renderSection(
           onDeploy={props.onDeploy ?? jest.fn()}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
+          hasFailed={props.hasFailed ?? false}
         />
       </React.Suspense>
     </I18nProvider>
@@ -210,6 +212,34 @@ describe('ManagedIntegrationsSection', () => {
       const btn = screen.getByTestId('managedIntegrationsSection-deployButton');
       expect(btn).toBeDisabled();
       expect(screen.getByText('Deploying integrations...')).toBeInTheDocument();
+    });
+  });
+
+  describe('failed state', () => {
+    it('shows error callout when hasFailed', () => {
+      renderSection({ hasFailed: true });
+      expect(screen.getByTestId('managedIntegrationsSection-errorCallout')).toBeInTheDocument();
+    });
+
+    it('hides deploy button when hasFailed', () => {
+      renderSection({ hasFailed: true });
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-deployButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls onDeploy when Retry clicked', () => {
+      const onDeploy = jest.fn();
+      renderSection({ hasFailed: true, onDeploy });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-retryButton'));
+      expect(onDeploy).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides callout while isDeploying (retry in flight)', () => {
+      renderSection({ hasFailed: true, isDeploying: true });
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-errorCallout')
+      ).not.toBeInTheDocument();
     });
   });
 

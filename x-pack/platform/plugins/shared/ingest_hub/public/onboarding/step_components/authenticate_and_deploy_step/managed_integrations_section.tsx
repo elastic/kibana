@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -44,6 +45,7 @@ interface ManagedIntegrationsSectionProps {
   onDeploy: () => void;
   isDeploying: boolean;
   isDone: boolean;
+  hasFailed: boolean;
 }
 
 export function ManagedIntegrationsSection({
@@ -52,6 +54,7 @@ export function ManagedIntegrationsSection({
   onDeploy,
   isDeploying,
   isDone,
+  hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { euiTheme } = useEuiTheme();
@@ -227,24 +230,60 @@ export function ManagedIntegrationsSection({
 
             <EuiSpacer size="m" />
 
-            <EuiButton
-              isDisabled={!isDeployReady || isDone}
-              isLoading={isDeploying}
-              onClick={onDeploy}
-              data-test-subj="managedIntegrationsSection-deployButton"
-            >
-              {isDeploying ? (
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
-                  defaultMessage="Deploying integrations..."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
-                  defaultMessage="Deploy integrations"
-                />
-              )}
-            </EuiButton>
+            {hasFailed && !isDeploying && (
+              <>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.title"
+                      defaultMessage="Deployment failed"
+                    />
+                  }
+                  color="danger"
+                  iconType="error"
+                  announceOnMount
+                  data-test-subj="managedIntegrationsSection-errorCallout"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.body"
+                    defaultMessage="One or more integrations could not be deployed. Check your credentials and try again."
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    color="danger"
+                    onClick={onDeploy}
+                    data-test-subj="managedIntegrationsSection-retryButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.retryButton"
+                      defaultMessage="Retry"
+                    />
+                  </EuiButton>
+                </EuiCallOut>
+              </>
+            )}
+
+            {!hasFailed && (
+              <EuiButton
+                isDisabled={!isDeployReady || isDone}
+                isLoading={isDeploying}
+                onClick={onDeploy}
+                data-test-subj="managedIntegrationsSection-deployButton"
+              >
+                {isDeploying ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
+                    defaultMessage="Deploying integrations..."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
+                    defaultMessage="Deploy integrations"
+                  />
+                )}
+              </EuiButton>
+            )}
           </EuiPanel>
         </div>
       )}

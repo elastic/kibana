@@ -38,6 +38,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { handleDeploy, isDeploying, failedInstances } = useDeploy({ onContinue: () => {} });
   const [deployAttempted, setDeployAttempted] = useState(false);
   const isDone = deployAttempted && !isDeploying && failedInstances.length === 0;
+  const hasFailed = deployAttempted && !isDeploying && failedInstances.length > 0;
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
@@ -76,6 +77,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           onDeploy={handleDeployClick}
           isDeploying={isDeploying}
           isDone={isDone}
+          hasFailed={hasFailed}
         />
       )}
 
