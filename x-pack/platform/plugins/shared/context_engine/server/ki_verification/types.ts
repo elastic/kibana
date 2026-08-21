@@ -52,7 +52,7 @@ export interface KiVerifier {
   /**
    * Whether this verifier has anything to check for the given KI. Receives the
    * same context as {@link KiVerifier.verify} so that applicability can depend
-   * on run configuration, such as which fields carry ES|QL.
+   * on run configuration, such as which attributes carry ES|QL.
    */
   applies(ki: KnowledgeIndicator, context: KiVerifierContext): boolean;
   verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierOutcome>;

@@ -49,8 +49,9 @@ export interface EsqlQueryRef {
 
 /**
  * The failure message for a query that exceeds {@link MAX_ESQL_QUERY_LENGTH},
- * or `undefined` when it is within bounds. Verifiers record it and skip the
- * query rather than aborting the whole KI.
+ * or `undefined` when it is within bounds. The KI still fails, but only this
+ * query goes unchecked; the rest are still verified. A malformed attribute, by
+ * contrast, stops the run outright.
  */
 export const getOversizedQueryFailure = ({ source, query }: EsqlQueryRef): string | undefined =>
   query.length > MAX_ESQL_QUERY_LENGTH
