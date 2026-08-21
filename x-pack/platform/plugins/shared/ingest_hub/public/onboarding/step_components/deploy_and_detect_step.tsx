@@ -51,7 +51,7 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { deployAndDetectStep, awsServicesMap } = useOnboardingFlow();
+  const { deployAndDetectStep } = useOnboardingFlow();
   const { serviceStatuses } = deployAndDetectStep;
 
   // Read service settings (global region + per-instance vars + instances) from session storage.
