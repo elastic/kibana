@@ -14,7 +14,6 @@ const ki: KiListItem = {
   ki_id: 'ki-1',
   type: 'playbook',
   title: 'Verify the order, check the SLA window, then issue store credit.',
-  description: 'Detailed steps for refunds.',
   source_label: 'Google Drive',
   version: 'v1',
 };

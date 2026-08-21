@@ -7,10 +7,11 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { KiListPanel } from './ki_list_panel';
@@ -38,6 +39,9 @@ const aiIndex: GetAiIndexResponse = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
+const SAMPLE_INDEX_MANAGEMENT_URL =
+  '/app/management/data/index_management/indices/index_details?indexName=ai-index-idx-sample-ki';
+
 const renderWithProviders = (ui: React.ReactElement) => {
   const services = {
     ...coreMock.createStart(),
@@ -47,6 +51,15 @@ const renderWithProviders = (ui: React.ReactElement) => {
     ...services.application.capabilities,
     discover_v2: { show: true },
   };
+
+  const indexManagementLocator = sharePluginMock.createLocator();
+  indexManagementLocator.getUrl.mockResolvedValue(SAMPLE_INDEX_MANAGEMENT_URL);
+  jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+    if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+      return indexManagementLocator;
+    }
+    return undefined;
+  });
 
   return render(
     <I18nProvider>
@@ -71,7 +84,6 @@ describe('KiListPanel', () => {
           ki_id: 'ki-1',
           type: 'playbook',
           title: 'Refund playbook',
-          description: 'Verify the order first.',
           source_label: 'Google Drive',
           version: 'v1',
         },
@@ -89,7 +101,7 @@ describe('KiListPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the list rows and type filters from counts_by_type', () => {
+  it('renders the list rows and type filters from counts_by_type', async () => {
     renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
 
     expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
@@ -100,6 +112,12 @@ describe('KiListPanel', () => {
     expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
     expect(screen.queryByTestId('contextKiListFilter-others')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('contextKiListPanelDestLink')).toHaveAttribute(
+        'href',
+        SAMPLE_INDEX_MANAGEMENT_URL
+      );
+    });
   });
 
   it('requests a type filter when a type button is selected', () => {

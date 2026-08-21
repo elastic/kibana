@@ -18,7 +18,6 @@ const LENIENT_INDEX_OPTIONS = {
 const KI_LIST_SOURCE_FIELDS = [
   'type',
   'title',
-  'description',
   'attributes.source',
   'attributes.source_label',
   'attributes.version',
@@ -27,7 +26,6 @@ const KI_LIST_SOURCE_FIELDS = [
 interface KiDocumentSource {
   type?: string;
   title?: string;
-  description?: string;
   attributes?: {
     source?: string;
     source_label?: string;
@@ -88,7 +86,6 @@ const toKiListItem = (kiId: string, source: KiDocumentSource): KiListItem | unde
     ki_id: kiId,
     type,
     title,
-    description: source.description ?? '',
     ...(sourceLabel !== undefined ? { source_label: sourceLabel } : {}),
     ...(version !== undefined ? { version } : {}),
   };

@@ -75,7 +75,6 @@ describe('ki_list', () => {
           ki_id: 'ki-1',
           type: 'playbook',
           title: 'Refund playbook',
-          description: 'Verify the order first.',
           source_label: 'Google Drive',
           version: 'v1',
         },
@@ -83,7 +82,6 @@ describe('ki_list', () => {
           ki_id: 'ki-2',
           type: 'policy',
           title: 'Refund policy',
-          description: 'Do not issue refunds outside the SLA window.',
         },
       ],
     });

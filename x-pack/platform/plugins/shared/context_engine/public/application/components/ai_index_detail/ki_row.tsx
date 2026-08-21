@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextBlockTruncate,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { getKiTypeLabel } from '../../utils/ki_type_labels';
@@ -15,13 +21,6 @@ interface KiRowProps {
   ki: KiListItem;
   sourceLabel: string | undefined;
 }
-
-const titleStyle = css`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
 
 const capitalizeLabel = (label: string): string =>
   label.length > 0 ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : label;
@@ -33,11 +32,12 @@ export const KiRow = ({ ki, sourceLabel }: KiRowProps) => {
   return (
     <div data-test-subj="contextKiRow">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+        {/* minWidth: 0 keeps the title from running underneath the version badge */}
         <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiTitle size="xxs">
-            <h4 css={titleStyle} data-test-subj="contextKiRowTitle">
-              {ki.title}
-            </h4>
+            <EuiTextBlockTruncate lines={2} cloneElement>
+              <h4 data-test-subj="contextKiRowTitle">{ki.title}</h4>
+            </EuiTextBlockTruncate>
           </EuiTitle>
           <EuiText size="xs" color="subdued" data-test-subj="contextKiRowMetadata">
             <p>{metadata}</p>

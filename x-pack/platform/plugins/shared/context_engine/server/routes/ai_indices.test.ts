@@ -487,7 +487,6 @@ describe('ai indices routes', () => {
               ki_id: 'ki-1',
               type: 'playbook',
               title: 'Refund playbook',
-              description: 'Verify the order first.',
               source_label: 'Google Drive',
               version: 'v1',
             },

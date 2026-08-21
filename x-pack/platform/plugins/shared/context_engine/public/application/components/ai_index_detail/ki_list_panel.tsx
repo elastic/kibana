@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonGroup,
   EuiEmptyPrompt,
@@ -20,11 +19,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
+import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
-import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import type { AiIndexDest, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKiList } from '../../hooks/use_ki_list';
 import { useKibana } from '../../hooks/use_kibana';
@@ -39,12 +44,21 @@ type KiListTypeFilter = { kind: 'all' } | { kind: 'type'; type: string };
 
 const getDiscoverEsqlQuery = (destValue: string): string => `FROM ${destValue} | LIMIT 100`;
 
+const getIndexManagementLocatorParams = (dest: AiIndexDest): IndexManagementLocatorParams => {
+  if (dest.type === 'data_stream') {
+    return { page: 'data_streams_details', dataStreamName: dest.value };
+  }
+
+  return { page: 'index_details', indexName: dest.value };
+};
+
 export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
   const {
     services: { share, application },
   } = useKibana();
 
-  const destValue = aiIndex.dest.value;
+  const dest = aiIndex.dest;
+  const destValue = dest.value;
 
   const [typeFilter, setTypeFilter] = useState<KiListTypeFilter>({ kind: 'all' });
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
@@ -80,8 +94,6 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
     type: listType,
   });
 
-  const typeFilterCounts = countsByType;
-
   const selectedFilterId = typeFilter.kind === 'all' ? 'all' : typeFilter.type;
 
   const typeFilterOptions = useMemo(
@@ -94,7 +106,7 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
         }),
         'data-test-subj': 'contextKiListFilter-all',
       },
-      ...typeFilterCounts.map(({ type, count }) => ({
+      ...countsByType.map(({ type, count }) => ({
         id: type,
         label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterType', {
           defaultMessage: '{typeLabel} ({count})',
@@ -103,7 +115,7 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
         'data-test-subj': `contextKiListFilter-${type}`,
       })),
     ],
-    [totalAll, typeFilterCounts]
+    [totalAll, countsByType]
   );
 
   const hasMore = kis.length < total;
@@ -124,15 +136,38 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
     });
   }, [canOpenDiscover, destValue, share?.url?.locators]);
 
+  const canLinkToIndexManagement = !isIndexPattern(destValue);
+  const indexManagementLocator = canLinkToIndexManagement
+    ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
+    : undefined;
+  const indexManagementUrl = useLocatorUrl(
+    indexManagementLocator,
+    canLinkToIndexManagement
+      ? getIndexManagementLocatorParams(dest)
+      : { page: 'index_details' as const, indexName: '' },
+    undefined,
+    [dest, canLinkToIndexManagement]
+  );
+  const indexManagementHref =
+    canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
+
   const resolveSourceLabel = (sourceLabel: string | undefined) => sourceLabel ?? defaultSourceLabel;
+
+  const destLink =
+    indexManagementHref !== undefined ? (
+      <EuiLink href={indexManagementHref} data-test-subj="contextKiListPanelDestLink">
+        {destValue}
+      </EuiLink>
+    ) : (
+      <code data-test-subj="contextKiListPanelDest">{destValue}</code>
+    );
 
   return (
     <div data-test-subj="contextKiListPanel">
       <EuiText size="s" color="subdued" data-test-subj="contextKiListPanelDescription">
         <p>
           {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.description', {
-            defaultMessage:
-              'The knowledge your agents retrieve. Each indicator shows the automation and sources it came from.',
+            defaultMessage: 'The knowledge your agents retrieve.',
           })}
         </p>
       </EuiText>
@@ -143,15 +178,24 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
             <EuiText size="s" data-test-subj="contextKiListPanelSummary">
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.kiList.summary"
-                defaultMessage="{count, plural, one {# <strong>Knowledge Indicator</strong>} other {# <strong>Knowledge Indicators</strong>}} in"
+                defaultMessage="{count, plural, one {# {indicatorLabel}} other {# {indicatorLabel}}} in"
                 values={{
                   count: totalAll,
-                  strong: (chunks) => <strong>{chunks}</strong>,
+                  indicatorLabel: (
+                    <strong>
+                      {i18n.translate(
+                        'xpack.contextEngine.aiIndexDetail.kiList.summaryIndicatorLabel',
+                        {
+                          defaultMessage:
+                            '{count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
+                          values: { count: totalAll },
+                        }
+                      )}
+                    </strong>
+                  ),
                 }}
               />{' '}
-              <EuiBadge color="hollow" data-test-subj="contextKiListPanelDest">
-                {destValue}
-              </EuiBadge>
+              {destLink}
             </EuiText>
           </EuiFlexItem>
           {discoverHref && (
@@ -218,13 +262,6 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
                 })}
               </h3>
             }
-            body={
-              <p>
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.emptyBody', {
-                  defaultMessage: 'Try adjusting your type filter.',
-                })}
-              </p>
-            }
           />
         ) : (
           <div data-test-subj="contextKiListRows" role="list">
@@ -270,11 +307,33 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
             <EuiSpacer size="m" />
             <EuiText size="xs" color="subdued" data-test-subj="contextKiListCapReached">
               <p>
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.capReached', {
-                  defaultMessage:
-                    'Showing the first {count} results. Use a type filter to find more.',
-                  values: { count: MAX_KI_PAGE_SIZE },
-                })}
+                {discoverHref ? (
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.kiList.capReachedWithDiscover"
+                    defaultMessage="Showing the first {count} results. {discoverLink} to view all Knowledge Indicators."
+                    values={{
+                      count: MAX_KI_PAGE_SIZE,
+                      discoverLink: (
+                        <EuiLink
+                          href={discoverHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-test-subj="contextKiListCapReachedDiscoverLink"
+                        >
+                          <FormattedMessage
+                            id="xpack.contextEngine.aiIndexDetail.kiList.capReachedDiscoverLink"
+                            defaultMessage="Open in Discover"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                ) : (
+                  i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.capReached', {
+                    defaultMessage: 'Showing the first {count} results.',
+                    values: { count: MAX_KI_PAGE_SIZE },
+                  })
+                )}
               </p>
             </EuiText>
           </>

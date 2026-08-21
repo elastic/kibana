@@ -11,7 +11,6 @@ export interface KiListItem {
   ki_id: string;
   type: string;
   title: string;
-  description: string;
   /** Human-readable source label when stored on the KI document. */
   source_label?: string;
   /** Version label when stored on the KI document (e.g. `1` → `v1`). */

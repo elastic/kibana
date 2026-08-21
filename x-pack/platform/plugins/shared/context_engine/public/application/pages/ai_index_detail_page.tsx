@@ -32,6 +32,7 @@ import {
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
+import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
@@ -50,9 +51,9 @@ export const AiIndexDetailPage = () => {
   const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
 
-  const { total: kiTotal } = useKiList({
+  const { totalAll: kiTotal } = useKiList({
     aiIndexId: aiIndex?.id,
-    size: 1,
+    size: DEFAULT_KI_PAGE_SIZE,
     enabled: aiIndex !== undefined,
   });
 
