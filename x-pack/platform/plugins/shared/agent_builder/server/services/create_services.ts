@@ -193,6 +193,14 @@ export class ServiceManager {
       trackingService,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+      agents,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -205,6 +213,7 @@ export class ServiceManager {
       actions,
       toolsService: tools,
       agentsService: agents,
+      conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
       skillServiceStart: skillsServiceStart,
@@ -217,14 +226,6 @@ export class ServiceManager {
       conversationTemplates: conversationTemplatesStart,
     });
     runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
-      agents,
-    });
 
     const workspaces = createWorkspaceService({
       logger: logger.get('workspaces'),
