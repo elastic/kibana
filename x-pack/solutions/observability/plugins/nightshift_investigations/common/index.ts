@@ -57,7 +57,7 @@ export interface ListInvestigationsRequest {
   started_before?: string;
   finished_after?: string;
   finished_before?: string;
-  sort_field?: 'created_at' | 'started_at' | 'finished_at';
+  sort_field?: 'created_at' | 'finished_at';
   sort_order?: 'asc' | 'desc';
   page?: number;
   size?: number;

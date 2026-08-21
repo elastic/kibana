@@ -28,12 +28,10 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        results: expect.any(Array),
-        total: expect.any(Number),
-        page: expect.any(Number),
-        size: expect.any(Number),
-      });
+      expect(Array.isArray(response.body.results)).toBe(true);
+      expect(typeof response.body.total).toBe('number');
+      expect(typeof response.body.page).toBe('number');
+      expect(typeof response.body.size).toBe('number');
     });
 
     apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {
