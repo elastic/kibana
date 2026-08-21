@@ -145,6 +145,7 @@ export function createAlertEventsBatchBuilder({
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
+    // Timestamp when the alert event is written to the index.
     const wroteAt = new Date().toISOString();
     const alertEventsBatch: AlertEvent[] = [];
 
