@@ -382,23 +382,26 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 
 #### Phase 4 — Run batch analysis and show results
 
+> **Todo discipline:** keep steps 1–3, 4, and 5 as **separate todos**. Never bundle "show results" and "show dashboard" into a single todo — completing the summary does not complete the dashboard.
+
 1. `ml.ad_create_job` (`create_job`) → `ml.ad_create_job` (`create_datafeed`) → `ml.ad_manage_job_state` (`open_job`)
 2. `ml.ad_manage_job_state` (`start_datafeed`) with historical `start` / `end` range covering available data
 3. `ml.ad_manage_job_state` (`await_batch_completion`) — poll until datafeed stops
-4. **Plain-language interpretation first** — before any charts, summarise what was found:
+4. **Summarise results in plain language** (own todo — complete only after this text is written):
    - Total anomalies, highest score, time of peak anomaly, top contributing entity (if applicable)
    - Example: *"3 anomalies were found. The most significant spike was on Aug 15 at 14:00 (score 87), driven by host: web-03."*
-5. **No-anomaly path** — if zero anomalies were found, explain clearly: *"The model didn't find any unusual patterns in this period — that could mean the data is very consistent, or the detector may need adjustment."* Offer: widen the time range, try a different field or detector, or adjust sensitivity. Do not proceed to dashboard.
-6. **Inline dashboard** (only when anomalies exist) — generate via `platform.dashboard.generate_dashboard` with all three panels for every job that just ran. **Always set `time_range` on each panel to the batch analysis window** (e.g. `{"from": "2024-01-01T00:00:00Z", "to": "2024-01-03T23:59:59Z"}`); without it the dashboard defaults to "last 15 minutes" which will show no data for historical jobs:
+   - **No-anomaly path** — if zero anomalies were found, explain clearly: *"The model didn't find any unusual patterns in this period — that could mean the data is very consistent, or the detector may need adjustment."* Offer: widen the time range, try a different field or detector, or adjust sensitivity. **Stop here — do not proceed to step 5.**
+5. **Generate inline dashboard** (own todo, only when anomalies exist) — generate via `platform.dashboard.generate_dashboard` with all three panels for every job that just ran. **Always set `time_range` on each panel to the batch analysis window** (e.g. `{"from": "2024-01-01T00:00:00Z", "to": "2024-01-03T23:59:59Z"}`); without it the dashboard defaults to "last 15 minutes" which will show no data for historical jobs:
    - `ml_anomaly_swimlane` — overall score heatmap (`y: 0`, `h: 10`, `w: 24`)
    - `ml_anomaly_charts` — multi-series actual vs model bounds (`y: 10`, `h: 15`, `w: 24`)
    - `ml_single_metric_viewer` — top entity/detector drill-down (`y: 25`, `h: 18`, `w: 24`)
+   - **Immediately after the dashboard renders — without waiting for user input — ask the Phase 5 approval question.** The dashboard and the approval question are one continuous response.
 
 ---
 
 #### Phase 5 — Approval and go-live
 
-Ask: *"Do these results look right to you?"*
+**Entry:** triggered automatically at the end of Phase 4 step 5 (or immediately after rendering the dashboard if the user requested it manually). Do not wait for the user to prompt this. Ask: *"Do these results look right to you?"*
 
 **If yes:**
 1. Create a new job set with the same configuration but without a historical `end` — running from now onwards. Use a distinct `job_id` (append `-realtime` or similar).
@@ -464,6 +467,11 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 11. **Forecasts require non-population jobs** — `over_field_name` jobs cannot be forecasted; warn before attempting.
 12. **`by_field_name` vs `over_field_name`:** `by` compares entity to its own history; `over` compares to peer group in the same bucket. `partition_field_name` = fully independent sub-model with its own normalization.
 13. **High-cardinality split fields (>10k values) require memory estimate before creating.** Warn the user if cardinality is extreme.
+14. **Link job tables to the Anomaly Explorer.** Whenever you show a table or list of created jobs, include a footer link to the ML Anomaly Explorer, pre-filtered to those jobs and the relevant time range. Use this URL template (rison-encoded):
+    ```
+    app/ml/explorer?_g=(ml:(jobIds:!(<job_id_1>,<job_id_2>)),refreshInterval:(pause:!t,value:0),time:(from:'<from_iso>',to:'<to_iso>'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))
+    ```
+    Example footer: *"Open in [Anomaly Explorer](app/ml/explorer?_g=...&_a=...)"*. For multiple jobs, list all IDs inside `!()` separated by commas. Use the batch analysis window for `from`/`to` (Phase 4), or `now-1h`/`now` for realtime jobs (Phase 5).
 
 ---
 
