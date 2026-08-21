@@ -918,6 +918,53 @@ describe('updateAlertsStatus — event bus', () => {
     );
   });
 
+  it('omits previousStatus entry for docs not found in prefetch (no fabricated open)', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // a1 is found with status 'acknowledged', a2 is not found
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'acknowledged' } },
+        { found: false, _id: 'a2' },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'acknowledged' }]);
+    // a2 is absent — not fabricated as 'open'
+    expect(payload.previousStatuses.find((s: { id: string }) => s.id === 'a2')).toBeUndefined();
+
+    bus.removeAllListeners();
+  });
+
+  it('omits previousStatus entry when source has an unrecognised status value (no fabricated open)', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [{ found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'triaged' } }],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.previousStatuses).toEqual([]);
+
+    bus.removeAllListeners();
+  });
+
   it('does not call mget when no event bus is provided', async () => {
     const alertService = new AlertService(esClient, logger, alertsClient);
     await alertService.updateAlertsStatus([

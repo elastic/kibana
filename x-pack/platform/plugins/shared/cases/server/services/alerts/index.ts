@@ -130,7 +130,7 @@ export class AlertService {
     }
   }
 
-  private static parseWorkflowStatus(source: unknown): STATUS_VALUES {
+  private static parseWorkflowStatus(source: unknown): STATUS_VALUES | undefined {
     const rawStatus =
       typeof source === 'object' && source !== null
         ? (source as Record<string, unknown>)[ALERT_WORKFLOW_STATUS]
@@ -140,7 +140,7 @@ export class AlertService {
       rawStatus === 'in-progress' ||
       rawStatus === 'closed'
       ? rawStatus
-      : 'open';
+      : undefined;
   }
 
   private async prefetchPreviousStatuses(
@@ -160,7 +160,10 @@ export class AlertService {
     const result = new Map<string, STATUS_VALUES>();
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._id != null) {
-        result.set(doc._id, AlertService.parseWorkflowStatus(doc._source));
+        const previousStatus = AlertService.parseWorkflowStatus(doc._source);
+        if (previousStatus !== undefined) {
+          result.set(doc._id, previousStatus);
+        }
       }
     }
     return result;
@@ -197,10 +200,10 @@ export class AlertService {
       casesEventBus.emitAlertStatusChanged(request, {
         alertIds,
         status,
-        previousStatuses: alertIds.map((id) => ({
-          id,
-          previousStatus: previousStatusMap.get(id) ?? 'open',
-        })),
+        previousStatuses: alertIds.flatMap((id) => {
+          const previousStatus = previousStatusMap.get(id);
+          return previousStatus !== undefined ? [{ id, previousStatus }] : [];
+        }),
         alertIdToIndex: Object.fromEntries(idToIndex),
         indices: Array.from(indicesSet),
       });
