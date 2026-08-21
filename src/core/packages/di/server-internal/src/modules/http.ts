@@ -14,7 +14,7 @@ import { cacheInScope } from '@kbn/core-di-internal';
 import { type KibanaContainerModuleLoadOptions, Scope } from '@kbn/core-di';
 
 export function loadHttp({ bind, onSetup }: KibanaContainerModuleLoadOptions): void {
-  onSetup(Route, Router, ({ inject }, router, route) => {
+  onSetup(Route, Router, ({ inject }, route, router) => {
     const register = router[route.method] as RouteRegistrar<
       typeof route.method,
       RequestHandlerContext
