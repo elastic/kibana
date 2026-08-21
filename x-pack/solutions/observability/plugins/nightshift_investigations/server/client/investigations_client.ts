@@ -27,9 +27,10 @@ export { InvestigationNotFoundError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
-  'createdAt' | 'finishedAt'
+  'createdAt' | 'startedAt' | 'finishedAt'
 > = {
-  started_at: 'createdAt',
+  created_at: 'createdAt',
+  started_at: 'startedAt',
   finished_at: 'finishedAt',
 };
 

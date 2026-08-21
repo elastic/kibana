@@ -30,7 +30,7 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
       started_before: z.string().max(100).datetime({ offset: true }).optional(),
       finished_after: z.string().max(100).datetime({ offset: true }).optional(),
       finished_before: z.string().max(100).datetime({ offset: true }).optional(),
-      sort_field: z.enum(['started_at', 'finished_at']).optional(),
+      sort_field: z.enum(['created_at', 'started_at', 'finished_at']).optional(),
       sort_order: z.enum(['asc', 'desc']).optional(),
       page: z.coerce.number().int().min(1).max(100).optional(),
       size: z.coerce.number().int().min(1).max(100).optional(),
