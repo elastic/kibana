@@ -79,7 +79,7 @@ import {
   nightshiftTransformTransition,
 } from '../common/transition';
 import {
-  getConclusionBody,
+  getConclusionText,
   getHypothesisStatusLabel,
   getInvestigationGoalText,
   getInvestigationHeadline,
@@ -569,7 +569,7 @@ export function InvestigationFlyout({
   const isRunning = status === 'running' || status === 'loading';
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const goalText = getInvestigationGoalText(state);
-  const conclusionBody = getConclusionBody(state?.conclusion);
+  const conclusionBody = getConclusionText(state);
   const recommendations = useMemo(() => parseInvestigationRecommendations(state), [state]);
   const blindSpots = useMemo(() => state?.blind_spots ?? [], [state?.blind_spots]);
   const hypotheses = useMemo(
