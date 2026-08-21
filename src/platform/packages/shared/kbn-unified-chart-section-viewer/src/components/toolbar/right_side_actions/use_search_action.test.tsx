@@ -14,10 +14,8 @@ import {
   METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ,
   METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ,
 } from '../../../common/constants';
-import { useSearchAction } from './use_search_action';
+import { useSearchAction, DEBOUNCE_TIME } from './use_search_action';
 import type { UseSearchActionProps } from './use_search_action';
-
-const DEBOUNCE_TIME = 300;
 
 const defaultProps: UseSearchActionProps = {
   value: '',

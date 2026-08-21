@@ -35,7 +35,7 @@ const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
   defaultMessage: 'Search metrics',
 });
 
-const DEBOUNCE_TIME = 300;
+export const DEBOUNCE_TIME = 300;
 const SEARCH_INPUT_MIN_WIDTH = 200;
 
 /**
