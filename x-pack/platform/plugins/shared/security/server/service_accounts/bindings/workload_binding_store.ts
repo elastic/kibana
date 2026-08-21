@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -24,8 +24,7 @@ import { getDetailedErrorMessage } from '../../errors';
 const FIND_PAGE_SIZE = 100;
 
 export interface WorkloadBindingStoreOptions {
-  /** Scoped to the binding type, which is hidden. */
-  repository: ISavedObjectsRepository;
+  client: SavedObjectsClientContract;
   encryptedClient: EncryptedSavedObjectsClient;
   isEncryptionError: (error: Error) => boolean;
   logger: Logger;
@@ -49,18 +48,13 @@ const toBinding = (attributes: WorkloadBindingAttributes): ServiceAccountWorkloa
  * authentication — silently making the binding undecryptable.
  */
 export class WorkloadBindingStore {
-  private readonly repository: ISavedObjectsRepository;
+  private readonly client: SavedObjectsClientContract;
   private readonly encryptedClient: EncryptedSavedObjectsClient;
   private readonly isEncryptionError: (error: Error) => boolean;
   private readonly logger: Logger;
 
-  constructor({
-    repository,
-    encryptedClient,
-    isEncryptionError,
-    logger,
-  }: WorkloadBindingStoreOptions) {
-    this.repository = repository;
+  constructor({ client, encryptedClient, isEncryptionError, logger }: WorkloadBindingStoreOptions) {
+    this.client = client;
     this.encryptedClient = encryptedClient;
     this.isEncryptionError = isEncryptionError;
     this.logger = logger;
@@ -73,7 +67,7 @@ export class WorkloadBindingStore {
   async set(attributes: WorkloadBindingAttributes): Promise<ServiceAccountWorkloadBinding> {
     const id = getWorkloadBindingId(attributes);
 
-    await this.repository.create<WorkloadBindingAttributes>(
+    await this.client.create<WorkloadBindingAttributes>(
       SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
       attributes,
       { id, overwrite: true, refresh: 'wait_for' }
@@ -88,7 +82,7 @@ export class WorkloadBindingStore {
    */
   async delete(coordinates: WorkloadBindingCoordinates): Promise<boolean> {
     try {
-      await this.repository.delete(
+      await this.client.delete(
         SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
         getWorkloadBindingId(coordinates),
         { refresh: 'wait_for' }
@@ -168,7 +162,7 @@ export class WorkloadBindingStore {
   async findByServiceAccountId(serviceAccountId: string): Promise<ServiceAccountWorkloadBinding[]> {
     const bindings: ServiceAccountWorkloadBinding[] = [];
 
-    const finder = this.repository.createPointInTimeFinder<WorkloadBindingAttributes>({
+    const finder = this.client.createPointInTimeFinder<WorkloadBindingAttributes>({
       type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
       perPage: FIND_PAGE_SIZE,
       filter: nodeBuilder.is(

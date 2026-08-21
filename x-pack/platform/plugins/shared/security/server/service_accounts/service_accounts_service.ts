@@ -108,7 +108,9 @@ export class ServiceAccountsService {
     });
 
     const store = new WorkloadBindingStore({
-      repository: savedObjects.createInternalRepository([SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE]),
+      client: savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+      }),
       encryptedClient: encryptedSavedObjects.getClient({
         includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
       }),

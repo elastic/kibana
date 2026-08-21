@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import type { WorkloadBindingAttributes } from './binding_saved_object';
@@ -35,17 +35,17 @@ const attributes = (
 });
 
 describe('WorkloadBindingStore', () => {
-  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
   let isEncryptionError: jest.Mock<boolean, [Error]>;
   let store: WorkloadBindingStore;
 
   beforeEach(() => {
-    repository = savedObjectsRepositoryMock.create();
+    client = savedObjectsClientMock.create();
     encryptedClient = encryptedSavedObjectsMock.createClient();
     isEncryptionError = jest.fn().mockReturnValue(false);
     store = new WorkloadBindingStore({
-      repository,
+      client,
       encryptedClient,
       isEncryptionError,
       logger: loggingSystemMock.create().get('workload-bindings'),
@@ -83,13 +83,13 @@ describe('WorkloadBindingStore', () => {
       const written = attributes();
       const binding = await store.set(written);
 
-      expect(repository.create).toHaveBeenCalledWith(
-        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-        written,
-        { id: getWorkloadBindingId(COORDINATES), overwrite: true, refresh: 'wait_for' }
-      );
+      expect(client.create).toHaveBeenCalledWith(SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE, written, {
+        id: getWorkloadBindingId(COORDINATES),
+        overwrite: true,
+        refresh: 'wait_for',
+      });
       // Never `update`: a partial write would not re-derive the canary's authentication.
-      expect(repository.update).not.toHaveBeenCalled();
+      expect(client.update).not.toHaveBeenCalled();
 
       expect(binding).toEqual({
         ...COORDINATES,
@@ -105,7 +105,7 @@ describe('WorkloadBindingStore', () => {
   describe('#delete', () => {
     it('reports a removed binding', async () => {
       await expect(store.delete(COORDINATES)).resolves.toBe(true);
-      expect(repository.delete).toHaveBeenCalledWith(
+      expect(client.delete).toHaveBeenCalledWith(
         SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
         getWorkloadBindingId(COORDINATES),
         { refresh: 'wait_for' }
@@ -113,7 +113,7 @@ describe('WorkloadBindingStore', () => {
     });
 
     it('treats a missing binding as success, so detaching twice is not an error', async () => {
-      repository.delete.mockRejectedValue(
+      client.delete.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
           'id'
@@ -124,7 +124,7 @@ describe('WorkloadBindingStore', () => {
     });
 
     it('propagates any other failure', async () => {
-      repository.delete.mockRejectedValue(new Error('cluster unavailable'));
+      client.delete.mockRejectedValue(new Error('cluster unavailable'));
       await expect(store.delete(COORDINATES)).rejects.toThrowError('cluster unavailable');
     });
   });
@@ -217,14 +217,14 @@ describe('WorkloadBindingStore', () => {
       mockFinder([]);
       await store.findByServiceAccountId('service-account-id');
 
-      const [[findOptions]] = repository.createPointInTimeFinder.mock.calls;
+      const [[findOptions]] = client.createPointInTimeFinder.mock.calls;
       expect(findOptions.type).toBe(SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE);
       expect(JSON.stringify(findOptions.filter)).toContain('serviceAccountId');
     });
 
     it('closes the finder even when a page fails', async () => {
       const close = jest.fn();
-      repository.createPointInTimeFinder.mockReturnValue({
+      client.createPointInTimeFinder.mockReturnValue({
         async *find() {
           throw new Error('search failed');
         },
@@ -241,7 +241,7 @@ describe('WorkloadBindingStore', () => {
   /** Stubs the point-in-time finder with the given pages; returns its `close` spy. */
   function mockFinder(pages: Array<Array<Partial<{ id: string; attributes: unknown }>>>) {
     const close = jest.fn();
-    repository.createPointInTimeFinder.mockReturnValue({
+    client.createPointInTimeFinder.mockReturnValue({
       async *find() {
         for (const page of pages) {
           yield { saved_objects: page };
