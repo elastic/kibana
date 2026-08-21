@@ -11,6 +11,6 @@
     "configPath": ["xpack", "evals"],
     "requiredPlugins": ["features", "encryptedSavedObjects", "inference"],
     "optionalPlugins": ["management", "spaces", "security", "workflowsExtensions", "workflowsManagement"],
-    "requiredBundles": ["kibanaReact", "spaces", "workflowsExtensions"]
+    "requiredBundles": ["kibanaReact", "spaces", "workflowsExtensions", "esUiShared"]
   }
 }

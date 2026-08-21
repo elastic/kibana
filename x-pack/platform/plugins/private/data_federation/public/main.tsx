@@ -17,11 +17,11 @@ import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
+import { CreateDatasetWizardPage } from './create_dataset_wizard';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
-const DATASETS_PATH = '/datasets' as const;
-const DATA_SOURCES_PATH = '/data_sources' as const;
+import { CREATE_DATASET_PATH, DATASETS_PATH, DATA_SOURCES_PATH } from './app_paths';
 
 export const Main: FunctionComponent = () => {
   const {
@@ -55,7 +55,12 @@ export const Main: FunctionComponent = () => {
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
 
   useEffect(() => {
-    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
+    if (
+      pathname === CREATE_DATASET_PATH ||
+      hasUserSelectedTab ||
+      !hasLoadedDataSources ||
+      !hasLoadedDataSets
+    ) {
       return;
     }
 
@@ -69,6 +74,7 @@ export const Main: FunctionComponent = () => {
     hasLoadedDataSources,
     hasUserSelectedTab,
     dataSources.length,
+    pathname,
     selectedTabId,
   ]);
 
@@ -130,6 +136,17 @@ export const Main: FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <Routes>
+        <Route
+          exact
+          path={CREATE_DATASET_PATH}
+          render={() => (
+            <CreateDatasetWizardPage
+              dataSources={dataSources}
+              existingDataSetNames={dataSets.map((ds) => ds.name)}
+              loadDataSets={reloadDataSets}
+            />
+          )}
+        />
         <Route
           exact
           path={DATASETS_PATH}

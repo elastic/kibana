@@ -18,69 +18,6 @@ export const CREATE_DATASET_BUTTON = i18n.translate(
   }
 );
 
-export const CREATE_DATASET_FLYOUT_TITLE = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.title',
-  {
-    defaultMessage: 'Create dataset',
-  }
-);
-
-export const CREATE_DATASET_NAME_LABEL = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.nameLabel',
-  {
-    defaultMessage: 'Name',
-  }
-);
-
-export const CREATE_DATASET_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.descriptionLabel',
-  {
-    defaultMessage: 'Description',
-  }
-);
-
-export const CREATE_DATASET_NAME_REQUIRED_ERROR = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.nameRequiredError',
-  {
-    defaultMessage: 'Name is required.',
-  }
-);
-
-export const CREATE_DATASET_SPACES_REQUIRED_ERROR = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.spacesRequiredError',
-  {
-    defaultMessage: 'Pick at least one space, otherwise nobody can reach this dataset.',
-  }
-);
-
-export const CREATE_DATASET_FAILED_TITLE = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.failedTitle',
-  {
-    defaultMessage: 'Could not create dataset',
-  }
-);
-
-export const CREATE_DATASET_CANCEL_BUTTON = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.cancelButton',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
-export const getCreatedInOtherSpacesMessage = (datasetName: string, spaceNames: string[]) =>
-  i18n.translate('xpack.evals.datasetsList.createdInOtherSpacesMessage', {
-    defaultMessage:
-      'Created "{datasetName}" in {spaceNames}. It is not assigned to this space, so it will not appear in this list.',
-    values: { datasetName, spaceNames: spaceNames.join(', ') },
-  });
-
-export const CREATE_DATASET_SUBMIT_BUTTON = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetFlyout.submitButton',
-  {
-    defaultMessage: 'Create dataset',
-  }
-);
-
 export const TABLE_CAPTION = i18n.translate('xpack.evals.datasetsList.tableCaption', {
   defaultMessage: 'Datasets',
 });

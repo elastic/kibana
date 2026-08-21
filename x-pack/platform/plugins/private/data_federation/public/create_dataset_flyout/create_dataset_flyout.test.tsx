@@ -70,7 +70,6 @@ describe('CreateDatasetFlyout', () => {
 
     expect(queryByTestId('createDatasetFlyoutResource')).toBeNull();
     expect(queryByTestId('createDatasetFlyoutSettingsFormat')).toBeNull();
-    expect(queryByTestId('createDatasetFlyoutAdvancedSettingsToggle')).toBeNull();
 
     fireEvent.change(getByTestId('createDatasetFlyoutDataSource'), {
       target: { value: 'source-1' },
@@ -78,6 +77,6 @@ describe('CreateDatasetFlyout', () => {
 
     expect(queryByTestId('createDatasetFlyoutResource')).not.toBeNull();
     expect(queryByTestId('createDatasetFlyoutSettingsFormat')).not.toBeNull();
-    expect(queryByTestId('createDatasetFlyoutAdvancedSettingsToggle')).not.toBeNull();
+    expect(queryByTestId('createDatasetFlyoutSettingsPartitionDetection')).not.toBeNull();
   });
 });
