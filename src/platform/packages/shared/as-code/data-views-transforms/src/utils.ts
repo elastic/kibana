@@ -12,7 +12,7 @@ import type {
   AsCodeFieldFormat,
   AsCodeHistogramFormat,
 } from '@kbn/as-code-data-views-schema/src/types';
-import { camelCase, snakeCase } from 'lodash';
+import { camelCase, isPlainObject, snakeCase } from 'lodash';
 
 export function isDurationFormat(format: AsCodeFieldFormat): format is AsCodeDurationFormat {
   return format.type === 'duration';
@@ -22,14 +22,10 @@ export function isHistogramFormat(format: AsCodeFieldFormat): format is AsCodeHi
   return format.type === 'histogram';
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 export function snakeCaseKeys(obj: Record<string, any>): Record<string, any> {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => {
-      if (isRecord(value)) {
+      if (isPlainObject(value)) {
         return [snakeCase(key), snakeCaseKeys(value)];
       }
       return [snakeCase(key), value];
@@ -40,7 +36,7 @@ export function snakeCaseKeys(obj: Record<string, any>): Record<string, any> {
 export function camelCaseKeys(obj: Record<string, any>): Record<string, any> {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => {
-      if (isRecord(value)) {
+      if (isPlainObject(value)) {
         return [camelCase(key), camelCaseKeys(value)];
       }
       return [camelCase(key), value];

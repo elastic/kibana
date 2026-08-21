@@ -95,21 +95,19 @@ export function toStoredFieldFormats(
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
     if ('format' in field && field.format) {
+      const params = toStoredFieldFormatParams(field.format);
       fieldFormats[name] = {
         id: field.format.type,
-        ...(toStoredFieldFormatParams(field.format)
-          ? { params: toStoredFieldFormatParams(field.format) }
-          : {}),
+        ...(params ? { params } : {}),
       };
     }
     if (!isCompositeRuntimeField(field)) continue;
     for (const [subName, subField] of Object.entries(field.fields)) {
       if ('format' in subField && subField.format) {
+        const params = toStoredFieldFormatParams(subField.format);
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          ...(toStoredFieldFormatParams(subField.format)
-            ? { params: toStoredFieldFormatParams(subField.format) }
-            : {}),
+          ...(params ? { params } : {}),
         };
       }
     }
@@ -123,11 +121,13 @@ export function toStoredFieldFormatParams(
   if (!('params' in format) || !format.params) return undefined;
 
   if (isDurationFormat(format)) {
-    const outputFormat = camelCase(format.params.output_format);
+    const outputFormat = format.params.output_format
+      ? camelCase(format.params.output_format)
+      : undefined;
 
     return {
       ...camelCaseKeys(format.params),
-      outputFormat,
+      ...(outputFormat ? { outputFormat } : {}),
     };
   }
 

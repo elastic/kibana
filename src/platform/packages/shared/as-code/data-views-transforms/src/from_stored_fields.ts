@@ -111,11 +111,13 @@ function fromStoredFieldFormatParams(format: NonNullable<DataViewSpec['fieldForm
   if (!format.params) return undefined;
 
   if (format.id === 'duration') {
-    const outputFormat = snakeCase(format.params.outputFormat?.toString());
+    const outputFormat = format.params.outputFormat
+      ? snakeCase(format.params.outputFormat.toString())
+      : undefined;
 
     return {
       ...snakeCaseKeys(format.params),
-      output_format: outputFormat,
+      ...(outputFormat ? { output_format: outputFormat } : {}),
     };
   }
 
