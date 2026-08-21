@@ -99,9 +99,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     tourPopoverWidth: 360,
   };
 
-  // The anchor element is tracked as state (via a callback ref) instead of a plain RefObject:
-  // ref attachment does not trigger a re-render, so a `ref.current !== null` render guard may
-  // never re-evaluate and the tour would never mount.
   const [tourAnchorElement, setTourAnchorElement] = useState<HTMLDivElement | null>(null);
   const tourTargetRef = useCallback((node: HTMLDivElement | null) => {
     setTourAnchorElement(node);
@@ -155,9 +152,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     localStorage.setItem(TOUR_QUERY_RULES_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
 
-  // Tour step 1 anchors to the "Test in Console" menu item. The AppHeader menu is
-  // lazy-loaded, so the button appears in the DOM asynchronously — observe for it
-  // instead of querying once.
   const [consoleTourAnchor, setConsoleTourAnchor] = useState<HTMLElement | null>(null);
   useEffect(() => {
     if (!isTourEnabled || !tourState.isTourActive) {
