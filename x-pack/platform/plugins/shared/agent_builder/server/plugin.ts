@@ -38,6 +38,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 
 export class AgentBuilderPlugin
   implements
@@ -57,6 +58,7 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -323,6 +325,7 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
   /**
