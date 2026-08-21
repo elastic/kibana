@@ -18,6 +18,7 @@ import {
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 import { TestProviders } from '../../common/mock';
+import { selectNotesTableSearch, selectNotesTableAssociatedFilter } from '..';
 
 jest.mock('../../common/components/user_profiles/use_suggest_users');
 
@@ -84,10 +85,9 @@ describe('SearchRow', () => {
   });
 
   it('should restore a previously applied search value from the store on mount', () => {
-    (useSelector as jest.Mock).mockImplementation((selector: unknown) => {
-      const { selectNotesTableSearch } = jest.requireActual('..');
-      return selector === selectNotesTableSearch ? 'previous search' : AssociatedFilter.all;
-    });
+    (useSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectNotesTableSearch ? 'previous search' : AssociatedFilter.all
+    );
 
     const { getByTestId } = render(
       <TestProviders>
@@ -99,10 +99,9 @@ describe('SearchRow', () => {
   });
 
   it('should restore a previously applied associated filter from the store on mount', () => {
-    (useSelector as jest.Mock).mockImplementation((selector: unknown) => {
-      const { selectNotesTableAssociatedFilter } = jest.requireActual('..');
-      return selector === selectNotesTableAssociatedFilter ? AssociatedFilter.documentOnly : '';
-    });
+    (useSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectNotesTableAssociatedFilter ? AssociatedFilter.documentOnly : ''
+    );
 
     const { getByTestId } = render(
       <TestProviders>

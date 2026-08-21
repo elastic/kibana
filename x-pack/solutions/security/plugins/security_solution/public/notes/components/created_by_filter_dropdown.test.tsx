@@ -79,11 +79,19 @@ describe('UserFilterDropdown', () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it('should restore the previously selected user from the store on mount', async () => {
+  it('should restore the previously selected user from the store on mount', () => {
     (useSelector as jest.Mock).mockReturnValue('1'); // uid matching 'test' user
 
     render(<CreatedByFilterDropdown />);
 
-    expect(await screen.findByDisplayValue('test')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('test')).toBeInTheDocument();
+  });
+
+  it('should show no selection when the stored filter is cleared', () => {
+    (useSelector as jest.Mock).mockReturnValue('');
+
+    const { getByTestId } = render(<CreatedByFilterDropdown />);
+
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 });

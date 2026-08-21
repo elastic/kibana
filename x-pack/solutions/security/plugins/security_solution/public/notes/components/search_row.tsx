@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiSearchBar,
   EuiSelect,
+  Query,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -69,7 +70,7 @@ export const SearchRow = React.memo(() => {
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
-        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery={notesSearch} />
+        <EuiSearchBar box={searchBox} onChange={onQueryChange} query={Query.parse(notesSearch)} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <CreatedByFilterDropdown />

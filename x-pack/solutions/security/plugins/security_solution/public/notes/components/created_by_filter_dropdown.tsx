@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiToolTip } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -52,17 +52,15 @@ export const CreatedByFilterDropdown = React.memo(() => {
   );
 
   const createdByFilter = useSelector(selectNotesTableCreatedByFilter);
-  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<User>>>();
 
-  useEffect(() => {
-    if (!createdByFilter || !users.length) return;
+  const selectedUser = useMemo<Array<EuiComboBoxOptionOption<User>>>(() => {
+    if (!createdByFilter || !users.length) return [];
     const match = users.find((u) => u.id === createdByFilter);
-    if (match) setSelectedUser([match]);
+    return match ? [match] : [];
   }, [createdByFilter, users]);
 
   const onChange = useCallback(
     (user: Array<EuiComboBoxOptionOption<User>>) => {
-      setSelectedUser(user);
       dispatch(userFilterCreatedBy(user.length > 0 ? (user[0].id as string) : ''));
     },
     [dispatch]
