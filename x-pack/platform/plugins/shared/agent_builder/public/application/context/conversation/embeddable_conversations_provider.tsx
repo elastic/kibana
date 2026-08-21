@@ -25,6 +25,7 @@ import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
+import { ConversationMessageQueueProvider } from '../conversation_message_queue/conversation_message_queue_context';
 
 const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -274,7 +275,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
               <StreamingProvider>
                 <ConversationContext.Provider value={conversationContextValue}>
                   <ConversationChangeNotifier />
-                  {children}
+                  <ConversationMessageQueueProvider>{children}</ConversationMessageQueueProvider>
                 </ConversationContext.Provider>
               </StreamingProvider>
             </AppLeaveContext.Provider>

@@ -22,6 +22,8 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { useConversationMessageQueue } from '../../../context/conversation_message_queue/conversation_message_queue_context';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -59,6 +61,12 @@ jest.mock('./message_editor', () => ({
   ),
   CommandBadgeSerializationError: class extends Error {},
 }));
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
+}));
+jest.mock('../../../context/conversation_message_queue/conversation_message_queue_context', () => ({
+  useConversationMessageQueue: jest.fn(),
+}));
 jest.mock('./input_actions', () => ({
   InputActions: () => null,
 }));
@@ -81,6 +89,8 @@ const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockedUseConversationMessageQueue = jest.mocked(useConversationMessageQueue);
 
 const submitMessage = jest.fn();
 const editorController = {
@@ -125,6 +135,14 @@ describe('ConversationInput', () => {
       messageEditor: {} as never,
       controller: editorController,
     } as never);
+    mockedUseExperimentalFeatures.mockReturnValue(false);
+    mockedUseConversationMessageQueue.mockReturnValue({
+      queues: new Map(),
+      enqueue: jest.fn(),
+      remove: jest.fn(),
+      clear: jest.fn(),
+      isMessageQueueFull: jest.fn().mockReturnValue(false),
+    });
   });
 
   it('calls onSubmitOverride with editor content and skips submitMessage when override is provided', () => {

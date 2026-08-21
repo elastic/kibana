@@ -201,6 +201,7 @@ const ebtAction = {
     VIEW_TOOL_RESPONSE: 'view_tool_response',
     VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',
     OPEN_ESQL_IN_DISCOVER: 'open_esql_in_discover',
+    MESSAGE_QUEUE_REMOVE: 'message_queue_remove',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',
