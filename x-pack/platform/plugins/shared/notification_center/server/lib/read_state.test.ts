@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
 import {
   MAX_OVERRIDES,
   OVERRIDES_KEY,
+  READ_ALL_BEFORE_DEFAULT,
   READ_ALL_BEFORE_KEY,
   type ReadOverrides,
 } from '../storage/user_storage';
-import { markRead, markAllRead } from './read_state';
+import { getReadState, isReadAt, markRead, markAllRead } from './read_state';
 
 const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: string } = {}) => {
   const store: Record<string, unknown> = {
@@ -94,5 +96,62 @@ describe('markAllRead', () => {
 
     const setKeys = (client.set as jest.Mock).mock.calls.map(([key]) => key);
     expect(setKeys).toEqual([READ_ALL_BEFORE_KEY, OVERRIDES_KEY]);
+  });
+});
+
+describe('getReadState', () => {
+  it('reads both keys for the scoped user', async () => {
+    const { client } = createClient({
+      overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
+      readAllBefore: '2026-07-02T00:00:00.000Z',
+    });
+
+    await expect(getReadState(client, loggingSystemMock.createLogger())).resolves.toEqual({
+      overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
+      readAllBefore: '2026-07-02T00:00:00.000Z',
+    });
+  });
+
+  it('degrades to an unannotated list when userStorage fails', async () => {
+    const { client } = createClient();
+    (client.get as jest.Mock).mockRejectedValue(new Error('boom'));
+    const logger = loggingSystemMock.createLogger();
+
+    await expect(getReadState(client, logger)).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+});
+
+describe('isReadAt', () => {
+  const at = (copy: string, state: Parameters<typeof isReadAt>[0]) => isReadAt(state, 'a', copy);
+
+  it('reads copies at or before readAllBefore when the id has no override', () => {
+    const state = { overrides: {}, readAllBefore: '2026-07-15T00:00:00.000Z' };
+
+    expect(at('2026-07-15T00:00:00.000Z', state)).toBe(true);
+    expect(at('2026-07-14T00:00:00.000Z', state)).toBe(true);
+    // A copy pushed after the bulk catch-up is new activity, so it resurfaces as unread
+    expect(at('2026-07-16T00:00:00.000Z', state)).toBe(false);
+  });
+
+  it('prefers a read override over the marker, anchored on when it was recorded', () => {
+    const state = {
+      overrides: { a: readOverride('2026-07-10T00:00:00.000Z') },
+      readAllBefore: READ_ALL_BEFORE_DEFAULT,
+    };
+
+    expect(at('2026-07-09T00:00:00.000Z', state)).toBe(true);
+    // Marking a notification read acknowledges the copy in hand, not every future one
+    expect(at('2026-07-11T00:00:00.000Z', state)).toBe(false);
+  });
+
+  it('keeps an unread override unread regardless of the copy', () => {
+    const state = {
+      overrides: { a: { read: false, markedAt: '2026-07-10T00:00:00.000Z' } },
+      readAllBefore: '2026-07-20T00:00:00.000Z',
+    };
+
+    expect(at('2026-07-09T00:00:00.000Z', state)).toBe(false);
+    expect(at('2026-07-21T00:00:00.000Z', state)).toBe(false);
   });
 });
