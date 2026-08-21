@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
-import { ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
+import { ESQL_EXECUTES_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
+type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
-const makeHandlerContext = (ki: VerifyKiHandlerContext['input']['ki']): VerifyKiHandlerContext =>
+const makeHandlerContext = (
+  ki: VerifyKiHandlerContext['input']['ki'],
+  esClient: EsClientMock
+): VerifyKiHandlerContext =>
   ({
     input: { ki },
     config: {},
     rawInput: { ki },
-    contextManager: { getFakeRequest: jest.fn(), getScopedEsClient: jest.fn() },
+    contextManager: {
+      getFakeRequest: jest.fn(),
+      getScopedEsClient: jest.fn().mockReturnValue(esClient),
+    },
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
     stepId: 'verify_ki',
@@ -27,6 +34,9 @@ const makeHandlerContext = (ki: VerifyKiHandlerContext['input']['ki']): VerifyKi
 describe('verify_ki workflow step', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let uiSettingsGet: jest.Mock;
+  // Accepts every query, so verifier-level execution failures stay the concern
+  // of the verifier's own tests; these cover the step's wiring.
+  let esClient: EsClientMock;
 
   const setContextEngineEnabled = (isEnabled: boolean) => {
     uiSettingsGet.mockResolvedValue(isEnabled);
@@ -40,11 +50,13 @@ describe('verify_ki workflow step', () => {
       get: uiSettingsGet,
     } as unknown as ReturnType<typeof startServices.uiSettings.asScopedToClient>);
     coreSetup.getStartServices.mockResolvedValue([startServices, {}, undefined]);
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
   });
 
   const runHandler = async (ki: VerifyKiHandlerContext['input']['ki']) => {
     const definition = createVerifyKiStepDefinition(coreSetup, loggingSystemMock.createLogger());
-    const { output } = await definition.handler(makeHandlerContext(ki));
+    const { output } = await definition.handler(makeHandlerContext(ki, esClient));
     if (!output) {
       throw new Error('step returned no output');
     }
@@ -60,7 +72,18 @@ describe('verify_ki workflow step', () => {
     });
 
     expect(output.passed).toBe(true);
-    expect(output.results).toEqual([{ verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true }]);
+    expect(output.results).toEqual([
+      { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
+      { verifier: ESQL_EXECUTES_VERIFIER_ID, passed: true },
+    ]);
+  });
+
+  it('hands the scoped Elasticsearch client to the verifiers that need one', async () => {
+    setContextEngineEnabled(true);
+
+    await runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } });
+
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
 
   it('fails a KI with invalid ES|QL and reports the reason', async () => {
@@ -77,6 +100,7 @@ describe('verify_ki workflow step', () => {
         passed: false,
         reason: expect.stringContaining('NOT_A_FUNCTION'),
       },
+      { verifier: ESQL_EXECUTES_VERIFIER_ID, passed: true },
     ]);
   });
 

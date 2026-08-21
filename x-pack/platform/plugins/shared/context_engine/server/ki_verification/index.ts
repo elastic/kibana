@@ -19,6 +19,9 @@ export { KiVerificationService } from './service';
 export { createKiVerifierRegistry } from './create_registry';
 export {
   createEsqlValidSyntaxVerifier,
+  createEsqlExecutesVerifier,
   ESQL_ATTRIBUTE_KEY,
   ESQL_VALID_SYNTAX_VERIFIER_ID,
+  ESQL_EXECUTES_VERIFIER_ID,
+  ESQL_EXECUTION_ROW_LIMIT,
 } from './verifiers';

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+export { ESQL_ATTRIBUTE_KEY } from './esql_attribute';
+export { createEsqlValidSyntaxVerifier, ESQL_VALID_SYNTAX_VERIFIER_ID } from './esql_valid_syntax';
 export {
-  createEsqlValidSyntaxVerifier,
-  ESQL_ATTRIBUTE_KEY,
-  ESQL_VALID_SYNTAX_VERIFIER_ID,
-} from './esql_valid_syntax';
+  createEsqlExecutesVerifier,
+  ESQL_EXECUTES_VERIFIER_ID,
+  ESQL_EXECUTION_ROW_LIMIT,
+} from './esql_executes';
