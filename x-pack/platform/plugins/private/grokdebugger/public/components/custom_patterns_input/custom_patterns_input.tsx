@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditor } from '@kbn/code-editor';
@@ -34,7 +35,7 @@ MSG message-id=<%{GREEDYDATA}>`;
     >
       <EuiSpacer size="m" />
 
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.grokDebugger.customPatterns.callOutTitle"
@@ -43,7 +44,7 @@ MSG message-id=<%{GREEDYDATA}>`;
         }
       >
         <EuiCodeBlock>{sampleCustomPatterns}</EuiCodeBlock>
-      </EuiCallOut>
+      </KbnInfoCallout>
 
       <EuiSpacer size="m" />
 
