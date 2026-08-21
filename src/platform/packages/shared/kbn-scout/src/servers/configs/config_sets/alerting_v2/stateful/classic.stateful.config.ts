@@ -16,7 +16,6 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      // '--mockIdpPlugin.enabled=false',
       '--xpack.alerting_v2.enabled=true',
       // Relax the schedule guardrails so functional tests can run rules every few seconds
       // without tripping the minimum-interval or per-minute limits.
