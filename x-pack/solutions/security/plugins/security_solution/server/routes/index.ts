@@ -145,7 +145,7 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  registerAttacksRoutes(router, ruleDataClient, telemetrySender, eventBus);
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender, eventBus, logger);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 

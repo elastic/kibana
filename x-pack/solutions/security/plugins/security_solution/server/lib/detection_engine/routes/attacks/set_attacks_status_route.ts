@@ -6,6 +6,7 @@
  */
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
 import {
@@ -47,7 +48,8 @@ export const setAttacksStatusRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
   telemetrySender: ITelemetryEventsSender,
-  eventBus?: SecuritySolutionEventBus
+  eventBus?: SecuritySolutionEventBus,
+  logger?: Logger
 ) => {
   router.versioned
     .post({
@@ -123,8 +125,10 @@ export const setAttacksStatusRoute = (
                 ids
               );
               attackPreviousStatuses.push(...fetched);
-            } catch {
-              // Non-blocking
+            } catch (err) {
+              logger?.warn(
+                `Failed to pre-fetch previous statuses for workflow trigger (attacks status): ${err}`
+              );
             }
           }
           return withSiemErrorHandlingAndAttacksTelemetry(
@@ -199,8 +203,10 @@ export const setAttacksStatusRoute = (
                   relatedAlertIds
                 );
                 relatedAlertPreviousStatuses.push(...fetched);
-              } catch {
-                // Non-blocking
+              } catch (err) {
+                logger?.warn(
+                  `Failed to pre-fetch previous statuses for workflow trigger (attacks cascade status): ${err}`
+                );
               }
             }
 
