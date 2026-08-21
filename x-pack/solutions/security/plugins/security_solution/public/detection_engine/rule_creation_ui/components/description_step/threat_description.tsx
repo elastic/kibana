@@ -101,31 +101,37 @@ export const ThreatEuiFlexGroup = ({
   return (
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>
       {threat.map((singleThreat, index) => {
-        const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
-        const tacticUnsupported = showUnsupportedWarnings && tactic == null;
+        const threatTactic = singleThreat?.tactic;
+        const tactic = threatTactic
+          ? tacticsOptions.find((t) => t.id === threatTactic.id)
+          : undefined;
+        const tacticUnsupported = showUnsupportedWarnings && threatTactic != null && tactic == null;
         return (
-          <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="threatTacticLink"
-                  href={singleThreat.tactic.reference}
-                  target="_blank"
-                >
-                  {tactic != null
-                    ? tactic.label
-                    : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
-                </EuiLink>
-              </EuiFlexItem>
-              {tacticUnsupported && (
+          <EuiFlexItem key={`${threatTactic?.name ?? 'threat'}-${index}`}>
+            {threatTactic ? (
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
                 <EuiFlexItem grow={false}>
-                  <UnsupportedMitreIdWarning id={singleThreat.tactic.id} />
+                  <EuiLink
+                    data-test-subj="threatTacticLink"
+                    href={threatTactic.reference}
+                    target="_blank"
+                  >
+                    {tactic != null ? tactic.label : `${threatTactic.name} (${threatTactic.id})`}
+                  </EuiLink>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                {tacticUnsupported && (
+                  <EuiFlexItem grow={false}>
+                    <UnsupportedMitreIdWarning id={threatTactic.id} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ) : null}
             <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-              {singleThreat.technique &&
+              {singleThreat?.technique &&
                 singleThreat.technique.map((technique, techniqueIndex) => {
+                  if (technique == null) {
+                    return null;
+                  }
                   const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                   const techniqueUnsupported = showUnsupportedWarnings && myTechnique == null;
                   return (
@@ -154,6 +160,9 @@ export const ThreatEuiFlexGroup = ({
                       <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                         {technique.subtechnique != null &&
                           technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
+                            if (subtechnique == null) {
+                              return null;
+                            }
                             const mySubtechnique = subtechniquesOptions.find(
                               (t) => t.id === subtechnique.id
                             );
