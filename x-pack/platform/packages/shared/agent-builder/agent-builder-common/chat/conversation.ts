@@ -25,6 +25,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
+import type { TimelineEvent } from './timeline_events';
 import type { MetadataFieldValue } from '../templates';
 
 /**
@@ -453,6 +454,15 @@ export interface RoundModelUsageStats {
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
+/** Maximum accepted length for a client-supplied conversation title */
+export const CONVERSATION_TITLE_MAX_LENGTH = 500;
+
+/**
+ * Defensive cap on the length of a conversation id accepted from a request.
+ * Conversation ids are UUIDs, so this should be more than enough.
+ */
+export const CONVERSATION_ID_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */
@@ -509,6 +519,8 @@ export interface Conversation {
   pinned?: boolean;
   /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
   read_only?: boolean;
+  /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
+  events?: TimelineEvent[];
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

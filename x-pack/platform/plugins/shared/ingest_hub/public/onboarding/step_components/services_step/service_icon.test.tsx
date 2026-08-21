@@ -38,11 +38,11 @@ const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock
 const BASE_SERVICE: AwsServiceMatrixEntry = {
   id: 's3_logs',
   name: 'Amazon S3',
-  category: 'Storage',
+  category: 'storage',
   signalType: 'logs',
   packageName: 'aws',
   policyTemplate: 's3',
-  deliveryMethods: [{ method: 'agentless' }],
+  deploymentMethods: [{ method: 'managed_integration' }],
   defaultEnabled: false,
   showInUI: true,
 };

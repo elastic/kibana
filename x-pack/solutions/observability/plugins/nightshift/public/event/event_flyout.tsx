@@ -131,8 +131,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_uuid, event.event_id),
-    [event.event_uuid, event.event_id]
+    () => buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [event.event_id]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
