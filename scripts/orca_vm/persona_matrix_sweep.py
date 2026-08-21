@@ -80,6 +80,20 @@ PATCHED_SCOUT_CONFIG = (
     / "src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/"
     "evals_security_persona_matrix/stateful/classic.stateful.config.ts"
 )
+# Detection-rule-edit skill (PR #285833): adds the final-answer contract to
+# the skill checklist — 62% of detection-rule-edit runs in the 2026-08-21
+# sweep ended on a tool call with no user-facing closing message. The base
+# image predates the fix, so overlay it like the other patched sources.
+PATCHED_RULE_SKILL = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/plugins/security_solution/server/agent_builder/"
+    "skills/detection_rule_edit/index.ts"
+)
+PATCHED_RULE_SKILL_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/plugins/security_solution/server/"
+    "agent_builder/skills/detection_rule_edit/index.ts"
+)
 # Scout readiness: PR #285302 makes SCOUT_READY_TIMEOUT_MS configurable; the
 # orca-eval-base-v5 image predates it, so cold-boot rspack compile (303
 # bundles) exceeds the hardcoded 180s and every VM fails before the eval
@@ -258,6 +272,7 @@ def deploy(ip: str) -> None:
         "kbn-evals-suite-security-persona-matrix/playwright.config.ts"
     )
     scp(str(PATCHED_PW_CONFIG), ip, PW_CONFIG_REMOTE)
+    scp(str(PATCHED_RULE_SKILL), ip, PATCHED_RULE_SKILL_REMOTE)
     # Env-truth fixtures (PR #286421): seeds + idempotent tool reinstall + spec wiring.
     ssh(ip, f"mkdir -p ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures ~/{FIXTURES_REMOTE_PREFIX}/evals")
     scp(str(PATCHED_ENV_SEEDS), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/env_seeds.ts")
@@ -270,6 +285,8 @@ def deploy(ip: str) -> None:
                   f"grep -q MAX_PAYLOAD_BYTES ~/{PATCHED_SCOUT_CONFIG_REMOTE} && "
                   f"grep -q SCOUT_READY_TIMEOUT_MS ~/{EVAL_STACK_REMOTE} && "
                   f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE} && "
+                  f"grep -q FinalAnswerPresent ~/{PATCHED_EVALUATOR_REMOTE} && "
+                  f"grep -q 'NEVER finish the turn' ~/{PATCHED_RULE_SKILL_REMOTE} && "
                   f"echo OVERLAY_OK")
     if "OVERLAY_OK" not in out:
         raise RuntimeError(f"patched overlay verification failed on {ip}: {out}")

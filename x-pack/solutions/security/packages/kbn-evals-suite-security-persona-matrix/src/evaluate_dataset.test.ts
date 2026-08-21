@@ -13,6 +13,7 @@ import {
   createEvaluatePersonaMatrixDataset,
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
+  createPersonaMatrixFinalAnswerPresentEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
@@ -252,6 +253,39 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
     } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
     expect(result.score).toBe(1);
     expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([]);
+  });
+});
+
+describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
+  const evaluate = (output: unknown) =>
+    createPersonaMatrixFinalAnswerPresentEvaluator().evaluate({
+      input: { question: 'q' },
+      expected: undefined,
+      output,
+      metadata: {},
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']>[0]);
+
+  it('scores 1 when the run produced a non-empty final message', async () => {
+    const result = await evaluate({ messages: [{ message: 'Rule created: ...' }] });
+    expect(result.score).toBe(1);
+  });
+
+  // Regression: 62% of detection-rule-edit runs in the 2026-08-21 sweep ended
+  // on a tool call with no user-facing closing text.
+  it('scores 0 when every message is empty', async () => {
+    const result = await evaluate({ messages: [{ message: '' }] });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when messages are missing from the output', async () => {
+    const result = await evaluate({ steps: [] });
+    expect(result.score).toBe(0);
+  });
+
+  it('returns N/A when there is no task output at all', async () => {
+    const result = await evaluate(undefined);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 });
 

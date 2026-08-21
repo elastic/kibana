@@ -116,6 +116,38 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
 });
 
 /**
+ * Regression gate for the empty-final-message failure mode: 62% of
+ * detection-rule-edit runs in the 2026-08-21 sweep ended on a tool call with
+ * no user-facing closing text, leaving judges (and users) with nothing to
+ * read. Scores 1 when the task output contains any non-empty message,
+ * otherwise 0. N/A only when the task produced no output at all (harness
+ * failure — already surfaced by every other evaluator).
+ */
+export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => ({
+  name: 'FinalAnswerPresent',
+  kind: 'CODE',
+  evaluate: async ({ output }) => {
+    const taskOutput = output as { messages?: Array<{ message?: unknown }> } | undefined;
+    if (!taskOutput) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No task output — skipping FinalAnswerPresent.',
+      };
+    }
+    const hasAnswer = (taskOutput.messages ?? []).some(
+      (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
+    );
+    return {
+      score: hasAnswer ? 1 : 0,
+      explanation: hasAnswer
+        ? 'Final user-facing message present.'
+        : 'Run ended without a user-facing final message.',
+    };
+  },
+});
+
+/**
  * Trajectory evaluator wrapper. Returns N/A when an example has no
  * `tool_sequence` annotation so partial-coverage datasets don't get
  * penalised. Mirrors `createAlertsRagTrajectoryEvaluator` in
@@ -294,6 +326,7 @@ export function createEvaluatePersonaMatrixDataset({
 
     const trajectoryEvaluator = createPersonaMatrixTrajectoryEvaluator();
     const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+    const finalAnswerPresentEvaluator = createPersonaMatrixFinalAnswerPresentEvaluator();
 
     const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
@@ -304,6 +337,7 @@ export function createEvaluatePersonaMatrixDataset({
       skillInvokedEvaluator,
       trajectoryEvaluator,
       expectedToolCalledEvaluator,
+      finalAnswerPresentEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       evaluators.criteria([
