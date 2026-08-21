@@ -490,19 +490,4 @@ export class LensDimensions {
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
-
-  /**
-   * Sets the reference function and field on an already-open dimension editor
-   * (FTR `configureReference`). Caller must leave the editor open (`keepOpen: true`).
-   */
-  async configureReference(opts: { operation: string; field: string }) {
-    await this.page.components
-      .comboBox('indexPattern-reference-function')
-      .setSelectedOptions([opts.operation]);
-    const fieldRow = this.page.testSubj.locator('indexPattern-reference-field-selection-row');
-    await fieldRow.waitFor({ state: 'visible' });
-    await this.page.components
-      .comboBox('indexPattern-dimension-field', fieldRow)
-      .setSelectedOptions([opts.field]);
-  }
 }
