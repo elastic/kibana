@@ -96,6 +96,11 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
+import {
+  APPLY_TEMPLATE_COUNTER,
+  CLEAR_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -466,6 +471,42 @@ export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
 }
+
+/**
+ * Counts the cases that had a template applied or cleared, once per case.
+ *
+ * A `template` key only survives into `updateReq` when it differs from the case's current
+ * template, so re-sending an unchanged one is not an apply. Restricted to the cases that actually
+ * persisted, since a bulk update can partially fail, and deduped by id so a request repeating a
+ * case id counts that case once, keeping the first change as `updatedFieldsByCaseId` does.
+ */
+const countTemplateChanges = (
+  casesToUpdate: UpdateRequestWithOriginalCase[],
+  persistedCaseIds: Set<string>
+): { appliedCases: number; clearedCases: number } => {
+  const countedCaseIds = new Set<string>();
+  let appliedCases = 0;
+  let clearedCases = 0;
+
+  for (const { updateReq } of casesToUpdate) {
+    const isCountable =
+      updateReq.template !== undefined &&
+      persistedCaseIds.has(updateReq.id) &&
+      !countedCaseIds.has(updateReq.id);
+
+    if (isCountable) {
+      countedCaseIds.add(updateReq.id);
+
+      if (updateReq.template === null) {
+        clearedCases += 1;
+      } else {
+        appliedCases += 1;
+      }
+    }
+  }
+
+  return { appliedCases, clearedCases };
+};
 
 /**
  * Updates the specified cases with new values
@@ -907,6 +948,15 @@ export const bulkUpdate = async (
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+
+    const { appliedCases, clearedCases } = countTemplateChanges(
+      casesToUpdate,
+      new Set(updatedCasesResponse.map(({ id }) => id))
+    );
+
+    incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
+    incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {
         // Keep first occurrence for duplicate ids handling.

@@ -14,6 +14,8 @@ import type { CasesClientArgs } from './types';
  */
 export const CREATE_CASE_WITH_TEMPLATE_COUNTER = 'create_case_with_template';
 export const CREATE_CASE_WITHOUT_TEMPLATE_COUNTER = 'create_case_without_template';
+export const APPLY_TEMPLATE_COUNTER = 'apply_template';
+export const CLEAR_TEMPLATE_COUNTER = 'clear_template';
 
 type CasesClientCounterArgs = Pick<CasesClientArgs, 'usageCounter' | 'clientSource'>;
 
