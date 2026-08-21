@@ -6,12 +6,13 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
 import type { ClusterPayload } from '../../../../common/lib';
 import type { RequestError } from '../../../types';
 import { extractQueryParams } from '../../../shared_imports';
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle } from '../components';
@@ -60,18 +61,14 @@ export const RemoteClusterAdd: React.FC<Props> = ({
     <EuiPageBody data-test-subj="remote-clusters-add">
       <EuiPageSection paddingSize="none">
         <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.addTitle"
-              defaultMessage="Add remote cluster"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClustersDescription"
-              defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
-            />
-          }
+          title={i18n.translate('xpack.remoteClusters.addTitle', {
+            defaultMessage: 'Add remote cluster',
+          })}
+          description={i18n.translate('xpack.remoteClusters.remoteClustersDescription', {
+            defaultMessage:
+              'Add a remote cluster that connects to seed nodes or to a single proxy address.',
+          })}
+          back={`/app${CRUD_APP_BASE_PATH}/list`}
         />
 
         <RemoteClusterWizard
