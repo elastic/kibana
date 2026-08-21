@@ -494,7 +494,7 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 
 **Memory limit:** "Job status shows `hard_limit` and results look wrong." → Troubleshoot → `ad_ts_model_memory_health` via `ml.query_anomalies` → `ml.ad_create_job` (`estimate_memory`) → `ml.ad_update_job_config` (`update_memory_limit`) — lifecycle: stop datafeed → close → update → open → start.
 
-**New job:** "Detect unusual error rates per host on nginx access logs." → Manage → Phase 1: sample `logs-nginx*` fields and cardinality → Phase 2: confirm what "unusual" means and whether any planned events exist → Phase 3: propose `high_count` by `host.keyword`, validate, show spec, recommend batch run → Phase 4: run historical batch, summarise findings ("5 anomalies found, peak on Aug 12"), show swimlane + anomaly charts + single metric viewer → Phase 5: if user approves, create realtime job and offer alerting.
+**New job:** "Detect unusual error rates per host on nginx access logs." → Manage → Phase 1: sample `logs-nginx*` fields and cardinality → Phase 2: confirm what "unusual" means and whether any planned events exist → Phase 3: propose `high_count` by `host.keyword`, validate, show spec, recommend batch run → Phase 4: run historical batch, summarise findings ("5 anomalies found, peak on Aug 12"), show swim lane + anomaly charts + single metric viewer → Phase 5: if user approves, create realtime job and offer alerting.
 
 **Calendar events:** "Create calendar `seasonal_sales_events` for Sept 1–16 'back to school' and Nov 27 2026 'black friday' on jobs A and B." → Troubleshoot → `ml.ad_get_job_info` (`get_calendar_events`) → `ml.ad_update_job_config` (`create_calendar_event` with `job_ids: [A, B]` + full `calendar_events` — once, not per job).
 
@@ -523,17 +523,17 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 
 | Situation | Chart |
 | --- | --- |
-| Investigation complete — entities and time ranges identified | Swimlane (`viewBy` on primary influencer field) |
-| After swimlane — comparing actual metric values across several top entities | Anomaly charts (multi-series view with model bounds + anomaly markers) |
-| After swimlane — narrowing to one entity + detector | Single metric viewer for that entity |
-| User asks to "show"/"visualise" anomalies with no investigation context | Swimlane (`overall`) first; then offer `viewBy` breakdown |
+| Investigation complete — entities and time ranges identified | Swim lane (`viewBy` on primary influencer field) |
+| After swim lane — comparing actual metric values across several top entities | Anomaly charts (multi-series view with model bounds + anomaly markers) |
+| After swim lane — narrowing to one entity + detector | Single metric viewer for that entity |
+| User asks to "show"/"visualise" anomalies with no investigation context | Swim lane (`overall`) first; then offer `viewBy` breakdown |
 | Explain mode — discussing model bounds or score deviation | Single metric viewer (actual vs model bounds is the visual score explanation) |
 | Forecast was run in Explain mode | Single metric viewer with `forecast_id` |
-| Manage mode — batch analysis complete and anomalies found | All three panels: swimlane (`overall`) → anomaly charts → single metric viewer for top entity |
+| Manage mode — batch analysis complete and anomalies found | All three panels: swim lane (`overall`) → anomaly charts → single metric viewer for top entity |
 
 Charts do **not** belong as unprompted additions in Troubleshoot mode (job health, memory, datafeed issues) or when explaining score methodology alone.
 
-### Swimlane type — decision logic
+### Swim lane type — decision logic
 
 Derive `swimlane_type` and `view_by` from the job's `analysis_config` (available from `ml.ad_get_job_info`) and from anomaly record field values already returned by prior RCA tools.
 
@@ -569,7 +569,7 @@ Heatmap — each row is one `view_by` field value, each column is a time bucket,
 
 ### `ml_anomaly_charts`
 
-Multi-series time series — one chart per anomalous entity/series — showing actual metric values alongside model bounds and anomaly markers. Useful for comparing how several top entities deviate from their respective baselines in a single view. Sits between the swimlane (score overview) and the single metric viewer (one-entity drill-down).
+Multi-series time series — one chart per anomalous entity/series — showing actual metric values alongside model bounds and anomaly markers. Useful for comparing how several top entities deviate from their respective baselines in a single view. Sits between the swim lane (score overview) and the single metric viewer (one-entity drill-down).
 
 ```json
 {
@@ -619,8 +619,8 @@ Populate `selected_entities` directly from anomaly record fields (`partition_fie
 
 ### Layout
 
-Stack in order of increasing specificity: swimlane (overview) → anomaly charts (multi-series detail) → single metric viewer (one-entity drill-down).
+Stack in order of increasing specificity: swim lane (overview) → anomaly charts (multi-series detail) → single metric viewer (one-entity drill-down).
 
-- Swimlane: `w: 24`, `h: 10`, `y: 0`.
-- Anomaly charts: `w: 24`, `h: 15`, `y: 10` (when shown alongside swimlane).
+- Swim lane: `w: 24`, `h: 10`, `y: 0`.
+- Anomaly charts: `w: 24`, `h: 15`, `y: 10` (when shown alongside swim lane).
 - Single metric viewer: `w: 24`, `h: 18`, `y: 10` (or `y: 25` when anomaly charts are also present).
