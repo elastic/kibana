@@ -19,6 +19,10 @@ export const LOGS = {
   DEFAULT_START_TIME: '2025-01-01T00:00:00.000Z',
   DEFAULT_END_TIME: '2025-01-01T01:00:00.000Z',
 
+  // The managed data view the observability solution ships, used to exercise the logs profile
+  // through a real data view rather than an ad hoc one.
+  ALL_LOGS_DATA_VIEW: 'All logs',
+
   SYNTH_LOGS_DATASET,
   SYNTH_LOGS_NAMESPACE: 'default',
   SYNTH_LOGS_HOST: 'synth-host',
