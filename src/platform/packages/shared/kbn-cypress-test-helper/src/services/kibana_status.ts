@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClient } from '@kbn/test';
+import { KbnClient } from '@kbn/kbn-client';
 import type { Client } from '@elastic/elasticsearch';
 import type { StatusResponse } from '@kbn/core-status-common';
 import { catchAxiosErrorFormatAndThrow } from '../error';

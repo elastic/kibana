@@ -9,4 +9,7 @@
 
 export type { LoadActionPerfOptions } from './src/lib/docs';
 export { EsArchiver } from './src/es_archiver';
-export * from './src/cli';
+export const runCli = async (): Promise<void> => {
+  const { runCli: runArchiverCli } = await import('./src/cli');
+  runArchiverCli();
+};

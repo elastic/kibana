@@ -25,7 +25,7 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/kbn-client",
-    "@kbn/test",
+    "@kbn/test-saml-auth",
     "@kbn/dev-cli-runner",
     "@kbn/core-status-common",
     "@kbn/dev-utils",

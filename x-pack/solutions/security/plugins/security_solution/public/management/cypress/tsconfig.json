@@ -22,7 +22,7 @@
     "@kbn/test-subj-selector",
     "@kbn/cases-plugin",
     "@kbn/kbn-client",
-    "@kbn/test",
+    "@kbn/test-saml-auth",
     "@kbn/repo-info",
     "@kbn/tooling-log",
     "@kbn/security-solution-serverless",
