@@ -17,8 +17,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-
-const DASHBOARD_SML_TYPE = 'dashboard';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -66,7 +65,7 @@ const toDashboardSearchContent = (state: DashboardState): string => {
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
-  id: DASHBOARD_SML_TYPE,
+  id: DASHBOARD_KI_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -96,7 +95,7 @@ export const createDashboardSmlType = ({
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        type: DASHBOARD_SML_TYPE,
+        type: DASHBOARD_KI_TYPE,
         title: dashboard.data.title ?? originId,
         content: toDashboardSearchContent(dashboard.data),
       };

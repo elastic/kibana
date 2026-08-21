@@ -10,9 +10,9 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
-  ACTION_POLICY_SML_TYPE,
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
@@ -36,7 +36,7 @@ export const createActionPolicySmlType = ({
   getInternalRepository,
   getIsAlertingV2Enabled,
 }: CreateActionPolicySmlTypeOptions): SmlTypeDefinition => ({
-  id: ACTION_POLICY_SML_TYPE,
+  id: ACTION_POLICY_KI_TYPE,
   fetchFrequency: () => '1m',
 
   async *list() {
@@ -89,7 +89,7 @@ export const createActionPolicySmlType = ({
       );
 
       return {
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: name,
         content: contentParts.join('\n'),
       };

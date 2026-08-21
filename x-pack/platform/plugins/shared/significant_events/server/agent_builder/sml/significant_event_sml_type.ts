@@ -9,7 +9,8 @@ import type { SmlEntry, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/
 import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import type { GetScopedClients } from '../../routes/types';
 
@@ -39,7 +40,7 @@ export const createSignificantEventSmlType = ({
   const eventService = new EventService();
 
   return {
-    id: SIGNIFICANT_EVENT_SML_TYPE,
+    id: SIGNIFICANT_EVENT_KI_TYPE,
     fetchFrequency: () => '10m',
 
     async *list(context) {
@@ -90,7 +91,7 @@ export const createSignificantEventSmlType = ({
         }
 
         return {
-          type: SIGNIFICANT_EVENT_SML_TYPE,
+          type: SIGNIFICANT_EVENT_KI_TYPE,
           title: event.title,
           content: eventToSmlContent(event),
         };
@@ -108,7 +109,7 @@ export const createSignificantEventSmlType = ({
      * by declaring `aiIndex: { read: ['significant_event'] }` (see `streams/server/plugin.ts`),
      * so the `kiType` here must stay in step with that declaration.
      */
-    getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_SML_TYPE }),
+    getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {
       if (!item.origin_id) {

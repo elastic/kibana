@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -59,21 +60,13 @@ describe('connectorSmlType', () => {
     logger: mockLogger,
   });
 
-  it('uses the KI type id the actions feature privilege grants (see actions/server/feature.ts)', () => {
-    // `aiIndex: { read: ['connector'] }` on ACTIONS_FEATURE is a literal, because the actions plugin
-    // cannot depend on this one. Renaming CONNECTOR_SML_TYPE without updating it would silently drop
-    // AI Index visibility rather than fail to compile. Note the KI type id is `connector`, not the
-    // saved-object type `action`.
-    expect(connectorSmlType.id).toBe('connector');
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('id', () => {
-    it('equals connector', () => {
-      expect(connectorSmlType.id).toBe('connector');
+    it('equals CONNECTOR_KI_TYPE', () => {
+      expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
 

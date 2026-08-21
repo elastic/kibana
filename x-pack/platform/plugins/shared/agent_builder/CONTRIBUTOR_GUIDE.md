@@ -889,8 +889,12 @@ class MyPlugin {
     // Register a reusable tab
     agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
 
-    // Assign tabs to a template, in render order
+    // Assign a display name, icon, and tabs (in render order) to a template
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'email',
       tabs: ['security.entities', 'security.overview'],
     });
   }
@@ -926,6 +930,10 @@ class SecurityPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
     agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'email',
       tabs: ['security.overview'],
     });
   }
@@ -934,6 +942,7 @@ class SecurityPlugin {
 
 ### Rules
 
+- **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
 - **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `attachments` and `timeline` are reserved for Agent Builder's built-in tabs.
 - **Duplicates**: Registering a duplicate tab id or template id throws.
 - **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
