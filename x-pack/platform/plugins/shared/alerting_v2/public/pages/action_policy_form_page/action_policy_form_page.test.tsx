@@ -254,7 +254,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('submits create payload on save', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPage();
 
       await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
@@ -288,7 +288,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('creates inline workflows and merges them into destinations on submit', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       renderPage();
 
@@ -322,7 +322,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('rolls back created workflows when policy creation fails', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       mockCreateMutateAsync.mockRejectedValue(new Error('policy failed'));
       renderPage();
@@ -346,7 +346,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('navigates to listing page on cancel', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPage();
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
@@ -408,7 +408,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('submits update payload on save', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,
@@ -445,7 +445,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('navigates to listing page on cancel', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,

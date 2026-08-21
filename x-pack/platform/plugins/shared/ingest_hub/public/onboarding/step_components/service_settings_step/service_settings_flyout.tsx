@@ -78,7 +78,6 @@ export function ServiceSettingsFlyout({
           draftTransport={draftTransport}
           onFieldChange={handleFieldChange}
           onTransportChange={setDraftTransport}
-          showTransportPrefix
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

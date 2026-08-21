@@ -19,6 +19,7 @@ import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getEsqlColumns: jest.fn(async () => []),
 }));
 

@@ -65,6 +65,8 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+export type SourceDisplayMode = 'summary' | 'json';
+
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
     onClick: (payload: { selectedDocIds: string[] }) => void;
