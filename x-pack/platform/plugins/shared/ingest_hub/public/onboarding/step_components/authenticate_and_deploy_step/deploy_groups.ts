@@ -7,7 +7,6 @@
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type {
   AuthenticateAndDeployStepState,
@@ -50,7 +49,8 @@ export interface GroupDeployOutcome {
  */
 export function buildDeployGroups(
   instances: ServiceInstance[],
-  selectedServiceIds: string[]
+  selectedServiceIds: string[],
+  servicesMap: Map<string, AwsServiceMatrixEntry>
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
@@ -62,7 +62,7 @@ export function buildDeployGroups(
   const added: ServiceInstance[] = [];
   for (const id of selectedServiceIds) {
     if (!coveredServiceIds.has(id)) {
-      const service = AWS_SERVICES_MAP.get(id);
+      const service = servicesMap.get(id);
       if (service?.showInUI) {
         added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
       }
@@ -74,11 +74,13 @@ export function buildDeployGroups(
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
 
   for (const inst of resolved) {
-    const service = AWS_SERVICES_MAP.get(inst.serviceId);
+    const service = servicesMap.get(inst.serviceId);
     if (!service) continue;
     // TODO(follow-up): non-agentless duplicates are silently dropped here.
     // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
-    if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
+    if (
+      !service.deploymentMethods.some((dm) => dm.method === 'managed_integration' && dm.preferred)
+    ) {
       continue;
     }
     if (inst.isDuplicate) {
