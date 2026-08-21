@@ -277,6 +277,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     // TODO: WAF only supports S3 input in ECF deployment mode
     // if users choose Agent-based deployment, cloudwatch should become available
     // and all package vars should be displayed
+    inputs: ['aws-s3'],
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
   {
@@ -528,8 +529,12 @@ export function buildAwsServiceMatrix(
       const dsStreams: Array<{ input?: string; enabled?: boolean }> = (ds as any)?.streams ?? [];
       const dsInputs: string[] = [...new Set(dsStreams.map((s) => s.input as string))];
       if (dsInputs.length > 0) {
-        inputs = dsInputs;
-        defaultEnabledInputs = dsInputs.filter((input) => {
+        // Static entry inputs act as an allowlist — skip manifest-derived inputs when already set.
+        if (!entry.inputs) {
+          inputs = dsInputs;
+        }
+        const effectiveInputs = inputs ?? dsInputs;
+        defaultEnabledInputs = effectiveInputs.filter((input) => {
           const stream = dsStreams.find((s) => s.input === input);
           return stream?.enabled !== false;
         });
@@ -625,15 +630,22 @@ export function buildAwsServiceMatrix(
     // gets deployment methods and becomes visible without a manual showInUI update.
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
+    // ECF trigger vars are expected to be the only required vars for ECF-only services
     // For ECF-only services, ECF manages all configuration internally.
     // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
-    // Suppress the rest of the manifest vars so the flyout stays minimal.
+    // Restrict to the effective inputs so services with a static input allowlist (e.g. WAF → S3
+    // only) don't surface trigger vars from inputs they don't support.
     const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
     if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
-      const allVarNames = new Set(
-        Object.values(varDefsByInput).flatMap((byName) => Object.keys(byName))
-      );
-      const ecfVarNames = [...allVarNames].filter((v) => ECF_TRIGGER_VARS.has(v));
+      const effectiveInputSet = new Set(inputs ?? []);
+      const ecfVarNames = [
+        ...new Set(
+          Object.entries(varDefsByInput)
+            .filter(([input]) => effectiveInputSet.size === 0 || effectiveInputSet.has(input))
+            .flatMap(([, byName]) => Object.keys(byName))
+            .filter((v) => ECF_TRIGGER_VARS.has(v))
+        ),
+      ];
       if (ecfVarNames.length > 0) {
         requiredConfig = ecfVarNames;
         optionalConfig = undefined;
