@@ -7,8 +7,7 @@
 
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
@@ -19,10 +18,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
-import {
-  initSecurityManagedWorkflowsClient,
-  type SecurityManagedWorkflowsClient,
-} from '../managed_workflows';
+import type { SecurityManagedWorkflowsClient } from '../managed_workflows';
 
 /**
  * The alert-analysis settings. Read from a space-scoped `uiSettings` client (by the settings
@@ -84,26 +80,4 @@ export const installSecurityAlertAnalysisWorkflow = async ({
   await managedWorkflowsClient.install(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
-};
-
-/**
- * Plugin-start entry point: install the workflow, then mark managed workflows ready. `ready()` must
- * run only after the install resolves (it closes the startup window and triggers reconciliation), so
- * this awaits the install first, reusing a single client, in one try/catch. Intended to be called
- * once, fire-and-forget, from the plugin's `start()`.
- */
-export const installSecurityAlertAnalysisWorkflowAndMarkReady = async ({
-  workflowsExtensions,
-  logger,
-}: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  logger: Logger;
-}): Promise<void> => {
-  try {
-    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
-    await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
-    await managedWorkflowsClient.ready();
-  } catch (error) {
-    logger.warn('Failed to install the alert analysis workflow', { error });
-  }
 };

@@ -174,7 +174,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
-import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/install_managed_workflows';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -874,11 +874,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.ruleMonitoringService.start(core, plugins);
 
     if (plugins.workflowsExtensions) {
-      // Install once in the global space, then mark ready (install is awaited before ready inside
+      // Install once in the global space, then mark ready (installs are awaited before ready inside
       // the helper). Fire-and-forget: startup must not block on it.
-      void installSecurityAlertAnalysisWorkflowAndMarkReady({
+      void installSecurityManagedWorkflowsAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
+        experimentalFeatures: config.experimentalFeatures,
       });
     }
 

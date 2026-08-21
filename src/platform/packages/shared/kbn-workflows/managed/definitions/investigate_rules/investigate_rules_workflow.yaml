@@ -1,0 +1,240 @@
+# =============================================================================
+# Security Investigate Rules Workflow (PoC)
+# =============================================================================
+#
+# Purpose:
+#   Periodically finds detection rules whose alerts analysts have recently
+#   CLOSED, runs the read-only `investigate-rule` Agent Builder skill for each
+#   rule to diagnose noise / false-positive patterns, and — when the skill
+#   reports analyst-confirmed patterns — pauses on a human review gate
+#   (waitForInput). If the reviewer approves, the proposed exception items are
+#   added to the rule's default exception list via the detection engine API.
+#   Nothing is ever mutated without explicit human approval.
+#
+# Flow:
+#   - Search closed alerts (last 24h) grouped by rule uuid (top 5 rules).
+#     Bucket keys are the rule object uuid (what the exceptions API needs);
+#     one sampled hit carries the rule signature id and name (what the skill
+#     and the security.rule attachment need).
+#   - For each rule:
+#     - Run the investigate-rule skill via the native ai.agent step, with a
+#       by-origin security.rule attachment and a structured-output schema
+#       (analysis summary + ready-to-apply exception items shaped exactly
+#       like the create-rule-exceptions API body).
+#     - If the skill found analyst-confirmed patterns: pause on waitForInput
+#       (apply: boolean + note). On approval, POST the proposed items to
+#       /api/detection_engine/rules/{rule uuid}/exceptions, which auto-creates
+#       and attaches the rule's default (rule_default) exception list.
+#
+# Author: Elastic
+# =============================================================================
+
+version: "1"
+name: "Security - Investigate noisy rules (PoC)"
+description: "Finds rules with recently closed alerts, runs the investigate-rule skill per rule, and — after human approval — adds the proposed exceptions to the rule. Author: Elastic"
+enabled: false
+tags:
+  - security
+  - detection-rules
+  - investigate-rule
+
+settings:
+  concurrency:
+    key: "security-investigate-rules"
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+  # Manual runs for demos and testing.
+  - type: manual
+
+steps:
+  # ---------------------------------------------------------------------------
+  # 1. Find rules with recently closed alerts (deterministic step).
+  # ---------------------------------------------------------------------------
+  - name: rules_with_closed_alerts
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: POST
+      path: /api/detection_engine/signals/search
+      body:
+        size: 0
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.alert.workflow_status: closed
+              - range:
+                  "@timestamp":
+                    gte: now-24h
+        aggs:
+          by_rule:
+            terms:
+              field: kibana.alert.rule.uuid
+              size: 5
+            aggs:
+              sample:
+                top_hits:
+                  size: 1
+                  _source:
+                    - kibana.alert.rule.rule_id
+                    - kibana.alert.rule.name
+
+  # ---------------------------------------------------------------------------
+  # 2. Per rule: investigate, review, and (on approval) add the exceptions.
+  #    The loop is sequential; a failing iteration (e.g. review timeout) is
+  #    skipped so the remaining rules still get processed.
+  # ---------------------------------------------------------------------------
+  - name: per_rule
+    type: foreach
+    foreach: "${{ steps.rules_with_closed_alerts.output.aggregations.by_rule.buckets }}"
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: investigate
+        type: ai.agent
+        timeout: 10m
+        # Persist the conversation so every investigation is auditable (and
+        # resumable) in the Agent Builder UI afterwards.
+        create-conversation: true
+        # No connector-id: the step falls back to the Agent Builder default model.
+        with:
+          attachments:
+            - type: security.rule
+              origin: "{{ foreach.item.sample.hits.hits[0]._source['kibana.alert.rule.rule_id'] }}"
+          message: >
+            Use the [/investigate-rule](skill://investigate-rule) skill to analyze
+            the detection rule with rule_id
+            "{{ foreach.item.sample.hits.hits[0]._source['kibana.alert.rule.rule_id'] }}"
+            (name: "{{ foreach.item.sample.hits.hits[0]._source['kibana.alert.rule.name'] }}").
+            Analysts closed {{ foreach.item.doc_count }} of its alerts in the last
+            24 hours.
+
+
+            You are running inside an automated workflow, not an interactive chat.
+            Follow the skill end to end and put its five-section analysis into the
+            analysis_summary field. Additionally, translate the skill's recommended
+            remediation into the structured output: for every analyst-CONFIRMED
+            closed false_positive/benign_positive pattern (Signal A only), emit one
+            ready-to-apply exception item. This does not violate the skill's
+            read-only rule: you are not mutating anything — a human reviews and
+            approves the items downstream before any change is applied.
+            If there are no confirmed dispositions, set has_confirmed_patterns to
+            false and leave exception_items empty.
+          schema:
+            type: object
+            properties:
+              rule_name:
+                type: string
+                description: The rule name from the rule attachment.
+              analysis_summary:
+                type: string
+                description: The skill's five-section analysis in markdown.
+              has_confirmed_patterns:
+                type: boolean
+                description: True only when closed alerts carry analyst-confirmed false_positive or benign_positive dispositions.
+              exception_items:
+                type: array
+                description: One item per confirmed pattern, shaped exactly like the detection engine create-rule-exceptions API items. Empty when has_confirmed_patterns is false.
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - simple
+                    name:
+                      type: string
+                      description: Short human-readable name for the exception.
+                    description:
+                      type: string
+                      description: Why this exception is safe, citing the analyst dispositions.
+                    entries:
+                      type: array
+                      description: Field conditions ANDed together; use the fields whose values are consistent across every alert in the pattern.
+                      items:
+                        type: object
+                        properties:
+                          field:
+                            type: string
+                          operator:
+                            type: string
+                            enum:
+                              - included
+                              - excluded
+                          type:
+                            type: string
+                            enum:
+                              - match
+                          value:
+                            type: string
+                        required:
+                          - field
+                          - operator
+                          - type
+                          - value
+                  required:
+                    - type
+                    - name
+                    - description
+                    - entries
+            required:
+              - rule_name
+              - analysis_summary
+              - has_confirmed_patterns
+              - exception_items
+
+      - name: gate
+        type: if
+        condition: "${{ steps.investigate.output.structured_output.has_confirmed_patterns }}"
+        steps:
+          - name: review
+            type: waitForInput
+            timeout: 24h
+            # A timed-out review fails this step; skip the rule and move on.
+            on-failure:
+              continue: true
+            with:
+              message: |
+                Rule "{{ steps.investigate.output.structured_output.rule_name }}" — the investigate-rule skill proposes exceptions based on analyst-closed alerts.
+
+                Proposed exception items:
+                {{ steps.investigate.output.structured_output.exception_items | json | truncate: 2000 }}
+
+                Analysis:
+                {{ steps.investigate.output.structured_output.analysis_summary | truncate: 6000 }}
+
+                Submit apply=true to add the proposed exception items to the rule's default exception list.
+              schema:
+                properties:
+                  apply:
+                    type: boolean
+                    default: false
+                  note:
+                    type: string
+                required:
+                  - apply
+
+          - name: apply_if_approved
+            type: if
+            condition: "${{ steps.review.output.response.apply }}"
+            steps:
+              - name: add_exceptions
+                type: kibana.request
+                with:
+                  method: POST
+                  path: "/api/detection_engine/rules/{{ foreach.item.key }}/exceptions"
+                  body:
+                    items: "${{ steps.investigate.output.structured_output.exception_items }}"
+
+              - name: log_applied
+                type: console
+                with:
+                  message: "Added exception item(s) to rule {{ foreach.item.key }} (approved by {{ steps.review.output.respondedBy }})"
