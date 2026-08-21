@@ -254,6 +254,16 @@ describe('AlertActionEventPublisher', () => {
       });
     });
 
+    it('preserves a null episode_id on the envelope (series-level action case)', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'snooze', episode_id: null }),
+      ]);
+
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ episodeId: null }), {
+        request,
+      });
+    });
+
     it('uses the request supplied per emit call (publisher is request-agnostic across invocations)', () => {
       const otherRequest = httpServerMock.createKibanaRequest();
 

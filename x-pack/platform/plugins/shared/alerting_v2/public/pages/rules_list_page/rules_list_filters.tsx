@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Query } from '@elastic/eui';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { EuiFieldSearch, EuiText } from '@elastic/eui';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
@@ -23,8 +24,8 @@ const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFil
   defaultMessage: 'Status',
 });
 
-const MODE_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.modeFilter.label', {
-  defaultMessage: 'Mode',
+const KIND_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.kindFilter.label', {
+  defaultMessage: 'Outcome',
 });
 
 const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.tagsFilter.label', {
@@ -46,18 +47,14 @@ export const STATUS_FILTER_OPTIONS = [
   },
 ];
 
-export const MODE_FILTER_OPTIONS = [
+export const KIND_FILTER_OPTIONS = [
   {
     key: 'alert' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alert',
-    }),
+    label: RULE_KIND_LABELS.alert,
   },
   {
     key: 'signal' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Signal',
-    }),
+    label: RULE_KIND_LABELS.signal,
   },
 ];
 
@@ -90,7 +87,7 @@ export const StatusFilter = filter.createComponent({
   }),
 });
 
-const ModeFilterComponent = ({
+const KindFilterComponent = ({
   query,
   onChange,
 }: {
@@ -99,23 +96,23 @@ const ModeFilterComponent = ({
 }) => (
   <SelectableFilterPopover
     fieldName={KIND_FILTER_ID}
-    title={MODE_FILTER_TITLE}
+    title={KIND_FILTER_TITLE}
     query={query}
     hideSearch={true}
     onChange={onChange}
-    options={MODE_FILTER_OPTIONS}
+    options={KIND_FILTER_OPTIONS}
     renderOption={(option, { isActive }) => (
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
-    data-test-subj="rulesListModeFilter"
+    data-test-subj="rulesListKindFilter"
   />
 );
 
-export const ModeFilter = filter.createComponent({
+export const KindFilter = filter.createComponent({
   resolve: () => ({
     type: 'custom_component' as const,
-    component: ModeFilterComponent,
+    component: KindFilterComponent,
   }),
 });
 
@@ -209,12 +206,12 @@ const enabledFieldDefinition: FieldDefinition = {
 
 const kindFieldDefinition: FieldDefinition = {
   fieldName: KIND_FILTER_ID,
-  resolveIdToDisplay: (id) => MODE_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
+  resolveIdToDisplay: (id) => KIND_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
   resolveDisplayToId: (displayValue) =>
-    MODE_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
+    KIND_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
   resolveFuzzyDisplayToIds: (partial) => {
     const lower = partial.toLowerCase();
-    return MODE_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
+    return KIND_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
       (o) => o.key
     );
   },

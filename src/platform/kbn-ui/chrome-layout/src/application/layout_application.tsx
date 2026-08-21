@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 
 import { styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
@@ -30,14 +30,15 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const { chromeStyle } = useLayoutConfig();
+  const { appearance } = useLayoutConfig();
 
   return (
     <div
-      css={styles.root(chromeStyle)}
+      css={styles.root(appearance)}
       id={APP_MAIN_SCROLL_CONTAINER_ID}
       className="kbnChromeLayoutApplication"
       data-test-subj="kbnChromeLayoutApplication"
+      tabIndex={-1}
     >
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>

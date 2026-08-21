@@ -18,8 +18,8 @@ import { assignShard, BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_sh
 
 describe('isConditionShardedLocation', () => {
   it('is true only when the flag is on', () => {
-    expect(isConditionShardedLocation({ agentConditionSharding: true })).toBe(true);
-    expect(isConditionShardedLocation({ agentConditionSharding: false })).toBe(false);
+    expect(isConditionShardedLocation({ isAgentSharding: true })).toBe(true);
+    expect(isConditionShardedLocation({ isAgentSharding: false })).toBe(false);
     expect(isConditionShardedLocation({})).toBe(false);
   });
 });

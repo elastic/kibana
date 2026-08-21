@@ -23,7 +23,7 @@ import {
   LOGSTASH_IN_RANGE_DATES,
 } from './constants';
 
-type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
+export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
@@ -281,8 +281,8 @@ export async function enableElasticChartDebug(context: ElasticChartDebugContext)
 /**
  * Creates a space-scoped Logstash data view + common uiSettings so Visualize/Lens
  * do not redirect to the "no data views" empty state.
- * Returns `beforeEach` that logs in and opens an empty Lens editor (same shape as
- * `createOpenInLensSuiteSetup`).
+ * Returns `beforeEach` that logs in and opens an empty Lens editor with `_g` time
+ * already in the URL (same shape as `createOpenInLensSuiteSetup`).
  */
 export function createLogstashLensEditorSuiteSetup(options?: {
   timeRange?: { from: string; to: string };
@@ -357,7 +357,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     if (skipEmptyLensOpen) {
       return;
     }
-    await openEmptyLensEditor(pageObjects);
+    await openEmptyLensEditor(pageObjects, { timeRange });
   };
 
   const afterAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
@@ -368,17 +368,25 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
-  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor };
+  const openEmptyLensEditorForSuite = async (
+    pageObjects: Pick<LensPageObjects, 'lens'>
+  ): Promise<void> => {
+    await openEmptyLensEditor(pageObjects, { timeRange });
+  };
+
+  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor: openEmptyLensEditorForSuite };
 }
 
-/** Opens a fresh empty Lens editor (URL navigation resets stale Visualize/Lens state). */
+/**
+ * Opens a fresh empty Lens editor with `_g` time already in the URL hash.
+ * Defaults to {@link LOGSTASH_IN_RANGE_DATES}. Pass `timeRange` when the suite uses a
+ * different window — sync will not replace an existing `_g` from uiSettings.
+ */
 export async function openEmptyLensEditor(
-  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>
+  pageObjects: Pick<LensPageObjects, 'lens'>,
+  options?: { timeRange?: { from: string; to: string } }
 ): Promise<void> {
-  await pageObjects.visualize.goto();
-  await pageObjects.visualize.openNewVisualizationWizard();
-  await pageObjects.visualize.clickVisType('lens');
-  await pageObjects.lens.waitForLensApp();
+  await pageObjects.lens.workspace.openEmptyEditor(options?.timeRange ?? LOGSTASH_IN_RANGE_DATES);
 }
 
 export async function openDimensionEditorAndWaitForFlyout(
