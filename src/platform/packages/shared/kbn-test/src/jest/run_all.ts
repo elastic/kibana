@@ -268,6 +268,10 @@ async function runConfigs(
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
+          // On CI, print heap size after each test file. This surfaces per-file
+          // memory growth in the config's log section, a signal for diagnosing
+          // out-of-memory failures and event-loop stalls on starved agents.
+          ...(isInBuildkite() ? ['--logHeapUsage'] : []),
           ...(shard ? [`--shard=${shard}`] : []),
         ];
 
