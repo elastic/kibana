@@ -54,6 +54,26 @@ PATCHED_EVALUATOR_REMOTE = (
     "Projects/kibana/x-pack/solutions/security/packages/"
     "kbn-evals-suite-security-persona-matrix/src/evaluate_dataset.ts"
 )
+# Per-example failure isolation (PR #285833): without it one example's
+# converse/judge 500 rejects Promise.all(runJobs) and aborts the whole
+# experiment — three determinism runs died this way mid-suite. Overlay the
+# patched executor client (+ its TaskRun.error type) so errored examples are
+# recorded and the remaining measurements survive.
+PATCHED_EXECUTOR_CLIENT = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/kibana_evals_executor/client.ts"
+)
+PATCHED_EXECUTOR_TYPES = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/types.ts"
+)
+EXECUTOR_CLIENT_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/"
+    "kibana_evals_executor/client.ts"
+)
+EXECUTOR_TYPES_REMOTE = "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/types.ts"
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/persona-matrix-maxpayload"
@@ -223,6 +243,9 @@ def deploy(ip: str) -> None:
     # the dev CLI, so copying the files is sufficient — no build step.
     scp(str(PATCHED_EVALUATOR), ip, PATCHED_EVALUATOR_REMOTE)
     scp(str(PATCHED_SCOUT_CONFIG), ip, PATCHED_SCOUT_CONFIG_REMOTE)
+    # Per-example failure isolation — see PATCHED_EXECUTOR_CLIENT.
+    scp(str(PATCHED_EXECUTOR_CLIENT), ip, EXECUTOR_CLIENT_REMOTE)
+    scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
@@ -246,6 +269,7 @@ def deploy(ip: str) -> None:
     out = ssh(ip, f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE} && "
                   f"grep -q MAX_PAYLOAD_BYTES ~/{PATCHED_SCOUT_CONFIG_REMOTE} && "
                   f"grep -q SCOUT_READY_TIMEOUT_MS ~/{EVAL_STACK_REMOTE} && "
+                  f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE} && "
                   f"echo OVERLAY_OK")
     if "OVERLAY_OK" not in out:
         raise RuntimeError(f"patched overlay verification failed on {ip}: {out}")
