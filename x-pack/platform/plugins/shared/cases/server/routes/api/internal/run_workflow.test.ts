@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { WorkflowsManagementApiActions, WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import {
+  WorkflowsManagementApiActions,
+  WorkflowsManagementOperationPrivileges,
+} from '@kbn/workflows';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import {
