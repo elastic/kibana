@@ -145,6 +145,7 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
 | Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
+| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`, `json` or `arrow`, defaults to `json` | [`config.ts`](../../config.ts) |
 
 `xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task. The rule executor task definition owns this via its `resolveTimeout` hook, which resolves the value as `config → DEFAULT_RULE_EXECUTION_TIMEOUT`; other task types (dispatcher, telemetry, API-key invalidation) omit the hook and keep their static `timeout`. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
 
@@ -153,6 +154,9 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 `CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
 
 The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
+
+`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query and yields the full result set as one in-memory batch; `arrow` streams self-contained Arrow record batches.
+
 ## Pipeline state
 
 `RulePipelineState` in `types.ts` is the data contract between steps.

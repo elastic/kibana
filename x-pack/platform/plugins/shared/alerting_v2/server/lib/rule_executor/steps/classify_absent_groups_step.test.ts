@@ -36,6 +36,7 @@ const createPluginConfigAccessor = () => {
         query: { maxResponseSize: 50 * 1024 * 1024 },
       },
     },
+    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };

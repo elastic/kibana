@@ -138,4 +138,21 @@ describe('alerting_v2 config schema', () => {
       );
     });
   });
+
+  describe('esql.responseFormat', () => {
+    it('defaults to json', () => {
+      const config = configSchema.validate({});
+      expect(config.esql.responseFormat).toBe('json');
+    });
+
+    it('accepts arrow', () => {
+      expect(configSchema.validate({ esql: { responseFormat: 'arrow' } }).esql.responseFormat).toBe(
+        'arrow'
+      );
+    });
+
+    it('rejects an unknown format', () => {
+      expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
+    });
+  });
 });
