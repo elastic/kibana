@@ -7,10 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import type {
-  ExchangeServiceAccountTokenResponse,
-  ServiceAccount,
-} from '@kbn/core-security-server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceAccount } from '@kbn/core-security-server';
 
 import type { ServiceAccountsBackend } from './types';
 
@@ -27,9 +25,23 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   }
 
   // See https://github.com/elastic/kibana/issues/284466.
-  async exchangeToken(): Promise<ExchangeServiceAccountTokenResponse> {
+  async createFakeRequest(): Promise<KibanaRequest> {
     throw Boom.notImplemented(
-      'Exchanging tokens for Elasticsearch service accounts is not yet implemented'
+      'Creating requests for Elasticsearch service accounts is not yet implemented'
     );
+  }
+
+  // See https://github.com/elastic/kibana/issues/284466.
+  async getLoopbackAuthHeaders(): Promise<Record<string, string>> {
+    throw Boom.notImplemented(
+      'Loopback headers for Elasticsearch service accounts are not yet implemented'
+    );
+  }
+
+  // This backend never mints service-account-bound requests, so there is nothing to refresh;
+  // `null` (rather than an error) keeps the ES-client unauthorized-error handler on its
+  // not-handled path for unrelated fake requests.
+  async reauthenticateFakeRequest(): Promise<{ authorization: string } | null> {
+    return null;
   }
 }

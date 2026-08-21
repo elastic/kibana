@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, ServiceAccount } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type {
   CheckPrivileges,
@@ -14,6 +15,7 @@ import type {
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
 
+import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS } from './fake_requests';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -201,52 +203,186 @@ describe('UiamServiceAccounts', () => {
     });
   });
 
-  describe('#exchangeToken', () => {
-    it('exchanges the service account id for an ephemeral token', async () => {
-      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: 'essu_ephemeral_token' });
+  describe('fake request lifecycle', () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+      jest.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 
-      await expect(serviceAccounts.exchangeToken('service-account-id')).resolves.toEqual({
-        token: 'essu_ephemeral_token',
+      let counter = 0;
+      mockUiam.exchangeServiceAccountToken.mockImplementation(async () => ({
+        token: `essu_token_${++counter}`,
+      }));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    describe('#createFakeRequest', () => {
+      it('mints a token and returns a service-account-bound fake request', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+          spaceId: 'marketing',
+        });
+
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledWith('service-account-id');
+        expect(request.isFakeRequest).toBe(true);
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+        expect(request.spaceId).toBe('marketing');
+        expect(request.auth.isAuthenticated).toBe(true);
       });
 
-      expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
-      expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledWith('service-account-id');
-    });
+      it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+        mockLicense.isEnabled.mockReturnValue(false);
 
-    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
-      mockLicense.isEnabled.mockReturnValue(false);
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
-      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toMatchObject({
-        output: { statusCode: 403 },
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
       });
 
-      expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+      // The exchange response is spec/live-verified but still validated so that a shape change
+      // fails loudly rather than leaking a partially-undefined credential into a request.
+      it('rejects when the exchange response does not match the expected shape', async () => {
+        mockUiam.exchangeServiceAccountToken.mockResolvedValue({ credential: 'nope' } as never);
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toThrowError('Error occured during service account token exchange');
+      });
+
+      it('rejects when the exchange response contains an empty token', async () => {
+        mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: '' });
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toThrowError('Error occured during service account token exchange');
+      });
+
+      it('logs and rethrows exchange failures', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('upstream exploded'));
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toThrowError('upstream exploded');
+      });
     });
 
-    // The upstream endpoint does not exist yet, so the response shape is a guess. Validating it
-    // means a mismatch fails loudly rather than leaking undefined fields to consumers.
-    it('rejects when the upstream response does not match the expected shape', async () => {
-      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ credential: 'nope' } as never);
+    describe('#getLoopbackAuthHeaders', () => {
+      it('mints a fresh credential on every call and derives the attestation for it', async () => {
+        await expect(serviceAccounts.getLoopbackAuthHeaders('service-account-id')).resolves.toEqual(
+          {
+            authorization: 'Bearer essu_token_1',
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
+          }
+        );
+        await expect(serviceAccounts.getLoopbackAuthHeaders('service-account-id')).resolves.toEqual(
+          {
+            authorization: 'Bearer essu_token_2',
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'some-internal-caller-attestation',
+          }
+        );
 
-      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
-        'Error occured during service account token exchange'
-      );
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledWith('service-account-id');
+        expect(mockUiam.getInternalCallerAttestationHeaders).toHaveBeenLastCalledWith(
+          expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_token_2' })
+        );
+      });
+
+      it('does not interact with the fake-request credential lifecycle', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        await serviceAccounts.getLoopbackAuthHeaders('service-account-id');
+
+        // The fake request keeps its own credential; the loopback mint is independent.
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+        mockLicense.isEnabled.mockReturnValue(false);
+
+        await expect(
+          serviceAccounts.getLoopbackAuthHeaders('service-account-id')
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+      });
+
+      it('rejects when the exchange fails', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('upstream exploded'));
+
+        await expect(
+          serviceAccounts.getLoopbackAuthHeaders('service-account-id')
+        ).rejects.toThrowError('upstream exploded');
+      });
     });
 
-    it('rejects when the upstream response contains an empty token', async () => {
-      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: '' });
+    describe('#reauthenticateFakeRequest', () => {
+      it('returns null for requests that are not bound to a service account', async () => {
+        await expect(
+          serviceAccounts.reauthenticateFakeRequest(httpServerMock.createFakeKibanaRequest({}))
+        ).resolves.toBeNull();
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+      });
 
-      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
-        'Error occured during service account token exchange'
-      );
-    });
+      it('reuses the current token without minting when it was minted recently', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
 
-    it('logs and rethrows upstream failures', async () => {
-      mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('upstream exploded'));
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toEqual({
+          authorization: 'Bearer essu_token_1',
+        });
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+      });
 
-      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
-        'upstream exploded'
-      );
+      it('mints a replacement and updates the request once the reuse window has passed', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toEqual({
+          authorization: 'Bearer essu_token_2',
+        });
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
+        expect(request.headers.authorization).toBe('Bearer essu_token_2');
+      });
+
+      it('returns null instead of throwing when minting fails', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('exchange failed'));
+
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
+        // The stale credential is left in place for the original 401 to propagate.
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('returns null without minting once the request lease has expired', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+          maxLifetimeMs: 1_000,
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+
+        jest.advanceTimersByTime(1_001);
+
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
     });
   });
 });

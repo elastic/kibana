@@ -101,13 +101,6 @@ export const buildSecurityApi = ({
         }
         return serviceAccounts.create(request, params);
       },
-      exchangeToken: async (serviceAccountId) => {
-        const serviceAccounts = getServiceAccounts();
-        if (!serviceAccounts) {
-          throw new Error('Service accounts are not enabled');
-        }
-        return serviceAccounts.exchangeToken(serviceAccountId);
-      },
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

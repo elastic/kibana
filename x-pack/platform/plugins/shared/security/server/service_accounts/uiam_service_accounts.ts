@@ -10,14 +10,16 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   CreateServiceAccountParams,
-  ExchangeServiceAccountTokenResponse,
   ServiceAccount,
   UiamOAuthProjectType,
 } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
+import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
@@ -54,12 +56,11 @@ const serviceAccountSchema = z.object({
 });
 
 /**
- * Response shape of the UIAM token exchange, derived from the API specification for the
- * same reason as {@link serviceAccountSchema}: the upstream endpoint is not implemented
- * yet, so validation makes the first real call fail loudly on any drift.
- *
- * TODO(https://github.com/elastic/kibana/issues/284465): revisit once UIAM ships
- * the endpoint and the response shape is confirmed.
+ * Validates the token exchange payload UIAM returns, so that a shape change fails loudly here
+ * rather than leaking partially-undefined objects to consumers. Verified against image
+ * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose exchange response carries `token`
+ * plus an `expires_in` ISO-8601 duration (currently `PT5M`) that is intentionally stripped:
+ * token freshness is managed locally and nothing should key off the upstream TTL.
  */
 const exchangeTokenResponseSchema = z.object({
   // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
@@ -84,6 +85,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly organizationId: string;
   private readonly projectId: string;
   private readonly projectType: UiamOAuthProjectType;
+  private readonly fakeRequests: ServiceAccountFakeRequests;
 
   constructor({
     logger,
@@ -101,6 +103,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.organizationId = organizationId;
     this.projectId = projectId;
     this.projectType = projectType;
+    this.fakeRequests = new ServiceAccountFakeRequests(logger, async (serviceAccountId) => {
+      const { token } = await this.exchangeToken(serviceAccountId);
+      return token;
+    });
   }
 
   async create(
@@ -153,7 +159,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
-  async exchangeToken(serviceAccountId: string): Promise<ExchangeServiceAccountTokenResponse> {
+  /**
+   * Exchanges the service account ID for an ephemeral access token under Kibana's own system
+   * credential. Deliberately private: the raw credential never leaves this backend — consumers
+   * get a fake request bound to it instead.
+   */
+  private async exchangeToken(serviceAccountId: string): Promise<{ token: string }> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'
@@ -177,6 +188,45 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     } catch (e) {
       this.logger.error(`Failed to exchange service account token: ${getDetailedErrorMessage(e)}`);
       throw e;
+    }
+  }
+
+  async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
+    // The license gate is enforced by `exchangeToken`, which mints the initial credential.
+    return await this.fakeRequests.create(params);
+  }
+
+  async getLoopbackAuthHeaders(serviceAccountId: string): Promise<Record<string, string>> {
+    const { token } = await this.exchangeToken(serviceAccountId);
+
+    return {
+      authorization: `Bearer ${token}`,
+      ...this.uiam.getInternalCallerAttestationHeaders(
+        new HTTPAuthorizationHeader('Bearer', token)
+      ),
+    };
+  }
+
+  async reauthenticateFakeRequest(
+    request: KibanaRequest
+  ): Promise<{ authorization: string } | null> {
+    if (!this.fakeRequests.isServiceAccountRequest(request)) {
+      return null;
+    }
+
+    try {
+      const token = await this.fakeRequests.ensureFreshToken(
+        request,
+        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+      );
+      return { authorization: `Bearer ${token}` };
+    } catch (e) {
+      this.logger.warn(
+        `Failed to replace the token of a service account bound fake request: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+      return null;
     }
   }
 }

@@ -8,11 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  CreateServiceAccountParams,
-  ExchangeServiceAccountTokenResponse,
-  ServiceAccount,
-} from '@kbn/core-security-common';
+import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-common';
 
 /**
  * Core's service accounts service
@@ -33,16 +29,4 @@ export interface CoreServiceAccountsService {
    * @param params The name and role assignments for the new service account.
    */
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
-
-  /**
-   * Exchange a service account ID for an ephemeral access token carrying the service
-   * account's privileges.
-   *
-   * The exchange is performed under Kibana's own system credential and performs **no user
-   * authorization**: callers MUST authorize their own users before invoking this method,
-   * since it mints a live credential for the service account.
-   *
-   * @param serviceAccountId The ID of the service account to exchange a token for.
-   */
-  exchangeToken(serviceAccountId: string): Promise<ExchangeServiceAccountTokenResponse>;
 }

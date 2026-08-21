@@ -45,7 +45,6 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     serviceAccounts: {
       isEnabled: () => false,
       create: () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR),
-      exchangeToken: () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR),
     },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,

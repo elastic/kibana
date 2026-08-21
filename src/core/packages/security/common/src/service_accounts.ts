@@ -44,16 +44,6 @@ export interface CreateServiceAccountParams {
 }
 
 /**
- * The response of exchanging a service account ID for an ephemeral access token.
- *
- * @public
- */
-export interface ExchangeServiceAccountTokenResponse {
-  /** The ephemeral access token. Short-lived and not intended to be cached or reused. */
-  token: string;
-}
-
-/**
  * A service account.
  *
  * @public

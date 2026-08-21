@@ -246,32 +246,6 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('serviceAccounts.exchangeToken', () => {
-    it('properly delegates to the service', async () => {
-      await api.serviceAccounts.exchangeToken('service-account-id');
-
-      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledTimes(1);
-      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledWith('service-account-id');
-    });
-
-    it('returns the result from the service', async () => {
-      const exchanged = { token: 'essu_ephemeral_token' };
-      serviceAccounts!.exchangeToken.mockResolvedValue(exchanged);
-
-      await expect(api.serviceAccounts.exchangeToken('service-account-id')).resolves.toBe(
-        exchanged
-      );
-    });
-
-    it('throws when service accounts are not enabled', async () => {
-      serviceAccounts = null;
-
-      await expect(
-        api.serviceAccounts.exchangeToken('service-account-id')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
-    });
-  });
-
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
