@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, LOGS, setupLogsExperience, teardownLogsExperience } from '../fixtures';
+import {
+  spaceTest,
+  LOGS,
+  LOGS_EXPERIENCE_TAGS,
+  setupLogsExperience,
+  teardownLogsExperience,
+} from '../fixtures';
 
 spaceTest.describe(
   'Logs profile - Recommended fields',
   {
-    tag: [...tags.stateful.classic, ...tags.serverless.observability.all],
+    tag: LOGS_EXPERIENCE_TAGS,
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
@@ -64,9 +69,10 @@ spaceTest.describe(
       'should NOT show the recommended fields group for a non-logs data source profile',
       async ({ page, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
+        const sessionTitle = 'metrics-system-no-recommended';
 
         await discoverScoutSpace.createDiscoverSession({
-          title: 'metrics-system-no-recommended',
+          title: sessionTitle,
           tabs: [
             {
               id: 'main',
@@ -80,12 +86,18 @@ spaceTest.describe(
             },
           ],
         });
-        await discover.loadSavedSearch('metrics-system-no-recommended');
+        await discover.loadSavedSearch(sessionTitle);
         await discover.waitUntilTabIsLoaded();
 
-        // The recommended-fields group must be absent for a non-logs profile
-        const sectionSelector = unifiedFieldList.getSidebarSectionSelector('recommended');
-        await expect(page.testSubj.locator(sectionSelector)).toBeHidden();
+        // Assert the seeded metrics data actually resolved into fields first. The available
+        // group renders even when empty, so without this the assertion below would also pass
+        // for an index pattern that matched nothing.
+        const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
+        expect(availableFields).toContain('system.cpu.total.norm.pct');
+
+        await expect(
+          page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('recommended'))
+        ).toBeHidden();
       }
     );
   }

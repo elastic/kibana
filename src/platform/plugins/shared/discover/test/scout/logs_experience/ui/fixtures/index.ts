@@ -8,5 +8,5 @@
  */
 
 export { spaceTest } from '../../../common/ui/fixtures';
-export { LOGS } from './constants';
+export { LOGS, LOGS_EXPERIENCE_TAGS } from './constants';
 export { setupLogsExperience, teardownLogsExperience } from './setup';

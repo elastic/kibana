@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
+
+export const LOGS_EXPERIENCE_TAGS = [...tags.stateful.all, ...tags.serverless.observability.all];
+
 export const LOGS = {
   // Fixed rather than moment-relative: global setup seeds this range once, and each worker
   // sets it as the default time, so both must resolve to the same window.
