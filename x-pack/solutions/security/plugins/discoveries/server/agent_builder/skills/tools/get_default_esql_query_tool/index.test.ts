@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -28,26 +28,11 @@ describe('getDefaultEsqlQueryTool', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchClientMock.createScopedClusterClient();
 
-  const mockContext: ToolHandlerContext = {
-    attachments: {} as never,
-    callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
+  const mockContext = {
+    ...agentBuilderMocks.tools.createHandlerContext(),
     esClient: mockEsClient,
-    events: {} as never,
-    experimentalFeatures: {} as never,
     logger: mockLogger,
-    modelProvider: {} as never,
-    prompts: {} as never,
-    request: {} as never,
-    resultStore: {} as never,
-    runContext: { runId: 'test-run-id', stack: [] },
-    runner: {} as never,
-    savedObjectsClient: {} as never,
-    skills: {} as never,
-    skillsStore: {} as never,
     spaceId: 'test-space',
-    stateManager: {} as never,
-    toolManager: {} as never,
-    toolProvider: {} as never,
   };
 
   beforeEach(() => {

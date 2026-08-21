@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -50,6 +51,7 @@ export interface PromptFactoryParams {
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
   imageResolver?: PromptImageResolver;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

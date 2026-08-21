@@ -19,6 +19,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isSubagentRosterUpdatedStep,
   isAskUserQuestionStep,
   isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
@@ -35,7 +36,7 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatSystemNotice } from '../prompts/utils/actions';
+import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
@@ -84,6 +85,7 @@ export const convertPreviousRounds = async ({
   compactionSummary,
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
+  const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 
@@ -105,6 +107,15 @@ export const convertPreviousRounds = async ({
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
+
+    // Inject back subagent roaster notice after compaction
+    if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
+      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+        name,
+        conversation_id: id,
+      }));
+      messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+    }
   }
 
   for (const round of rounds) {
@@ -167,6 +178,8 @@ export const roundToLangchain = async (
     for (const step of round.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isSubagentRosterUpdatedStep(step)) {
+        messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
       } else if (isRelevantSkillsStep(step)) {
         if (step.skills.length > 0) {
           messages.push(createRelevantSkillsNoticeMessage(step.skills));

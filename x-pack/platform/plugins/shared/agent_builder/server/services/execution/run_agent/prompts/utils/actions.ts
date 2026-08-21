@@ -19,7 +19,7 @@ import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/form
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import type {
@@ -34,6 +34,7 @@ import type {
 import {
   isAgentErrorAction,
   isBackgroundExecutionCompleteAction,
+  isSubagentRosterUpdatedAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
@@ -153,6 +154,9 @@ const formatActions = async ({
     }
     if (isBackgroundExecutionCompleteAction(action)) {
       formatted.push(createUserMessage(formatSystemNotice(action.execution)));
+    }
+    if (isSubagentRosterUpdatedAction(action)) {
+      formatted.push(createUserMessage(formatSubagentRosterNotice(action.roster)));
     }
   }
 
@@ -467,4 +471,17 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
       outcome.detail,
     ],
   });
+};
+
+/**
+ * Render the active persistent sub-agent roster as a system notice.
+ */
+export const formatSubagentRosterNotice = (roster: SubagentRosterEntry[]): string => {
+  const lines = roster.map((entry) =>
+    entry.purpose ? `- ${entry.name}: ${entry.purpose}` : `- ${entry.name}`
+  );
+  return `<system-notice>
+Active persistent sub-agents (interact via send_message):
+${lines.join('\n')}
+</system-notice>`;
 };

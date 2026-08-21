@@ -18,6 +18,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DeployAndDetectStep } from './deploy_and_detect_step';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
@@ -40,9 +41,13 @@ function setupMocks({
       deployErrors,
       policyIdsByInstance: {},
     },
+    awsServicesMap: AWS_SERVICES_MAP,
     retryDeploy,
   });
-  mockUseSessionStorage.mockReturnValue([{ instances }, jest.fn()]);
+  mockUseSessionStorage.mockReturnValue([
+    { instances, serviceVars: {}, globalRegion: '' },
+    jest.fn(),
+  ]);
   return { retryDeploy };
 }
 
@@ -59,20 +64,22 @@ describe('DeployAndDetectStep', () => {
 
   describe('chip labels', () => {
     it('shows instance name from session storage when instanceId matches', () => {
+      // Use an agentless service (ec2_metrics) — cloudtrail is an ECF service and is filtered
+      // out of the agentless chip row, so it would not appear here.
       setupMocks({
-        serviceStatuses: { 'cloudtrail__dup-1': 'instantiating' },
+        serviceStatuses: { 'ec2_metrics__dup-1': 'instantiating' },
         instances: [
           {
-            instanceId: 'cloudtrail__dup-1',
-            serviceId: 'cloudtrail',
-            name: 'AWS CloudTrail [Duplicate]',
+            instanceId: 'ec2_metrics__dup-1',
+            serviceId: 'ec2_metrics',
+            name: 'AWS EC2 [Duplicate]',
             isDuplicate: true,
           },
         ],
       });
 
       renderStep();
-      expect(screen.getByText('AWS CloudTrail [Duplicate]')).toBeInTheDocument();
+      expect(screen.getByText('AWS EC2 [Duplicate]')).toBeInTheDocument();
     });
 
     it('falls back to AWS_SERVICES_MAP name when instanceId is a known serviceId (original instance)', () => {
@@ -84,8 +91,9 @@ describe('DeployAndDetectStep', () => {
       });
 
       renderStep();
-      // ec2_metrics maps to "AWS EC2" in the real service matrix
-      expect(screen.getByText('AWS EC2')).toBeInTheDocument();
+      // AWS_SERVICES_MAP has no manifest data; name falls back to entry.id ('ec2_metrics').
+      // In production the matrix hook enriches this with the manifest title ('AWS EC2 metrics').
+      expect(screen.getByText('ec2_metrics')).toBeInTheDocument();
     });
 
     it('falls back to the raw instanceId when neither session storage nor service map has a match', () => {
