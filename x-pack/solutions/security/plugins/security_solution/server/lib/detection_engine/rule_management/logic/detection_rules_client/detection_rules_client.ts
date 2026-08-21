@@ -19,7 +19,6 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { RuleImportErrorObject } from '../import/errors';
 import type {
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
@@ -36,10 +35,17 @@ import type {
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
   BulkCreatePrebuiltRulesArgs,
+  BulkUpgradePrebuiltRulesArgs,
+  BulkUpgradePrebuiltRulesResult,
+  BulkUpdateRulesArgs,
+  BulkUpdateRulesResult,
 } from './detection_rules_client_interface';
+import type { ImportRulesResult } from './methods/import_rules';
 import type { RestoreRuleFromHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import { createRule } from './methods/create_rule';
 import { bulkCreatePrebuiltRules } from './methods/bulk_create_prebuilt_rules';
+import { bulkUpgradePrebuiltRules } from './methods/bulk_upgrade_prebuilt_rules';
+import { bulkUpdateRules } from './methods/bulk_update_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
@@ -157,6 +163,26 @@ export const createDetectionRulesClient = ({
       });
     },
 
+    async bulkUpgradePrebuiltRules(
+      args: BulkUpgradePrebuiltRulesArgs
+    ): Promise<BulkUpgradePrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.bulkUpgradePrebuiltRules', async () => {
+        return bulkUpgradePrebuiltRules({
+          actionsClient,
+          rulesClient,
+          prebuiltRuleAssetClient,
+          mlAuthz,
+          args,
+        });
+      });
+    },
+
+    async bulkUpdateRules(args: BulkUpdateRulesArgs): Promise<BulkUpdateRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.bulkUpdateRules', async () => {
+        return bulkUpdateRules({ actionsClient, rulesClient, args });
+      });
+    },
+
     async updateRule({ ruleUpdate, changeTracking }: UpdateRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
         return updateRule({
@@ -259,12 +285,14 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
+    async importRules(args: ImportRulesArgs): Promise<ImportRulesResult> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
         return importRules({
-          ...args,
-          detectionRulesClient: this,
+          actionsClient,
+          rulesClient,
           savedObjectsClient,
+          mlAuthz,
+          args,
         });
       });
     },
