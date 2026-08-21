@@ -191,7 +191,8 @@ export class AttachmentService {
         const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
 
         ids.forEach((id, index) => {
-          if (!originOnly || !isNonLocalIndexName(indices[index])) {
+          const alertIndex = indices[index];
+          if (!originOnly || alertIndex == null || !isNonLocalIndexName(alertIndex)) {
             alertIds.add(id);
           }
         });
