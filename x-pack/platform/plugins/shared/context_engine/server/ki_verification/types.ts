@@ -49,11 +49,7 @@ export type KiVerifierResult = KiVerifierOutcome & { verifier: string };
 
 export interface KiVerifier {
   readonly id: string;
-  /**
-   * Whether this verifier has anything to check for the given KI. Receives the
-   * same context as {@link KiVerifier.verify} so that applicability can depend
-   * on run configuration, such as which attributes carry ES|QL.
-   */
+  /** Whether this verifier has anything to check for the given KI. */
   applies(ki: KnowledgeIndicator, context: KiVerifierContext): boolean;
   verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierOutcome>;
 }
