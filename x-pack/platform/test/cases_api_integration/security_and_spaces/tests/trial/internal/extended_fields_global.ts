@@ -12,6 +12,7 @@ import { CASES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/consta
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
+  deleteConfiguration,
   createCase,
   createConfiguration,
   getConfigurationRequest,
@@ -277,6 +278,57 @@ export default ({ getService }: FtrProviderContext): void => {
         // label-derived friendly name ("text"), not the raw v1 custom-field key.
         expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({
           text_as_keyword: 'legacy value',
+        });
+      });
+
+      describe('a mirrored global definition outlives its configuration', () => {
+        // Deleting a configuration leaves its mirrored global definitions behind, each still
+        // carrying the v1 `required` flag. Nothing can satisfy that flag afterwards: the custom
+        // field is no longer configured, so neither validateRequiredCustomFields nor the
+        // customFields mirror runs. Enforcing it would reject every create in the space.
+        beforeEach(async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await deleteConfiguration(es);
+        });
+
+        it('creates a case with no extended_fields', async () => {
+          const createdCase = await createCase(
+            supertest,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' })
+          );
+
+          expect(createdCase[CASE_EXTENDED_FIELDS]).to.be(undefined);
+        });
+
+        it('creates a case when the caller sends an unrelated global field', async () => {
+          // A caller-sent map switches extended_fields validation to full create semantics, so
+          // the stale flag must be inert there too.
+          await supertest
+            .post(`${FIELD_DEFINITIONS_URL}`)
+            .set('kbn-xsrf', 'true')
+            .send(buildFieldDef('notes'))
+            .expect(200);
+
+          const createdCase = await createCase(supertest, {
+            ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            [CASE_EXTENDED_FIELDS]: { notes_as_keyword: 'some notes' },
+          });
+
+          expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({ notes_as_keyword: 'some notes' });
         });
       });
     });

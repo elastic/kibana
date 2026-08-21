@@ -1706,13 +1706,16 @@ describe('create', () => {
     const makeGlobalDef = (
       name: string,
       defaultValue?: unknown,
-      { required = false }: { required?: boolean } = {}
+      { required = false, legacyKey }: { required?: boolean; legacyKey?: string } = {}
     ) => ({
       fieldDefinitionId: `fd-${name}`,
       name,
       owner: SECURITY_SOLUTION_OWNER,
       description: '',
       isGlobal: true,
+      // Set only on a definition linked to a v1 custom field (mirrored by the configure path
+      // or the templates migration), never on a natively created v2 global field.
+      ...(legacyKey !== undefined ? { legacyKey } : {}),
       definition: yamlStringify({
         name,
         type: 'keyword',
@@ -2014,6 +2017,12 @@ describe('create', () => {
       describe('v1 mirror interplay', () => {
         // The global definition migrated from a v1 custom field keeps the v1 key as its name,
         // so the customFields mirror writes to the same storage key the required check reads.
+        // `legacyKey` is what marks it as that mirror.
+        const linkedDef = makeGlobalDef('risk_score', undefined, {
+          required: true,
+          legacyKey: 'risk_score',
+        });
+
         const v1LinkedClient = (customFieldsConfiguration: unknown[]) => {
           const client = createCasesClientMock();
           client.configure.get = jest.fn().mockResolvedValue([
@@ -2029,7 +2038,7 @@ describe('create', () => {
         it('a caller-sent customFields value satisfies the linked required global field', async () => {
           const clientArgs = createClientArgs();
           clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            fieldDefinitions: [linkedDef],
             total: 1,
           });
           const casesClient = v1LinkedClient([
@@ -2063,7 +2072,7 @@ describe('create', () => {
           // The linked global field must not fail the same request.
           const clientArgs = createClientArgs();
           clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            fieldDefinitions: [linkedDef],
             total: 1,
           });
           const casesClient = v1LinkedClient([
@@ -2087,7 +2096,7 @@ describe('create', () => {
           // here (a required v1 field already 400s on null via validateRequiredCustomFields).
           const clientArgs = createClientArgs();
           clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            fieldDefinitions: [linkedDef],
             total: 1,
           });
           const casesClient = v1LinkedClient([
@@ -2118,7 +2127,7 @@ describe('create', () => {
           // extended_fields value from the effective view the required check reads.
           const clientArgs = createClientArgs();
           clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            fieldDefinitions: [linkedDef],
             total: 1,
           });
           const casesClient = v1LinkedClient([
@@ -2137,6 +2146,98 @@ describe('create', () => {
           );
 
           expect(clientArgs.services.caseService.createCase).toHaveBeenCalled();
+        });
+
+        it('enforces the linked required global field while its v1 custom field stays configured', async () => {
+          // The v1 field is optional here, so validateRequiredCustomFields cannot fire and the
+          // rejection can only come from the global check — the boundary the orphan cases below
+          // must not erode.
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [linkedDef],
+            total: 1,
+          });
+          const casesClient = v1LinkedClient([
+            {
+              key: 'risk_score',
+              type: CustomFieldTypes.TEXT,
+              label: 'Risk score',
+              required: false,
+            },
+          ]);
+
+          await expect(create(theCase, clientArgs, casesClient)).rejects.toThrow(
+            'Field "risk_score" is required'
+          );
+          expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+        });
+
+        // A definition outlives the configuration that created it (deleting a configuration
+        // leaves it behind), so its mirrored `required` flag can point at a v1 custom field that
+        // is no longer configured. Nothing can satisfy it then: validateRequiredCustomFields has
+        // no configuration to read and pairing is skipped entirely, so enforcing it would reject
+        // every create in the space.
+        it('creates the case when the linked v1 custom field is no longer configured', async () => {
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [linkedDef],
+            total: 1,
+          });
+
+          // casesClientMock resolves an empty configuration list — the v1 field is gone.
+          await create(theCase, clientArgs, casesClientMock);
+
+          const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+          expect(createArgs.attributes.extended_fields).toBeUndefined();
+        });
+
+        it('creates the case when the caller sends another extended field and the linked v1 custom field is no longer configured', async () => {
+          // A caller-sent map switches extended_fields validation to full create semantics, so
+          // the stale flag has to be inert there too — not only in the required-only pass.
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [linkedDef, makeGlobalDef('notes')],
+            total: 2,
+          });
+
+          await create(
+            { ...theCase, extended_fields: { notes_as_keyword: 'some notes' } },
+            clientArgs,
+            casesClientMock
+          );
+
+          const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+          expect(createArgs.attributes.extended_fields).toEqual({
+            notes_as_keyword: 'some notes',
+          });
+        });
+
+        it('still validates the value of a global field whose linked v1 custom field is gone', async () => {
+          // Only `required` goes stale. The key stays valid and its constraints still apply.
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [
+              {
+                ...linkedDef,
+                definition: yamlStringify({
+                  name: 'risk_score',
+                  type: 'keyword',
+                  control: 'INPUT_TEXT',
+                  label: 'risk_score',
+                  validation: { required: true, max_length: 3 },
+                }),
+              },
+            ],
+            total: 1,
+          });
+
+          await expect(
+            create(
+              { ...theCase, extended_fields: { risk_score_as_keyword: 'far too long' } },
+              clientArgs,
+              casesClientMock
+            )
+          ).rejects.toThrow('Field "risk_score" must be at most 3 characters');
         });
       });
     });

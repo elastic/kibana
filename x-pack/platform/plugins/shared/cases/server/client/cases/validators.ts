@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { differenceWith, intersectionWith, isEmpty } from 'lodash';
+import { differenceWith, intersectionWith, isEmpty, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { CaseStatuses } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
@@ -214,6 +215,58 @@ export const resolveGlobalFields = async (
 };
 
 /**
+ * True when a field definition mirrors a v1 custom field (`legacyKey`) that the owner no longer
+ * has configured.
+ */
+const isStaleMirror = (
+  fieldDefinition: FieldDefinition,
+  configuredLegacyKeys: Set<string>
+): boolean =>
+  fieldDefinition.legacyKey !== undefined && !configuredLegacyKeys.has(fieldDefinition.legacyKey);
+
+/**
+ * Same as `resolveGlobalFields`, but drops `required` from every stale mirror — a definition
+ * whose `legacyKey` points at a v1 custom field the owner no longer has configured.
+ *
+ * A linked definition copies the v1 field's `required` flag into its own YAML, and definitions
+ * deliberately outlive the configuration that created them: deleting a configuration leaves them
+ * behind (see `ensureGlobalFieldDefinitions` and the configure client). For a linked definition
+ * the v1 configuration stays the authority. While the custom field is configured,
+ * `validateRequiredCustomFields` enforces the flag and pairing copies the value into
+ * `extended_fields`; once the configuration is gone neither runs, and pairing is skipped
+ * altogether, so the copied flag becomes a requirement no caller can satisfy.
+ *
+ * Only `required` is dropped. The definition stays a valid global field: its key is still
+ * accepted and its value is still validated.
+ */
+export const resolveGlobalFieldsWithoutStaleMirrorRequired = async (
+  owner: string,
+  fieldDefinitionsService: FieldDefinitionsService,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+): Promise<InlineField[]> => {
+  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
+    isGlobal: true,
+  });
+  const configuredLegacyKeys = new Set((customFieldsConfiguration ?? []).map(({ key }) => key));
+
+  // Parsed one definition at a time: parseFieldDefinitionsToInlineFields skips malformed
+  // definitions, so its result cannot be index-aligned with its input.
+  return fieldDefinitions.flatMap((fieldDefinition) => {
+    const [field] = parseFieldDefinitionsToInlineFields([fieldDefinition]);
+    if (field === undefined) {
+      return [];
+    }
+    if (
+      field.validation?.required !== true ||
+      !isStaleMirror(fieldDefinition, configuredLegacyKeys)
+    ) {
+      return [field];
+    }
+    return [{ ...field, validation: omit(field.validation, 'required') }];
+  });
+};
+
+/**
  * @deprecated Use `resolveGlobalFields` instead (returns the full InlineField array so
  * values can be validated against each field's definition).
  */
@@ -235,6 +288,10 @@ export const resolveGlobalFieldKeys = async (
  * configuration `defaultValue` filled by `fillMissingCustomFields` — into that map, so a
  * legacy customFields-only create that passes v1 validation also passes here. An explicit null
  * on the linked v1 field clears the v2 key, so it does not satisfy required.
+ *
+ * `globalFields` must come from `resolveGlobalFieldsWithoutStaleMirrorRequired`: a definition
+ * that mirrors a v1 custom field the owner no longer has configured carries a stale `required`
+ * flag that nothing on the create path can satisfy.
  *
  * Only required-ness is enforced here (`requiredOnly`): value validation of the request's own
  * map is handled by `validateCaseExtendedFields`.
