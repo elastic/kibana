@@ -57993,7 +57993,6 @@
     "xpack.transform.models.transformService.allOtherRequestsCancelledDescription": "他のすべてのリクエストはキャンセルされました。",
     "xpack.transform.models.transformService.requestToActionTimedOutErrorMessage": "''{id}''を{action}するリクエストがタイムアウトしました。{extra}",
     "xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel": "一括アクション",
-    "xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel": "管理アクション",
     "xpack.transform.multiTransformActionsMenu.transformsCount": "{count} {count, plural, one {transform} other {個の変換}}が選択されました",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "トランスフォームプレビューの開発コンソールステートメントをクリップボードにコピーします。",
     "xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody": "group-by フィールドと集約を 1 つ以上選んでください。",

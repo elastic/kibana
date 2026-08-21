@@ -57996,7 +57996,6 @@
     "xpack.transform.models.transformService.allOtherRequestsCancelledDescription": "所有其他请求已取消。",
     "xpack.transform.models.transformService.requestToActionTimedOutErrorMessage": "对 {action}“{id}”的请求超时。{extra}",
     "xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel": "批处理操作",
-    "xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel": "管理操作",
     "xpack.transform.multiTransformActionsMenu.transformsCount": "已选择 {count} 个{count, plural, one {转换} other {转换}}",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "将转换预览的开发控制台语句复制到剪贴板。",
     "xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody": "请至少选择一个分组依据字段和聚合。",

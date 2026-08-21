@@ -57556,7 +57556,6 @@
     "xpack.transform.models.transformService.allOtherRequestsCancelledDescription": "Toutes les autres requêtes ont été annulées.",
     "xpack.transform.models.transformService.requestToActionTimedOutErrorMessage": "La requête pour {action} \"{id}\" a expiré. {extra}",
     "xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel": "Actions groupées",
-    "xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel": "Actions de gestion",
     "xpack.transform.multiTransformActionsMenu.transformsCount": "{count} {count, plural, one {transform} other {transformations}} sélectionné",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "Copier la déclaration Dev Console de l'aperçu de la transformation dans le presse-papiers.",
     "xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody": "Veuillez choisir au moins un champ Regrouper par et une agrégation.",
