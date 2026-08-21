@@ -323,6 +323,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 min-height: 32px;
               `}
               gutterSize="s"
+              wrap
             >
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s" data-test-subj="streamsCanvasFlyoutTitle">
