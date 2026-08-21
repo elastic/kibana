@@ -11,6 +11,7 @@ import { find, getOr } from 'lodash/fp';
 import type { Alert } from '@kbn/alerting-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { CPS_SCOPE_LINKED_PROJECTS } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -88,10 +89,23 @@ export const CellValue = memo(function RenderCellValue({
   // Derive legacyAlert (flat {field, value[]} array) from alert
   const legacyAlert = useMemo<TimelineNonEcsData[]>(() => {
     if (!alert) return [];
-    return Object.entries(alert).map(([field, value]) => ({
-      field,
-      value: (Array.isArray(value) ? value : [value]) as string[],
-    }));
+    return Object.entries(alert).map(([field, value]) => {
+      // linked_projects stores {id, alias, type, organization} objects; extract alias for display
+      if (field === CPS_SCOPE_LINKED_PROJECTS && Array.isArray(value)) {
+        return {
+          field,
+          value: value.map((project) =>
+            typeof project === 'object' && project !== null && 'alias' in project
+              ? String((project as { alias: string }).alias)
+              : String(project)
+          ),
+        };
+      }
+      return {
+        field,
+        value: (Array.isArray(value) ? value : [value]) as string[],
+      };
+    });
   }, [alert]);
 
   // Derive ecsAlert (nested object) from alert
