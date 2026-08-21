@@ -74,7 +74,17 @@ jest.mock('./compose_discover_tabs', () => {
 });
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
+  CodeEditor: ({
+    value,
+    options,
+  }: {
+    value: string;
+    options?: { theme?: string };
+  }) => (
+    <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+      {value}
+    </pre>
+  ),
   ESQL_LANG_ID: 'esql',
 }));
 
@@ -133,6 +143,7 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('mockCodeEditor')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
+    expect(screen.getByTestId('mockCodeEditor')).toHaveAttribute('data-theme', 'esql');
     expect(screen.queryByTestId('mockComposeDiscoverTabs')).not.toBeInTheDocument();
   });
 
