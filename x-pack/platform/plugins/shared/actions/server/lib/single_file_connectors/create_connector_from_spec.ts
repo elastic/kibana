@@ -54,7 +54,19 @@ export const createConnectorTypeFromSpec = (
   const networkSettings = createConnectorNetworkSettings(configUtils);
 
   const hasTest = Boolean(spec.test.enabled);
-  const hasActions = Boolean(spec.actions);
+  const hasActions = Object.keys(spec.actions ?? {}).length > 0;
+  const hasEvents = spec.events !== undefined && Object.keys(spec.events.definitions).length > 0;
+
+  if (hasTest && !hasActions && hasEvents) {
+    throw new Error(
+      `Connector spec "${spec.metadata.id}" cannot enable test without outbound actions.`
+    );
+  }
+
+  if (!hasActions && !hasEvents && !hasTest) {
+    throw new Error('No actions or events defined');
+  }
+
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
 
