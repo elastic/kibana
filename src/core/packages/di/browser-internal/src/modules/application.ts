@@ -13,7 +13,7 @@ import { type KibanaContainerModuleLoadOptions, Scope } from '@kbn/core-di';
 import { Application, ApplicationParameters, CoreSetup } from '@kbn/core-di-browser';
 
 export function loadApplication({ onSetup }: KibanaContainerModuleLoadOptions) {
-  onSetup(Application, CoreSetup('application'), ({ inject }, application, definition) => {
+  onSetup(Application, CoreSetup('application'), ({ inject }, definition, application) => {
     application.register({
       ...definition,
       mount: inject(Scope, (scope, params) => {
