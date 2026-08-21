@@ -153,16 +153,24 @@ export interface XYVisualizationState {
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   pointVisibility?: PointVisibility;
-  exemplars?: XYExemplarPoint[];
+  bubbles?: XYBubblePoint[];
+  /** Series name shown when hovering the bubble markers. */
+  bubblesTitle?: string;
+}
+
+/** A generic label/value shown in the bubble details popover. */
+export interface XYBubbleDetail {
+  label: string;
+  value: string;
 }
 
 /**
- * A clickable exemplar marker point overlaid on the XY chart. Consumers fetch and
- * normalize exemplars (e.g. from `metrics.exemplars-*`) before passing them in.
+ * A generic clickable marker overlaid on the XY chart as a bubble series. The
+ * consumer owns what each point means and what its `details` contain; the chart
+ * only renders the marker and, when `details` are present, a details popover.
  */
-export interface XYExemplarPoint {
+export interface XYBubblePoint {
   x: number;
   y: number;
-  traceId?: string;
-  spanId?: string;
+  details?: XYBubbleDetail[];
 }

@@ -142,9 +142,13 @@ export const strings = {
     i18n.translate('expressionXY.layeredXyVis.pointVisibility.help', {
       defaultMessage: 'Specifies the line/area chart point visibility',
     }),
-  getExemplarsHelp: () =>
-    i18n.translate('expressionXY.layeredXyVis.exemplars.help', {
-      defaultMessage: 'JSON array of exemplar points to render as clickable markers',
+  getBubblesHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.bubbles.help', {
+      defaultMessage: 'JSON array of bubble points to render as clickable markers',
+    }),
+  getBubblesTitleHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.bubblesTitle.help', {
+      defaultMessage: 'Series name shown when hovering the bubble markers',
     }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {

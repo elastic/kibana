@@ -7,31 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EXEMPLARS_SERIES_ID = 'exemplar';
+export const BUBBLES_SERIES_ID = 'bubbles';
 
-/**
- * Normalized exemplar point the marker and flyout consume. The consumer (e.g. the
- * Metrics Experience) fetches exemplars from Elasticsearch and maps the OTel /
- * Prometheus documents onto this shape before passing them to the chart.
- */
-export interface ExemplarPoint {
-  x: number;
-  y: number;
-  traceId?: string;
-  spanId?: string;
+/** A generic label/value shown in the bubble details popover. */
+export interface BubbleDetail {
+  label: string;
+  value: string;
 }
 
 /**
- * Parses the exemplars passed through the expression as a JSON string. Returns an
+ * A generic bubble marker overlaid on the chart. The consumer decides what a
+ * point represents and what its `details` contain; the chart only renders the
+ * marker and, when `details` are present, a details popover on click.
+ */
+export interface BubblePoint {
+  x: number;
+  y: number;
+  details?: BubbleDetail[];
+}
+
+/**
+ * Parses the bubbles passed through the expression as a JSON string. Returns an
  * empty array for missing or malformed input so the chart renders no markers.
  */
-export const parseExemplars = (json?: string): ExemplarPoint[] => {
+export const parseBubbles = (json?: string): BubblePoint[] => {
   if (!json) {
     return [];
   }
   try {
     const parsed = JSON.parse(json);
-    return Array.isArray(parsed) ? (parsed as ExemplarPoint[]) : [];
+    return Array.isArray(parsed) ? (parsed as BubblePoint[]) : [];
   } catch (e) {
     return [];
   }

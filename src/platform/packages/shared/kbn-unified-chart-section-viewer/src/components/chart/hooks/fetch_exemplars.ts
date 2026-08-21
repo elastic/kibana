@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYExemplarPoint } from '@kbn/lens-common';
+import { i18n } from '@kbn/i18n';
+import type { XYBubblePoint } from '@kbn/lens-common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -18,6 +19,13 @@ import { executeEsqlQuery } from '../../observability/metrics/utils/execute_esql
 // Standalone exemplar data stream from the "Exemplar support in ES" proposal.
 const EXEMPLARS_INDEX_PATTERN = 'metrics.exemplars-*';
 const MAX_EXEMPLARS = 100;
+
+const TRACE_ID_LABEL = i18n.translate('metricsExperience.exemplars.traceIdLabel', {
+  defaultMessage: 'Trace ID',
+});
+const SPAN_ID_LABEL = i18n.translate('metricsExperience.exemplars.spanIdLabel', {
+  defaultMessage: 'Span ID',
+});
 
 export interface FetchExemplarsParams {
   /** Metric value field name, used to correlate and resolve the value column. */
@@ -37,9 +45,10 @@ const toOptionalString = (value: unknown): string | undefined =>
   typeof value === 'string' && value ? value : undefined;
 
 /**
- * Fetches exemplars for a metric and normalizes the OTel / Prometheus documents
- * onto the chart's `{ x, y, traceId, spanId }` shape. Trace/span ids are top-level
- * for OTel and nested under `exemplar_labels` for Prometheus.
+ * Fetches exemplars for a metric and maps the OTel / Prometheus documents onto the
+ * chart's generic bubble points. Trace/span ids are top-level for OTel and nested
+ * under `exemplar_labels` for Prometheus; they become the bubble's clickable
+ * details. Exemplars without a trace id get no details, so they are not clickable.
  */
 export async function fetchExemplars({
   metricName,
@@ -51,7 +60,7 @@ export async function fetchExemplars({
   uiSettings,
   profileId,
   signal,
-}: FetchExemplarsParams): Promise<XYExemplarPoint[]> {
+}: FetchExemplarsParams): Promise<XYBubblePoint[]> {
   const valueColumn = `metrics.${metricName}`;
   const esqlQuery = `FROM ${EXEMPLARS_INDEX_PATTERN} | WHERE ${valueColumn} IS NOT NULL | SORT @timestamp | LIMIT ${MAX_EXEMPLARS}`;
 
@@ -68,11 +77,21 @@ export async function fetchExemplars({
   });
 
   return documents
-    .map((row) => ({
-      x: Date.parse(String(row['@timestamp'])),
-      y: toNumber(row[valueColumn]),
-      traceId: toOptionalString(row.trace_id ?? row['exemplar_labels.trace_id']),
-      spanId: toOptionalString(row.span_id ?? row['exemplar_labels.span_id']),
-    }))
+    .map((row) => {
+      const traceId = toOptionalString(row.trace_id ?? row['exemplar_labels.trace_id']);
+      const spanId = toOptionalString(row.span_id ?? row['exemplar_labels.span_id']);
+      const details = traceId
+        ? [
+            { label: TRACE_ID_LABEL, value: traceId },
+            ...(spanId ? [{ label: SPAN_ID_LABEL, value: spanId }] : []),
+          ]
+        : undefined;
+
+      return {
+        x: Date.parse(String(row['@timestamp'])),
+        y: toNumber(row[valueColumn]),
+        details,
+      };
+    })
     .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
 }

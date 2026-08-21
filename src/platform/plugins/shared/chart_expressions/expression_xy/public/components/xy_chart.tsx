@@ -102,9 +102,9 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getMaximumFractionDigits,
-  parseExemplars,
-  EXEMPLARS_SERIES_ID,
-  type ExemplarPoint,
+  parseBubbles,
+  BUBBLES_SERIES_ID,
+  type BubblePoint,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -126,7 +126,7 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { ExemplarFlyout } from './exemplar_flyout';
+import { BubbleDetailsFlyout } from './bubble_details_flyout';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
@@ -250,7 +250,8 @@ export function XYChart({
     singleTable,
     annotations,
     pointVisibility,
-    exemplars: exemplarsJson,
+    bubbles: bubblesJson,
+    bubblesTitle,
   } = args;
 
   const chartRef = useRef<Chart>(null);
@@ -258,13 +259,13 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
   // `useEuiTheme()` doesn't reliably reflect Kibana dark mode in this chart's
-  // render path, so drive the exemplar marker colors from the trusted `darkMode`
+  // render path, so drive the bubble marker colors from the trusted `darkMode`
   // flag using the colorMode-independent constants `plainLight`/`plainDark`.
   // Fill and outline are inverse neutrals (black diamond + white outline in dark
   // mode, and the reverse in light mode) so markers stay legible in both themes
   // and never collide with the vis palette used by the metric series.
-  const exemplarFill = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
-  const exemplarStroke = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+  const bubbleFill = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
+  const bubbleStroke = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
@@ -327,7 +328,7 @@ export function XYChart({
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
 
-  const [selectedExemplar, setSelectedExemplar] = useState<ExemplarPoint | null>(null);
+  const [selectedBubble, setSelectedBubble] = useState<BubblePoint | null>(null);
 
   useEffect(() => {
     const legendShow = getShowLegendDefault();
@@ -373,9 +374,9 @@ export function XYChart({
     [renderComplete]
   );
 
-  // Exemplar markers are fetched by the consumer (e.g. Metrics Experience) and
+  // Bubble markers are provided by the consumer (e.g. Metrics Experience) and
   // passed in as a JSON string through the expression.
-  const exemplars = useMemo<ExemplarPoint[]>(() => parseExemplars(exemplarsJson), [exemplarsJson]);
+  const bubbles = useMemo<BubblePoint[]>(() => parseBubbles(bubblesJson), [bubblesJson]);
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
@@ -661,12 +662,12 @@ export function XYChart({
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
-    // Exemplar markers open a flyout instead of triggering the normal filter path.
-    // Only exemplars carrying a trace id are clickable; the rest are hover-only.
-    if (xySeries.specId === EXEMPLARS_SERIES_ID) {
-      const exemplar = xyGeometry.datum as ExemplarPoint;
-      if (exemplar.traceId) {
-        setSelectedExemplar(exemplar);
+    // Bubble markers open a details flyout instead of triggering the normal filter
+    // path. Only bubbles that carry details are clickable; the rest are hover-only.
+    if (xySeries.specId === BUBBLES_SERIES_ID) {
+      const bubble = xyGeometry.datum as BubblePoint;
+      if (bubble.details?.length) {
+        setSelectedBubble(bubble);
       }
       return;
     }
@@ -1143,22 +1144,23 @@ export function XYChart({
                 pointVisibility={pointVisibility}
               />
             )}
-            {exemplars.length ? (
+            {bubbles.length ? (
               <BubbleSeries
-                id={EXEMPLARS_SERIES_ID}
+                id={BUBBLES_SERIES_ID}
+                name={bubblesTitle || undefined}
                 groupId={(yAxesMap.left ?? yAxesMap.right)?.groupId}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="x"
                 yAccessors={['y']}
-                data={exemplars}
-                color={exemplarFill}
+                data={bubbles}
+                color={bubbleFill}
                 bubbleSeriesStyle={{
                   point: {
                     shape: PointShape.Diamond,
                     radius: 4,
                     strokeWidth: 1,
-                    stroke: exemplarStroke,
+                    stroke: bubbleStroke,
                   },
                 }}
                 hideInLegend
@@ -1198,8 +1200,11 @@ export function XYChart({
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
       </div>
-      {selectedExemplar ? (
-        <ExemplarFlyout exemplar={selectedExemplar} onClose={() => setSelectedExemplar(null)} />
+      {selectedBubble?.details ? (
+        <BubbleDetailsFlyout
+          details={selectedBubble.details}
+          onClose={() => setSelectedBubble(null)}
+        />
       ) : null}
     </>
   );

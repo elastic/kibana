@@ -59,10 +59,15 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       help: strings.getPointVisibilityHelp(),
       options: Object.values(PointVisibilityOptions),
     },
-    exemplars: {
+    bubbles: {
       types: ['string'],
-      help: strings.getExemplarsHelp(),
+      help: strings.getBubblesHelp(),
       default: '[]',
+    },
+    bubblesTitle: {
+      types: ['string'],
+      help: strings.getBubblesTitleHelp(),
+      default: '',
     },
   },
   async fn(data, args, handlers) {

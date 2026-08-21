@@ -24,18 +24,18 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ExemplarPoint } from '../helpers/exemplars';
+import type { BubbleDetail } from '../helpers/bubbles';
 
-interface ExemplarFlyoutProps {
-  exemplar: ExemplarPoint;
+interface BubbleDetailsFlyoutProps {
+  details: BubbleDetail[];
   onClose: () => void;
 }
 
-const copyLabel = i18n.translate('expressionXY.exemplarFlyout.copyAriaLabel', {
+const copyLabel = i18n.translate('expressionXY.bubbleDetailsFlyout.copyAriaLabel', {
   defaultMessage: 'Copy to clipboard',
 });
 
-const CopyableField = ({ label, value }: { label: string; value: string }) => (
+const CopyableField = ({ label, value }: BubbleDetail) => (
   <>
     <EuiText size="xs" color="subdued">
       <strong>{label}</strong>
@@ -50,10 +50,10 @@ const CopyableField = ({ label, value }: { label: string; value: string }) => (
           {(copy) => (
             <EuiToolTip content={copyLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="copy"
+                iconType="copyClipboard"
                 onClick={copy}
                 aria-label={copyLabel}
-                data-test-subj="exemplarFlyoutCopyButton"
+                data-test-subj="bubbleDetailsFlyoutCopyButton"
               />
             </EuiToolTip>
           )}
@@ -63,52 +63,32 @@ const CopyableField = ({ label, value }: { label: string; value: string }) => (
   </>
 );
 
-export const ExemplarFlyout: React.FC<ExemplarFlyoutProps> = ({ exemplar, onClose }) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'exemplarFlyoutTitle' });
+export const BubbleDetailsFlyout: React.FC<BubbleDetailsFlyoutProps> = ({ details, onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'bubbleDetailsFlyoutTitle' });
 
   return (
     <EuiFlyout
       onClose={onClose}
       size="s"
       aria-labelledby={flyoutTitleId}
-      data-test-subj="exemplarFlyout"
+      data-test-subj="bubbleDetailsFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>
-            {i18n.translate('expressionXY.exemplarFlyout.title', {
-              defaultMessage: 'Exemplar',
+            {i18n.translate('expressionXY.bubbleDetailsFlyout.title', {
+              defaultMessage: 'Details',
             })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText size="s">
-          <p>
-            {i18n.translate('expressionXY.exemplarFlyout.description', {
-              defaultMessage:
-                'This data point is linked to a trace. Use the identifiers below to inspect it.',
-            })}
-          </p>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <CopyableField
-          label={i18n.translate('expressionXY.exemplarFlyout.traceIdLabel', {
-            defaultMessage: 'Trace ID',
-          })}
-          value={exemplar.traceId ?? ''}
-        />
-        {exemplar.spanId ? (
-          <>
-            <EuiSpacer size="m" />
-            <CopyableField
-              label={i18n.translate('expressionXY.exemplarFlyout.spanIdLabel', {
-                defaultMessage: 'Span ID',
-              })}
-              value={exemplar.spanId}
-            />
-          </>
-        ) : null}
+        {details.map((detail, index) => (
+          <React.Fragment key={`${detail.label}-${index}`}>
+            {index > 0 ? <EuiSpacer size="m" /> : null}
+            <CopyableField label={detail.label} value={detail.value} />
+          </React.Fragment>
+        ))}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

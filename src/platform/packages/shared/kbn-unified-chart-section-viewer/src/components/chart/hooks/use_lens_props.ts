@@ -39,9 +39,15 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import type { XYExemplarPoint } from '@kbn/lens-common';
+import { i18n } from '@kbn/i18n';
+import type { XYBubblePoint } from '@kbn/lens-common';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
+
+// Hover title shown on the exemplar bubble markers.
+const EXEMPLAR_BUBBLE_TITLE = i18n.translate('metricsExperience.exemplars.bubbleTitle', {
+  defaultMessage: 'Exemplar',
+});
 import { fetchExemplars } from './fetch_exemplars';
 
 export type LensProps = Pick<
@@ -127,9 +133,10 @@ export const useLensProps = ({
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !effectiveError) return null;
 
-    // Fetch correlated exemplars for this metric; failures (e.g. no exemplar index)
-    // just yield no markers and never block the chart.
-    const exemplars =
+    // Fetch correlated exemplars for this metric and pass them to the chart as
+    // generic bubble points; failures (e.g. no exemplar index) just yield no
+    // markers and never block the chart.
+    const bubbles =
       metricName && fetchParams.dataView
         ? await fetchExemplars({
             metricName,
@@ -141,7 +148,7 @@ export const useLensProps = ({
             uiSettings: services.uiSettings,
             profileId,
             signal: fetchParams.abortController?.signal,
-          }).catch(() => [] as XYExemplarPoint[])
+          }).catch(() => [] as XYBubblePoint[])
         : [];
 
     const lensParams = buildLensParams({
@@ -151,7 +158,8 @@ export const useLensProps = ({
       chartLayers,
       yBounds,
       legend,
-      exemplars,
+      bubbles,
+      bubblesTitle: EXEMPLAR_BUBBLE_TITLE,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -295,7 +303,8 @@ const buildLensParams = ({
   chartLayers,
   yBounds,
   legend,
-  exemplars,
+  bubbles,
+  bubblesTitle,
 }: {
   query: string;
   title: string;
@@ -303,7 +312,8 @@ const buildLensParams = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
-  exemplars?: XYExemplarPoint[];
+  bubbles?: XYBubblePoint[];
+  bubblesTitle?: string;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -321,7 +331,8 @@ const buildLensParams = ({
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,
-    exemplars,
+    bubbles,
+    bubblesTitle,
   };
 };
 
