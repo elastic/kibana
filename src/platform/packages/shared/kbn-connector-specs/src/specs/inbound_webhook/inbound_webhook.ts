@@ -44,11 +44,32 @@ const getHandshakeChallenge = (rawBody: unknown): string | undefined => {
   return challenge;
 };
 
+const BODY_PREVIEW_MAX_LENGTH = 512;
+
+const previewBody = (rawBody: unknown): string => {
+  try {
+    const serialized = JSON.stringify(rawBody);
+    if (serialized === undefined) {
+      return String(rawBody);
+    }
+    return serialized.length <= BODY_PREVIEW_MAX_LENGTH
+      ? serialized
+      : `${serialized.slice(0, BODY_PREVIEW_MAX_LENGTH)}…`;
+  } catch {
+    return '[unserializable body]';
+  }
+};
+
 const handleInboundWebhookEvents = async (
   ctx: ConnectorIngressContext
 ): Promise<HandleEventsResult> => {
   const challenge = getHandshakeChallenge(ctx.rawBody);
   if (challenge !== undefined) {
+    ctx.log.info(
+      `inboundWebhook handshake ack connectorId=${ctx.connectorId} spaceId=${
+        ctx.spaceId
+      } body=${previewBody(ctx.rawBody)}`
+    );
     return {
       type: 'http',
       httpResponse: {
@@ -58,12 +79,19 @@ const handleInboundWebhookEvents = async (
     };
   }
 
+  const correlationKey = uuidv4();
+  ctx.log.info(
+    `inboundWebhook emit ${INBOUND_WEBHOOK_RECEIVED_EVENT_ID} connectorId=${
+      ctx.connectorId
+    } spaceId=${ctx.spaceId} correlationKey=${correlationKey} body=${previewBody(ctx.rawBody)}`
+  );
+
   return {
     type: 'emit',
     events: [
       {
         eventId: INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
-        correlationKey: uuidv4(),
+        correlationKey,
         payload: {
           body: ctx.rawBody,
         },

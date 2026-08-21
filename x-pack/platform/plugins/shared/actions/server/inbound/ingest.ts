@@ -306,7 +306,11 @@ export async function ingestInboundEvent({
         detail: `emit_failures=${emitFailures}_of=${result.events.length}`,
       });
     } else {
-      logInboundIngressOutcome(logger, { ...baseLog, outcome: 'accepted' });
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'accepted',
+        detail: result.events.map((event) => event.eventId).join(','),
+      });
     }
 
     return { status: 'accepted', body: { ok: true } };
