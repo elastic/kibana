@@ -43,6 +43,7 @@ export const useDefaultToolsFlyoutProperties = (): OverlaySystemFlyoutOpenOption
       paddingSize: 'm',
       resizable: true,
       size: 'm',
+      flyoutMenuDisplayMode: 'always',
     }),
     [euiTheme.base]
   );
