@@ -12,7 +12,6 @@ import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builde
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type {
-  BuiltinToolDefinition,
   InternalBuiltinToolDefinition,
   SubAgentExecutor,
 } from '@kbn/agent-builder-server';
