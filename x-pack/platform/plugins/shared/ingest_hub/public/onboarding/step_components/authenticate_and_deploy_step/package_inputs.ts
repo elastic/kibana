@@ -81,6 +81,8 @@ export function buildPackageInputs(
     const activeInputs =
       serviceVars.enabledInputs.length > 0
         ? serviceVars.enabledInputs
+        : service.defaultEnabledInputs?.length
+        ? service.defaultEnabledInputs
         : service.inputs?.slice(0, 1) ?? [];
 
     const streamKey = `${service.packageName}.${service.id}`;
