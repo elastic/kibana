@@ -17009,7 +17009,6 @@
     "xpack.cases.caseView.attach.menu.timeline": "时间线",
     "xpack.cases.caseView.attach.savedObjectModal.attachAction": "附加",
     "xpack.cases.caseView.attach.savedObjectModal.attachedAction": "已附加",
-    "xpack.cases.caseView.attach.savedObjectModal.attachSuccessTitle": "已将已保存的对象附加到案例中",
     "xpack.cases.caseView.attach.savedObjectModal.fetchErrorTitle": "无法提取已保存对象",
     "xpack.cases.caseView.attach.savedObjectModal.filterAll": "全部",
     "xpack.cases.caseView.attach.savedObjectModal.filterTypeLabel": "按类型筛选",
