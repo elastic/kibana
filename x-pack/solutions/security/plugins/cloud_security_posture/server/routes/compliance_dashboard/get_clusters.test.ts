@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ClusterBucket } from './get_clusters';
 import { getClusters, getClustersFromAggs, getClustersQuery } from './get_clusters';
 
@@ -84,7 +85,10 @@ describe('getClustersQuery', () => {
 
 describe('getClusters', () => {
   const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
-  const pit = { id: 'pit-0' };
+  const pit: OpenPointInTimeResponse = {
+    id: 'pit-0',
+    _shards: { total: 1, successful: 1, failed: 0 },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
