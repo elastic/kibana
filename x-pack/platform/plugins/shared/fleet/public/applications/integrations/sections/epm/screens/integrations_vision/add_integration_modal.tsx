@@ -30,7 +30,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -47,7 +46,7 @@ const MAX_SIDEBAR_CATEGORIES = 9;
 type SidebarView = 'browse' | 'installed' | 'for_you';
 type ContentTab = 'all' | 'integration' | 'content' | 'connectors' | 'policies';
 
-const CARD_HEIGHT = 92;
+const CARD_HEIGHT = 112;
 
 const ComingSoon: React.FunctionComponent<{ title: string }> = ({ title }) => (
   <EuiEmptyPrompt
@@ -101,11 +100,18 @@ const IntegrationCard: React.FunctionComponent<{ item: PackageListItem }> = ({ i
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0, height: '100%' }}>
-          <EuiFlexGroup direction="column" gutterSize="xs" style={{ height: '100%' }}>
+          <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
             <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-              <EuiTitle size="xxs">
-                <h3 className="eui-textTruncate">{item.title}</h3>
-              </EuiTitle>
+              <EuiText
+                size="s"
+                className="eui-textTruncate"
+                style={{ fontWeight: euiTheme.font.weight.semiBold }}
+              >
+                {item.title}
+              </EuiText>
+              <EuiText size="xs" color="subdued" className="eui-textTruncate">
+                Description
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true} style={{ minWidth: 0, justifyContent: 'flex-end' }}>
               <EuiFlexGroup gutterSize="xs" wrap responsive={false} style={{ overflow: 'hidden' }}>
@@ -139,12 +145,15 @@ const IntegrationCard: React.FunctionComponent<{ item: PackageListItem }> = ({ i
 // vision doc) — search, a left rail (Browse all / Installed / For you +
 // live categories), a secondary content-type tab row, and a scrollable
 // card grid backed by the real EPR catalog (useGetPackagesQuery) and real
-// package icons (CardIcon). Descriptions are intentionally omitted for now
-// per design feedback; only "Browse all" / "All" are wired up — the other
-// nav items are present but inert until a later pass.
+// package icons (CardIcon). Real descriptions aren't wired up yet, so
+// cards show a subdued "Description" placeholder for now. Only
+// "Browse all/Installed" + "All/Integrations/Content packages" are
+// functionally wired — "For you", "Connectors", and "Policies" are
+// present but inert until a later pass.
 export const AddIntegrationModal: React.FunctionComponent<{ onClose: () => void }> = ({
   onClose,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [sidebarView, setSidebarView] = useState<SidebarView>('browse');
   const [contentTab, setContentTab] = useState<ContentTab>('all');
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
@@ -194,8 +203,8 @@ export const AddIntegrationModal: React.FunctionComponent<{ onClose: () => void 
       onClose={onClose}
       aria-label="Sources"
       data-test-subj="addIntegrationVisionModal"
-      maxWidth={1200}
-      style={{ width: 1200, height: 720 }}
+      maxWidth={1400}
+      style={{ width: 'min(1400px, 92vw)', height: '75vh' }}
     >
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="xs">
@@ -205,7 +214,11 @@ export const AddIntegrationModal: React.FunctionComponent<{ onClose: () => void 
                 <EuiModalHeaderTitle>Sources</EuiModalHeaderTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" iconType="pencil" iconSide="right">
+                <EuiBadge
+                  color={euiTheme.colors.backgroundLightPrimary}
+                  iconType="pencil"
+                  iconSide="right"
+                >
                   OTel-Native
                 </EuiBadge>
               </EuiFlexItem>
@@ -316,51 +329,45 @@ export const AddIntegrationModal: React.FunctionComponent<{ onClose: () => void 
               />
             </EuiListGroup>
 
-            {sidebarView === 'browse' && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiHorizontalRule margin="none" />
-                <EuiSpacer size="m" />
-                <EuiText size="xs" color="subdued">
-                  <strong>CATEGORIES</strong>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiListGroup data-test-subj="addIntegrationVisionCategories">
-                  {sidebarCategories.map((category) => (
-                    <EuiListGroupItem
-                      key={category.id}
-                      label={
-                        <EuiFlexGroup
-                          gutterSize="s"
-                          alignItems="center"
-                          justifyContent="spaceBetween"
-                          responsive={false}
-                        >
-                          <EuiFlexItem grow={false} className="eui-textTruncate">
-                            {category.title}
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiNotificationBadge color="subdued">
-                              {category.count}
-                            </EuiNotificationBadge>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      isActive={activeCategoryId === category.id}
-                      onClick={() =>
-                        setActiveCategoryId((current) =>
-                          current === category.id ? null : category.id
-                        )
-                      }
-                    />
-                  ))}
-                </EuiListGroup>
-              </>
-            )}
+            <EuiSpacer size="m" />
+            <EuiHorizontalRule margin="none" />
+            <EuiSpacer size="m" />
+            <EuiText size="xs" color="subdued">
+              <strong>CATEGORIES</strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiListGroup data-test-subj="addIntegrationVisionCategories">
+              {sidebarCategories.map((category) => (
+                <EuiListGroupItem
+                  key={category.id}
+                  label={
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      justifyContent="spaceBetween"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false} className="eui-textTruncate">
+                        {category.title}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiNotificationBadge color="subdued">
+                          {category.count}
+                        </EuiNotificationBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                  isActive={activeCategoryId === category.id}
+                  onClick={() =>
+                    setActiveCategoryId((current) => (current === category.id ? null : category.id))
+                  }
+                />
+              ))}
+            </EuiListGroup>
           </EuiFlexItem>
 
           <EuiFlexItem style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <EuiTabs size="s" data-test-subj="addIntegrationVisionTabs">
+            <EuiTabs data-test-subj="addIntegrationVisionTabs">
               <EuiTab isSelected={contentTab === 'all'} onClick={() => setContentTab('all')}>
                 All
               </EuiTab>
