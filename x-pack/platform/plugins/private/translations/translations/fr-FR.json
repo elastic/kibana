@@ -659,7 +659,6 @@
     "console.notification.monaco.error.nonSupportedRequest": "La requête sélectionnée n'est pas valide.",
     "console.notification.monaco.error.noRequestSelectedTitle": "Aucune requête sélectionnée. Sélectionnez une requête en positionnant le curseur dessus.",
     "console.notification.monaco.error.unknownErrorTitle": "Erreur de requête inconnue",
-    "console.notification.monaco.warning.nonSupportedAutoindentation": "L'auto-indentation n'est actuellement pas prise en charge pour les requêtes contenant des commentaires. Veuillez supprimer les commentaires pour activer le formatage.",
     "console.openFullscreenButton": "Ouvrir cette console en affichage pleine page",
     "console.outputEmptyState.description": "Lorsque vous exécutez une requête dans le panneau de saisie, la réponse de sortie s'affichera ici.",
     "console.outputEmptyState.docsLink": "Lire la documentation de la Console",
