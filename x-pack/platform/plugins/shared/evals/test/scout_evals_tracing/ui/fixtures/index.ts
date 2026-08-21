@@ -24,7 +24,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     }: {
       pageObjects: ExtScoutTestFixtures['pageObjects'];
       page: ExtScoutTestFixtures['page'];
-      kbnUrl: ExtScoutTestFixtures['kbnUrl'];
+      kbnUrl: ScoutWorkerFixtures['kbnUrl'];
     },
     use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {

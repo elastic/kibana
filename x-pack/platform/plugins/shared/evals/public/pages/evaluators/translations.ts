@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.evals.evaluators.pageTitle', {
-  defaultMessage: 'Evaluators',
-});
-export const PAGE_DESCRIPTION = i18n.translate('xpack.evals.evaluators.pageDescription', {
-  defaultMessage:
-    'Browse the built-in evaluator registry and manage LLM judges defined in this space.',
-});
 export const CREATE_BUTTON = i18n.translate('xpack.evals.evaluators.createButtonLabel', {
   defaultMessage: 'Create evaluator',
 });

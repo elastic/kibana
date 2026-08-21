@@ -20,8 +20,8 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   type EuiBasicTableColumn,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ListEvaluatorsResponse } from '@kbn/evals-common';
@@ -68,6 +68,7 @@ const EvaluatorInputs: React.FC<{ evaluator: EvaluatorSummary }> = ({ evaluator 
 
 export const EvaluatorsPage: React.FC = () => {
   const deleteModalTitleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
   const { data, isLoading, error, refetch } = useEvaluators();
   const deleteEvaluator = useDeleteEvaluator();
@@ -166,54 +167,16 @@ export const EvaluatorsPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="l">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiFlexGroup
+          responsive={false}
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="m"
+        >
           <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>{i18n.PAGE_TITLE}</h1>
-            </EuiTitle>
-            <EuiText color="subdued">
-              <p>{i18n.PAGE_DESCRIPTION}</p>
-            </EuiText>
-          </EuiFlexItem>
-          {canManage ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                onClick={() => setEditor({ mode: 'create' })}
-                data-test-subj="evalsEvaluatorCreate"
-              >
-                {i18n.CREATE_BUTTON}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-
-        {actionError ? (
-          <>
-            <EuiCallOut announceOnMount color="danger" iconType="warning" title={actionError} />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-
-        {error ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            iconType="warning"
-            title={i18n.LOAD_ERROR_TITLE}
-          >
-            <p>{getErrorMessage(error)}</p>
-            <EuiButton color="danger" onClick={() => refetch()}>
-              {i18n.RETRY_BUTTON}
-            </EuiButton>
-          </EuiCallOut>
-        ) : (
-          <>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
+              <EuiFlexItem css={{ maxWidth: 500 }}>
                 <EuiFieldSearch
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
@@ -249,7 +212,43 @@ export const EvaluatorsPage: React.FC = () => {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+          {canManage ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                iconType="plusCircle"
+                onClick={() => setEditor({ mode: 'create' })}
+                data-test-subj="evalsEvaluatorCreate"
+              >
+                {i18n.CREATE_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
+        {actionError ? (
+          <>
+            <EuiCallOut announceOnMount color="danger" iconType="warning" title={actionError} />
             <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        {error ? (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="warning"
+            title={i18n.LOAD_ERROR_TITLE}
+          >
+            <p>{getErrorMessage(error)}</p>
+            <EuiButton color="danger" onClick={() => refetch()}>
+              {i18n.RETRY_BUTTON}
+            </EuiButton>
+          </EuiCallOut>
+        ) : (
+          <>
             {!isLoading && evaluators.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="search"
