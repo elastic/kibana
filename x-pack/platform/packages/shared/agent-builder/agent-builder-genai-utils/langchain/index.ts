@@ -21,6 +21,7 @@ export {
   createThinkingCompleteEvent,
   createPromptRequestEvent,
   createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
 } from './graph_events';
 export {
   extractTextContent,
