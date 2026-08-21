@@ -12279,12 +12279,12 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@playwright/test@1.61.1":
-  version "1.61.1"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.61.1.tgz#48568dc22af7819e55fa5e8e3bc79b7e6a3e6675"
-  integrity sha512-8nKv6+0RJSL9FE4jYOEGXnPeM/Hg12qZpmqzZjRh3qM0Y7c3z1mrOTfFLids72RDQYVh9WpLEfR5WdpNX4fkig==
+"@playwright/test@1.62.1":
+  version "1.62.1"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.62.1.tgz#68e1aaf6e480e1923936dee6c66fae1921d3a65a"
+  integrity sha512-DTcUc8qii+cpHvtOwggMtBRMjKZHXYWdw8syRYu2vtzuq4Wxphqq4NfCs5Zt44L6mA8rfDfj+PHnxFc/FeK6mQ==
   dependencies:
-    playwright "1.61.1"
+    playwright "1.62.1"
 
 "@pmmmwh/react-refresh-webpack-plugin@0.6.1":
   version "0.6.1"
@@ -16963,7 +16963,7 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-baseline-browser-mapping@2.9.14, baseline-browser-mapping@^2.8.25, baseline-browser-mapping@^2.9.0:
+baseline-browser-mapping@2.9.14, baseline-browser-mapping@^2.11.12:
   version "2.9.14"
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.14.tgz#3b6af0bc032445bca04de58caa9a87cfe921cbb3"
   integrity sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==
@@ -17329,27 +17329,16 @@ browserslist-to-es-version@^1.2.0:
   dependencies:
     browserslist "^4.28.1"
 
-browserslist@4.28.0:
-  version "4.28.0"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.28.0.tgz#9cefece0a386a17a3cd3d22ebf67b9deca1b5929"
-  integrity sha512-tbydkR/CxfMwelN0vwdP/pLkDwyAASZ+VfWm4EOwlB6SWhx1sYnWLqo8N5j0rAzPfzfRaxt0mM/4wPU/Su84RQ==
+browserslist@4.28.8, browserslist@^4.0.0, browserslist@^4.20.3, browserslist@^4.24.0, browserslist@^4.24.5, browserslist@^4.28.1:
+  version "4.28.8"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.28.8.tgz#a3c79ceb70028527e5da7dafc887f3200b5168c0"
+  integrity sha512-V2NpofLblG64mfOtSgDhOJESZEGogzDMBv/q+W6oc4LXWP/q75eOXoOaaOu1EOadB9U4Bwx/e0yzbvwKH8zalA==
   dependencies:
-    baseline-browser-mapping "^2.8.25"
-    caniuse-lite "^1.0.30001754"
-    electron-to-chromium "^1.5.249"
-    node-releases "^2.0.27"
-    update-browserslist-db "^1.1.4"
-
-browserslist@^4.0.0, browserslist@^4.20.3, browserslist@^4.24.0, browserslist@^4.24.5, browserslist@^4.28.1:
-  version "4.28.1"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.28.1.tgz#7f534594628c53c63101079e27e40de490456a95"
-  integrity sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==
-  dependencies:
-    baseline-browser-mapping "^2.9.0"
-    caniuse-lite "^1.0.30001759"
-    electron-to-chromium "^1.5.263"
-    node-releases "^2.0.27"
-    update-browserslist-db "^1.2.0"
+    baseline-browser-mapping "^2.11.12"
+    caniuse-lite "^1.0.30001809"
+    electron-to-chromium "^1.5.402"
+    node-releases "^2.0.53"
+    update-browserslist-db "^1.3.0"
 
 bser@^2.0.0:
   version "2.0.0"
@@ -17630,10 +17619,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001754, caniuse-lite@^1.0.30001759:
-  version "1.0.30001781"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001781.tgz#344b47c03eb8168b79c3c158b872bcfbdd02a400"
-  integrity sha512-RdwNCyMsNBftLjW6w01z8bKEvT6e/5tpPVEgtn22TiLGlstHOVecsX2KHFkD5e/vRnIE4EGzpuIODb3mtswtkw==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001809:
+  version "1.0.30001809"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001809.tgz#e6cf71f14ddfe008f114dd2a846923be3c03a07b"
+  integrity sha512-xxWVywk6a6Arlk+hymeycyn/VgqEfLDxupvhH/xiY5SJ/18kmi9o6MiO320DCUzypORHLtvh0I4i04tUhCNHNQ==
 
 canvg@3.0.11:
   version "3.0.11"
@@ -20365,10 +20354,10 @@ elasticsearch@^16.4.0:
     chalk "^1.0.0"
     lodash "^4.17.10"
 
-electron-to-chromium@^1.5.249, electron-to-chromium@^1.5.263:
-  version "1.5.321"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.321.tgz#57a80554e2e7fd65e3689d320f52a64723472d5d"
-  integrity sha512-L2C7Q279W2D/J4PLZLk7sebOILDSWos7bMsMNN06rK482umHUrh/3lM8G7IlHFOYip2oAg5nha1rCMxr/rs6ZQ==
+electron-to-chromium@^1.5.402:
+  version "1.5.403"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.403.tgz#8a6e422bc68c5d2fa4d8c5fa2ba9a583c3d4452c"
+  integrity sha512-MQsYmdaLzvaCX5j+ZZBr5Fm6uCCnPQcRtlvmvRlWqrXy+BH2O4ffXIAScF+JQznQWB9brWp4lSD9Z4yNmaf2BA==
 
 elliptic@^6.5.3, elliptic@^6.5.5:
   version "6.6.1"
@@ -27819,10 +27808,10 @@ node-preload@^0.2.1:
   dependencies:
     process-on-spawn "^1.0.0"
 
-node-releases@^2.0.27:
-  version "2.0.27"
-  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.27.tgz#eedca519205cf20f650f61d56b070db111231e4e"
-  integrity sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==
+node-releases@^2.0.53:
+  version "2.0.53"
+  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.53.tgz#0fe5ad8a7935e075172f574e56f0c20f07fa41af"
+  integrity sha512-D9UOmYG3UH1V+ENW56t5QXBwJw1YEY18ruVeus89Rw+SyIgjPkCO84bRzO3uNIYosJbNwiabWVn48o3uJLjxFQ==
 
 node-source-walk@^7.0.1:
   version "7.0.1"
@@ -29159,17 +29148,17 @@ platform@^1.3.0:
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
   integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
 
-playwright-core@1.61.1:
-  version "1.61.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.61.1.tgz#3c99841307efbbabc9d724c41a88c914705d15fc"
-  integrity sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==
+playwright-core@1.62.1:
+  version "1.62.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.62.1.tgz#120f67a19181bfd183c60fa903c0d99330b56785"
+  integrity sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==
 
-playwright@1.61.1:
-  version "1.61.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.61.1.tgz#d8c0c06eb93c28981afc747bace453bdbd5018bc"
-  integrity sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==
+playwright@1.62.1:
+  version "1.62.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.62.1.tgz#8447b6755e8aec85a3cb7207c823e3ed2fc66700"
+  integrity sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg==
   dependencies:
-    playwright-core "1.61.1"
+    playwright-core "1.62.1"
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -34627,10 +34616,10 @@ upath@^2.0.1:
   resolved "https://registry.yarnpkg.com/upath/-/upath-2.0.1.tgz#50c73dea68d6f6b990f51d279ce6081665d61a8b"
   integrity sha512-1uEe95xksV1O0CYKXo8vQvN1JEbtJp7lb7C5U9HMsIp6IVwntkH/oNUzyVNQSd4S1sYk2FpSSW44FqMc8qee5w==
 
-update-browserslist-db@^1.1.4, update-browserslist-db@^1.2.0:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/update-browserslist-db/-/update-browserslist-db-1.2.3.tgz#64d76db58713136acbeb4c49114366cc6cc2e80d"
-  integrity sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==
+update-browserslist-db@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/update-browserslist-db/-/update-browserslist-db-1.3.0.tgz#9ff2604d5b949051639c01a223a16619f8a2b2c7"
+  integrity sha512-x/M6q3w4Ybp91CNaS4S69UnliqR3BzRpOT6LWbksjth0S/+jhfaPJsWjt/TewpT8j9eLIojUf5jr29WextHroA==
   dependencies:
     escalade "^3.2.0"
     picocolors "^1.1.1"
