@@ -14,25 +14,25 @@ import { TestProviders, kibanaMock } from '../mock';
 import { useIsCpsLinkedSearchSpace } from './use_is_cps_linked_search_space';
 
 const createCpsManager = ({
-  totalProjectCount,
+  hasLinkedProjects,
   defaultProjectRouting = PROJECT_ROUTING.ALL,
 }: {
-  totalProjectCount: number;
+  hasLinkedProjects: boolean;
   defaultProjectRouting?: string;
 }): ICPSManager =>
   ({
     whenReady: jest.fn().mockResolvedValue(undefined),
-    getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
+    hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
     getDefaultProjectRouting: jest.fn().mockReturnValue(defaultProjectRouting),
   } as unknown as ICPSManager);
 
 const startServicesWithCps = (
-  totalProjectCount: number,
+  hasLinkedProjects: boolean,
   defaultProjectRouting: string = PROJECT_ROUTING.ALL
 ): StartServices => ({
   ...kibanaMock,
   cps: {
-    cpsManager: createCpsManager({ totalProjectCount, defaultProjectRouting }),
+    cpsManager: createCpsManager({ hasLinkedProjects, defaultProjectRouting }),
     isTierEligible: true,
   },
 });
@@ -52,15 +52,15 @@ describe('useIsCpsLinkedSearchSpace', () => {
   });
 
   it('returns a linked-search space when there are linked projects and routing is not origin-only', async () => {
-    const { result } = renderUseIsCpsLinkedSearchSpace(startServicesWithCps(2));
+    const { result } = renderUseIsCpsLinkedSearchSpace(startServicesWithCps(true));
 
     await waitFor(() => {
       expect(result.current).toEqual({ isReady: true, isLinkedSearchSpace: true });
     });
   });
 
-  it('returns not a linked-search space when there is only one project', async () => {
-    const startServices = startServicesWithCps(1);
+  it('returns not a linked-search space when there are no linked projects', async () => {
+    const startServices = startServicesWithCps(false);
     const { result } = renderUseIsCpsLinkedSearchSpace(startServices);
 
     await waitFor(() => {
@@ -71,7 +71,7 @@ describe('useIsCpsLinkedSearchSpace', () => {
 
   it('returns not a linked-search space when routing is origin-only', async () => {
     const { result } = renderUseIsCpsLinkedSearchSpace(
-      startServicesWithCps(2, PROJECT_ROUTING.ORIGIN)
+      startServicesWithCps(true, PROJECT_ROUTING.ORIGIN)
     );
 
     await waitFor(() => {

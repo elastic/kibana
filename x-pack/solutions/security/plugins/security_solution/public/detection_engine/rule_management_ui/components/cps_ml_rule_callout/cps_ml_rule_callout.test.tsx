@@ -15,33 +15,33 @@ import { TestProviders, kibanaMock } from '../../../../common/mock';
 import { CpsMlRuleCallout } from './callout';
 
 const createCpsManager = ({
-  totalProjectCount,
+  hasLinkedProjects,
   defaultProjectRouting = PROJECT_ROUTING.ALL,
 }: {
-  totalProjectCount: number;
+  hasLinkedProjects: boolean;
   defaultProjectRouting?: string;
 }): ICPSManager =>
   ({
     whenReady: jest.fn().mockResolvedValue(undefined),
-    getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
+    hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
     getDefaultProjectRouting: jest.fn().mockReturnValue(defaultProjectRouting),
   } as unknown as ICPSManager);
 
-const startServicesWithProjectCount = (
-  totalProjectCount: number,
+const startServicesWithLinkedProjects = (
+  hasLinkedProjects: boolean,
   defaultProjectRouting: string = PROJECT_ROUTING.ALL
 ): StartServices => ({
   ...kibanaMock,
   cps: {
-    cpsManager: createCpsManager({ totalProjectCount, defaultProjectRouting }),
+    cpsManager: createCpsManager({ hasLinkedProjects, defaultProjectRouting }),
     isTierEligible: true,
   },
 });
 
 describe('CpsMlRuleCallout', () => {
-  it('renders when total project count is 2 and space default routing includes linked projects', async () => {
+  it('renders when there are linked projects and space default routing includes them', async () => {
     render(
-      <TestProviders startServices={startServicesWithProjectCount(2)}>
+      <TestProviders startServices={startServicesWithLinkedProjects(true)}>
         <CpsMlRuleCallout />
       </TestProviders>
     );
@@ -51,8 +51,8 @@ describe('CpsMlRuleCallout', () => {
     });
   });
 
-  it('does not render when total project count is 1', async () => {
-    const startServices = startServicesWithProjectCount(1);
+  it('does not render when there are no linked projects', async () => {
+    const startServices = startServicesWithLinkedProjects(false);
     const cpsManager = startServices.cps!.cpsManager!;
 
     render(
@@ -77,8 +77,8 @@ describe('CpsMlRuleCallout', () => {
     expect(screen.queryByTestId('callout-cps-ml-rule')).not.toBeInTheDocument();
   });
 
-  it('does not render when total project count is 2 but space is limited to origin only', async () => {
-    const startServices = startServicesWithProjectCount(2, PROJECT_ROUTING.ORIGIN);
+  it('does not render when there are linked projects but space is limited to origin only', async () => {
+    const startServices = startServicesWithLinkedProjects(true, PROJECT_ROUTING.ORIGIN);
     const cpsManager = startServices.cps!.cpsManager!;
 
     render(

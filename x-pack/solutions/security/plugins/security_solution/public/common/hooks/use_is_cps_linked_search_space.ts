@@ -45,13 +45,12 @@ export const useIsCpsLinkedSearchSpace = (): UseIsCpsLinkedSearchSpaceResult => 
           return;
         }
 
-        const hasLinkedProjects = cpsManager.getTotalProjectCount() > 1;
         const spaceSearchesLinkedProjects =
           cpsManager.getDefaultProjectRouting() !== PROJECT_ROUTING.ORIGIN;
 
         setState({
           isReady: true,
-          isLinkedSearchSpace: hasLinkedProjects && spaceSearchesLinkedProjects,
+          isLinkedSearchSpace: cpsManager.hasLinkedProjects() && spaceSearchesLinkedProjects,
         });
       } catch {
         if (!cancelled) {
