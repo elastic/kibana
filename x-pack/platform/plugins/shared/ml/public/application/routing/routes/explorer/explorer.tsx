@@ -48,7 +48,6 @@ export const explorerRouteFactory = (
       }),
     },
   ],
-  enableDatePicker: true,
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 

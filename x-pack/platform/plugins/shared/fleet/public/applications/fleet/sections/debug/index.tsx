@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiListGroup,
   EuiPage,
@@ -16,9 +15,9 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -49,7 +48,7 @@ export const DebugPage: React.FunctionComponent<{
   isInitialized: boolean;
   setupError: RequestError | null;
 }> = ({ isInitialized, setupError }) => {
-  const { chrome } = useStartServices();
+  const { chrome, docLinks } = useStartServices();
   const { getHref } = useLink();
   const { enableCloudOnboardingDeployments } = ExperimentalFeaturesService.get();
 
@@ -137,8 +136,9 @@ export const DebugPage: React.FunctionComponent<{
               iconType="wrench"
             />
             <EuiSpacer size="m" />
-            <EuiCallOut color="danger" iconType="warning" title="Danger zone">
-              <EuiText grow={false}>
+            <KbnDangerCallout
+              title="Danger zone"
+              text={
                 <FormattedMessage
                   id="xpack.fleet.debug.dangerZone.description"
                   defaultMessage="This page provides an interface for directly managing Fleet's underlying data and diagnosing issues. Be aware that these debugging tools can be {strongDestructive} in nature and can result in {strongLossOfData}. Please proceed with caution."
@@ -161,13 +161,15 @@ export const DebugPage: React.FunctionComponent<{
                     ),
                   }}
                 />
-              </EuiText>
-            </EuiCallOut>
+              }
+            />
             {!isInitialized && setupError?.message && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut announceOnMount color="danger" iconType="warning" title="Setup error">
-                  <EuiText grow={false}>
+                <KbnDangerCallout
+                  announceOnMount
+                  title="Setup error"
+                  text={
                     <FormattedMessage
                       id="xpack.fleet.debug.initializationError.description"
                       defaultMessage="{message}. You can use this page to debug the error."
@@ -175,8 +177,8 @@ export const DebugPage: React.FunctionComponent<{
                         message: setupError?.message,
                       }}
                     />
-                  </EuiText>
-                </EuiCallOut>
+                  }
+                />
               </>
             )}
           </EuiPageSection>
@@ -227,7 +229,7 @@ export const DebugPage: React.FunctionComponent<{
                   label: i18n.translate('xpack.fleet.debug.usefulLinks.troubleshootingGuide', {
                     defaultMessage: 'Troubleshooting Guide',
                   }),
-                  href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                  href: docLinks.links.fleet.troubleshooting,
                   iconType: 'external',
                   target: '_blank',
                 },

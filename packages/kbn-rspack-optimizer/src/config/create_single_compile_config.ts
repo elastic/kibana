@@ -22,7 +22,7 @@ import {
 } from '../utils/entry_generation';
 import { resolveBundlesDir, resolveEntryWrappersDir } from '../paths';
 import { loadDllManifest } from './dll_manifest';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
@@ -66,7 +66,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/plugins/bundle_metrics_plugin.ts',
   'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
   'packages/kbn-rspack-optimizer/limits.yml',
-  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
   UiSharedDepsNpm.dllManifestPath,
@@ -80,6 +80,10 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
@@ -117,6 +121,8 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -134,11 +140,13 @@ export async function createSingleCompileConfig(
   }
   const resolvedHmrPort = hmrPort as number;
 
-  // Discover all plugins
+  // Discover all plugins, including plugins explicitly passed via --plugin-path.
   const plugins = await discoverPlugins({
     repoRoot,
     examples,
     testPlugins,
+    paths: pluginPaths,
+    parentDirs: pluginScanDirs,
   });
 
   // Create a SINGLE unified entry that imports ALL plugins
@@ -220,7 +228,19 @@ export async function createSingleCompileConfig(
     // Only externalize shared deps (npm packages), NOT cross-plugin imports
     // In single compilation mode, cross-plugin imports are bundled together
     // This ensures proper module deduplication and service initialization order
-    externals: sharedDepsExternals,
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }: { context?: string; request?: string }, callback: Function) => {
+        if (isKeaReactReduxImport(context, request)) {
+          return callback();
+        }
+        if (request && request in sharedDepsExternals) {
+          return callback(null, sharedDepsExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     // Use shared resolve config (same as external plugins)
     resolve: {
@@ -352,6 +372,15 @@ export async function createSingleCompileConfig(
       // Node.js browser polyfills (same as kbn-optimizer)
       new NodeLibsBrowserPlugin() as any,
 
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new rspack.NormalModuleReplacementPlugin(/^react-redux$/, (resource: any) => {
+        if (isKeaReactReduxImport(resource.context, resource.request)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
+
       // Reference the pre-built @kbn/ui-shared-deps-npm DLL so that transitive
       // dependencies (babel helpers, core-js polyfills, internal sub-modules of
       // shared packages) are resolved from __kbnSharedDeps_npm__ instead of
@@ -450,7 +479,8 @@ export async function createSingleCompileConfig(
           ]
         : []),
 
-      // RsDoctor profiling - only works in the profile worker (avoids require-in-the-middle conflict)
+      // RsDoctor profiling - only works in the profile worker (which skips harden's prototype
+      // sealing; envinfo, used by RsDoctor, breaks once Function.prototype is sealed)
       // Skip if profileStatsOnly is enabled (faster builds when only stats.json is needed)
       ...(profile && !profileStatsOnly
         ? (() => {
@@ -469,8 +499,8 @@ export async function createSingleCompileConfig(
                 }),
               ];
             } catch (e: any) {
-              // RsDoctor's envinfo dependency conflicts with require-in-the-middle (from harden)
-              // This should only happen if running outside the profile worker
+              // RsDoctor's envinfo dependency breaks when Function.prototype is sealed by harden.
+              // This should only happen if running outside the profile worker (which skips sealing).
               log?.warning(`RsDoctor not available: ${e.message}`);
               log?.info('Use stats.json with https://statoscope.tech for bundle analysis');
               return [];

@@ -52,6 +52,8 @@ interface TemplateEditorLayoutProps {
   metadataErrors: TemplateMetadataErrors;
   onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
+  /** The Fields YAML has validation errors — surfaces an indicator on the Fields tab. */
+  fieldsHaveErrors?: boolean;
 }
 
 type ActiveTab = 'fields' | 'configuration';
@@ -86,6 +88,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   metadataErrors,
   onMetadataChange,
   formResetKey,
+  fieldsHaveErrors = false,
 }) => {
   const styles = useMemoCss(componentStyles);
   const [activeTab, setActiveTab] = useState<ActiveTab>('fields');
@@ -109,8 +112,6 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     );
   }
 
-  const nameNeedsAttention = metadataErrors.name != null;
-
   const tabs = (
     <EuiTabs
       css={css`
@@ -120,26 +121,28 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       <EuiTab
         isSelected={activeTab === 'fields'}
         onClick={() => selectTab('fields')}
-        data-test-subj="templateTabFields"
-      >
-        {i18n.FIELDS_TAB_LABEL}
-      </EuiTab>
-      <EuiTab
-        isSelected={activeTab === 'configuration'}
-        onClick={() => selectTab('configuration')}
         append={
-          nameNeedsAttention ? (
-            <EuiToolTip content={i18n.CONFIGURATION_TAB_NAME_REQUIRED}>
+          fieldsHaveErrors ? (
+            <EuiToolTip content={i18n.FIELDS_TAB_HAS_ERRORS}>
               <EuiNotificationBadge
                 color="accent"
-                aria-label={i18n.CONFIGURATION_TAB_NAME_REQUIRED}
-                data-test-subj="templateConfigTabRequiredIndicator"
+                aria-label={i18n.FIELDS_TAB_HAS_ERRORS}
+                data-test-subj="templateFieldsTabErrorIndicator"
               >
                 {'!'}
               </EuiNotificationBadge>
             </EuiToolTip>
           ) : undefined
         }
+        data-test-subj="templateTabFields"
+      >
+        {i18n.FIELDS_TAB_LABEL}
+      </EuiTab>
+      {/* No required-attention badge: the name it used to flag now lives in the page title, which
+          is always visible, so the tab has nothing mandatory left to warn about. */}
+      <EuiTab
+        isSelected={activeTab === 'configuration'}
+        onClick={() => selectTab('configuration')}
         data-test-subj="templateTabConfiguration"
       >
         {i18n.CONFIGURATION_TAB_LABEL}
@@ -162,7 +165,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     <ResizableLayout
       className="eui-fullHeight"
       flexPanel={
-        <div css={styles.editorPanel}>
+        <div css={styles.editorPanel} data-test-subj="templateYamlEditorPanel">
           <TemplateYamlEditor
             value={yamlValue}
             onChange={onYamlChange}

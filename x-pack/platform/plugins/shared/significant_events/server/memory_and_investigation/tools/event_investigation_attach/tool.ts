@@ -24,12 +24,12 @@ export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
 
 const eventInvestigationAttachSchema = z.object({
-  event_id: z
+  event_uuid: z
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
       i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventUuid',
         {
           defaultMessage: 'Identifier of the significant event to attach the investigation to.',
         }
@@ -93,18 +93,25 @@ export const createEventInvestigationAttachTool = ({
         }
       )}
     `,
+    annotations: {
+      title: 'Attach Investigation to Event',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventInvestigationAttachSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        const { getEventClient, licensing } = await getScopedClients({ request });
+        await assertSignificantEventsAccess({ server, licensing });
 
         const data = await attachEventInvestigationToolHandler({
           eventClient: getEventClient(),
-          eventId: toolParams.event_id,
+          eventUuid: toolParams.event_uuid,
           workflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
@@ -112,7 +119,7 @@ export const createEventInvestigationAttachTool = ({
 
         telemetry.trackAgentToolEventInvestigationAttach({
           success: true,
-          event_id: toolParams.event_id,
+          event_uuid: toolParams.event_uuid,
           workflow_execution_id: toolParams.workflow_execution_id,
         });
 
@@ -122,7 +129,7 @@ export const createEventInvestigationAttachTool = ({
         logger.error(`Error running event_investigation_attach: ${message}`);
         telemetry.trackAgentToolEventInvestigationAttach({
           success: false,
-          event_id: toolParams.event_id,
+          event_uuid: toolParams.event_uuid,
           workflow_execution_id: toolParams.workflow_execution_id,
           error_message: message,
         });

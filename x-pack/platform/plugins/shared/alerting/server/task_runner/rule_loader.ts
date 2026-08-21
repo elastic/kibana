@@ -7,7 +7,7 @@
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -21,6 +21,7 @@ import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getAlertFromRaw } from '../rules_client/lib';
 import { UIAM_LOGS_USAGE_TAGS } from '../constants';
+import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
 
 interface RuleData {
   rawRule: RawRule;
@@ -186,7 +187,6 @@ export function getFakeKibanaRequest(
   let effectiveApiKey: string | null = null;
 
   const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
-  const logTags = ruleId ? [...UIAM_LOGS_USAGE_TAGS, ruleId] : UIAM_LOGS_USAGE_TAGS;
 
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
@@ -195,24 +195,35 @@ export function getFakeKibanaRequest(
         effectiveApiKey = apiKey;
       }
       if (apiKeyCreatedByUser && apiKey) {
+        alertingUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
+        alertingUiamTelemetry.recordUiamApiKeyFallback('likely_non_cloud_user');
         context.logger.debug(
           'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else {
-        context.logger.warn(
+        // Some deployments legitimately cannot mint UIAM keys, so this fallback is
+        // expected in the wild and is logged at debug level to avoid noise. Volume
+        // and reason are tracked via the
+        // `kibana.alerting.rule_run.uiam_api_key_fallback.count` OTel counter
+        // instead, which is broken down per project.
+        alertingUiamTelemetry.recordUiamApiKeyFallback('unexpected');
+        context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       }
@@ -228,7 +239,7 @@ export function getFakeKibanaRequest(
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: asSpaceId(spaceId),
+    spaceId: brandSpaceId(spaceId),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

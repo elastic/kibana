@@ -76,6 +76,13 @@ Note:
 Do NOT use this tool if a more specific skill is available for the request (see the SKILLS section) — prefer
 loading that skill first, since its dedicated tools are more accurate than a general-purpose search for that domain.
     `,
+    annotations: {
+      title: 'Search for Elasticsearch Documents',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchSchema,
     handler: async (
       { query: nlQuery, index, time_range: explicitTimeRange },

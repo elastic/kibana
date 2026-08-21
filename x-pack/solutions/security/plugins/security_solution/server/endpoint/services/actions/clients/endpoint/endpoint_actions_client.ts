@@ -136,11 +136,23 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
+      const memDumpType = actionRequest.parameters.type;
+
+      // Memory Dump `raw` type is gated behind a feature flag
+      if (
+        memDumpType === 'raw' &&
+        !this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError('memory-dump `raw` type is not enabled', 400),
+        };
+      }
+
       const endpointMetadata = await this.options.endpointService
         .getEndpointMetadataService(this.options.spaceId)
         .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
 
-      const memDumpType = actionRequest.parameters.type;
       const unsupportedAgents: string[] = [];
 
       for (const endpointMeta of endpointMetadata) {
@@ -148,7 +160,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           (memDumpType === 'kernel' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
           (memDumpType === 'process' &&
-            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process')) ||
+          (memDumpType === 'raw' && !endpointMeta.Endpoint.capabilities?.includes('memdump_raw'))
         ) {
           unsupportedAgents.push(
             `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`
@@ -160,7 +173,52 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(' | ')}`
+          ),
+        };
+      }
+    }
+
+    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
+    // Endpoint supports it (via the `kill_process_descendents` capability).
+    if (
+      actionRequest.command === 'kill-process' &&
+      actionRequest.parameters?.kill_descendants === true
+    ) {
+      if (
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointKillProcessDescendants
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            'kill-process `kill_descendants` parameter is not enabled',
+            400
+          ),
+        };
+      }
+
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter(
+          (endpointMeta) =>
+            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendents')
+        )
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
+              ', '
+            )}`
           ),
         };
       }

@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 interface Props {
   taskLabel: string;
@@ -24,11 +25,11 @@ const InferenceInfo: FC<Props> = ({ taskLabel, info }) => {
   }
   return (
     <>
-      <EuiCallOut title={taskLabel}>
+      <KbnInfoCallout title={taskLabel}>
         {info.map((i) => (
-          <EuiText size="s">{i}</EuiText>
+          <p key={i}>{i}</p>
         ))}
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer />
     </>
   );

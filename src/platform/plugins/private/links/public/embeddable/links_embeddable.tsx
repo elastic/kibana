@@ -208,6 +208,7 @@ export const getLinksEmbeddableFactory = () => {
             },
           });
         },
+        supportsJsonExport: true,
       });
 
       const Component = () => {

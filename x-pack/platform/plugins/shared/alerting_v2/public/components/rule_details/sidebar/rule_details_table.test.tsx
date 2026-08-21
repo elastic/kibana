@@ -29,7 +29,7 @@ describe('RuleDetailsTable', () => {
   it('forwards data-test-subj to the description cell', () => {
     render(
       <RuleDetailsTable
-        items={[{ title: 'Mode', description: 'Alert', 'data-test-subj': 'myTestId' }]}
+        items={[{ title: 'Outcome', description: 'Alert', 'data-test-subj': 'myTestId' }]}
       />
     );
 
@@ -76,7 +76,7 @@ describe('RuleDetailsTable', () => {
     render(
       <RuleDetailsTable
         items={[
-          { title: 'Mode', description: 'Alert', 'data-test-subj': 'modeRow' },
+          { title: 'Outcome', description: 'Alert', 'data-test-subj': 'kindRow' },
           {
             title: 'Recovery',
             description: 'Custom',
@@ -87,7 +87,7 @@ describe('RuleDetailsTable', () => {
       />
     );
 
-    expect(screen.getByTestId('modeRow')).not.toHaveAttribute('colspan');
+    expect(screen.getByTestId('kindRow')).not.toHaveAttribute('colspan');
     expect(screen.getByTestId('recoveryRow')).toHaveAttribute('colspan', '2');
   });
 });

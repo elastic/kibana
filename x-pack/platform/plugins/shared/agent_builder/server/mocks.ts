@@ -20,6 +20,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
   return {
     agents: {
       register: jest.fn(),
+      registerType: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -39,6 +40,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
+    conversationTemplates: {
+      register: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
@@ -50,6 +54,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     agents: {
       runAgent: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
+      ensure: jest.fn(),
     },
     tools: {
       execute: jest.fn(),
@@ -75,6 +80,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
+    },
+    conversationTemplates: {
+      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 };

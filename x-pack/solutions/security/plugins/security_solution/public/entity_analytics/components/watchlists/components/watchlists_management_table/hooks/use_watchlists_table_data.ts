@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
@@ -29,6 +30,13 @@ const getSourceLabel = (source: MonitoringEntitySource): string => {
   }
   return source.name ?? '';
 };
+
+const MANUAL_SOURCE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.source.manual',
+  {
+    defaultMessage: 'Manual',
+  }
+);
 
 export const useWatchlistsTableData = (
   spaceId: string,
@@ -58,8 +66,14 @@ export const useWatchlistsTableData = (
 
       const results = await Promise.allSettled(
         list.map(async (watchlist): Promise<WatchlistTableItemType> => {
-          if (!watchlist.id || !watchlist.entitySourceIds?.length) {
+          if (!watchlist.id) {
             return watchlist;
+          }
+
+          const labels = watchlist.hasManualEntities ? [MANUAL_SOURCE_LABEL] : [];
+
+          if (!watchlist.entitySourceIds?.length) {
+            return labels.length ? { ...watchlist, source: labels.join(', ') } : watchlist;
           }
 
           try {
@@ -68,16 +82,17 @@ export const useWatchlistsTableData = (
               signal,
             });
 
-            const labels = sources
-              ?.map(getSourceLabel)
-              .filter((label): label is string => Boolean(label));
+            labels.push(
+              ...(sources?.map(getSourceLabel).filter((label): label is string => Boolean(label)) ??
+                [])
+            );
             return {
               ...watchlist,
-              source: labels?.length ? labels.join(', ') : undefined,
+              source: labels.length ? labels.join(', ') : undefined,
             };
           } catch {
-            // If fetching sources fails for a single watchlist, just show it without the source
-            return watchlist;
+            // If fetching sources fails, preserve any known manual assignment label.
+            return labels.length ? { ...watchlist, source: labels.join(', ') } : watchlist;
           }
         })
       );

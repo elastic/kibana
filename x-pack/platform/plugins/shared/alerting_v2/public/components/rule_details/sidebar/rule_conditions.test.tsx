@@ -28,24 +28,24 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule' },
+  metadata: { name: 'Test Events Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
     format: 'standalone',
     breach: { query: 'FROM logs-* | STATS count() BY host.name' },
   },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule' },
+  metadata: { name: 'Test Alert Rule', version: 1 },
   recovery_strategy: 'query',
   query: {
     format: 'standalone',
@@ -82,7 +82,7 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsTimeField')).toHaveTextContent('@timestamp');
     expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
-    expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Alerts');
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
       'After 3 matches or 5m'
     );
@@ -139,7 +139,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders Default recovery with a dash for the condition row when recovery_strategy is absent', () => {
+  it('renders a dash for recovery and the condition row when recovery_strategy is absent', () => {
     renderConditions({
       ...alertRule,
       recovery_strategy: undefined,
@@ -148,7 +148,20 @@ describe('RuleConditions', () => {
         breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
       },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+  });
+
+  it('renders No recovery with a dash for the condition row when recovery_strategy is none', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'none',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('No recovery');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
@@ -239,9 +252,11 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders "Recover" for recover strategy', () => {
+  it('renders "Recover immediately" for recover strategy', () => {
     renderConditions({ ...alertRule, no_data_strategy: 'recover' });
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent('Recover');
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Recover immediately'
+    );
   });
 
   it('renders "Do nothing" for none strategy', () => {
@@ -251,7 +266,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('does not render no data behavior for signal rules', () => {
+  it('does not render no data behavior for Events rules', () => {
     renderConditions(baseRule);
     expect(screen.queryByTestId('alertingV2RuleDetailsNoDataStrategy')).not.toBeInTheDocument();
   });
@@ -281,7 +296,26 @@ describe('RuleConditions', () => {
       expect(screen.getByTestId('alertingV2RuleDetailsTimeField')).toHaveTextContent('@timestamp');
       expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
       expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
-      expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alert');
+      expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Alerts');
+    });
+  });
+
+  describe('description', () => {
+    it('renders description text before the ES|QL heading when it exists', () => {
+      const ruleWithDesc = {
+        ...baseRule,
+        metadata: { ...baseRule.metadata, name: 'Test Events Rule', description: 'My rule desc' },
+      };
+      renderConditions(ruleWithDesc);
+      const desc = screen.getByTestId('ruleConditionsDescription');
+      expect(desc).toHaveTextContent('My rule desc');
+      const query = screen.getByTestId('alertingV2RuleDetailsBaseQuery');
+      expect(desc.compareDocumentPosition(query)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('does not render description when it is absent', () => {
+      renderConditions(baseRule);
+      expect(screen.queryByTestId('ruleConditionsDescription')).not.toBeInTheDocument();
     });
   });
 
@@ -295,7 +329,7 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsDataSource')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsGroupBy')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('-');
-    expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Signal');
+    expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Events');
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
   });
 });

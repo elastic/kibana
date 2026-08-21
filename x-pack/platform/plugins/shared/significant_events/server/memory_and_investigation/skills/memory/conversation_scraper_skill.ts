@@ -8,7 +8,6 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
-import { toInlineMemoryTools } from './to_inline_tools';
 import description from './conversation_scraper.description.text';
 import content from './conversation_scraper.skill.md.text';
 
@@ -17,7 +16,8 @@ export const createConversationScraperSkill = (options: MemoryToolsOptions) =>
     id: 'streams-conversation-scraper',
     name: 'streams-conversation-scraper',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
-    getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
+    getInlineTools: () => createMemoryTools(options),
   });

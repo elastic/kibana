@@ -6,13 +6,21 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
-import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
+import {
+  useSaveRegionPolicy,
+  type SaveRegionPolicyVariables,
+} from '../../hooks/use_save_region_policy';
+import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { getAvailableRegions, getGeoDisplayName, regionKey } from '../../utils/eis_utils';
-import { GEO_ORDER } from '../../types';
-import type { CspRegion } from '../../../common/types';
-import type { ZoneGroup } from './region_zone_list';
+import { useRegionPreferencesRedesignEnabled } from '../../hooks/use_region_preferences_redesign_enabled';
+import { getAvailableRegions, getAvailableGeos, regionKey } from '../../utils/eis_utils';
+import { parseRegionPolicyConflict } from '../../utils/parse_region_policy_conflict';
+import type { PolicyMode, RegionPolicyConflictArtifact } from '../../types';
+import { computeSeedState } from '../../utils/compute_seed_state';
+import { useSetSelection } from '../../hooks/use_set_selection';
+import { useRegionTabState } from './use_region_tab_state';
 
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
@@ -22,145 +30,227 @@ export const useManageRegionsState = (onClose: () => void) => {
     isError: isEndpointsError,
   } = useEisModels();
   const { mutate: savePolicy, isLoading: isSaving } = useSaveRegionPolicy();
+  const { mutate: deletePolicy, isLoading: isDeleting } = useDeleteRegionPolicy(onClose);
+  const isRedesignEnabled = useRegionPreferencesRedesignEnabled();
 
   const availableRegions = useMemo(() => getAvailableRegions(eisEndpoints ?? []), [eisEndpoints]);
+  const availableGeos = useMemo(() => getAvailableGeos(eisEndpoints ?? []), [eisEndpoints]);
 
-  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set());
-  const [initialCheckedKeys, setInitialCheckedKeys] = useState<Set<string>>(new Set());
-  const [syncedFromPolicy, setSyncedFromPolicy] = useState(false);
-  const [expandedZones, setExpandedZones] = useState<Set<string>>(new Set());
+  const regionTab = useRegionTabState(availableRegions);
+  const geoSelection = useSetSelection(availableGeos);
+
+  const { seed: seedRegions } = regionTab.regionSelection;
+  const { seed: seedGeos } = geoSelection;
+
+  const [activeTab, setActiveTab] = useState<PolicyMode>('geo');
+  const [syncedFromInitial, setSyncedFromInitial] = useState(false);
+  const [isNewPolicy, setIsNewPolicy] = useState(false);
+  const [useCustomPolicy, setUseCustomPolicy] = useState(false);
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [conflictArtifacts, setConflictArtifacts] = useState<
+    RegionPolicyConflictArtifact[] | undefined
+  >(undefined);
 
-  // Seed checkbox state once the policy finishes loading.
+  // Seed state once both queries finish loading.
   useEffect(() => {
-    if (!isPolicyLoading && !isEndpointsLoading && !syncedFromPolicy) {
-      const existing = policy?.region_policy?.allowed_regions ?? [];
-      if (existing.length > 0) {
-        const availableKeys = new Set(availableRegions.map(regionKey));
-        const seeded = new Set(existing.map(regionKey).filter((k) => availableKeys.has(k)));
-        setCheckedKeys(seeded);
-        setInitialCheckedKeys(seeded);
-      } else {
-        const seeded = new Set(availableRegions.map(regionKey));
-        setCheckedKeys(seeded);
-        setInitialCheckedKeys(seeded);
-      }
-      setSyncedFromPolicy(true);
+    const shouldSeed = !isPolicyLoading && !isEndpointsLoading && !syncedFromInitial;
+    if (shouldSeed) {
+      const seedState = computeSeedState(policy, availableRegions, availableGeos);
+      setActiveTab(seedState.activeTab);
+      setIsNewPolicy(seedState.isNewPolicy);
+      // Toggle is ON when a custom policy is already saved; OFF for first-time setup.
+      setUseCustomPolicy(!seedState.isNewPolicy);
+      seedRegions(seedState.regionKeys);
+      seedGeos(seedState.geos);
+      setSyncedFromInitial(true);
     }
-  }, [isPolicyLoading, isEndpointsLoading, syncedFromPolicy, policy, availableRegions]);
+  }, [
+    isPolicyLoading,
+    isEndpointsLoading,
+    syncedFromInitial,
+    policy,
+    availableRegions,
+    availableGeos,
+    seedRegions,
+    seedGeos,
+  ]);
 
-  const zoneGroups = useMemo((): ZoneGroup[] => {
-    const regionsByGeo: Record<string, CspRegion[]> = {};
-    for (const region of availableRegions) {
-      (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
-    }
-
-    return GEO_ORDER.filter((geo) => geo in regionsByGeo).map((geo) => ({
-      geo,
-      displayName: getGeoDisplayName(geo),
-      regions: regionsByGeo[geo],
-    }));
-  }, [availableRegions]);
-
-  const totalSelected = checkedKeys.size;
-  const totalRegions = availableRegions.length;
-  const allSelected = totalRegions > 0 && totalSelected === totalRegions;
-  const isAllExpanded = zoneGroups.length > 0 && expandedZones.size === zoneGroups.length;
+  // --- Common derived values ---
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
-  const isDirty =
-    syncedFromPolicy &&
-    (checkedKeys.size !== initialCheckedKeys.size ||
-      [...checkedKeys].some((k) => !initialCheckedKeys.has(k)));
+  const activeSelectionIsDirty =
+    activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;
+  const hasExistingPolicy = syncedFromInitial && !isNewPolicy;
+  const pendingDelete = hasExistingPolicy && !useCustomPolicy;
 
-  const handleSelectAll = useCallback(() => {
-    if (allSelected) {
-      setCheckedKeys(new Set());
+  const hasUnsavedSelectionChanges = isNewPolicy || activeSelectionIsDirty;
+  const hasCustomPolicyEdits = syncedFromInitial && hasUnsavedSelectionChanges;
+  const isDirty = useCustomPolicy ? hasCustomPolicyEdits : pendingDelete;
+
+  const hasNoGeosSelected = geoSelection.totalSelected === 0;
+  const hasNoRegionsSelected = regionTab.regionSelection.totalSelected === 0;
+  const hasEmptySelection = activeTab === 'geo' ? hasNoGeosSelected : hasNoRegionsSelected;
+
+  const isBusy = isSaving || isDeleting || isLoading;
+  const requiresSelection = useCustomPolicy && hasEmptySelection;
+  const isSaveDisabled = isBusy || !isDirty || requiresSelection;
+
+  // --- Confirmation flow handlers ---
+  const handleRequestSave = useCallback(() => {
+    if (pendingDelete) {
+      setShowDeleteConfirmation(true);
     } else {
-      setCheckedKeys(new Set(availableRegions.map(regionKey)));
+      setConflictArtifacts(undefined);
+      setShowConfirmation(true);
     }
-  }, [allSelected, availableRegions]);
+  }, [pendingDelete]);
 
-  const handleToggleRegion = useCallback((key: string) => {
-    setCheckedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
+  const handleCancelConfirmation = useCallback(() => {
+    if (isSaving) return;
+    setConflictArtifacts(undefined);
+    setShowConfirmation(false);
+  }, [isSaving]);
+
+  const handleCancelDeleteConfirmation = useCallback(() => {
+    if (isDeleting) return;
+    setShowDeleteConfirmation(false);
+  }, [isDeleting]);
+
+  const handleConfirmSave = useCallback(
+    (force?: boolean) => {
+      const forceFields = force === true ? { force: true } : {};
+      const saveOptions = {
+        onSuccess: () => {
+          setConflictArtifacts(undefined);
+          setShowConfirmation(false);
+          onClose();
+        },
+        onError: (err: IHttpFetchError<ResponseErrorBody>) => {
+          if (!isRedesignEnabled) return;
+          const artifacts = parseRegionPolicyConflict(err.body?.attributes);
+          if (artifacts) {
+            setConflictArtifacts(artifacts);
+          }
+        },
+      };
+
+      if (activeTab === 'geo') {
+        const variables: SaveRegionPolicyVariables = {
+          body: { allowed_geos: [...geoSelection.selected] },
+          ...forceFields,
+        };
+        savePolicy(variables, saveOptions);
+        return;
       }
-      return next;
-    });
-  }, []);
 
-  const handleToggleZone = useCallback(
-    (zone: ZoneGroup) => {
-      const zoneKeys = zone.regions.map(regionKey);
-      const allZoneChecked = zoneKeys.every((k) => checkedKeys.has(k));
-      setCheckedKeys((prev) => {
-        const next = new Set(prev);
-        if (allZoneChecked) {
-          zoneKeys.forEach((k) => next.delete(k));
-        } else {
-          zoneKeys.forEach((k) => next.add(k));
-        }
-        return next;
-      });
+      const allowedRegions = availableRegions
+        .filter((r) => regionTab.regionSelection.selected.has(regionKey(r)))
+        .map(({ csp, region }) => ({ csp, region }));
+      const variables: SaveRegionPolicyVariables = {
+        body: { allowed_regions: allowedRegions },
+        ...forceFields,
+      };
+      savePolicy(variables, saveOptions);
     },
-    [checkedKeys]
+    [
+      activeTab,
+      geoSelection.selected,
+      regionTab.regionSelection.selected,
+      availableRegions,
+      savePolicy,
+      onClose,
+      isRedesignEnabled,
+    ]
   );
 
-  const handleToggleExpand = useCallback((zoneId: string, isOpen: boolean) => {
-    setExpandedZones((prev) => {
-      const next = new Set(prev);
-      if (isOpen) {
-        next.add(zoneId);
-      } else {
-        next.delete(zoneId);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleExpandAll = useCallback(() => {
-    if (zoneGroups.length === 0) return;
-    if (expandedZones.size === zoneGroups.length) {
-      setExpandedZones(new Set());
-    } else {
-      setExpandedZones(new Set(zoneGroups.map((z) => z.geo)));
-    }
-  }, [expandedZones.size, zoneGroups]);
-
-  const handleSave = useCallback(() => {
-    const allowedRegions = availableRegions
-      .filter((r) => checkedKeys.has(regionKey(r)))
-      .map(({ csp, region }) => ({ csp, region }));
-    savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
-  }, [availableRegions, checkedKeys, savePolicy, onClose]);
+  const handleConfirmDelete = useCallback(() => {
+    deletePolicy();
+  }, [deletePolicy]);
 
   const handleDismissCallOut = useCallback(() => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const regionTabReturn = useMemo(
+    () => ({
+      zoneGroups: regionTab.zoneGroups,
+      checkedKeys: regionTab.regionSelection.selected,
+      expandedZones: regionTab.expandedZones,
+      totalRegions: regionTab.regionSelection.total,
+      totalSelected: regionTab.regionSelection.totalSelected,
+      allSelected: regionTab.regionSelection.allSelected,
+      isAllExpanded: regionTab.isAllExpanded,
+      onSelectAll: regionTab.regionSelection.selectAll,
+      onToggleRegion: regionTab.regionSelection.toggle,
+      onToggleExpand: regionTab.handleToggleExpand,
+      onExpandAll: regionTab.handleExpandAll,
+    }),
+    [
+      regionTab.zoneGroups,
+      regionTab.regionSelection.selected,
+      regionTab.expandedZones,
+      regionTab.regionSelection.total,
+      regionTab.regionSelection.totalSelected,
+      regionTab.regionSelection.allSelected,
+      regionTab.isAllExpanded,
+      regionTab.regionSelection.selectAll,
+      regionTab.regionSelection.toggle,
+      regionTab.handleToggleExpand,
+      regionTab.handleExpandAll,
+    ]
+  );
+
+  const geoTabReturn = useMemo(
+    () => ({
+      availableGeos,
+      checkedGeos: geoSelection.selected,
+      totalGeos: geoSelection.total,
+      totalGeosSelected: geoSelection.totalSelected,
+      allGeosSelected: geoSelection.allSelected,
+      onSelectAll: geoSelection.selectAll,
+      onToggleGeo: geoSelection.toggle,
+    }),
+    [
+      availableGeos,
+      geoSelection.selected,
+      geoSelection.total,
+      geoSelection.totalSelected,
+      geoSelection.allSelected,
+      geoSelection.selectAll,
+      geoSelection.toggle,
+    ]
+  );
+
   return {
-    zoneGroups,
-    checkedKeys,
-    expandedZones,
-    isCallOutDismissed,
-    totalSelected,
-    totalRegions,
-    allSelected,
-    isAllExpanded,
-    isLoading,
-    isError,
-    isSaving,
-    isDirty,
-    handleDismissCallOut,
-    handleSelectAll,
-    handleToggleRegion,
-    handleToggleZone,
-    handleToggleExpand,
-    handleExpandAll,
-    handleSave,
+    // Shared modal state and handlers
+    common: {
+      activeTab,
+      isLoading,
+      isError,
+      isSaving,
+      isDeleting,
+      isDirty,
+      hasExistingPolicy,
+      pendingDelete,
+      useCustomPolicy,
+      isSaveDisabled,
+      isCallOutDismissed,
+      showConfirmation,
+      showDeleteConfirmation,
+      conflictArtifacts,
+      isRedesignEnabled,
+      setActiveTab,
+      setUseCustomPolicy,
+      handleDismissCallOut,
+      handleRequestSave,
+      handleConfirmSave,
+      handleCancelConfirmation,
+      handleConfirmDelete,
+      handleCancelDeleteConfirmation,
+    },
+    regionTab: regionTabReturn,
+    geoTab: geoTabReturn,
   };
 };

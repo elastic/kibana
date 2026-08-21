@@ -20,7 +20,7 @@ export const useFetchSynonymsSet = (synonymsSetId: string, page: Page = DEFAULT_
     queryKey: [SYNONYMS_SETS_QUERY_KEY, synonymsSetId, page.from, page.size],
     queryFn: async () => {
       return await http.get<Paginate<SynonymsSynonymRule> & { id: string }>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`,
         {
           query: { from: page.from, size: page.size },
         }

@@ -35,7 +35,7 @@ export const ChromeNextToggle: React.FC<ChromeNextToggleProps> = ({ featureFlags
       <EuiBadge
         color={isEnabled ? 'success' : 'danger'}
         css={badgeStyles}
-        iconType="beaker"
+        iconType="flask"
         iconSide="left"
         onClick={onClick}
         onClickAriaLabel="Toggle Chrome Next"

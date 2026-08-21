@@ -1,5 +1,9 @@
 {
-  "sha1": "ff631ce8d67305318c81010c310aa3fde4f8d903",
+  "sha1": "c8c020743becc36cb062adcf3e6570df2e2bc270",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "bcb9cab26454e44-7c276f5e1f3aed9",
@@ -8,12 +12,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -23,7 +21,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
-        "line": 46,
+        "line": 39,
         "column": 7
       }
     },
@@ -34,12 +32,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -49,7 +41,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
-        "line": 73,
+        "line": 59,
         "column": 7
       }
     },
@@ -60,12 +52,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -75,8 +61,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
-        "line": 108,
-        "column": 7
+        "line": 88,
+        "column": 12
       }
     },
     {
@@ -86,12 +72,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -101,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/copy_saved_objects.spec.ts",
-        "line": 133,
-        "column": 7
+        "line": 109,
+        "column": 11
       }
     },
     {
@@ -115,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 21,
+        "column": 91
       }
     },
     {
@@ -129,8 +109,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 45,
+        "column": 24
       }
     },
     {
@@ -143,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 76,
-        "column": 7
+        "line": 61,
+        "column": 43
       }
     },
     {
@@ -157,8 +137,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 98,
-        "column": 7
+        "line": 81,
+        "column": 23
       }
     },
     {
@@ -171,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 124,
+        "column": 13
       }
     },
     {
@@ -185,8 +165,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 194,
-        "column": 7
+        "line": 171,
+        "column": 43
+      }
+    },
+    {
+      "id": "ea43afd5e948232-69cf3e32104030c",
+      "title": "Spaces Management: Create and Edit prompts before leaving the create form with unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
+        "line": 189,
+        "column": 13
       }
     },
     {
@@ -199,8 +193,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 216,
-        "column": 7
+        "line": 199,
+        "column": 8
       }
     },
     {
@@ -213,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/enter_space_navigation.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 31,
+        "column": 16
       }
     },
     {
@@ -228,7 +222,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_default_space_only.spec.ts",
         "line": 29,
-        "column": 7
+        "column": 79
       }
     },
     {
@@ -241,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_default_space_only.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 33,
+        "column": 11
       }
     },
     {
@@ -252,12 +246,26 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_global_all.spec.ts",
+        "line": 16,
+        "column": 8
+      }
+    },
+    {
+      "id": "38c84240f1d8631-bbf0c2f0b6dd994",
+      "title": "Spaces feature controls: global all can navigate to the spaces grid, create, and edit pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -268,33 +276,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_global_all.spec.ts",
         "line": 20,
-        "column": 7
-      }
-    },
-    {
-      "id": "38c84240f1d8631-bbf0c2f0b6dd994",
-      "title": "Spaces feature controls: global all can navigate to the spaces grid, create, and edit pages",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_global_all.spec.ts",
-        "line": 27,
-        "column": 7
+        "column": 8
       }
     },
     {
@@ -307,8 +289,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_nondefault_space.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 35,
+        "column": 28
       }
     },
     {
@@ -321,8 +303,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/feature_controls_nondefault_space.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 39,
+        "column": 75
       }
     },
     {
@@ -332,12 +314,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -347,8 +323,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 34,
+        "column": 39
       }
     },
     {
@@ -358,12 +334,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -373,8 +343,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 40,
+        "column": 16
       }
     },
     {
@@ -384,12 +354,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -399,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 71,
-        "column": 7
+        "line": 52,
+        "column": 18
       }
     },
     {
@@ -410,12 +374,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -425,8 +383,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 59,
+        "column": 9
       }
     },
     {
@@ -436,12 +394,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -451,8 +403,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_grid.spec.ts",
-        "line": 98,
-        "column": 7
+        "line": 77,
+        "column": 9
       }
     },
     {
@@ -462,12 +414,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -477,8 +423,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_login.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 23,
+        "column": 5
       }
     },
     {
@@ -488,12 +434,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -503,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_login.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 39,
+        "column": 23
       }
     },
     {
@@ -514,12 +454,46 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "775aea469851335-ac709ef92fb10f6",
+      "title": "Spaces selection: search spaces in popover finds a single matching space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
+        "line": 42,
+        "column": 26
+      }
+    },
+    {
+      "id": "775aea469851335-0723c5c252f03e3",
+      "title": "Spaces selection: search spaces in popover finds no spaces for a non-matching query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -530,59 +504,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
         "line": 46,
-        "column": 9
-      }
-    },
-    {
-      "id": "775aea469851335-ac709ef92fb10f6",
-      "title": "Spaces selection: search spaces in popover finds a single matching space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
-        "line": 52,
-        "column": 9
-      }
-    },
-    {
-      "id": "775aea469851335-0723c5c252f03e3",
-      "title": "Spaces selection: search spaces in popover finds no spaces for a non-matching query",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_search.spec.ts",
-        "line": 59,
-        "column": 9
+        "column": 83
       }
     },
     {
@@ -599,8 +521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 24,
+        "column": 18
       }
     },
     {
@@ -617,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 33,
+        "column": 13
       }
     },
     {
@@ -635,8 +557,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 44,
+        "column": 14
       }
     },
     {
@@ -653,8 +575,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 54,
+        "column": 7
       }
     }
   ]

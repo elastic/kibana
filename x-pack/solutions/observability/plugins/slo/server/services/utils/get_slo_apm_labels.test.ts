@@ -30,6 +30,7 @@ describe('getSloApmLabels', () => {
       slo_time_window: 'rolling_7d',
       slo_has_group_by: false,
       slo_prevent_initial_backfill: false,
+      slo_prevent_cross_project_search: false,
     });
   });
 

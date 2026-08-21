@@ -37,6 +37,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    http,
     savedObjects,
     modelProvider,
     toolsService,
@@ -55,6 +56,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     analyticsService,
     trackingService,
     experimentalFeatures,
+    projectRouting,
+    conversationTemplates,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -73,7 +76,15 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
-    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
+    selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
     toolRegistry,
@@ -103,6 +114,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
@@ -138,12 +150,18 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId, { access: 'use' });
 
-  // Single merge point for runtime overrides — consumed by both the agent handler
-  // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).
-  const effectiveConfiguration = {
-    ...agent.configuration,
-    ...(agentParams.configurationOverrides || {}),
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  const agentWithOverrides = {
+    ...agent,
+    configuration: {
+      ...agent.configuration,
+      ...(agentParams.configurationOverrides || {}),
+    },
   };
+  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
+    agent: agentWithOverrides,
+    request,
+  });
   manager.deps.agentConfiguration = effectiveConfiguration;
 
   const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;

@@ -124,8 +124,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
         await rule.rulePage.clickSelectAllRules();
-        await rule.rulePage.toggleBulkActionButton();
-        await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
+        // Retry open+click together: if the dropdown re-renders between open and click the stale
+        // element reference fails, and retrying re-opens with a fresh reference.
+        await retryService.try(async () => {
+          await rule.rulePage.toggleBulkActionButton();
+          await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
         await retryService.try(async () => {
@@ -167,7 +171,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickFlyoutEnableSwitchButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
+        await retryService.waitFor(
+          'flyout enable switch to reflect the disabled state',
+          async () => (await rule.rulePage.getEnableSwitchButtonState()) === 'false'
+        );
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {

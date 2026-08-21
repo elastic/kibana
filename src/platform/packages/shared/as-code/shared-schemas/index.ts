@@ -8,6 +8,7 @@
  */
 
 export {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
@@ -16,14 +17,11 @@ export {
   asCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
-  getTagsSearchRequest,
   type AsCodeMeta,
   type AsCodeQuery,
 } from './src/schemas';
 
 export {
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
   MAX_DESCRIPTION_LENGTH,
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,

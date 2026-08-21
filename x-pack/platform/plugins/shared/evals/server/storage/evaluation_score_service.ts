@@ -39,19 +39,44 @@ export const computeScoreDocumentId = (document: EvaluationScoreDocument): strin
   ].join('-');
 };
 
+type IngestScore = IngestScoresRequestBody['scores'][number];
+
+/**
+ * Resolves the model a single score's evaluator judged with. A model sent per score
+ * wins; a `code` evaluator invoked none, so it stays unattributed; anything else
+ * falls back to the request's `evaluator_model` so callers predating per-evaluator
+ * attribution keep writing the same documents.
+ */
+const resolveScoreEvaluatorModel = (
+  evaluator: IngestScore['evaluator'],
+  requestEvaluatorModel: IngestScoresRequestBody['evaluator_model']
+): IngestScoresRequestBody['evaluator_model'] | undefined => {
+  if (evaluator.model) {
+    return evaluator.model;
+  }
+  if (evaluator.kind === 'code') {
+    return undefined;
+  }
+  return requestEvaluatorModel;
+};
+
 const toEvaluationScoreDocuments = (
   request: IngestScoresRequestBody,
-  timestamp: string
+  timestamp: string,
+  spaceIds: string[]
 ): Array<{ _id: string } & EvaluationScoreDocument> => {
   return request.scores.map((score) => {
+    const evaluatorModel = resolveScoreEvaluatorModel(score.evaluator, request.evaluator_model);
     const payload: EvaluationScoreDocument = {
       '@timestamp': timestamp,
       experiment_id: request.experiment_id,
       experiment_name: request.experiment_name,
+      space_ids: spaceIds,
       example: {
         id: score.example.id,
         index: score.example.index,
         input: score.example.input,
+        metadata: score.example.metadata,
         dataset: score.example.dataset,
       },
       task: {
@@ -67,7 +92,8 @@ const toEvaluationScoreDocuments = (
         explanation: score.evaluator.explanation,
         metadata: score.evaluator.metadata,
         trace_id: score.evaluator.trace_id,
-        model: request.evaluator_model,
+        ...(score.evaluator.kind != null && { kind: score.evaluator.kind }),
+        ...(evaluatorModel != null && { model: evaluatorModel }),
       },
       metadata: {
         execution_id: request.metadata.execution_id ?? request.experiment_id,
@@ -106,13 +132,13 @@ export class EvaluationScoreService {
     return client.search(request);
   }
 
-  async write(request: IngestScoresRequestBody): Promise<WriteResult> {
+  async write(request: IngestScoresRequestBody, spaceIds: string[]): Promise<WriteResult> {
     if (request.scores.length === 0) {
       return { ingested: 0, conflicted: 0, failed: [] };
     }
 
     const timestamp = new Date().toISOString();
-    const documents = toEvaluationScoreDocuments(request, timestamp);
+    const documents = toEvaluationScoreDocuments(request, timestamp, spaceIds);
     const client = await this.getClient();
     const response = await client.create({
       documents,

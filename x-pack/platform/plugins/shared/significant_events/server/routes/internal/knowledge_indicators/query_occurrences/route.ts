@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
@@ -12,15 +12,12 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { searchModeSchema } from '../../../utils/search_mode';
+import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
-// Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z
-  .string()
-  .max(100)
-  .transform((input) => new Date(input));
+const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
 const readQueryOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_query_occurrences',
@@ -44,6 +41,16 @@ const readQueryOccurrencesRoute = createServerRoute({
         ])
         .optional()
         .describe('Stream names to filter results by'),
+      rule_uuid: z
+        .union([
+          z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .transform((value) => [value]),
+          z.array(z.string().max(MAX_ID_LENGTH)),
+        ])
+        .optional()
+        .describe('Alerting rule UUIDs to include in the occurrence response'),
       searchMode: searchModeSchema,
     }),
   }),
@@ -66,14 +73,27 @@ const readQueryOccurrencesRoute = createServerRoute({
     logger,
   }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { scopedClusterClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
       logger,
     });
-    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
+    const {
+      from,
+      to,
+      bucketSize,
+      query,
+      streamNames,
+      rule_uuid: ruleUuids,
+      searchMode,
+    } = params.query;
+    assertValidDateRange(from, to);
+
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -85,7 +105,8 @@ const readQueryOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames,
+        streamNames: resolvedStreamNames,
+        ruleUuids,
         searchMode,
         alertsReader,
         spaceId: await getSpaceId(request),

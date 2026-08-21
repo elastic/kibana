@@ -11,9 +11,12 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import type {
+  AnomalyScoreRange,
+  AnomalySummaryEntry,
+} from '../../../../common/api/entity_analytics';
 import type {
   AnomalySortField,
   AnomalySortOrder,
@@ -57,11 +60,11 @@ const mapToAnomalySummaryEntry = (
 interface GetEntityAnomaliesParams {
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   jobIds?: string[];
   threatTactics?: string[];
   logger: Logger;
@@ -81,11 +84,11 @@ export interface GetEntityAnomaliesResult {
 export const getEntityAnomalies = async ({
   entityId,
   entityType,
+  entityRecord,
   esClient,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   jobIds,
   threatTactics,
   logger,
@@ -122,10 +125,10 @@ export const getEntityAnomalies = async ({
   const { hits: page, total } = await searchEntityAnomalies({
     entityType,
     entityId,
+    entityRecord,
     fromMs,
     toMs,
-    minScore,
-    maxScore,
+    scoreRanges,
     jobIds: resolvedJobIds,
     sort,
     from: offset,
@@ -146,6 +149,7 @@ export const getEntityAnomalies = async ({
         anomaly,
         entityId,
         entityType,
+        entityRecord,
         esClient,
         fromMs,
         toMs,

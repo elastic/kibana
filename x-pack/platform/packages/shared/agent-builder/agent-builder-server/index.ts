@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
+export type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -43,6 +47,7 @@ export type {
   ToolHandlerContext,
   ToolHandlerResult,
   BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -106,6 +111,7 @@ export {
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,
   PluginCreateRequest,
@@ -145,7 +151,9 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
-  ReadOnlyConversationClient,
   ConversationsStart,
+  ConversationTemplatesSetup,
+  ConversationTemplatesStart,
 } from './plugin_contract';
+export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

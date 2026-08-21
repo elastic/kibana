@@ -22,6 +22,7 @@ import type {
 } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 import type { ConversationAccessControl } from './access_control';
+import type { UserIdAndName } from '../base/users';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -318,6 +319,7 @@ export interface ConversationCreatedEventData {
   conversation_id: string;
   title: string;
   access_control: ConversationAccessControl;
+  user: UserIdAndName;
 }
 
 export type ConversationCreatedEvent = ChatEventBase<

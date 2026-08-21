@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ matrix.branch }}
         persist-credentials: false
@@ -61,7 +61,7 @@ jobs:
     - name: Dismiss alerts
       id: dismiss-alerts
       continue-on-error: true
-      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
+      uses: advanced-security/dismiss-alerts@a18f986bdb40edba0dd7a74382c15d4a3d50a1c8 # v2.0.3
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
       with:
@@ -106,7 +106,7 @@ jobs:
     if: ${{ github.repository == 'elastic/kibana' && success() }} # Hack: Do not run on forks
     steps:
     - name: Checkout kibana-operations
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: 'elastic/kibana-operations'
         ref: main

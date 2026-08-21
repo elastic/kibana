@@ -68,7 +68,7 @@ export function createNavigationTree({
   return {
     body: [
       {
-        icon: 'logoElasticsearch',
+        icon: 'logoVectorDB',
         link: 'vectordb',
         renderAs: 'home',
         title: NAV_TITLE,
@@ -77,6 +77,10 @@ export function createNavigationTree({
       {
         icon: 'productAgent',
         link: 'agent_builder',
+      },
+      {
+        icon: 'sparkles',
+        link: 'context_engine',
       },
       {
         link: 'discover',
@@ -129,8 +133,8 @@ export function createNavigationTree({
       {
         id: 'vectordb_getting_started',
         icon: 'rocket',
-        link: 'vectordb:tutorials',
-        title: i18n.translate('xpack.serverlessVectordb.nav.tutorials', {
+        link: 'vectordb:getting_started',
+        title: i18n.translate('xpack.serverlessVectordb.nav.gettingStarted', {
           defaultMessage: 'Getting started',
         }),
       },

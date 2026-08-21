@@ -11,20 +11,20 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { CommonAttachmentTabViewProps } from '../../../client/attachment_framework/types';
+import type { CommonAttachmentListViewProps } from '../../../client/attachment_framework/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { FilesTable } from './files_table';
 import { FilesUtilityBar } from './files_utility_bar';
-import { getFileIdsFromComments } from './utils';
+import { getFileIdsFromComments, getFilesFromComments } from './utils';
 
 export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
   page: 0,
   perPage: 10,
 };
 
-export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewProps) => {
+export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentListViewProps) => {
   const searchTermRef = useRef<string | undefined>(searchTerm);
   const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
     ...DEFAULT_CASE_FILES_FILTERING_OPTIONS,
@@ -63,6 +63,11 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewP
     [caseData.comments, caseData.owner]
   );
 
+  const existingFiles = useMemo(
+    () => getFilesFromComments(caseData.comments, caseData.owner),
+    [caseData.comments, caseData.owner]
+  );
+
   const visibleFiles = useMemo(
     () => (caseFiles?.files ?? []).filter((file) => allowedFileIds.has(file.id)),
     [caseFiles?.files, allowedFileIds]
@@ -95,7 +100,7 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewP
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <FilesUtilityBar caseId={caseData.id} />
+        <FilesUtilityBar caseId={caseData.id} existingFiles={existingFiles} />
         <FilesTable
           caseId={caseData.id}
           isLoading={isLoading}

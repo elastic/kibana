@@ -18,7 +18,7 @@ import {
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { AzureAuthenticationMode } from './create_data_source_flyout_authentication';
 
 export function CreateDataSourceFlyoutTypeSettingsAzure({
@@ -201,7 +201,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isOptionalOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isOptionalOpen}
         aria-controls={optionalId}
         onClick={() => setIsOptionalOpen((value) => !value)}

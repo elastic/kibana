@@ -345,7 +345,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={tooltipContent}>
-                  <EuiText size="xs" data-test-subj="entityAttachmentTableName">
+                  <EuiText size="xs" data-test-subj="entityAttachmentTableName" tabIndex={0}>
                     <strong>{label}</strong>
                   </EuiText>
                 </EuiToolTip>
@@ -462,7 +462,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       ))}
       <div css={tableScrollStyles}>
         <EuiBasicTable
-          aria-label={i18n.translate(
+          tableCaption={i18n.translate(
             'xpack.securitySolution.agentBuilder.entityAttachment.table.caption',
             { defaultMessage: 'Entities referenced in this message' }
           )}
@@ -478,7 +478,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="popout"
+            iconType="external"
             onClick={handleOpenEntityAnalytics}
             data-test-subj="entityAttachmentTableOpenEntityAnalytics"
             aria-label={OPEN_ENTITY_ANALYTICS_LABEL}

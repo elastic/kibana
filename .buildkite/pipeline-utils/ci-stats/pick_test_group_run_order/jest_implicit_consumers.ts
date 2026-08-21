@@ -8,15 +8,15 @@
  */
 
 /**
- * Overlay for Jest selective testing.
+ * Overlay for Jest selective testing when the dependency graph misses a real consumer.
  *
- * The encrypted_saved_objects integration ci_checks test validates every
- * registered encrypted SO type at runtime, but lives in @kbn/encrypted-saved-objects-plugin
- * while publishers (alerting, actions, fleet, …) sit upstream in the dependency graph.
- * Publisher-only model-version changes therefore skip that config under includeDownstream.
+ * - encrypted_saved_objects: ci_checks snapshots every registered encrypted SO type, but
+ *   publishers (alerting, actions, fleet, …) sit upstream so includeDownstream skips them.
+ * - kbn-plugin-helpers: build integration tests exercise generate_plugin from
+ *   @kbn/plugin-generator, which does not depend on @kbn/plugin-helpers.
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 interface ImplicitConsumerRule {
   reason: string;
@@ -39,6 +39,12 @@ const IMPLICIT_JEST_CONSUMERS: readonly ImplicitConsumerRule[] = [
       '**/packages/**/server/saved_objects/schemas/**/*.{ts,tsx}',
     ],
     consumers: [ENCRYPTED_SAVED_OBJECTS_PLUGIN],
+  },
+  {
+    reason:
+      'Plugin generator changes must re-run kbn-plugin-helpers generate/build integration tests.',
+    patterns: ['packages/kbn-plugin-generator/**/*'],
+    consumers: ['@kbn/plugin-helpers'],
   },
 ];
 

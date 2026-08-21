@@ -107,11 +107,19 @@ function capturePageFilters({
   urlServiceName: string | undefined;
   filterManagerFilters: Filter[];
   controlSelections: Record<string, string[]>;
-}): { kuery: string | undefined; service_name: string | undefined } {
+}): {
+  kuery: string | undefined;
+  service_name: string | undefined;
+  highlighted_service_names: string[] | undefined;
+} {
   let serviceName = urlServiceName;
+  let highlightedServiceNames: string[] | undefined;
   const serviceNameSelection = controlSelections['service.name'];
   if (!serviceName && serviceNameSelection && serviceNameSelection.length === 1) {
     serviceName = serviceNameSelection[0];
+  } else if (!serviceName && serviceNameSelection && serviceNameSelection.length > 1) {
+    // Multi-select Controls → panel highlight (single stays on `service_name`).
+    highlightedServiceNames = serviceNameSelection;
   }
 
   const remainingSelections: Record<string, string[]> = { ...controlSelections };
@@ -139,6 +147,7 @@ function capturePageFilters({
   return {
     kuery: fragments.length > 0 ? fragments.join(' and ') : undefined,
     service_name: serviceName || undefined,
+    highlighted_service_names: highlightedServiceNames,
   };
 }
 
@@ -180,7 +189,11 @@ export function AddToDashboardButton({
       }
       const stateTransfer = embeddable.getStateTransfer();
 
-      const { kuery: capturedKuery, service_name: capturedServiceName } = capturePageFilters({
+      const {
+        kuery: capturedKuery,
+        service_name: capturedServiceName,
+        highlighted_service_names: capturedHighlightedServiceNames,
+      } = capturePageFilters({
         urlKuery: kuery,
         urlServiceName: serviceName,
         filterManagerFilters: filterManager?.getFilters() ?? [],
@@ -193,6 +206,7 @@ export function AddToDashboardButton({
         environment,
         kuery: capturedKuery,
         service_name: capturedServiceName,
+        highlighted_service_names: capturedHighlightedServiceNames,
         service_group_id: serviceGroupId || undefined,
         map_orientation: mapOrientation,
         sync_with_dashboard_filters: false,

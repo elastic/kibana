@@ -61,6 +61,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }
@@ -263,13 +264,19 @@ describe('StepExecutionRuntime', () => {
       (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        scopeStack: [
-          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
-        ] as StackFrame[],
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
+      underTest = new StepExecutionRuntime({
+        node: fakeNode,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
     });
 
     it('should upsertStep with the fake step execution id', () => {
@@ -729,10 +736,9 @@ describe('StepExecutionRuntime', () => {
       expect(JSON.stringify(persistedStep.error?.details)).not.toContain('do-not-persist');
       expect(JSON.stringify(persistedStep.error?.details)).not.toContain('x-trace-id');
 
-      // Also guarded at the workflow-execution level.
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        error: expectedSerializedError,
-      });
+      // The workflow-execution-level error is derived from this same serialized step error
+      // (via the runtime `error` getter, captured by the execution loop), so the guardrail
+      // holds transitively — `failStep` itself no longer writes the workflow execution.
     });
 
     it('should extract and accumulate partial token usage from partial output on failure', () => {

@@ -76,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not cause PDF reports to fail', async () => {
       await dashboard.navigateToApp();
+      await listingTable.searchForItemWithName('Lens reportz');
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
       await reporting.selectExportItem('PDF');
       await reporting.clickGenerateReportButton();
