@@ -67,6 +67,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'web-frontend',
       name: 'web-frontend',
       stream_name: 'logs.web-frontend',
@@ -239,18 +240,21 @@ describe('DetectionsList', () => {
         blast_radius: [
           {
             type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-one',
             name: 'entity-one',
             stream_name: 'logs.web-frontend',
           },
           {
             type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-two',
             name: 'entity-two',
             stream_name: 'logs.web-frontend',
           },
           {
             type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-three',
             name: 'entity-three',
             stream_name: 'logs.web-frontend',
