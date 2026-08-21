@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
 /** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
@@ -54,7 +54,15 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
         flex: 1;
         min-height: 0;
         overflow: ${overflow};
-        background: ${euiTheme.colors.body};
+        background: ${euiTheme.colors.emptyShade};
+        background: linear-gradient(
+            180deg,
+            ${euiTheme.colors.emptyShade} 0%,
+            ${euiTheme.colors.backgroundBaseSubdued} 50%,
+            ${euiTheme.colors.emptyShade} 100%
+          ),
+          ${euiTheme.colors.emptyShade};
+        box-shadow: 0 1px 2px ${transparentize(euiTheme.colors.shadow, 0.04)};
       `}
       data-test-subj="pndAppChromeLayout"
     >

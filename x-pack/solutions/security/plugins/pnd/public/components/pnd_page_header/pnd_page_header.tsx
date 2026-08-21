@@ -124,40 +124,42 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
               role="img"
               css={css`
                 align-items: center;
-                background: linear-gradient(
-                  99.4deg,
-                  ${euiTheme.colors.backgroundLightPrimary} 3.97%,
-                  ${euiTheme.colors.backgroundLightAssistance} 65.6%
-                );
+                border: 1px solid ${euiTheme.colors.lightShade};
                 border-radius: 50%;
                 color: ${euiTheme.colors.textAssistance};
                 display: inline-flex;
-                height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
+                height: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
                 justify-content: center;
+                position: relative;
+                width: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
+                transition: background ${euiTheme.animation.slow} ease,
+                  border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type="sun" size="l" aria-hidden={true} />
+              <EuiIcon type="sun" size="m" aria-hidden={true} />
+              <span
+                style={{
+                  display: 'inline-block',
+                  background: `${euiTheme.colors.danger}`,
+                  width: `${euiTheme.size.s}`,
+                  height: `${euiTheme.size.s}`,
+                  borderRadius: '50%',
+                  boxShadow: `0 0 0 2px ${euiTheme.colors.textGhost}`,
+                  position: 'absolute',
+                  pointerEvents: 'none',
+                  top: '1px',
+                  right: '1px',
+                }}
+              />
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="flexStart"
-              gutterSize="none"
-              responsive={false}
-              direction="column"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  {getPndGreeting()}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l" css={{ fontWeight: 500 }}>
-                  <h1>{title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="m" css={{ fontWeight: 400 }}>
+              <h1>
+                <span style={{ color: euiTheme.colors.textSubdued }}>{getPndGreeting()}</span>{' '}
+                <span style={{ fontWeight: 600 }}>{title}</span>
+              </h1>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
