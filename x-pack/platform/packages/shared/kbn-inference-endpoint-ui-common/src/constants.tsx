@@ -39,6 +39,7 @@ export enum ServiceProviderKeys {
   contextualai = 'contextualai',
   fireworksai = 'fireworksai',
   nvidia = 'nvidia',
+  tencentcloud = 'tencentcloud',
 }
 
 export const GEMINI_REGION_DOC_LINK = (
