@@ -15,13 +15,13 @@ import type {
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
-} from '@kbn/agent-builder-common';
+
+  ConversationParentRelation} from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
-  ConversationParentRelation,
   ToolOrigin,
   ToolResultType,
   normalizeConversationAccessControl,
