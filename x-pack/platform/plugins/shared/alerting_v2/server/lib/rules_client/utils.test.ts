@@ -290,6 +290,35 @@ describe('utils', () => {
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
+    it('strips legacy artifact value left on disk after model-version migration', () => {
+      const attrs = createRuleSoAttributes({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: 'runbook',
+            data: { content: 'steps' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'steps',
+          },
+          {
+            id: 'dashboard-1',
+            type: 'dashboard',
+            data: { dashboardId: 'dash-1' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'dash-1',
+          },
+        ],
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('includes description in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'rule-1', description: 'A test description' },
