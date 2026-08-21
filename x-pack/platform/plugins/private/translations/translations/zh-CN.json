@@ -52314,7 +52314,6 @@
     "xpack.snapshotRestore.home.repositoriesTabTitle": "存储库",
     "xpack.snapshotRestore.home.restoreTabTitle": "还原状态",
     "xpack.snapshotRestore.home.snapshotRestoreDescription": "使用存储库存储 Elasticsearch 索引和集群的备份。",
-    "xpack.snapshotRestore.home.snapshotRestoreDocsLinkText": "快照和还原文档",
     "xpack.snapshotRestore.home.snapshotRestoreTitle": "拍取快照并还原",
     "xpack.snapshotRestore.home.snapshotsTabTitle": "快照",
     "xpack.snapshotRestore.indicesList.allIndicesValue": "所有索引",

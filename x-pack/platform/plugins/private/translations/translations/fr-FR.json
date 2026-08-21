@@ -51906,7 +51906,6 @@
     "xpack.snapshotRestore.home.repositoriesTabTitle": "Référentiels",
     "xpack.snapshotRestore.home.restoreTabTitle": "Statut de restauration",
     "xpack.snapshotRestore.home.snapshotRestoreDescription": "Utilisez les référentiels pour stocker et récupérer les sauvegardes de vos index et clusters Elasticsearch.",
-    "xpack.snapshotRestore.home.snapshotRestoreDocsLinkText": "Documents de snapshot et restauration",
     "xpack.snapshotRestore.home.snapshotRestoreTitle": "Snapshot et restauration",
     "xpack.snapshotRestore.home.snapshotsTabTitle": "Snapshots",
     "xpack.snapshotRestore.indicesList.allIndicesValue": "Tous les index",
