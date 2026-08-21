@@ -12,7 +12,14 @@ export {
 export type { ServiceAccountWorkloadBindingsApi } from './bindings';
 export { ServiceAccountsService } from './service_accounts_service';
 export type { ServiceAccountsServiceStartParams } from './service_accounts_service';
-export type { ServiceAccountsBackend, ServiceAccountsServiceStart } from './types';
+export type {
+  ServiceAccountsBackend,
+  ServiceAccountsServiceStart,
+  ListServiceAccountsParams,
+  ListServiceAccountsResult,
+  ListedServiceAccount,
+  ServiceAccountCreator,
+} from './types';
 export { buildAssumableBy } from './assumable_by';
 export { EsServiceAccounts } from './es_service_accounts';
 export { UiamServiceAccounts } from './uiam_service_accounts';

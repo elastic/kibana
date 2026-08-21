@@ -33,3 +33,9 @@ export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 16384;
  * whether this cap is still needed.
  */
 export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 16384;
+
+/**
+ * Cap on a single page of listed service accounts. UIAM's `limit` is optional;
+ * this is Kibana's bound on the query parameter.
+ */
+export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;

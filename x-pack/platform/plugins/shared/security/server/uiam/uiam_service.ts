@@ -280,6 +280,22 @@ export interface UiamServicePublic {
   ): Promise<ServiceAccount>;
 
   /**
+   * Lists service accounts via the UIAM service.
+   *
+   * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
+   * credential: UIAM returns accounts whose `assumable_by` policy includes this Kibana.
+   */
+  listServiceAccounts(params?: { limit?: number; after?: string; q?: string }): Promise<unknown>;
+
+  /**
+   * Fetches one service account via the UIAM service.
+   *
+   * Authenticated as Kibana itself (shared secret and, when configured, mTLS) with no user
+   * credential: UIAM authorizes against `assumable_by`.
+   */
+  getServiceAccount(serviceAccountId: string): Promise<unknown>;
+
+  /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
    *
    * The request is authenticated with Kibana's own client authentication (shared secret and,
@@ -750,6 +766,86 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.listServiceAccounts}.
+   */
+  async listServiceAccounts(params?: {
+    limit?: number;
+    after?: string;
+    q?: string;
+  }): Promise<unknown> {
+    try {
+      this.#logger.debug('Attempting to list service accounts.');
+
+      const url = new URL(`${this.#config.url}/uiam/api/v1/service-accounts`);
+      if (params?.limit != null) {
+        url.searchParams.set('limit', String(params.limit));
+      }
+      if (params?.after) {
+        url.searchParams.set('after', params.after);
+      }
+      if (params?.q) {
+        url.searchParams.set('q', params.q);
+      }
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'User-Agent': this.#userAgentHeader,
+            // Kibana's own client authentication is the credential for this request: no user
+            // `Authorization` header is sent, and UIAM authorizes against `assumable_by`.
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully listed service accounts.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to list service accounts: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.getServiceAccount}.
+   */
+  async getServiceAccount(serviceAccountId: string): Promise<unknown> {
+    try {
+      this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}`,
+          {
+            method: 'GET',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              // Kibana's own client authentication is the credential for this request: no user
+              // `Authorization` header is sent, and UIAM authorizes against `assumable_by`.
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully got service account ${serviceAccountId}.`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

@@ -17,6 +17,24 @@ describe('EsServiceAccounts', () => {
     });
   });
 
+  describe('#list', () => {
+    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
+      await expect(new EsServiceAccounts().list()).rejects.toMatchObject({
+        message: 'Listing Elasticsearch service accounts is not yet implemented',
+        output: { statusCode: 501 },
+      });
+    });
+  });
+
+  describe('#get', () => {
+    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
+      await expect(new EsServiceAccounts().get()).rejects.toMatchObject({
+        message: 'Getting Elasticsearch service accounts by id is not yet implemented',
+        output: { statusCode: 501 },
+      });
+    });
+  });
+
   describe('#createFakeRequest', () => {
     it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
       await expect(new EsServiceAccounts().createFakeRequest()).rejects.toMatchObject({
