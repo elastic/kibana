@@ -96,8 +96,6 @@ describe('ConversationClient', () => {
     attachments?: unknown[];
     workspaceId?: string;
     read?: boolean;
-    // Events-native docs set both; legacy docs leave them undefined so the
-    // read path derives events and the write path never persists a projection.
     schemaVersion?: number;
     events?: TimelineEvent[];
   } = {}): Document =>
