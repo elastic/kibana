@@ -123,13 +123,13 @@ describe('resolveStatusFromExecution', () => {
 describe('resolveInvestigationStatuses', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const resolve = (getWorkflowExecution?: jest.Mock) =>
+  const resolve = (getWorkflowExecution?: jest.Mock, workflowExecutionIds: string[] = ['exec-1']) =>
     resolveInvestigationStatuses({
       workflowsManagement: getWorkflowExecution
         ? ({ management: { getWorkflowExecution } } as never)
         : undefined,
       spaceId: 'default',
-      workflowExecutionIds: ['exec-1'],
+      workflowExecutionIds,
       logger,
     });
 
@@ -145,5 +145,24 @@ describe('resolveInvestigationStatuses', () => {
 
   it('reports unavailable when workflow management cannot read executions', async () => {
     await expect(resolve()).resolves.toEqual({ 'exec-1': 'unavailable' });
+  });
+
+  it('limits concurrent execution reads', async () => {
+    let activeReads = 0;
+    let maxActiveReads = 0;
+    const getWorkflowExecution = jest.fn(async () => {
+      activeReads += 1;
+      maxActiveReads = Math.max(maxActiveReads, activeReads);
+      await new Promise<void>((complete) => setImmediate(complete));
+      activeReads -= 1;
+      return null;
+    });
+
+    await resolve(
+      getWorkflowExecution,
+      Array.from({ length: 10 }, (_, index) => `exec-${index}`)
+    );
+
+    expect(maxActiveReads).toBe(5);
   });
 });

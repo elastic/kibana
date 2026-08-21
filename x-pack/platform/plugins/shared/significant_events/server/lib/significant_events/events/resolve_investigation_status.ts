@@ -8,11 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import pLimit from 'p-limit';
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
   type InvestigationRunStatus,
 } from '@kbn/significant-events-schema';
+
+const INVESTIGATION_STATUS_READ_CONCURRENCY = 5;
 
 export const resolveStatusFromExecution = (
   execution: Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>
@@ -60,21 +63,24 @@ export const resolveInvestigationStatuses = async ({
     return Object.fromEntries(uniqueIds.map((id) => [id, 'unavailable'] as const));
   }
 
+  const limit = pLimit(INVESTIGATION_STATUS_READ_CONCURRENCY);
   const entries = await Promise.all(
-    uniqueIds.map(async (id) => {
-      try {
-        const execution = await workflowsManagement.management.getWorkflowExecution(id, spaceId, {
-          includeOutput: true,
-        });
-        return execution ? ([id, resolveStatusFromExecution(execution)] as const) : undefined;
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        logger.debug(
-          `Could not resolve investigation status for workflow execution "${id}": ${reason}`
-        );
-        return [id, 'unavailable'] as const;
-      }
-    })
+    uniqueIds.map((id) =>
+      limit(async () => {
+        try {
+          const execution = await workflowsManagement.management.getWorkflowExecution(id, spaceId, {
+            includeOutput: true,
+          });
+          return execution ? ([id, resolveStatusFromExecution(execution)] as const) : undefined;
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : String(error);
+          logger.debug(
+            `Could not resolve investigation status for workflow execution "${id}": ${reason}`
+          );
+          return [id, 'unavailable'] as const;
+        }
+      })
+    )
   );
 
   return Object.fromEntries(entries.filter((entry) => entry != null));
