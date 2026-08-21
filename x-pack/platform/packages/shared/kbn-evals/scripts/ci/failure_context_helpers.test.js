@@ -70,7 +70,7 @@ describe('resolveTriageConnector', () => {
     delete process.env.KIBANA_TESTING_AI_CONNECTORS;
   });
 
-  it('builds from vault credentials with the native Haiku id, ignoring generated connectors', () => {
+  it('builds from vault credentials with the pinned native id, ignoring generated connectors', () => {
     process.env.OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
     process.env.OPENROUTER_API_KEY = 'sk-test';
     process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(
@@ -78,7 +78,7 @@ describe('resolveTriageConnector', () => {
         [TRIAGE_OPENROUTER_CONNECTOR_ID]: {
           config: {
             apiUrl: 'https://example.invalid/chat',
-            defaultModel: 'anthropic/claude-haiku-4-5',
+            defaultModel: 'google/gemini-3.7-flash-stale',
           },
           secrets: { apiKey: 'sk-generated' },
         },
@@ -88,8 +88,8 @@ describe('resolveTriageConnector', () => {
 
     const { connector, modelId } = resolveTriageConnector();
 
-    expect(modelId).toBe('openrouter-anthropic-claude-haiku-4-5');
-    expect(connector.config.defaultModel).toBe('anthropic/claude-haiku-4.5');
+    expect(modelId).toBe('openrouter-google-gemini-3-7-flash');
+    expect(connector.config.defaultModel).toBe('google/gemini-3.7-flash');
     expect(connector.secrets.apiKey).toBe('sk-test');
   });
 });

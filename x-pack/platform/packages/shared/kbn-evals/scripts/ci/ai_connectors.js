@@ -52,7 +52,7 @@ function parseVaultConfig() {
 }
 
 // CI notify triage uses this OpenRouter model.
-const TRIAGE_OPENROUTER_MODEL = 'anthropic/claude-haiku-4.5';
+const TRIAGE_OPENROUTER_MODEL = 'google/gemini-3.7-flash';
 
 /**
  * Build the CI-notification triage connector from vault/env OpenRouter credentials.

@@ -17,7 +17,7 @@ describe('buildOpenrouterConnectorFromVault', () => {
     delete process.env.KBN_EVALS_CONFIG_B64;
   });
 
-  it('always uses the native Haiku id (does not reverse a slugified connector id)', () => {
+  it('always uses the native OpenRouter id (does not reverse a slugified connector id)', () => {
     process.env.OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
     process.env.OPENROUTER_API_KEY = 'sk-test';
 
@@ -38,7 +38,7 @@ describe('buildOpenrouterConnectorFromVault', () => {
 
     const connector = buildOpenrouterConnectorFromVault();
 
-    expect(connector.config.defaultModel).toBe('anthropic/claude-haiku-4.5');
+    expect(connector.config.defaultModel).toBe('google/gemini-3.7-flash');
     expect(connector.secrets.apiKey).toBe('sk-vault');
   });
 
