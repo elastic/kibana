@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// import { SetTypeControl } from './set_type_control';
 import { ConversationSharingButton } from './conversation_sharing_button';
 import { ChatInfoButton } from './chat_info_button';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -31,9 +30,6 @@ export const ConversationRightActions: React.FC = () => {
       aria-label={labels.container}
       responsive={false}
     >
-      {/* <EuiFlexItem grow={false}>
-        <SetTypeControl />
-      </EuiFlexItem> */}
       <EuiFlexItem grow={false}>
         <ConversationSharingButton />
       </EuiFlexItem>
