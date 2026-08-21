@@ -40,7 +40,7 @@ describe('createEsSearchIterable', () => {
 
     const iterable = createEsSearchIterable({
       esClient: esClient as unknown as ElasticsearchClient,
-      searchRequest: { index: 'test', sort: [{ _doc: 'asc' }] },
+      searchRequest: { index: 'test', sort: [{ _doc: { order: 'asc' } }] },
     });
 
     for await (const _ of iterable) {
@@ -57,7 +57,7 @@ describe('createEsSearchIterable', () => {
 
     const iterable = createEsSearchIterable({
       esClient: esClient as unknown as ElasticsearchClient,
-      searchRequest: { index: 'test', sort: [{ _doc: 'asc' }] },
+      searchRequest: { index: 'test', sort: [{ _doc: { order: 'asc' } }] },
     });
 
     const thrownError = new Error('consumer error');
