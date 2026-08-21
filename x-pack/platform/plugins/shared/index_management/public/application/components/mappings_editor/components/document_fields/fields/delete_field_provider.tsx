@@ -12,6 +12,7 @@ import { useMappingsState, useDispatch } from '../../../mappings_state_context';
 import type { NormalizedField } from '../../../types';
 import { getAllDescendantAliases } from '../../../lib';
 import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
+import { useInlineFieldEdit } from '../use_inline_field_edit';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
 
@@ -28,6 +29,7 @@ interface State {
 export const DeleteFieldProvider = ({ children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const dispatch = useDispatch();
+  const { cancelInlineFieldEdit } = useInlineFieldEdit();
   const { fields } = useMappingsState();
   const { byId } = fields;
 
@@ -56,6 +58,8 @@ export const DeleteFieldProvider = ({ children }: Props) => {
   }
 
   const deleteField: DeleteFieldFunc = (field) => {
+    cancelInlineFieldEdit();
+
     const aliases = getAllDescendantAliases(field, fields)
       .map((id) => byId[id].path.join(' > '))
       .sort();

@@ -73,7 +73,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
           control={control}
           fields={commonFields}
           testSubjPrefix={testSubjPrefix}
-          columns={2}
+          columns={1}
         />
       </EuiPanel>
 

@@ -277,9 +277,11 @@ export const reducer = (state: State, action: Action): State => {
     case 'documentField.createField': {
       return {
         ...state,
+        fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
           fieldToAddFieldTo: action.value,
+          fieldToEdit: undefined,
           status: 'creatingField',
         },
       };
@@ -287,10 +289,12 @@ export const reducer = (state: State, action: Action): State => {
     case 'documentField.editField': {
       return {
         ...state,
+        fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
           status: 'editingField',
           fieldToEdit: action.value,
+          fieldToAddFieldTo: undefined,
         },
       };
     }

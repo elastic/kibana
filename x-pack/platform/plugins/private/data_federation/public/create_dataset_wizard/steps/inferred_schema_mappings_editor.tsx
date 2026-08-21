@@ -58,6 +58,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
   const [isInferMenuOpen, setIsInferMenuOpen] = useState(false);
+  const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
   const [seedFieldTypes, setSeedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
   );
@@ -132,6 +133,27 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     addFieldButtonRef.current?.click();
   }, []);
 
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) {
+      return;
+    }
+
+    const syncAddFieldFormOpen = () => {
+      const isOpen = root.querySelector('[data-test-subj="createFieldForm"]') !== null;
+      setIsAddFieldFormOpen(isOpen);
+    };
+
+    syncAddFieldFormOpen();
+
+    const observer = new MutationObserver(syncAddFieldFormOpen);
+    observer.observe(root, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [schemaEditorKey]);
+
   // Hides the editor's own "Add field" control and portals a matching outlined
   // primary button into a sibling mount, alongside a split Infer schema control.
   // The extra node is untracked by the editor, so it won't fight React
@@ -195,20 +217,23 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         key={schemaEditorKey}
         value={mappings}
         compressed
+        fieldEditDisplay="inline"
         onChange={onMappingsChange}
       />
       {actionsMount
         ? createPortal(
             <>
-              <EuiButton
-                iconType="plusCircle"
-                color="primary"
-                size="s"
-                data-test-subj="datasetWizardAddField"
-                onClick={handleAddField}
-              >
-                {datasetWizardStrings.addFieldButton()}
-              </EuiButton>
+              {!isAddFieldFormOpen ? (
+                <EuiButton
+                  iconType="plusCircle"
+                  color="primary"
+                  size="s"
+                  data-test-subj="datasetWizardAddField"
+                  onClick={handleAddField}
+                >
+                  {datasetWizardStrings.addFieldButton()}
+                </EuiButton>
+              ) : null}
               <EuiSplitButton
                 color="text"
                 fill={false}

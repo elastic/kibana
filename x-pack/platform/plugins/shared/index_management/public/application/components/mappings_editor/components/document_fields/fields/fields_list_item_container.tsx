@@ -10,6 +10,11 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from '../../../mappings_state_context';
 import type { NormalizedField, State } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
+import {
+  getAreFieldActionButtonsVisible,
+  getIsFieldDimmed,
+  useInlineFieldEdit,
+} from '../use_inline_field_edit';
 
 interface Props {
   fieldId: string;
@@ -31,6 +36,7 @@ export const FieldsListItemContainer = ({
   pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
+  const { fieldEditDisplay, cancelInlineFieldEdit } = useInlineFieldEdit();
   const listElement = useRef<HTMLLIElement | null>(null);
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
@@ -43,9 +49,16 @@ export const FieldsListItemContainer = ({
   const field: NormalizedField = getField(fieldId);
   const { childFields } = field;
   const isHighlighted = fieldToEdit === fieldId;
-  const isDimmed = status === 'editingField' && fieldToEdit !== fieldId;
+  const isDimmed = getIsFieldDimmed({ fieldEditDisplay, status, fieldToEdit, fieldId });
   const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === fieldId;
-  const areActionButtonsVisible = status === 'idle';
+  const isEditFieldFormVisible =
+    fieldEditDisplay === 'inline' && status === 'editingField' && fieldToEdit === fieldId;
+  const areActionButtonsVisible = getAreFieldActionButtonsVisible({
+    fieldEditDisplay,
+    status,
+    fieldToEdit,
+    fieldId,
+  });
   const childFieldsArray = useMemo(
     () => (childFields !== undefined ? childFields.map(getField) : []),
     [childFields, getField]
@@ -56,18 +69,25 @@ export const FieldsListItemContainer = ({
     rootLevelFields.includes(fieldId) && runtimeFieldNames.includes(field.source.name);
 
   const addField = useCallback(() => {
+    cancelInlineFieldEdit();
     dispatch({
       type: 'documentField.createField',
       value: fieldId,
     });
-  }, [fieldId, dispatch]);
+  }, [cancelInlineFieldEdit, dispatch, fieldId]);
 
   const editField = useCallback(() => {
+    if (fieldEditDisplay === 'inline') {
+      dispatch({ type: 'search:update', value: '' });
+    }
+
+    cancelInlineFieldEdit();
+
     dispatch({
       type: 'documentField.editField',
       value: fieldId,
     });
-  }, [fieldId, dispatch]);
+  }, [cancelInlineFieldEdit, dispatch, fieldEditDisplay, fieldId]);
 
   const toggleExpand = useCallback(() => {
     // if using static state, set state manually
@@ -102,6 +122,7 @@ export const FieldsListItemContainer = ({
       isDimmed={isDimmed}
       isShadowed={isShadowed}
       isCreateFieldFormVisible={isCreateFieldFormVisible}
+      isEditFieldFormVisible={isEditFieldFormVisible}
       areActionButtonsVisible={areActionButtonsVisible}
       isLastItem={isLastItem}
       childFieldsArray={childFieldsArray}

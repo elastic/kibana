@@ -17,9 +17,15 @@ import { RegionSuperSelect } from './region_super_select';
 
 export interface WizardRegionFieldProps {
   control: Control<DatasetWizardFormValues>;
+  autoDetectedRegion?: string;
+  onRegionManualChange?: (regionId: string) => void;
 }
 
-export const WizardRegionField: FunctionComponent<WizardRegionFieldProps> = ({ control }) => {
+export const WizardRegionField: FunctionComponent<WizardRegionFieldProps> = ({
+  control,
+  autoDetectedRegion = '',
+  onRegionManualChange,
+}) => {
   const { field: regionField, fieldState: regionFieldState } = useController({
     name: 'region',
     control,
@@ -44,7 +50,11 @@ export const WizardRegionField: FunctionComponent<WizardRegionFieldProps> = ({ c
         searchPlaceholder={datasetWizardStrings.regionSearchPlaceholder()}
         isInvalid={Boolean(regionFieldState.error)}
         value={regionField.value || undefined}
-        onChange={regionField.onChange}
+        autoDetectedRegion={autoDetectedRegion}
+        onChange={(nextRegion) => {
+          onRegionManualChange?.(nextRegion);
+          regionField.onChange(nextRegion);
+        }}
         onBlur={regionField.onBlur}
         name={regionField.name}
         buttonRef={regionField.ref}

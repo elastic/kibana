@@ -10,6 +10,7 @@ import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/c
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildTestConfigurationPreviewRows,
+  getEffectiveTestConfigurationPreviewFields,
   getTestConfigurationPreviewFields,
   TEST_CONFIGURATION_PREVIEW_MIN_COLUMN_COUNT,
   TEST_CONFIGURATION_PREVIEW_ROW_COUNT,
@@ -190,5 +191,28 @@ describe('test_configuration_preview_utils', () => {
     expect(rows[0].col2).toBe('Sample log event 1');
     expect(rows[0].col3).toBe('info');
     expect(rows[0].col6).toBe(200);
+  });
+
+  it('applies automatic field type updates from the schema mappings step', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+      automatic_field_types: {
+        duration_ms: 'keyword',
+        extra_field: 'boolean',
+      },
+    };
+
+    const fields = getEffectiveTestConfigurationPreviewFields(values);
+
+    expect(fields.find((field) => field.name === 'duration_ms')).toEqual({
+      name: 'duration_ms',
+      type: 'keyword',
+    });
+    expect(fields.find((field) => field.name === 'status_code')).toEqual({
+      name: 'status_code',
+      type: 'long',
+    });
+    expect(fields[fields.length - 1]).toEqual({ name: 'extra_field', type: 'boolean' });
   });
 });

@@ -7,7 +7,7 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiForm, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -50,6 +50,8 @@ export interface AdditionalSettingsStepProps {
   syncedResourceRef: MutableRefObject<string | null>;
   isEditMode: boolean;
   flowVariant: DatasetWizardFlowVariant;
+  autoDetectedRegion?: string;
+  onRegionManualChange?: (regionId: string) => void;
 }
 
 export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepProps> = ({
@@ -60,6 +62,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   syncedResourceRef,
   isEditMode,
   flowVariant,
+  autoDetectedRegion = '',
+  onRegionManualChange,
 }) => {
   const [autoDetectedFormat, setAutoDetectedFormat] = useState<DatasetFormatFormValue | ''>('');
   const [formatSelectionSource, setFormatSelectionSource] = useState<FormatSelectionSource>('none');
@@ -219,6 +223,12 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     });
   }, [autoDetectedFormat, flowVariant, format]);
 
+  const showDataSourceSetupWarning = useMemo(
+    () =>
+      isDatasetWizardFlow3(flowVariant) && !autoDetectedRegion && !autoDetectedFormat,
+    [autoDetectedFormat, autoDetectedRegion, flowVariant]
+  );
+
   const accordionTitles = useMemo(
     () => ({
       structure: datasetWizardStrings.accordionStructureAndSchema(),
@@ -243,10 +253,30 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       <EuiText size="s" color="subdued">
         <p>{datasetWizardStrings.additionalSettingsDescription()}</p>
       </EuiText>
+      {showDataSourceSetupWarning ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            color="warning"
+            iconType="alert"
+            size="s"
+            title={datasetWizardStrings.dataSourceSetupWarningTitle()}
+            data-test-subj="datasetWizardDataSourceSetupWarning"
+          >
+            <p>{datasetWizardStrings.dataSourceSetupWarningDescription()}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        {isDatasetWizardFlow3(flowVariant) ? <WizardRegionField control={control} /> : null}
+        {isDatasetWizardFlow3(flowVariant) ? (
+          <WizardRegionField
+            control={control}
+            autoDetectedRegion={autoDetectedRegion}
+            onRegionManualChange={onRegionManualChange}
+          />
+        ) : null}
 
         <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
           <EuiSuperSelect

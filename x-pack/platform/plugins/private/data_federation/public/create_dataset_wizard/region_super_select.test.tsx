@@ -49,6 +49,28 @@ describe('RegionSuperSelect', () => {
     });
 
     expect(within(getAllByRole('option')[0]).getByText('US East (Ohio)')).toBeInTheDocument();
+    expect(within(getAllByRole('option')[0]).getByText('us-east-2')).toBeInTheDocument();
+  });
+
+  it('filters regions by short code', async () => {
+    const { getByTestId, getAllByRole } = renderSelect();
+
+    fireEvent.click(getByTestId('datasetWizardRegion'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardRegionSearch')).toBeInTheDocument();
+    });
+
+    fireEvent.change(getByTestId('datasetWizardRegionSearch'), {
+      target: { value: 'us-east-1' },
+    });
+
+    await waitFor(() => {
+      expect(getAllByRole('option')).toHaveLength(1);
+    });
+
+    expect(within(getAllByRole('option')[0]).getByText('US East (N. Virginia)')).toBeInTheDocument();
+    expect(within(getAllByRole('option')[0]).getByText('us-east-1')).toBeInTheDocument();
   });
 
   it('selects a region from the searchable list', async () => {
@@ -71,5 +93,25 @@ describe('RegionSuperSelect', () => {
     fireEvent.click(getAllByRole('option')[0]);
 
     expect(onChange).toHaveBeenCalledWith('us-west-2');
+  });
+
+  it('shows an auto-detected suffix for the selected region when applicable', () => {
+    const { getByTestId } = renderSelect({
+      value: 'us-east-1',
+      autoDetectedRegion: 'us-east-1',
+    });
+
+    expect(getByTestId('datasetWizardRegion')).toHaveTextContent('US East (N. Virginia)');
+    expect(getByTestId('datasetWizardAutoDetectedSuffix')).toHaveTextContent('(auto-detected)');
+  });
+
+  it('does not show an auto-detected suffix after manual region selection', () => {
+    const { getByTestId } = renderSelect({
+      value: 'us-west-2',
+      autoDetectedRegion: 'us-east-1',
+    });
+
+    expect(getByTestId('datasetWizardRegion')).toHaveTextContent('US West (Oregon)');
+    expect(getByTestId('datasetWizardRegion')).not.toHaveTextContent('(auto-detected)');
   });
 });

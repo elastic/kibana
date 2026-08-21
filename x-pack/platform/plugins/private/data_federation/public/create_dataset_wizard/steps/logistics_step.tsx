@@ -24,7 +24,6 @@ import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
-import { inferRegionFromResource } from '../infer_region_from_resource';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
 import { WizardRegionField } from '../wizard_region_field';
 
@@ -40,6 +39,9 @@ export interface LogisticsStepProps {
   validateName: Validate<string, DatasetWizardFormValues>;
   setValue: UseFormSetValue<DatasetWizardFormValues>;
   flowVariant: DatasetWizardFlowVariant;
+  syncRegionFromResource: (resource: string, dataSourceName: string) => void;
+  autoDetectedRegion?: string;
+  onRegionManualChange?: (regionId: string) => void;
 }
 
 export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
@@ -49,6 +51,9 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
   validateName,
   setValue,
   flowVariant,
+  syncRegionFromResource,
+  autoDetectedRegion = '',
+  onRegionManualChange,
 }) => {
   const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
@@ -105,11 +110,8 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
       return;
     }
 
-    const inferredRegion = inferRegionFromResource(resourceField.value);
-    if (inferredRegion) {
-      setValue('region', inferredRegion, { shouldDirty: true, shouldValidate: true });
-    }
-  }, [dataSourceField.value, dataSources, resourceField, setValue]);
+    syncRegionFromResource(resourceField.value, dataSourceField.value);
+  }, [dataSourceField.value, resourceField, syncRegionFromResource]);
 
   const resourceHelpText = useMemo(() => {
     const selected = dataSources.find((ds) => ds.name === dataSourceField.value);
@@ -206,7 +208,13 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
           />
         </EuiFormRow>
 
-        {showRegion ? <WizardRegionField control={control} /> : null}
+        {showRegion ? (
+          <WizardRegionField
+            control={control}
+            autoDetectedRegion={autoDetectedRegion}
+            onRegionManualChange={onRegionManualChange}
+          />
+        ) : null}
       </EuiForm>
     </>
   );

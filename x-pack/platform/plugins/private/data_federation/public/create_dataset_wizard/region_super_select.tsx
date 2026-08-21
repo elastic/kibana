@@ -16,8 +16,10 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiSuperSelectControl,
+  EuiText,
 } from '@elastic/eui';
 
+import { AutoDetectedSuffix } from './auto_detected_suffix';
 import { AWS_REGIONS, getCountryFlagEmoji, type AwsRegionOption } from './aws_regions';
 
 const selectableListProps = {
@@ -30,7 +32,10 @@ const selectableListProps = {
   bordered: false,
 };
 
-const RegionOptionDisplay: FunctionComponent<{ region: AwsRegionOption }> = ({ region }) => {
+const RegionOptionDisplay: FunctionComponent<{
+  region: AwsRegionOption;
+  showAutoDetectedSuffix?: boolean;
+}> = ({ region, showAutoDetectedSuffix = false }) => {
   const flag = getCountryFlagEmoji(region.countryCode);
 
   return (
@@ -41,6 +46,11 @@ const RegionOptionDisplay: FunctionComponent<{ region: AwsRegionOption }> = ({ r
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>{region.label}</EuiFlexItem>
+      {showAutoDetectedSuffix ? (
+        <EuiFlexItem grow={false}>
+          <AutoDetectedSuffix />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
@@ -50,6 +60,12 @@ const getRegionPrepend = (region: AwsRegionOption) => {
 
   return flag ? <span aria-hidden="true">{flag}</span> : undefined;
 };
+
+const getRegionShortCodeAppend = (region: AwsRegionOption) => (
+  <EuiText size="s" color="subdued" component="span">
+    {region.id}
+  </EuiText>
+);
 
 export interface RegionSuperSelectProps {
   value?: string;
@@ -63,6 +79,7 @@ export interface RegionSuperSelectProps {
   buttonRef?: Ref<HTMLButtonElement>;
   isInvalid?: boolean;
   fullWidth?: boolean;
+  autoDetectedRegion?: string;
 }
 
 export const RegionSuperSelect: FunctionComponent<RegionSuperSelectProps> = ({
@@ -77,16 +94,24 @@ export const RegionSuperSelect: FunctionComponent<RegionSuperSelectProps> = ({
   buttonRef,
   isInvalid = false,
   fullWidth = false,
+  autoDetectedRegion = '',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const showAutoDetectedSuffix = value === autoDetectedRegion && autoDetectedRegion !== '';
 
   const controlOptions = useMemo(
     (): Array<EuiSuperSelectOption<string>> =>
       AWS_REGIONS.map((region) => ({
         value: region.id,
-        inputDisplay: <RegionOptionDisplay region={region} />,
+        inputDisplay: (
+          <RegionOptionDisplay
+            region={region}
+            showAutoDetectedSuffix={showAutoDetectedSuffix && region.id === value}
+          />
+        ),
       })),
-    []
+    [showAutoDetectedSuffix, value]
   );
 
   const selectableOptions = useMemo(
@@ -97,6 +122,7 @@ export const RegionSuperSelect: FunctionComponent<RegionSuperSelectProps> = ({
         searchableLabel: `${region.label} ${region.id}`,
         checked: value === region.id ? 'on' : undefined,
         prepend: getRegionPrepend(region),
+        append: getRegionShortCodeAppend(region),
       })),
     [value]
   );

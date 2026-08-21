@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import type { SemanticTextInfo } from './fields';
 import { CreateField, FieldsList } from './fields';
+import { useInlineFieldEdit } from './use_inline_field_edit';
 
 interface Props {
   onCancelAddingNewFields?: () => void;
@@ -27,6 +28,7 @@ export const DocumentFieldsTreeEditor = ({
   pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
+  const { isInlineFieldEditEnabled } = useInlineFieldEdit();
   const {
     fields: { byId, rootLevelFields },
     documentFields: { status, fieldToAddFieldTo },
@@ -61,7 +63,8 @@ export const DocumentFieldsTreeEditor = ({
   };
 
   const renderAddFieldButton = () => {
-    const isDisabled = status !== 'idle';
+    const isDisabled =
+      status === 'creatingField' || (!isInlineFieldEditEnabled && status !== 'idle');
     return (
       <>
         <EuiSpacer />

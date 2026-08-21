@@ -35,6 +35,7 @@ describe('PreviewResultsStep', () => {
     );
 
     expect(screen.getByTestId('datasetWizardPreviewResultsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('datasetWizardPreviewResultsRefreshButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('datasetWizardTestConfigurationTable')).not.toBeInTheDocument();
   });
 
@@ -58,9 +59,11 @@ describe('PreviewResultsStep', () => {
       expect(screen.queryByTestId('datasetWizardTestConfigurationLoading')).not.toBeInTheDocument();
       expect(screen.getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('datasetWizardPreviewResultsRefreshButton')).toBeInTheDocument();
   });
 
-  it('resets to the empty state when the form configuration changes', async () => {
+  it('keeps the last preview and lets the user refresh it after configuration changes', async () => {
     jest.useFakeTimers();
 
     const { rerender } = render(
@@ -78,6 +81,8 @@ describe('PreviewResultsStep', () => {
       expect(screen.getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
     });
 
+    expect(screen.getByTestId('datasetWizardPreviewResultsRefreshButton')).toBeInTheDocument();
+
     rerender(
       <EuiProvider>
         <PreviewResultsStep
@@ -90,7 +95,23 @@ describe('PreviewResultsStep', () => {
       </EuiProvider>
     );
 
-    expect(screen.getByTestId('datasetWizardPreviewResultsButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('datasetWizardTestConfigurationTable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('datasetWizardPreviewResultsButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('datasetWizardPreviewResultsRefreshButton')).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /@timestamp/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('datasetWizardPreviewResultsRefreshButton'));
+    expect(screen.getByTestId('datasetWizardTestConfigurationLoading')).toBeInTheDocument();
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('columnheader', { name: /@timestamp/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /timestamp/ })).toBeInTheDocument();
   });
 });

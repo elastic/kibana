@@ -173,6 +173,35 @@ export const getTestConfigurationPreviewFields = (
   return getFormatInferredFields(values.settings);
 };
 
+export const applyAutomaticFieldTypesToPreviewFields = (
+  fields: TestConfigurationPreviewField[],
+  automaticFieldTypes: Record<string, string>
+): TestConfigurationPreviewField[] => {
+  if (Object.keys(automaticFieldTypes).length === 0) {
+    return fields;
+  }
+
+  const appliedFields = fields.map((field) => {
+    const nextType = automaticFieldTypes[field.name];
+    return nextType === undefined ? field : { ...field, type: nextType };
+  });
+
+  const existingNames = new Set(fields.map((field) => field.name));
+  const addedFields = Object.entries(automaticFieldTypes)
+    .filter(([name]) => !existingNames.has(name))
+    .map(([name, type]) => ({ name, type }));
+
+  return addedFields.length === 0 ? appliedFields : [...appliedFields, ...addedFields];
+};
+
+export const getEffectiveTestConfigurationPreviewFields = (
+  values: DatasetWizardFormValues
+): TestConfigurationPreviewField[] =>
+  applyAutomaticFieldTypesToPreviewFields(
+    getTestConfigurationPreviewFields(values),
+    values.automatic_field_types ?? {}
+  );
+
 const getPrefixedColumnSampleField = (
   field: TestConfigurationPreviewField
 ): TestConfigurationPreviewField | undefined => {

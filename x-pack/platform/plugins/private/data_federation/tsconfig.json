@@ -23,6 +23,7 @@
     "@kbn/index-management-shared-types",
     "@kbn/es-ui-shared-plugin",
     "@kbn/react-field",
+    "@kbn/field-utils",
     "@kbn/share-plugin"
   ],
   "exclude": [

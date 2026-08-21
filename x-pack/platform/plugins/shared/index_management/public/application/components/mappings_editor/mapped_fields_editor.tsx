@@ -24,12 +24,13 @@ export interface MappedFieldsEditorProps {
   onChange: OnUpdateHandler;
   value?: { [key: string]: unknown };
   compressed?: boolean;
+  fieldEditDisplay?: 'flyout' | 'inline';
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
 }
 
 export const MappedFieldsEditor = React.memo(
-  ({ onChange, value, compressed, indexSettings, docLinks }: MappedFieldsEditorProps) => {
+  ({ onChange, value, compressed, fieldEditDisplay, indexSettings, docLinks }: MappedFieldsEditorProps) => {
     const { parsedDefaultValue, multipleMappingsDeclared } =
       useMemo<MappingsEditorParsedMetadata>(() => parseMappings(value), [value]);
 
@@ -53,8 +54,9 @@ export const MappedFieldsEditor = React.memo(
       updateConfig({
         docLinks,
         indexSettings: indexSettings ?? {},
+        fieldEditDisplay,
       });
-    }, [updateConfig, docLinks, indexSettings]);
+    }, [updateConfig, docLinks, indexSettings, fieldEditDisplay]);
 
     const onSearchChange = useCallback(
       (searchValue: string) => {

@@ -13,6 +13,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
 
 import { datasetWizardStrings } from './dataset_wizard_i18n';
+import { FieldNameWithTypeIcon } from './field_name_with_type_icon';
 import {
   buildTestConfigurationPreviewRows,
   TEST_CONFIGURATION_PREVIEW_ROW_COUNT,
@@ -58,7 +59,7 @@ export const SchemaSamplePreviewTable: FunctionComponent<SchemaSamplePreviewTabl
     () =>
       fields.map((field) => ({
         field: field.name,
-        name: field.name,
+        name: <FieldNameWithTypeIcon name={field.name} type={field.type} />,
         truncateText: true,
         'data-test-subj': `${testSubjPrefix}Column-${field.name}`,
       })),

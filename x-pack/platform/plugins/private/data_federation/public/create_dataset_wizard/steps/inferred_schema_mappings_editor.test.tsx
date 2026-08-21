@@ -22,8 +22,13 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   onChange,
 }) => {
   const [mappings, setMappings] = useState(value ?? {});
+  const [isCreateFieldFormOpen, setIsCreateFieldFormOpen] = useState(false);
 
   const addManualField = () => {
+    setIsCreateFieldFormOpen(true);
+  };
+
+  const confirmManualField = () => {
     const nextMappings = {
       properties: {
         ...((mappings as { properties?: Record<string, unknown> }).properties ?? {}),
@@ -31,6 +36,7 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
       },
     };
     setMappings(nextMappings);
+    setIsCreateFieldFormOpen(false);
     onChange({
       getData: () => nextMappings,
       validate: () => Promise.resolve(true),
@@ -41,6 +47,13 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   return (
     <div>
       <div data-test-subj="fakeMappedFieldsValue">{JSON.stringify(mappings)}</div>
+      {isCreateFieldFormOpen ? (
+        <div data-test-subj="createFieldForm">
+          <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
+            Confirm field
+          </button>
+        </div>
+      ) : null}
       <button type="button" data-test-subj="addFieldButton" onClick={addManualField}>
         Add field
       </button>
@@ -148,10 +161,31 @@ describe('InferredSchemaMappingsEditor', () => {
     });
 
     fireEvent.click(getByTestId('datasetWizardAddField'));
+    fireEvent.click(getByTestId('fakeConfirmAddField'));
     fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
 
     await waitFor(() => {
       expect(getByTestId('datasetWizardInferMissingFields')).toBeEnabled();
+    });
+  });
+
+  it('hides Add field while the create field form is open', async () => {
+    const { getByTestId, queryByTestId } = render(<TestHarness />);
+
+    expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('datasetWizardAddField'));
+
+    await waitFor(() => {
+      expect(getByTestId('createFieldForm')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardAddField')).toBeNull();
+    });
+
+    fireEvent.click(getByTestId('fakeConfirmAddField'));
+
+    await waitFor(() => {
+      expect(queryByTestId('createFieldForm')).toBeNull();
+      expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
     });
   });
 });

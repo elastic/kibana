@@ -47,6 +47,30 @@ describe('TestConfigurationPreviewContent', () => {
     expect(
       screen.getAllByTestId('datasetWizardTestConfigurationColumn-message').length
     ).toBeGreaterThan(0);
+    expect(screen.getByText('Date')).toHaveAttribute('data-euiicon-type', 'tokenDate');
+    expect(screen.getByText('Text')).toHaveAttribute('data-euiicon-type', 'tokenString');
     expect(screen.getAllByRole('row')).toHaveLength(TEST_CONFIGURATION_PREVIEW_ROW_COUNT + 1);
+  });
+
+  it('updates preview column type icons after schema mapping type changes', () => {
+    render(
+      <EuiProvider>
+        <TestConfigurationPreviewContent
+          values={{
+            ...defaultValues,
+            automatic_field_types: {
+              'http.response.status_code': 'keyword',
+            },
+          }}
+        />
+      </EuiProvider>
+    );
+
+    const statusCodeHeader = screen.getByRole('columnheader', {
+      name: /http\.response\.status_code/,
+    });
+
+    expect(statusCodeHeader.querySelector('[data-euiicon-type="tokenKeyword"]')).not.toBeNull();
+    expect(statusCodeHeader.querySelector('[data-euiicon-type="tokenNumber"]')).toBeNull();
   });
 });

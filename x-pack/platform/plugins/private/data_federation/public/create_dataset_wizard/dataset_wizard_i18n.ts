@@ -238,6 +238,17 @@ export const datasetWizardStrings = {
       defaultMessage: 'You can further customize your setup of your dataset',
     }),
 
+  dataSourceSetupWarningTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSetupWarningTitle', {
+      defaultMessage: 'Unable to verify data source setup',
+    }),
+
+  dataSourceSetupWarningDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSetupWarningDescription', {
+      defaultMessage:
+        'We could not auto-detect the region or file format from your resource URI. You can continue, but consider reviewing your logistics settings and data source configuration from the previous step.',
+    }),
+
   formatAutoDetectedSuffix: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.formatAutoDetectedSuffix', {
       defaultMessage: '(auto-detected)',
@@ -705,6 +716,16 @@ export const datasetWizardStrings = {
   previewResultsButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.previewResultsButton', {
       defaultMessage: 'Preview results',
+    }),
+
+  previewResultsRefreshButtonLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsRefreshButtonLabel', {
+      defaultMessage: 'Refresh',
+    }),
+
+  previewResultsRefreshAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsRefreshAriaLabel', {
+      defaultMessage: 'Refresh preview results',
     }),
 
   testConfigurationPreviewTableCaption: (rowCount: number) =>

@@ -182,6 +182,7 @@ export interface IndexMappingProps {
 export interface MappedFieldsEditorProps {
   value?: Record<string, unknown>;
   compressed?: boolean;
+  fieldEditDisplay?: 'flyout' | 'inline';
   onChange: (update: {
     getData: () => Record<string, unknown> | undefined;
     validate: () => Promise<boolean>;

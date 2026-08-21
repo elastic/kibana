@@ -12,7 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SearchResult as SearchResultType, State } from '../../../types';
 import { useDispatch } from '../../../mappings_state_context';
+import type { FieldEditDisplay } from '../../../config_context';
+import { useConfig } from '../../../config_context';
 import { SearchResultItem } from './search_result_item';
+import {
+  getAreFieldActionButtonsVisible,
+  getIsFieldDimmed,
+} from '../use_inline_field_edit';
 
 interface Props {
   result: SearchResultType[];
@@ -30,20 +36,31 @@ interface RowProps {
     result: Props['result'];
     status: Props['documentFieldsState']['status'];
     fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
+    fieldEditDisplay?: FieldEditDisplay;
   };
 }
 
 const Row = React.memo<RowProps>(({ data, index, style }) => {
   // Data passed to List as "itemData" is available as props.data
-  const { fieldToEdit, result, status } = data;
+  const { fieldToEdit, result, status, fieldEditDisplay } = data;
   const item = result[index];
 
   return (
     <div key={item.field.id} style={style}>
       <SearchResultItem
         item={item}
-        areActionButtonsVisible={status === 'idle'}
-        isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
+        areActionButtonsVisible={getAreFieldActionButtonsVisible({
+          fieldEditDisplay,
+          status,
+          fieldToEdit,
+          fieldId: item.field.id,
+        })}
+        isDimmed={getIsFieldDimmed({
+          fieldEditDisplay,
+          status,
+          fieldToEdit,
+          fieldId: item.field.id,
+        })}
         isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
       />
     </div>
@@ -58,6 +75,9 @@ export const SearchResult = React.memo(
     onClearSearch,
   }: Props) => {
     const dispatch = useDispatch();
+    const {
+      value: { fieldEditDisplay = 'flyout' },
+    } = useConfig();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
     const clearSearch = () => {
@@ -69,8 +89,8 @@ export const SearchResult = React.memo(
     };
 
     const itemData = useMemo(
-      () => ({ result, status, fieldToEdit }),
-      [fieldToEdit, result, status]
+      () => ({ result, status, fieldToEdit, fieldEditDisplay }),
+      [fieldEditDisplay, fieldToEdit, result, status]
     );
 
     return result.length === 0 ? (

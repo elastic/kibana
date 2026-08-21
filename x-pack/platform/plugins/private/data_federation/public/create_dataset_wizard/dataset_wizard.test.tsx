@@ -206,6 +206,7 @@ describe('DatasetWizard step navigation', () => {
 
     await waitFor(() => {
       expect(getByTestId('datasetWizardRegion')).toHaveTextContent('US East (N. Virginia)');
+      expect(getByTestId('datasetWizardRegion')).toHaveTextContent('(auto-detected)');
     });
   });
 
@@ -397,7 +398,37 @@ describe('DatasetWizard step navigation', () => {
 
     expect(region).toBeVisible();
     expect(region).toHaveTextContent('US East (N. Virginia)');
+    expect(region).toHaveTextContent('(auto-detected)');
     expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('marks flow 3 region as auto-detected when advancing from logistics without blurring resource', async () => {
+    const { getByRole, getByTestId } = renderWizard(
+      '/create',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://logs/us-east-1/**/*.parquet' },
+    });
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+    });
+
+    const region = within(getByTestId('datasetWizardAdditionalSettingsStep')).getByTestId(
+      'datasetWizardRegion'
+    );
+
+    expect(region).toHaveTextContent('US East (N. Virginia)');
+    expect(region).toHaveTextContent('(auto-detected)');
   });
 
   it('validates region on additional settings in flow 3, not on logistics', async () => {

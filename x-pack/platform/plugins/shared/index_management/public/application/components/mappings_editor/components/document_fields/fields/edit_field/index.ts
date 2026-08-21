@@ -7,6 +7,7 @@
 
 export type { Props as EditFieldContainerProps } from './edit_field_container';
 export { EditFieldContainer, defaultFlyoutProps } from './edit_field_container';
+export { EditFieldInline } from './edit_field_inline';
 
 export * from './basic_parameters_section';
 

@@ -53,6 +53,7 @@ import {
 } from './dataset_wizard_form_persistence';
 import { findFirstInvalidWizardStep, getWizardStepFields } from './dataset_wizard_step_validation';
 import { validateResourceForDataSource } from './validate_dataset_resource';
+import { inferRegionFromResource } from './infer_region_from_resource';
 import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { SchemaMappingsStep } from './steps/schema_mappings_step';
@@ -67,6 +68,18 @@ import { TestConfigurationPreview } from './test_configuration_preview';
 
 const TEST_CONFIGURATION_LOADING_MS = 600;
 const TEST_CONFIGURATION_STEPS: DatasetWizardStep[] = [SCHEMA_MAPPINGS_STEP, REVIEW_STEP];
+
+const getInitialRegionSelectionSource = (
+  resource: string,
+  region: string
+): 'none' | 'auto' | 'manual' => {
+  const inferredRegion = inferRegionFromResource(resource);
+  if (inferredRegion && region === inferredRegion) {
+    return 'auto';
+  }
+
+  return region ? 'manual' : 'none';
+};
 
 export interface DatasetWizardProps {
   isEditMode: boolean;
@@ -112,6 +125,13 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const [isTestConfigLoading, setIsTestConfigLoading] = useState(false);
   const additionalSettingsSyncedResourceRef = useRef<string | null>(null);
   const testConfigLoadingTimeoutRef = useRef<number | undefined>();
+  const regionSelectionSourceRef = useRef(
+    getInitialRegionSelectionSource(defaultValues.resource, defaultValues.region)
+  );
+  const [autoDetectedRegion, setAutoDetectedRegion] = useState(() => {
+    const inferredRegion = inferRegionFromResource(defaultValues.resource);
+    return inferredRegion && defaultValues.region === inferredRegion ? inferredRegion : '';
+  });
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
   const reviewStep = getReviewStep(flowVariant);
@@ -127,6 +147,36 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const watchedName = wizardFormValues.name;
   const watchedResource = wizardFormValues.resource;
   const watchedRegion = wizardFormValues.region;
+
+  const syncRegionFromResource = useCallback(
+    (resource: string, dataSourceName: string) => {
+      const selectedDataSource = dataSources.find((dataSource) => dataSource.name === dataSourceName);
+      if (selectedDataSource && selectedDataSource.type !== 's3') {
+        return;
+      }
+
+      const inferredRegion = inferRegionFromResource(resource);
+      if (inferredRegion) {
+        setAutoDetectedRegion(inferredRegion);
+        if (regionSelectionSourceRef.current !== 'manual') {
+          regionSelectionSourceRef.current = 'auto';
+          setValue('region', inferredRegion, { shouldDirty: true, shouldValidate: true });
+        }
+        return;
+      }
+
+      setAutoDetectedRegion('');
+      if (regionSelectionSourceRef.current === 'auto') {
+        regionSelectionSourceRef.current = 'none';
+      }
+    },
+    [dataSources, setValue]
+  );
+
+  const handleRegionManualChange = useCallback((regionId: string) => {
+    regionSelectionSourceRef.current = 'manual';
+    setAutoDetectedRegion((current) => (regionId !== current ? '' : current));
+  }, []);
 
   useEffect(() => {
     const subscription = watch((values) => {
@@ -446,6 +496,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       persistCustomJsonToForm();
     }
 
+    if (currentStep === LOGISTICS_STEP) {
+      const logisticsValues = getValues();
+      syncRegionFromResource(logisticsValues.resource, logisticsValues.data_source);
+    }
+
     const values = getValues();
     const fields = getWizardStepFields(currentStep, values, flowVariant);
     const isValid = await trigger(fields, { shouldFocus: true });
@@ -537,6 +592,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           validateName={validateName}
           setValue={setValue}
           flowVariant={flowVariant}
+          syncRegionFromResource={syncRegionFromResource}
+          autoDetectedRegion={autoDetectedRegion}
+          onRegionManualChange={handleRegionManualChange}
         />
       </div>
       <div hidden={currentStep !== ADDITIONAL_SETTINGS_STEP}>
@@ -548,6 +606,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           syncedResourceRef={additionalSettingsSyncedResourceRef}
           isEditMode={isEditMode}
           flowVariant={flowVariant}
+          autoDetectedRegion={autoDetectedRegion}
+          onRegionManualChange={handleRegionManualChange}
         />
       </div>
       <div hidden={currentStep !== SCHEMA_MAPPINGS_STEP}>

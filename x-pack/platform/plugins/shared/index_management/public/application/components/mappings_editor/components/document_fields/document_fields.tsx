@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { deNormalize } from '../../lib';
+import { useConfig } from '../../config_context';
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { GlobalFlyout } from '../../shared_imports';
 import type { EditFieldContainerProps, SemanticTextInfo } from './fields';
@@ -36,6 +37,10 @@ export const DocumentFields = React.memo(
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
+    const {
+      value: { fieldEditDisplay = 'flyout' },
+    } = useConfig();
+    const useInlineFieldEdit = fieldEditDisplay === 'inline';
     const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
       useGlobalFlyout();
 
@@ -65,7 +70,7 @@ export const DocumentFields = React.memo(
     }, [dispatch]);
 
     useEffect(() => {
-      if (isEditing) {
+      if (isEditing && !useInlineFieldEdit) {
         // Open the flyout with the <EditField /> content
         addContentToGlobalFlyout<EditFieldContainerProps>({
           id: 'mappingsEditField',
@@ -75,7 +80,7 @@ export const DocumentFields = React.memo(
           cleanUpFunc: exitEdit,
         });
       }
-    }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
+    }, [isEditing, useInlineFieldEdit, addContentToGlobalFlyout, fields.byId, exitEdit]);
 
     useEffect(() => {
       if (!isEditing) {
@@ -85,13 +90,17 @@ export const DocumentFields = React.memo(
     }, [isEditing, removeContentFromGlobalFlyout, pendingFieldsRef]);
 
     useEffect(() => {
+      if (useInlineFieldEdit) {
+        return undefined;
+      }
+
       return () => {
         if (isEditing) {
           // When the component unmounts, exit edit mode.
           exitEdit();
         }
       };
-    }, [isEditing, exitEdit]);
+    }, [isEditing, exitEdit, useInlineFieldEdit]);
 
     return (
       <div data-test-subj="documentFields">

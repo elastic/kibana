@@ -6,8 +6,8 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -21,8 +21,7 @@ export interface PreviewResultsStepProps {
 }
 
 export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({ values }) => {
-  const configKey = useMemo(() => JSON.stringify(values), [values]);
-  const [previewedConfigKey, setPreviewedConfigKey] = useState<string | null>(null);
+  const [previewedValues, setPreviewedValues] = useState<DatasetWizardFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const loadingTimeoutRef = useRef<number | undefined>();
 
@@ -35,16 +34,18 @@ export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
     []
   );
 
-  const hasPreview = previewedConfigKey === configKey && !isLoading;
+  const hasPreview = previewedValues !== null && !isLoading;
 
   const handlePreview = () => {
+    const valuesToPreview = values;
+
     if (loadingTimeoutRef.current !== undefined) {
       window.clearTimeout(loadingTimeoutRef.current);
     }
 
     setIsLoading(true);
     loadingTimeoutRef.current = window.setTimeout(() => {
-      setPreviewedConfigKey(configKey);
+      setPreviewedValues(valuesToPreview);
       setIsLoading(false);
       loadingTimeoutRef.current = undefined;
     }, PREVIEW_RESULTS_LOADING_MS);
@@ -52,18 +53,36 @@ export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
 
   return (
     <div data-test-subj="datasetWizardPreviewResultsStep">
-      <EuiTitle size="s">
-        <h3>{datasetWizardStrings.stepPreviewResults()}</h3>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>{datasetWizardStrings.stepPreviewResults()}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {hasPreview ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="refresh"
+              color="text"
+              size="s"
+              onClick={handlePreview}
+              aria-label={datasetWizardStrings.previewResultsRefreshAriaLabel()}
+              data-test-subj="datasetWizardPreviewResultsRefreshButton"
+            >
+              {datasetWizardStrings.previewResultsRefreshButtonLabel()}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.testConfigurationPreviewDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
 
-      {hasPreview ? (
+      {hasPreview && previewedValues ? (
         <TestConfigurationPreviewContent
-          values={values}
+          values={previewedValues}
           maxVisibleRows={TEST_CONFIGURATION_PREVIEW_ROW_COUNT}
         />
       ) : isLoading ? (

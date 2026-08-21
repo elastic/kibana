@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
 import { useDispatch } from '../../../mappings_state_context';
+import { useInlineFieldEdit } from '../use_inline_field_edit';
 import { getTypeLabelFromField } from '../../../lib';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 import { getListItemStyle } from '../common/listItemStyle';
@@ -37,11 +38,18 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
   isDimmed,
 }: Props) {
   const dispatch = useDispatch();
+  const { fieldEditDisplay, cancelInlineFieldEdit } = useInlineFieldEdit();
   const { source, isMultiField } = field;
   const { euiTheme } = useEuiTheme();
   const styles = getListItemStyle(euiTheme);
 
   const editField = () => {
+    if (fieldEditDisplay === 'inline') {
+      dispatch({ type: 'search:update', value: '' });
+    }
+
+    cancelInlineFieldEdit();
+
     dispatch({
       type: 'documentField.editField',
       value: field.id,

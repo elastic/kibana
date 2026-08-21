@@ -10,9 +10,12 @@ import React, { createContext, useContext, useState } from 'react';
 import type { DocLinksStart } from './shared_imports';
 import type { IndexSettings } from './types';
 
+export type FieldEditDisplay = 'flyout' | 'inline';
+
 interface ContextState {
   indexSettings: IndexSettings;
   docLinks?: DocLinksStart;
+  fieldEditDisplay?: FieldEditDisplay;
 }
 
 interface Context {

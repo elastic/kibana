@@ -94,7 +94,7 @@ export interface DatasetSettingsAdvancedViewToggleProps {
 export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   DatasetSettingsAdvancedViewToggleProps
 > = ({ control, getValues, setValue, format, errorMode, testSubjPrefix }) => {
-  const [activeView, setActiveView] = useState<AdvancedViewMode>('json');
+  const [activeView, setActiveView] = useState<AdvancedViewMode>('list');
   const lastValidParsedRef = useRef<Record<string, unknown>>({});
   const prevSettingsDigestRef = useRef<string | null>(null);
 
@@ -231,14 +231,14 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   const toggleOptions = useMemo(
     () => [
       {
-        id: 'json',
-        label: datasetWizardStrings.advancedSettingsJsonViewLabel(),
-        iconType: 'editorCodeBlock',
-      },
-      {
         id: 'list',
         label: datasetWizardStrings.advancedSettingsListViewLabel(),
         iconType: 'list',
+      },
+      {
+        id: 'json',
+        label: datasetWizardStrings.advancedSettingsJsonViewLabel(),
+        iconType: 'editorCodeBlock',
       },
     ],
     []

@@ -23,10 +23,11 @@ import {
 } from '@elastic/eui';
 
 import { datasetWizardStrings } from './dataset_wizard_i18n';
+import { FieldNameWithTypeIcon } from './field_name_with_type_icon';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildTestConfigurationPreviewRows,
-  getTestConfigurationPreviewFields,
+  getEffectiveTestConfigurationPreviewFields,
   TEST_CONFIGURATION_PREVIEW_ROW_COUNT,
   type TestConfigurationPreviewRow,
 } from './test_configuration_preview_utils';
@@ -53,7 +54,7 @@ export const TestConfigurationPreview: FunctionComponent<TestConfigurationPrevie
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const fields = useMemo(() => getTestConfigurationPreviewFields(values), [values]);
+  const fields = useMemo(() => getEffectiveTestConfigurationPreviewFields(values), [values]);
   const tableScrollContainerStyles = useMemo(
     () => css`
       max-height: calc(${euiTheme.size.l} + (${FLOW_1_VISIBLE_DATA_ROWS} * ${euiTheme.size.xxxl}));
@@ -71,7 +72,7 @@ export const TestConfigurationPreview: FunctionComponent<TestConfigurationPrevie
     () =>
       fields.map((field) => ({
         field: field.name,
-        name: field.name,
+        name: <FieldNameWithTypeIcon name={field.name} type={field.type} />,
         truncateText: true,
         'data-test-subj': `datasetWizardTestConfigurationColumn-${field.name}`,
       })),
@@ -138,7 +139,7 @@ export const TestConfigurationPreviewContent: FunctionComponent<
   testSubjPrefix = 'datasetWizardTestConfiguration',
   maxVisibleRows,
 }) => {
-  const fields = useMemo(() => getTestConfigurationPreviewFields(values), [values]);
+  const fields = useMemo(() => getEffectiveTestConfigurationPreviewFields(values), [values]);
 
   if (isLoading) {
     return (
