@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
+import type { KibanaRole } from '@kbn/scout-oblt';
+import { apiTest, COMMON_HEADERS } from '../fixtures';
+
+const INVESTIGATIONS_READ_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { agentBuilder: ['read'] }, spaces: ['*'] }],
+};
+
+const LIST_PATH = 'internal/nightshift/investigations';
+
+apiTest.describe(
+  'GET /internal/nightshift/investigations',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    apiTest('returns 200 with a paginated result shape', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+      const response = await apiClient.get(LIST_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toMatchObject({
+        results: expect.any(Array),
+        total: expect.any(Number),
+        page: expect.any(Number),
+        size: expect.any(Number),
+      });
+    });
+
+    apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      const response = await apiClient.get(LIST_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
+    });
+
+    apiTest('returns 400 when page exceeds the maximum of 100', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+      const response = await apiClient.get(`${LIST_PATH}?page=101`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 for an unrecognised status value', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+      const response = await apiClient.get(`${LIST_PATH}?statuses=not_a_status`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 for an invalid sort_field value', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+      const response = await apiClient.get(`${LIST_PATH}?sort_field=unknown_field`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+  }
+);
