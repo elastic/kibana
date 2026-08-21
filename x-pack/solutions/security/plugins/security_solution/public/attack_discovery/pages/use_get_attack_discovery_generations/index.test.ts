@@ -52,7 +52,13 @@ describe('useGetAttackDiscoveryGenerations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    queryClient = new QueryClient();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
   });
 
   it('calls addError with the expected title', async () => {
