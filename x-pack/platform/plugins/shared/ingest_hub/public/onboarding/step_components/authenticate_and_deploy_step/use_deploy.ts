@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
@@ -46,6 +45,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     updateDeployAndDetectStep,
     getLatestFailedInstances,
     registerDeployHandler,
+    awsServicesMap: servicesMap,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -59,20 +59,25 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const [failedInstances, setFailedInstances] = useState<string[]>([]);
 
   const deployGroups: DeployGroup[] = useMemo(
-    () => buildDeployGroups(serviceSettings?.instances ?? [], selectedServiceIds),
-    [serviceSettings?.instances, selectedServiceIds]
+    () =>
+      buildDeployGroups(
+        serviceSettings?.instances ?? [],
+        selectedServiceIds,
+        servicesMap ?? new Map()
+      ),
+    [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>
       selectedServiceIds
-        .map((id) => AWS_SERVICES_MAP.get(id))
+        .map((id) => servicesMap?.get(id))
         .filter(
           (s): s is AwsServiceMatrixEntry =>
             s !== undefined &&
-            !s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
+            !s.deploymentMethods.some((dm) => dm.method === 'managed_integration' && dm.preferred)
         ),
-    [selectedServiceIds]
+    [selectedServiceIds, servicesMap]
   );
 
   const handleDeploy = useCallback(

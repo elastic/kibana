@@ -8,7 +8,6 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   euiCanAnimate,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -655,20 +655,17 @@ export function ChatBody({
         responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
             })}
-            iconType="warning"
-          >
-            {i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
+            text={i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
               defaultMessage:
                 'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
               values: { conversationId: initialConversationId },
             })}
-          </EuiCallOut>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -686,20 +683,17 @@ export function ChatBody({
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
       >
         {conversation.error ? (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
             })}
-            iconType="warning"
-          >
-            {i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
+            text={i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
               defaultMessage:
                 'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
               values: { conversationId: initialConversationId },
             })}
-          </EuiCallOut>
+          />
         ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false} className={headerContainerClassName}>
