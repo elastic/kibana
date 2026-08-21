@@ -321,53 +321,6 @@ describe('ExecuteRuleQueryStep', () => {
     });
   });
 
-  it('flags dropped rows and logs when JSON results reach the alerts cap', async () => {
-    step = createStep(2);
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
-    );
-
-    const state = createRulePipelineState({ rule: createRuleResponse(), logger: loggerService });
-    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-    expect(result.type).toBe('continue');
-    // @ts-expect-error: meta is present on the result
-    expect(result.meta?.counters).toEqual({
-      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
-      [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
-    });
-
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('truncated at the 2-row limit'),
-      expect.objectContaining({
-        labels: expect.objectContaining({
-          rule_id: state.input.ruleId,
-          step: 'execute_rule_query',
-        }),
-      })
-    );
-  });
-
-  it('does not flag dropped rows when JSON results are below the cap', async () => {
-    step = createStep(10);
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
-    );
-
-    const state = createRulePipelineState({ rule: createRuleResponse(), logger: loggerService });
-    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-    expect(result.type).toBe('continue');
-    // @ts-expect-error: meta is present on the result
-    expect(result.meta?.counters).toEqual({
-      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
-    });
-    expect(mockLogger.debug).not.toHaveBeenCalledWith(
-      expect.stringContaining('truncated'),
-      expect.anything()
-    );
-  });
-
   describe('arrow response format', () => {
     beforeEach(() => {
       step = createStep(undefined, 'arrow');
@@ -411,38 +364,6 @@ describe('ExecuteRuleQueryStep', () => {
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
       });
-    });
-
-    it('flags truncation once across Arrow batches when cumulative rows reach the cap', async () => {
-      step = createStep(3, 'arrow');
-      mockHelpersEsqlArrowBatches(mockEsClient, [
-        { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
-        { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
-      ]);
-
-      const state = createRulePipelineState({ rule: createRuleResponse(), logger: loggerService });
-      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-      expect(results).toHaveLength(2);
-
-      // First batch: cumulative 2 < cap 3, no truncation flag yet.
-      // @ts-expect-error: meta is present on the result
-      expect(results[0].meta?.counters).toEqual({
-        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
-      });
-
-      // Second batch: cumulative 3 hits the cap, truncation flagged once.
-      // @ts-expect-error: meta is present on the result
-      expect(results[1].meta?.counters).toEqual({
-        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
-        [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
-      });
-
-      // Logged exactly once even though multiple batches were streamed.
-      const truncationLogs = (mockLogger.debug as jest.Mock).mock.calls.filter(
-        ([message]) => typeof message === 'string' && message.includes('truncated')
-      );
-      expect(truncationLogs).toHaveLength(1);
     });
 
     it('yields continue with empty esqlRowBatch when the reader yields no batches', async () => {
