@@ -467,11 +467,6 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 11. **Forecasts require non-population jobs** — `over_field_name` jobs cannot be forecasted; warn before attempting.
 12. **`by_field_name` vs `over_field_name`:** `by` compares entity to its own history; `over` compares to peer group in the same bucket. `partition_field_name` = fully independent sub-model with its own normalization.
 13. **High-cardinality split fields (>10k values) require memory estimate before creating.** Warn the user if cardinality is extreme.
-14. **Link job tables to the Anomaly Explorer.** Whenever you show a table or list of created jobs, include a footer link to the ML Anomaly Explorer, pre-filtered to those jobs and the relevant time range. Use this URL template (rison-encoded):
-    ```
-    app/ml/explorer?_g=(ml:(jobIds:!(<job_id_1>,<job_id_2>)),refreshInterval:(pause:!t,value:0),time:(from:'<from_iso>',to:'<to_iso>'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))
-    ```
-    Example footer: *"Open in [Anomaly Explorer](app/ml/explorer?_g=...&_a=...)"*. For multiple jobs, list all IDs inside `!()` separated by commas. Use the batch analysis window for `from`/`to` (Phase 4), or `now-1h`/`now` for realtime jobs (Phase 5).
 
 ---
 

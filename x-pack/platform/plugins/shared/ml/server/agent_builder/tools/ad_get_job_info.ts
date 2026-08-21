@@ -82,13 +82,6 @@ export const createAdGetJobInfoTool = (
   type: ToolType.builtin,
   description:
     'Read ML job state, config, runtime stats, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty. Use get_job_stats to get processing counts, memory status, and datafeed state needed for scratch-run verdict evaluation.',
-  annotations: {
-    title: 'Get Anomaly Detection Job Info',
-    readOnlyHint: true,
-    destructiveHint: false,
-    idempotentHint: true,
-    openWorldHint: false,
-  },
   experimental: true,
   schema,
   handler: async ({ operation, job_id: jobId }, { esClient, request }) => {

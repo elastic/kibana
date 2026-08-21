@@ -21,13 +21,6 @@ import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 /** Groups that mark a scratch job created by the agent builder. */
 const SCRATCH_GROUP = 'ml-agent-scratch';
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/** Terminal datafeed states: the datafeed has stopped itself. */
-const TERMINAL_DATAFEED_STATES = new Set(['stopped', 'failed']);
-/** Datafeed states where the batch run is still in flight. */
-const ACTIVE_DATAFEED_STATES = new Set(['started', 'starting', 'stopping']);
-
 const schema = z.object({
   operation: z.enum([
     'open_job',
@@ -37,7 +30,6 @@ const schema = z.object({
     'revert_model_snapshot',
     'preview_datafeed',
     'delete_job',
-    'await_batch_completion',
   ]),
   job_id: z.string().describe('The anomaly detection job ID.'),
   snapshot_id: z
@@ -62,24 +54,6 @@ const schema = z.object({
     .boolean()
     .optional()
     .describe('For delete_job: also delete user annotations. Default true.'),
-  max_wait_seconds: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the job has not closed by then. Call again to extend the wait.'
-    ),
-  datafeed_start_ms: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: epoch ms the datafeed was started from — used to compute progress_pct.'
-    ),
-  datafeed_end_ms: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: epoch ms the datafeed was started to — used to compute progress_pct.'
-    ),
 });
 
 export const createAdManageJobStateTool = (
@@ -93,13 +67,6 @@ export const createAdManageJobStateTool = (
   type: ToolType.builtin,
   description:
     'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, preview a datafeed, delete a scratch job, or block until a batch datafeed run completes.',
-  annotations: {
-    title: 'Manage Anomaly Detection Job State',
-    readOnlyHint: false,
-    destructiveHint: true,
-    idempotentHint: false,
-    openWorldHint: false,
-  },
   experimental: true,
   schema,
   handler: async (
@@ -111,9 +78,6 @@ export const createAdManageJobStateTool = (
       end,
       allow_non_scratch: allowNonScratch,
       delete_user_annotations: deleteUserAnnotations = true,
-      max_wait_seconds: maxWaitSeconds = 120,
-      datafeed_start_ms: datafeedStartMs,
-      datafeed_end_ms: datafeedEndMs,
     },
     { esClient, savedObjectsClient, request, events }
   ) => {
@@ -204,11 +168,17 @@ export const createAdManageJobStateTool = (
         }
 
         case 'delete_job': {
+          await hasMlCapabilities(['canDeleteJob']);
+
+          // Use mlClient when available so that saved-object lifecycle hooks run,
+          // keeping the ML UI in sync after deletion.
+          const deleteClient = mlClient ?? ml;
+
           // "Scratch" jobs are temporary batch jobs created for the user to initially preview/confirm configurations with historical data
           // before creating a permanent job, real time job
           // So in specific operations, we only want agent to only be able to delete these temporary "scratch" jobs
           if (!allowNonScratch) {
-            const jobInfo = await ml.getJobs({ job_id: jobId });
+            const jobInfo = await deleteClient.getJobs({ job_id: jobId });
             const job = jobInfo.jobs?.[0];
             const groups: string[] = Array.isArray(job?.groups) ? job.groups : [];
             if (!groups.includes(SCRATCH_GROUP)) {
@@ -224,20 +194,22 @@ export const createAdManageJobStateTool = (
 
           // Stop datafeed (ignore 404 — may already be stopped or never created)
           try {
-            await ml.stopDatafeed({ datafeed_id: datafeedId, body: { force: true } as any });
+            await deleteClient.stopDatafeed({
+              datafeed_id: datafeedId,
+              body: { force: true } as any,
+            });
           } catch {
             // datafeed not running or does not exist — proceed
           }
 
           // Delete datafeed (ignore 404)
           try {
-            await ml.deleteDatafeed({ datafeed_id: datafeedId });
+            await deleteClient.deleteDatafeed({ datafeed_id: datafeedId });
           } catch {
             // datafeed does not exist — proceed
           }
 
-          // Delete the job; ES API enforces user permissions
-          const response = await ml.deleteJob({
+          const response = await deleteClient.deleteJob({
             job_id: jobId,
             delete_user_annotations: deleteUserAnnotations,
           });
