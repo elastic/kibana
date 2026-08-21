@@ -74,13 +74,7 @@ jest.mock('./compose_discover_tabs', () => {
 });
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    options,
-  }: {
-    value: string;
-    options?: { theme?: string };
-  }) => (
+  CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
     <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
       {value}
     </pre>
