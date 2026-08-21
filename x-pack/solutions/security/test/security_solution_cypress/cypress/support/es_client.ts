@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import Fs from 'fs';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
-
-const systemIndicesSuperuser = {
-  username: process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser',
-  password: process.env.TEST_ES_PASS || 'changeme',
-};
+import { systemIndicesSuperuser } from '@kbn/test';
+import { createEsClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 
 export const esClient = (
   on: Cypress.PluginEvents,
@@ -32,14 +26,10 @@ export const esClient = (
   */
   const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesSuperuser) : user;
 
-  const esUrl = new URL(config.env.ELASTICSEARCH_URL);
-  esUrl.username = authOverride.username;
-  esUrl.password = authOverride.password;
-  const client = new Client({
-    node: esUrl.href,
-    Connection: HttpConnection,
-    requestTimeout: 30_000,
-    tls: process.env.TEST_CLOUD ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
+  const client = createEsClient({
+    url: config.env.ELASTICSEARCH_URL,
+    username: authOverride?.username,
+    password: authOverride?.password,
   });
 
   on('task', {

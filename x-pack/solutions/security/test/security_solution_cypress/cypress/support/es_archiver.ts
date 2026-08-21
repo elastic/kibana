@@ -6,16 +6,11 @@
  */
 
 import Fs from 'fs';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
+import * as Url from 'url';
 import { EsArchiver } from '@kbn/es-archiver';
-import { KbnClient } from '@kbn/kbn-client';
+import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-
-const systemIndicesSuperuser = {
-  username: process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser',
-  password: process.env.TEST_ES_PASS || 'changeme',
-};
 
 interface ClientOptions {
   url: string;
@@ -47,14 +42,10 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
     authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
   }
 
-  const esUrl = new URL(config.env.ELASTICSEARCH_URL);
-  esUrl.username = authOverride.username;
-  esUrl.password = authOverride.password;
-  const client = new Client({
-    node: esUrl.href,
-    Connection: HttpConnection,
-    requestTimeout: 30_000,
-    tls: process.env.TEST_CLOUD ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
+  const client = createEsClientForTesting({
+    esUrl: Url.format(config.env.ELASTICSEARCH_URL),
+    // Use system indices user so tests can write to system indices
+    authOverride,
   });
 
   const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
