@@ -315,11 +315,19 @@ def launch(ip: str, model: str) -> subprocess.Popen:
 
 
 def check_golden(model: str, ip: str) -> dict:
-    """Completeness gate: 252 docs on golden for this model's latest run.
+    """Completeness gate: docs on golden for this model's LATEST execution.
 
     Connector IDs use hyphens for semantic versions while score docs use dots,
     so resolve the stored ID from the VM's clean local score index instead of
-    guessing with string replacement.
+    guessing with string replacement. The count is scoped to the newest
+    `metadata.execution_id` for the model — a model-level count accumulates
+    across executions and false-FAILs any model with recent history.
+
+    Expected size is derived, not hardcoded: 21 examples x evaluator count x
+    EVAL_REPETITIONS, with the evaluator count read from the local index so
+    adding an evaluator (e.g. FinalAnswerPresent) doesn't silently skew the
+    gate. (The local index holds evaluator docs only — task output rides on
+    those docs' `task.output` — so there is no +1 task doc term.)
     """
     resolve_cmd = (
         "curl -sf -u elastic:changeme 'http://localhost:9220/.evaluation-scores/"
@@ -332,22 +340,69 @@ def check_golden(model: str, ip: str) -> dict:
     except Exception as exc:
         return {"count": -1, "error": f"cannot resolve stored model id: {exc}"}
 
-    q = json.dumps({"query": {"bool": {"must": [
-        {"term": {"task.model.id": stored_id}},
-        {"term": {"example.dataset.id": "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"}},
-        {"range": {"@timestamp": {"gte": "now-2d"}}},
-    ]}}})
+    eval_count_cmd = (
+        "curl -sf -u elastic:changeme 'http://localhost:9220/.evaluation-scores/"
+        "_search?size=0' -H 'Content-Type: application/json' --data "
+        "'{\"aggs\":{\"n\":{\"cardinality\":{\"field\":\"evaluator.name\"}}}}'"
+    )
+    try:
+        local2 = json.loads(ssh(ip, eval_count_cmd).splitlines()[-1])
+        n_evaluators = int(local2["aggregations"]["n"]["value"])
+    except Exception as exc:
+        return {"count": -1, "error": f"cannot count local evaluators: {exc}"}
+
+    latest_cmd_q = json.dumps({
+        "size": 1,
+        "_source": ["metadata.execution_id"],
+        "sort": [{"@timestamp": {"order": "desc"}}],
+        "query": {"bool": {"must": [
+            {"term": {"task.model.id": stored_id}},
+            {"term": {"example.dataset.id": "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"}},
+        ]}},
+    })
+    out = ssh(
+        ip,
+        f"source /tmp/golden-cluster-env.sh; printf '%s' '{latest_cmd_q}' > /tmp/q_latest.json; "
+        f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\\\" "
+        f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_search\\\" "
+        f"-H 'Content-Type: application/json' --data @/tmp/q_latest.json",
+    )
+    try:
+        hits = json.loads(out.splitlines()[-1])["hits"]["hits"]
+        exec_id = hits[0]["_source"]["metadata"]["execution_id"]
+    except Exception:
+        return {"count": -1, "error": f"cannot resolve latest execution id: {out[:200]}"}
+
+    q = json.dumps({"query": {"term": {"metadata.execution_id.keyword": exec_id}}})
     out = ssh(
         ip,
         f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
-        f"curl -sS -H \"Authorization: ApiKey $GOLDEN_ES_API_KEY\" "
-        f"\"$GOLDEN_ES_URL/.evaluation-scores/_count\" "
+        f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\" "
+        f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_count\\\" "
         f"-H 'Content-Type: application/json' --data @/tmp/q.json",
     )
     try:
-        return json.loads(out.splitlines()[-1])
+        result = json.loads(out.splitlines()[-1])
     except Exception:
         return {"count": -1, "error": out[:200]}
+    if result.get("count", 0) == 0:
+        # mapping without a .keyword subfield — match_phrase works on text
+        q = json.dumps({"query": {"match_phrase": {"metadata.execution_id": exec_id}}})
+        out = ssh(
+            ip,
+            f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
+            f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\" "
+            f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_count\\\" "
+            f"-H 'Content-Type: application/json' --data @/tmp/q.json",
+        )
+        try:
+            result = json.loads(out.splitlines()[-1])
+        except Exception:
+            return {"count": -1, "error": out[:200]}
+    reps = int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
+    result["expected"] = 21 * n_evaluators * reps
+    result["execution_id"] = exec_id
+    return result
 
 
 def status() -> None:
@@ -417,15 +472,17 @@ def main() -> None:
     for model, ip, p in procs:
         rc = p.wait()
         result = check_golden(model, ip)
-        # 21 examples × 12 evaluator docs × EVAL_REPETITIONS. Single-pass runs
-        # expect 252; determinism runs (EVAL_REPETITIONS=3) expect 756. Read
-        # the live value so the gate stays correct for both.
-        expected_docs = 252 * int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
+        # Expected size is derived inside check_golden from the live evaluator
+        # count on the VM (21 examples x (evaluators + 1 task doc) x reps).
+        expected_docs = result.get("expected", -1)
         state = "PASS" if result.get("count") == expected_docs else "FAIL"
         json.dump({"ip": ip, "model": model, "state": state,
-                   "docs": result.get("count", -1), "rc": rc},
+                   "docs": result.get("count", -1), "rc": rc,
+                   "execution_id": result.get("execution_id"),
+                   "error": result.get("error")},
                   open(SWEEP_DIR / model / "status.json", "w"), indent=2)
-        print(f"[done] {model}: {state} docs={result.get('count', -1)}", flush=True)
+        print(f"[done] {model}: {state} docs={result.get('count', -1)}/{expected_docs}"
+              + (f" ({result['error']})" if result.get("error") else ""), flush=True)
 
 
 if __name__ == "__main__":
