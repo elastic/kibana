@@ -69,7 +69,8 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
 
 export type KibanaHandler<T, A extends unknown[] = []> = (
   context: KibanaResolutionContext,
-  ...args: [...services: A, injectable: T]
+  injectable: T,
+  ...services: A
 ) => void;
 
 export interface KibanaResolutionContext extends ResolutionContext {
@@ -188,8 +189,8 @@ function toKibanaContainerModuleLoadOptions(
       handler(
         ...([
           toKibanaResolutionContext(context),
-          ...resolveSync(context, dependencies),
           injectable,
+          ...resolveSync(context, dependencies),
         ] as const)
       );
 

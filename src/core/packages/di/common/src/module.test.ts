@@ -111,8 +111,8 @@ describe('KibanaContainerModule', () => {
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
-          'overridden',
-          'value2'
+          'value2',
+          'overridden'
         );
       });
 
@@ -157,8 +157,8 @@ describe('KibanaContainerModule', () => {
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
-          expected,
-          'value'
+          'value',
+          expected
         );
       });
     });
