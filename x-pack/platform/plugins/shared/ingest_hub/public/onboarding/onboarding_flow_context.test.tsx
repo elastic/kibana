@@ -156,5 +156,4 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.getLatestFailedInstances()).toEqual(['inst_x']);
     });
   });
-
 });
