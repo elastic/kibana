@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CompactApiKeys } from './compact_api_keys';
 import { OnboardingApiKeys } from './onboarding_api_keys';
 import { EndpointUrl } from './endpoint_url';
+import { ConnectionTypePopover, type ConnectionType } from './connection_type_popover';
+import { useMcpServerUrl } from '../hooks/use_mcp_server_url';
 
 interface ConnectToProjectProps {
   elasticsearchUrl: string | null;
@@ -19,6 +21,7 @@ interface ConnectToProjectProps {
   showLabel?: boolean;
   isCompact?: boolean;
   apiKeyButtonFill?: boolean;
+  showConnectionTypeSelector?: boolean;
   /** Identifies the page the button was clicked on, used in `data-telemetry-id`. */
   telemetryPage: string;
 }
@@ -30,8 +33,13 @@ export const ConnectToProject = ({
   showLabel = true,
   isCompact = false,
   apiKeyButtonFill = true,
+  showConnectionTypeSelector = false,
   telemetryPage,
 }: ConnectToProjectProps) => {
+  const [connectionType, setConnectionType] = useState<ConnectionType>('elasticsearch');
+  const mcpServerUrl = useMcpServerUrl();
+  const isMcpServer = showConnectionTypeSelector && connectionType === 'mcpServer';
+
   return (
     <>
       {showLabel && (
@@ -39,7 +47,7 @@ export const ConnectToProject = ({
           <EuiText size="s">
             <strong>
               {i18n.translate('vectordbOnboarding.pathSelection.connectLabel', {
-                defaultMessage: 'Project endpoint:',
+                defaultMessage: 'Connect to your project:',
               })}
             </strong>
           </EuiText>
@@ -49,10 +57,27 @@ export const ConnectToProject = ({
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EndpointUrl
-            elasticsearchUrl={elasticsearchUrl}
+            url={isMcpServer ? mcpServerUrl : elasticsearchUrl}
+            copyAriaLabel={
+              isMcpServer
+                ? i18n.translate('vectordbOnboarding.pathSelection.copyMcpUrlAriaLabel', {
+                    defaultMessage: 'Copy MCP server URL',
+                  })
+                : i18n.translate('vectordbOnboarding.pathSelection.copyUrlAriaLabel', {
+                    defaultMessage: 'Copy Elasticsearch URL',
+                  })
+            }
             isLoading={isLoading}
-            isCompact={isCompact}
             telemetryPage={telemetryPage}
+            typeSelector={
+              showConnectionTypeSelector ? (
+                <ConnectionTypePopover
+                  connectionType={connectionType}
+                  onConnectionTypeChange={setConnectionType}
+                  telemetryPage={telemetryPage}
+                />
+              ) : undefined
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -15,51 +15,44 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiToolTip,
-  type UseEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { copyButtonStyle, flexItemStyle, typeSelectorStyle, urlStyle } from './endpoint_url.styles';
 
 interface EndpointUrlProps {
-  elasticsearchUrl: string | null;
+  url: string | null;
+  copyAriaLabel: string;
   isLoading: boolean;
-  isCompact?: boolean;
   telemetryPage: string;
+  typeSelector?: React.ReactNode;
 }
 
-const urlStyle = ({ euiTheme }: UseEuiTheme) => css`
-  color: ${euiTheme.colors.textParagraph};
-  font-weight: ${euiTheme.font.weight.regular};
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const flexItemStyle = css`
-  min-width: 0;
-`;
-
 export const EndpointUrl = ({
-  elasticsearchUrl,
+  url,
+  copyAriaLabel,
   isLoading,
-  isCompact = false,
   telemetryPage,
+  typeSelector,
 }: EndpointUrlProps) => {
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
 
   return (
-    <EuiPanel paddingSize={isCompact ? 'xs' : 's'} hasBorder>
+    <EuiPanel paddingSize="xs" hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {typeSelector && (
+          <EuiFlexItem grow={false} css={typeSelectorStyle}>
+            {typeSelector}
+          </EuiFlexItem>
+        )}
         <EuiFlexItem css={flexItemStyle}>
           <EuiCode transparentBackground css={urlStyle}>
-            {elasticsearchUrl}
+            {url}
           </EuiCode>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCopy textToCopy={elasticsearchUrl || ''}>
+        <EuiFlexItem grow={false} css={copyButtonStyle}>
+          <EuiCopy textToCopy={url || ''}>
             {(copy) => (
               <EuiToolTip
                 content={i18n.translate('vectordbOnboarding.pathSelection.copyUrl', {
@@ -70,9 +63,7 @@ export const EndpointUrl = ({
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={copy}
-                  aria-label={i18n.translate('vectordbOnboarding.pathSelection.copyUrlAriaLabel', {
-                    defaultMessage: 'Copy Elasticsearch URL',
-                  })}
+                  aria-label={copyAriaLabel}
                   data-test-subj="vectordbConnectToProjectCopyUrl"
                   data-telemetry-id={`vectordbOnboarding-${telemetryPage}-copyEndpointUrl`}
                 />
