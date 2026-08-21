@@ -1064,7 +1064,7 @@ x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-signals-traces-team
-x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-engineering
+x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
