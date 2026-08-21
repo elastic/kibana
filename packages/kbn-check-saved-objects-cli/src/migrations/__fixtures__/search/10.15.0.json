@@ -1,20 +1,130 @@
 {
   "10.14.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.14.0 and 10.15.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "title": "Saved search (KQL)",
+      "description": "Fixture saved search used for modelVersion migration checks",
+      "tabs": [
+        {
+          "id": { "$match": "uuid" },
+          "label": "Untitled",
+          "attributes": {
+            "columns": ["@timestamp", "message"],
+            "sort": [["@timestamp", "desc"]],
+            "grid": {
+              "columns": {
+                "@timestamp": {
+                  "width": 190
+                },
+                "message": {
+                  "width": 420
+                }
+              }
+            },
+            "hideChart": false,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"host.name : *\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": false,
+            "usesAdHocDataView": false,
+            "timeRestore": true,
+            "timeRange": {
+              "from": "now-15m",
+              "to": "now"
+            },
+            "refreshInterval": {
+              "pause": true,
+              "value": 0
+            },
+            "viewMode": "documents",
+            "hideAggregatedPreview": false
+          }
+        }
+      ]
+    },
+    {
+      "title": "Saved search (ES|QL text-based)",
+      "description": "",
+      "tabs": [
+        {
+          "id": { "$match": "uuid" },
+          "label": "Untitled",
+          "attributes": {
+            "columns": [],
+            "sort": [],
+            "grid": {},
+            "hideChart": true,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": true,
+            "timeRestore": false
+          }
+        }
+      ]
     }
   ],
   "10.15.0": [
     {
-      "title": "string",
-      "description": "string?",
-      "tabs": "array"
+      "title": "Saved search (KQL)",
+      "description": "Fixture saved search used for modelVersion migration checks",
+      "tabs": [
+        {
+          "id": { "$match": "uuid" },
+          "label": "Untitled",
+          "attributes": {
+            "columns": ["@timestamp", "message"],
+            "sort": [["@timestamp", "desc"]],
+            "grid": {
+              "columns": {
+                "@timestamp": {
+                  "width": 190
+                },
+                "message": {
+                  "width": 420
+                }
+              }
+            },
+            "hideChart": false,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"host.name : *\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": false,
+            "usesAdHocDataView": false,
+            "timeRestore": true,
+            "timeRange": {
+              "from": "now-15m",
+              "to": "now"
+            },
+            "refreshInterval": {
+              "pause": true,
+              "value": 0
+            },
+            "viewMode": "documents",
+            "hideAggregatedPreview": false
+          }
+        }
+      ]
+    },
+    {
+      "title": "Saved search (ES|QL text-based)",
+      "description": "",
+      "tabs": [
+        {
+          "id": { "$match": "uuid" },
+          "label": "Untitled",
+          "attributes": {
+            "columns": [],
+            "sort": [],
+            "grid": {},
+            "hideChart": true,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": true,
+            "timeRestore": false
+          }
+        }
+      ]
     }
   ]
 }
