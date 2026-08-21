@@ -9,7 +9,7 @@
 import { dirname, resolve } from 'path';
 import { createRequire } from 'node:module';
 import { globbySync } from 'globby';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
 /**

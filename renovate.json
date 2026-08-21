@@ -5,7 +5,11 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
-  "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
+  "ignorePaths": [
+    "**/__fixtures__/**",
+    "**/fixtures/**",
+    ".github/workflows/*.lock.yml"
+  ],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
@@ -68,6 +72,7 @@
         "@rsdoctor/rspack-plugin",
         "@swc/plugin-emotion"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -165,10 +170,7 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "babel-plugin-istanbul",
         "lighthouse",
-        "nyc",
-        "oboe",
         "pixelmatch",
         "@playwright/test",
         "playwright",
@@ -866,6 +868,7 @@
       "groupName": "babel",
       "matchDepNames": ["@emotion/babel-preset-css-prop", "babel-loader"],
       "matchDepPatterns": ["^@babel", "^babel-plugin"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
@@ -1983,6 +1986,7 @@
         "jest-snapshot",
         "jest-styled-components"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
@@ -2467,6 +2471,7 @@
     {
       "groupName": "moonrepo",
       "matchDepNames": ["@moonrepo/cli"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^[9].*/", "8.19"],
       "labels": ["Team:Operations", "release_note:skip", "backport:skip"],
@@ -2502,6 +2507,7 @@
     {
       "groupName": "@swc",
       "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

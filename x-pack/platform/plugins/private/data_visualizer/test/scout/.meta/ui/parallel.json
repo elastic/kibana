@@ -1,5 +1,9 @@
 {
-  "sha1": "",
+  "sha1": "a59d25d0a175549454aee50cf1d4afd3f296bc9d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "9e156c7c212e11b-f2cd2d3cdc77643",
@@ -8,78 +12,78 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
       "id": "60d8218dafa8e69-b0d8d76ebf5387c",
-      "title": "data drift data view flows from data view creation mode allows analyzing data drift without saving (deferred until Scout elastic-charts click helper is available)",
-      "expectedStatus": "skipped",
+      "title": "data drift data view flows from data view creation mode allows analyzing data drift without saving",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 23,
+        "column": 13
       }
     },
     {
       "id": "60d8218dafa8e69-f2d55cce9d8b89e",
-      "title": "data drift data view flows from data view creation mode hides analyze data drift without saving option if patterns are same (deferred until Scout elastic-charts click helper is available)",
-      "expectedStatus": "skipped",
+      "title": "data drift data view flows from data view creation mode hides analyze data drift without saving option if patterns are same",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 40,
+        "column": 23
       }
     },
     {
       "id": "60d8218dafa8e69-adfe07a24e56afd",
-      "title": "data drift data view flows from data view creation mode loads non-time series data (deferred until Scout elastic-charts click helper is available)",
-      "expectedStatus": "skipped",
+      "title": "data drift data view flows from data view creation mode loads non-time series data",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 68,
+        "column": 14
       }
     },
     {
       "id": "60d8218dafa8e69-87479a94df5ecb6",
-      "title": "data drift data view flows opens the data view editor from picker and loads drift after creation (deferred until Scout elastic-charts click helper is available)",
-      "expectedStatus": "skipped",
+      "title": "data drift data view flows opens the data view editor from picker and loads drift after creation",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 71,
+        "column": 26
       }
     },
     {
       "id": "c955b89422536e7-a476ca8e0991b30",
-      "title": "data drift with ft_farequote_filter_and_kuery saved search loads the source data in data drift (deferred until Scout elastic-charts click helper is available)",
-      "expectedStatus": "skipped",
+      "title": "data drift with ft_farequote_filter_and_kuery saved search loads the source data in data drift",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_saved_search.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 27,
+        "column": 35
       }
     },
     {
@@ -92,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/esql_data_visualizer.spec.ts",
-        "line": 301,
-        "column": 12
+        "line": 296,
+        "column": 40
       }
     },
     {
@@ -106,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/esql_data_visualizer.spec.ts",
-        "line": 305,
-        "column": 12
+        "line": 298,
+        "column": 5
       }
     },
     {
@@ -120,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_dashboard.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 189,
+        "column": 14
       }
     },
     {
@@ -134,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover_license.spec.ts",
-        "line": 80,
-        "column": 14
+        "line": 52,
+        "column": 29
       }
     },
     {
@@ -148,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
-        "line": 113,
-        "column": 13
+        "line": 95,
+        "column": 11
       }
     },
     {
@@ -162,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
-        "line": 122,
-        "column": 13
+        "line": 106,
+        "column": 5
       }
     },
     {
@@ -176,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
-        "line": 131,
-        "column": 13
+        "line": 115,
+        "column": 18
       }
     },
     {
@@ -190,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
-        "line": 144,
-        "column": 13
+        "line": 118,
+        "column": 9
       }
     },
     {
@@ -204,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 39,
+        "column": 54
       }
     },
     {
@@ -218,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 39,
+        "column": 54
       }
     },
     {
@@ -232,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 39,
+        "column": 54
       }
     },
     {
@@ -246,8 +250,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 39,
+        "column": 54
       }
     },
     {
@@ -260,13 +264,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
-        "line": 142,
-        "column": 14
+        "line": 137,
+        "column": 84
       }
     },
     {
-      "id": "e66fb412c0b109c-c0fdda57757b075",
-      "title": "data view management manages runtime fields and custom labels",
+      "id": "e66fb412c0b109c-f020e8bf4268fdf",
+      "title": "data view management adds new field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -274,8 +278,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
-        "line": 181,
-        "column": 12
+        "line": 178,
+        "column": 13
+      }
+    },
+    {
+      "id": "e66fb412c0b109c-c6fa264f5d4ad28",
+      "title": "data view management sets custom label for existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
+        "line": 186,
+        "column": 26
+      }
+    },
+    {
+      "id": "e66fb412c0b109c-ac1e60a0c3cc320",
+      "title": "data view management deletes existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
+        "line": 207,
+        "column": 5
       }
     },
     {
@@ -288,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_data_view.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 22,
+        "column": 7
       }
     },
     {
@@ -302,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_filtered_saved_search.spec.ts",
-        "line": 38,
-        "column": 14
+        "line": 28,
+        "column": 15
       }
     },
     {
@@ -316,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_kql_saved_search.spec.ts",
-        "line": 35,
-        "column": 14
+        "line": 25,
+        "column": 15
       }
     },
     {
@@ -330,13 +362,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_lucene_saved_search.spec.ts",
-        "line": 35,
-        "column": 14
+        "line": 25,
+        "column": 15
       }
     },
     {
-      "id": "3a365604f6ecde5-c4e2974ca3d764e",
-      "title": "data visualizer with pinned global filters with lucene saved search and filter",
+      "id": "3a365604f6ecde5-c20d79c51b19716",
+      "title": "data visualizer with pinned global filters retains pinned filters from discover with lucene saved search and filter",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -344,13 +376,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
-        "line": 151,
-        "column": 14
+        "line": 208,
+        "column": 29
       }
     },
     {
-      "id": "3a365604f6ecde5-3bbdac083a3dd79",
-      "title": "data visualizer with pinned global filters with KQL saved search and filters",
+      "id": "3a365604f6ecde5-9d56a21515974f6",
+      "title": "data visualizer with pinned global filters retains pinned filters to discover with lucene saved search and filter",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -358,8 +390,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
-        "line": 155,
-        "column": 14
+        "line": 219,
+        "column": 15
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-ff7285bfd69927e",
+      "title": "data visualizer with pinned global filters retains pinned filters from discover with KQL saved search and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 224,
+        "column": 29
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-b9a3c04d6089f55",
+      "title": "data visualizer with pinned global filters retains pinned filters to discover with KQL saved search and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 233,
+        "column": 24
       }
     },
     {
@@ -372,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_random_sampler.spec.ts",
-        "line": 102,
-        "column": 14
+        "line": 82,
+        "column": 32
       }
     },
     {
@@ -386,8 +446,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_sample_logs.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 23,
+        "column": 5
+      }
+    },
+    {
+      "id": "c50dbbf8476e1e6-76791fb8649a847",
+      "title": "Reset data visualizer Scout test settings",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

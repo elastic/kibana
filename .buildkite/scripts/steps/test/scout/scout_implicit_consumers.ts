@@ -21,7 +21,7 @@
  * files change.
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { ScoutLog } from './scout_log.ts';
 
 interface ImplicitConsumerRule {

@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import minimatch from 'minimatch';
-
-const { Minimatch } = minimatch;
-
-// Inference + `ReturnType` avoids depending on the legacy @types/minimatch
-// value/type export shape.
+import { Minimatch } from 'minimatch';
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 

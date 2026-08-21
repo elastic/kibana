@@ -97568,12 +97568,13 @@ components:
           description: The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.anomaly"`.
           properties:
             anomalyDetectorTypes:
-              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.
+              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.
               items:
                 enum:
                   - txLatency
                   - txThroughput
                   - txFailureRate
+                  - txLowCount
                 type: string
               minItems: 1
               type: array
