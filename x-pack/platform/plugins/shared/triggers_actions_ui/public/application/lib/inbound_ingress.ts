@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import type { ActionConnector } from '../../types';
+
+export const getInboundIngestToken = (connector: ActionConnector): string | undefined => {
+  if (!('secrets' in connector) || connector.secrets == null) {
+    return undefined;
+  }
+  const secrets = connector.secrets as Record<string, unknown>;
+  const token = secrets.ingestToken ?? secrets.ingest_token;
+  return typeof token === 'string' && token.length > 0 ? token : undefined;
+};
+
+export const isInboundIngressConnector = (connector: ActionConnector): boolean => {
+  if (connectorTypeHasInboundEvents(connector.actionTypeId)) {
+    return true;
+  }
+  if ('config' in connector) {
+    const hash = connector.config?.ingestTokenHash;
+    if (typeof hash === 'string' && hash.length > 0) {
+      return true;
+    }
+  }
+  return getInboundIngestToken(connector) !== undefined;
+};

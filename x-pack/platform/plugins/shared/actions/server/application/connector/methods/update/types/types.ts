@@ -18,4 +18,6 @@ export interface ConnectorUpdateParams {
   context: ActionsClientContext;
   id: string;
   action: ConnectorUpdate;
+  /** When true, remint inbound ingest credentials even if a hash is already stored. */
+  rotateIngress?: boolean;
 }

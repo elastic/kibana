@@ -19,12 +19,14 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AgentBuilderConnectorFeatureId,
   getConnectorCompatibility,
   getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
@@ -48,6 +50,8 @@ import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
+import { InboundIngressCredentials } from '../inbound_ingress_credentials';
+import { getInboundIngestToken } from '../../../lib/inbound_ingress';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -168,6 +172,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const resetActionType = useCallback(() => setActionType(null), []);
 
   const [connectorToTest, setConnectorToTest] = useState<ActionConnector | null>(null);
+  const [createdInboundConnector, setCreatedInboundConnector] = useState<ActionConnector | null>(
+    null
+  );
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -192,6 +199,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (createdConnector) {
       if (onConnectorCreated) {
         onConnectorCreated(createdConnector);
+      }
+
+      if (getInboundIngestToken(createdConnector)) {
+        setCreatedInboundConnector(createdConnector);
+        return;
       }
 
       onClose();
@@ -235,6 +247,35 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const handleErrorFocus = useCallback((node: HTMLDivElement) => {
     node?.focus();
   }, []);
+
+  const inboundSettingsContent = useMemo(() => {
+    if (createdInboundConnector) {
+      return <InboundIngressCredentials connector={createdInboundConnector} />;
+    }
+    if (actionType == null || !connectorTypeHasInboundEvents(actionType.id)) {
+      return undefined;
+    }
+    return (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="primary"
+        iconType="info"
+        data-test-subj="inbound-ingress-save-to-view-credentials"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewTitle',
+          {
+            defaultMessage: 'Webhook URL and ingest token',
+          }
+        )}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewDescription"
+          defaultMessage="Save this connector to generate the webhook URL and ingest token. The token is shown only once."
+        />
+      </EuiCallOut>
+    );
+  }, [actionType, createdInboundConnector]);
 
   const onFlyoutClose = useCallback(() => {
     if (connectorToTest && isFormModified) {
@@ -461,6 +502,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                     isEdit={false}
                     onChange={setFormState}
                     setResetForm={setResetForm}
+                    settingsContent={inboundSettingsContent}
                   />
                   {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
                 </>
@@ -489,6 +531,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onSubmit={onSubmit}
         testConnector={testConnector}
         isTestable={isTestable}
+        isCreated={createdInboundConnector != null}
       />
     </EuiFlyout>
   );

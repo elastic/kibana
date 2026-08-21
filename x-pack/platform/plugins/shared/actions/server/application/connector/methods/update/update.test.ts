@@ -904,7 +904,7 @@ describe('update()', () => {
       }));
     });
 
-    test('keeps the stored hash and URL and does not return a new token', async () => {
+    test('keeps the stored hash and does not return a new token', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...existingRawAction,
         attributes: {
@@ -947,6 +947,37 @@ describe('update()', () => {
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
         config: { ingestTokenHash: string };
       };
+      expect(saved.config.ingestTokenHash).toBe(
+        computeIngestTokenHash({
+          connectorId: 'connector-id',
+          spaceId: 'default',
+          token: result.secrets!.ingestToken!,
+        })
+      );
+    });
+
+    test('remints credentials when rotateIngress is true', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: storedHash },
+        },
+      } as never);
+
+      const result = await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+        rotateIngress: true,
+      });
+
+      expect(result.secrets?.ingestToken).toEqual(expect.any(String));
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash: string };
+      };
+      expect(saved.config.ingestTokenHash).not.toBe(storedHash);
       expect(saved.config.ingestTokenHash).toBe(
         computeIngestTokenHash({
           connectorId: 'connector-id',

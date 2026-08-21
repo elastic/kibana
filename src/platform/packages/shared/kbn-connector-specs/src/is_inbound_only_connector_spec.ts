@@ -8,13 +8,10 @@
  */
 
 import type { ConnectorSpec } from './connector_spec';
+import { connectorSpecHasEvents } from './connector_spec_has_events';
 
 /**
- * Inbound-only types have events and no outbound actions. Dual connectors
- * (actions + events) are not inbound-only and stay registered when inbound
- * events are disabled so steps still work.
+ * Inbound-only types have events and no outbound actions.
  */
 export const isInboundOnlyConnectorSpec = (spec: ConnectorSpec): boolean =>
-  spec.events !== undefined &&
-  Object.keys(spec.events.definitions).length > 0 &&
-  Object.keys(spec.actions).length === 0;
+  connectorSpecHasEvents(spec) && Object.keys(spec.actions).length === 0;

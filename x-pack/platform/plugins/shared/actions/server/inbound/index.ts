@@ -10,7 +10,6 @@ export { computeIngestTokenHash } from './compute_ingest_token_hash';
 export {
   applyInboundIngressCredentialsIfNeeded,
   ensureConnectorIngressCredentials,
-  isInboundIngressConnectorType,
   resolveInboundEventsSpaceId,
 } from './ensure_connector_ingress_credentials';
 export type { InboundEventsClient, InboundEventsClientArgs } from './factory';

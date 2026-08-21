@@ -695,6 +695,49 @@ describe('CreateConnectorFlyout', () => {
         expect(screen.getByText('Error on pre submit validator')).toBeInTheDocument();
       });
     });
+
+    it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
+      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+        ...createConnectorResponse,
+        connector_type_id: actionTypeModel.id,
+        secrets: { ingest_token: 'once-token' },
+        config: { ingestTokenHash: 'a'.repeat(64) },
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      await userEvent.click(await screen.findByTestId('nameInput'));
+      await userEvent.paste('My test');
+
+      await userEvent.click(screen.getByTestId('test-connector-text-field'));
+      await userEvent.paste('My text field');
+
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(screen.getByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
+      expect(screen.getByTestId('connector-settings-label')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-close-btn')).toBeInTheDocument();
+    });
   });
 
   describe('Save & Test transition', () => {

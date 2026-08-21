@@ -10,22 +10,10 @@ import {
   applyInboundIngressCredentialsIfNeeded,
   ensureConnectorIngressCredentials,
   generateIngestToken,
-  isInboundIngressConnectorType,
 } from './ensure_connector_ingress_credentials';
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 
 const INBOUND_WEBHOOK_CONNECTOR_TYPE_ID = '.inboundWebhook';
-
-describe('isInboundIngressConnectorType', () => {
-  it('is true for .inboundWebhook', () => {
-    expect(isInboundIngressConnectorType(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID)).toBe(true);
-  });
-
-  it('is false for outbound specs and unknown types', () => {
-    expect(isInboundIngressConnectorType('.http')).toBe(false);
-    expect(isInboundIngressConnectorType('my-connector-type')).toBe(false);
-  });
-});
 
 describe('generateIngestToken', () => {
   it('returns a high-entropy token within the hub max length', () => {

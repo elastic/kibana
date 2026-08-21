@@ -38,11 +38,12 @@ export const ObjectWidget: React.FC<ObjectWidgetProps> = ({
   });
 
   return fields.map((field) => {
+    const isHidden = Boolean(meta.getMeta(field.schema).hidden);
     return (
-      <>
+      <React.Fragment key={field.path}>
         {renderField({ field, meta })}
-        <EuiSpacer size="m" />
-      </>
+        {!isHidden && <EuiSpacer size="m" />}
+      </React.Fragment>
     );
   });
 };

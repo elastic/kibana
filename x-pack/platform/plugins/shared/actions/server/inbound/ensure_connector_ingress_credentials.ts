@@ -7,16 +7,11 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { ActionsClientContext } from '../actions_client';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
-
-export const isInboundIngressConnectorType = (actionTypeId: string): boolean => {
-  const spec = getConnectorSpec(actionTypeId);
-  return spec !== undefined && isInboundOnlyConnectorSpec(spec);
-};
 
 export const resolveInboundEventsSpaceId = (context: ActionsClientContext): string =>
   context.spaceId ?? context.spaces?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;
@@ -82,7 +77,7 @@ export const applyInboundIngressCredentialsIfNeeded = ({
   storedConfig?: Record<string, unknown>;
   forceMint: boolean;
 }): { config: Record<string, unknown>; ingestToken?: string } => {
-  if (!isInboundIngressConnectorType(actionTypeId)) {
+  if (!connectorTypeHasInboundEvents(actionTypeId)) {
     return { config };
   }
 

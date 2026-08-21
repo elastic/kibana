@@ -23,7 +23,13 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export {
+  connectorSpecHasEvents,
+  connectorTypeHasInboundEvents,
+} from './src/connector_spec_has_events';
 export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
+export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
+export { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from './src/specs/inbound_webhook/constants';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export type {
   ConnectorIngressContext,

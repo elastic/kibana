@@ -629,5 +629,32 @@ describe('createConnectorTypeFromSpec', () => {
         configWithAuthType
       );
     });
+
+    it('accepts ingestTokenHash on dual specs that declare events', () => {
+      const spec = createMockSpec({
+        schema: z4.object({ url: z4.string() }),
+        events: {
+          definitions: {
+            received: {
+              eventId: 'test.received',
+              title: 'Received',
+              description: 'Inbound event',
+              eventSchema: z4.object({ body: z4.unknown() }),
+            },
+          },
+          handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+        },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const hash = 'a'.repeat(64);
+
+      expect(() =>
+        connectorType.validate.config.schema.parse({
+          url: 'https://example.com',
+          ingestTokenHash: hash,
+        })
+      ).not.toThrow();
+    });
   });
 });

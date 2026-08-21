@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
+import { ingestTokenHashSchema } from '../../ingest_token_hash_schema';
 import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
@@ -57,12 +58,7 @@ export const InboundWebhook: ConnectorSpec = {
   },
 
   schema: z.object({
-    ingestTokenHash: z
-      .string()
-      .regex(/^[a-f0-9]{64}$/)
-      .optional()
-      .describe('HMAC-SHA256 hex digest of the ingest token. Set on create; never the raw token.')
-      .meta({ hidden: true }),
+    ingestTokenHash: ingestTokenHashSchema,
   }),
 
   actions: {},

@@ -30,7 +30,12 @@ const getAuthTypeId = (
 ): string | undefined =>
   (secrets as { authType?: string })?.authType ?? (config as { authType?: string })?.authType;
 
-export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {
+export async function update({
+  context,
+  id,
+  action,
+  rotateIngress = false,
+}: ConnectorUpdateParams): Promise<Connector> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'update' });
 
@@ -169,7 +174,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     spaceId: resolveInboundEventsSpaceId(context),
     config: configForSave as Record<string, unknown>,
     storedConfig,
-    forceMint: false,
+    forceMint: rotateIngress,
   });
 
   const result = await tryCatch(

@@ -108,4 +108,33 @@ describe('createActionConnector', () => {
     const result = await createActionConnector({ http, connector });
     expect(result).toMatchObject({ authMode: 'shared' });
   });
+
+  test('should map secrets.ingest_token from the API response to ingestToken', async () => {
+    const apiResponse = {
+      connector_type_id: '.inboundWebhook',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'sales-ingress',
+      config: { ingestTokenHash: 'a'.repeat(64) },
+      secrets: { ingest_token: 'once-token' },
+      id: '123',
+    };
+    http.post.mockResolvedValueOnce(apiResponse);
+
+    const connector: Pick<
+      ActionConnectorWithoutId,
+      'actionTypeId' | 'name' | 'config' | 'secrets'
+    > = {
+      actionTypeId: '.inboundWebhook',
+      name: 'sales-ingress',
+      config: {},
+      secrets: {},
+    };
+
+    const result = await createActionConnector({ http, connector });
+    if (!('secrets' in result)) {
+      throw new Error('expected user-configured connector secrets');
+    }
+    expect(result.secrets).toEqual({ ingestToken: 'once-token' });
+  });
 });
