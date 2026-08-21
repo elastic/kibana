@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { context, INVALID_TRACEID, trace, TraceFlags } from '@opentelemetry/api';
+import { context, INVALID_SPANID, INVALID_TRACEID, trace, TraceFlags } from '@opentelemetry/api';
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type agent from 'elastic-apm-node';
@@ -111,6 +111,19 @@ describe('getTraceId', () => {
 
     it('returns undefined when no span is active', () => {
       expect(getActiveOtelSpanId()).toBeUndefined();
+    });
+
+    it('rejects the all-zero INVALID_SPANID rather than persisting it', async () => {
+      const spanContext: SpanContext = {
+        traceId: OTEL_TRACE_ID,
+        spanId: INVALID_SPANID,
+        traceFlags: TraceFlags.SAMPLED,
+      };
+      const span = trace.wrapSpanContext(spanContext);
+
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        expect(getActiveOtelSpanId()).toBeUndefined();
+      });
     });
   });
 });

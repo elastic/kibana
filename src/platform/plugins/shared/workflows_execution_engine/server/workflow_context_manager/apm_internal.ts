@@ -12,7 +12,7 @@
 // rest of the workflow engine is `any`-free; this module is the chokepoint
 // where the upstream typing gaps are absorbed so they don't bleed elsewhere.
 
-import { INVALID_TRACEID, trace } from '@opentelemetry/api';
+import { INVALID_SPANID, INVALID_TRACEID, trace } from '@opentelemetry/api';
 import type agent from 'elastic-apm-node';
 
 type ApmAgentInternals = typeof agent & {
@@ -70,12 +70,15 @@ export function getActiveOtelTraceId(): string | undefined {
 
 /**
  * Reads the span ID from the active OTEL span context, or `undefined` when no
- * span is active. Used as the `entryTransactionId` fallback under EDOT-only
- * instrumentation.
+ * span is active (or the context carries the all-zero invalid span id). Used
+ * as the `entryTransactionId` fallback under EDOT-only instrumentation.
  */
 export function getActiveOtelSpanId(): string | undefined {
   const spanContext = trace.getActiveSpan()?.spanContext();
-  return spanContext?.spanId || undefined;
+  if (spanContext?.spanId && spanContext.spanId !== INVALID_SPANID) {
+    return spanContext.spanId;
+  }
+  return undefined;
 }
 
 /**
