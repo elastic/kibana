@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react';
+import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
 import {
   useSourceDisplayMode,
   useJsonModeSettings,
@@ -16,20 +16,12 @@ import {
   getStoredJsonModeSettings,
 } from './use_json_view_settings';
 
-const localStorageMock = {
-  get: jest.fn(),
-  set: jest.fn(),
-};
-const storage = localStorageMock as unknown as Storage;
+const SOURCE_DISPLAY_MODE_KEY = 'discover:sourceDisplayMode';
+const JSON_MODE_SETTINGS_KEY = 'discover:jsonModeSettings';
 
 describe('useSourceDisplayMode', () => {
-  beforeEach(() => {
-    localStorageMock.get.mockReset();
-    localStorageMock.set.mockReset();
-  });
-
   it('defaults to "summary" when neither state nor local storage has a value', () => {
-    localStorageMock.get.mockReturnValue(undefined);
+    const storage = createLocalStorageMock({});
     const { result } = renderHook(() => useSourceDisplayMode({ storage, consumer: 'discover' }));
     expect(result.current.sourceDisplayMode).toBe('summary');
   });
@@ -37,12 +29,13 @@ describe('useSourceDisplayMode', () => {
   it('defaults to "summary" and ignores local storage when there is no state', () => {
     // Local storage only seeds new authoring contexts, it must not flip an object with no
     // persisted mode to JSON at render time.
-    localStorageMock.get.mockReturnValue('json');
+    const storage = createLocalStorageMock({ [SOURCE_DISPLAY_MODE_KEY]: 'json' });
     const { result } = renderHook(() => useSourceDisplayMode({ storage, consumer: 'discover' }));
     expect(result.current.sourceDisplayMode).toBe('summary');
   });
 
   it('uses the per-context state when provided', () => {
+    const storage = createLocalStorageMock({});
     const { result } = renderHook(() =>
       useSourceDisplayMode({ storage, consumer: 'discover', sourceDisplayModeState: 'json' })
     );
@@ -50,6 +43,7 @@ describe('useSourceDisplayMode', () => {
   });
 
   it('writes to local storage and calls onUpdate when changed', () => {
+    const storage = createLocalStorageMock({});
     const onUpdateSourceDisplayMode = jest.fn();
     const { result } = renderHook(() =>
       useSourceDisplayMode({ storage, consumer: 'discover', onUpdateSourceDisplayMode })
@@ -57,32 +51,29 @@ describe('useSourceDisplayMode', () => {
 
     result.current.onChangeSourceDisplayMode?.('json');
 
-    expect(localStorageMock.set).toHaveBeenCalledWith('discover:sourceDisplayMode', 'json');
+    expect(storage.get(SOURCE_DISPLAY_MODE_KEY)).toBe('json');
     expect(onUpdateSourceDisplayMode).toHaveBeenCalledWith('json');
   });
 });
 
 describe('useJsonModeSettings', () => {
-  beforeEach(() => {
-    localStorageMock.get.mockReset();
-    localStorageMock.set.mockReset();
-  });
-
   it('defaults to an empty object when neither state nor local storage has a value', () => {
-    localStorageMock.get.mockReturnValue(undefined);
+    const storage = createLocalStorageMock({});
     const { result } = renderHook(() => useJsonModeSettings({ storage, consumer: 'discover' }));
     expect(result.current.jsonModeSettings).toEqual({});
   });
 
   it('falls back to the local storage value when there is no state', () => {
     // hideNulls/wrapLines are cosmetic prefs (like density), so they remember the viewer's last choice.
-    localStorageMock.get.mockReturnValue({ hideNulls: true, wrapLines: false });
+    const storage = createLocalStorageMock({
+      [JSON_MODE_SETTINGS_KEY]: { hideNulls: true, wrapLines: false },
+    });
     const { result } = renderHook(() => useJsonModeSettings({ storage, consumer: 'discover' }));
     expect(result.current.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
   });
 
   it('prefers the per-context state over the local storage value', () => {
-    localStorageMock.get.mockReturnValue({ hideNulls: true });
+    const storage = createLocalStorageMock({ [JSON_MODE_SETTINGS_KEY]: { hideNulls: true } });
     const { result } = renderHook(() =>
       useJsonModeSettings({
         storage,
@@ -94,6 +85,7 @@ describe('useJsonModeSettings', () => {
   });
 
   it('writes to local storage and calls onUpdate when changed', () => {
+    const storage = createLocalStorageMock({});
     const onUpdateJsonModeSettings = jest.fn();
     const { result } = renderHook(() =>
       useJsonModeSettings({ storage, consumer: 'discover', onUpdateJsonModeSettings })
@@ -101,48 +93,41 @@ describe('useJsonModeSettings', () => {
 
     result.current.onChangeJsonModeSettings?.({ hideNulls: true, wrapLines: false });
 
-    expect(localStorageMock.set).toHaveBeenCalledWith('discover:jsonModeSettings', {
-      hideNulls: true,
-      wrapLines: false,
-    });
+    expect(storage.get(JSON_MODE_SETTINGS_KEY)).toEqual({ hideNulls: true, wrapLines: false });
     expect(onUpdateJsonModeSettings).toHaveBeenCalledWith({ hideNulls: true, wrapLines: false });
   });
 });
 
 describe('getStoredSourceDisplayMode', () => {
-  beforeEach(() => localStorageMock.get.mockReset());
-
   it('returns the stored mode', () => {
-    localStorageMock.get.mockReturnValue('json');
+    const storage = createLocalStorageMock({ [SOURCE_DISPLAY_MODE_KEY]: 'json' });
     expect(getStoredSourceDisplayMode(storage, 'discover')).toBe('json');
   });
 
   it('returns undefined when nothing is stored', () => {
-    localStorageMock.get.mockReturnValue(undefined);
+    const storage = createLocalStorageMock({});
     expect(getStoredSourceDisplayMode(storage, 'discover')).toBeUndefined();
   });
 
   it('returns undefined for an invalid stored value', () => {
-    localStorageMock.get.mockReturnValue('nonsense');
+    const storage = createLocalStorageMock({ [SOURCE_DISPLAY_MODE_KEY]: 'nonsense' });
     expect(getStoredSourceDisplayMode(storage, 'discover')).toBeUndefined();
   });
 });
 
 describe('getStoredJsonModeSettings', () => {
-  beforeEach(() => localStorageMock.get.mockReset());
-
   it('returns the stored settings', () => {
-    localStorageMock.get.mockReturnValue({ hideNulls: true });
+    const storage = createLocalStorageMock({ [JSON_MODE_SETTINGS_KEY]: { hideNulls: true } });
     expect(getStoredJsonModeSettings(storage, 'discover')).toEqual({ hideNulls: true });
   });
 
   it('returns undefined when nothing is stored', () => {
-    localStorageMock.get.mockReturnValue(undefined);
+    const storage = createLocalStorageMock({});
     expect(getStoredJsonModeSettings(storage, 'discover')).toBeUndefined();
   });
 
   it('returns undefined for a non-object stored value', () => {
-    localStorageMock.get.mockReturnValue('nonsense');
+    const storage = createLocalStorageMock({ [JSON_MODE_SETTINGS_KEY]: 'nonsense' });
     expect(getStoredJsonModeSettings(storage, 'discover')).toBeUndefined();
   });
 });

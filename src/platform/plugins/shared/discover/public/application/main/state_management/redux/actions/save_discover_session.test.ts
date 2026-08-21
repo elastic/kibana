@@ -586,7 +586,7 @@ describe('saveDiscoverSession', () => {
   });
 
   describe('display settings pinning', () => {
-    it('pins the source view mode chosen in local storage when the JSON view is enabled', async () => {
+    it('does not pin the source view mode from local storage onto a persisted tab', async () => {
       const { toolkit, services, saveDiscoverSessionSpy } = await setup();
       services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => true);
       services.storage.set('discover:sourceDisplayMode', 'json');
@@ -596,8 +596,10 @@ describe('saveDiscoverSession', () => {
       );
 
       const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-      // The tab has no source display mode in its app state, so the local storage value is pinned.
-      expect(savedTab.sourceDisplayMode).toBe('json');
+      // The save must not read local storage for the view mode: the tab keeps its app-state value
+      // (here unset → "Table"). New tabs inherit the last-used mode at initialization instead, so an
+      // existing session the user is viewing as "Table" is never silently flipped to "JSON" on save.
+      expect(savedTab.sourceDisplayMode).toBeUndefined();
       // JSON settings were never chosen (absent from local storage), so they are not pinned.
       expect(savedTab.jsonModeSettings).toBeUndefined();
     });

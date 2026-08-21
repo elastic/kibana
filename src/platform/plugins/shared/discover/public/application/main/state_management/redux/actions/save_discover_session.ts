@@ -22,7 +22,6 @@ import {
   getStoredDataGridDensity,
   getStoredJsonModeSettings,
   getStoredRowHeightLines,
-  getStoredSourceDisplayMode,
 } from '@kbn/unified-data-table';
 import { ROW_HEIGHT_OPTION } from '@kbn/discover-utils';
 import { selectAllTabs } from '../selectors';
@@ -99,9 +98,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           });
 
         if (services.discoverFeatureFlags.getDataTableJsonViewEnabled()) {
-          updatedTab.sourceDisplayMode =
-            updatedTab.sourceDisplayMode ??
-            getStoredSourceDisplayMode(services.storage, 'discover');
+          // `sourceDisplayMode` is intentionally not pinned from local storage here: getInitialAppState
+          // already seeds it into a new tab's app state.
           updatedTab.jsonModeSettings =
             updatedTab.jsonModeSettings ?? getStoredJsonModeSettings(services.storage, 'discover');
         }
