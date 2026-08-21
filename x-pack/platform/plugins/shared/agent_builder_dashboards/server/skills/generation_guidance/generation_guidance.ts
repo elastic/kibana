@@ -56,9 +56,11 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
+**ES|QL for custom content:** set \`config.esqlQuery\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Prefer a query you have already validated or one the user supplied verbatim: an invalid query is not reported as an error, it silently produces a template built from guessed column names.
+
 **Creating a custom content panel:**
 - Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
-- Optionally set \`config.esqlQuery\` when the panel needs live data.
+- Set \`config.esqlQuery\` when the panel needs live data.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
