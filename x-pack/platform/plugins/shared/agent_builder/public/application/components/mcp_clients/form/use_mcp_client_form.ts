@@ -65,22 +65,22 @@ const remoteRedirectUriSchema = z.object({
     }),
 });
 
+const redirectUrisSchema = <TUri extends z.ZodType>(uriSchema: TUri) =>
+  z
+    .array(uriSchema)
+    .min(1, mcpClientI18nMessages.redirectUri.requiredError)
+    .max(OAUTH_REDIRECT_URIS_MAX_SIZE, {
+      error: mcpClientI18nMessages.redirectUri.tooManyError(OAUTH_REDIRECT_URIS_MAX_SIZE),
+    });
+
 const redirectSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal(RedirectUriType.LOCAL),
-    uris: z
-      .array(localRedirectUriSchema)
-      .min(1, mcpClientI18nMessages.redirectUri.requiredError)
-      .max(OAUTH_REDIRECT_URIS_MAX_SIZE, {
-        error: mcpClientI18nMessages.redirectUri.tooManyError(OAUTH_REDIRECT_URIS_MAX_SIZE),
-      }),
+    uris: redirectUrisSchema(localRedirectUriSchema),
   }),
   z.object({
     type: z.literal(RedirectUriType.REMOTE),
-    uris: z
-      .array(remoteRedirectUriSchema)
-      .min(1, mcpClientI18nMessages.redirectUri.requiredError)
-      .max(1),
+    uris: redirectUrisSchema(remoteRedirectUriSchema),
   }),
 ]);
 
