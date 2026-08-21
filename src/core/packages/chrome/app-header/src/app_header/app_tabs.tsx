@@ -22,6 +22,7 @@ import {
   EuiTabs,
   EuiToolTip,
 } from '@elastic/eui';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import type { AppHeaderTab, AppHeaderTabActions } from '../types';
 
 export interface AppTabsProps {
@@ -39,8 +40,10 @@ const renderTabBadge = (badge: AppHeaderTab['badge']) => {
     );
   }
 
-  return badge.tooltip !== undefined ? (
-    <EuiIconTip type={badge.iconType} content={badge.tooltip} position="bottom" />
+  const tooltip = asOptionalPlainText(badge.tooltip);
+
+  return tooltip !== undefined ? (
+    <EuiIconTip type={badge.iconType} content={tooltip} position="bottom" />
   ) : (
     <EuiIcon type={badge.iconType} aria-hidden />
   );
@@ -51,6 +54,7 @@ const renderTabBadge = (badge: AppHeaderTab['badge']) => {
 // a11y tree). `append` is EuiTab's only slot; a proper fix needs EUI-level support. Accepted for now.
 const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const ariaLabel = asPlainText(actions.ariaLabel);
 
   const items = actions.items.map((item) => (
     <EuiContextMenuItem
@@ -66,7 +70,7 @@ const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
         item.onClick();
       }}
     >
-      {item.label}
+      {asPlainText(item.label)}
     </EuiContextMenuItem>
   ));
 
@@ -76,14 +80,14 @@ const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
       panelPaddingSize="none"
-      aria-label={actions.ariaLabel}
+      aria-label={ariaLabel}
       button={
-        <EuiToolTip content={actions.ariaLabel} disableScreenReaderOutput>
+        <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="ellipsis"
             size="xs"
             display="empty"
-            aria-label={actions.ariaLabel}
+            aria-label={ariaLabel}
             data-test-subj={actions['data-test-subj']}
             onClick={(event: React.MouseEvent) => {
               // The trigger lives inside the tab element, so prevent tab navigation/selection.
@@ -123,25 +127,30 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
 
   return (
     <EuiTabs size="m" bottomBorder={false}>
-      {tabs.map((tab) => (
-        <EuiTab
-          key={tab.id}
-          isSelected={tab.isSelected}
-          onClick={tab.onClick}
-          href={tab.href}
-          data-test-subj={tab['data-test-subj']}
-          disabled={tab.disabled}
-          append={renderTabAppend(tab)}
-        >
-          {tab.toolTipContent !== undefined ? (
-            <EuiToolTip content={tab.toolTipContent} position="bottom">
-              <span tabIndex={0}>{tab.label}</span>
-            </EuiToolTip>
-          ) : (
-            tab.label
-          )}
-        </EuiTab>
-      ))}
+      {tabs.map((tab) => {
+        const label = asPlainText(tab.label);
+        const toolTipContent = asOptionalPlainText(tab.toolTipContent);
+
+        return (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.isSelected}
+            onClick={tab.onClick}
+            href={tab.href}
+            data-test-subj={tab['data-test-subj']}
+            disabled={tab.disabled}
+            append={renderTabAppend(tab)}
+          >
+            {toolTipContent !== undefined ? (
+              <EuiToolTip content={toolTipContent} position="bottom">
+                <span tabIndex={0}>{label}</span>
+              </EuiToolTip>
+            ) : (
+              label
+            )}
+          </EuiTab>
+        );
+      })}
     </EuiTabs>
   );
 });

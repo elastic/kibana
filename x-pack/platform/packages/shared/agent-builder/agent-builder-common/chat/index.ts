@@ -6,15 +6,23 @@
  */
 
 export {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
+  type ConversationAccessControlInput,
   type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
+  DEFAULT_CONVERSATION_TITLE,
+  CONVERSATION_TITLE_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
@@ -152,10 +160,10 @@ export {
   type PromptResponseEvent,
   type ExecutionStartedEventData,
   type ExecutionStartedEvent,
-  type PromptRequestedEventData,
-  type PromptRequestedEvent,
-  type ExecutionCompletedEventData,
-  type ExecutionCompletedEvent,
+  type ExecutionRunSummary,
+  type ExecutionOutcome,
+  type ExecutionTerminatedEventData,
+  type ExecutionTerminatedEvent,
   type ExecutionFailedEventData,
   type ExecutionFailedEvent,
   type ExecutionAbortedEventData,

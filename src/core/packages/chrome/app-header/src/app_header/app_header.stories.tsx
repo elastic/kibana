@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
@@ -19,9 +19,10 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderSpacing } from '../types';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import type { AppHeaderBack, AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
+import { AppHeaderLoadingView, type AppHeaderLoadingMenu } from './app_header_loading';
 
 interface ComposedHeaderStoryProps {
   title: string;
@@ -241,5 +242,231 @@ export const WithoutTabs: Story = {
 export const NonEditableTitle: Story = {
   args: {
     editable: false,
+  },
+};
+
+const LoadingHeader = ({
+  menuSkeleton,
+  back,
+}: {
+  menuSkeleton?: AppHeaderLoadingMenu;
+  back?: AppHeaderBack;
+}) => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <div
+        css={css`
+          width: 900px;
+        `}
+      >
+        <AppHeaderLoadingView menu={menuSkeleton} back={back} sticky={false} />
+      </div>
+    </ChromeServiceProvider>
+  );
+};
+
+export const Loading: Story = {
+  render: () => <LoadingHeader />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default `AppHeaderLoading`: title skeleton plus overflow and primary-action placeholders.',
+      },
+    },
+  },
+};
+
+export const LoadingCustomMenu: Story = {
+  render: () => <LoadingHeader menuSkeleton={{ buttonCount: 2, hasPrimary: false }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Customized menu skeleton (`buttonCount: 2`, no primary) for headers that will not look ' +
+          'like the default overflow + primary layout.',
+      },
+    },
+  },
+};
+
+export const LoadingWithBack: Story = {
+  render: () => <LoadingHeader back={{ href: '/app/management', label: 'Stack Management' }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`AppHeaderLoading` with a back button. The title and menu stay skeletoned; only the ' +
+          'known back target renders.',
+      },
+    },
+  },
+};
+
+const defaultLoadedMenu: AppMenuConfig = {
+  items: [
+    {
+      id: 'settings',
+      order: 0,
+      label: 'Settings',
+      iconType: 'gear',
+      overflow: true,
+      run: action('settings'),
+    },
+  ],
+  primaryActionItem: {
+    id: 'save',
+    label: 'Save',
+    iconType: 'save',
+    run: action('save'),
+  },
+};
+
+const twoIconMenu: AppMenuConfig = {
+  items: [
+    {
+      id: 'settings',
+      order: 0,
+      label: 'Settings',
+      iconType: 'gear',
+      run: action('settings'),
+    },
+    {
+      id: 'share',
+      order: 1,
+      label: 'Share',
+      iconType: 'share',
+      run: action('share'),
+    },
+  ],
+};
+
+const comparisonBack: AppHeaderBack = { href: '/app/management', label: 'Stack Management' };
+
+const loadingSwapCases: Array<{
+  name: string;
+  note?: string;
+  loading: {
+    back?: AppHeaderBack;
+    menu?: AppHeaderLoadingMenu;
+    spacing?: AppHeaderSpacing;
+  };
+  loaded: ComponentProps<typeof AppHeaderView>;
+}> = [
+  {
+    name: 'Default (title + overflow + primary)',
+    loading: {},
+    loaded: { title: 'System Shells via Services', menu: defaultLoadedMenu, sticky: false },
+  },
+  {
+    name: 'With back',
+    loading: { back: comparisonBack },
+    loaded: {
+      title: 'System Shells via Services',
+      back: comparisonBack,
+      menu: defaultLoadedMenu,
+      sticky: false,
+    },
+  },
+  {
+    name: 'Title only',
+    loading: { menu: { buttonCount: 0, hasPrimary: false } },
+    loaded: { title: 'System Shells via Services', sticky: false },
+  },
+  {
+    name: 'Custom menu (2 icons, no primary)',
+    loading: { menu: { buttonCount: 2, hasPrimary: false } },
+    loaded: { title: 'System Shells via Services', menu: twoIconMenu, sticky: false },
+  },
+  {
+    name: 'Compact spacing',
+    loading: { spacing: 'compact' },
+    loaded: {
+      title: 'System Shells via Services',
+      menu: defaultLoadedMenu,
+      spacing: 'compact',
+      sticky: false,
+    },
+  },
+  {
+    name: 'Multi-row (tabs + metadata) — expected height shift',
+    note: 'AppHeaderLoading only skeletons the primary row. Tabs and metadata add a second row.',
+    loading: {},
+    loaded: {
+      title: 'System Shells via Services',
+      menu: defaultLoadedMenu,
+      tabs,
+      metadata,
+      sticky: false,
+    },
+  },
+];
+
+const comparisonGrid = css`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 900px;
+`;
+
+const comparisonPair = css`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+`;
+
+const comparisonLabel = css`
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+`;
+
+const comparisonNote = css`
+  font-size: 12px;
+  opacity: 0.7;
+  margin: 0 0 8px;
+`;
+
+const LoadingToLoadedComparison = () => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <div css={comparisonGrid}>
+        {loadingSwapCases.map((swapCase) => (
+          <section key={swapCase.name}>
+            <div css={comparisonLabel}>{swapCase.name}</div>
+            {swapCase.note ? <p css={comparisonNote}>{swapCase.note}</p> : null}
+            <div css={comparisonPair}>
+              <div>
+                <div css={comparisonLabel}>Loading</div>
+                <AppHeaderLoadingView {...swapCase.loading} sticky={false} />
+              </div>
+              <div>
+                <div css={comparisonLabel}>Loaded</div>
+                <AppHeaderView {...swapCase.loaded} />
+              </div>
+            </div>
+          </section>
+        ))}
+      </div>
+    </ChromeServiceProvider>
+  );
+};
+
+export const LoadingToLoaded: Story = {
+  render: () => <LoadingToLoadedComparison />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Side-by-side loading vs loaded for typical single-row combinations. Height and the ' +
+          'trailing menu width should match closely; title width is a fixed skeleton. Multi-row ' +
+          'headers (tabs, description, metadata) are not fully supported and will shift height.',
+      },
+    },
   },
 };
