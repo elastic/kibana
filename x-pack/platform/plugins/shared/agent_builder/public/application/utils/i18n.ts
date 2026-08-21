@@ -2990,10 +2990,5 @@ export const labels = {
     columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
       defaultMessage: 'AI indices',
     }),
-    hiddenCountBadge: (count: number) =>
-      i18n.translate('xpack.agentBuilder.aiIndices.hiddenCountBadge', {
-        defaultMessage: '+{count}',
-        values: { count },
-      }),
   },
 };

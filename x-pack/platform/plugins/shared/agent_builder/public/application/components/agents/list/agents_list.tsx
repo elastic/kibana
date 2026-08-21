@@ -199,7 +199,6 @@ export const AgentsList: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
-                {/* Clamped so one long description cannot stretch every other cell in the row. */}
                 <EuiTextBlockTruncate lines={2}>{agent.description}</EuiTextBlockTruncate>
               </EuiText>
             </EuiFlexItem>
