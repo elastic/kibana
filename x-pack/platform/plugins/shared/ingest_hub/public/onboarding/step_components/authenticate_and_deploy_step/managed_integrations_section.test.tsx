@@ -257,6 +257,7 @@ describe('ManagedIntegrationsSection', () => {
                 onDeploy={jest.fn()}
                 isDeploying={false}
                 isDone={true}
+                hasFailed={false}
               />
             </React.Suspense>
           </I18nProvider>
