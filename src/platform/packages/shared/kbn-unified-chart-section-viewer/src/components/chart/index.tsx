@@ -67,6 +67,7 @@ export const Chart = ({
   yBounds,
   legend,
   metricName,
+  onBubbleClick,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -118,6 +119,7 @@ export const Chart = ({
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onBubbleClick={onBubbleClick}
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}

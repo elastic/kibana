@@ -41,6 +41,7 @@ import type { ThemeServiceSetup } from '@kbn/core/public';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { getDataLayers } from '../helpers';
+import type { BubbleDetail } from '../helpers/bubbles';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
 import type {
@@ -238,6 +239,9 @@ export const getXyChartRenderer = ({
     const onCreateAlertRule = (data: AlertRuleFromVisUIActionData) => {
       handlers.event({ name: ALERT_RULE_TRIGGER, data });
     };
+    const onBubbleClick = (details: BubbleDetail[]) => {
+      handlers.event({ name: 'bubbleClick', data: { details } });
+    };
     const setChartSize = (data: ChartSizeSpec) => {
       const event: ChartSizeEvent = { name: 'chartSize', data };
       handlers.event(event);
@@ -297,6 +301,7 @@ export const getXyChartRenderer = ({
             minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
             interactive={handlers.isInteractive()}
             onClickValue={onClickValue}
+            onBubbleClick={onBubbleClick}
             onClickMultiValue={onClickMultiValue}
             onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}

@@ -49,6 +49,17 @@ export function isLensAlertRule(event: ExpressionRendererEvent): event is LensAl
   return event.name === 'alertRule';
 }
 
+export interface LensBubbleClickEvent {
+  name: 'bubbleClick';
+  data: Record<string, unknown>;
+}
+
+export function isLensBubbleClickEvent(
+  event: ExpressionRendererEvent
+): event is LensBubbleClickEvent {
+  return event.name === 'bubbleClick';
+}
+
 export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
     typeof operationCandidate === 'object' &&

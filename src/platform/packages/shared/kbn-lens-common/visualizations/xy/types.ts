@@ -158,10 +158,15 @@ export interface XYVisualizationState {
   bubblesTitle?: string;
 }
 
-/** A generic label/value shown in the bubble details popover. */
+/**
+ * A generic label/value row shown for a bubble marker. `field` is the optional
+ * source field name, so the consumer can identify specific rows (e.g. trace.id)
+ * without matching on the display label.
+ */
 export interface XYBubbleDetail {
   label: string;
   value: string;
+  field?: string;
 }
 
 /**

@@ -9,6 +9,7 @@
 
 import React from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiCode,
   EuiCopy,
@@ -24,18 +25,20 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { BubbleDetail } from '../helpers/bubbles';
+import type { XYBubbleDetail } from '@kbn/lens-common';
 
 interface BubbleDetailsFlyoutProps {
-  details: BubbleDetail[];
+  details: XYBubbleDetail[];
   onClose: () => void;
+  /** When provided, shows a button that opens the related trace in Discover. */
+  onOpenInDiscover?: () => void;
 }
 
-const copyLabel = i18n.translate('expressionXY.bubbleDetailsFlyout.copyAriaLabel', {
+const copyLabel = i18n.translate('unifiedChartSectionViewer.bubbleDetailsFlyout.copyAriaLabel', {
   defaultMessage: 'Copy to clipboard',
 });
 
-const CopyableField = ({ label, value }: BubbleDetail) => (
+const CopyableField = ({ label, value }: XYBubbleDetail) => (
   <>
     <EuiText size="xs" color="subdued">
       <strong>{label}</strong>
@@ -63,7 +66,16 @@ const CopyableField = ({ label, value }: BubbleDetail) => (
   </>
 );
 
-export const BubbleDetailsFlyout: React.FC<BubbleDetailsFlyoutProps> = ({ details, onClose }) => {
+/**
+ * Consumer-owned flyout that shows a clicked exemplar's metadata and, when it is
+ * linked to a trace, a button to open that trace in Discover. Rendering it here
+ * keeps the chart/Lens layer generic.
+ */
+export const BubbleDetailsFlyout: React.FC<BubbleDetailsFlyoutProps> = ({
+  details,
+  onClose,
+  onOpenInDiscover,
+}) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'bubbleDetailsFlyoutTitle' });
 
   return (
@@ -76,15 +88,40 @@ export const BubbleDetailsFlyout: React.FC<BubbleDetailsFlyoutProps> = ({ detail
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>
-            {i18n.translate('expressionXY.bubbleDetailsFlyout.title', {
-              defaultMessage: 'Details',
+            {i18n.translate('unifiedChartSectionViewer.bubbleDetailsFlyout.title', {
+              defaultMessage: 'Exemplar',
             })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('unifiedChartSectionViewer.bubbleDetailsFlyout.description', {
+              defaultMessage:
+                'An exemplar links this metric data point to the trace that produced it. Use the metadata below to inspect it, or open the related trace in Discover.',
+            })}
+          </p>
+        </EuiText>
+        {onOpenInDiscover ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton
+              iconType="discoverApp"
+              onClick={onOpenInDiscover}
+              fill
+              size="s"
+              data-test-subj="bubbleDetailsFlyoutOpenInDiscover"
+            >
+              {i18n.translate('unifiedChartSectionViewer.bubbleDetailsFlyout.openInDiscover', {
+                defaultMessage: 'Open trace in Discover',
+              })}
+            </EuiButton>
+          </>
+        ) : null}
+        <EuiSpacer size="l" />
         {details.map((detail, index) => (
-          <React.Fragment key={`${detail.label}-${index}`}>
+          <React.Fragment key={`${detail.field ?? detail.label}-${index}`}>
             {index > 0 ? <EuiSpacer size="m" /> : null}
             <CopyableField label={detail.label} value={detail.value} />
           </React.Fragment>

@@ -39,15 +39,9 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { XYBubblePoint } from '@kbn/lens-common';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
-
-// Hover title shown on the exemplar bubble markers.
-const EXEMPLAR_BUBBLE_TITLE = i18n.translate('metricsExperience.exemplars.bubbleTitle', {
-  defaultMessage: 'Exemplar',
-});
 import { fetchExemplars } from './fetch_exemplars';
 
 export type LensProps = Pick<
@@ -159,7 +153,7 @@ export const useLensProps = ({
       yBounds,
       legend,
       bubbles,
-      bubblesTitle: EXEMPLAR_BUBBLE_TITLE,
+      bubblesTitle: metricName,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import type { XYBubbleDetail } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
@@ -25,6 +26,7 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { BubbleDetailsFlyout } from '../../chart/bubble_details_flyout';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
@@ -37,6 +39,7 @@ import {
   ACTION_VIEW_DETAILS,
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { TRACE_ID_FIELD } from '../../chart/hooks/fetch_exemplars';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
 
@@ -394,6 +397,33 @@ const ChartItem = React.memo(
       return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
     }, [metricItem.metricName, searchTerm]);
 
+    // Bubble (exemplar) click opens a consumer-owned details flyout. The chart/Lens
+    // layer only forwards the clicked bubble's details payload.
+    const [bubbleDetails, setBubbleDetails] = useState<XYBubbleDetail[] | null>(null);
+    const handleBubbleClick = useCallback((data: unknown) => {
+      const details = (data as { details?: XYBubbleDetail[] })?.details;
+      setBubbleDetails(details?.length ? details : null);
+    }, []);
+    const traceId = useMemo(
+      () => bubbleDetails?.find((detail) => detail.field === TRACE_ID_FIELD)?.value,
+      [bubbleDetails]
+    );
+    const handleOpenTraceInDiscover = useCallback(() => {
+      if (!traceId) {
+        return;
+      }
+      actions.openInNewTab?.({
+        query: {
+          esql: `FROM traces-apm*,apm-*,traces-*.otel-* | WHERE trace.id == "${traceId}"`,
+        },
+        tabLabel: i18n.translate('metricsExperience.exemplars.traceTabLabel', {
+          defaultMessage: 'Trace {traceId}',
+          values: { traceId },
+        }),
+        timeRange: fetchParams.timeRange,
+      });
+    }, [traceId, actions, fetchParams.timeRange]);
+
     return (
       <A11yGridCell
         id={id}
@@ -421,6 +451,7 @@ const ChartItem = React.memo(
           description={description}
           chartLayers={chartLayers}
           metricName={metricItem.metricName}
+          onBubbleClick={handleBubbleClick}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}
@@ -429,6 +460,15 @@ const ChartItem = React.memo(
           userMessages={userMessages}
           profileId={profileId}
         />
+        {bubbleDetails ? (
+          <BubbleDetailsFlyout
+            details={bubbleDetails}
+            onClose={() => setBubbleDetails(null)}
+            onOpenInDiscover={
+              traceId && actions.openInNewTab ? handleOpenTraceInDiscover : undefined
+            }
+          />
+        ) : null}
       </A11yGridCell>
     );
   }

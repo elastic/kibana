@@ -9,10 +9,12 @@
 
 export const BUBBLES_SERIES_ID = 'bubbles';
 
-/** A generic label/value shown in the bubble details popover. */
+/** A generic label/value row for a bubble marker; `field` is the optional source
+ * field name so consumers can identify specific rows (e.g. trace.id). */
 export interface BubbleDetail {
   label: string;
   value: string;
+  field?: string;
 }
 
 /**

@@ -105,6 +105,7 @@ import {
   parseBubbles,
   BUBBLES_SERIES_ID,
   type BubblePoint,
+  type BubbleDetail,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -126,7 +127,6 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { BubbleDetailsFlyout } from './bubble_details_flyout';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
@@ -159,6 +159,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
   onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
+  onBubbleClick?: (details: BubbleDetail[]) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -223,6 +224,7 @@ export function XYChart({
   onClickValue,
   onClickMultiValue,
   onCreateAlertRule,
+  onBubbleClick,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -327,8 +329,6 @@ export function XYChart({
   }, [chartHasMoreThanOneSeries, legend.isVisible, legend.showSingleSeries, uiState]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
-
-  const [selectedBubble, setSelectedBubble] = useState<BubblePoint | null>(null);
 
   useEffect(() => {
     const legendShow = getShowLegendDefault();
@@ -662,12 +662,13 @@ export function XYChart({
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
-    // Bubble markers open a details flyout instead of triggering the normal filter
-    // path. Only bubbles that carry details are clickable; the rest are hover-only.
+    // Bubble markers route the click to the consumer (which owns the flyout)
+    // instead of triggering the normal filter path. Only bubbles that carry
+    // details are clickable; the rest are hover-only.
     if (xySeries.specId === BUBBLES_SERIES_ID) {
       const bubble = xyGeometry.datum as BubblePoint;
       if (bubble.details?.length) {
-        setSelectedBubble(bubble);
+        onBubbleClick?.(bubble.details);
       }
       return;
     }
@@ -1200,12 +1201,6 @@ export function XYChart({
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
       </div>
-      {selectedBubble?.details ? (
-        <BubbleDetailsFlyout
-          details={selectedBubble.details}
-          onClose={() => setSelectedBubble(null)}
-        />
-      ) : null}
     </>
   );
 }

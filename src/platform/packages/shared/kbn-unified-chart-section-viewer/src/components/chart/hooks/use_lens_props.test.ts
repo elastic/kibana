@@ -185,7 +185,7 @@ describe('useLensProps', () => {
             show: false,
           },
           bubbles: [],
-          bubblesTitle: 'Exemplar',
+          bubblesTitle: undefined,
         },
         {
           query: {
