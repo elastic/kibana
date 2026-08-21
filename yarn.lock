@@ -14013,11 +14013,6 @@
   dependencies:
     "@types/ms" "*"
 
-"@types/dedent@0.7.2":
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/@types/dedent/-/dedent-0.7.2.tgz#878b5286877ec68e68e89f16b1014411c8e10814"
-  integrity sha512-kRiitIeUg1mPV9yH4VUJ/1uk2XjyANfeL8/7rH1tsjvHeO9PJLBHJIYsFWmAvmGj5u8rj+1TZx7PZzW2qLw3Lw==
-
 "@types/deep-freeze-strict@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@types/deep-freeze-strict/-/deep-freeze-strict-1.1.2.tgz#707d1f9721aea9251ca6188111c272c61fc5490f"

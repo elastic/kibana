@@ -2029,7 +2029,6 @@
     "@types/d3-scale": "3.3.2",
     "@types/d3-selection": "3.0.2",
     "@types/d3-transition": "3.0.1",
-    "@types/dedent": "0.7.2",
     "@types/deep-freeze-strict": "1.1.2",
     "@types/ejs": "3.1.5",
     "@types/enzyme": "3.10.12",
