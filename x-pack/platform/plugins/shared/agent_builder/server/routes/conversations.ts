@@ -16,6 +16,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   agentBuilderDefaultAgentId,
+  agentIdMaxLength,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationAlreadyExistsError,
@@ -122,6 +123,7 @@ export function registerConversationRoutes({
               {
                 agent_id: schema.maybe(
                   schema.string({
+                    maxLength: agentIdMaxLength,
                     meta: {
                       description: 'Optional agent ID to filter conversations by a specific agent.',
                     },
@@ -311,7 +313,7 @@ export function registerConversationRoutes({
             body: schema.object({
               agent_id: schema.maybe(
                 schema.string({
-                  maxLength: 256,
+                  maxLength: agentIdMaxLength,
                   meta: {
                     description:
                       'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',
