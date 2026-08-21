@@ -46,7 +46,7 @@ if (!subCommand) {
   if (_.intersection(argv.slice(2), ['-h', '--help']).length) {
     program.defaultHelp();
   } else {
-    argv.splice(2, 0, ['serve']);
+    argv.splice(2, 0, 'serve');
   }
 }
 

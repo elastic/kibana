@@ -2939,7 +2939,6 @@
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
       "piscina": ["./node_modules/piscina/dist/src/index.d.ts"],
-      "getopts": ["./node_modules/getopts/index.d.ts"],
       "canvg": ["./typings/canvg"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["./typings/@a2a-js-sdk/server"],

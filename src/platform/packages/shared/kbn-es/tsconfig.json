@@ -6,6 +6,7 @@
   "include": [
     "**/*.ts",
     "**/*.js",
+    "../../../../../typings/getopts.d.ts",
     "**/*.json"
   ],
   "exclude": [

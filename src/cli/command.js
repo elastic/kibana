@@ -51,7 +51,7 @@ Command.prototype.unknownArgv = function (argv) {
 Command.prototype.collectUnknownOptions = function () {
   const title = `Extra ${this._name} options`;
 
-  this.allowUnknownOption();
+  this.allowUnknownOption().allowExcessArguments();
   this.getUnknownOptions = function () {
     const opts = {};
 
@@ -72,17 +72,17 @@ Command.prototype.collectUnknownOptions = function () {
     }
 
     while (unknowns.length) {
-      const optName = unknowns.shift();
+      const [optName, optValueFromOption] = unknowns.shift().split(/=(.*)/, 2);
 
       if (optName.slice(0, 2) !== '--') {
         this.error(`${title} "${optName}" must start with "--"`);
       }
 
-      if (unknowns.length === 0) {
+      if (unknowns.length === 0 && optValueFromOption === undefined) {
         this.error(`${title} "${optName}" must have a value`);
       }
 
-      const optValue = unknowns.shift();
+      const optValue = optValueFromOption ?? unknowns.shift();
 
       let val = optValue;
       try {
