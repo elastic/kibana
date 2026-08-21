@@ -67,9 +67,19 @@ export const toDatasetExample = (ex: PersonaMatrixExample): PersonaMatrixDataset
 };
 
 /**
- * ExpectedToolCalled — verifies the primary expected tool was invoked.
- * Reads `expectedTools` from example metadata (first entry) or `tool_sequence`
- * from the expected output.
+ * ExpectedToolCalled — verifies every declared expected tool was invoked.
+ * Reads `expectedTools` from example metadata, or `tool_sequence` from the
+ * expected output.
+ *
+ * Scores the whole declared set, not just `expectedTools[0]`. 16 of the 21
+ * examples declare more than one expected tool, so reading only the first
+ * entry left the rest unenforced: an example annotated
+ * `['platform.core.generate_esql', 'platform.core.execute_esql']` scored 1 for
+ * a run that generated a query and never executed it.
+ *
+ * All-or-nothing rather than a partial ratio: `Trajectory` already reports
+ * graded per-tool overlap. `missingToolIds` names what was skipped so a 0 is
+ * diagnosable without re-reading the trace.
  */
 export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   name: 'ExpectedToolCalled',
@@ -88,14 +98,19 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
       };
     }
 
-    const expectedToolId = expectedTools[0];
     const usedToolIds = getToolCallSteps(output as TaskOutput)
       .map((step) => step.tool_id)
       .filter((id): id is string => Boolean(id));
 
+    const usedToolIdSet = new Set(usedToolIds);
+    const missingToolIds = expectedTools.filter((toolId) => !usedToolIdSet.has(toolId));
+
     return {
-      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
-      metadata: { expectedToolId, usedToolIds },
+      score: missingToolIds.length === 0 ? 1 : 0,
+      explanation: missingToolIds.length
+        ? `Expected tools not called: ${missingToolIds.join(', ')}.`
+        : `All expected tools called: ${expectedTools.join(', ')}.`,
+      metadata: { expectedToolIds: expectedTools, missingToolIds, usedToolIds },
     };
   },
 });
