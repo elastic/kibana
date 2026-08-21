@@ -136,9 +136,12 @@ describe('pollEsNodesVersion', () => {
     internalClient = elasticsearchClientMock.createInternalClient();
   });
 
-  const nodeInfosSuccessOnce = (infos: NodesInfo, date?: string) => {
+  const nodeInfosSuccessOnce = (infos: NodesInfo, timestamp = Date.now()) => {
     // @ts-expect-error not full interface
-    internalClient.nodes.info.mockResponseOnce(infos, date ? { headers: { date } } : undefined);
+    internalClient.nodes.info.mockResponseOnce(infos);
+    internalClient.nodes.stats.mockResponseOnce({
+      nodes: { 'node-0': { os: { timestamp } } },
+    });
   };
   const nodeInfosErrorOnce = (error: any) => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
@@ -340,10 +343,10 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(2);
     const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
     jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
-    const elasticsearchDate = new Date(kibanaTime - 61_000).toUTCString();
+    const elasticsearchTime = kibanaTime - 61_000;
 
-    nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchDate);
-    nodeInfosSuccessOnce(createNodes('5.2.0'), elasticsearchDate);
+    nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchTime);
+    nodeInfosSuccessOnce(createNodes('5.2.0'), elasticsearchTime);
 
     pollEsNodesVersion({
       internalClient,
@@ -370,7 +373,7 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(1);
     const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
     jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
-    nodeInfosSuccessOnce(createNodes('5.1.0'), new Date(kibanaTime - 60_000).toUTCString());
+    nodeInfosSuccessOnce(createNodes('5.1.0'), kibanaTime - 60_000);
 
     pollEsNodesVersion({
       internalClient,
@@ -430,6 +433,10 @@ describe('pollEsNodesVersion', () => {
     const mockTestSchedulerInfoResponseOnce = (infos: NodesInfo) => {
       // @ts-expect-error we need to return an incompatible type to use the testScheduler here
       internalClient.nodes.info.mockReturnValueOnce([infos]);
+      // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+      internalClient.nodes.stats.mockReturnValueOnce([
+        { nodes: { 'node-0': { os: { timestamp: Date.now() } } } },
+      ]);
     };
 
     const mockTestSchedulerInfoErrorOnce = (error = 'mock error') => {
@@ -481,9 +488,17 @@ describe('pollEsNodesVersion', () => {
           // @ts-expect-error we need to return an incompatible type to use the testScheduler here
           of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
         );
+        internalClient.nodes.stats.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of({ nodes: { 'node-0': { os: { timestamp: Date.now() } } } })
+        );
         internalClient.nodes.info.mockReturnValueOnce(
           // @ts-expect-error we need to return an incompatible type to use the testScheduler here
           of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+        );
+        internalClient.nodes.stats.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of({ nodes: { 'node-0': { os: { timestamp: Date.now() } } } })
         );
 
         const esNodesCompatibility$ = pollEsNodesVersion({

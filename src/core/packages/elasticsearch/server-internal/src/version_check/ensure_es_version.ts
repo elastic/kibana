@@ -244,12 +244,35 @@ export const pollEsNodesVersion = ({
         })
       );
     }),
-    tap((nodesInfoResponse) => {
-      if (clockSkewLogged || !('headers' in nodesInfoResponse)) {
+    switchMap((nodesInfoResponse) => {
+      if (clockSkewLogged || 'nodesInfoRequestError' in nodesInfoResponse) {
+        return of({ nodesInfoResponse, elasticsearchTime: undefined });
+      }
+
+      return defer(() =>
+        internalClient.nodes.stats(
+          {
+            node_id: '_all',
+            metric: 'os',
+            filter_path: ['nodes.*.os.timestamp'],
+          },
+          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
+        )
+      ).pipe(
+        map((nodesStatsResponse) => {
+          const elasticsearchTime = Object.values(nodesStatsResponse.nodes).find(
+            (node) => node.os?.timestamp !== undefined
+          )?.os?.timestamp;
+          return { nodesInfoResponse, elasticsearchTime };
+        }),
+        catchError(() => of({ nodesInfoResponse, elasticsearchTime: undefined }))
+      );
+    }),
+    tap(({ elasticsearchTime }) => {
+      if (elasticsearchTime === undefined) {
         return;
       }
 
-      const elasticsearchTime = Date.parse(nodesInfoResponse.headers.date as string);
       const kibanaTime = Date.now();
       const clockSkew = Math.abs(kibanaTime - elasticsearchTime);
 
@@ -262,7 +285,7 @@ export const pollEsNodesVersion = ({
         clockSkewLogged = true;
       }
     }),
-    map((nodesInfoResponse) => {
+    map(({ nodesInfoResponse }) => {
       const nodesInfo =
         'body' in nodesInfoResponse
           ? nodesInfoResponse.body
