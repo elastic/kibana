@@ -99,7 +99,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss}>
+    <div css={wrapperCss} data-test-subj="customContentPanel">
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {

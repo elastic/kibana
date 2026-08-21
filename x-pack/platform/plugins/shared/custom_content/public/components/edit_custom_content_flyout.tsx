@@ -226,7 +226,11 @@ export const EditCustomContentFlyout = ({
         >
           <EuiResizeObserver onResize={onEditorContainerResize}>
             {(editorResizeRef) => (
-              <div ref={editorResizeRef} css={editorContainerCss}>
+              <div
+                ref={editorResizeRef}
+                css={editorContainerCss}
+                data-test-subj="customContentTemplateEditorContainer"
+              >
                 <CodeEditor
                   languageId="liquid"
                   value={draftTemplate}
