@@ -300,7 +300,10 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
       acc.osVersion = result.osVersion;
       acc.cypressVersion = result.cypressVersion;
       acc.config = result.config;
-      acc.runs = ([] as CypressCommandLine.RunResult[]).concat(acc.runs ?? [], result.runs);
+      acc.runs = ([] as CypressCommandLine.RunResult[]).concat(
+        acc.runs ?? [],
+        _.compact(result.runs)
+      );
       return acc;
     },
     {} as CypressCommandLine.CypressRunResult

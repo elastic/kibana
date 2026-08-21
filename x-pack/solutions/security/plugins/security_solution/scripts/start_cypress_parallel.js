@@ -6,6 +6,4 @@
  */
 
 require('@kbn/setup-node-env');
-// Cypress installs a CommonJS TypeScript loader that cannot resolve del's ESM dependency graph.
-require('del');
 require('./run_cypress/parallel').cli();

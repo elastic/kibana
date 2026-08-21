@@ -12,7 +12,6 @@ import path from 'path';
 
 import chalk from 'chalk';
 import execa from 'execa';
-import { deleteAsync } from 'del';
 import { extract } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -54,7 +53,7 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
 
   if (fs.existsSync(installPath)) {
     log.info('install directory already exists, removing');
-    await deleteAsync(installPath, { force: true });
+    await fs.promises.rm(installPath, { recursive: true, force: true });
   }
 
   log.info('extracting %s', chalk.bold(dest));
