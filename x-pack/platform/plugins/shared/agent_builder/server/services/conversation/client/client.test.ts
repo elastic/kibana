@@ -2115,20 +2115,12 @@ describe('ConversationClient', () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Events persistence: create / upsertRound / update wired through the OCC
-  // writer must produce an atomic (rounds + events + schema_version) write for
-  // events-native documents, and a rounds-only write for legacy documents.
-  // ---------------------------------------------------------------------------
-
   describe('events persistence', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      // The mock returns some doc from the follow-up `get`; only the initial
-      // `index` payload matters for what was actually written.
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument({ schemaVersion: 1 })] },
       });
@@ -2153,23 +2145,16 @@ describe('ConversationClient', () => {
         'round-1::execution_started',
         'round-1::execution_terminated',
       ]);
-      // Same physical write carries the rounds — atomic by construction (one
-      // `storage.index` call), which is Pierre's "no desynced second write".
       expect(indexed.conversation_rounds).toHaveLength(1);
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('round-trips attachment_refs through the stored events projection', async () => {
-      // Pins the hydration ordering: `createRequestToEs` derives events from
-      // the caller's rounds, so `events[0].data` is the round's input verbatim
-      // — including `attachment_refs`. Later reads must return the same shape.
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
 
-      // Follow-up `get` returns the doc the create wrote (schema_version = 1,
-      // events non-empty ⇒ stored projection served, no derivation).
       const written = createConversationDocument({
         schemaVersion: 1,
         rounds: [
@@ -2193,26 +2178,16 @@ describe('ConversationClient', () => {
         ],
       });
 
-      // (a) Write path: `_source.events[0].data.attachment_refs` matches the
-      // input array passed by the caller.
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
       };
       expect(indexed.events?.[0]?.data.attachment_refs).toEqual(attachmentRefs);
 
-      // (b) Read path: the API-returned event carries the same refs (fromEs
-      // serves stored events for events-native docs), and the round's input
-      // still has them (verifying the ordering rule "merge → recompute events
-      // → serialize" leaves rounds and events in agreement).
       expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
       expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
     });
 
     it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
-      // Simulates an execution that persisted only its `execution_started` before
-      // the process crashed. After a successful upsertRound completing the round,
-      // the stored projection must carry exactly one `execution_terminated` — no
-      // stale in-progress artifacts, no duplicated terminals.
       const inProgressRound = createRound({
         id: 'round-crash',
         status: ConversationRoundStatus.inProgress,
@@ -2264,9 +2239,6 @@ describe('ConversationClient', () => {
       );
       expect(terminals).toHaveLength(1);
       expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
-      // The projection is fully reconciled from the completed round, not
-      // appended to the stale partial: no duplicate `user_message` or
-      // `execution_started` from the pre-crash state.
       expect(indexed.events?.map((event) => event.id)).toEqual([
         'round-crash::user_message',
         'round-crash::execution_started',
@@ -2275,9 +2247,6 @@ describe('ConversationClient', () => {
     });
 
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
-      // No `schemaVersion` on the read doc ⇒ legacy. `updateConversation`
-      // skips reconcile and `toEs` omits both fields — a plain title update
-      // must never accidentally migrate the doc.
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -2307,9 +2276,6 @@ describe('ConversationClient', () => {
         id: 'round-1',
         status: ConversationRoundStatus.completed,
       });
-      // A minimal stored projection covering the existing round; on update the
-      // reconcile step must regenerate these from the current rounds (unchanged
-      // here) and re-stamp `schema_version` at the current format version.
       const storedEvents: TimelineEvent[] = [
         {
           id: 'round-1::user_message',
@@ -2340,8 +2306,6 @@ describe('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      // Round-derived events regenerated from the current round set: id, plus
-      // the two lifecycle events that stored projection was missing.
       expect(indexed.events?.map((event) => event.id)).toEqual([
         'round-1::user_message',
         'round-1::execution_started',
