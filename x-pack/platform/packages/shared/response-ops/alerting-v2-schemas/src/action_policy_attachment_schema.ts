@@ -21,14 +21,14 @@ export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
  *      id           — identity for saved policies
  *      version      — optimistic concurrency on canvas updates
  *      enabled      — status badge in formatActionPolicyDescription
- *      snoozedUntil — display
- *      updatedAt    — staleness check against origin_snapshot_at
+ *      snoozed_until — display
+ *      updated_at    — staleness check against origin_snapshot_at
  *
  * All fields are optional so the same schema covers both:
  *  - proposed policies (by-value, built incrementally by manage_action_policy)
  *  - saved policies    (by-reference, snapshotted from the API response)
  *
- * Audit/identity metadata (auth, createdBy*, updatedBy*, createdAt) is
+ * Audit/identity metadata (auth, created_by*, updated_by*, created_at) is
  * intentionally excluded — nothing on the attachment side reads it, and we
  * don't want per-user identity baked into a conversation attachment.
  */
@@ -40,13 +40,13 @@ export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
     description: true,
     destinations: true,
     matcher: true,
-    groupBy: true,
+    group_by: true,
     tags: true,
-    groupingMode: true,
+    grouping_mode: true,
     throttle: true,
     enabled: true,
-    snoozedUntil: true,
-    updatedAt: true,
+    snoozed_until: true,
+    updated_at: true,
   })
   .partial();
 

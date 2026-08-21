@@ -6,15 +6,27 @@
  */
 
 import { ACTION_POLICY_MANAGEMENT_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
+  logger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    forSubsystem: jest.fn(),
+  } as unknown as LoggerServiceContract,
   getWorkflow: jest.fn(async () => null),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
 });
 
 describe('createActionPolicyManagementSkill', () => {
+  it('generates schema docs without throwing', () => {
+    expect(() => createActionPolicyManagementSkill(createDeps())).not.toThrow();
+  });
+
   it('registers the skill under the stable action-policy-management id and name', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 

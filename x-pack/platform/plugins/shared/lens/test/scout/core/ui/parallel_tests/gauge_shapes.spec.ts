@@ -28,7 +28,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       const { lens } = pageObjects;
 
       const getGaugeBullet = async () => {
-        const debugState = await lens.getCurrentChartDebugState('gaugeChart');
+        const debugState = await lens.workspace.getCurrentChartDebugState('gaugeChart');
         return debugState.bullet?.rows[0][0];
       };
 
@@ -66,36 +66,38 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
         await lens.setEuiSwitch('lnsDynamicColoringGaugeSwitch', true);
         await lens.closeDimensionEditor();
 
-        await lens.openStyleSettingsFlyout();
+        await lens.style.openStyleSettingsFlyout();
         const { violations: styleViolations } = await page.checkA11y({
           include: ['[data-test-subj="lnsApp"]'],
         });
         expect(styleViolations).toHaveLength(0);
-        await lens.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
-        await lens.setGaugeMinorLabelMode('custom');
-        await lens.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+        await lens.workspace.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
+        await lens.style.setGaugeMinorLabelMode('custom');
+        await lens.workspace.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
         // Wait for debounced title/subtitle to reach the chart before closing the flyout.
         await expect.poll(async () => (await getGaugeBullet())?.title).toBe('custom title');
         await expect.poll(async () => (await getGaugeBullet())?.subtitle).toBe('custom subtitle');
-        await lens.closeFlyoutWithBackButton();
+        await lens.style.closeFlyoutWithBackButton();
 
         await lens.waitForVisualization('gaugeChart');
-        await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
-        await lens.waitForStaticValueInput();
+        await lens.dimensions.openDimensionEditor(
+          'lnsGauge_goalDimensionPanel > lns-empty-dimension'
+        );
+        await lens.dimensions.waitForStaticValueInput();
         await lens.waitForVisualization('gaugeChart');
         await lens.closeDimensionEditor();
 
-        await lens.openDimensionEditor(
+        await lens.dimensions.openDimensionEditor(
           'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
         );
-        await lens.setInputValue('lns-indexPattern-static_value-input', '1000');
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '1000');
         await expect.poll(async () => (await getGaugeBullet())?.domain?.[0]).toBe(1000);
         await lens.closeDimensionEditor();
 
-        await lens.openDimensionEditor(
+        await lens.dimensions.openDimensionEditor(
           'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
         );
-        await lens.setInputValue('lns-indexPattern-static_value-input', '25000');
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '25000');
         await expect.poll(async () => (await getGaugeBullet())?.domain?.[1]).toBe(25000);
         await lens.closeDimensionEditor();
 
@@ -110,7 +112,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to vertical bullet without losing configuration', async () => {
-        await lens.setGaugeOrientation('vertical');
+        await lens.style.setGaugeOrientation('vertical');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.vertical);
         expect(debugData?.title).toBe('custom title');
@@ -119,7 +121,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to minor arc without losing configuration', async () => {
-        await lens.setGaugeShape('Minor arc');
+        await lens.style.setGaugeShape('Minor arc');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.halfCircle);
         expect(debugData?.title).toBe('custom title');
@@ -128,7 +130,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to major arc without losing configuration', async () => {
-        await lens.setGaugeShape('Major arc');
+        await lens.style.setGaugeShape('Major arc');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
         expect(debugData?.title).toBe('custom title');
@@ -137,7 +139,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to circle without losing configuration', async () => {
-        await lens.setGaugeShape('Circle');
+        await lens.style.setGaugeShape('Circle');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.circle);
         expect(debugData?.title).toBe('custom title');
@@ -147,8 +149,8 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
 
       await spaceTest.step('switch to table and drop unsupported static values', async () => {
         await lens.switchToVisualization('lnsDatatable');
-        await expect.poll(async () => lens.getCountOfDatatableColumns()).toBe(1);
-        expect(await lens.getDatatableHeaderText(0)).toBe('Count of records');
+        await expect.poll(async () => lens.datatable.getCountOfColumns()).toBe(1);
+        expect(await lens.datatable.getHeaderText(0)).toBe('Count of records');
       });
     }
   );
