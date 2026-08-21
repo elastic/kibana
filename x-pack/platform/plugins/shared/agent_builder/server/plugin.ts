@@ -183,6 +183,10 @@ export class AgentBuilderPlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
+      },
     });
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
