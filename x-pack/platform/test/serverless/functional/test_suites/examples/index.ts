@@ -17,7 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./field_formats'));
     loadTestFile(require.resolve('./partial_results'));
     loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./search_examples'));
     loadTestFile(require.resolve('./unified_field_list_examples'));
   });
 }
