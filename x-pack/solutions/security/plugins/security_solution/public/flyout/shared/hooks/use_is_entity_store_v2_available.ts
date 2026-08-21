@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useResolvedLatestEntitiesIndexName } from '../../../common/hooks/use_resolved_latest_entities_index_name';
 
@@ -31,5 +32,5 @@ export const useIsEntityStoreV2Available = (): { data?: EntitiesIndexExistsResul
   const spaceId = useSpaceId();
   const { data } = useResolvedLatestEntitiesIndexName(spaceId);
 
-  return { data: data && { indexExists: data.indexName != null } };
+  return useMemo(() => ({ data: data && { indexExists: data.indexName != null } }), [data]);
 };
