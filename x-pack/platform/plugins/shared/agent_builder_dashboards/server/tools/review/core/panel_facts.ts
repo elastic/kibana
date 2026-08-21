@@ -147,7 +147,7 @@ const computeNumericFacts = (
       continue;
     }
     const n = Number(v);
-    if (isNaN(n)) {
+    if (Number.isNaN(n)) {
       nullCount++;
       continue;
     }

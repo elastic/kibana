@@ -22,6 +22,7 @@ import { isSection, DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-com
 import { executeEsql, buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { hasStartEndParams } from '@kbn/esql-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { getErrorMessage } from '../../generate/core';
 import { resolveEsqlDataset } from '../../resolve_esql_dataset';
 import type { PanelFacts } from './panel_facts';
 import {
@@ -216,7 +217,7 @@ const executePanel = async (
     return buildSuccessPanelFacts(panel, title, query, result, duration);
   } catch (error) {
     const duration = Date.now() - start;
-    const message = error instanceof Error ? error.message : String(error);
+    const message = getErrorMessage(error);
     logger.debug(`Panel "${panel.id}" query failed: ${message}`);
     return buildErrorPanelFacts(panel, title, query, message, duration);
   } finally {
@@ -255,7 +256,6 @@ export const reviewDashboard = async ({
     } panels, time range: ${JSON.stringify(timeRange)})`
   );
 
-  // Execute all panel queries in parallel — no concurrency cap per design decision.
   const panelFacts = await Promise.all(
     panels.map((panel) => {
       const query = extractPanelQuery(panel);

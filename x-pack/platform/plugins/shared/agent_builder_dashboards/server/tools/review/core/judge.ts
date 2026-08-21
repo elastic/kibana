@@ -177,7 +177,6 @@ const buildDashboardSummary = (dashboardData: DashboardAttachmentData): string =
   if (sections.length > 0) {
     lines.push('\nSections:');
     for (const section of sections) {
-      if (!isSection(section)) continue;
       lines.push(
         `  - "${section.title}" (collapsed: ${section.collapsed ?? false}, panels: ${
           section.panels.length
@@ -189,9 +188,8 @@ const buildDashboardSummary = (dashboardData: DashboardAttachmentData): string =
   if (controls.length > 0) {
     lines.push('\nControls (pinned filters):');
     for (const control of controls) {
-      const c = control as { type?: unknown; config?: unknown };
-      const config = c.config as { title?: unknown } | undefined;
-      const type = typeof c.type === 'string' ? c.type : 'unknown';
+      const config = control.config as { title?: unknown } | undefined;
+      const type = typeof control.type === 'string' ? control.type : 'unknown';
       const title = typeof config?.title === 'string' ? config.title : '(none)';
       const field = getControlField(config) ?? '(none)';
       lines.push(`  - type: ${type}, title: ${title}, field: ${field}`);

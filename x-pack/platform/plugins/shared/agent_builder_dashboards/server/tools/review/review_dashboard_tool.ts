@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { dashboardTools } from '../../../common';
+import { getErrorMessage } from '../generate/core';
 import { retrieveLatestVersion } from '../generate/attachment_state';
 import { reviewDashboard } from './core';
 
@@ -28,18 +29,9 @@ const reviewDashboardSchema = z.object({
 });
 
 /**
- * Dashboard review tool.
- *
- * Re-executes every panel's ES|QL query with the dashboard's stored time range,
- * computes per-panel result facts, and calls a holistic LLM judge that evaluates
- * the dashboard as a whole — data correctness, composition, readability, and
- * intent alignment — against the same guidelines used during generation.
- *
- * Returns structured findings the main agent can act on via generate_dashboard.
- *
- * IMPORTANT: Always call this tool in a new turn, after generate_dashboard has
- * returned. Never call it in the same response as generate_dashboard — the
- * attachment it reads must already be persisted.
+ * Dashboard review tool: re-executes every panel's ES|QL query and calls a
+ * holistic LLM judge, returning structured findings the main agent can act on
+ * via generate_dashboard. See the tool description for the usage contract.
  */
 export const reviewDashboardTool = (): BuiltinSkillBoundedTool<typeof reviewDashboardSchema> => ({
   id: dashboardTools.reviewDashboard,
@@ -87,7 +79,7 @@ Returns findings with severity (critical / warning / suggestion) and plain-prose
         ],
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
       logger.error(`Error in review_dashboard tool: ${message}`);
       return {
         results: [createErrorResult(`Failed to review dashboard: ${message}`)],
