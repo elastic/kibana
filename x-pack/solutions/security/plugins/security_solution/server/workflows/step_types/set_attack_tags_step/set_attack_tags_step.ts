@@ -6,9 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { DETECTION_ENGINE_ATTACKS_TAGS_URL } from '../../../../common/constants';
 import { setAttackTagsStepCommonDefinition } from '../../../../common/workflows/step_types/set_attack_tags_step/set_attack_tags_step_common';
+import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
 
 export const setAttackTagsStepDefinition = createServerStepDefinition({
   ...setAttackTagsStepCommonDefinition,
@@ -22,9 +22,7 @@ export const setAttackTagsStepDefinition = createServerStepDefinition({
     const ids = Array.isArray(attackIds) ? attackIds : [attackIds];
 
     try {
-      const { status: responseStatus, body } = await context.contextManager.callKibanaApi<
-        Record<string, unknown>
-      >({
+      await context.contextManager.callKibanaApi<Record<string, unknown>>({
         method: 'POST',
         path: DETECTION_ENGINE_ATTACKS_TAGS_URL,
         body: {
@@ -36,14 +34,6 @@ export const setAttackTagsStepDefinition = createServerStepDefinition({
           update_related_alerts: updateRelatedAlerts,
         },
       });
-
-      if (responseStatus >= 400) {
-        throw new ExecutionError({
-          type: 'ApiError',
-          message: `Failed to set attack tags: HTTP ${responseStatus}`,
-          details: { body },
-        });
-      }
 
       const addedCount = tagsToAdd.length;
       const removedCount = tagsToRemove.length;
@@ -58,14 +48,7 @@ export const setAttackTagsStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      if (error instanceof ExecutionError) {
-        throw error;
-      }
-      throw new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: { error },
-      });
+      throw toAlertApiExecutionError(error, 'set attack tags');
     }
   },
 });
