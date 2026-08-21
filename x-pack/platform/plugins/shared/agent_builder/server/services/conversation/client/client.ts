@@ -484,21 +484,23 @@ class ConversationClientImpl implements ConversationClient {
 
     await this.getDocumentWithAccess({ conversationId, access: 'delete' });
 
-    // Cascade — find children (persistent sub-agent conversations), recursively delete them (best-effort)
+    // Cascade — find children (persistent sub-agent conversations), delete them
+    // concurrently (best-effort per child; the `visited` guard is race-free
+    // because its has/add pair runs synchronously with no `await` between).
     const childIds = (await this.findChildConversationIds(conversationId)).filter(
       (id) => id !== conversationId && !visited.has(id)
     );
-    for (const childId of childIds) {
-      try {
-        await this.deleteWithCascade(childId, visited);
-      } catch (err) {
-        this.logger.warn(
-          `Failed to cascade-delete child conversation ${childId} of ${conversationId}: ${
-            (err as Error)?.message ?? String(err)
-          }`
-        );
-      }
-    }
+    await Promise.all(
+      childIds.map((childId) =>
+        this.deleteWithCascade(childId, visited).catch((err) => {
+          this.logger.warn(
+            `Failed to cascade-delete child conversation ${childId} of ${conversationId}: ${
+              (err as Error)?.message ?? String(err)
+            }`
+          );
+        })
+      )
+    );
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
