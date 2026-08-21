@@ -39,6 +39,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { loadElasticSkills } from './skills/elastic_skills';
 
 export class AgentBuilderPlugin
   implements
@@ -191,6 +192,10 @@ export class AgentBuilderPlugin
     });
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
+    });
+
+    loadElasticSkills({ logger: this.logger.get('elastic-skills') }).forEach((skill) => {
+      serviceSetups.skills.registerSkill(skill);
     });
 
     return {
