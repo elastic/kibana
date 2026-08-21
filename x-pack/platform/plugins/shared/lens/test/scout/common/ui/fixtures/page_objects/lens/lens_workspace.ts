@@ -424,11 +424,6 @@ export class LensWorkspace {
     await this.shareModal.waitFor({ state: 'hidden' });
   }
 
-  /** Closes the Lens settings menu. */
-  async closeSettingsMenu() {
-    await this.settingsButton.click();
-    await this.settingsMenu.waitFor({ state: 'hidden' });
-  }
 
   /** Toggles the auto-apply setting. */
   async toggleAutoApply() {
