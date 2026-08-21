@@ -9,7 +9,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import Chalk from 'chalk';
+import chalk from 'chalk';
 
 import help from './help';
 import { Command } from 'commander';
@@ -19,7 +19,7 @@ Command.prototype.error = function (err) {
 
   console.log(
     `
-${Chalk.white.bgRed(' ERROR ')} ${err}
+${chalk.white.bgRed(' ERROR ')} ${err}
 
 ${help(this, '  ')}
 `
