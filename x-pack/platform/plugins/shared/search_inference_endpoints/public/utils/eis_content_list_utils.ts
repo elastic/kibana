@@ -126,7 +126,8 @@ export const createEisFieldDefinitions = (models: GroupedModel[]): FieldDefiniti
       resolveIdToDisplay: (id) =>
         TASK_TYPE_FILTERS.find(({ category }) => category === id)?.label ?? id,
       resolveDisplayToId: (displayValue) =>
-        TASK_TYPE_FILTERS.find(({ label }) => label === displayValue)?.category,
+        TASK_TYPE_FILTERS.find(({ label }) => label.toLowerCase() === displayValue.toLowerCase())
+          ?.category,
       resolveFuzzyDisplayToIds: (displayValue) =>
         TASK_TYPE_FILTERS.filter(({ label }) => matchesPartial(label, displayValue)).map(
           ({ category }) => category

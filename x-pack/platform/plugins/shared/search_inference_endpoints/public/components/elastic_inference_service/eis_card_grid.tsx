@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, useCurrentEuiBreakpoint } from '@elastic/eui';
 import { useContentListItems } from '@kbn/content-list-provider';
 import { getItemModelId, toGroupedModel } from '../../utils/eis_content_list_utils';
-import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelCard } from './model_card';
 
 interface EisCardGridProps {
@@ -20,10 +19,6 @@ interface EisCardGridProps {
 export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
   const { items } = useContentListItems();
   const breakpoint = useCurrentEuiBreakpoint();
-
-  if (items.length === 0) {
-    return <EisNoModelsPrompt />;
-  }
 
   return (
     <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">

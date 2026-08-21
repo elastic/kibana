@@ -99,7 +99,9 @@ describe('ElasticInferenceServiceModelsPage', () => {
     const { container, getByTestId, queryByTestId } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.change(getByTestId(SEARCH_BOX), { target: { value: 'Jina Reranker v2' } });
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
+    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
@@ -129,7 +131,9 @@ describe('ElasticInferenceServiceModelsPage', () => {
   it('shows "No models found" when filters match nothing', async () => {
     const { getByTestId, getByText } = await renderPopulatedPage();
 
-    fireEvent.change(getByTestId(SEARCH_BOX), { target: { value: 'nonexistent-model-xyz-999' } });
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'nonexistent-model-xyz-999' } });
+    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
 
     await waitFor(() => expect(getByText('No models found')).toBeInTheDocument());
   });

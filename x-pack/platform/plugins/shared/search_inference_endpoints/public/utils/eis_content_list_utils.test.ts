@@ -171,7 +171,7 @@ describe('createEisFieldDefinitions', () => {
   it('resolves task-type categories by display label', () => {
     expect(category.fieldName).toBe(EIS_CATEGORY_FILTER_ID);
     expect(category.resolveIdToDisplay('Rerank')).toBe('Rerank');
-    expect(category.resolveDisplayToId('Embedding')).toBe('Embedding');
+    expect(category.resolveDisplayToId('embedding')).toBe('Embedding');
     expect(category.resolveFuzzyDisplayToIds?.('rer')).toEqual(['Rerank']);
   });
 });
