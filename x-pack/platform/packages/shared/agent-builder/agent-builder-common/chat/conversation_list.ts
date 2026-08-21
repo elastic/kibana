@@ -7,4 +7,19 @@
 
 export interface ConversationListOptions {
   agentId?: string;
+  filters?: ConversationSearchFilters;
+}
+
+export interface ConversationExtendedFieldFilter {
+  key: string;
+  value?: string;
+  exists?: boolean;
+}
+
+export interface ConversationSearchFilters {
+  template?: {
+    id?: string;
+    version?: number;
+  };
+  extendedFields?: ConversationExtendedFieldFilter[];
 }

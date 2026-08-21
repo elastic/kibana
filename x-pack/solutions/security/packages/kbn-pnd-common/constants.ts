@@ -37,6 +37,9 @@ export const buildSkillUrl = (skillId: string) =>
 export const PND_INVESTIGATIONS_URL = `${PND_INTERNAL_URL}/investigations` as const;
 export const PND_INVESTIGATION_URL_TEMPLATE = `${PND_INVESTIGATIONS_URL}/{id}` as const;
 
+/** All proposals across all investigations — Brief queue (one row per Proposal). */
+export const PND_PROPOSALS_URL = `${PND_INTERNAL_URL}/proposals` as const;
+
 export const buildInvestigationUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
@@ -146,6 +149,16 @@ export const TEMPLATE_IDS = [
   TEMPLATE_ID_PROPOSAL,
   TEMPLATE_ID_INCIDENT,
 ] as const;
+
+/**
+ * Current revision of the PND conversation templates. Producers stamp this onto
+ * every record they create so a later template revision does not retroactively
+ * change how already-persisted records are validated or rendered.
+ *
+ * Bump when a template gains, removes, or changes the meaning of a field.
+ * Records written before the bump keep their original value.
+ */
+export const TEMPLATE_VERSION_CURRENT = 1 as const;
 
 export const API_VERSIONS = {
   internal: {

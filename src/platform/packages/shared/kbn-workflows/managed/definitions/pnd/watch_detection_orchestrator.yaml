@@ -1,0 +1,130 @@
+version: '1'
+name: Detection Watch
+description: >
+  Detection Watch Orchestrator (D10, 5th Watch tier). Reactive: invoked when a
+  producing Watch (Dark/Deep/AD) attaches a Detection Change Signal to an
+  Investigation, or when the Watch Floor surfaces a Rule-Tuning trigger on a
+  proposal. Owns the detection-change lifecycle: routes coverage-gap signals to
+  the Rule Creation Worker and false-positive triggers to the Rule Tuning Worker,
+  then emits their DRAFT, approval-gated proposals. Never creates or edits a
+  detection rule directly — all output is a proposal for analyst approval.
+enabled: true
+tags:
+  - watch
+  - watch-detection
+settings:
+  timeout: '15m'
+  concurrency:
+    key: 'watch-detection-orchestrator'
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Detection coverage gaps & rule tuning
+        autonomyLevel: 3
+        handoff: proposal
+        onDemand: true
+        draft: true
+        cadence: reactive
+        mode: on-signal
+        runAs: pnd-watch-service
+        ui:
+          color: '#8b5cf6'
+          icon: inspect
+          order: 40
+        scopeSummary: Detection rules - Investigations - alert history
+        scopes:
+          - name: Detection rules
+            access: full
+            label: Read
+          - name: Investigations
+            access: full
+            label: Read
+          - name: Alert history
+            access: full
+            label: Read
+        callables:
+          - id: rule-creation
+            name: Rule creation
+            kind: worker
+            summary: On coverage-gap signal - drafts a new detection rule proposal
+            gated: true
+            enabled: true
+          - id: rule-tuning
+            name: Rule tuning
+            kind: worker
+            summary: On false-positive trigger - drafts a rule-tuning proposal
+            gated: true
+            enabled: true
+  # Route 1: a coverage gap was surfaced -> draft a rule-creation proposal.
+  # Gated with an explicit `type: if` block (the compiler path proven by floor's
+  # escalate + alert_analysis); a bare `if:` on a workflow.execute→worker step
+  # silently skips the child, so we wrap creation + emit in a condition block.
+  #
+  # Reads inputs.* not event.*: Detection Watch is always invoked via workflow.execute
+  # (from Dark/Deep's escalate_to_detection step, or Floor's dispatch_detection_watch_tuning
+  # step), which populates context.inputs on this execution, never context.event. The prior
+  # event.* conditions always evaluated false (KQL `field:*` exists-check against a field
+  # that's never populated for a workflow.execute-invoked child), silently skipping both
+  # routes end-to-end -- confirmed live: execution 94440c98 received a real
+  # inputs.detectionChangeSignal payload but both route_rule_creation/route_rule_tuning
+  # nested steps never ran.
+  - name: route_rule_creation
+    type: if
+    condition: 'inputs.detectionChangeSignal.sourceWatch:*'
+    steps:
+      - name: run_rule_creation
+        type: workflow.execute
+        with:
+          workflow-id: 'system-security-watch-detection-rule-creation-worker'
+          inputs:
+            detectionChangeSignal: '${{ inputs.detectionChangeSignal }}'
+            investigationId: '{{ inputs.investigationId }}'
+      - name: emit_rule_creation_proposal
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: '/internal/pnd/investigations/_emit_proposal'
+          headers:
+            kbn-xsrf: 'true'
+            Elastic-Api-Version: '1'
+          body:
+            sourceWatch: watch-detection
+            draft: true
+            hilRequired: true
+            workerRun: '${{ steps.run_rule_creation.output.workerRun }}'
+  # Route 2: a false-positive trigger was surfaced -> draft a rule-tuning proposal.
+  - name: route_rule_tuning
+    type: if
+    condition: 'inputs.ruleTuningTrigger.investigationId:*'
+    steps:
+      - name: run_rule_tuning
+        type: workflow.execute
+        with:
+          workflow-id: 'system-security-watch-detection-rule-tuning-worker'
+          inputs:
+            ruleTuningTrigger: '${{ inputs.ruleTuningTrigger }}'
+            investigationId: '{{ inputs.investigationId }}'
+      - name: emit_rule_tuning_proposal
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: '/internal/pnd/investigations/_emit_proposal'
+          headers:
+            kbn-xsrf: 'true'
+            Elastic-Api-Version: '1'
+          body:
+            sourceWatch: watch-detection
+            draft: true
+            hilRequired: true
+            workerRun: '${{ steps.run_rule_tuning.output.workerRun }}'
+

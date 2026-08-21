@@ -1406,8 +1406,11 @@ x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/secur
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1424,6 +1427,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/
 x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
@@ -3534,6 +3538,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/automatic_troubleshooting @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/endpoint_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows

@@ -1,0 +1,106 @@
+version: '1'
+name: Deep Watch
+description: >
+  Deep Watch Orchestrator (D10). Specialist, draft-only depth. Activated by
+  escalation from Dark Watch or an analyst. Runs the Deep Worker under the demo
+  service identity, emits a DRAFT forensic proposal, and gates any containment
+  behind human review. Never auto-executes response actions.
+enabled: true
+tags:
+  - watch
+  - watch-deep
+settings:
+  timeout: '25m'
+  concurrency:
+    key: 'watch-deep-orchestrator'
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Deep investigation & hunts
+        autonomyLevel: 3
+        handoff: records
+        onDemand: true
+        draft: true
+        cadence: manual
+        from: 8
+        to: 18
+        mode: window
+        runAs: pnd-watch-service
+        hilRequired: true
+        ui:
+          color: '#8b5cf6'
+          icon: console
+          order: 40
+        scopeSummary: Security indices - EDR - DNS
+        scopes:
+          - name: Security indices
+            access: full
+            label: Read
+          - name: EDR telemetry
+            access: full
+            label: Read
+          - name: DNS - netflow
+            access: full
+            label: Read
+        callables:
+          - id: deep-watch-forensics
+            name: Forensic analysis
+            kind: skill
+            summary: On-demand - patient-zero timeline, lateral movement, persistence
+            gated: false
+            enabled: true
+          - id: endpoint-forensic-analysis
+            name: Endpoint forensics
+            kind: skill
+            summary: EDR telemetry - process trees, IoC validation, evidence packaging
+            gated: false
+            enabled: true
+  - name: run_deep_worker
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-deep-worker'
+      inputs:
+        # Same fix as Dark Watch's run_dark_worker: workflow.execute populates
+        # context.inputs on the child, never context.event -- event.escalation is always
+        # undefined when Deep is invoked from Dark's escalate_to_deep step. There is no
+        # `trigger` context key at all (buildWorkflowContext only exposes
+        # event/inputs/output/workflow/consts), so the prior `default: trigger.context`
+        # fallback never resolved; dropped rather than replaced.
+        escalation: '${{ inputs.escalation }}'
+  - name: emit_draft_proposal
+    # Draft-only proposal; HIL-gated. No response action executes here.
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: '/internal/pnd/investigations/_emit_proposal'
+      headers:
+        kbn-xsrf: 'true'
+        Elastic-Api-Version: '1'
+      body:
+        sourceWatch: watch-deep
+        draft: true
+        hilRequired: true
+        workerRun: '${{ steps.run_deep_worker.output.workerRun }}'
+  # Route a surfaced detection coverage gap to the Detection Watch (5th tier). Conditional.
+  - name: dispatch_detection_watch
+    if: "{{ steps.run_deep_worker.output.workerRun.detectionChangeSignalGaps and steps.run_deep_worker.output.workerRun.detectionChangeSignalGaps != '' and steps.run_deep_worker.output.workerRun.detectionChangeSignalGaps != '[]' and steps.run_deep_worker.output.workerRun.detectionChangeSignalGaps != 'null' }}"
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-detection'
+      inputs:
+        investigationId: '{{ steps.run_deep_worker.output.workerRun.investigationId }}'
+        detectionChangeSignal:
+          sourceWatch: watch-deep
+          runId: '{{ steps.run_deep_worker.output.workerRun.runId | default: execution.id }}'
+          investigationId: '{{ steps.run_deep_worker.output.workerRun.investigationId }}'
+          gaps: '{{ steps.run_deep_worker.output.workerRun.detectionChangeSignalGaps }}'

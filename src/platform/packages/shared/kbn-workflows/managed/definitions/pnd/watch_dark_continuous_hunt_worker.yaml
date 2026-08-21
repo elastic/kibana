@@ -1,0 +1,129 @@
+version: '1'
+name: Dark Watch Continuous Threat Hunt Worker
+description: >
+  Dark Watch continuous-hunt Worker (D10). Scheduled batch sweep that lifts the
+  continuous_threat_hunt behavior from the Black Hat continuous-hunt POC
+  (kibana#278905): selects up to 10 candidate threat reports that have not been
+  hunted recently, runs the two-tier hunt (Tier 1 deterministic IOC/technique
+  lookup -> Tier 2 LLM behavioral corroboration) per report via the internal
+  hunt_orchestrator service, and emits a typed finding per report the Dark
+  Orchestrator turns into a Proposal. Clean runs always write report feedback
+  (last_hunted_at / corroborated_rank_score) via hunt_orchestrator's own
+  writeHuntFeedbackSafe side effect — the cooldown-aware corpus improvement
+  loop. Investigation opens only for reviewable/corroborated outputs; this
+  Worker never lifts the Black Hat findings index or the Intelligence Hub.
+enabled: true
+tags:
+  - watch-worker
+  - watch-dark-worker
+  - continuous-hunt
+settings:
+  timeout: '30m'
+  concurrency:
+    key: 'watch-dark-hunt-worker'
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    # CWL policy bag (Option 2). Dark Watch hunts with the threat-intelligence skill.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - threat-intelligence
+        # Interim capacity knobs (soft defaults until buildout A8 hardens
+        # numbers) — every 4h, up to 10 candidate reports per scheduled run.
+        hunt:
+          cadence: '4h'
+          batch_size: 10
+          tier2_when: on_hits
+
+  - name: load_hunt_candidates
+    # Tier 1 candidate selection: top enriched threat reports that carry at
+    # least one IOC or behavior technique and have NOT been hunted within the
+    # cadence window. Ranked by corroborated rank score. This is the exact
+    # selection predicate from the Black Hat continuous_threat_hunt POC
+    # (kibana#278905), retargeted to a per-report Worker invocation.
+    type: elasticsearch.search
+    on-failure:
+      continue: false
+    with:
+      index: .kibana-threat-reports
+      size: 10
+      query:
+        bool:
+          filter:
+            - bool:
+                should:
+                  - nested:
+                      path: extracted.iocs
+                      query:
+                        exists:
+                          field: extracted.iocs.value
+                  - nested:
+                      path: extracted.behaviors
+                      query:
+                        exists:
+                          field: extracted.behaviors.technique_id
+                minimum_should_match: 1
+          must_not:
+            - range:
+                feedback.last_hunted_at:
+                  gte: 'now-4h'
+      sort:
+        - corroborated_rank_score:
+            order: desc
+            missing: _last
+        - rank_score:
+            order: desc
+            missing: _last
+        - '@timestamp':
+            order: desc
+
+  - name: hunt_each_report
+    # Per-report two-tier hunt. `tier2_when: on_hits` is the product default
+    # (use `always` only for demo reliability — see mvp-slice.md). Each report
+    # calls hunt_coordinator (service) via the internal hunt_orchestrator
+    # route; that service runs Tier 1 -> Tier 2 (when gated in), persists
+    # findings, and writes hunt feedback (last_hunted_at / rank score) so clean
+    # runs stay cooldown-aware. A single report's failure must not kill the
+    # batch.
+    type: foreach
+    foreach: '{{ steps.load_hunt_candidates.output.hits.hits }}'
+    steps:
+      - name: run_hunt_orchestrator
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: /api/threat_intelligence/hunt_orchestrator
+          headers:
+            elastic-api-version: '2023-10-31'
+            x-elastic-internal-origin: kibana
+          body:
+            report_id: '{{ foreach.item._id }}'
+            tier2_when: on_hits
+
+  - name: worker_output
+    # Typed WorkerRun the Dark Orchestrator emits as a canonical Proposal.
+    # Reviewable = at least one report corroborated (tier1_and_tier2) or
+    # produced environment hits; clean = no reviewable findings (feedback was
+    # still written by the hunt service itself).
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-dark
+        workerKind: continuous_threat_hunt
+        finding: >-
+          Continuous threat hunt sweep completed.
+        confidence: 0
+        rationale: >-
+          Batch hunt over candidate threat reports; per-report findings are
+          persisted by the hunt_orchestrator service and fed back onto
+          .kibana-threat-reports.
+        candidateCount: '${{ steps.load_hunt_candidates.output.hits.hits | size }}'
+        investigationId: '{{ inputs.investigationId }}'
+        escalation: '{{ inputs.escalation }}'

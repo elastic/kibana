@@ -13,10 +13,14 @@ export const threatHuntingSkill = defineSkillType({
   name: 'threat-hunting',
   basePath: 'skills/security',
   description:
-    'Hypothesis-driven threat hunting using iterative ES|QL exploration. ' +
-    'Covers IOC search, anomaly identification, baseline comparison, lateral movement tracking, ' +
-    'and converting hunt findings into actionable intelligence. ' +
-    'Use when investigating suspected threats, running proactive hunts, or analyzing suspicious activity patterns.',
+    'Hypothesis-driven threat hunting using iterative ES|QL exploration, with NO source report ' +
+    'or advisory in hand. Covers IOC search, anomaly identification, baseline comparison, ' +
+    'lateral movement tracking, and converting hunt findings into actionable intelligence. ' +
+    'Use when investigating suspected threats, running proactive hunts from an analyst ' +
+    'hypothesis, or analyzing suspicious activity patterns. NOT for "run a threat hunt for ' +
+    'this report/advisory/paste" — when the user has a specific threat-intel report, blog ' +
+    'post, or pasted advisory to hunt against, use the `threat-intelligence` skill instead ' +
+    "(it sweeps the environment for that report's IOCs/techniques in one call).",
   content: `# Threat Hunting Guide
 
 ## When to Use This Skill
@@ -81,7 +85,17 @@ The following embedded query templates provide common hunting patterns (availabl
 - Hunt on 7-30 day windows for behavioral patterns; use shorter windows for IOC sweeps
 - Operationalize confirmed findings by converting hunt queries into detection rules
 - Prefer ECS field names: process.name, process.executable, event.action, source.ip, destination.ip, user.name, host.name
-- Document your hunting trail — future analysts need the context`,
+- Document your hunting trail — future analysts need the context
+- **Always re-execute the query when the user asks to "run it now", "run again", or "run the hunt" — even if you already generated or ran an equivalent query earlier in the conversation.** Answering from conversational context instead of a fresh 'platform.core.execute_esql' call risks reporting stale or hallucinated results; the user's request for re-execution is a signal that they want live, current data, not a recap.
+
+## Receiving a Forensic Handoff (BlackHat Phase 2)
+
+When invoked after a forensic reconstruction, you receive a structured IoC set (file hashes, C2 destinations, registry persistence keys, renamed file extensions, process chain). Run a cross-environment sweep for those IoCs across **all** enrolled endpoints, not just the originally investigated host:
+
+1. For each IoC, generate an ES|QL query scoped to the full fleet (no host.name filter) within the relevant time window.
+2. Report results as a per-endpoint match table — which hosts show the IoC, the matched indicator, and first-seen timestamp.
+3. After surfacing matches, recommend specific containment actions (malware scan + isolation on affected hosts) and defer to **endpoint-response-actions** for execution. Do not run write actions from this skill.
+4. Close with a clear question: confirm whether the analyst wants to proceed with containment on the affected hosts.`,
   referencedContent: [
     {
       relativePath: './queries',

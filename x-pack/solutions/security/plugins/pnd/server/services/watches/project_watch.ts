@@ -7,6 +7,7 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
+  AutonomyLevel,
   ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
@@ -21,9 +22,10 @@ import type {
 } from '@kbn/pnd-common';
 import { coverageFromSchedule } from '@kbn/pnd-common';
 
-/** Static watch policy bag from `consts.watch_policy`. */
-interface WatchPolicyAttrs {
+/** Temporary policy bag on the workflow watch_policy data.set step. */
+interface WatchAgentStepAttrs {
   mandate?: string;
+  autonomyLevel?: AutonomyLevel;
   handoff?: ScheduleHandoff;
   scopes?: WatchScope[];
   onDemand?: boolean;
@@ -57,6 +59,12 @@ const asNumber = (value: unknown, fallback: number): number =>
 const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
 
+const asAutonomyLevel = (value: unknown): AutonomyLevel => {
+  const n = asNumber(value, 1);
+  if (n >= 1 && n <= 5) return n as AutonomyLevel;
+  return 1;
+};
+
 const asScopeAccess = (value: unknown): ScopeAccess => {
   if (value === 'full' || value === 'masked' || value === 'denied') return value;
   return 'full';
@@ -75,6 +83,11 @@ const asHandoff = (value: unknown): ScheduleHandoff => {
   return 'none';
 };
 
+const asCadence = (value: unknown): ScheduleCadence => {
+  if (value === 'stream' || value === 'sweep' || value === 'manual') return value;
+  return 'manual';
+};
+
 const asMode = (value: unknown): ScheduleMode => {
   if (value === 'always' || value === 'window' || value === 'demand') return value;
   return 'demand';
@@ -82,10 +95,16 @@ const asMode = (value: unknown): ScheduleMode => {
 
 export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
-): WatchPolicyAttrs | undefined => {
-  const policy = definition?.consts?.watch_policy;
-  if (!isRecord(policy)) return undefined;
-  return policy as unknown as WatchPolicyAttrs;
+): WatchAgentStepAttrs | undefined => {
+  if (!definition?.steps) return undefined;
+  for (const step of definition.steps) {
+    const withBlock = (step as { with?: unknown }).with;
+    if (!isRecord(withBlock)) continue;
+    const watch = withBlock.watch;
+    if (!isRecord(watch)) continue;
+    return watch as unknown as WatchAgentStepAttrs;
+  }
+  return undefined;
 };
 
 export const normalizeWorkflowTriggerType = (raw: string | undefined): WorkflowTriggerType => {
@@ -116,7 +135,7 @@ export const projectTriggers = (
 
 export const projectSchedule = (
   triggers: WatchTriggerProjection[],
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchAgentStepAttrs | undefined
 ): WatchSchedule => {
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
@@ -139,13 +158,17 @@ export const projectSchedule = (
     from: asNumber(policy?.from, 8),
     to: asNumber(policy?.to, 18),
     onDemand,
-    cadence: hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual',
+    cadence: asCadence(
+      manualOnly
+        ? 'manual'
+        : policy?.cadence ?? (hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual')
+    ),
     every: asNumber(policy?.every, 60),
     handoff: asHandoff(policy?.handoff),
   };
 };
 
-const projectScopes = (policy: WatchPolicyAttrs | undefined): WatchScope[] => {
+const projectScopes = (policy: WatchAgentStepAttrs | undefined): WatchScope[] => {
   if (!policy?.scopes || !Array.isArray(policy.scopes)) return [];
   return policy.scopes.map((scope) => ({
     name: asString(scope.name, 'Scope'),
@@ -202,7 +225,7 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
  */
 export const projectCallablesFromDefinition = (
   definition: WorkflowYaml | null | undefined,
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchAgentStepAttrs | undefined
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
   const workflowIds = new Set<string>();
@@ -315,6 +338,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     scopeSummary: asString(policy?.scopeSummary, '—'),
     scopes: projectScopes(policy),
     callables: projectCallablesFromDefinition(definition, policy),
+    autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.
       runs7d: null,
@@ -335,21 +359,24 @@ tags:
   - watch-custom
 triggers:
   - type: manual
-consts:
-  watch_policy:
-    mandate: ${JSON.stringify(name)}
-    handoff: none
-    onDemand: true
-    draft: false
-    cadence: manual
-    mode: demand
-    ui:
-      color: "#6b7280"
-      icon: sparkles
-    scopeSummary: Custom
-    scopes: []
-    callables: []
 steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: ${JSON.stringify(name)}
+        autonomyLevel: 1
+        handoff: none
+        onDemand: true
+        draft: false
+        cadence: manual
+        mode: demand
+        ui:
+          color: "#6b7280"
+          icon: sparkles
+        scopeSummary: Custom
+        scopes: []
+        callables: []
   - name: run_watch
     type: console
     with:

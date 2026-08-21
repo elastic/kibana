@@ -11,6 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 export type PndPluginSetup = Record<string, never>;
 export type PndPluginStart = Record<string, never>;
@@ -19,11 +20,17 @@ export interface PndSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  // Optional because Agent Builder can be disabled; when absent, Watch-created
+  // Conversations still get an `agent_id` stamped on them (template_mapping.ts)
+  // but nothing is registered to resolve it against — same fail-soft posture
+  // as the `agentBuilder` dependency already carried on PndStartDependencies.
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface PndStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type PndRouter = IRouter;

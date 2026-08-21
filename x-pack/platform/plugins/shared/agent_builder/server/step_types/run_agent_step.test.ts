@@ -796,7 +796,62 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         outputTokens: 50,
         cachedTokens: 20,
         totalTokens: 150,
+        latencyMs: expect.any(Number),
       });
+    });
+
+    it('captures the model id reported by the provider', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'hello' },
+            model_usage: {
+              connector_id: 'c',
+              model: 'claude-4-5-haiku',
+              llm_calls: 1,
+              input_tokens: 100,
+              output_tokens: 50,
+            },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).toEqual(
+        expect.objectContaining({ modelId: 'claude-4-5-haiku' })
+      );
+    });
+
+    it('measures step latency in the output metadata', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'hello' },
+            model_usage: {
+              connector_id: 'c',
+              llm_calls: 1,
+              input_tokens: 10,
+              output_tokens: 5,
+            },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(typeof res.output?.metadata?.usage.latencyMs).toBe('number');
+      expect(res.output?.metadata?.usage.latencyMs).toBeGreaterThanOrEqual(0);
     });
 
     it('accumulates token usage across multiple rounds', async () => {
@@ -849,6 +904,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         outputTokens: 200,
         cachedTokens: 120,
         totalTokens: 700,
+        latencyMs: expect.any(Number),
       });
     });
 
@@ -874,6 +930,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         outputTokens: 0,
         cachedTokens: 0,
         totalTokens: 0,
+        latencyMs: expect.any(Number),
       });
     });
 
@@ -943,6 +1000,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         outputTokens: 60,
         cachedTokens: 30,
         totalTokens: 210,
+        latencyMs: expect.any(Number),
       });
     });
   });

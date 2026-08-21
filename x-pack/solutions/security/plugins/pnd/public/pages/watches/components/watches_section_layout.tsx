@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type {
@@ -28,6 +28,26 @@ const readCollapsed = (): boolean => {
   } catch {
     return false;
   }
+};
+
+const WatchesSubnavContext = React.createContext<{
+  expand: () => void;
+  isCollapsed: boolean;
+}>({ expand: () => undefined, isCollapsed: false });
+
+export const WatchesSubnavExpandControl: React.FC = () => {
+  const { expand, isCollapsed } = React.useContext(WatchesSubnavContext);
+  if (!isCollapsed) {
+    return null;
+  }
+  return (
+    <EuiButtonIcon
+      iconType="menuRight"
+      aria-label={i18n.SUBNAV_EXPAND}
+      onClick={expand}
+      data-test-subj="pndWatchesSubnavExpand"
+    />
+  );
 };
 
 interface WatchesSectionLayoutProps {
@@ -87,24 +107,25 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   );
 
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="pndWatchesSectionLayout">
-      {!isCollapsed ? (
-        /**
-         * `sticky` must be passed explicitly. The EUI docs claim `EuiPageTemplate` makes its sidebar
-         * sticky by default and that you opt out with `sticky={false}`, but the template never sets
-         * it and `EuiPageSidebar` defaults to `sticky = false`.
-         *
-         * With it, the page scrolls as one inside the chrome's application scroll container while the
-         * subnav stays pinned, and a subnav taller than the viewport scrolls on its own — `sticky`
-         * brings `overflow-y: auto` and `max-height: calc(100vh - offset)` with it. Nothing here may
-         * introduce an `overflow` ancestor; see the note in `app_chrome_layout.tsx`.
-         */
-        <EuiPageTemplate.Sidebar
-          paddingSize="none"
-          minWidth={PND_WATCHES_SUBNAV_WIDTH}
-          sticky
-          css={css`
-            /**
+    <WatchesSubnavContext.Provider value={{ expand: () => setCollapsed(false), isCollapsed }}>
+      <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="pndWatchesSectionLayout">
+        {!isCollapsed ? (
+          /**
+           * `sticky` must be passed explicitly. The EUI docs claim `EuiPageTemplate` makes its sidebar
+           * sticky by default and that you opt out with `sticky={false}`, but the template never sets
+           * it and `EuiPageSidebar` defaults to `sticky = false`.
+           *
+           * With it, the page scrolls as one inside the chrome's application scroll container while the
+           * subnav stays pinned, and a subnav taller than the viewport scrolls on its own — `sticky`
+           * brings `overflow-y: auto` and `max-height: calc(100vh - offset)` with it. Nothing here may
+           * introduce an `overflow` ancestor; see the note in `app_chrome_layout.tsx`.
+           */
+          <EuiPageTemplate.Sidebar
+            paddingSize="none"
+            minWidth={PND_WATCHES_SUBNAV_WIDTH}
+            sticky
+            css={css`
+              /**
              * EUI sets max-block-size via inline style to calc(100vh - euiFixedHeadersOffset).
              * Kibana's grid layout sets --euiFixedHeadersOffset: 0 ("no fixed header"), so EUI
              * produces max-block-size: 100vh. But the actual scroll container (#app-main-scroll)
@@ -120,20 +141,21 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
              *
              * !important is required because EUI applies this via an inline style.
              */
-            max-block-size: calc(
-              var(--kbn-layout--application-height, 100vh) -
-                var(--kbn-layout--application-margin-top, 0px) -
-                var(--kbn-layout--application-margin-bottom, 0px)
-            ) !important;
-          `}
-        >
-          <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
-        </EuiPageTemplate.Sidebar>
-      ) : null}
-      <AppHeader title={title} description={description} badges={badges} menu={menu} />
-      <EuiPageTemplate.Section paddingSize="l" grow>
-        {children}
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+              max-block-size: calc(
+                var(--kbn-layout--application-height, 100vh) -
+                  var(--kbn-layout--application-margin-top, 0px) -
+                  var(--kbn-layout--application-margin-bottom, 0px)
+              ) !important;
+            `}
+          >
+            <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
+          </EuiPageTemplate.Sidebar>
+        ) : null}
+        <AppHeader title={title} description={description} badges={badges} menu={menu} />
+        <EuiPageTemplate.Section paddingSize="l" grow>
+          {children}
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </WatchesSubnavContext.Provider>
   );
 };

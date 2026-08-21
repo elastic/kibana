@@ -21,6 +21,12 @@ export interface ConverseStep {
   [k: string]: unknown;
 }
 
+export interface AgentBuilderConfigurationOverrides {
+  instructions?: string;
+  skillIds?: string[];
+  enableElasticCapabilities?: boolean;
+}
+
 export interface AgentBuilderConverseParams {
   /** Agent Builder agent id to invoke. */
   agentId: string;
@@ -37,6 +43,11 @@ export interface AgentBuilderConverseParams {
    * instead of sending a new free-text message via {@link input}.
    */
   promptResponses?: Record<string, unknown>;
+  /**
+   * Runtime configuration overrides for this execution only (e.g. skill_ids
+   * straight-replace used by Watch worker ai.agent steps).
+   */
+  configurationOverrides?: AgentBuilderConfigurationOverrides;
 }
 
 export interface AgentBuilderClientResponse {
@@ -106,6 +117,7 @@ export function createAgentBuilderClient({
     input,
     conversationId,
     promptResponses,
+    configurationOverrides,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -124,6 +136,24 @@ export function createAgentBuilderClient({
           // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
           _execution_mode: 'local',
           ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(configurationOverrides
+            ? {
+                configuration_overrides: {
+                  ...(configurationOverrides.instructions
+                    ? { instructions: configurationOverrides.instructions }
+                    : {}),
+                  ...(configurationOverrides.skillIds
+                    ? { skill_ids: configurationOverrides.skillIds }
+                    : {}),
+                  ...(configurationOverrides.enableElasticCapabilities !== undefined
+                    ? {
+                        enable_elastic_capabilities:
+                          configurationOverrides.enableElasticCapabilities,
+                      }
+                    : {}),
+                },
+              }
+            : {}),
         }),
       });
 

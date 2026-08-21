@@ -80,7 +80,8 @@ steps:
           machineType: c2-standard-16
           preemptible: true
           diskSizeGb: 150
-        timeout_in_minutes: 30
+          zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+        timeout_in_minutes: 60
         depends_on: build
         retry:
           automatic:

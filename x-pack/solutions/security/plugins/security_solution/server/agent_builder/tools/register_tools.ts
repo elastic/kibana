@@ -37,6 +37,12 @@ import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
+import {
+  analyseEnvironmentTool,
+  extractIocsTool,
+  huntBehaviorTool,
+  synthesizeAdvisoryTool,
+} from './threat_intelligence';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -108,6 +114,22 @@ export const registerTools = (
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+  }
+
+  // Threat-intelligence registry tools. Inline tools live on the skill;
+  // extractIocs + analyseEnvironment + huntBehavior + synthesizeAdvisory
+  // are globally registered (the skill is at its 7-inline-tool cap, so these
+  // tools live on the registry instead — huntOrchestrator moved inline in
+  // its place so the model sees the one-call Tier1+Tier2 default without a
+  // registry lookup; description wording alone did not change routing).
+  // huntOrchestratorTool is intentionally NOT registered here — it's
+  // inline-only (BuiltinSkillBoundedTool) and loaded directly via the
+  // skill's getInlineTools(), same as the other inline tools.
+  if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+    agentBuilder.tools.register(extractIocsTool);
+    agentBuilder.tools.register(analyseEnvironmentTool);
+    agentBuilder.tools.register(huntBehaviorTool);
+    agentBuilder.tools.register(synthesizeAdvisoryTool);
   }
 
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {

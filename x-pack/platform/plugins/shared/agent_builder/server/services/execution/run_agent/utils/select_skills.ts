@@ -10,11 +10,18 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 
 /**
- * Resolves the set of skills available to an agent based on its configuration:
+ * Resolves the set of skills available to an agent based on its (already effective,
+ * post-override) configuration:
  * - Explicitly selected skills via `skill_ids` (fetched with bulkGet)
  * - Built-in skills when `enable_elastic_capabilities` is true, excluding any
  *   marked `excludeFromElasticCapabilities` (those remain reachable via `skill_ids`)
  * - Additional skills from assigned plugins via `additionalSkillIds`
+ *
+ * `agentConfiguration.skill_ids` is expected to already reflect any runtime
+ * `configuration_overrides.skill_ids` — that override is applied earlier by replacing
+ * `skill_ids` outright (same as `tools`), not by intersecting here. See PR #280617 review:
+ * a defensive intersection at this layer silently dropped legitimate overrides that named an
+ * elastic-capability built-in whenever the agent also had a non-empty explicit `skill_ids`.
  *
  * Returns the merged, deduplicated list.
  */
@@ -71,7 +78,11 @@ export const selectSkills = async ({
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
 }): Promise<InternalSkillDefinition[]> => {
-  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration, additionalSkillIds });
+  const agentSkills = await resolveAgentSkills({
+    skills,
+    agentConfiguration,
+    additionalSkillIds,
+  });
   for (const skill of agentSkills) {
     skillsStore.add(skill);
   }

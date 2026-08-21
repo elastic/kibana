@@ -58,6 +58,7 @@ export type SkillsDirectoryStructure = Directory<{
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
       entity_analytics_leads: FileDirectory<{}>;
+      deep_watch: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
