@@ -117,6 +117,7 @@
     "@kbn/utility-types",
     "@kbn/xstate-utils",
     "@kbn/zod",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/data-source"
   ]
 }
