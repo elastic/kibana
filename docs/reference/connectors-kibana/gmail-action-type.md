@@ -173,7 +173,7 @@ Send a reply to an existing message, preserving the thread. The connector fetche
 
 ## Limitations [gmail-limitations]
 
-- **Write actions require OAuth 2.0 authorization code auth.** Elastic managed authentication is limited to `gmail.readonly`. The `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread` actions are not available with Elastic managed authentication.
+- **Write actions require OAuth 2.0 authorization code auth.** Elastic-managed authentication is limited to `gmail.readonly`. The `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread` actions are not available with Elastic-managed authentication.
 - **Existing connectors must be re-authorized.** Google does not re-prompt for consent when the requested scope changes. If you created a Gmail connector before write action support was added, edit the connector and re-authorize it so Google issues a token that includes `gmail.modify`.
 - **Permanent deletion is not supported.** Use `trashMessage` (reversible with `untrashMessage`). Gmail permanently removes trashed mail after 30 days.
 - **No attachments in `sendMessage` v1.** Attachment support is planned for a future release.
