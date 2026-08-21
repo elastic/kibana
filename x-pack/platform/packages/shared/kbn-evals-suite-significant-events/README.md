@@ -145,6 +145,8 @@ node scripts/evals run \
 | `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
+| `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |
+| `KI_QUERY_GENERATION_MAX_STEPS`         | Optional max reasoning steps override for KI query generation (integer 1-20) | suite default               |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |

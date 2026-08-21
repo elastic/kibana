@@ -45,6 +45,8 @@ export interface KIQueryGenerationEvaluationExample {
   output: {
     expected_categories?: string[];
     expect_stats?: boolean;
+    /** Eval-only deterministic outcome contract, e.g. expect_queries: false for an empty stream. */
+    expect_queries?: boolean;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
@@ -53,6 +55,9 @@ interface KIQueryGenerationTaskOutput {
   queries: Query[];
   toolUsage?: SignificantEventsToolUsage;
   traceId?: string | null;
+  /** Resolved KI source and grounding mode for this task's run. */
+  ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
+  grounding_mode?: 'baseline' | 'grounded';
   sample_logs?: string[];
   sample_docs?: Array<Record<string, unknown>>;
   query_attempts?: QueryAttempt[];
