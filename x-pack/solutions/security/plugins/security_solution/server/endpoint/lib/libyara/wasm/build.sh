@@ -9,7 +9,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
+# IMPORTANT: Update the version in 3rd party report as well: src/dev/run_licenses_csv_report.js
 YARA_VERSION="4.3.2"
+
 YARA_SHA256="a9587a813dc00ac8cdcfd6646d7f1c172f730cda8046ce849dfea7d3f6600b15"
 YARA_TARBALL="yara-${YARA_VERSION}.tar.gz"
 YARA_URL="https://github.com/VirusTotal/yara/archive/refs/tags/v${YARA_VERSION}.tar.gz"

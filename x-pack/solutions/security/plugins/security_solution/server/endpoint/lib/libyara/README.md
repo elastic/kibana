@@ -29,13 +29,16 @@ Should be in sync with Endpoint.
 
 See [`wasm/dist/ENGINE.md`](./wasm/dist/ENGINE.md) (generated) and Endpoint `cmake/dependencies.cmake`.
 
-Make sure version is in sync with the version used by Endpoint (endpoint-dev repo).
+> [!IMPORTANT]
+> Make sure version is in sync with the version used by Endpoint (endpoint-dev repo, `cmake/dependencies.cmake`).
 
 ### Version bump
 
-Update `YARA_VERSION` and `YARA_SHA256` in `build.sh`, then run the command below.
+- Update `YARA_VERSION` and `YARA_SHA256` in `build.sh`.
+- Rebuild WASM: see below.
+- **Important**: Update the version in 3rd party report (`src/dev/run_licenses_csv_report.js`).
 
-See versions here: https://github.com/VirusTotal/yara/releases
+See available versions here: https://github.com/VirusTotal/yara/releases
 
 ### Rebuild WASM
 
