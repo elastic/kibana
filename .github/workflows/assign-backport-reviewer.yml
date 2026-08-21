@@ -1,0 +1,37 @@
+name: Assign manual backport reviewer
+
+on:
+  pull_request_target:
+    branches:
+      - '8.19'
+      - '9.*'
+      - '[1-9][0-9]*.*'
+    types:
+      - labeled
+
+permissions:
+  contents: read
+
+jobs:
+  assign-reviewer:
+    name: Find reviewer for manual backport
+    runs-on: ubuntu-latest
+    if: |
+      github.event.label.name == 'backport' &&
+      github.event.pull_request.user.login != 'kibanamachine'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Assign reviewers
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const assignBackportReviewer = require('./.github/scripts/assign_backport_reviewer');
+            await assignBackportReviewer({ github, context, core });

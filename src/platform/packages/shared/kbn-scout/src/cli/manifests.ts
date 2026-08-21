@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import CliTable3 from 'cli-table3';
@@ -28,15 +29,35 @@ const manifestUpdateReporter = path.join(
   '/src/platform/packages/private/kbn-scout-reporting/src/reporting/playwright/manifest_updater'
 );
 
-async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
-  return await playwrightCLI.test(
-    { config: configPath, reporters: [manifestUpdateReporter], list: true, project: 'local' },
+export async function generateScoutConfigManifest(configPath: string, log?: ToolingLog) {
+  // passWithNoTests lets configs with zero tests exit cleanly (code 0) so we can
+  // unambiguously treat any non-zero exit as a real discovery failure (e.g. a syntax
+  // error during Playwright transpilation).
+  const result = await playwrightCLI.test(
+    {
+      config: configPath,
+      reporters: [manifestUpdateReporter],
+      list: true,
+      project: 'local',
+      passWithNoTests: true,
+    },
     {},
     log
   );
+
+  if (result.exitCode !== 0) {
+    throw createFailError(
+      `Failed to discover tests for Scout config at '${configPath}': ` +
+        `playwright --list exited with code ${result.exitCode}. ` +
+        `This usually means the config has a real error (e.g. a syntax/transpilation error) ` +
+        `rather than legitimately zero tests.`
+    );
+  }
+
+  return result;
 }
 
-async function updateScoutConfigManifests(
+export async function updateScoutConfigManifests(
   onlyOutdated: boolean,
   removeDangling: boolean,
   reload: boolean,
@@ -45,6 +66,7 @@ async function updateScoutConfigManifests(
 ) {
   const expectedManifestPaths: string[] = [];
   const updatedConfigPaths: string[] = [];
+  const failedConfigPaths: string[] = [];
   const ongoingManifestUpdates = new Set<Promise<any>>();
   const maxOngoingManifestUpdates = concurrencyLimit > 0 ? concurrencyLimit : 1;
 
@@ -77,9 +99,16 @@ async function updateScoutConfigManifests(
     // Start manifest update task
     log.info(`Generating manifest for test config at '${config.path}'`);
     const manifestUpdateTask = generateScoutConfigManifest(config.path, log)
-      .then(() => {
-        updatedConfigPaths.push(config.path);
-      })
+      .then(
+        () => {
+          updatedConfigPaths.push(config.path);
+        },
+        (reason) => {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          log.error(`Failed to generate manifest for test config at '${config.path}': ${message}`);
+          failedConfigPaths.push(config.path);
+        }
+      )
       .finally(() => {
         ongoingManifestUpdates.delete(manifestUpdateTask);
       });
@@ -89,6 +118,18 @@ async function updateScoutConfigManifests(
 
   // Wait for all manifest updates to complete
   await Promise.all(ongoingManifestUpdates);
+
+  // Retry failed manifest update tasks if any and fail fast
+  if (failedConfigPaths.length > 0) {
+    log.warning(
+      `Retrying manifest generation for ${failedConfigPaths.length} configs ` +
+        'that failed during the first attempt'
+    );
+    for (const configPath of failedConfigPaths) {
+      await generateScoutConfigManifest(configPath, log);
+      updatedConfigPaths.push(configPath);
+    }
+  }
 
   if (removeDangling) {
     // Remove any manifest files that no longer have a corresponding test config

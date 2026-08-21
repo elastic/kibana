@@ -15,6 +15,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLCallbacks,
   EsqlView,
+  EsqlDataset,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -157,7 +158,7 @@ export interface ESQLCommandSummary {
    */
   metadataColumns?: Set<string>;
   /**
-   * A set of renamed columns pairs [oldName, newName]
+   * A set of renamed columns pairs [newName, oldName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
@@ -215,6 +216,7 @@ export interface ICommandContext {
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
   views?: EsqlView[];
+  datasets?: EsqlDataset[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
@@ -223,6 +225,7 @@ export interface ICommandContext {
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -265,6 +268,11 @@ export enum Location {
    * In a LIMIT grouping clause
    */
   LIMIT_BY = 'limit_by',
+
+  /**
+   * In a CHANGE_POINT grouping clause
+   */
+  CHANGE_POINT_BY = 'change_point_by',
 
   /**
    * In a per-agg filter
@@ -326,10 +334,29 @@ export enum Location {
    * In the PROMQL command (PromQL query expression)
    */
   PROMQL = 'promql',
+
+  /**
+   * In the HIGHLIGHT command ON field list
+   */
+  HIGHLIGHT = 'highlight',
+
+  /**
+   * In the HIGHLIGHT command query expression (before ON)
+   */
+  HIGHLIGHT_QUERY = 'highlight_query',
 }
 
 export enum UnmappedFieldsStrategy {
   DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
+  LOAD_ALL = 'LOAD_ALL',
+}
+const UNMAPPED_FIELD_STRATEGIES = new Set<string>(Object.values(UnmappedFieldsStrategy));
+
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return UNMAPPED_FIELD_STRATEGIES.has(value);
 }

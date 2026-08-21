@@ -35,8 +35,6 @@ export {
   type UnifiedHistogramPartialLayoutProps,
 } from './hooks/use_unified_histogram';
 
-export { useStableCallback } from './hooks/use_stable_callback';
-
 export type { UnifiedHistogramState } from './services/state_service';
 
 export { canImportVisContext } from './utils/external_vis_context';

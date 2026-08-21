@@ -9,9 +9,11 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type { ContentListItem } from '@kbn/content-list-provider';
 import { useContentListConfig } from '@kbn/content-list-provider';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 
 export interface NameCellTitleProps {
   item: ContentListItem;
@@ -26,9 +28,6 @@ export interface NameCellTitleProps {
    */
   onClick?: (item: ContentListItem) => void;
 }
-
-const isPlainPrimaryClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
-  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
 export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitleProps) => {
   const { title } = item;
@@ -47,7 +46,7 @@ export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitlePro
 
   const handleClick = onClick
     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-        if (href && !isPlainPrimaryClick(event)) {
+        if (href && (event.button !== 0 || hasActiveModifierKey(event))) {
           return;
         }
         event.preventDefault();
@@ -57,8 +56,11 @@ export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitlePro
 
   return (
     <EuiText size="s">
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- Intentional when `shouldUseHref` preserves native link affordances while `onClick` handles plain clicks. */}
-      <EuiLink href={href} onClick={handleClick} data-test-subj="content-list-table-item-link">
+      <EuiLink
+        href={href}
+        onClick={handleClick}
+        data-test-subj={CONTENT_LIST_TEST_SUBJECTS.itemLink}
+      >
         {title}
       </EuiLink>
     </EuiText>

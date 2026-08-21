@@ -17,18 +17,21 @@
 
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  getPrChangesCached,
+  isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
   prHasFIPSLabel,
   doAllChangesMatch,
+  isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -49,11 +52,29 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
   const pipeline: string[] = [];
 
   try {
+    if (await isAutomatedVersionBumpPR()) {
+      emitPipeline([emptyStep]);
+      return;
+    }
+
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
       emitPipeline([emptyStep]);
       return;
+    }
+
+    // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
+    const prChanges = await getPrChangesCached();
+    const scoutTestsOnly = isScoutTestsOnlyDiff(
+      prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      )
+    );
+    if (scoutTestsOnly) {
+      console.warn(
+        'Scout-tests-only diff detected — skipping OAS Snapshot, API Contracts, and Saved Objects checks'
+      );
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
@@ -67,11 +88,23 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
+
+    // Gated together: check_api_contracts depends_on check_oas_snapshot.
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+    }
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    registerCancelKeys(['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']);
+    registerCancelKeys([
+      'pick_test_group_run_order',
+      'build_scout_tests',
+      'report_package_metrics',
+    ]);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
@@ -119,18 +152,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml', cancelable)
       );
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^src\/platform\/packages\/shared\/kbn-synthtrace/,
-        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml', cancelable));
     }
 
     if (
@@ -594,9 +615,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    const evalsYaml = getEvalPipeline(GITHUB_PR_LABELS);
-    if (evalsYaml) {
-      pipeline.push(evalsYaml);
+    // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr-llm-evals` pipeline via a
+    // fire-and-forget trigger step (not inline) so their runtime is off the PR's critical path.
+    const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
+    if (evalsTrigger) {
+      pipeline.push(evalsTrigger);
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
@@ -637,15 +660,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    // Run Saved Objects checks conditionally
-    if (
-      await doAnyChangesMatch([
-        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
-        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
-        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
-        /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
-      ])
-    ) {
+    // Run Saved Objects checks systematically
+    if (!scoutTestsOnly) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
       );
@@ -666,12 +682,26 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
+      );
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
     }
 
     // post_build is not cancelable — cleanup/reporting should always run

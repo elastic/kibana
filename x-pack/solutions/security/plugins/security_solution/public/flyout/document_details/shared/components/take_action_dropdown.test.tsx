@@ -69,7 +69,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -106,7 +106,6 @@ describe('take action dropdown', () => {
       dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      isHostIsolationPanelOpen: false,
       onAddEventFilterClick: jest.fn(),
       onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),
@@ -129,7 +128,6 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
-              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {

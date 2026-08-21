@@ -1,0 +1,4 @@
+java.io.IOException: Inline in outline
+	at s7.a(r8-map-id-aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabb:2)
+	at s8.a(r8-map-id-aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabb:27)
+	at s8.b(r8-map-id-aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabb:10)

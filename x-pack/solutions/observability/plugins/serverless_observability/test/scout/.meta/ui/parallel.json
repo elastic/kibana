@@ -1,5 +1,9 @@
 {
-  "sha1": "e1e6ffb0f31e8ee14c08b5d851d69abceccf16a5",
+  "sha1": "3085303e9281d4b9a17646eee53f8aeae17b5c93",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "08c621ad2871856-3596071962e357d",
@@ -11,13 +15,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
-      "id": "08c621ad2871856-a09fd1e365d7489",
-      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "08c621ad2871856-913984dcecec931",
+      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -25,13 +29,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 76,
+        "column": 19
       }
     },
     {
-      "id": "08c621ad2871856-84fd07f729aa1c1",
-      "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate and update breadcrumbs",
+      "id": "08c621ad2871856-bb61deb08996fef",
+      "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -39,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 121,
-        "column": 9
+        "line": 151,
+        "column": 99
       }
     },
     {
@@ -53,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 169,
-        "column": 9
+        "line": 211,
+        "column": 11
       }
     },
     {
@@ -67,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 176,
-        "column": 9
+        "line": 217,
+        "column": 26
       }
     },
     {
@@ -83,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -99,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 38,
+        "column": 15
       }
     },
     {
@@ -115,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 62,
+        "column": 13
       }
     },
     {
@@ -129,8 +133,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 17,
+        "column": 61
+      }
+    },
+    {
+      "id": "dd531796bab2f79-add5444a9a692b8",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body does not show ML or AI related project settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 55,
+        "column": 17
       }
     },
     {
@@ -143,8 +161,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 106,
+        "column": 15
       }
     },
     {
@@ -157,8 +175,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 126,
+        "column": 45
+      }
+    },
+    {
+      "id": "dd531796bab2f79-75faf3770b408ff",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body Model Management pages are not reachable via direct URL or global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 132,
+        "column": 11
       }
     }
   ]

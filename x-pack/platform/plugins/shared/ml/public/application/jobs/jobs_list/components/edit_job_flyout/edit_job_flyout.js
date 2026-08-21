@@ -8,9 +8,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -39,10 +41,13 @@ import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
+import { showProjectRoutingChangeConfirmModal } from '../../../components/project_routing_change_confirm';
 
 const { collapseLiteralStrings } = XJson;
 
 export class EditJobFlyoutUI extends Component {
+  static contextType = context;
   _initialJobFormState = null;
 
   constructor(props, constructorContext) {
@@ -66,10 +71,13 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
+      datafeedProjectRouting: undefined,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       isValidJobDetails: true,
       isValidJobCustomUrls: true,
+      modelMemoryEstimation: undefined,
+      saving: false,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -93,7 +101,7 @@ export class EditJobFlyoutUI extends Component {
       return;
     }
     this.setState({ isConfirmationModalVisible: false });
-    this.setState({ isFlyoutVisible: false });
+    this.setState({ isFlyoutVisible: false, saving: false });
   };
 
   /**
@@ -117,6 +125,7 @@ export class EditJobFlyoutUI extends Component {
         'datafeedQueryDelay',
         'datafeedFrequency',
         'datafeedScrollSize',
+        'datafeedProjectRouting',
       ])
     );
   }
@@ -129,6 +138,7 @@ export class EditJobFlyoutUI extends Component {
         this.setState({
           job,
           isFlyoutVisible: true,
+          saving: false,
         });
       })
       .catch((error) => {
@@ -178,6 +188,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
       datafeedFrequency: hasDatafeed ? frequency : '',
       datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
+      datafeedProjectRouting: hasDatafeed ? datafeedConfig.project_routing : undefined,
     });
   }
 
@@ -185,6 +196,18 @@ export class EditJobFlyoutUI extends Component {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
+    const defaultProjectRouting = DEFAULT_ML_PROJECT_ROUTING;
+
+    if (jobClosed && job.datafeed_config && job.data_counts) {
+      this.estimateModelMemoryLimit({
+        earliestMs: job.data_counts.earliest_record_timestamp,
+        latestMs: job.data_counts.latest_record_timestamp,
+        indexPattern: job.datafeed_config.indices.join(','),
+        query: job.datafeed_config.query,
+        timeFieldName: job.data_description.time_field,
+        analysisConfig: job.analysis_config,
+      });
+    }
 
     this.setState({
       job,
@@ -194,6 +217,12 @@ export class EditJobFlyoutUI extends Component {
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
+      ...(datafeedRunning === false &&
+      this.props.kibana.services.cps?.cpsManager &&
+      !this._initialJobFormState.datafeedProjectRouting &&
+      defaultProjectRouting
+        ? { datafeedProjectRouting: defaultProjectRouting }
+        : {}),
     });
   }
 
@@ -261,7 +290,7 @@ export class EditJobFlyoutUI extends Component {
     });
   };
 
-  save = () => {
+  save = async () => {
     const newJobData = {
       description: this.state.jobDescription,
       groups: this.state.jobGroups,
@@ -273,39 +302,87 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,
+      datafeedProjectRouting: this.state.datafeedProjectRouting,
       customUrls: this.state.jobCustomUrls,
     };
+
+    // Show confirm when project routing changes, except when going from
+    // unset → default origin scope. Expanding from unset → all (or any other
+    // non-default scope) still requires confirmation.
+    const initialProjectRouting = this._initialJobFormState.datafeedProjectRouting;
+    const newProjectRouting = newJobData.datafeedProjectRouting;
+    const projectRoutingChanged = newProjectRouting !== initialProjectRouting;
+    const isSettingDefaultFromUnset =
+      initialProjectRouting === undefined && newProjectRouting === DEFAULT_ML_PROJECT_ROUTING;
+
+    if (projectRoutingChanged && !isSettingDefaultFromUnset) {
+      const { overlays, rendering } = this.props.kibana.services;
+      try {
+        await showProjectRoutingChangeConfirmModal({
+          overlays,
+          rendering,
+        });
+      } catch {
+        return;
+      }
+    }
 
     const mlApi = this.props.kibana.services.mlServices.mlApi;
     const { toasts } = this.props.kibana.services.notifications;
     const toastNotificationService = toastNotificationServiceProvider(toasts);
 
-    saveJob(mlApi, this.state.job, newJobData)
-      .then(() => {
-        toasts.addSuccess(
-          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {
-            defaultMessage: 'Changes to {jobId} saved',
-            values: {
-              jobId: this.state.job.job_id,
-            },
-          })
-        );
-        this.refreshJobs();
-        this.closeFlyout(true);
-      })
-      .catch((error) => {
-        console.error(error);
-        toastNotificationService.displayErrorToast(
-          error,
-          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
-            defaultMessage: 'Could not save changes to {jobId}',
-            values: {
-              jobId: this.state.job.job_id,
-            },
-          })
-        );
-      });
+    this.setState({ saving: true });
+    try {
+      await saveJob(mlApi, this.state.job, newJobData);
+      toasts.addSuccess(
+        i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {
+          defaultMessage: 'Changes to {jobId} saved',
+          values: {
+            jobId: this.state.job.job_id,
+          },
+        })
+      );
+      this.refreshJobs();
+      this.closeFlyout(true);
+    } catch (error) {
+      console.error(error);
+      toastNotificationService.displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
+          defaultMessage: 'Could not save changes to {jobId}',
+          values: {
+            jobId: this.state.job.job_id,
+          },
+        })
+      );
+    } finally {
+      this.setState({ saving: false });
+    }
   };
+
+  async estimateModelMemoryLimit(payload) {
+    this.setState({ modelMemoryEstimation: undefined });
+
+    if (
+      payload === undefined ||
+      payload.earliestMs === undefined ||
+      payload.latestMs === undefined
+    ) {
+      this.setState({ modelMemoryEstimation: null });
+      return;
+    }
+
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+
+    try {
+      const { modelMemoryLimit } = await firstValueFrom(mlApi.calculateModelMemoryLimit$(payload));
+      this.setState({ modelMemoryEstimation: modelMemoryLimit ?? null });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Model memory limit could not be calculated', error);
+      this.setState({ modelMemoryEstimation: undefined });
+    }
+  }
 
   render() {
     const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
@@ -329,12 +406,16 @@ export class EditJobFlyoutUI extends Component {
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
+        datafeedProjectRouting,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
         isValidJobDetails,
         isValidJobCustomUrls,
         datafeedRunning,
         jobClosed,
+        modelMemoryEstimation,
+        hasDatafeed,
+        saving,
       } = this.state;
 
       const tabs = [
@@ -357,6 +438,8 @@ export class EditJobFlyoutUI extends Component {
               setJobDetails={this.setJobDetails}
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
+              modelMemoryEstimation={modelMemoryEstimation}
+              hasDatafeed={hasDatafeed}
             />
           ),
         },
@@ -389,6 +472,7 @@ export class EditJobFlyoutUI extends Component {
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
               datafeedRunning={datafeedRunning}
+              datafeedProjectRouting={datafeedProjectRouting}
             />
           ),
         },
@@ -458,6 +542,7 @@ export class EditJobFlyoutUI extends Component {
                     this.closeFlyout();
                   }}
                   flush="left"
+                  isDisabled={saving}
                   data-test-subj="mlEditJobFlyoutCloseButton"
                 >
                   <FormattedMessage
@@ -470,7 +555,10 @@ export class EditJobFlyoutUI extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
+                  isLoading={saving}
+                  isDisabled={
+                    saving || isValidJobDetails === false || isValidJobCustomUrls === false
+                  }
                   data-test-subj="mlEditJobFlyoutSaveButton"
                 >
                   <FormattedMessage

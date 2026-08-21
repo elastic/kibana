@@ -6,6 +6,7 @@
  */
 
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 
 import type { HaltReason, RuleExecutorTaskParams } from './types';
@@ -15,21 +16,26 @@ import type {
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
 import { RuleExecutionPipeline } from './execution_pipeline';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
   constructor(
-    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract
+    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, abortController);
+  public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
+    const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
     const result = await this.pipeline.execute(input);
 
-    return this.buildRunResult(result, taskInstance);
+    return this.buildRunResult(result, input.logger, taskInstance);
   }
 
   /**
@@ -37,16 +43,25 @@ export class RuleExecutorTaskRunner {
    */
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController
+    signal: AbortSignal,
+    executionUuid: string
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
+    const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
+      rule_id: params.ruleId,
+      space_id: params.spaceId,
+      task_id: taskInstance.id,
+      execution_id: executionUuid,
+    });
 
     return {
       ruleId: params.ruleId,
       spaceId: params.spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
-      abortSignal: abortController.signal,
+      abortSignal: signal,
+      executionUuid,
+      logger,
     };
   }
 
@@ -67,10 +82,19 @@ export class RuleExecutorTaskRunner {
    */
   private buildRunResult(
     result: RuleExecutionPipelineResult,
+    logger: LoggerServiceContract,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {
       return { state: {} };
+    }
+
+    if (result.haltReason === 'rule_deleted') {
+      const params = taskInstance.params as RuleExecutorTaskParams;
+      logger.debug({
+        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
+      });
+      throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 
     return { state: this.getStateForHaltReason(taskInstance, result.haltReason) };
@@ -84,7 +108,6 @@ export class RuleExecutorTaskRunner {
     reason?: HaltReason
   ): Record<string, unknown> {
     switch (reason) {
-      case 'rule_deleted':
       case 'rule_disabled':
         return taskInstance.state ?? {};
       default:

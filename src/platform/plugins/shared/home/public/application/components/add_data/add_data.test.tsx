@@ -19,13 +19,16 @@ jest.mock('../app_navigation_handler', () => {
 });
 
 jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
+  getServices: jest.fn().mockReturnValue({
     trackUiMetric: jest.fn(),
     addDataService: {
       getCloudConnectStatusHook: jest.fn(() => () => ({
         isLoading: false,
         isCloudConnected: false,
       })),
+    },
+    notifications: {
+      tours: { isEnabled: jest.fn().mockReturnValue(true) },
     },
   }),
 }));
@@ -40,6 +43,10 @@ const applicationStartMock = {
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
+const applicationWithCloudConnectMock = {
+  capabilities: { navLinks: { integrations: true }, cloudConnect: { show: true } },
+} as unknown as ApplicationStart;
+
 describe('AddData', () => {
   test('render', () => {
     const component = shallowWithIntl(
@@ -51,5 +58,22 @@ describe('AddData', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  test('hides SetupCloudConnect when hideAnnouncements is true', () => {
+    jest
+      .requireMock('../../kibana_services')
+      .getServices()
+      .notifications.tours.isEnabled.mockReturnValueOnce(false);
+    const component = shallowWithIntl(
+      <AddData
+        addBasePath={addBasePathMock}
+        application={applicationWithCloudConnectMock}
+        isDarkMode={false}
+        isCloudEnabled={false}
+      />
+    );
+    expect(component.find('SetupCloudConnect')).toHaveLength(0);
+    expect(component.find('MoveData')).toHaveLength(1);
   });
 });

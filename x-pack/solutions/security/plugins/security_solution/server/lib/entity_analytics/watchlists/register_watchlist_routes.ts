@@ -11,6 +11,7 @@ import {
   deleteWatchlistRoute,
   getWatchlistRoute,
   listWatchlistsRoute,
+  watchlistsPrivilegesRoute,
   searchWatchlistIndicesRoute,
   updateWatchlistRoute,
 } from './management/routes';
@@ -25,16 +26,18 @@ export const registerWatchlistRoutes = ({
   logger,
   getStartServices,
   telemetrySender,
+  hasEncryptionKey,
 }: EntityAnalyticsRoutesDeps) => {
-  installPrebuiltWatchlistsRoute(router, logger);
-  createWatchlistRoute(router, logger, telemetrySender);
-  deleteWatchlistRoute(router, logger);
+  installPrebuiltWatchlistsRoute(router, logger, getStartServices, hasEncryptionKey);
+  createWatchlistRoute(router, logger, telemetrySender, getStartServices, hasEncryptionKey);
+  deleteWatchlistRoute(router, logger, getStartServices, hasEncryptionKey);
   getWatchlistRoute(router, logger);
-  listWatchlistsRoute(router, logger);
+  watchlistsPrivilegesRoute(router, logger, getStartServices);
+  listWatchlistsRoute(router, logger, getStartServices, hasEncryptionKey);
   searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger, telemetrySender);
-  registerEntitySourceRoutes(router, logger);
-  syncWatchlistRoute(router, logger);
+  registerEntitySourceRoutes(router, logger, getStartServices, hasEncryptionKey);
+  syncWatchlistRoute(router, logger, getStartServices, hasEncryptionKey);
   csvUploadRoute({ router, logger, getStartServices });
   registerManualEntityRoutes(router, logger);
 };

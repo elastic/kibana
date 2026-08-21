@@ -87,5 +87,47 @@ export default function (providerContext: FtrProviderContext) {
         'multiple_versions-0.1.0 is out-of-date and cannot be installed or updated'
       );
     });
+
+    it('should install an older version if allow_outdated_version is true', async () => {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packages: [{ name: pkgName, version: pkgOlderVersion }],
+          allow_outdated_version: true,
+        })
+        .expect(200);
+
+      expect(response.body.items.length).equal(1);
+      expect(response.body.items[0].version).equal(pkgOlderVersion);
+
+      await uninstallPackage(pkgName, pkgOlderVersion);
+    });
+
+    it('should return already_installed when re-installing same version with allow_outdated_version but not force', async () => {
+      // First install the older version
+      await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packages: [{ name: pkgName, version: pkgOlderVersion }],
+          allow_outdated_version: true,
+        })
+        .expect(200);
+
+      // Re-POST the same version — should return already_installed, not trigger a reinstall
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packages: [{ name: pkgName, version: pkgOlderVersion }],
+          allow_outdated_version: true,
+        })
+        .expect(200);
+
+      expect(response.body.items[0].result?.status).equal('already_installed');
+
+      await uninstallPackage(pkgName, pkgOlderVersion);
+    });
   });
 }

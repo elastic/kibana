@@ -10,7 +10,7 @@
 import { loadWorkflowsThunk } from './load_workflows_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
-import { initialWorkflowsState } from '../slice';
+import { initialWorkflowsState, setWorkflow } from '../slice';
 
 const mockGetWorkflows = jest.fn();
 
@@ -21,9 +21,10 @@ jest.mock('@kbn/workflows-ui', () => ({
   })),
 }));
 
-// Mock normalizeFieldsToJsonSchema
+// Mock normalizeFieldsToJsonSchema; keep real getInputsFromDefinition for thunk behavior
 jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  normalizeFieldsToJsonSchema: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
 }));
 
 describe('loadWorkflowsThunk', () => {
@@ -43,7 +44,9 @@ describe('loadWorkflowsThunk', () => {
         {
           id: 'wf-1',
           name: 'Workflow One',
-          definition: { inputs: [{ name: 'input1', type: 'string' }] },
+          definition: {
+            triggers: [{ type: 'manual', inputs: [{ name: 'input1', type: 'string' }] }],
+          },
         },
         {
           id: 'wf-2',
@@ -61,6 +64,7 @@ describe('loadWorkflowsThunk', () => {
     expect(mockGetWorkflows).toHaveBeenCalledWith({
       size: 1000,
       page: 1,
+      managed: 'unmanaged',
     });
     expect(result.type).toBe('detail/loadWorkflowsThunk/fulfilled');
     expect(result.payload).toEqual({
@@ -123,6 +127,44 @@ describe('loadWorkflowsThunk', () => {
     expect(result.payload).toEqual({
       workflows: {},
       totalWorkflows: 0,
+    });
+  });
+
+  it('should request all workflows when the current workflow is managed', async () => {
+    store.dispatch(
+      setWorkflow({
+        id: 'managed-wf',
+        name: 'Managed Workflow',
+        enabled: true,
+        managed: true,
+        yaml: '',
+        valid: true,
+        createdAt: '',
+        createdBy: '',
+        lastUpdatedAt: '',
+        lastUpdatedBy: '',
+        definition: null,
+      })
+    );
+
+    mockGetWorkflows.mockResolvedValue({
+      results: [
+        {
+          id: 'managed-child',
+          name: 'Managed Child',
+          managed: true,
+          definition: null,
+        },
+      ],
+      total: 1,
+    });
+
+    await store.dispatch(loadWorkflowsThunk());
+
+    expect(mockGetWorkflows).toHaveBeenCalledWith({
+      size: 1000,
+      page: 1,
+      managed: 'all',
     });
   });
 

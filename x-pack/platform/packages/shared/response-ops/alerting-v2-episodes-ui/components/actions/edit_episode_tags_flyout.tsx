@@ -8,11 +8,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner, EuiSelectable, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import { EpisodeTagsFlyoutActionBar } from './episode_tags_flyout_action_bar';
 import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
@@ -25,20 +23,24 @@ function tagValueFromOptionKey(key: string): string {
 }
 
 export interface AlertEpisodeTagsFlyoutProps {
-  isOpen: boolean;
   onClose: () => void;
-  groupHash: string;
   currentTags: string[];
-  http: HttpStart;
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  /** Called with the selected tags on save. The flyout closes immediately after. */
+  onSave: (tags: string[]) => void;
+  /**
+   * When true, render only the body — `overlays.openFlyout` already provides
+   * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
+   */
+  embedded?: boolean;
 }
 
 export function AlertEpisodeTagsFlyout({
   onClose,
-  groupHash,
   currentTags,
-  http,
   services,
+  onSave,
+  embedded = false,
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -47,7 +49,6 @@ export function AlertEpisodeTagsFlyout({
     useFetchAlertEpisodeTagSuggestions({
       services,
     });
-  const { mutate: createAlertAction, isLoading: isSaving } = useCreateAlertAction(http);
 
   const allKnownTags = useMemo(() => {
     const merged = new Set<string>([...suggestionTags, ...currentTags, ...selectedTags]);
@@ -55,13 +56,13 @@ export function AlertEpisodeTagsFlyout({
   }, [suggestionTags, currentTags, selectedTags]);
 
   const trimmedSearch = searchValue.trim();
-  const atTagCountLimit = selectedTags.length >= MAX_TAGS_PER_EPISODE;
+  const atTagCountLimit = selectedTags.length >= MAX_TAGS;
 
   const canAddNew =
     trimmedSearch.length > 0 &&
     trimmedSearch.length <= MAX_TAG_LENGTH &&
     !allKnownTags.some((t) => t === trimmedSearch) &&
-    selectedTags.length < MAX_TAGS_PER_EPISODE;
+    selectedTags.length < MAX_TAGS;
 
   const tagsForSelectAll = useMemo(() => {
     const next = new Set(allKnownTags);
@@ -69,7 +70,7 @@ export function AlertEpisodeTagsFlyout({
       next.add(trimmedSearch);
     }
     const sorted = [...next].sort((a, b) => a.localeCompare(b));
-    return sorted.slice(0, MAX_TAGS_PER_EPISODE);
+    return sorted.slice(0, MAX_TAGS);
   }, [allKnownTags, canAddNew, trimmedSearch]);
 
   const tagTooLong = useMemo(
@@ -78,11 +79,8 @@ export function AlertEpisodeTagsFlyout({
     [trimmedSearch, selectedTags]
   );
 
-  const tooManyTags = useMemo(() => selectedTags.length > MAX_TAGS_PER_EPISODE, [selectedTags]);
-  const tooManyTagsWarning = useMemo(
-    () => selectedTags.length === MAX_TAGS_PER_EPISODE,
-    [selectedTags]
-  );
+  const tooManyTags = useMemo(() => selectedTags.length > MAX_TAGS, [selectedTags]);
+  const tooManyTagsWarning = useMemo(() => selectedTags.length === MAX_TAGS, [selectedTags]);
 
   const selectableOptions: EuiSelectableOption[] = useMemo(() => {
     const base = allKnownTags.map((tag) => ({
@@ -121,18 +119,13 @@ export function AlertEpisodeTagsFlyout({
     if (saveBlocked) {
       return;
     }
-    createAlertAction(
-      {
-        groupHash,
-        actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
-        body: { tags: selectedTags },
-      },
-      { onSuccess: onClose }
-    );
-  }, [createAlertAction, groupHash, onClose, saveBlocked, selectedTags]);
+    onSave(selectedTags);
+    onClose();
+  }, [onClose, onSave, saveBlocked, selectedTags]);
 
   return (
     <EpisodeActionFlyout
+      embedded={embedded}
       onClose={onClose}
       dataTestSubj="alertingEpisodeTagsFlyout"
       ariaLabelledBy="alertingEpisodeTagsFlyoutTitle"
@@ -147,7 +140,6 @@ export function AlertEpisodeTagsFlyout({
           primaryLabel={i18n.TAGS_ACTION_SAVE}
           cancelTestSubj="alertingEpisodeTagsFlyoutCancel"
           primaryTestSubj="alertingEpisodeTagsFlyoutSave"
-          isPrimaryLoading={isSaving}
           isPrimaryDisabled={saveBlocked}
         />
       }
@@ -209,7 +201,7 @@ export function AlertEpisodeTagsFlyout({
             iconType="warning"
             data-test-subj="alertingEpisodeTagsFlyoutTooManyTagsWarning"
           >
-            <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS_PER_EPISODE)}</p>
+            <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS)}</p>
           </EuiCallOut>
         </>
       ) : null}

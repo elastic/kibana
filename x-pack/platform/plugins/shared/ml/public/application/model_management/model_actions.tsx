@@ -29,7 +29,6 @@ import {
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-  isRerankModelItem,
 } from '@kbn/ml-common-types/trained_models';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
@@ -235,8 +234,6 @@ export function useModelActions({
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
-          if (isRerankModelItem(item)) return false;
-
           return (
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
@@ -277,7 +274,6 @@ export function useModelActions({
         isPrimary: false,
         available: (item) =>
           isNLPModelItem(item) &&
-          !isRerankModelItem(item) &&
           canStartStopTrainedModels &&
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),

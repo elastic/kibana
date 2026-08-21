@@ -31,9 +31,11 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { DocLinksServiceSetup, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreStartContract, EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { DetectionRulesAuthz } from '../../../../common/detection_engine/rule_management/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { CheckOsqueryResponseActionAuthz } from '../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -93,6 +95,10 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  /** Timestamp fields mapped as date_nanos in at least one of the input indices */
+  dateNanosTimestampFields: string[];
+  /** Timestamp fields mapped as both date and date_nanos across the input indices */
+  mixedTimestampFields: string[];
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
@@ -165,6 +171,15 @@ export interface CreateSecurityRuleTypeWrapperProps {
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   endpointAppContextService: EndpointAppContextService;
   getEntityStore: () => Promise<EntityStoreStartContract>;
+  getRulesAuthz: (request: KibanaRequest) => Promise<DetectionRulesAuthz>;
+  /**
+   * Returns a request-scoped osquery response action authorization checker, used
+   * when authorizing rule `responseActions` on write paths. Optional because
+   * osquery may be unavailable.
+   */
+  getOsqueryResponseActionsAuthzChecker?: (
+    request: KibanaRequest
+  ) => CheckOsqueryResponseActionAuthz;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

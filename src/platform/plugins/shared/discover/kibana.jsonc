@@ -52,13 +52,13 @@
       "apmSourcesAccess",
       "fileUpload",
       "cps",
-      "alertingVTwo"
+      "alertingVTwo",
+      "feedback"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "presentationPanel",
       "presentationUtil",
       "esql"
     ],

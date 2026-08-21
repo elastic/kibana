@@ -9,6 +9,7 @@
 
 import { validateWorkflowForExecution } from './validate_workflow_for_execution';
 import type { WorkflowDetailDto } from '../..';
+import { WorkflowDisabledError, WorkflowNotFoundError } from '../../common/errors';
 
 const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
   id: 'test-workflow-id',
@@ -36,9 +37,20 @@ describe('validateWorkflowForExecution', () => {
   });
 
   it('should throw when workflow is null (not found)', () => {
-    expect(() => validateWorkflowForExecution(null, 'missing-id')).toThrow(
-      'Workflow not found: missing-id'
-    );
+    // caught like this to assert on the error properties, since it's a custom error class
+    const error = (() => {
+      try {
+        validateWorkflowForExecution(null, 'missing-id');
+      } catch (caughtError) {
+        return caughtError;
+      }
+      return undefined;
+    })();
+
+    expect(error).toBeDefined();
+    expect(error).toBeInstanceOf(WorkflowNotFoundError);
+    expect(error).toHaveProperty('isUserError', true);
+    expect((error as Error).message).toBe('Workflow with id "missing-id" not found.');
   });
 
   it('should throw when workflow definition is missing', () => {
@@ -59,15 +71,29 @@ describe('validateWorkflowForExecution', () => {
 
   it('should throw when workflow is disabled', () => {
     const workflow = createMockWorkflow({ enabled: false });
+    // caught like this to assert on the error properties, since it's a custom error class
+    const error = (() => {
+      try {
+        validateWorkflowForExecution(workflow, 'test-workflow-id');
+      } catch (caughtError) {
+        return caughtError;
+      }
+      return undefined;
+    })();
 
-    expect(() => validateWorkflowForExecution(workflow, 'test-workflow-id')).toThrow(
+    expect(error).toBeDefined();
+    expect(error).toBeInstanceOf(WorkflowDisabledError);
+    expect(error).toHaveProperty('isUserError', true);
+    expect((error as Error).message).toBe(
       'Workflow is disabled: test-workflow-id. Enable the workflow to run it.'
     );
   });
 
   it('should check conditions in order: not found > no definition > not valid > disabled', () => {
     // A null workflow should throw "not found", not any other error
-    expect(() => validateWorkflowForExecution(null, 'wf-1')).toThrow('Workflow not found: wf-1');
+    expect(() => validateWorkflowForExecution(null, 'wf-1')).toThrow(
+      'Workflow with id "wf-1" not found.'
+    );
 
     // A workflow with no definition should throw "definition not found" even if also invalid and disabled
     const noDefAndInvalidAndDisabled = createMockWorkflow({

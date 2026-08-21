@@ -16,13 +16,16 @@ export type {
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
   ToolReturnSummarizerFn,
-  ToolConfirmationPolicy,
-  ToolConfirmationPolicyMode,
+  BuiltInToolConfirmationPolicy,
+  BuiltInToolConfirmationContext,
+  McpToolAnnotations,
+  InternalBuiltinToolDefinition,
 } from './builtin';
 export {
   type ToolHandlerFn,
   type ToolHandlerReturn,
   type ToolHandlerContext,
+  type ToolHandlerCallContext,
   type ToolHandlerResult,
   type ToolHandlerPromptReturn,
   type ToolHandlerStandardReturn,

@@ -10,6 +10,9 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -25,9 +28,13 @@ export interface OpenIndicatorFlyoutButtonProps {
  */
 export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openIocFlyout } = useFlyoutApi();
 
-  const open = useCallback(
-    () =>
+  const open = useCallback(() => {
+    if (enableNewFlyout) {
+      openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE });
+    } else {
       openFlyout({
         right: {
           id: IOCRightPanelKey,
@@ -35,9 +42,9 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
             id: indicator._id,
           },
         },
-      }),
-    [indicator._id, openFlyout]
-  );
+      });
+    }
+  }, [enableNewFlyout, openIocFlyout, indicator, openFlyout]);
 
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>

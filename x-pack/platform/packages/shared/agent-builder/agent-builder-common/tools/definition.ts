@@ -44,6 +44,26 @@ export enum ToolOrigin {
 }
 
 /**
+ * Controls how often the user is prompted for confirmation when the agent calls a tool.
+ *
+ * - once:   prompt once per tool type for the entire conversation. After the user
+ *           accepts (or rejects), all subsequent calls to the same tool reuse that
+ *           response — including retries after failures.
+ * - always: prompt on every individual tool call. Each invocation gets its own
+ *           confirmation, even if it targets the same tool type.
+ * - never:  skip confirmation entirely.
+ */
+export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
+
+export interface ToolConfirmationPolicy {
+  /**
+   * Controls when the agent prompts the user for confirmation before executing the tool.
+   * Defaults to `never` if omitted.
+   */
+  askUser?: ToolConfirmationPolicyMode;
+}
+
+/**
  * Serializable representation of a tool, without its handler or schema.
  *
  * Use as a common base for browser-side and server-side tool types.
@@ -76,6 +96,14 @@ export interface ToolDefinition<
    * The type-specific configuration for this tool.
    */
   configuration: TConfig;
+  /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
+   * Optional tool call policy to control tool call confirmation behavior
+   */
+  confirmation?: ToolConfirmationPolicy;
 }
 
 export interface ToolDefinitionWithSchema<

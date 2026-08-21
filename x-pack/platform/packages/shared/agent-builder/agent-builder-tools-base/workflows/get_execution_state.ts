@@ -7,14 +7,20 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WaitForInputStep } from '@kbn/workflows';
-import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
+import type { WaitForApprovalStep, WaitForInputStep, WorkflowExecutionDto } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
+  getStepByNameFromNestedSteps,
+} from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 export interface WaitingInputContext {
-  /** Human-readable prompt from the waitForInput step's `with.message`. */
+  /** Step execution document id for the paused HITL step instance. Compare across status polls. */
+  step_execution_id: string;
+  /** Human-readable prompt from the step's `with.message`. */
   message?: string;
   /** JSON Schema describing the expected input, from the step's `with.schema`. */
   schema?: Record<string, unknown>;
@@ -30,29 +36,17 @@ export interface WorkflowExecutionState {
   workflow_name?: string;
   /** Present when status is FAILED; contains the workflow error message. */
   error_message?: string;
-  /** Present when status is WAITING_FOR_INPUT; describes what input is needed to resume. */
+  /** Present when status is WAITING_FOR_INPUT. */
   waiting_input?: WaitingInputContext;
 }
 
 /**
- * Returns the state of a workflow execution.
+ * Converts a workflow execution DTO into the state shape exposed to agent tools.
  */
-export const getExecutionState = async ({
-  executionId,
-  spaceId,
-  workflowApi,
-}: {
-  executionId: string;
-  spaceId: string;
-  workflowApi: WorkflowApi;
-}): Promise<WorkflowExecutionState | null> => {
-  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
-    includeOutput: true,
-  });
-  if (!execution) {
-    return null;
-  }
-
+export const toWorkflowExecutionState = (
+  execution: WorkflowExecutionDto,
+  executionId: string = execution.id
+): WorkflowExecutionState => {
   const state: WorkflowExecutionState = {
     execution_id: executionId,
     status: execution.status,
@@ -81,16 +75,48 @@ export const getExecutionState = async ({
         waitingStep.stepId
       );
       const stepConfig =
-        step?.type === 'waitForInput' ? (step as WaitForInputStep).with : undefined;
+        step?.type === 'waitForInput'
+          ? (step as WaitForInputStep).with
+          : step?.type === 'waitForApproval'
+          ? (step as WaitForApprovalStep).with
+          : undefined;
+      const schema =
+        step?.type === 'waitForApproval'
+          ? WAIT_FOR_APPROVAL_RESPONSE_SCHEMA
+          : stepConfig && 'schema' in stepConfig
+          ? stepConfig.schema
+          : undefined;
+
       const waitContext: WaitingInputContext = {
+        step_execution_id: waitingStep.id,
         ...(stepConfig?.message && { message: stepConfig.message }),
-        ...(stepConfig?.schema && { schema: stepConfig.schema as Record<string, unknown> }),
+        ...(schema && { schema: schema as Record<string, unknown> }),
       };
-      if (waitContext.message !== undefined || waitContext.schema !== undefined) {
-        state.waiting_input = waitContext;
-      }
+      state.waiting_input = waitContext;
     }
   }
 
   return state;
+};
+
+/**
+ * Returns the state of a workflow execution.
+ */
+export const getExecutionState = async ({
+  executionId,
+  spaceId,
+  workflowApi,
+}: {
+  executionId: string;
+  spaceId: string;
+  workflowApi: WorkflowApi;
+}): Promise<WorkflowExecutionState | null> => {
+  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
+    includeOutput: true,
+  });
+  if (!execution) {
+    return null;
+  }
+
+  return toWorkflowExecutionState(execution, executionId);
 };

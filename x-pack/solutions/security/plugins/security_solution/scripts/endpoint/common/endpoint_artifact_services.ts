@@ -19,7 +19,7 @@ import type {
 import { memoize } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/endpoint_exceptions/constants';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blocklist/constants';
@@ -37,10 +37,7 @@ import {
 } from '../../../server/endpoint/lib/reference_data';
 
 export const ensureArtifactListExists = memoize(
-  async (
-    kbnClient: KbnClient,
-    artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS | 'endpointExceptions'
-  ) => {
+  async (kbnClient: KbnClient, artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS) => {
     let listDefinition: CreateExceptionListSchema;
 
     switch (artifactType) {
@@ -77,7 +74,7 @@ export const ensureArtifactListExists = memoize(
           'elastic-api-version': '1',
         },
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
   },
   (kbnClient: KbnClient, artifactType: string) => {
     return `${artifactType}@[${kbnClient.resolveUrl('')}`;
@@ -106,7 +103,7 @@ export const createExceptionListItem = async (
         'elastic-api-version': '2023-10-31',
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 

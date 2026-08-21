@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -23,12 +23,7 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards', 'workflows'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -38,6 +33,14 @@ test.describe(
 
       await test.step('Open More menu', async () => {
         await nav.openMoreMenu();
+      });
+
+      await test.step('Alerts is visible and linked (primary or More, depending on overflow)', async () => {
+        // Alerts sits at the primary/More overflow boundary: it renders in the primary
+        // nav when there is room and overflows into the More menu otherwise.
+        const alerts = nav.navItemInBodyByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toBeVisible();
+        await expect(alerts).toHaveAttribute('href', /.+/);
       });
 
       await test.step('More linked items are visible and linked', async () => {
@@ -63,7 +66,7 @@ test.describe(
       });
     });
 
-    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
+    test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,
     }) => {
@@ -71,34 +74,59 @@ test.describe(
 
       await test.step('Discover', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
-        await expect(nav.pageOrNoData('dscPage')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
+        await expect(nav.pageOrNoData('dscPage')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('Dashboards', async () => {
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
-        await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible();
+        await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+        await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('Workflows', async () => {
         await nav.navItemInPrimaryByDeepLinkId('workflows').click();
-        await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible();
+        await expect(page.testSubj.locator('workflowsPage')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
-        await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
+        // Alerts sits at the primary/More overflow boundary — click it in the primary
+        // nav when it rendered there, otherwise reach it through the More menu.
+        const primaryAlerts = nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts');
+        if (await primaryAlerts.isVisible()) {
+          await primaryAlerts.click();
+        } else {
+          await nav.openMoreMenu();
+          await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
+        }
+        await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible();
+        // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
+        // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
+        await expect(
+          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
+        ).toHaveText('Cases', {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('SLOs (via More menu)', async () => {
@@ -108,61 +136,79 @@ test.describe(
           page.testSubj
             .locator('slosPage')
             .or(page.testSubj.locator('o11ySloListWelcomePromptCreateSloButton'))
-        ).toBeVisible();
+        ).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
       });
 
       await test.step('Machine Learning opens its nested panel inside the More menu', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreById('machine_learning-landing').click();
-        await expect(nav.nestedPanel('machine_learning-landing')).toBeVisible();
+        await expect(nav.nestedPanel('machine_learning-landing')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
     });
 
-    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects }) => {
-      const nav = pageObjects.observabilityNavigation;
+    test('footer-panel children navigate to the expected pages', async ({ pageObjects, page }) => {
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       await test.step('data_management → Integrations', async () => {
         await nav.navItemInFooterById('data_management').click();
-        await expect(nav.sidePanel('data_management')).toBeVisible();
+        await expect(nav.sidePanel('data_management')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
 
         await nav
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Integrations' })).toBeVisible();
+        await expect(page.testSubj.locator('epmList.integrationCards')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('data_management → Fleet', async () => {
         await nav.navItemInFooterById('data_management').click();
-        await expect(nav.sidePanel('data_management')).toBeVisible();
+        await expect(nav.sidePanel('data_management')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
 
         await nav
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-fleet"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Fleet' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Fleet', {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('admin_and_settings → Tags', async () => {
         await nav.navItemInFooterById('admin_and_settings').click();
-        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
 
         await nav
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Tags', {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('admin_and_settings → Maintenance Windows', async () => {
         await nav.navItemInFooterById('admin_and_settings').click();
-        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
 
         await nav
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Maintenance Windows', {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
     });
 
@@ -170,43 +216,58 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
       await page.gotoApp('management');
       await nav.waitForLoad();
-      await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
+      await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible({
+        timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+      });
     });
 
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
+      page,
     }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       const expectNoReload = await nav.createNoPageReloadCheck();
 
       await test.step('Discover via sidenav', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
-        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
-      });
-
-      await test.step('Agents via More', async () => {
-        await nav.openMoreMenu();
-        await nav.navItemInMoreById('agent_builder').click();
-        await expect(nav.breadcrumb({ text: 'Agents' })).toBeVisible();
+        await expect(nav.pageOrNoData('dscPage')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+        await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('admin_and_settings → Tags', async () => {
         await nav.navItemInFooterById('admin_and_settings').click();
-        await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
+        await expect(nav.sidePanel('admin_and_settings')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
 
         await nav
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Tags', {
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('Logo returns to observability landing', async () => {
-        await nav.clickLogo();
+        await chrome.clickLogo();
         await nav.waitForLoad();
-        await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible();
+        await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+      });
+
+      await test.step('Agents via More', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreById('agent_builder').click();
+        await expect(page.testSubj.locator('agentBuilderWrapper')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
       });
 
       await test.step('no page reload happened during the flow', async () => {

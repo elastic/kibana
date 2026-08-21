@@ -229,7 +229,7 @@ describe('SearchSLODefinitions', () => {
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
       const result = await searchSLODefinitions.execute({
-        searchAfter: JSON.stringify(afterKey),
+        searchAfter: Buffer.from(JSON.stringify(afterKey)).toString('base64'),
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
@@ -246,7 +246,9 @@ describe('SearchSLODefinitions', () => {
         })
       );
 
-      expect(result.searchAfter).toBe(JSON.stringify({ slo_id: 'slo-2' }));
+      expect(result.searchAfter).toBe(
+        Buffer.from(JSON.stringify({ slo_id: 'slo-2' })).toString('base64')
+      );
     });
 
     it('normalizes groupBy array correctly', async () => {
@@ -330,6 +332,24 @@ describe('SearchSLODefinitions', () => {
           name: 'Local SLO',
           groupBy: [],
           remoteName: 'local',
+        },
+      ]);
+
+      mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
+
+      const result = await searchSLODefinitions.execute({});
+
+      expect(result.results[0].remote).toBeUndefined();
+    });
+
+    it('does not build a remote object for a local SLO when kibanaUrl is set', async () => {
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Local SLO',
+          groupBy: [],
+          remoteName: 'local',
+          kibanaUrl: 'https://local-kibana.example.com',
         },
       ]);
 

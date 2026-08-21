@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './beta_badge_style';
 export * from './form_changes';
 export * from './form_field';
 export * from './form_label';

@@ -8,13 +8,8 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
-import {
-  createBadRequestError,
-  HookLifecycle,
-  ToolResultType,
-  AgentExecutionMode,
-} from '@kbn/agent-builder-common';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
   BeforeToolCallHookContext,
@@ -29,7 +24,10 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
+import type {
+  InternalToolDefinition,
+  ToolHandlerCallContext,
+} from '@kbn/agent-builder-server/tools';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
@@ -42,6 +40,7 @@ import {
   createSkillsService,
 } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
+import { enforceResultSizeLimit } from './utils/enforce_result_size_limit';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -109,13 +108,23 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
   toolParams = beforeToolHooksResult.toolParams;
 
-  const isStandaloneExecution = manager.deps.executionMode === AgentExecutionMode.standalone;
+  const interactivityDisabled = !manager.deps.interactivity.enabled;
+
+  const toolHandlerExecutionParams: ToolHandlerExecutionParams<TParams> = {
+    toolId: tool.id,
+    toolCallId,
+    source,
+    toolParams: toolParams as TParams,
+    onEvent: toolExecutionParams.onEvent ?? (() => undefined),
+  };
+
+  let toolHandlerContext: ToolHandlerContext | undefined;
 
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
-      // In sub-agent mode, HITL is not available — auto-decline
-      if (isStandaloneExecution) {
+      // Non-interactive execution — auto-decline HITL prompts
+      if (interactivityDisabled) {
         return {
           results: [
             createErrorResult(
@@ -139,9 +148,17 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
-        const definition = tool.confirmation.getConfirmation
-          ? await tool.confirmation.getConfirmation({ toolParams })
-          : undefined;
+        let definition;
+        if (tool.confirmation.getConfirmation) {
+          toolHandlerContext = await createToolHandlerContext({
+            toolExecutionParams: toolHandlerExecutionParams,
+            manager,
+          });
+          definition = await tool.confirmation.getConfirmation({
+            toolParams,
+            context: toolHandlerContext,
+          });
+        }
         return {
           prompt: createToolConfirmationPrompt({ confirmationId, tool, definition }),
         };
@@ -150,19 +167,15 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   }
 
   const startTime = Date.now();
-  const toolHandlerContext = await createToolHandlerContext<TParams>({
-    toolExecutionParams: {
-      ...toolExecutionParams,
-      toolId: tool.id,
-      toolParams: toolParams as TParams,
-    },
+  toolHandlerContext ??= await createToolHandlerContext({
+    toolExecutionParams: toolHandlerExecutionParams,
     manager,
   });
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams } },
-    async (): Promise<ToolHandlerReturn> => {
+    { tool: { input: toolParams, toolCallId, description: tool.description } },
+    async (span): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -177,8 +190,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           validation.data as Record<string, unknown>,
           toolHandlerContext
         );
+        if (isToolHandlerStandardReturn(result) && hasOnlyErrorResults(result.results) && span) {
+          markToolSpanAsError(span, { result: result.results });
+        }
         return result;
       } catch (err) {
+        if (span) {
+          markToolSpanAsError(span, { error: err });
+        }
         return {
           results: [createErrorResult(err.message)],
         };
@@ -197,19 +216,23 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           tool_result_id: result.tool_result_id ?? getToolResultId(),
         } as ToolResult)
     );
-    runToolReturn = { results: resultsWithIds };
+    // Storage guardrail: cap the total persisted size for non-MCP calls
+    const guardedResults =
+      source === 'mcp' ? resultsWithIds : enforceResultSizeLimit(resultsWithIds);
+    runToolReturn = { results: guardedResults };
 
     reportToolCallTelemetry({
       parentManager,
       toolId: tool.id,
+      toolType: tool.type,
       toolCallId,
       source,
-      results: resultsWithIds,
+      results: guardedResults,
       duration,
     });
   } else {
     // On-demand HITL prompt from tool handler
-    if (isStandaloneExecution) {
+    if (interactivityDisabled) {
       runToolReturn = {
         results: [
           createErrorResult(
@@ -236,26 +259,30 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
-    runToolReturn.results.forEach((result) => {
-      resultStore.add({
-        tool_id: tool.id,
-        tool_call_id: toolCallId,
-        result,
-      });
+    resultStore.add({
+      tool_id: tool.id,
+      tool_call_id: toolCallId,
+      params: toolParams,
+      results: runToolReturn.results,
     });
   }
 
   return runToolReturn;
 };
 
+type ToolHandlerExecutionParams<TParams = Record<string, unknown>> = Pick<
+  Required<ScopedRunnerRunToolsParams<TParams>>,
+  'onEvent' | 'toolId' | 'toolCallId' | 'toolParams' | 'source'
+>;
+
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({
   manager,
   toolExecutionParams,
 }: {
-  toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
+  toolExecutionParams: ToolHandlerExecutionParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent, toolId, toolCallId, toolParams } = toolExecutionParams;
+  const { onEvent, toolId, toolCallId, toolParams, source } = toolExecutionParams;
   const {
     request,
     elasticsearch,
@@ -264,21 +291,39 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     modelProvider,
     toolsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     toolManager,
+    experimentalFeatures,
+    projectRouting,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const savedObjectsClient = savedObjects.getScopedClient(request);
+
+  const callContext: ToolHandlerCallContext = {
+    toolId,
+    toolCallId,
+    callSource: source,
+  };
+
   return {
+    callContext,
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request),
-    savedObjectsClient: savedObjects.getScopedClient(request),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
+    savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
@@ -293,6 +338,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
+    skillsStore: skillsStore.asReadonly(),
     attachments: attachmentStateManager,
     skills: await createSkillsService({
       skillServiceStart,
@@ -302,10 +348,13 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
     }),
     toolManager,
-    filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
+    agentConfiguration: manager.deps.agentConfiguration,
+    experimentalFeatures,
   };
 };
 
@@ -316,6 +365,7 @@ const getAgentExecutionContext = (manager: RunnerManager) => {
 const reportToolCallTelemetry = ({
   parentManager,
   toolId,
+  toolType,
   toolCallId,
   source,
   results,
@@ -323,6 +373,7 @@ const reportToolCallTelemetry = ({
 }: {
   parentManager: RunnerManager;
   toolId: string;
+  toolType: ToolType;
   toolCallId: string;
   source: string;
   results: ToolResult[];
@@ -335,7 +386,7 @@ const reportToolCallTelemetry = ({
 
   try {
     const agentContext = getAgentExecutionContext(parentManager);
-    const allErrors = results.length > 0 && results.every((r) => r.type === ToolResultType.error);
+    const allErrors = hasOnlyErrorResults(results);
 
     if (allErrors) {
       const firstError = results[0];
@@ -348,6 +399,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         errorType: 'tool_error',
@@ -360,6 +412,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         resultTypes: results.map((r) => r.type),
@@ -370,3 +423,6 @@ const reportToolCallTelemetry = ({
     parentManager.deps.logger.warn(`Failed to report tool call telemetry: ${e}`);
   }
 };
+
+const hasOnlyErrorResults = (results: Array<{ type: string }>): boolean =>
+  results.length > 0 && results.every((r) => r.type === ToolResultType.error);

@@ -50,6 +50,8 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/code-editor-mock'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -61,6 +63,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - __jest__/**/*
     - '!target/**/*'
   jest-config:

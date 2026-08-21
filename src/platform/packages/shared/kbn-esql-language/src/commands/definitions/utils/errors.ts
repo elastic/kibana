@@ -25,6 +25,15 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../constants';
+
+/**
+ * Full-text function names for user-facing messages. Operator forms (the `:` match operator)
+ * are left out, since only the named functions read well in a list.
+ */
+const FULL_TEXT_FUNCTION_NAMES = FULL_TEXT_SEARCH_DEFINITIONS.filter((name) => /^\w+$/.test(name))
+  .map((name) => name.toUpperCase())
+  .join(', ');
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -222,6 +231,15 @@ Expected one of:
           },
         }),
       };
+    case 'expectedAggregationArgument':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
+          defaultMessage: 'This argument of {parentName} must be an aggregation function.',
+          values: {
+            parentName: out.parentName.toUpperCase(),
+          },
+        }),
+      };
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknowAggregateFunction', {
@@ -242,7 +260,17 @@ Expected one of:
             field: out.field,
           },
         }),
-        type: 'warning',
+      };
+    case 'columnTypeConflict':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.columnTypeConflict', {
+          defaultMessage: 'Column [{columnName}] has conflicting types across indices{typesSuffix}',
+          values: {
+            columnName: out.columnName,
+            // Live validation may know only that a column is conflicted; include exact types when available.
+            typesSuffix: out.types ? `: ${out.types}` : '',
+          },
+        }),
       };
     case 'unsupportedMode':
       return {
@@ -433,29 +461,11 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkTooFewBranches':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkTooFewBranches', {
-          defaultMessage: '[FORK] Must include at least two branches.',
-        }),
-        type: 'error',
-      };
     case 'forkNotAllowedWithSubqueries':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
           defaultMessage: '[FORK] Command is not allowed inside a subquery.',
         }),
-        type: 'error',
-      };
-    case 'inlineStatsNotAllowedAfterLimit':
-      return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.inlineStatsNotAllowedAfterLimit',
-          {
-            defaultMessage:
-              '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
-          }
-        ),
         type: 'error',
       };
     case 'invalidSettingValue':
@@ -505,6 +515,56 @@ Expected one of:
           values: { type: out.type },
         }),
         type: 'error',
+      };
+    case 'invalidMapParameterValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValue', {
+          defaultMessage:
+            'Invalid value "{value}" for parameter "{paramName}". Expected one of: {allowedValues}.',
+          values: {
+            paramName: out.paramName,
+            value: out.value,
+            allowedValues: out.allowedValues,
+          },
+        }),
+        type: 'error',
+      };
+    case 'highlightMissingOnClause':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
+          defaultMessage: '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+        }),
+        type: 'error',
+      };
+    case 'highlightInvalidPrefixModifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidPrefixModifier',
+          {
+            defaultMessage: '[HIGHLIGHT] Invalid modifier [{keyword}], expected [prefix]',
+            values: { keyword: out.keyword },
+          }
+        ),
+        type: 'error',
+      };
+    case 'highlightInvalidQueryExpression':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidQueryExpression',
+          {
+            defaultMessage:
+              '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
+            values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
+          }
+        ),
+        type: 'error',
+      };
+    case 'tsdbIncompatibleFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {
+          defaultMessage: 'Function {fnName} is not supported in time series (TS) pipelines',
+          values: { fnName: out.fnName.toUpperCase() },
+        }),
       };
   }
   return { message: '' };
@@ -569,6 +629,9 @@ const createError = (messageId: string, location: ESQLLocation, message: string 
 export function tagSemanticError(error: ESQLMessage, requiresCallback: string): ESQLMessage {
   return { ...error, errorType: 'semantic', requiresCallback };
 }
+
+const withWarningSeverity = (message: ESQLMessage, shouldWarn: boolean): ESQLMessage =>
+  shouldWarn ? { ...message, type: 'warning', underlinedWarning: true } : message;
 
 export const errors = {
   unexpected: (
@@ -639,6 +702,14 @@ export const errors = {
       parentName,
     }),
 
+  expectedAggregationArgument: (
+    parentFn: ESQLFunction,
+    location: ESQLLocation = parentFn.location
+  ): ESQLMessage =>
+    errors.byId('expectedAggregationArgument', location, {
+      parentName: parentFn.name,
+    }),
+
   unknownAggFunction: (
     node: ESQLColumn | ESQLIdentifier,
     type: string = 'FieldAttribute'
@@ -703,6 +774,9 @@ export const errors = {
       locationName,
     }),
 
+  tsdbIncompatibleFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('tsdbIncompatibleFunction', fn.location, { fnName: fn.name }),
+
   wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
     const validArgCounts = new Set<number>();
     let minParams: number | undefined;
@@ -748,20 +822,50 @@ export const errors = {
       givenType: type,
     }),
 
+  unsupportedFieldType: (
+    column: ESQLColumn | ESQLIdentifier,
+    field: string,
+    shouldWarn = false
+  ): ESQLMessage =>
+    tagSemanticError(
+      withWarningSeverity(
+        errors.byId('unsupportedFieldType', column.location, { field }),
+        shouldWarn
+      ),
+      'getColumnsFor'
+    ),
+
+  columnTypeConflict: (
+    column: ESQLColumn | ESQLIdentifier,
+    columnName: string,
+    types: string[],
+    shouldWarn = false
+  ): ESQLMessage =>
+    tagSemanticError(
+      withWarningSeverity(
+        {
+          ...errors.byId('columnTypeConflict', column.location, {
+            columnName,
+            types: types.map((type) => `[${type}]`).join(', '),
+          }),
+          data: {
+            columnName,
+            types,
+          },
+        },
+        shouldWarn
+      ),
+      'getColumnsFor'
+    ),
+
   dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
     errors.byId('dropTimestampWarning', location, {}),
 
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkTooFewBranches', command.location, {}),
-
   forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
-
-  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

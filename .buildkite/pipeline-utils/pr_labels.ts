@@ -41,11 +41,21 @@ export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   'ci:use-chrome-beta': {
     USE_CHROME_BETA: 'true', // Use if you want to run tests with Chrome Beta
   },
+  'ci:ftr-smart-retry': {
+    FTR_SMART_RETRY_ENABLED: 'true',
+  },
+  'ci:ftr-auto-retry': {
+    FTR_AUTO_RETRY_COUNT: '1',
+  },
   [FIPS_GH_LABELS[FIPS_VERSION.TWO]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.TWO,
   },
   [FIPS_GH_LABELS[FIPS_VERSION.THREE]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.THREE,
+  },
+  // [rspack-transition] Remove this mapping when the legacy optimizer is removed.
+  'ci:build-with-rspack-optimizer': {
+    KBN_USE_RSPACK: 'true',
   },
 };
 

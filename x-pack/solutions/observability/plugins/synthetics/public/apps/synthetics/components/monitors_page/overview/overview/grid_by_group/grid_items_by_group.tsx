@@ -8,7 +8,7 @@
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -117,6 +117,30 @@ export const GridItemsByGroup = ({
         },
       };
       break;
+    case 'remoteName': {
+      const remoteNames = [
+        ...new Set(
+          allConfigs
+            ?.map((monitor) => monitor.remote?.remoteName)
+            .filter((name): name is string => Boolean(name))
+        ),
+      ];
+      selectedGroup = {
+        key: 'remote.remoteName',
+        items: remoteNames.map((name) => ({ label: name, count: 0 })),
+        values: remoteNames.map((name) => ({ label: name, count: 0 })),
+        otherValues: {
+          label: i18n.translate(
+            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.localMonitors',
+            {
+              defaultMessage: 'Local monitors',
+            }
+          ),
+          items: allConfigs?.filter((monitor) => !monitor.remote),
+        },
+      };
+      break;
+    }
     default:
   }
 

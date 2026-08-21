@@ -7,7 +7,6 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
 import { TestProviders } from '../../mock';
 import { getEmptyString } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -165,22 +164,6 @@ describe('draggables', () => {
       );
 
       expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().exists()).toBe(false);
-    });
-
-    test('it uses the specified tooltipPosition', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <DraggableBadge
-            contextId="context-id"
-            eventId="event-id"
-            field="some-field"
-            value="some value"
-            tooltipPosition="top"
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(EuiToolTip).first().props().position).toEqual('top');
     });
   });
 });

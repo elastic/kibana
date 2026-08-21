@@ -91,7 +91,13 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({ message, event, object, metadata }: TrackUserActionParams) => {
+  private trackUserAction = ({
+    message,
+    event,
+    object,
+    metadata,
+    error,
+  }: TrackUserActionParams) => {
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
@@ -105,6 +111,7 @@ export class UserActivityService
       event,
       object,
       ...(metadata ? { metadata } : {}),
+      ...(error ? { error } : {}),
       ...injectedContext,
     });
   };

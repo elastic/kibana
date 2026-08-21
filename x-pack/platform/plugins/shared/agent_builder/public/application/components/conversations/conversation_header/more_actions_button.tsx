@@ -10,10 +10,12 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
   useAgentId,
@@ -25,7 +27,6 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
-import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
@@ -54,6 +55,12 @@ const fullscreenLabels = {
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
   }),
+  fullScreenDisabledTooltip: i18n.translate(
+    'xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip',
+    {
+      defaultMessage: 'Full-screen mode is available once this conversation has been created.',
+    }
+  ),
   addToDataset: i18n.translate('xpack.agentBuilder.conversationActions.addToDataset', {
     defaultMessage: 'Add conversation to dataset',
   }),
@@ -68,7 +75,6 @@ interface MoreActionsButtonProps {
 
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -131,11 +137,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           selected: true,
         };
       }),
-    }).onClick();
+    })?.onClick();
   }, [completedRounds, conversation?.id, getAddToDatasetAction]);
 
   const showAddToDatasetItem =
-    isExperimentalEnabled && getAddToDatasetAction != null && completedRounds.length > 0;
+    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -147,6 +153,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
+    if (!conversationId) return;
 
     setIsPopoverOpen(false);
     onCloseSidebar?.();
@@ -155,17 +162,32 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       ? appPaths.agent.conversations.byId({ agentId: agentId!, conversationId: conversationId! })
       : appPaths.agent.conversations.new({ agentId: agentId! });
 
-    navigateToAgentBuilderUrl(path);
-  }, [application, agentId, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
+    navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
+  }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
+
+  const fullScreenMenuItemLabel = useMemo(() => {
+    if (conversationId) {
+      return fullscreenLabels.fullScreen;
+    }
+    return (
+      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      </EuiToolTip>
+    );
+  }, [conversationId]);
 
   const addToDatasetMenuItem = showAddToDatasetItem
     ? [
         <EuiContextMenuItem
           key="addConversationToDataset"
-          icon="beaker"
-          size="s"
+          icon="flask"
           data-test-subj="agentBuilderAddConversationToDataset"
           onClick={onAddConversationToDataset}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.ADD_TO_DATASET,
+            detail: 'conversation',
+          })}
         >
           {fullscreenLabels.addToDataset}
         </EuiContextMenuItem>,
@@ -176,10 +198,14 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
+        detail: 'conversation',
+      })}
     >
       {fullscreenLabels.agentDetails}
     </EuiContextMenuItem>,
@@ -188,11 +214,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="full-screen"
             icon="fullScreen"
-            size="s"
+            disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.inappChat.OPEN_FULLSCREEN,
+            })}
           >
-            {fullscreenLabels.fullScreen}
+            {fullScreenMenuItemLabel}
           </EuiContextMenuItem>,
         ]
       : []),
@@ -204,6 +234,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             onClick={closePopover}
             href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
             data-test-subj="agentBuilderGenAiSettingsButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
+              detail: 'conversation',
+            })}
           >
             {fullscreenLabels.genAiSettings}
           </EuiContextMenuItem>,
@@ -216,10 +251,14 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
+        detail: 'conversation',
+      })}
     >
       {fullscreenLabels.agentDetails}
     </EuiContextMenuItem>,
@@ -231,6 +270,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             onClick={closePopover}
             href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
             data-test-subj="agentBuilderGenAiSettingsButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
+              detail: 'conversation',
+            })}
           >
             {fullscreenLabels.genAiSettings}
           </EuiContextMenuItem>,
@@ -244,10 +288,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const buttonProps = {
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
-    size: 'm' as const,
+    size: 's' as const,
     'aria-label': fullscreenLabels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_MORE_ACTIONS,
+      detail: 'conversation',
+    }),
   };
 
   return (
@@ -256,17 +305,12 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="xs"
-        anchorPosition="downCenter"
+        panelPaddingSize="none"
+        anchorPosition="downRight"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
-        <EuiSpacer size="s" />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
-      <DeleteConversationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
     </>
   );
 };

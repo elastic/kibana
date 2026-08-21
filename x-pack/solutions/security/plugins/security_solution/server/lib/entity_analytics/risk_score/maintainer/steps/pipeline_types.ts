@@ -10,16 +10,6 @@
 import type { AssetCriticalityLevel } from '@kbn/entity-store/common';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 
-/** Output of entity categorization for write routing decisions. */
-export interface CategorizedEntities {
-  /** Entities missing in Entity Store. */
-  not_in_store: EntityRiskScoreRecord[];
-  /** Scores safe to persist immediately. */
-  write_now: EntityRiskScoreRecord[];
-  /** Scores reserved for deferred handling. */
-  defer_to_phase_2: EntityRiskScoreRecord[];
-}
-
 /** Minimal entity fields required for modifier application. */
 export interface RiskScoreModifierEntity {
   entity?: {
@@ -36,6 +26,28 @@ export interface RiskScoreModifierEntity {
   asset?: {
     criticality?: AssetCriticalityLevel | null;
   };
+  /**
+   * EUID of the group member whose criticality set `asset.criticality` (the
+   * first member holding the max level, on ties). Only set by the
+   * resolution-group aggregation, where the level is the max across members
+   * and would otherwise be unattributable; store entities never carry it
+   * (the scored entity is its own criticality holder).
+   */
+  criticalityContributorEUID?: string;
+}
+
+/**
+ * Loose entity-store `_source` boundary shape. `unknown` fields are variably
+ * typed; `normalizeModifierEntity` is the single normalizer to the strict
+ * `RiskScoreModifierEntity`. Keep this type loose — only widen at the boundary.
+ */
+export interface EntityStoreModifierSource {
+  entity?: {
+    id?: string;
+    attributes?: { watchlists?: unknown };
+    relationships?: { resolution?: { resolved_to?: unknown } };
+  };
+  asset?: RiskScoreModifierEntity['asset'] | null;
 }
 
 /** Shared scored page shape used across scoring loops. */
@@ -48,10 +60,13 @@ export interface ScoredEntityPage {
 /** Common summary fields returned by scorer modules. */
 export interface StepResult {
   pagesProcessed: number;
-  scoresWritten: number;
+  scoresWrittenRiskIndex: number;
+  scoresWrittenEntityStore: number;
+  scoresFailed: number;
 }
 
 /** Phase 2 scoring summary with optional skip reason. */
 export interface ResolutionStepResult extends StepResult {
   skippedReason?: 'lookup_empty';
+  scores: Record<string, number>;
 }

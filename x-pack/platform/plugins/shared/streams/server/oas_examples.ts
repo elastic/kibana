@@ -48,7 +48,6 @@ export const createWiredStreamRequest: Streams.WiredStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -80,7 +79,6 @@ export const updateClassicStreamRequest: Streams.ClassicStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -98,7 +96,6 @@ export const createQueryStreamRequest: Streams.QueryStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -230,7 +227,6 @@ export const getWiredStreamResponse: Streams.WiredStream.GetResponse = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
   data_stream_exists: true,
   inherited_fields: {
     '@timestamp': { type: 'date', from: 'logs' },
@@ -291,6 +287,51 @@ export const getWiredIngestResponse: { ingest: Streams.WiredStream.Definition['i
       ],
     },
   },
+};
+
+// ---------------------------------------------------------------------------
+// PUT /api/streams/{name}/queries/{queryId}
+// ---------------------------------------------------------------------------
+
+export const upsertStreamQueryRequest = {
+  title: 'Error count by host',
+  description: 'Count error-level log events grouped by host name',
+  esql: {
+    query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/queries/_bulk
+// ---------------------------------------------------------------------------
+
+export const bulkStreamQueriesRequest = {
+  operations: [
+    {
+      index: {
+        id: 'error-count-by-host',
+        title: 'Error count by host',
+        description: 'Count error-level log events grouped by host name',
+        esql: {
+          query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+        },
+      },
+    },
+    {
+      delete: { id: 'old-query-id' },
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/content/export
+// ---------------------------------------------------------------------------
+
+export const exportContentRequest = {
+  name: 'nginx-pack',
+  description: 'Nginx stream content pack',
+  version: '1.0.0',
+  include: { objects: { all: {} } },
 };
 
 // ---------------------------------------------------------------------------

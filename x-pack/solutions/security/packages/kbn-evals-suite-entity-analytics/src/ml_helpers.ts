@@ -32,15 +32,15 @@ export const securityAuthJobIds = [
 // Privileged Access Detection (PAD) ML module
 export const padModule = 'pad-ml';
 export const padJobIds = [
-  'pad_linux_rare_process_executed_by_user',
-  'pad_linux_high_count_privileged_process_events_by_user',
+  'pad_linux_rare_process_executed_by_user_ea',
+  'pad_linux_high_count_privileged_process_events_by_user_ea',
 ];
 
 // Lateral Movement Detection (LMD) ML module
 export const lmdModule = 'lmd-ml';
 export const lmdJobIds = [
-  'lmd_high_count_remote_file_transfer',
-  'lmd_high_file_size_remote_file_transfer',
+  'lmd_high_count_remote_file_transfer_ea',
+  'lmd_high_file_size_remote_file_transfer_ea',
 ];
 
 // Security PacketBeat ML module
@@ -50,10 +50,10 @@ export const securityPacketBeatJobIds = ['packetbeat_rare_server_domain_ea'];
 // Data Exfiltration Detection (DED) ML module
 export const dedModule = 'ded-ml';
 export const dedJobIds = [
-  'ded_high_bytes_written_to_external_device',
-  'ded_high_bytes_written_to_external_device_airdrop',
-  'ded_high_sent_bytes_destination_geo_country_iso_code',
-  'ded_high_sent_bytes_destination_ip',
+  'ded_high_bytes_written_to_external_device_ea',
+  'ded_high_bytes_written_to_external_device_airdrop_ea',
+  'ded_high_sent_bytes_destination_geo_country_iso_code_ea',
+  'ded_high_sent_bytes_destination_ip_ea',
 ];
 
 interface ModuleJob {

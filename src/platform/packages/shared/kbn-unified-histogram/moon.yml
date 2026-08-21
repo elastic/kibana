@@ -51,6 +51,9 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/control-group-renderer'
   - '@kbn/controls-schemas'
+  - '@kbn/react-hooks'
+  - '@kbn/ebt-click'
+  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package

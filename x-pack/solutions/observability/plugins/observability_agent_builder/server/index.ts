@@ -7,8 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ObservabilityAgentBuilderPlugin } from './plugin';
-
 export type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginStart,
@@ -18,5 +16,7 @@ export type {
 
 export type { ObservabilityAgentBuilderServerRouteRepository } from './routes/get_global_observability_agent_builder_route_repository';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ObservabilityAgentBuilderPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { ObservabilityAgentBuilderPlugin } = await import('./plugin');
+  return new ObservabilityAgentBuilderPlugin(initializerContext);
+};

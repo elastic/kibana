@@ -9,13 +9,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
 import type { AlertEpisodeAction } from '../queries/episode_actions_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 
 jest.mock('../apis/fetch_episode_actions');
 
 const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 const mockExpressions = {} as ExpressionsStart;
+const mockSpaces = createMockSpaces();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -34,7 +35,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: [],
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -49,6 +50,7 @@ describe('useFetchEpisodeActions', () => {
         group_hash: 'gh-1',
         last_ack_action: 'ack',
         last_assignee_uid: 'u-1',
+        last_ack_actor: 'actor-1',
       },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
@@ -57,7 +59,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['ep-1'],
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -72,6 +74,7 @@ describe('useFetchEpisodeActions', () => {
       groupHash: 'gh-1',
       lastAckAction: 'ack',
       lastAssigneeUid: 'u-1',
+      lastAckActor: 'actor-1',
     });
   });
 
@@ -83,6 +86,7 @@ describe('useFetchEpisodeActions', () => {
         group_hash: null,
         last_ack_action: 'ack',
         last_assignee_uid: null,
+        last_ack_actor: null,
       },
       {
         episode_id: 'dup',
@@ -90,6 +94,7 @@ describe('useFetchEpisodeActions', () => {
         group_hash: null,
         last_ack_action: 'unack',
         last_assignee_uid: 'u-2',
+        last_ack_actor: null,
       },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
@@ -98,7 +103,7 @@ describe('useFetchEpisodeActions', () => {
       () =>
         useFetchEpisodeActions({
           episodeIds: ['dup'],
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );

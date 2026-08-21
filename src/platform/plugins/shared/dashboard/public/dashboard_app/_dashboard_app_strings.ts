@@ -182,14 +182,6 @@ export const topNavStrings = {
       defaultMessage: 'Full Screen Mode',
     }),
   },
-  labs: {
-    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
-      defaultMessage: 'labs',
-    }),
-    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
-      defaultMessage: 'Labs',
-    }),
-  },
   edit: {
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
@@ -298,7 +290,7 @@ export const topNavStrings = {
   },
   add: {
     label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'Add panel',
+      defaultMessage: 'Add',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',

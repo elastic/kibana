@@ -9,13 +9,6 @@ import { pick } from 'lodash';
 import type { Assign } from 'utility-types';
 
 import type { Props } from '@kbn/config-schema';
-import type { LensByValueSerializedState } from '@kbn/lens-common';
-import type {
-  LensByRefSerializedAPIConfig,
-  LensByValueSerializedAPIConfig,
-} from '@kbn/lens-common-2';
-
-import type { AnyLensPanelConfig, FlattenedLensByValuePanelSchema } from './types';
 
 /**
  * Picks a subset of props from base schema definition
@@ -30,34 +23,4 @@ export function pickFromObjectSchema<T extends Props, K extends keyof T>(
 
   // lodash.pick types do not infer the object type to enforce keyof T
   return pick<T, K>(schema, keys);
-}
-
-// TODO: dedup logic with improved type organization
-export function isByRefLensConfig(
-  config: AnyLensPanelConfig
-): config is LensByRefSerializedAPIConfig {
-  return 'ref_id' in config && !!config.ref_id;
-}
-
-export function isFlattenedAPIConfig(
-  config: FlattenedLensByValuePanelSchema | LensByValueSerializedState
-): config is FlattenedLensByValuePanelSchema {
-  return !('attributes' in config);
-}
-
-export function unflattenAPIConfig(
-  config: FlattenedLensByValuePanelSchema
-): LensByValueSerializedAPIConfig {
-  const { title, description, hide_title, hide_border, time_range, drilldowns, ...attributes } =
-    config;
-
-  return {
-    title,
-    description,
-    hide_title,
-    hide_border,
-    time_range,
-    drilldowns,
-    attributes,
-  };
 }

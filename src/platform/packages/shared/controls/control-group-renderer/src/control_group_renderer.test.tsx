@@ -11,13 +11,14 @@ import React from 'react';
 
 import {
   registerEmbeddablePublicDefinition,
-  type EmbeddableFactory,
+  type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ControlGroupRendererApi, ControlPanelsState } from '.';
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { ControlGroupRenderer } from './control_group_renderer';
@@ -44,6 +45,7 @@ const getTestEmbeddableFactory = () =>
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        anyStateChange$: of(),
         applySerializedState: jest.fn(),
       });
       return {
@@ -54,7 +56,7 @@ const getTestEmbeddableFactory = () =>
         },
       };
     },
-  } as EmbeddableFactory<{ selection?: string }>);
+  } as EmbeddablePublicDefinition<{ selection?: string }>);
 
 // defined in the outer scope so that its reference doesn't change on rerender
 const mockGetCreationOptions = jest
@@ -63,6 +65,7 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
+    setStubKibanaServices();
     registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 
@@ -154,6 +157,24 @@ describe('control group renderer', () => {
       />
     );
     expect(api.query$?.getValue()).toEqual(updatedQuery);
+  });
+
+  test('project routing changes are dispatched to control parent API if they are different', async () => {
+    const initialProjectRouting = '_alias:_origin';
+    const updatedProjectRouting = '_alias:*';
+
+    const { component, api } = await mountControlGroupRenderer({
+      projectRouting: initialProjectRouting,
+    });
+    expect(api.projectRouting$.getValue()).toEqual(initialProjectRouting);
+    component.rerender(
+      <ControlGroupRenderer
+        onApiAvailable={jest.fn()}
+        getCreationOptions={mockGetCreationOptions}
+        projectRouting={updatedProjectRouting}
+      />
+    );
+    expect(api.projectRouting$.getValue()).toEqual(updatedProjectRouting);
   });
 
   test('time range changes are dispatched to control parent API if they are different', async () => {

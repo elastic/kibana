@@ -118,7 +118,13 @@ export type DefaultParams = z.infer<typeof DefaultParams>;
 
 export const RunScriptOsConfigValues = lazySchema(() =>
   z.object({
+    /**
+     * The ID of the script to run (from the Kibana Script library)
+     */
     scriptId: z.string().optional(),
+    /**
+     * The arguments to pass to the script (if any)
+     */
     scriptInput: z.string().optional(),
     /**
      * Specify the timeout in seconds for the script execution
@@ -129,10 +135,8 @@ export const RunScriptOsConfigValues = lazySchema(() =>
 export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
 
 /**
-  * > warn
-> This functionality is currently not available
-
-  */
+ * Run a script on the Elastic Defend host that triggered the alert.
+ */
 export const RunscriptParams = lazySchema(() =>
   z.object({
     command: z.literal('runscript'),
@@ -151,12 +155,40 @@ export const RunscriptParams = lazySchema(() =>
 );
 export type RunscriptParams = z.infer<typeof RunscriptParams>;
 
-export const ProcessesParams = lazySchema(() =>
+export const KillProcessParams = lazySchema(() =>
   z.object({
     /**
-     * To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"
+     * To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"
      */
-    command: z.enum(['kill-process', 'suspend-process']),
+    command: z.literal('kill-process'),
+    /**
+     * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
+     */
+    comment: z.string().optional(),
+    config: z.object({
+      /**
+       * Field to use instead of `process.pid`
+       */
+      field: z.string().max(2000),
+      /**
+       * Whether to overwrite field with `process.pid`
+       */
+      overwrite: z.boolean().optional().default(true),
+      /**
+       * Whether to also terminate the descendant processes of the targeted process.
+       */
+      kill_descendants: z.boolean().optional(),
+    }),
+  })
+);
+export type KillProcessParams = z.infer<typeof KillProcessParams>;
+
+export const SuspendProcessParams = lazySchema(() =>
+  z.object({
+    /**
+     * To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"
+     */
+    command: z.literal('suspend-process'),
     /**
      * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
      */
@@ -165,13 +197,18 @@ export const ProcessesParams = lazySchema(() =>
       /**
        * Field to use instead of process.pid
        */
-      field: z.string(),
+      field: z.string().max(2000),
       /**
        * Whether to overwrite field with process.pid
        */
       overwrite: z.boolean().optional().default(true),
     }),
   })
+);
+export type SuspendProcessParams = z.infer<typeof SuspendProcessParams>;
+
+export const ProcessesParams = lazySchema(() =>
+  z.discriminatedUnion('command', [KillProcessParams, SuspendProcessParams])
 );
 export type ProcessesParams = z.infer<typeof ProcessesParams>;
 

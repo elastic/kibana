@@ -9,7 +9,9 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
+import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
 import type {
   AgentBuilderPluginSetup,
@@ -30,10 +32,8 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
-import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -55,6 +55,8 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private teardownTracing?: () => Promise<void>;
+  private startDeps?: AgentBuilderStartDependencies;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -94,6 +96,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -104,25 +107,6 @@ export class AgentBuilderPlugin
           throw new Error('getTaskHandler called before service init');
         }
         return services.taskHandler;
-      },
-    });
-
-    // Register SML crawler task definition
-    registerSmlCrawlerTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getCrawlerDeps: async () => {
-        const [coreStart] = await coreSetup.getStartServices();
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getCrawlerDeps called before service init');
-        }
-        return {
-          smlService: services.sml,
-          elasticsearch: coreStart.elasticsearch,
-          savedObjects: coreStart.savedObjects,
-          uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services.sml'),
-        };
       },
     });
 
@@ -181,12 +165,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getSmlService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('SML service not available — plugin has not started');
+      getAgentBuilderSml: () => {
+        if (!this.startDeps) {
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return services.sml;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -198,24 +181,13 @@ export class AgentBuilderPlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
+      },
     });
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
-    });
-
-    // Register connector lifecycle listener to index connectors into SML
-    // when they are created/deleted. The handler checks the connectors-enabled
-    // feature flag at runtime, so we always register.
-    const connectorLifecycleHandler = createConnectorLifecycleHandler({
-      serviceManager: this.serviceManager,
-      logger: this.logger.get('connector-lifecycle'),
-      getStartServices: coreSetup.getStartServices,
-    });
-
-    setupDeps.actions.registerConnectorLifecycleListener({
-      connectorTypes: '*',
-      onPostCreate: connectorLifecycleHandler.onPostCreate,
-      onPostDelete: connectorLifecycleHandler.onPostDelete,
     });
 
     return {
@@ -224,9 +196,13 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
@@ -237,29 +213,45 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
-      sml: {
-        registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
       },
       topSnippets: this.config.topSnippets,
     };
   }
 
-  start(
-    coreStart: CoreStart,
-    {
+  start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+    this.startDeps = startDeps;
+    void registerTracingExporter({
+      core: coreStart,
+      tracingConfig: this.config.tracing,
+      logger: this.logger.get('tracing'),
+    }).then((teardownTracing) => {
+      this.teardownTracing = teardownTracing;
+    });
+    const {
       inference,
       spaces,
       actions,
       taskManager,
       searchInferenceEndpoints,
-    }: AgentBuilderStartDependencies
-  ): AgentBuilderPluginStart {
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+      security: securityPlugin,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
+
+    this.cleanupLegacySmlTasks(taskManager).catch((error) => {
+      this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -273,8 +265,16 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -290,20 +290,10 @@ export class AgentBuilderPlugin
       logger: this.logger.get('model-provider'),
     });
 
-    // Schedule SML crawler tasks for all registered types
-    scheduleSmlCrawlerTasks({
-      taskManager,
-      smlService: startServices.sml,
-      logger: this.logger.get('services.sml'),
-    }).catch((error) => {
-      this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
-    });
-
-    const smlService = startServices.sml;
-
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -328,30 +318,33 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-          };
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
-      sml: {
-        indexAttachment: async (params) => {
-          const soClient = savedObjects.getScopedClient(params.request);
-          const spaceId =
-            params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-          return smlService.indexAttachment({
-            originId: params.originId,
-            attachmentType: params.attachmentType,
-            action: params.action,
-            spaces: [spaceId],
-            esClient: elasticsearch.client.asInternalUser,
-            savedObjectsClient: soClient,
-            logger: this.logger.get('services.sml'),
-          });
-        },
-      },
+      conversationTemplates,
     };
   }
 
-  stop() {}
+  async stop() {
+    await this.teardownTracing?.();
+  }
+  /**
+   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
+   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
+   */
+  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
+    const logger = this.logger.get('sml-migration');
+    const legacyTaskIds = [
+      'agent_builder:sml_crawler:visualization',
+      'agent_builder:sml_crawler:connector',
+      'agent_builder:sml_crawler:dashboard',
+      'agent_builder:sml_crawler:workflow',
+    ];
+    try {
+      await taskManager.bulkRemove(legacyTaskIds);
+    } catch (error) {
+      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
+    }
+  }
 }

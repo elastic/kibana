@@ -15,28 +15,82 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import type {
   AgentErrorAction,
   HandoverAction,
   ResearchAgentAction,
   AnswerAgentAction,
+  ToolCallAction,
+  ExecuteToolAction,
+  ToolCallResult,
 } from '../../actions';
 import {
   isAgentErrorAction,
   isBackgroundExecutionCompleteAction,
+  isSubagentRosterUpdatedAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
 } from '../../actions';
+import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
+import { extractToolReturn } from '../../utils/extract_tool_return';
+import { estimateMessagesTokens } from '../../utils/estimate_conversation_tokens';
 
-export const formatResearcherActionHistory = ({
+const PRESERVED_RECENT_CYCLES = 2;
+
+export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
+
+interface IntraRoundCompaction {
+  resultTransformer: ToolCallResultTransformer;
+  toolManager: ToolManager;
+}
+
+export const formatResearcherActionHistory = async ({
   actions,
+  cycleLimit,
+  resultTransformer,
+  toolManager,
 }: {
   actions: ResearchAgentAction[];
-}): BaseMessageLike[] => {
+  cycleLimit: number;
+  resultTransformer?: ToolCallResultTransformer;
+  toolManager?: ToolManager;
+}): Promise<BaseMessageLike[]> => {
+  const rawMessages = await formatActions({ actions, cycleLimit });
+
+  if (
+    !resultTransformer ||
+    !toolManager ||
+    estimateMessagesTokens(rawMessages as BaseMessage[]) <= IN_FLIGHT_TOKEN_THRESHOLD
+  ) {
+    return rawMessages;
+  }
+
+  const compactedMessages = await formatActions({
+    actions,
+    cycleLimit,
+    compaction: { resultTransformer, toolManager },
+  });
+
+  return compactedMessages;
+};
+
+const formatActions = async ({
+  actions,
+  cycleLimit,
+  compaction,
+}: {
+  actions: ResearchAgentAction[];
+  cycleLimit: number;
+  compaction?: IntraRoundCompaction;
+}): Promise<BaseMessageLike[]> => {
+  const compactionCutoff = compaction ? getCompactionCutoffCycle(actions) : undefined;
   const formatted: BaseMessageLike[] = [];
 
   for (let i = 0; i < actions.length; i++) {
@@ -51,11 +105,33 @@ export const formatResearcherActionHistory = ({
       formatted.push(createToolCallMessage(action.tool_calls, action.message));
     }
     if (isExecuteToolAction(action)) {
-      formatted.push(
-        ...action.tool_results.map((result) =>
-          createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
-        )
-      );
+      const compactThis =
+        compaction !== undefined &&
+        compactionCutoff !== undefined &&
+        action.cycle !== undefined &&
+        action.cycle <= compactionCutoff;
+
+      if (compactThis) {
+        formatted.push(
+          ...(await formatCompactedToolResults(
+            action,
+            findPrecedingToolCallAction(actions, i),
+            compaction!
+          ))
+        );
+      } else {
+        formatted.push(
+          ...action.tool_results.map((result) =>
+            createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
+          )
+        );
+      }
+
+      // Add system reminder about being close to the limit when only 5 cycles left.
+      const remainingCycles = cycleLimit - action.cycle!;
+      if (remainingCycles === 5 || remainingCycles === 1) {
+        formatted.push(createCycleLimitSystemMessage(remainingCycles));
+      }
     }
     if (isHandoverAction(action)) {
       // returns a single [AI, user] tuple
@@ -68,9 +144,116 @@ export const formatResearcherActionHistory = ({
     if (isBackgroundExecutionCompleteAction(action)) {
       formatted.push(createUserMessage(formatSystemNotice(action.execution)));
     }
+    if (isSubagentRosterUpdatedAction(action)) {
+      formatted.push(createUserMessage(formatSubagentRosterNotice(action.roster)));
+    }
   }
 
   return formatted;
+};
+const getCompactionCutoffCycle = (actions: ResearchAgentAction[]): number | undefined => {
+  const cycles = actions
+    .filter(isExecuteToolAction)
+    .map((action) => action.cycle)
+    .filter((cycle): cycle is number => cycle !== undefined);
+
+  if (cycles.length <= PRESERVED_RECENT_CYCLES) {
+    return undefined;
+  }
+  return Math.max(...cycles) - PRESERVED_RECENT_CYCLES;
+};
+
+const findPrecedingToolCallAction = (
+  actions: ResearchAgentAction[],
+  executeIndex: number
+): ToolCallAction | undefined => {
+  for (let i = executeIndex - 1; i >= 0; i--) {
+    const action = actions[i];
+    if (isToolCallAction(action)) {
+      return action;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Runs the result transformer over an older cycle's tool results, mirroring how
+ * previous rounds are compacted. Filestore substitution is forced because the
+ * pressure comes from the in-flight round, not conversation history. A result whose
+ * structured payload can't be recovered falls back to its raw content.
+ */
+const formatCompactedToolResults = async (
+  executeAction: ExecuteToolAction,
+  toolCallAction: ToolCallAction | undefined,
+  { resultTransformer, toolManager }: IntraRoundCompaction
+): Promise<BaseMessageLike[]> => {
+  const toolIdMapping = toolManager.getToolIdMapping();
+  const messages: BaseMessageLike[] = [];
+
+  for (const result of executeAction.tool_results) {
+    const toolCall = reconstructToolCall(result, toolCallAction, toolIdMapping);
+    if (!toolCall) {
+      messages.push(
+        createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
+      );
+      continue;
+    }
+
+    const transformed = await resultTransformer(toolCall, { forceFilestoreSubstitution: true });
+    // Only use the transformed form when it's actually smaller. Re-serializing an
+    // unchanged result (no summarizer, and below the filestore threshold) as JSON can
+    // otherwise add overhead and make the prompt larger than the raw rendering.
+    const transformedContent = { results: transformed };
+    const useTransformed =
+      estimateTokens(JSON.stringify(transformedContent)) < estimateTokens(result.content);
+    messages.push(
+      createToolResultMessage({
+        content: useTransformed ? transformedContent : result.content,
+        toolCallId: result.toolCallId,
+      })
+    );
+  }
+
+  return messages;
+};
+
+const reconstructToolCall = (
+  result: ToolCallResult,
+  toolCallAction: ToolCallAction | undefined,
+  toolIdMapping: Map<string, string>
+): ToolCallWithResult | undefined => {
+  let results: ToolResult[];
+  try {
+    results = extractToolReturn(result).results ?? [];
+  } catch {
+    return undefined;
+  }
+
+  const call = toolCallAction?.tool_calls.find(
+    (toolCall) => toolCall.toolCallId === result.toolCallId
+  );
+  const langchainName = call?.toolName ?? '';
+
+  return {
+    tool_call_id: result.toolCallId,
+    // getToolIdMapping is langchain name -> internal id; fall back to the name for evicted tools.
+    tool_id: toolIdMapping.get(langchainName) ?? langchainName,
+    params: stripReasoning(call?.args ?? {}),
+    results,
+  };
+};
+
+const stripReasoning = (args: Record<string, unknown>): Record<string, unknown> => {
+  const { _reasoning, ...rest } = args;
+  return rest;
+};
+
+const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
+  return createUserMessage(`<system-notice>
+You action budget is almost expired for that round. You only have ${cycle} cycles (tool calls) left before the execution will be terminated.
+Finish what you are doing in that budget and proceed to respond to the user before reaching the end of the cycles.
+Interrupt your current action if necessary to make sure you finish before termination.
+</system-notice>`);
 };
 
 export const formatAnswerActionHistory = ({
@@ -86,7 +269,7 @@ export const formatAnswerActionHistory = ({
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
     }
-    // [...] we don't need to format AnswerAction because it will terminate the execution
+    // [...] we don't need to format StructuredAnswerAction because it will terminate the execution
   }
 
   return formatted;
@@ -155,10 +338,12 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
     ];
   }
 
-  // empty response -> we format that as an empty AI message and user message asking to try again.
+  // empty response -> placeholder AI turn + user nudge to retry.
+  // Use non-empty assistant text: Anthropic rejects empty content blocks, and dropping the
+  // turn collapses consecutive user messages (endless empty-response retries).
   if (isExecutionError(error, AgentExecutionErrorCode.emptyResponse)) {
     return [
-      createAIMessage(``),
+      createAIMessage('...'),
       createUserMessage('Looks like you did not provide any answer. Please try again.'),
     ];
   }
@@ -196,4 +381,17 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
       outcome.detail,
     ],
   });
+};
+
+/**
+ * Render the active persistent sub-agent roster as a system notice.
+ */
+export const formatSubagentRosterNotice = (roster: SubagentRosterEntry[]): string => {
+  const lines = roster.map((entry) =>
+    entry.purpose ? `- ${entry.name}: ${entry.purpose}` : `- ${entry.name}`
+  );
+  return `<system-notice>
+Active persistent sub-agents (interact via send_message):
+${lines.join('\n')}
+</system-notice>`;
 };

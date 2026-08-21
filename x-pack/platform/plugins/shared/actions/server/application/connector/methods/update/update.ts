@@ -17,7 +17,7 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
-import { isConnectorDeprecated } from '../../lib';
+import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 
@@ -209,13 +209,23 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     throw result;
   }
 
+  await context.evictClientPool?.(id);
+
   try {
-    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id, authMode });
+    await context.connectorTokenClient.deleteConnectorTokens({
+      connectorId: id,
+      authMode,
+      skipRevocation: true,
+    });
   } catch (e) {
     context.logger.error(
       `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
     );
   }
+
+  const resolvedAuthMode = getAuthMode(
+    result.attributes.authMode as Connector['authMode'] | undefined
+  );
 
   return {
     id,
@@ -227,8 +237,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    authMode: result.attributes.authMode
-      ? (result.attributes.authMode as Connector['authMode'])
-      : 'shared',
+    authMode: resolvedAuthMode,
   };
 }

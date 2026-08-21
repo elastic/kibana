@@ -16,8 +16,7 @@ export function MachineLearningAnomalyExplorerProvider(
   { getPageObject, getService }: FtrProviderContext,
   anomalyCharts: MlAnomalyCharts
 ) {
-  const dashboardPage = getPageObject('dashboard');
-  const retry = getService('retry');
+  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
 
@@ -96,10 +95,6 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
     },
 
-    async assertFeedbackButtonExists() {
-      await testSubjects.existOrFail('mlFeatureFeedbackButton');
-    },
-
     async assertAnnotationsPanelExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotationsPanel ${state}`, {
         timeout: 30 * 1000,
@@ -144,24 +139,12 @@ export function MachineLearningAnomalyExplorerProvider(
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await retry.tryForTime(30 * 1000, async () => {
-        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
-        const label = await dashboardSelector.findByCssSelector(
-          `label[for="new-dashboard-option"]`
-        );
-        await label.click();
-        await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+      const label = await dashboardSelector.findByCssSelector(`label[for="new-dashboard-option"]`);
+      await label.click();
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await common.waitForSaveModalToClose();
 
-        // make sure the dashboard page actually loaded
-        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
-        expect(dashboardItemCount).to.not.eql(undefined);
-      });
       // changing to the dashboard app might take some time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByTestSubject('mlSwimLaneContainer');

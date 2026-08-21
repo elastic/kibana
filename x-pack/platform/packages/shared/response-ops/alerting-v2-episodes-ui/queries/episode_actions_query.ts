@@ -5,30 +5,10 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
+import { buildEpisodeActionsQuery as buildEpisodeActionsQueryCommon } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionRow } from '@kbn/alerting-v2-common-queries';
 
-export interface AlertEpisodeAction {
-  episode_id: string;
-  rule_id: string | null;
-  group_hash: string | null;
-  last_ack_action: string | null;
-  last_assignee_uid: string | null;
-}
+export type AlertEpisodeAction = EpisodeActionRow;
 
-export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
-  const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
-
-  // prettier-ignore
-  return esql.from(ALERT_ACTIONS_DATA_STREAM)
-    .where`episode_id IN (${episodeIdLiterals})`
-    .where`action_type IN ("ack", "unack", "assign")`
-    .pipe`EVAL
-      ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
-      assignee_value = CASE(action_type == "assign", assignee_uid, null)`
-    .pipe`STATS
-      last_ack_action = LAST(ack_action, @timestamp),
-      last_assignee_uid = LAST(assignee_value, @timestamp)
-      BY episode_id, rule_id, group_hash`
-    .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid');
-};
+export const buildEpisodeActionsQuery = (spaceId: string, episodeIds: string[]) =>
+  buildEpisodeActionsQueryCommon(spaceId, episodeIds);

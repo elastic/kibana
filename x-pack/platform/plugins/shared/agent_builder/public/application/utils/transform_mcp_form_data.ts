@@ -6,9 +6,9 @@
  */
 
 import { ToolType, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
-import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { McpToolFormData } from '../components/tools/form/types/tool_form_types';
+import { toCreatePayload, toUpdatePayload } from './tool_payload';
 
 export const transformMcpToolToFormData = (tool: McpToolDefinition): McpToolFormData => {
   return {
@@ -16,6 +16,7 @@ export const transformMcpToolToFormData = (tool: McpToolDefinition): McpToolForm
     description: tool.description,
     connectorId: tool.configuration.connector_id,
     mcpToolName: tool.configuration.tool_name,
+    confirmation_ask_user: tool.confirmation?.askUser ?? 'never',
     labels: tool.tags,
     type: ToolType.mcp,
   };
@@ -26,21 +27,25 @@ export const transformFormDataToMcpTool = (data: McpToolFormData): McpToolDefini
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       connector_id: data.connectorId,
       tool_name: data.mcpToolName,
     },
     tags: data.labels,
     type: ToolType.mcp,
+    ...(data.confirmation_ask_user
+      ? { confirmation: { askUser: data.confirmation_ask_user } }
+      : {}),
   };
 };
 
 // Form data → Create API payload
 export const transformMcpFormDataForCreate = (data: McpToolFormData): CreateToolPayload => {
-  return omit(transformFormDataToMcpTool(data), ['readonly']);
+  return toCreatePayload(transformFormDataToMcpTool(data));
 };
 
 // Form data → Update API payload
 export const transformMcpFormDataForUpdate = (data: McpToolFormData): UpdateToolPayload => {
-  return omit(transformFormDataToMcpTool(data), ['id', 'type', 'readonly']);
+  return toUpdatePayload(transformFormDataToMcpTool(data));
 };

@@ -6,12 +6,46 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { FeedbackContext } from '../../../common';
+
+/**
+ * Apps listed here will not have their category prefix in the satisfaction question.
+ * e.g. Questions for "metrics:inventory" will ask users about "Infrastructure inventory" instead of "Observability - Infrastructure inventory"
+ */
+export const APPS_WITHOUT_CATEGORY_PREFIX = [
+  'ml:singleMetricViewer',
+  'ml:resultExplorer',
+  'ml:analyticsMap',
+  'ml:anomalyExplorer',
+  'apm',
+  'apm:service-groups-list',
+  'apm:services',
+  'apm:traces',
+  'apm:service-map',
+  'apm:dependencies',
+  'apm:settings',
+  'apm:storage-explorer',
+  'apm:tutorial',
+  'metrics',
+  'metrics:inventory',
+  'metrics:hosts',
+  'metrics:metrics-explorer',
+  'metrics:settings',
+  'metrics:assetDetails',
+] as readonly string[];
+
+const hasContextKeys = (context?: FeedbackContext): context is FeedbackContext =>
+  context !== undefined && Object.keys(context).length > 0;
 
 /**
  * Get current app details from browser URL and nav links.
  * Uses the actual browser URL for accurate deep link detection.
  */
-export const getAppDetails = (core: CoreStart) => {
+export const getAppDetails = (
+  core: CoreStart,
+  context?: FeedbackContext,
+  titleOverride?: string
+) => {
   const currentPath = window.location.pathname;
   const navLinks = core.chrome.navLinks.getAll();
 
@@ -43,15 +77,21 @@ export const getAppDetails = (core: CoreStart) => {
   }
 
   let title = match?.title;
+  const id = match?.id;
   const category = match?.category;
 
-  if (category) {
+  if (category && !APPS_WITHOUT_CATEGORY_PREFIX.includes(match?.id)) {
     title = `${category.label} - ${match?.title}`;
+  }
+
+  if (titleOverride) {
+    title = titleOverride;
   }
 
   return {
     title: title ?? 'Kibana',
-    id: match?.id ?? 'Kibana',
+    id: id ?? 'Kibana',
     url: currentPath,
+    ...(hasContextKeys(context) && { context }),
   };
 };

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. This feature deserves coverage, but we should use playwright's network observation capabilities to make it faster and more reliable.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -71,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       let asyncExpirationTimeAfterSessionWasSaved: number;
       let newAsyncSearchId: string;
+      // NOTE: this is an example where when we migrate to playwright, we can use network observation to make this faster and more reliable. We can wait for the request that saves the session to complete, and then check the expiration time of the search.
       await retry.waitFor('async search keepAlive is extended', async () => {
         const newSearchResponse = await dashboardPanelActions.getSearchResponseByTitle(
           'Sum of Bytes by Extension (Delayed 5s)'
@@ -170,30 +175,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await searchSessionsManagement.goTo();
-
         let searchSessionList = await searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(1);
 
-        await new Promise((resolve) => setTimeout(resolve, 10_000));
-        await retry.waitFor('session should be in a completed status', async () => {
-          searchSessionList = await searchSessionsManagement.getList();
-          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-          return searchSessionItem.status === 'complete';
-        });
-
-        await searchSessionItem.view();
-
+        await searchSessions.openCompletedSearchFromToast();
         // Check that session is still loading
         await retry.waitFor('session restoration warnings related to other bucket', async () => {
-          return (await toasts.getCount()) === 1;
+          return await searchSessions.hasErrorsOrWarnings();
         });
         await toasts.dismissAll();
+        await dashboard.waitForRenderComplete();
 
         // check that other bucket requested add to a session
         await searchSessionsManagement.goTo();
 
-        await new Promise((resolve) => setTimeout(resolve, 10_000));
         await retry.waitFor('session should be in a completed status', async () => {
           searchSessionList = await searchSessionsManagement.getList();
           searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
@@ -201,13 +197,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.waitFor('the third search should be added to the session', async () => {
+          await browser.refresh();
+          await testSubjects.existOrFail('searchSessionsMgmtUiTable');
           searchSessionList = await searchSessionsManagement.getList();
           searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
           return searchSessionItem.searchesCount === 3;
         });
 
         await searchSessionItem.view();
-        expect(await toasts.getCount()).to.be(0); // there should be no warnings
+        await searchSessions.expectNoErrorsOrWarnings();
         await dashboardExpect.noErrorEmbeddablesPresent();
       });
     });

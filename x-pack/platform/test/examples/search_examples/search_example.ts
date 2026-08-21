@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Keep as smoke coverage of the search_examples demo (with and without
+ * bfetch). Also migrate/remove the serverless twin noted below.
+ */
+
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/search_examples/search_example.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 

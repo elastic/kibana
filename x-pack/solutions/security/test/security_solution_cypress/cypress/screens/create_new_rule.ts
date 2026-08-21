@@ -171,7 +171,7 @@ export const MACHINE_LEARNING_DROPDOWN_INPUT =
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
-export const MITRE_TACTIC = '.euiContextMenuItem__text';
+export const MITRE_TACTIC = '.euiListItemLayout__text';
 
 export const MITRE_ATTACK_TACTIC_DROPDOWN = '[data-test-subj="mitreAttackTactic"]';
 

@@ -20,6 +20,13 @@ export interface UseCasesFeatures {
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
   isExtractObservablesEnabled: boolean;
+  /**
+   * True when at least one case setting is available to toggle (alert syncing, observable
+   * extraction, or metrics). Mirrors the switches rendered by `CaseSettingsPopover`. When false
+   * (e.g. Observability and Stack, which enable none of these), the case settings button and its
+   * tour step have nothing to show and should be hidden.
+   */
+  hasCaseSettings: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -30,8 +37,15 @@ export const useCasesFeatures = (): UseCasesFeatures => {
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
-  const casesFeatures = useMemo(
-    () => ({
+  const casesFeatures = useMemo(() => {
+    const isSyncAlertsEnabled =
+      !features.alerts.enabled || !features.alerts.all ? false : features.alerts.sync;
+    const observablesAuthorized = hasLicenseGreaterThanPlatinum;
+    const isExtractObservablesEnabled =
+      !!features.observables.enabled && !!features.observables.autoExtract;
+    const metricsFeatures = features.metrics;
+
+    return {
       isAlertsEnabled: features.alerts.enabled,
       /**
        * If the alerts feature is disabled we will disable everything.
@@ -41,29 +55,32 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        * option to true and get the whole alerts experience without the need
        * to explicitly set the sync to true
        */
-      isSyncAlertsEnabled:
-        !features.alerts.enabled || !features.alerts.all ? false : features.alerts.sync,
-      metricsFeatures: features.metrics,
+      isSyncAlertsEnabled,
+      metricsFeatures,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
-      observablesAuthorized: hasLicenseGreaterThanPlatinum,
+      observablesAuthorized,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
       isObservablesFeatureEnabled: !!features.observables.enabled,
-      isExtractObservablesEnabled:
-        !!features.observables.enabled && !!features.observables.autoExtract,
-    }),
-    [
-      features.alerts.enabled,
-      features.alerts.sync,
-      features.alerts.all,
-      features.metrics,
-      hasLicenseGreaterThanPlatinum,
-      assign,
-      features.observables?.enabled,
-      features.observables?.autoExtract,
-      hasLicenseWithAtLeastGold,
-    ]
-  );
+      isExtractObservablesEnabled,
+      // Mirrors the switches shown by CaseSettingsPopover: sync alerts, observable extraction
+      // (license-gated), or metrics. Keep in sync with that component's render conditions.
+      hasCaseSettings:
+        isSyncAlertsEnabled ||
+        (observablesAuthorized && isExtractObservablesEnabled) ||
+        metricsFeatures.length > 0,
+    };
+  }, [
+    features.alerts.enabled,
+    features.alerts.sync,
+    features.alerts.all,
+    features.metrics,
+    hasLicenseGreaterThanPlatinum,
+    assign,
+    features.observables?.enabled,
+    features.observables?.autoExtract,
+    hasLicenseWithAtLeastGold,
+  ]);
 
   return casesFeatures;
 };

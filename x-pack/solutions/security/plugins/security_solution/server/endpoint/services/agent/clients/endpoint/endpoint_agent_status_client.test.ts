@@ -13,6 +13,7 @@ import { getPendingActionsSummary as _getPendingActionsSummary } from '../../../
 import { createMockEndpointAppContextService } from '../../../../mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
   const realModule = jest.requireActual('../../../actions/pending_actions_summary');
@@ -44,6 +45,7 @@ describe('EndpointAgentStatusClient', () => {
     (endpointAppContextServiceMock.getEndpointMetadataService as jest.Mock).mockReturnValue(
       metadataMocks.endpointMetadataService
     );
+    getPendingActionsSummaryMock.mockResolvedValue([]);
     constructorOptions = {
       spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
@@ -78,12 +80,28 @@ describe('EndpointAgentStatusClient', () => {
     await statusClient.getAgentStatuses(agentIds);
 
     expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' })
+      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' }),
+      undefined
     );
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
       'default',
       agentIds
+    );
+  });
+
+  it('should forward the request so the metadata read can fan out under CPS', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const scoped = constructorOptions.endpointService.asScoped(request);
+    const clientWithRequest = new EndpointAgentStatusClient({ ...constructorOptions, scoped });
+    const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
+    jest.spyOn(metadataClient, 'getHostMetadataList');
+
+    await clientWithRequest.getAgentStatuses(['one']);
+
+    expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'agent.id: one' }),
+      expect.anything()
     );
   });
 
@@ -101,5 +119,31 @@ describe('EndpointAgentStatusClient', () => {
         status: 'unhealthy',
       },
     });
+  });
+
+  it('should log errors and still return expected data structure', async () => {
+    constructorOptions.esClient.search = jest.fn().mockRejectedValue(new Error('foo error'));
+
+    await expect(
+      statusClient.getAgentStatuses([dataMocks.unitedMetadata.agent.id])
+    ).resolves.toEqual({
+      '0dc3661d-6e67-46b0-af39-6f12b025fcb0': {
+        agentId: '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
+        agentType: 'endpoint',
+        error: 'foo error',
+        found: false,
+        isolated: false,
+        lastSeen: '',
+        pendingActions: {},
+        status: 'offline',
+      },
+    });
+
+    expect(constructorOptions.endpointService.createLogger().error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          'Failed to fetch agent status for [endpoint] agentIds: [0dc3661d-6e67-46b0-af39-6f12b025fcb0]: foo error',
+      })
+    );
   });
 });

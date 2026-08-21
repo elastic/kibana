@@ -134,21 +134,6 @@ exports[`ManageData render 1`] = `
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="homeManage"
-            flush="both"
-            href=""
-            iconType="gear"
-          >
-            <MemoizedFormattedMessage
-              defaultMessage="Stack Management"
-              id="home.manageData.stackManagementButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>

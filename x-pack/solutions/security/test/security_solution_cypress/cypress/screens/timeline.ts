@@ -25,6 +25,11 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
+// Link rendered by the `security.timeline` case attachment (unified attachments flow).
+export const TIMELINE_CASE_ATTACHMENT_LINK = (timelineId: string) => {
+  return `[data-test-subj="timeline-attachment-link-${timelineId}"]`;
+};
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
@@ -196,7 +201,7 @@ export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDE
 
 export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL} input[type="search"]`;
 
-export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `${TIMELINE_ROW_RENDERERS_MODAL} [data-test-subj="render-content-suricata.eve.alert.signature"]`;
+export const TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE = `[data-test-subj="render-content-suricata.eve.alert.signature"]`;
 
 export const TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP = `[data-test-subj="externalLinkTooltip"]`;
 
@@ -223,6 +228,8 @@ export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.ale
 export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[data-test-subj="dataGridRowCell"]`; // empty column for the test data
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
+
+export const TIMELINE_EVENT_COUNT_BADGE = '[data-test-subj="timeline-event-count-badge"]';
 
 // timeline table grid cell
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>

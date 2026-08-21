@@ -84,7 +84,11 @@ import {
   GetKnowledgeBaseResponseSchema,
   BulkRollbackPackagesRequestSchema,
   BulkRollbackPackagesResponseSchema,
+  BulkNamespaceCustomizationRequestSchema,
+  BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
+  NamespacePreflightCheckRequestSchema,
+  NamespacePreflightCheckResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -115,6 +119,7 @@ import {
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
   reviewUpgradeHandler,
+  namespacePreflightCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -127,8 +132,10 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
   postBulkRollbackPackagesHandler,
+  postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
+import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -1101,6 +1108,128 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   }
 
   router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_NAMESPACE_CUSTOMIZATION_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk enable/disable namespace-level customization for packages`,
+      description: `Enable or disable namespace-level index template customization for a list of packages in one call. Use this for IaC-style declarative flows.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkNamespaceCustomizationRequest: {
+                      value: {
+                        packages: ['system', 'nginx'],
+                        enable: ['production', 'staging'],
+                        disable: ['dev'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          items: [
+                            {
+                              name: 'system',
+                              success: true,
+                              namespace_customization_enabled_for: ['production', 'staging'],
+                            },
+                            {
+                              name: 'nginx',
+                              success: false,
+                              error: 'Package nginx is not installed',
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          statusCode: 400,
+                          error: 'Bad Request',
+                          message:
+                            'Namespaces must not appear in both enable and disable: production',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: BulkNamespaceCustomizationRequestSchema,
+          response: {
+            200: {
+              body: () => BulkNamespaceCustomizationResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      postBulkNamespaceCustomizationHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      access: 'internal',
+      summary: `Check for pre-existing index template conflicts before namespace opt-in`,
+      description:
+        `Runs a non-mutating pre-flight check to detect index templates that would ` +
+        `conflict with the Fleet-managed namespace index templates for the given namespaces. ` +
+        `Does not modify any saved objects or ES resources.`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: NamespacePreflightCheckRequestSchema,
+          response: {
+            200: {
+              body: () => NamespacePreflightCheckResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      namespacePreflightCheckHandler
+    );
+
+  router.versioned
     .get({
       path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
@@ -1549,8 +1678,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .delete({
       path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
       security: INSTALL_PACKAGES_SECURITY,
-      summary: `Delete assets for an input package`,
-      description: `Delete datastream assets for a specific input package, by data stream name.`,
+      summary: `Delete assets for a package`,
+      description: `Delete datastream assets for a specific package, by data stream name.`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
@@ -1773,4 +1902,34 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         bulkRollbackAvailableCheckHandler
       );
   }
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.ILM_POLICIES_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Get available ILM policies`,
+      description: `Returns the list of user-created ILM policies and whether the current user has the \`manage_ilm\` cluster privilege.`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+            },
+          },
+        },
+      },
+      getIlmPoliciesHandler
+    );
 };

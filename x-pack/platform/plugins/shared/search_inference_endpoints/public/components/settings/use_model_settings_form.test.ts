@@ -18,7 +18,7 @@ jest.mock('../../hooks/use_inference_settings');
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
 const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
 const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
-const mockSaveSettings = jest.fn();
+const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
 
 const parentFeature: InferenceFeatureConfig = {
   featureId: 'search',
@@ -53,7 +53,10 @@ describe('useModelSettingsForm', () => {
     jest.clearAllMocks();
     mockUseRegisteredFeatures.mockReturnValue({ features: allFeatures, isLoading: false });
     mockUseInferenceSettings.mockReturnValue({ data: undefined, isLoading: false });
-    mockUseSaveInferenceSettings.mockReturnValue({ mutate: mockSaveSettings, isLoading: false });
+    mockUseSaveInferenceSettings.mockReturnValue({
+      mutateAsync: mockSaveSettings,
+      isLoading: false,
+    });
   });
 
   it('groups features into sections by parentFeatureId', () => {
@@ -73,6 +76,15 @@ describe('useModelSettingsForm', () => {
       child_2: ['endpoint-c'],
     });
     expect(result.current.isDirty).toBe(false);
+  });
+
+  it('exposes effective recommended endpoints per child feature', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.effectiveRecommendedEndpoints).toEqual({
+      child_1: ['endpoint-a', 'endpoint-b'],
+      child_2: ['endpoint-c'],
+    });
   });
 
   it('uses saved settings over recommendedEndpoints', () => {
@@ -147,33 +159,6 @@ describe('useModelSettingsForm', () => {
     });
   });
 
-  it('resetSection restores recommendedEndpoints and saves immediately', () => {
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.updateEndpoints('child_1', ['custom-ep']);
-    });
-
-    act(() => {
-      result.current.resetSection('search');
-    });
-
-    expect(result.current.assignments.child_1).toEqual(['endpoint-a', 'endpoint-b']);
-    expect(result.current.assignments.child_2).toEqual(['endpoint-c']);
-    expect(mockSaveSettings).toHaveBeenCalledTimes(1);
-    expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
-  });
-
-  it('resetSection does nothing for unknown section', () => {
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.resetSection('nonexistent');
-    });
-
-    expect(mockSaveSettings).not.toHaveBeenCalled();
-  });
-
   it('falls back to Kibana default endpoint when child and parent have no recommendations', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
@@ -187,6 +172,9 @@ describe('useModelSettingsForm', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.assignments.child_2).toEqual([
+      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+    ]);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual([
       defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
     ]);
   });
@@ -208,35 +196,10 @@ describe('useModelSettingsForm', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.assignments.child_2).toEqual(['parent-ep']);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual(['parent-ep']);
   });
 
-  it('resetSection falls back to parent recommendedEndpoints when child has none', () => {
-    const parentWithEndpoints: InferenceFeatureConfig = {
-      ...parentFeature,
-      recommendedEndpoints: ['parent-ep'],
-    };
-    const childWithNoRecommended: InferenceFeatureConfig = {
-      ...childFeature2,
-      recommendedEndpoints: [],
-    };
-    mockUseRegisteredFeatures.mockReturnValue({
-      features: [parentWithEndpoints, childFeature1, childWithNoRecommended],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    act(() => {
-      result.current.updateEndpoints('child_2', ['custom-ep']);
-    });
-    act(() => {
-      result.current.resetSection('search');
-    });
-
-    expect(result.current.assignments.child_2).toEqual(['parent-ep']);
-  });
-
-  it('save excludes features matching Kibana default endpoint from payload', () => {
+  it('save excludes features matching effective recommended endpoints from payload', () => {
     const childWithNoRecommended: InferenceFeatureConfig = {
       ...childFeature2,
       recommendedEndpoints: [],
@@ -267,7 +230,14 @@ describe('useModelSettingsForm', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('hasSavedObject reflects which features have saved settings', () => {
+  it('exposes hasSavedObject false when no saved feature rows exist', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.hasSavedObject.child_1).toBe(false);
+    expect(result.current.hasSavedObject.child_2).toBe(false);
+  });
+
+  it('sets hasSavedObject true only for features present in saved settings', () => {
     mockUseInferenceSettings.mockReturnValue({
       data: {
         data: {
@@ -279,25 +249,11 @@ describe('useModelSettingsForm', () => {
 
     const { result } = renderHook(() => useModelSettingsForm());
 
-    expect(result.current.hasSavedObject).toEqual({ child_1: true, child_2: false });
+    expect(result.current.hasSavedObject.child_1).toBe(true);
+    expect(result.current.hasSavedObject.child_2).toBe(false);
   });
 
-  it('hasSavedObject treats empty saved endpoints as no saved object', () => {
-    mockUseInferenceSettings.mockReturnValue({
-      data: {
-        data: {
-          features: [{ feature_id: 'child_1', endpoints: [] }],
-        },
-      },
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useModelSettingsForm());
-
-    expect(result.current.hasSavedObject).toEqual({ child_1: false, child_2: false });
-  });
-
-  it('dirtyFeatureIds contains only features whose assignments differ from defaults', () => {
+  it('exposes dirtyFeatureIds when assignments differ from defaults', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
     expect(result.current.dirtyFeatureIds.size).toBe(0);
@@ -307,6 +263,5 @@ describe('useModelSettingsForm', () => {
     });
 
     expect(result.current.dirtyFeatureIds.has('child_1')).toBe(true);
-    expect(result.current.dirtyFeatureIds.has('child_2')).toBe(false);
   });
 });

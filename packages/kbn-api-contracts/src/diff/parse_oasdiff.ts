@@ -28,10 +28,13 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'request-parameter-removed': 'parameter_removed',
   'response-required-property-removed': 'response_property_removed',
   'response-optional-property-removed': 'response_property_removed',
+  'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
 // These oasdiff warning-level (level 2) checks are promoted to blocking because
-// they break Terraform provider configurations that reference the removed fields.
+// removing a request field, request parameter, or optional response property is a
+// genuine breaking change for any client that sends or reads it, even though
+// oasdiff only flags them as warnings.
 const PROMOTED_WARNING_IDS = new Set([
   'request-property-removed',
   'request-parameter-removed',

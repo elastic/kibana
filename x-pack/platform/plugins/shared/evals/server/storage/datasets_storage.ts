@@ -6,16 +6,19 @@
  */
 
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { EvaluationIndices, type DatasetMaturity } from '@kbn/evals-common';
 import { types } from '@kbn/storage-adapter';
 
-export const datasetsIndexName = 'kibana-evaluation-datasets' as const;
-
 export const datasetsStorageSettings = {
-  name: datasetsIndexName,
+  name: EvaluationIndices.DATASETS,
   schema: {
     properties: {
       name: types.keyword({}),
       description: types.text({}),
+      tags: types.keyword({}),
+      maturity: types.keyword({}),
+      examples_count: types.long({}),
+      space_ids: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -25,6 +28,14 @@ export const datasetsStorageSettings = {
 export interface DatasetStorageProperties {
   name: string;
   description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
+  examples_count?: number;
+  /**
+   * The spaces the dataset is visible in. Absent means the default space, so an
+   * empty array is never stored: it would read back the same way.
+   */
+  space_ids?: string[];
   created_at: string;
   updated_at: string;
 }

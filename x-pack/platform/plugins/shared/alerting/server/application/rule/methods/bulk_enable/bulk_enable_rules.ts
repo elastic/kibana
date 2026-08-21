@@ -15,11 +15,13 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -48,6 +50,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -109,7 +112,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     action: 'ENABLE',
     logger: context.logger,
     bulkOperation: (filterKueryNode: KueryNode | null) =>
-      bulkEnableRulesWithOCC(context, { filter: filterKueryNode }),
+      bulkEnableRulesWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
     filter: kueryNodeFilterWithAuth,
   });
 
@@ -133,7 +136,6 @@ export const bulkEnableRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -156,7 +158,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
 
 const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -245,6 +247,7 @@ const bulkEnableRulesWithOCC = async (
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
+                  apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
                 })
               : undefined;
 
@@ -362,11 +365,26 @@ const bulkEnableRulesWithOCC = async (
       })
   );
 
+  await logRuleChanges({
+    ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToEnable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleEnable,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
+
   // Get a map of all rules that failed to enable so we do not clear their flapping
   const ruleIdsFailedToEnable: Record<string, boolean> = {};
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error) {
+    if (isSavedObjectErrorResult(rule)) {
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
@@ -406,7 +424,7 @@ const bulkEnableRulesWithOCC = async (
   const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
       if (rule.attributes.scheduledTaskId) {
         taskIdsToEnable.push(rule.attributes.scheduledTaskId);
       }

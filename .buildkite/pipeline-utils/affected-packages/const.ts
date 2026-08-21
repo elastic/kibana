@@ -9,8 +9,6 @@
 
 export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 
-export const SELECTIVE_TESTS_LABEL = 'ci:use-selective-testing';
-
 // Changes here skip affected-package filtering for Jest (full run).
 // Keep narrow: global test harness, transforms, CI selection.
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [
@@ -50,19 +48,11 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
 
-export const CRITICAL_FILES_SCOUT = [
-  'package.json',
-  'yarn.lock',
-  'tsconfig.json',
-  '.node-version',
-  '.nvmrc',
-  'src/setup_node_env/**/*',
-  'packages/kbn-babel-preset/**/*',
-  'src/platform/packages/shared/kbn-repo-info/**/*',
-  'src/platform/packages/shared/kbn-scout/**/*',
-  'src/platform/packages/private/kbn-scout-reporting/**/*',
-  'scripts/scout.js',
-  '.buildkite/scripts/steps/test/scout/**/*',
-  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
-  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+// Integration configs that snapshot a global registry (rule-type params, connector types, task
+// types) fed by downstream plugins. Those publishers sit upstream of these configs, so
+// includeDownstream never marks them affected — they must run regardless of the graph. Keep tiny.
+export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
+  'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
 ];

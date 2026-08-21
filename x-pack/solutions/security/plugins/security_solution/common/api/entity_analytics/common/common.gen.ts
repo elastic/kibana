@@ -18,18 +18,25 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
+export const EntityAnalyticsPrivilegesDetail = lazySchema(() =>
+  z.object({
+    elasticsearch: z.object({
+      cluster: z.object({}).catchall(z.boolean()).optional(),
+      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+    }),
+    kibana: z.object({}).catchall(z.boolean()).optional(),
+  })
+);
+export type EntityAnalyticsPrivilegesDetail = z.infer<typeof EntityAnalyticsPrivilegesDetail>;
+
 export const EntityAnalyticsPrivileges = lazySchema(() =>
   z.object({
     has_all_required: z.boolean(),
     has_read_permissions: z.boolean().optional(),
     has_write_permissions: z.boolean().optional(),
-    privileges: z.object({
-      elasticsearch: z.object({
-        cluster: z.object({}).catchall(z.boolean()).optional(),
-        index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
-      }),
-      kibana: z.object({}).catchall(z.boolean()).optional(),
-    }),
+    has_install_permissions: z.boolean().optional(),
+    privileges: EntityAnalyticsPrivilegesDetail,
+    install_privileges: EntityAnalyticsPrivilegesDetail.optional(),
   })
 );
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
@@ -122,6 +129,20 @@ export const RiskScoreInput = lazySchema(() =>
 );
 export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
 
+/**
+ * A modifier that was applied to the risk score calculation.
+ */
+export const RiskScoreModifier = lazySchema(() =>
+  z.object({
+    type: z.string().max(100),
+    subtype: z.string().max(100).optional(),
+    modifier_value: z.number().optional(),
+    contribution: z.number(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
+export type RiskScoreModifier = z.infer<typeof RiskScoreModifier>;
+
 export const RiskScoreCategories = lazySchema(() => z.literal('category_1'));
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
 
@@ -182,17 +203,7 @@ export const EntityRiskScoreRecord = lazySchema(() =>
     /**
      * A list of modifiers that were applied to the risk score calculation.
      */
-    modifiers: z
-      .array(
-        z.object({
-          type: z.string(),
-          subtype: z.string().optional(),
-          modifier_value: z.number().optional(),
-          contribution: z.number(),
-          metadata: z.object({}).catchall(z.unknown()).optional(),
-        })
-      )
-      .optional(),
+    modifiers: z.array(RiskScoreModifier).optional(),
     /**
      * Distinguishes base, propagated, and resolution scores.
      */

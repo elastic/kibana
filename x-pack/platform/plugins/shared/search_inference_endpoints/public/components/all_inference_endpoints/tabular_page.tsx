@@ -19,6 +19,7 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -41,7 +42,7 @@ const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
-const DEFAULT_GROUP_BY = GroupByOptions.Model;
+const DEFAULT_GROUP_BY = GroupByOptions.None;
 
 const initializeGroupBy = (): GroupByOptions => {
   const params = new URLSearchParams(window.location.search);
@@ -52,8 +53,6 @@ const initializeGroupBy = (): GroupByOptions => {
       return GroupByOptions.None;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     default:
       // Fallback to default group by setting
       return DEFAULT_GROUP_BY;
@@ -68,6 +67,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const { canManage } = useInferenceCapabilities();
 
   const {
     showDeleteAction,
@@ -151,16 +151,17 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       {
         actions: [
           {
-            name: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
-              defaultMessage: 'View endpoint',
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.editEndpoint', {
+              defaultMessage: 'Edit endpoint',
             }),
-            description: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
-              defaultMessage: 'View endpoint',
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.editEndpoint', {
+              defaultMessage: 'Edit endpoint',
             }),
-            icon: 'eye',
+            icon: 'pencil',
             type: 'icon',
+            available: () => canManage,
             onClick: (item) => displayInferenceFlyout(item),
-            'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
+            'data-test-subj': 'inference-endpoints-action-edit-endpoint-label',
           },
           {
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
@@ -183,6 +184,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             }),
             icon: 'trash',
             type: 'icon',
+            available: () => canManage,
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
             onClick: (item) => displayDeleteActionItem(item),
             'data-test-subj': (item) =>
@@ -194,7 +196,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionItem, displayInferenceFlyout]
+    [canManage, copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (

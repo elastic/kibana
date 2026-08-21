@@ -10,18 +10,16 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningDataFrameAnalyticsMapProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async assertMapElementsExists() {
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap');
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapLegend');
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapCytoscape');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapGraph');
     },
     async assertJobMapTitle(id: string) {
       const expected = 'Analytics map';
-      const titleElement = await find.byCssSelector('.euiPageHeader .euiTitle');
-      const actualTitle = await titleElement.getVisibleText();
+      const actualTitle = await testSubjects.getVisibleText('appHeaderTitle');
       expect(actualTitle).to.eql(
         expected,
         `Title for map should be '${expected}' (got '${actualTitle}')`

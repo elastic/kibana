@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import os from 'os';
 import type { ConfigType } from './config';
 
 interface WindowSize {
@@ -77,14 +76,7 @@ export const args = ({
     flags.push('--no-sandbox');
   }
 
-  // Headless mode in arm based macs is not working with `--disable-gpu`
-  // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.
-  // As a workaround, we pass --enable-gpu to stop forcing swiftshader, see https://issues.chromium.org/issues/40256775#comment4
-  if (os.arch() === 'arm64' && process.platform === 'darwin') {
-    flags.push('--enable-gpu');
-  } else {
-    flags.push('--disable-gpu');
-  }
+  flags.push('--disable-gpu', '--enable-unsafe-swiftshader');
 
   return [...flags, 'about:blank'];
 };

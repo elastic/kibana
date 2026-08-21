@@ -5,28 +5,52 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getSampleDocuments } from '@kbn/ai-tools';
-import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/streams-schema';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { esql } from '@elastic/esql';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { compact } from 'lodash';
 import type { ComputedFeatureGenerator } from './types';
 import { formatRawDocument } from '../utils/format_raw_document';
 
 const SAMPLE_SIZE = 5;
-const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
-const ERROR_KEYWORDS = ['error', 'exception'];
+const LOG_MESSAGE_FIELDS = ['message', 'body.text'] as const;
+const ERROR_KEYWORDS = ['error', 'exception'] as const;
 
-const ERROR_FILTER: QueryDslQueryContainer = {
-  bool: {
-    should: [
-      { term: { 'log.level': 'error' } },
-      ...LOG_MESSAGE_FIELDS.flatMap((field) =>
-        ERROR_KEYWORDS.map((keyword) => ({ match_phrase: { [field]: keyword } }))
-      ),
-    ],
-    minimum_should_match: 1,
-  },
+const ERROR_LOG_KEEP_FIELDS = new Set<string>([
+  '@timestamp',
+  ...LOG_MESSAGE_FIELDS,
+  'log.level',
+  'severity_text',
+  'severity_number',
+  'error.type',
+  'error.message',
+  'exception.type',
+  'exception.message',
+  'event.outcome',
+  'service.name',
+]);
+
+const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
+
+export const pickErrorLogFields = (fields: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    if (ERROR_LOG_KEEP_FIELDS.has(key.replace(OTEL_FIELD_PREFIX, ''))) {
+      result[key] = value;
+    }
+  }
+  return result;
 };
+
+// QSTR: log.level is union-typed on some streams; ::keyword cast fixes verification but kills OR pushdown. QSTR resolves per-shard, avoiding both.
+const ERROR_QUERY_STRING = [
+  'log.level:error',
+  ...LOG_MESSAGE_FIELDS.flatMap((field) => ERROR_KEYWORDS.map((keyword) => `${field}:${keyword}`)),
+].join(' OR ');
+
+const ERROR_WHERE_CONDITION = esql.exp`QSTR(${esql.str(ERROR_QUERY_STRING)})`;
 
 export const errorLogsGenerator: ComputedFeatureGenerator = {
   type: ERROR_LOGS_FEATURE_TYPE,
@@ -37,18 +61,24 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient }) => {
-    const { hits } = await getSampleDocuments({
+  generate: async ({ stream, start, end, esClient, signal }) => {
+    const { hits } = await getSampleDocumentsEsql({
       esClient,
-      index: stream.name,
+      index: getStreamSamplingSource(stream),
       start,
       end,
-      size: SAMPLE_SIZE,
-      filter: ERROR_FILTER,
+      sampleSize: SAMPLE_SIZE,
+      whereCondition: ERROR_WHERE_CONDITION,
+      abortSignal: signal,
     });
 
     return {
-      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
+      samples: compact(
+        hits.map((hit) => {
+          const fields = formatRawDocument({ hit })?.fields;
+          return fields ? pickErrorLogFields(fields) : undefined;
+        })
+      ),
     };
   },
 };

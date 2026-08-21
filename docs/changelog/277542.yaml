@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/277542
+type: deprecation
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: "Deprecate `include_comments` in the `cases.getCase` workflow step"
+description: "The `include_comments` field on the `cases.getCase` workflow step is deprecated. Prefer the unified attachments APIs for case content that is not represented by the legacy comments shape."
+impact: "Workflows that set `include_comments` continue to work for now, but the field is marked deprecated and may be removed in a later release."
+action: "Stop relying on `include_comments` in new workflows. Use the unified attachment APIs when you need case attachments beyond the legacy comments contract."

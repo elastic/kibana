@@ -48,15 +48,15 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { CPSPluginStart } from '@kbn/cps/public/types';
+import type { CPSPluginSetup, CPSPluginStart } from '@kbn/cps/public/types';
 import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
@@ -93,6 +93,7 @@ export interface MlStartDependencies {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   dataVisualizer: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
@@ -100,7 +101,6 @@ export interface MlStartDependencies {
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   security: SecurityPluginStart;
@@ -131,6 +131,7 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  cps: CPSPluginSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -206,6 +207,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViewEditor: pluginsStart.dataViewEditor,
+            dataViewFieldEditor: pluginsStart.dataViewFieldEditor,
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
@@ -214,7 +216,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licensing: pluginsStart.licensing,
             maps: pluginsStart.maps,
             observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-            presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
             security: pluginsStart.security,
@@ -231,6 +232,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           },
           params,
           this.isServerless,
+          pluginsSetup.cps?.cpsEnabled ?? false,
           this.enabledFeatures,
           this.experimentalFeatures,
           this.nlpSettings
@@ -242,6 +244,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
+
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    }
+    registerMlUiActions(pluginsSetup.uiActions, core);
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
@@ -269,19 +276,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 core,
                 { telemetry: telemetryClient, ...deps },
                 this.isServerless,
+                pluginsSetup.cps?.cpsEnabled ?? false,
                 this.enabledFeatures,
                 this.nlpSettings,
                 this.experimentalFeatures,
                 mlCapabilities
               );
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
             }
 
             const { registerSearchLinks, registerCasesAttachments } = await import(

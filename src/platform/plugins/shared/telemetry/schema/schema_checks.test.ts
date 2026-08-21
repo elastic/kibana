@@ -50,12 +50,19 @@ describe('Telemetry Schema Checks', () => {
       )
       .map((key) => key.replace('._meta.description', ''))
       .sort();
+
     /**
-     * Ideally, this list should be empty. Please, refrain from adding new keys to this list.
-     * Instead, change the description of your UI setting to be more descriptive.
+     * Grandfathered UI settings that still report the generic telemetry description
+     * "Non-default value of setting." Do **not** increase `EXPECTED_COUNT`; add a proper
+     * setting description instead. When you remove an entry from the list below, decrement
+     * `EXPECTED_COUNT`. The goal is for both this count and the list to reach zero.
      */
+    const EXPECTED_COUNT = 145;
+
+    expect(keysWithNonDefaultDescriptions).toHaveLength(EXPECTED_COUNT);
     expect(keysWithNonDefaultDescriptions).toEqual([
       'accessibility:disableAnimations',
+      'agentBuilder:bashSupport',
       'agentBuilder:experimentalFeatures',
       'agentBuilder:externalMcp',
       'agentBuilder:navEnabled',
@@ -118,12 +125,7 @@ describe('Telemetry Schema Checks', () => {
       'history:limit',
       'indexPattern:placeholder',
       'isDefaultIndexMigrated',
-      'labs:canvas:byValueEmbeddable',
-      'labs:canvas:enable_ui',
-      'labs:canvas:useDataService',
       'labs:dashboard:deferBelowFold',
-      'labs:dashboard:enable_ui',
-      'labs:presentation:timeToPresent',
       'metaFields.items',
       'metrics:allowStringIndices',
       'metrics:max_buckets',
@@ -142,7 +144,6 @@ describe('Telemetry Schema Checks', () => {
       'observability:apmEnableTransactionProfiling',
       'observability:apmProgressiveLoading',
       'observability:apmServiceGroupMaxNumberOfServices',
-      'observability:apmUseUnifiedTraceWaterfall',
       'observability:enableComparisonByDefault',
       'observability:enableInfrastructureAssetCustomDashboards',
       'observability:enableInspectEsQueries',

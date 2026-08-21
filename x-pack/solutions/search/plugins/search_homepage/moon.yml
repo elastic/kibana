@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-homepage'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-homepage'
   description: Moon project for @kbn/search-homepage
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/search_homepage
 dependsOn:
   - '@kbn/core'
@@ -43,13 +43,15 @@ dependsOn:
   - '@kbn/sample-data-ingest'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/search-shared-ui'
+  - '@kbn/shared-components'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
   - '@kbn/index-management-shared-types'
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/workflows-ui'
   - '@kbn/scout-search'
 tags:
   - plugin

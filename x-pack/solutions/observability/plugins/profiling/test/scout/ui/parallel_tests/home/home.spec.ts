@@ -23,15 +23,21 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
     await profilingHomePage.gotoWithTimeRange(rangeFrom, rangeTo);
     await profilingHomePage.expectTopNContent();
     // Since we're using loginAsAdmin(), the user has privileges and won't see the limitation message
-    // Instead, we should verify the page loads successfully
+    // Instead, we should verify the page loads successfully. The default location is Stacktraces > Threads, so we can check for content specific to that tab.
     await expect(
-      profilingHomePage.page.getByTestId('profilingPageTemplate').getByText('Universal Profiling')
+      profilingHomePage.page
+        .getByTestId('profilingPageTemplate')
+        .getByRole('heading', { name: 'Stacktraces' })
     ).toBeVisible();
   });
 
   test('navigates through the tabs', async ({ pageObjects: { profilingHomePage }, page }) => {
     await profilingHomePage.gotoWithTimeRange(rangeFrom, rangeTo);
+    await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/executables');
+
+    await profilingHomePage.clickTab('Threads');
     await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/threads');
+    expect(page.url()).toContain('/app/profiling/stacktraces/threads');
 
     await profilingHomePage.clickTab('Traces');
     await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/traces');

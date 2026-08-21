@@ -13,6 +13,8 @@ import type {
   GetEnrollmentAPIKeysRequest,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysRequest,
+  BulkDeleteEnrollmentAPIKeysResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -40,11 +42,25 @@ export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptio
   });
 }
 
-export function sendDeleteOneEnrollmentAPIKey(keyId: string, options?: RequestOptions) {
+export async function getOneEnrollmentAPIKeyToken(keyId: string): Promise<string> {
+  const data = await sendRequestForRq<GetOneEnrollmentAPIKeyResponse>({
+    method: 'get',
+    path: enrollmentAPIKeyRouteService.getInfoPath(keyId),
+    version: API_VERSIONS.public.v1,
+  });
+  return data.item.api_key;
+}
+
+export function sendDeleteOneEnrollmentAPIKey(
+  keyId: string,
+  query?: { forceDelete?: boolean },
+  options?: RequestOptions
+) {
   return sendRequest({
     method: 'delete',
     path: enrollmentAPIKeyRouteService.getDeletePath(keyId),
     version: API_VERSIONS.public.v1,
+    query,
     ...options,
   });
 }
@@ -64,23 +80,38 @@ export function sendGetEnrollmentAPIKeys(
 
 export function useGetEnrollmentAPIKeysQuery(
   query: GetEnrollmentAPIKeysRequest['query'],
-  options?: RequestOptions
+  options: RequestOptions & { refetchInterval?: number | false } = {}
 ) {
-  return useQuery(['get-enrollment-api-keys', query], () => {
-    return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
-      method: 'get',
-      path: enrollmentAPIKeyRouteService.getListPath(),
-      version: API_VERSIONS.public.v1,
-      query,
-      ...options,
-    });
-  });
+  const { refetchInterval, ...requestOptions } = options;
+
+  return useQuery(
+    ['get-enrollment-api-keys', query],
+    () => {
+      return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
+        method: 'get',
+        path: enrollmentAPIKeyRouteService.getListPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+        ...requestOptions,
+      });
+    },
+    { refetchInterval, refetchIntervalInBackground: false }
+  );
 }
 
 export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['body']) {
   return sendRequest<PostEnrollmentAPIKeyResponse>({
     method: 'post',
     path: enrollmentAPIKeyRouteService.getCreatePath(),
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendBulkDeleteEnrollmentAPIKeys(body: BulkDeleteEnrollmentAPIKeysRequest['body']) {
+  return sendRequest<BulkDeleteEnrollmentAPIKeysResponse>({
+    method: 'post',
+    path: enrollmentAPIKeyRouteService.getBulkDeletePath(),
     version: API_VERSIONS.public.v1,
     body,
   });

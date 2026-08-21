@@ -29,7 +29,7 @@ import {
 } from '../test_ids';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
-  const isOn = status === 'enabled' || status === 'partially_enabled';
+  const isOn = status === 'enabled';
   return (
     <EuiHealth
       textSize="m"
@@ -76,7 +76,8 @@ export const EntityAnalyticsErrorPanel: React.FC<{
 };
 
 interface EntityAnalyticsToggleProps {
-  hasAllRequiredPrivileges: boolean;
+  hasEnablementPrivileges: boolean;
+  hasStopPrivileges: boolean;
   isPrivilegesLoading: boolean;
   selectedSettingsMatchSavedSettings: boolean;
   onSaveSettings: () => Promise<void>;
@@ -84,22 +85,31 @@ interface EntityAnalyticsToggleProps {
 }
 
 export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
-  hasAllRequiredPrivileges,
+  hasEnablementPrivileges,
+  hasStopPrivileges,
   isPrivilegesLoading,
   selectedSettingsMatchSavedSettings,
   onSaveSettings,
   isSavingSettings,
 }) => {
-  const { status, isLoading, toggle, errors } = useToggleEntityAnalytics({
+  const { status, isLoading, isStatusLoading, toggle, errors } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
     onSaveSettings,
     isSavingSettings,
   });
 
-  const isDisabled =
-    isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
+  const isChecked = status === 'enabled';
 
-  const isChecked = status === 'enabled' || status === 'partially_enabled';
+  // Turning the toggle ON installs/starts the Entity Store and inits/enables the risk score
+  // maintainer, so it requires the full enablement privilege set. Turning it OFF stops engines
+  // via user-scoped SO updates on entity-engine-descriptor-v2,
+  // so it requires SO write privileges, but not the full ES/cluster install set.
+  const isDisabled =
+    isPrivilegesLoading ||
+    isStatusLoading ||
+    status === 'enabling' ||
+    status === 'error' ||
+    (isChecked ? !hasStopPrivileges : !hasEnablementPrivileges);
 
   return (
     <>
@@ -110,7 +120,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {isLoading && (
+          {(isLoading || isStatusLoading) && (
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner
                 data-test-subj={ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID}

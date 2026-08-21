@@ -10,14 +10,15 @@ import React, { useState } from 'react';
 import moment from 'moment';
 
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiComment,
   EuiFlexGroup,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -223,7 +224,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           },
         }}
         eventColor="subdued"
-        timelineAvatar="compute"
+        timelineAvatar="processor"
         timelineAvatarAriaLabel={i18n.translate(
           'xpack.searchPlayground.chat.message.assistant.avatarAriaLabel',
           {
@@ -244,12 +245,15 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
               })}
             />
             {addToDatasetAction ? (
-              <EuiButtonIcon
-                aria-label={addToDatasetAction.ariaLabel}
-                color="text"
-                iconType={addToDatasetAction.iconType}
-                onClick={addToDatasetAction.onClick}
-              />
+              <EuiToolTip content={addToDatasetAction.ariaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="searchPlaygroundAssistantMessageButton"
+                  aria-label={addToDatasetAction.ariaLabel}
+                  color="text"
+                  iconType={addToDatasetAction.iconType}
+                  onClick={addToDatasetAction.onClick}
+                />
+              </EuiToolTip>
             ) : null}
           </>
         }

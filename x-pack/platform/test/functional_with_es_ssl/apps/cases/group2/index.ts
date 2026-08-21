@@ -11,6 +11,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases', function () {
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./configure_templates_v2'));
     loadTestFile(require.resolve('./attachment_framework'));
     loadTestFile(require.resolve('./upgrade'));
     loadTestFile(require.resolve('./paste_image_to_comment'));

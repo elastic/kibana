@@ -17,6 +17,7 @@ export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
 export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
 
 export const DEFAULT_MAX_AUDIT_MESSAGE_SIZE = 500;
+export const TRANSFORM_PROJECT_ROUTING_MAX_LENGTH = 10000;
 
 export const PLUGIN = {
   ID: 'transform',
@@ -241,6 +242,7 @@ export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
 export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
 export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
 export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;
+export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST = 5000;
 
 // Used in the transform list's expanded row for the messages and issues table.
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

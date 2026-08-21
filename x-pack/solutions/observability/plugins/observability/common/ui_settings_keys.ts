@@ -17,6 +17,7 @@ export const enableInfrastructureAssetCustomDashboards =
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
+export const apmTraceLogsDefaultColumns = 'observability:apmTraceLogsDefaultColumns';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
@@ -30,6 +31,5 @@ export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDisco
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
-export const apmUseUnifiedTraceWaterfall = 'observability:apmUseUnifiedTraceWaterfall';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
 export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

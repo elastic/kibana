@@ -12,6 +12,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from './translations';
@@ -49,21 +50,24 @@ export const ConversationSidePanelContextMenu = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.CONVERSATION_CONTEXT_MENU}
       panelPaddingSize="none"
       button={
-        <EuiButtonIcon
-          data-test-subj={`convo-context-menu-button`}
-          size="xs"
-          iconType="boxesVertical"
-          iconSize="s"
-          aria-label={i18n.CONVERSATION_CONTEXT_MENU}
-          aria-haspopup="true"
-          aria-controls={menuId}
-          aria-expanded={isPopoverOpen}
-          color="text"
-          id={buttonId}
-          onClick={() => setPopoverOpen(!isPopoverOpen)}
-        />
+        <EuiToolTip content={i18n.CONVERSATION_CONTEXT_MENU} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`convo-context-menu-button`}
+            size="xs"
+            iconType="boxesVertical"
+            iconSize="s"
+            aria-label={i18n.CONVERSATION_CONTEXT_MENU}
+            aria-haspopup="true"
+            aria-controls={menuId}
+            aria-expanded={isPopoverOpen}
+            color="text"
+            id={buttonId}
+            onClick={() => setPopoverOpen(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -73,7 +77,7 @@ export const ConversationSidePanelContextMenu = ({
         'aria-labelledby': buttonId,
       }}
     >
-      <EuiContextMenuPanel data-test-subj="convo-context-menu" size="s" items={actionItems} />
+      <EuiContextMenuPanel data-test-subj="convo-context-menu" items={actionItems} />
     </EuiPopover>
   );
 };

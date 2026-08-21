@@ -77,5 +77,46 @@ describe('Actions Plugin', () => {
       const pluginSetup = plugin.setup();
       expect(pluginSetup.isWebhookSslWithPfxEnabled).toBe(false);
     });
+
+    it('returns isEarsEnabled as false when neither config key is set', async () => {
+      const context = coreMock.createPluginInitializerContext({});
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isEarsEnabled).toBe(false);
+    });
+
+    it('returns isEarsEnabled as true when auth.ears.enabled is set', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        auth: { ears: { enabled: true } },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isEarsEnabled).toBe(true);
+    });
+
+    it('returns isInboundEventsEnabled as false when not configured', async () => {
+      const context = coreMock.createPluginInitializerContext({});
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isInboundEventsEnabled).toBe(false);
+    });
+
+    it('returns isInboundEventsEnabled as false when inboundEvents.enabled is false', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        inboundEvents: { enabled: false },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isInboundEventsEnabled).toBe(false);
+    });
+
+    it('returns isInboundEventsEnabled as true when inboundEvents.enabled is true', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        inboundEvents: { enabled: true },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isInboundEventsEnabled).toBe(true);
+    });
   });
 });

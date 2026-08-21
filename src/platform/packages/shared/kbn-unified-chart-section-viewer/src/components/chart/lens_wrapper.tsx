@@ -9,16 +9,22 @@
 import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
+import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
+const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_INSPECT_PANEL,
+];
+
 export type LensWrapperProps = {
   lensProps: LensProps;
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
   onExploreInDiscoverTab?: UnifiedMetricsGridProps['actions']['openInNewTab'];
@@ -27,9 +33,15 @@ export type LensWrapperProps = {
   abortController: AbortController | undefined;
   disabledActions?: string[];
   extraDisabledActions?: string[];
+  quickActionIds?: QuickActionIds;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
+const DEFAULT_DISABLED_ACTIONS = [
+  'ACTION_CUSTOMIZE_PANEL',
+  'ACTION_EXPORT_CSV',
+  'ACTION_FILTERS_NOTIFICATION',
+  'alertRule',
+];
 export function LensWrapper({
   lensProps,
   services,
@@ -43,6 +55,7 @@ export function LensWrapper({
   syncTooltips,
   syncCursor,
   extraDisabledActions = [],
+  quickActionIds,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -94,8 +107,15 @@ export function LensWrapper({
         query: resolvedQuery,
         tabLabel: lensProps.attributes.title,
         timeRange: lensProps.timeRange,
+        isApproximate: lensProps.isApproximate,
       }),
-    [resolvedQuery, lensProps.attributes.title, lensProps.timeRange, onExploreInDiscoverTab]
+    [
+      resolvedQuery,
+      lensProps.attributes.title,
+      lensProps.timeRange,
+      lensProps.isApproximate,
+      onExploreInDiscoverTab,
+    ]
   );
 
   const extraActions = useLensExtraActions({
@@ -108,11 +128,19 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
+  // EmbeddableRendererContext is the only way to configure the visible quick-action row because
+  // Lens does not expose a first-class prop for it (tracked in https://github.com/elastic/kibana/issues/236787).
+  // Memoize the whole context value (not just `view`) so consumers of the context don't re-render
+  // every time LensWrapper does — a fresh `{ quickActions: { view } }` literal each render would
+  // defeat the inner memo.
+  const embeddableRendererContextValue = useMemo(
+    () => ({ quickActions: { view: quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW } }),
+    [quickActionIds]
+  );
+
   return (
     <div css={chartCss}>
-      <PresentationPanelQuickActionContext.Provider
-        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
-      >
+      <EmbeddableRendererContext.Provider value={embeddableRendererContextValue}>
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
@@ -126,7 +154,7 @@ export function LensWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
-      </PresentationPanelQuickActionContext.Provider>
+      </EmbeddableRendererContext.Provider>
     </div>
   );
 }

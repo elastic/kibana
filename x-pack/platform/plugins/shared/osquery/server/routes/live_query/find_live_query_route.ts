@@ -10,12 +10,13 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 import type {
   ActionDetails,
@@ -28,6 +29,9 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
@@ -70,7 +74,12 @@ export const findLiveQueryRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
           const res = await lastValueFrom(
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
@@ -86,7 +95,7 @@ export const findLiveQueryRoute = (
                 },
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -95,8 +104,32 @@ export const findLiveQueryRoute = (
           if (request.query.withResultCounts && items.length > 0) {
             try {
               const [coreStartServices] = await osqueryContext.getStartServices();
-              const esClient = coreStartServices.elasticsearch.client.asInternalUser;
-              const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+              const internalEsClient = coreStartServices.elasticsearch.client.asInternalUser;
+              const readEsClient = getReadEsClient(
+                coreStartServices.elasticsearch.client,
+                request,
+                osqueryContext.cpsEnabled
+              );
+              const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+              let integrationNamespaces: string[] | undefined;
+
+              if (osqueryContext?.service?.getIntegrationNamespaces) {
+                const logger = osqueryContext.logFactory.get('find_live_query');
+                const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+                  osqueryContext,
+                  request
+                );
+                const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                  [OSQUERY_INTEGRATION_NAME],
+                  spaceScopedClient,
+                  logger
+                );
+                const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+                integrationNamespaces =
+                  osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+                logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+              }
 
               const allActionIds: string[] = [];
               for (const item of items) {
@@ -111,9 +144,10 @@ export const findLiveQueryRoute = (
               }
 
               const resultCountsMap = await getResultCountsForActions(
-                esClient,
+                readEsClient,
                 allActionIds,
                 spaceId,
+                integrationNamespaces,
                 ccsEnabled
               );
 

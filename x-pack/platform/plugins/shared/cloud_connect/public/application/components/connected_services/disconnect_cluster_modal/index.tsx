@@ -14,15 +14,15 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiLink,
   EuiIcon,
   copyToClipboard,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../../app_context';
@@ -43,6 +43,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
   const { telemetryService } = useCloudConnectedAppContext();
   const [confirmationText, setConfirmationText] = useState('');
   const isConfirmationValid = confirmationText === clusterName;
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'disconnectClusterModalTitle' });
 
   const handleConfirm = async () => {
     if (isConfirmationValid) {
@@ -52,9 +53,9 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
   };
 
   return (
-    <EuiModal onClose={onClose} maxWidth={650}>
+    <EuiModal onClose={onClose} maxWidth={650} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="disconnectClusterModalTitle">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="disconnectClusterModalTitle">
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.disconnect.modalTitle"
             defaultMessage="Disconnect cluster"
@@ -63,18 +64,15 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut
+        <KbnWarningCallout
           title={
             <FormattedMessage
               id="xpack.cloudConnect.connectedServices.disconnect.warningTitle"
               defaultMessage="Disconnecting a cluster cannot be reversed"
             />
           }
-          color="warning"
-          iconType="warning"
           data-test-subj="disconnectClusterWarningCallout"
-        >
-          <EuiText size="s">
+          text={
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.disconnect.warningDescription"
@@ -87,15 +85,21 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                         copyToClipboard(clusterName);
                       }}
                       data-test-subj="disconnectClusterNameLink"
+                      aria-label={i18n.translate(
+                        'xpack.cloudConnect.connectedServices.disconnect.clusterNameLinkAriaLabel',
+                        {
+                          defaultMessage: 'Copy cluster name to clipboard',
+                        }
+                      )}
                     >
-                      {clusterName} <EuiIcon type="copy" />
+                      {clusterName} <EuiIcon type="copy" aria-hidden={true} />
                     </EuiLink>
                   ),
                 }}
               />
             </p>
-          </EuiText>
-        </EuiCallOut>
+          }
+        />
 
         <EuiSpacer size="m" />
 

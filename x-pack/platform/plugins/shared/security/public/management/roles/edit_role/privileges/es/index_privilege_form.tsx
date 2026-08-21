@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import _ from 'lodash';
@@ -99,13 +100,24 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <Fragment>
         <EuiSpacer size="m" />
         <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
-          <EuiFlexItem>
-            <EuiPanel color="subdued">{this.getPrivilegeForm()}</EuiPanel>
+          <EuiFlexItem
+            css={css`
+              min-width: 330px;
+            `}
+          >
+            <EuiPanel
+              color="subdued"
+              css={css`
+                max-width: 100%;
+              `}
+            >
+              {this.getPrivilegeForm()}
+            </EuiPanel>
           </EuiFlexItem>
           {!this.props.isRoleReadOnly && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={
+              <EuiToolTip
+                content={
                   this.props.indexType === 'remote_indices'
                     ? i18n.translate(
                         'xpack.security.management.editRole.indexPrivilegeForm.deleteRemoteIndexPrivilegeAriaLabel',
@@ -116,10 +128,25 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         { defaultMessage: 'Delete index privilege' }
                       )
                 }
-                color={'danger'}
-                onClick={this.props.onDelete}
-                iconType={'trash'}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={
+                    this.props.indexType === 'remote_indices'
+                      ? i18n.translate(
+                          'xpack.security.management.editRole.indexPrivilegeForm.deleteRemoteIndexPrivilegeAriaLabel',
+                          { defaultMessage: 'Delete remote index privilege' }
+                        )
+                      : i18n.translate(
+                          'xpack.security.management.editRole.indexPrivilegeForm.deleteIndexPrivilegeAriaLabel',
+                          { defaultMessage: 'Delete index privilege' }
+                        )
+                  }
+                  color={'danger'}
+                  onClick={this.props.onDelete}
+                  iconType={'trash'}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -440,6 +467,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   onChange={this.onQueryChange}
                   options={{
                     readOnly: this.props.isRoleReadOnly,
+                    automaticLayout: true,
                     minimap: {
                       enabled: false,
                     },

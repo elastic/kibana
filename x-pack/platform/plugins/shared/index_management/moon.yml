@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-mount'
   - '@kbn/rollup'
-  - '@kbn/ml-error-utils'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/core-application-browser'
@@ -70,7 +69,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/ml-common-types'
-  - '@kbn/failure-store-modal'
+  - '@kbn/data-lifecycle-phases'
   - '@kbn/react-query'
   - '@kbn/scout'
   - '@kbn/deeplinks-management'
@@ -80,6 +79,12 @@ dependsOn:
   - '@kbn/search-index-documents'
   - '@kbn/cloud-connect-plugin'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/index-lifecycle-management-common-shared'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/streams-schema'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

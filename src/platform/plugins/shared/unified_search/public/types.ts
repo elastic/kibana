@@ -14,6 +14,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -23,6 +24,7 @@ import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { EsqlPluginStart } from '@kbn/esql/public';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import type { StatefulSearchBarDeps } from './search_bar/create_search_bar';
@@ -50,6 +52,8 @@ export interface UnifiedSearchStartDependencies {
   screenshotMode?: ScreenshotModePluginStart;
   cps: CPSPluginStart;
   kql: KqlPluginStart;
+  esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
@@ -110,4 +114,6 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   cps: CPSPluginStart;
+  esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }

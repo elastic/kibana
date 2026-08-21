@@ -10,13 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
 import {
   LENS_EMBEDDABLE_TYPE,
   type LensRendererProps,
   type LensSerializedState,
 } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
@@ -40,10 +40,8 @@ type PanelProps = Pick<
   | 'showShadow'
   | 'showBorder'
   | 'showBadges'
-  | 'showNotifications'
   | 'hideLoader'
   | 'hideHeader'
-  | 'hideInspector'
   | 'getActions'
   | 'titleHighlight'
 >;
@@ -55,9 +53,9 @@ type PanelProps = Pick<
  */
 export function LensRenderer({
   title,
+  description,
   withDefaultActions,
   extraActions,
-  showInspector,
   syncColors,
   syncCursor,
   syncTooltips,
@@ -87,6 +85,7 @@ export function LensRenderer({
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
+  const isApproximate$ = useObservableVariable(props.isApproximate);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -100,7 +99,9 @@ export function LensRenderer({
     return rest;
   }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
+    props.attributes
+      ? { attributes: cleanedAttributes, description }
+      : createEmptyLensState(null, title, description)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
@@ -127,6 +128,14 @@ export function LensRenderer({
     }
   }, [lensApi, cleanedAttributes, props.overrides]);
 
+  // workaround: `description` is not currently exposed as an observable so we manually keep it in sync here
+  // Revisit if the Lens API aligns `description` with the observable pattern in the future.
+  useEffect(() => {
+    if (lensApi) {
+      lensApi.setDescription(description);
+    }
+  }, [lensApi, description]);
+
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
       settings.syncColors$.next(syncColors);
@@ -141,8 +150,6 @@ export function LensRenderer({
 
   const panelProps: PanelProps = useMemo(() => {
     return {
-      hideInspector: !showInspector,
-      showNotifications: false,
       showShadow: false,
       showBadges: false,
       titleHighlight,
@@ -154,10 +161,10 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
+  }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
-    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
+    <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>
@@ -176,6 +183,7 @@ export function LensRenderer({
           getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
+          isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
         } satisfies LensParentApi)

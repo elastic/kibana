@@ -21,7 +21,7 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockObservedService } from './mocks';
-import { mockServiceRiskScoreState } from '../mocks';
+import { mockServiceRiskScoreState, mockServiceEntityRiskScores } from '../mocks';
 
 const mockProps: ServicePanelProps = {
   serviceName: 'test',
@@ -35,6 +35,11 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockServiceRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
+}));
+
+const mockedUseEntityRiskScores = jest.fn();
+jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
+  useEntityRiskScores: () => mockedUseEntityRiskScores(),
 }));
 
 const mockedUseObservedService = jest.fn().mockReturnValue(mockObservedService);
@@ -61,10 +66,15 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn(),
 }));
 
+jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: jest.fn(() => [true]),
+}));
+
 describe('ServicePanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);
     mockedUseObservedService.mockReturnValue(mockObservedService);
+    mockedUseEntityRiskScores.mockReturnValue(mockServiceEntityRiskScores);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);

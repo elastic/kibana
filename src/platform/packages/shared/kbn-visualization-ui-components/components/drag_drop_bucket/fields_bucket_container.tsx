@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { TooltipWrapper } from '@kbn/visualization-utils';
@@ -54,7 +55,7 @@ export const FieldsBucketContainer = ({
             <EuiIcon
               size="s"
               color={isNotDraggable ? euiTheme.colors.textDisabled : euiTheme.colors.textParagraph}
-              type="grab"
+              type="dragVertical"
               aria-label={i18n.translate(
                 'visualizationUiComponents.fieldsBucketContainer.dragToReorder',
                 {
@@ -78,14 +79,16 @@ export const FieldsBucketContainer = ({
             )}
             condition={isNotRemovable ?? false}
           >
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={removeTitle}
-              onClick={onRemoveClick}
-              data-test-subj={`${dataTestSubj}-removeField-${idx}`}
-              isDisabled={isNotRemovable}
-            />
+            <EuiToolTip content={removeTitle} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={removeTitle}
+                onClick={onRemoveClick}
+                data-test-subj={`${dataTestSubj}-removeField-${idx}`}
+                isDisabled={isNotRemovable}
+              />
+            </EuiToolTip>
           </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>

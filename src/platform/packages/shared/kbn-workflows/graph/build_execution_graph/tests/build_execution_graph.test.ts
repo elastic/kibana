@@ -17,6 +17,7 @@ import {
   type KibanaStep,
   type LoopBreakStep,
   type LoopContinueStep,
+  type WaitForApprovalStep,
   type WaitStep,
   type WhileStep,
   type WorkflowYaml,
@@ -569,6 +570,47 @@ describe('convertToWorkflowGraph', () => {
     });
 
     describe('step level if condition', () => {
+      // `parallel` is covered in parallel_step_graph.test.ts, where the body adds its own nodes.
+      const ifEnabledSteps: Array<{ name: string; step: Record<string, unknown> }> = [
+        { name: 'wait', step: { type: 'wait', with: { duration: '5s' } } },
+        { name: 'waitForInput', step: { type: 'waitForInput', with: { message: 'input?' } } },
+        {
+          name: 'waitForApproval',
+          step: { type: 'waitForApproval', with: { message: 'approve?' } },
+        },
+        { name: 'data.set', step: { type: 'data.set', with: { key: 'value' } } },
+        {
+          name: 'elasticsearch.search',
+          step: { type: 'elasticsearch.search', with: { index: 'x' } },
+        },
+        {
+          name: 'kibana.request',
+          step: { type: 'kibana.request', with: { method: 'GET', path: '/api/status' } },
+        },
+        {
+          name: 'workflow.execute',
+          step: { type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+        },
+        {
+          name: 'workflow.executeAsync',
+          step: { type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+        },
+      ];
+
+      it.each(ifEnabledSteps)('wraps a $name step carrying `if` in an if zone', ({ step }) => {
+        const executionGraph = convertToWorkflowGraph({
+          steps: [{ name: 'gated', if: 'inputs.enabled : true', ...step }],
+        } as unknown as WorkflowYaml);
+
+        expect(graphlib.alg.topsort(executionGraph)).toEqual([
+          'enterCondition_if_gated',
+          'enterThen_if_gated',
+          'gated',
+          'exitThen_if_gated',
+          'exitCondition_if_gated',
+        ]);
+      });
+
       const workflowDefinition = {
         steps: [
           {
@@ -1339,6 +1381,59 @@ describe('convertToWorkflowGraph', () => {
       expect(breakNode.type).toBe('loop-break');
       expect(breakNode.loopExitNodeId).toBe('exitForeach_inner_loop');
       expect(breakNode.loopStepId).toBe('inner_loop');
+    });
+  });
+
+  describe('waitForApproval step', () => {
+    it('should build a graph without entering an infinite timeout recursion', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'request-approval',
+            type: 'waitForApproval',
+            timeout: '24h',
+            with: {
+              message: 'Approve?',
+            },
+          } as WaitForApprovalStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      expect(() => convertToWorkflowGraph(workflowDefinition as WorkflowYaml)).not.toThrow();
+
+      const graph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+      expect(graph.node('request-approval')).toEqual(
+        expect.objectContaining({
+          type: 'waitForApproval',
+          configuration: expect.objectContaining({
+            timeout: '24h',
+          }),
+        })
+      );
+    });
+
+    it('should default approval timeout when omitted', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'request-approval',
+            type: 'waitForApproval',
+            with: {
+              message: 'Approve?',
+            },
+          } as WaitForApprovalStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+
+      expect(graph.node('request-approval')).toEqual(
+        expect.objectContaining({
+          configuration: expect.objectContaining({
+            timeout: '24h',
+          }),
+        })
+      );
     });
   });
 });

@@ -103,8 +103,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
     return createdAction.id;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/254838
-  describe.skip('http action', () => {
+  describe('http action', () => {
     let httpSimulatorURL: string = '';
     let httpServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
@@ -366,7 +365,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling http, retry later/);
-      expect(result.service_message).to.eql('[500] Internal Server Error');
+      expect(result.service_message).to.eql('[500] Internal Server Error: Error');
     });
 
     it('should not abort when the request completes normally', async () => {
@@ -582,12 +581,8 @@ export default function httpTest({ getService }: FtrProviderContext) {
         oauth2Server.server.close();
       });
 
-      afterEach(() => {
-        oauth2Server.reset();
-      });
-
-      it('should get access token with client credentials', async () => {
-        const { body: result } = await supertest
+      it('should get access token with client credentials and refresh once expired', async () => {
+        const { body: firstResult } = await supertest
           .post(`/api/actions/connector/${httpActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -598,49 +593,27 @@ export default function httpTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // HTTP connector returns data: { status, statusText, headers, data }; simulator responds with body 'OK'
-        expect(result.status).to.eql('ok');
-        expect(result.connector_id).to.eql(httpActionId);
-        expect(result.data?.data).to.eql('OK');
+        expect(firstResult.status).to.eql('ok');
+        expect(firstResult.connector_id).to.eql(httpActionId);
+        expect(firstResult.data?.data).to.eql('OK');
 
-        // this is the request that Kibana did to the auth server
-        // before calling the http server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        let tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(1);
         expect(tokenRequests[0].client_id).to.be(clientId);
         expect(tokenRequests[0].client_secret).to.be(clientSecret);
         expect(tokenRequests[0].grant_type).to.be('client_credentials');
         expect(tokenRequests[0].token).to.be('test-token-1');
 
-        // this is the request Kibana did to the http server
-        // it returns headers because we are sending body: 'header_as_payload'
-        const httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
-        const httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
+        let httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
+        let httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
         expect(httpSimulatorHeaders.length).to.be(1);
         expect(JSON.parse(httpSimulatorHeaders[0]).authorization).to.equal('Bearer test-token-1');
-      });
 
-      it('should refresh the token once the previous one has expired', async () => {
-        // first call will generate a token as we could see in the previous test
-        await supertest
-          .post(`/api/actions/connector/${httpActionId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              method: 'POST',
-              body: 'header_as_payload',
-            },
-          })
-          .expect(200);
-
-        // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000 + 2500)
         );
 
-        // this second call should trigger a second call to the auth server because
-        // the token will be expired
-        const { body: result } = await supertest
+        const { body: secondResult } = await supertest
           .post(`/api/actions/connector/${httpActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -651,26 +624,21 @@ export default function httpTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // HTTP connector returns data: { status, statusText, headers, data }; simulator responds with body 'OK'
-        expect(result.status).to.eql('ok');
-        expect(result.connector_id).to.eql(httpActionId);
-        expect(result.data?.data).to.eql('OK');
+        expect(secondResult.status).to.eql('ok');
+        expect(secondResult.connector_id).to.eql(httpActionId);
+        expect(secondResult.data?.data).to.eql('OK');
 
-        // this is the request that Kibana did to the auth server
-        // before calling the http server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(2);
         expect(tokenRequests[1].client_id).to.be(clientId);
         expect(tokenRequests[1].client_secret).to.be(clientSecret);
         expect(tokenRequests[1].grant_type).to.be('client_credentials');
         expect(tokenRequests[1].token).to.be('test-token-2');
 
-        // this is the request Kibana did to the http server
-        // it returns headers because we are sending body: 'header_as_payload'
-        const httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
-        const httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
-        expect(httpSimulatorHeaders.length).to.be(2);
-        expect(JSON.parse(httpSimulatorHeaders[1]).authorization).to.equal('Bearer test-token-2');
+        httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
+        httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
+        expect(httpSimulatorHeaders.length).to.be(1);
+        expect(JSON.parse(httpSimulatorHeaders[0]).authorization).to.equal('Bearer test-token-2');
       });
     });
 

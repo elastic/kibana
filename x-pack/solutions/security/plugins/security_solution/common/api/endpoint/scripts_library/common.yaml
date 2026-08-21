@@ -118,10 +118,17 @@ components:
       description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
       enum: [script, archive]
 
+    ScriptNameSchema:
+      type: string
+      description: Name of the script
+      minLength: 1
+      maxLength: 256
+
     ArchivePathToExecutableSchema:
       type: string
       description:
         Used only for when the uploaded script is an archive (.zip file for example).
         This property defines the relative path to the file included in the archive that should be executed
         once its contents are extracted. The path should be relative to the root of the archive.
+      maxLength: 4096
       example: ./bin/script.sh

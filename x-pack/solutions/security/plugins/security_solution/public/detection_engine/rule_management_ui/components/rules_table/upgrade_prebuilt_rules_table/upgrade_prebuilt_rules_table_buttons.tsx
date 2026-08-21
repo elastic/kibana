@@ -21,7 +21,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isInitializingPrebuiltRulesPackage },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
@@ -31,7 +31,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleUpgrading = loadingRules.length > 0;
-  const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress = isRuleUpgrading || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&

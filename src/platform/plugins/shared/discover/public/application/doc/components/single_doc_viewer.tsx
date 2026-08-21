@@ -29,7 +29,7 @@ export const SingleDocViewer: React.FC<SingleDocViewerProps> = ({ record, dataVi
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ actions: {}, record });
+    return getDocViewer({ record });
   }, [getDocViewerAccessor, record]);
 
   return (

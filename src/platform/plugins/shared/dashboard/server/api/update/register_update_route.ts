@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+
+import { z } from '@kbn/zod';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
-import { update } from './update';
+import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { writeErrorHandler } from '../write_error_handler';
+import { getRouteConfig } from '../get_route_config';
+import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
+import { getUpdateResponseBodySchema } from './schemas';
+import { update } from './update';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
@@ -35,20 +40,28 @@ export function registerUpdateRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   updateRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).updateDashboardOASOperationObject,
+      },
       validate: () => ({
         request: {
-          params: schema.object({
-            // Can not validate id at route level
-            // existing dashboards may have invalid "as code" ids
-            id: schema.string(),
-          }),
-          body: getUpdateRequestBodySchema(isDashboardAppRequest),
+          params: z
+            .object({
+              // Can not validate id at route level
+              // existing dashboards may have invalid "as code" ids
+              id: z.string().meta({
+                description: 'The unique ID of the dashboard to be created or updated',
+              }),
+            })
+            .strict(),
+          body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
           200: {
@@ -65,24 +78,37 @@ export function registerUpdateRoute(
           403: {
             description: 'forbidden',
           },
+          409: {
+            description: 'conflict',
+          },
         },
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
-          const result = await update(
+          const { body, operation } = await update(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
+            req.serverTiming,
             isDashboardAppRequest
           );
-          return result.meta.updated_at === result.meta.created_at
-            ? res.created({ body: result })
-            : res.ok({ body: result });
+          if (operation === 'create') {
+            // do not await tracking actions
+            void trackCreateDashboardAction(body, req).catch(); // do nothing on throw
+            return res.created({ body });
+          } else {
+            void trackUpdateDashboardAction(body, req).catch();
+            return res.ok({ body });
+          }
         } catch (e) {
-          return writeErrorHandler(e, res);
+          if (e instanceof TransformPanelsInError) {
+            logRequest(logger, req, 'warn', e.message);
+            return res.custom(e.getCustomResponse());
+          }
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

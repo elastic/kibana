@@ -169,6 +169,18 @@ async function updateExistingStreamsManagedPipeline({
     if (action.type === 'append_processor_to_ingest_pipeline') {
       if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
+        // Only set default_pipeline on the write index when this is the first time this stream's
+        // processor is being added (i.e. it wasn't already present in the shared pipeline).
+        // This mirrors what createStreamsManagedPipeline does for the very first stream — without
+        // this, a second (or later) stream sharing the same template pipeline never gets
+        // index.default_pipeline set on its write index and documents bypass processing entirely.
+        actionsByType.update_default_ingest_pipeline.push({
+          type: 'update_default_ingest_pipeline',
+          request: {
+            name: action.dataStream,
+            pipeline: pipelineName,
+          },
+        });
       }
     } else {
       processors = processors.filter(

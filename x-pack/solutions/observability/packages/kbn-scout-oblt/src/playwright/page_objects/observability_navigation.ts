@@ -7,14 +7,21 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
+/** Serverless / cloud: primary chrome nav can lag behind Playwright defaults (gh-267186). */
+export const OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
+
+/**
+ * Budget for app shells after sidenav navigations — bundles + async `data-test-subj` (ex. dashboards
+ * listing mounts `dashboardLandingPage` in an effect; gh-267186 comment).
+ */
+export const OBSERVABILITY_SPA_SHELL_TIMEOUT_MS = OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS;
+
 /** Chrome nav for Observability — locators and actions only; specs own `expect`. */
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
   public readonly primaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
-  public readonly breadcrumbs: Locator;
-  public readonly logo: Locator;
   public readonly moreMenuTrigger: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -22,8 +29,6 @@ export class ObservabilityNavigation {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
-    this.breadcrumbs = this.page.testSubj.locator('breadcrumbs');
-    this.logo = this.page.testSubj.locator('nav-header-logo');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
@@ -41,13 +46,24 @@ export class ObservabilityNavigation {
   }
 
   /** Waits on `primaryNav` (outer layout can be 0-width until CSS vars apply). */
-  async waitForLoad() {
-    await this.primaryNav.waitFor({ state: 'visible' });
+  async waitForLoad(options?: { timeout?: number }) {
+    await this.primaryNav.waitFor({
+      state: 'visible',
+      timeout: options?.timeout ?? OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
   }
 
-  /** App root or `kbnNoDataPage` (Discover/Dashboards with no data views). */
+  /**
+   * App root or one of the shared no-data shells. Discover/Dashboards delegate to
+   * `KibanaNoDataPage`, which renders either `kbnNoDataPage` (cluster has no data) or
+   * `noDataViewsPrompt` (cluster has data but no user data view), depending on cluster
+   * state. The shells are mutually exclusive, so an `.or()` chain is enough — see gh-267186.
+   */
   pageOrNoData(testSubj: string): Locator {
-    return this.page.testSubj.locator(testSubj).or(this.page.testSubj.locator('kbnNoDataPage'));
+    return this.page.testSubj
+      .locator(testSubj)
+      .or(this.page.testSubj.locator('kbnNoDataPage'))
+      .or(this.page.testSubj.locator('noDataViewsPrompt'));
   }
 
   navItemInPrimaryByDeepLinkId(deepLinkId: string): Locator {
@@ -118,12 +134,24 @@ export class ObservabilityNavigation {
     return this.sidePanel(id).or(this.nestedPanel(id));
   }
 
-  /** By `breadcrumb-deepLinkId-*` test-subj or visible text. */
-  breadcrumb(by: { deepLinkId: string } | { text: string }): Locator {
-    if ('deepLinkId' in by) {
-      return this.breadcrumbs.locator(`[data-test-subj~="breadcrumb-deepLinkId-${by.deepLinkId}"]`);
+  /**
+   * Resolve a body nav item wherever it renders. It lives in the primary nav on some
+   * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
+   * open "More" when it is not in the primary nav so the returned locator is reachable.
+   */
+  async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
+    const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
+    if (await primaryItem.isVisible()) {
+      return primaryItem;
     }
-    return this.breadcrumbs.locator('[data-test-subj~="breadcrumb"]', { hasText: by.text });
+    await this.openMoreMenu();
+    return this.navItemInMoreByDeepLinkId(deepLinkId);
+  }
+
+  /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
+  async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
+    const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
+    await item.click();
   }
 
   /** If More is already open, Escape first so the next open is the root list. */
@@ -134,10 +162,6 @@ export class ObservabilityNavigation {
     }
     await this.moreMenuTrigger.click();
     await this.morePopover.waitFor({ state: 'visible' });
-  }
-
-  async clickLogo() {
-    await this.logo.click();
   }
 
   /** Returns a function that is false after a full page reload (spec asserts). */

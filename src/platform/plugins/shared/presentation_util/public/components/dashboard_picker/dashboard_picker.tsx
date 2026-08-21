@@ -182,6 +182,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
           onChange({ name: selected.label, id: selected.value });
         }}
         renderOption={(option) => <EuiHighlight search={query}>{option.label}</EuiHighlight>}
+        listProps={{ paddingSize: 's' }}
       >
         {(list) => <div>{list}</div>}
       </EuiSelectable>

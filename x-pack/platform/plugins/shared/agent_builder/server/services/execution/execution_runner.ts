@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -17,11 +27,15 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
+  normalizeInteractive,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SerializedExecutionError } from '@kbn/agent-builder-common';
@@ -31,6 +45,8 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -47,6 +63,7 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
@@ -71,6 +88,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -80,16 +111,34 @@ export const handleAgentExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: AgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity?: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
+  const resolvedInteractivity: InteractivityConfig =
+    interactivity ??
+    execution.interactivity ??
+    normalizeInteractive(undefined, execution.executionMode);
   if (execution.executionMode === AgentExecutionMode.standalone) {
-    return handleStandaloneExecution({ execution, deps, request, abortSignal });
+    return handleStandaloneExecution({
+      execution,
+      deps,
+      request,
+      abortSignal,
+      interactivity: resolvedInteractivity,
+    });
   }
-  return handleConversationExecution({ execution, deps, request, abortSignal });
+  return handleConversationExecution({
+    execution,
+    deps,
+    request,
+    abortSignal,
+    interactivity: resolvedInteractivity,
+  });
 };
 
 /**
@@ -101,11 +150,13 @@ const handleConversationExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: ConversationAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const {
     agentId = agentBuilderDefaultAgentId,
@@ -116,28 +167,46 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
     action,
+    telemetryMetadata,
+    maxContentLength,
+    accessControl,
+    subagentCreation,
+    readOnly,
+    projectRouting,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
+    deps;
 
   // Resolve scoped services
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
+    telemetryMetadata,
     request,
     ...deps,
   });
 
-  // Get conversation
+  // Get conversation — only the conversation-level part of the origin is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
+    accessControl,
+    readOnly,
+    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+    subagentCreation,
+  });
+
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    origin,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -152,102 +221,152 @@ const handleConversationExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput,
+    origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
     abortSignal,
     conversation,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
+    maxContentLength,
     runAgent,
     browserApiTools,
     configurationOverrides,
     action,
+    interactivity,
+    parentExecutionId: execution.parentExecutionId,
+    projectRouting,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
-    conversation.operation === 'CREATE'
+  // Generate title when creating a new conversation
+  // OR when the conversation still carries the default placeholder title
+  const needsTitle =
+    (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
+    !subagentCreation;
+  const title$ = (
+    needsTitle
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
-      : of(conversation.title);
+      : of(conversation.title)
+  ).pipe(shareReplay(1));
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
     ? buildPersistenceEvents({
-        agentId,
         conversation,
         conversationClient,
-        conversationId,
         title$,
         agentEvents$,
         action,
       })
     : EMPTY;
 
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
-
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
-  return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
-    merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-      handleCancellation(abortSignal),
-      tap((event) => {
-        try {
-          if (isRoundCompleteEvent(event)) {
-            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
-            const currentRoundCount = isReplacingRound
-              ? conversation.rounds.length
-              : (conversation.rounds?.length ?? 0) + 1;
+  const agentRegistry = await agentService.getRegistry({ request });
+  const { name: agentName } = await agentRegistry.get(agentId);
 
-            // metering
-            meteringService
-              .reportExecution({
-                conversationId: effectiveConversationId,
+  const { headers } = request;
+  const opikTraceId = headers.opik_trace_id as string | undefined;
+  const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
+  const opikHeaders =
+    opikTraceId && opikParentSpanId
+      ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
+      : undefined;
+
+  const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+
+  return withConverseSpan(
+    {
+      agentId,
+      agentName,
+      providerName: connectorProvider,
+      conversationId: conversation.id,
+      spaceId,
+      opikHeaders,
+    },
+    (span) => {
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes(span, {
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
+      const titleAttr$ = storeConversation
+        ? title$.pipe(
+            tap((title) => {
+              span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+            }),
+            ignoreElements()
+          )
+        : EMPTY;
+
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+        handleCancellation(abortSignal),
+        tap((event) => {
+          if (isConversationCreatedEvent(event) && !author) {
+            setUserAttributes(span, {
+              id: event.data.user.id,
+              username: event.data.user.username,
+            });
+          }
+
+          try {
+            if (isRoundCompleteEvent(event)) {
+              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const currentRoundCount = isReplacingRound
+                ? conversation.rounds.length
+                : (conversation.rounds?.length ?? 0) + 1;
+
+              // metering
+              meteringService
+                .reportExecution({
+                  conversationId: conversation.id,
+                  executionId: execution.executionId,
+                  roundCount: currentRoundCount,
+                  agentId,
+                  round: event.data.round,
+                  modelProvider: connectorProvider,
+                })
+                .catch((err) => {
+                  logger.warn(`Failed to report execution metering: ${err}`);
+                });
+
+              // snapshot telemetry tracking
+              trackingService?.trackConversationRound(conversation.id, currentRoundCount);
+
+              // EBT tracking
+              analyticsService?.reportRoundComplete({
+                conversationId: conversation.id,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
-              })
-              .catch((err) => {
-                logger.warn(`Failed to report execution metering: ${err}`);
               });
-
-            // snapshot telemetry tracking
-            if (effectiveConversationId) {
-              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
-
-            // EBT tracking
-            analyticsService?.reportRoundComplete({
-              conversationId: effectiveConversationId,
-              executionId: execution.executionId,
-              roundCount: currentRoundCount,
-              agentId,
-              round: event.data.round,
-              modelProvider: connectorProvider,
-            });
+          } catch (error) {
+            logger.error(`Failed to report round complete telemetry: ${error}`);
           }
-        } catch (error) {
-          logger.error(`Failed to report round complete telemetry: ${error}`);
-        }
-      }),
-      convertErrors({
-        agentId,
-        logger,
-        analyticsService,
-        trackingService,
-        modelProvider: connectorProvider,
-        conversationId: effectiveConversationId,
-        executionId: execution.executionId,
-      })
-    )
+        }),
+        convertErrors({
+          agentId,
+          logger,
+          analyticsService,
+          trackingService,
+          modelProvider: connectorProvider,
+          conversationId: conversation.id,
+          executionId: execution.executionId,
+        })
+      );
+    }
   );
 };
 
@@ -326,29 +445,52 @@ export const collectAndWriteEvents = ({
 /**
  * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
  * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError.
+ * - Otherwise, wraps it as an internalError, preserving the HTTP status from
+ *   Boom-style errors (or any error carrying a numeric `statusCode`) in
+ *   `meta.statusCode` so the route layer can return the correct code.
  */
 export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
   if (isAgentBuilderError(error)) {
     return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
   }
   const message = error instanceof Error ? error.message : String(error);
-  return { code: AgentBuilderErrorCode.internalError, message };
+  const statusCode = getHttpStatusFromError(error);
+  return {
+    code: AgentBuilderErrorCode.internalError,
+    message,
+    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
+  };
 };
 
+const getHttpStatusFromError = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { output, statusCode } = error as {
+    output?: { statusCode?: unknown };
+    statusCode?: unknown;
+  };
+  const candidate =
+    typeof output?.statusCode === 'number'
+      ? output.statusCode
+      : typeof statusCode === 'number'
+      ? statusCode
+      : undefined;
+  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
+    ? candidate
+    : undefined;
+};
+
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+
 const buildPersistenceEvents = ({
-  agentId,
   conversation,
   conversationClient,
-  conversationId,
   title$,
   agentEvents$,
   action,
 }: {
-  agentId: string;
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
@@ -357,9 +499,8 @@ const buildPersistenceEvents = ({
 
   if (conversation.operation === 'CREATE') {
     return createConversation$({
-      agentId,
+      conversation,
       conversationClient,
-      conversationId: conversationId || conversation.id,
       title$,
       roundCompletedEvents$,
     });
@@ -368,9 +509,9 @@ const buildPersistenceEvents = ({
   return updateConversation$({
     conversationClient,
     conversation,
-    title$,
     roundCompletedEvents$,
     action,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
   });
 };
 
@@ -383,18 +524,22 @@ const handleStandaloneExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: StandaloneAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
+  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
+    telemetryMetadata,
     request,
     ...deps,
   });
@@ -408,8 +553,13 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
+    maxContentLength,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
+    interactivity,
+    parentExecutionId: execution.parentExecutionId,
   });
 
   return agentEvents$.pipe(

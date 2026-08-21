@@ -31,6 +31,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { CreateSentinelRulesBody } from '../../vendor/rules/sentinel.gen';
 import { EnhanceQRadarRule } from '../../vendor/rules/qradar.gen';
 import {
   LangSmithOptions,
@@ -106,6 +107,28 @@ export type CreateRuleMigrationRulesRequestBody = z.infer<
 >;
 export type CreateRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateRuleMigrationRulesRequestBody
+>;
+
+export const CreateSentinelRuleMigrationRulesRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
+export type CreateSentinelRuleMigrationRulesRequestParams = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+export type CreateSentinelRuleMigrationRulesRequestParamsInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+
+export const CreateSentinelRuleMigrationRulesRequestBody = lazySchema(
+  () => CreateSentinelRulesBody
+);
+export type CreateSentinelRuleMigrationRulesRequestBody = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
+>;
+export type CreateSentinelRuleMigrationRulesRequestBodyInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
 >;
 
 export const DeleteRuleMigrationRequestParams = lazySchema(() =>

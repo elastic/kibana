@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/deeplinks-observability'
   - '@kbn/discover-plugin'
   - '@kbn/ebt-tools'
+  - '@kbn/es-errors'
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/field-formats-plugin'
@@ -81,6 +82,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
   - '@kbn/licensing-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

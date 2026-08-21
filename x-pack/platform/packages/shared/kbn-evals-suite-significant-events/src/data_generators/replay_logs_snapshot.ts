@@ -8,12 +8,13 @@
 import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createGcsRepository, replaySnapshot } from '@kbn/es-snapshot-loader';
+import { createGcsRepository, replaySnapshot, TEMP_INDEX_PREFIX } from '@kbn/es-snapshot-loader';
 import { deleteLogsIndexTemplate, ensureLogsIndexTemplate } from './logs_index_template';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
+const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -44,6 +45,7 @@ export async function replaySignificantEventsSnapshot(
   log.debug(`Replaying significant events data from snapshot: ${snapshotName}`);
 
   await cleanSignificantEventsDataStreams(esClient, log);
+  await deleteStaleSnapshotLoaderIndices(esClient, log);
   await ensureLogsIndexTemplate(esClient, log);
 
   const basePath = resolveBasePath(gcs);
@@ -56,35 +58,73 @@ export async function replaySignificantEventsSnapshot(
   });
 }
 
+async function deleteStaleSnapshotLoaderIndices(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    const resolved = await esClient.indices.get({
+      index: `${TEMP_INDEX_PREFIX}*`,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    const staleIndices = Object.keys(resolved);
+    if (staleIndices.length === 0) return;
+
+    await esClient.indices.delete({
+      index: staleIndices,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+    });
+    log.debug(`Deleted ${staleIndices.length} stale snapshot-loader temp indices`);
+  } catch (error) {
+    log.warning(`Failed to delete stale snapshot-loader temp indices: ${getErrorMessage(error)}`);
+  }
+}
+
+export interface CleanSignificantEventsDataStreamsOptions {
+  /** When false, only clears `.significant_events-events` and leaves the replayed logs stream intact. */
+  includeLogs?: boolean;
+}
+
 export async function cleanSignificantEventsDataStreams(
   esClient: Client,
-  log: ToolingLog
+  log: ToolingLog,
+  { includeLogs = true }: CleanSignificantEventsDataStreamsOptions = {}
 ): Promise<void> {
-  const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
-    esClient.indices.deleteDataStream({ name: LOGS_STREAM_NAME }),
-    esClient.indices.delete({ index: LOGS_STREAM_NAME, ignore_unavailable: true }),
-  ]);
+  if (includeLogs) {
+    const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
+      esClient.indices.deleteDataStream({ name: LOGS_STREAM_NAME }),
+      esClient.indices.delete({ index: LOGS_STREAM_NAME, ignore_unavailable: true }),
+    ]);
 
-  if (
-    deleteDataStreamResult.status === 'rejected' &&
-    !isNotFoundError(deleteDataStreamResult.reason)
-  ) {
-    log.debug(
-      `Failed to delete ${LOGS_STREAM_NAME} data stream: ${getErrorMessage(
-        deleteDataStreamResult.reason
-      )}`
-    );
+    if (
+      deleteDataStreamResult.status === 'rejected' &&
+      !isNotFoundError(deleteDataStreamResult.reason)
+    ) {
+      log.debug(
+        `Failed to delete ${LOGS_STREAM_NAME} data stream: ${getErrorMessage(
+          deleteDataStreamResult.reason
+        )}`
+      );
+    }
+
+    if (
+      deleteIndexResult.status === 'rejected' &&
+      !isNotFoundError(deleteIndexResult.reason) &&
+      !isDataStreamDeleteConflict(deleteIndexResult.reason)
+    ) {
+      log.debug(
+        `Failed to delete ${LOGS_STREAM_NAME} index: ${getErrorMessage(deleteIndexResult.reason)}`
+      );
+    }
+
+    await deleteLogsIndexTemplate(esClient, log);
   }
 
-  if (
-    deleteIndexResult.status === 'rejected' &&
-    !isNotFoundError(deleteIndexResult.reason) &&
-    !isDataStreamDeleteConflict(deleteIndexResult.reason)
-  ) {
-    log.debug(
-      `Failed to delete ${LOGS_STREAM_NAME} index: ${getErrorMessage(deleteIndexResult.reason)}`
-    );
-  }
-
-  await deleteLogsIndexTemplate(esClient, log);
+  await esClient
+    .deleteByQuery({
+      index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+      query: { match_all: {} },
+      refresh: true,
+    })
+    .catch(() => {});
 }

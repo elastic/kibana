@@ -76,7 +76,7 @@ export function MobileLocationStats({
         return locationStatsStatus === FETCH_STATUS.LOADING ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          <EuiIcon type={type} width={width} height={height} fill={color} />
+          <EuiIcon type={type} width={width} height={height} fill={color} aria-hidden={true} />
         );
       },
     [locationStatsStatus]
@@ -157,7 +157,7 @@ export function MobileLocationStats({
         currentPeriodValue: currentPeriod?.mostLaunches.value,
         previousPeriodValue: previousPeriod?.mostLaunches.value,
       }),
-      icon: getIcon('launch'),
+      icon: getIcon('rocket'),
       value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
       trend: currentPeriod?.mostLaunches.timeseries ?? [],
       trendShape: MetricTrendShape.Area,

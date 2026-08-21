@@ -18,6 +18,8 @@ import { NoGroupCrossingManifestsRule } from './src/rules/no_group_crossing_mani
 import { RequireImportRule } from './src/rules/require_import';
 import { NoDirectHandlebarsImportRule } from './src/rules/no_direct_handlebars_import';
 import { NoDirectMonacoImportRule } from './src/rules/no_direct_monaco_import';
+import { NoUndeclaredPluginTargetRule } from './src/rules/no_undeclared_plugin_target';
+import { NoReduxToolkitV2ImportsRule } from './src/rules/no_redux_toolkit_v2_imports';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
@@ -34,4 +36,6 @@ export const rules = {
   require_import: RequireImportRule,
   no_direct_handlebars_import: NoDirectHandlebarsImportRule,
   no_direct_monaco_import: NoDirectMonacoImportRule,
+  no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
+  no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
 };

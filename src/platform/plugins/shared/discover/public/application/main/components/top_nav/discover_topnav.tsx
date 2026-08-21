@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
@@ -18,9 +19,7 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
   useDiscoverCustomization,
   useDiscoverCustomizationContext,
@@ -42,78 +41,10 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
-import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
-import {
-  isDiscoverInspectorInTabMenu,
-  useDiscoverTopNavWithInspector,
-  useDiscoverTopNavWithoutInspector,
-} from './use_discover_topnav';
+import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
-
-function DiscoverTopNavMenuSection({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const services = useDiscoverServices();
-  const customizationContext = useDiscoverCustomizationContext();
-  if (isDiscoverInspectorInTabMenu(services, customizationContext)) {
-    return (
-      <DiscoverTopNavMenuNoInspector
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
-      />
-    );
-  }
-  return (
-    <DiscoverTopNavMenuWithInspector
-      onOpenSaveModal={onOpenSaveModal}
-      onOpenSaveAsModal={onOpenSaveAsModal}
-      persistedDiscoverSession={persistedDiscoverSession}
-    />
-  );
-}
-
-function DiscoverTopNavMenuWithInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithInspector({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
-
-function DiscoverTopNavMenuNoInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithoutInspector({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -148,6 +79,7 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
@@ -156,9 +88,6 @@ export const DiscoverTopNav = ({
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
-  const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
-    (state) => state.isESQLToDataViewTransitionModalVisible
-  );
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -197,7 +126,7 @@ export const DiscoverTopNav = ({
 
   const onOpenQueryInNewTab = useCallback(
     async (tabName: string, esqlQuery: string) => {
-      dispatch(
+      await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
           appState: { query: { esql: esqlQuery } },
@@ -268,35 +197,17 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, getState, currentTabId, updateAppState]
   );
 
+  const onUseApproximationChange = useCallback(
+    (nextValue: boolean) => {
+      dispatch(updateAppState({ appState: { esqlApproximation: nextValue } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   const dataStateContainer = useCurrentTabDataStateContainer();
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
     dataStateContainer.inspectorAdapters.requests
-  );
-
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
-  const onESQLToDataViewTransitionModalClose = useCallback(
-    (shouldDismissModal?: boolean, needsSave?: boolean) => {
-      if (shouldDismissModal) {
-        services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
-      }
-      dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false));
-      if (needsSave == null) {
-        return;
-      }
-      if (needsSave) {
-        setInitialCopyOnSave(false);
-        onSaveCbRef.current = () => {
-          dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
-        };
-        setIsSaveModalVisible(true);
-        return;
-      }
-      dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
-    },
-    [dataView.id, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {
@@ -411,15 +322,26 @@ export const DiscoverTopNav = ({
     [dispatch, setEsqlEditorUiState]
   );
 
+  const textBasedLanguageModeErrors = useMemo(
+    () => (esqlModeErrors ? [esqlModeErrors] : undefined),
+    [esqlModeErrors]
+  );
+
+  const { topNavBadges, topNavMenu, shareAction } = useDiscoverTopNav({
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
     <span>
-      <DiscoverTopNavMenuSection
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
+      <DiscoverTopNavMenu
+        topNavBadges={topNavBadges}
+        topNavMenu={topNavMenu}
+        shareAction={shareAction}
       />
       <SearchBar
         useBackgroundSearchButton={
@@ -456,7 +378,7 @@ export const DiscoverTopNav = ({
           shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
         }
         displayStyle="detached"
-        textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={esqlModeWarning}
         enableResourceBrowser={isEsqlMode}
         prependFilterBar={
@@ -476,6 +398,7 @@ export const DiscoverTopNav = ({
                 onSaveControl,
                 controlsWrapper: (
                   <ControlGroupRenderer
+                    query={query}
                     onApiAvailable={setControlGroupApi}
                     timeRange={timeRangeAbsolute}
                     getCreationOptions={async (initialState) => {
@@ -496,10 +419,18 @@ export const DiscoverTopNav = ({
         }
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
+        esqlApproximation={
+          isEsqlMode
+            ? {
+                isApproximate: esqlApproximation,
+                onChange: onUseApproximationChange,
+                additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
+                  defaultMessage: 'Only applies to queries that use one STATS command.',
+                }),
+              }
+            : undefined
+        }
       />
-      {isESQLToDataViewTransitionModalVisible && (
-        <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
-      )}
       {isSaveModalVisible && (
         <DiscoverSessionSaveModalContainer
           initialCopyOnSave={initialCopyOnSave}
