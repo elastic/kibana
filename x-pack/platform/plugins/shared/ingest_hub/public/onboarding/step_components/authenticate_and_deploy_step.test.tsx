@@ -54,12 +54,14 @@ function makeDeployReturn(
     handleDeploy?: jest.Mock;
     isDeploying?: boolean;
     failedInstances?: string[];
+    isAlreadyDeployed?: boolean;
   } = {}
 ) {
   return {
     handleDeploy: overrides.handleDeploy ?? jest.fn(),
     isDeploying: overrides.isDeploying ?? false,
     failedInstances: overrides.failedInstances ?? [],
+    isAlreadyDeployed: overrides.isAlreadyDeployed ?? false,
     namespace: 'default',
     setNamespace: jest.fn(),
   };
@@ -126,6 +128,14 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       expect(screen.getByTestId('mock-failed')).toBeInTheDocument();
+    });
+  });
+
+  describe('Next button gating — already deployed', () => {
+    it('Next is enabled immediately when isAlreadyDeployed', () => {
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ isAlreadyDeployed: true }));
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
     });
   });
 

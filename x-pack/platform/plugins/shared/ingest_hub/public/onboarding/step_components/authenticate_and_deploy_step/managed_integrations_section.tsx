@@ -59,7 +59,7 @@ export function ManagedIntegrationsSection({
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(!isDone);
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
     showIdentityFederation ? 'identity_federation' : 'access_keys'
   );

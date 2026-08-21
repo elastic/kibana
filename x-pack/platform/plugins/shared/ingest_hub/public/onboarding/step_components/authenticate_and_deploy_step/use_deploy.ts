@@ -35,6 +35,7 @@ export interface UseDeployResult {
   isDeploying: boolean;
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
+  isAlreadyDeployed: boolean;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -66,6 +67,17 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         servicesMap ?? new Map()
       ),
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
+  );
+
+  const isAlreadyDeployed = useMemo(
+    () =>
+      deployGroups.length > 0 &&
+      deployGroups.every((group) =>
+        group.members.every(
+          ({ instance }) => instance.instanceId in deployAndDetectStep.serviceStatuses
+        )
+      ),
+    [deployGroups, deployAndDetectStep.serviceStatuses]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
@@ -208,5 +220,5 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     registerDeployHandler(handleDeploy);
   }, [handleDeploy, registerDeployHandler]);
 
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy };
+  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
 }

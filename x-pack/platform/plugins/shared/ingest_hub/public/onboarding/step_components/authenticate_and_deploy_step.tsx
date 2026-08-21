@@ -35,9 +35,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const [deploymentMethod, setDeploymentMethod] =
     useState<DeploymentMethod>('managed_integrations');
 
-  const { handleDeploy, isDeploying, failedInstances } = useDeploy({ onContinue: () => {} });
+  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
+    onContinue: () => {},
+  });
   const [deployAttempted, setDeployAttempted] = useState(false);
-  const isDone = deployAttempted && !isDeploying && failedInstances.length === 0;
+  const isDone =
+    isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
   const hasFailed = deployAttempted && !isDeploying && failedInstances.length > 0;
 
   const handleDeployClick = useCallback(() => {
