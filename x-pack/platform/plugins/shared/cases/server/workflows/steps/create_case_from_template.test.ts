@@ -338,13 +338,11 @@ describe('createCaseFromTemplateStepDefinition', () => {
       );
       // CRITICAL: the step must NOT materialize these optional fields. cases.create's expansion only
       // applies a template default when the field is `=== undefined`, so seeding severity /
-      // assignees / settings.extractObservables here would silently suppress the template's own
-      // defaults. They must be absent from the forwarded payload.
+      // assignees / category here would silently suppress the template's own defaults.
       expect('severity' in createPayload).toBe(false);
       expect('assignees' in createPayload).toBe(false);
       expect('category' in createPayload).toBe(false);
-      expect(createPayload.settings).toEqual({ syncAlerts: true });
-      expect('extractObservables' in createPayload.settings).toBe(false);
+      expect(createPayload.settings).toEqual({ syncAlerts: true, extractObservables: true });
       // Tags are seeded empty (= "caller sent none") so expansion applies the template's tags.
       expect(createPayload.tags).toEqual([]);
 
@@ -478,10 +476,10 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     // Regression guard for the dropped-template-defaults bug: it is not enough that the step forwards
     // a minimal payload — that payload has to actually let cases.create's real expansion apply the
-    // template's severity / category / assignees / extractObservables defaults. Here we capture what
+    // template's severity / category / assignees defaults. Here we capture what
     // the step forwards and run it through the REAL applyTemplateDefaultsToCreateRequest, asserting
     // the final persisted values carry the template defaults rather than getInitialCaseValue's
-    // hardcoded low / [] / true that previously suppressed them.
+    // hardcoded low / [].
     it('forwards a payload that expansion resolves to the template defaults (end-to-end)', async () => {
       const templateDefinition = {
         name: 'Triage default title',
@@ -541,13 +539,12 @@ describe('createCaseFromTemplateStepDefinition', () => {
       });
 
       // The template defaults survive expansion — the previous getInitialCaseValue seeding would
-      // have pinned severity: 'low', assignees: [], and extractObservables: true instead.
+      // have pinned severity: 'low' and assignees: [] instead.
       expect(expanded.severity).toBe('high');
       expect(expanded.category).toBe('events');
       expect(expanded.assignees).toEqual([{ uid: 'template-assignee' }]);
       expect(expanded.tags).toEqual(['from-template']);
-      // `syncAlerts` is seeded from the template (unlike the other defaults, expansion never
-      // fills it in), so the template's `syncAlerts: false` must survive end-to-end.
+      // Settings are seeded on the payload (template over OWNER_INFO); expansion does not rewrite them.
       expect(expanded.settings).toEqual({ syncAlerts: false, extractObservables: true });
       expect(expanded.template).toEqual({ id: 'triage_template', version: 4 });
     });
@@ -577,10 +574,10 @@ describe('createCaseFromTemplateStepDefinition', () => {
       );
 
       const createPayload = create.mock.calls[0][0];
-      expect(createPayload.settings).toEqual({ syncAlerts: false });
+      expect(createPayload.settings).toEqual({ syncAlerts: false, extractObservables: true });
     });
 
-    it('defaults settings.syncAlerts to true when the template does not specify it', async () => {
+    it('defaults settings from OWNER_INFO when the template does not specify them', async () => {
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
       const getTemplate = jest.fn().mockResolvedValue(
         buildTemplateSO({
@@ -604,7 +601,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
       );
 
       const createPayload = create.mock.calls[0][0];
-      expect(createPayload.settings).toEqual({ syncAlerts: true });
+      expect(createPayload.settings).toEqual({ syncAlerts: true, extractObservables: true });
     });
 
     it('fails with a clear message when the template has no default title and no title overwrite is provided', async () => {

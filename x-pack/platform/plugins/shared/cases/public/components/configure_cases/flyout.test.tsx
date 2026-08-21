@@ -488,7 +488,7 @@ describe('CommonFlyout ', () => {
             customFields: [],
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
           description: 'Template description',
@@ -552,7 +552,7 @@ describe('CommonFlyout ', () => {
             customFields: [],
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
         });
@@ -607,7 +607,7 @@ describe('CommonFlyout ', () => {
             },
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
             customFields: [
               {
@@ -709,7 +709,7 @@ describe('CommonFlyout ', () => {
             },
             settings: {
               syncAlerts: true,
-              extractObservables: false,
+              extractObservables: true,
             },
           },
         });

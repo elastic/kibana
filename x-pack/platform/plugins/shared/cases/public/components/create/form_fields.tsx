@@ -35,6 +35,8 @@ import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
+  /** Selected solution. Prefer this over `configuration.owner`, which is '' when lookup falls back. */
+  selectedOwner?: string;
   connectors: ActionConnector[];
   isLoading: boolean;
   withSteps: boolean;
@@ -67,19 +69,19 @@ const transformTemplateCaseFieldsToCaseFormFields = (
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
+  ({ configuration, selectedOwner, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
 
+    const caseOwner = selectedOwner || configuration.owner;
     const {
       isSyncAlertsEnabled,
       isExtractObservablesEnabled,
       observablesAuthorized,
       connectorsAuthorized,
-    } = useCasesFeatures();
-    const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
+    } = useCasesFeatures(caseOwner);
     const config = KibanaServices.getConfig();
     const isTemplatesV2Enabled = config?.templates?.enabled ?? false;
-    const configurationOwner = configuration.owner;
+    const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
 
     /**
      * Changes the selected connector
@@ -96,27 +98,24 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         key: DEFAULT_EMPTY_TEMPLATE_KEY,
         name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
         caseFields: getInitialCaseValue({
-          owner: configurationOwner,
+          owner: caseOwner,
           connector: configuration.connector,
         }),
       }),
-      [configurationOwner, configuration.connector]
+      [caseOwner, configuration.connector]
     );
 
     const onTemplateChange = useCallback(
       ({ caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
-        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
-          configurationOwner,
-          caseFields
-        );
+        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(caseOwner, caseFields);
 
         reset({
           resetValues: true,
-          defaultValue: getInitialCaseValue({ owner: configurationOwner }),
+          defaultValue: getInitialCaseValue({ owner: caseOwner }),
         });
         updateFieldValues(caseFormFields);
       },
-      [configurationOwner, reset, updateFieldValues]
+      [caseOwner, reset, updateFieldValues]
     );
 
     const firstStep = useMemo(

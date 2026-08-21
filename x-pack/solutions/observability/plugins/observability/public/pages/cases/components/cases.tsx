@@ -34,16 +34,7 @@ export function Cases({ permissions }: CasesProps) {
 
   return (
     <>
-      <CasesList
-        basePath={CASES_PATH}
-        features={{
-          alerts: { sync: false, isExperimental: false },
-          observables: { enabled: false },
-          events: { enabled: false },
-        }}
-        owner={[observabilityFeatureId]}
-        permissions={permissions}
-      />
+      <CasesList basePath={CASES_PATH} owner={[observabilityFeatureId]} permissions={permissions} />
     </>
   );
 }

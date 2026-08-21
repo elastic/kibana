@@ -101,7 +101,7 @@ describe('CaseActionBar', () => {
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     renderWithTestingProviders(<CaseActionBar {...defaultProps} />, {
-      wrapperProps: { features: { alerts: { sync: false, enabled: true }, metrics: [] } },
+      wrapperProps: { owner: ['observability'], features: { metrics: [] } },
     });
 
     expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
