@@ -65,6 +65,8 @@ const PresentationPanelChrome = <
   }, [componentApi]);
 
   const [
+    dataLoading,
+    blockingError,
     panelTitle,
     hidePanelTitle,
     panelDescription,
@@ -72,11 +74,11 @@ const PresentationPanelChrome = <
     defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
-    blockingError,
-    dataLoading,
     rendered,
     renderCount,
   ] = useBatchedPublishingSubjects(
+    componentApi.dataLoading$ ?? new BehaviorSubject(false),
+    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
     componentApi.title$ ?? new BehaviorSubject(undefined),
     componentApi.hideTitle$ ?? new BehaviorSubject(false),
     componentApi.description$ ?? new BehaviorSubject(undefined),
@@ -84,8 +86,6 @@ const PresentationPanelChrome = <
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
     viewModeSubject ?? new BehaviorSubject(undefined),
     (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
-    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
-    componentApi.dataLoading$ ?? new BehaviorSubject(false),
     componentApi.rendered$ ?? new BehaviorSubject(true),
     componentApi.renderCount$ ?? new BehaviorSubject(undefined)
   );
