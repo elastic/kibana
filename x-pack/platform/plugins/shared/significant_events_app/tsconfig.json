@@ -23,6 +23,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/cps",
+    "@kbn/cps-utils",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/es-types",
