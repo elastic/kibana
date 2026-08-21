@@ -14,6 +14,8 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -38,6 +40,7 @@ interface Props {
   environment: string;
   start: string;
   end: string;
+  ebt?: EbtClickAttrs;
 }
 
 const badgeCss = css`
@@ -58,6 +61,7 @@ export function ServiceIconBadge({
   environment,
   start,
   end,
+  ebt,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
@@ -100,6 +104,8 @@ export function ServiceIconBadge({
       break;
   }
 
+  const ebtProps = ebt ? getEbtProps(ebt) : {};
+
   return (
     <EuiPopover
       aria-labelledby={popoverTitleId}
@@ -115,6 +121,7 @@ export function ServiceIconBadge({
             data-test-subj={`popover_${title}`}
             onClick={() => setIsOpen((open) => !open)}
             onClickAriaLabel={title}
+            {...ebtProps}
           >
             <EuiIcon type={iconType} size="m" aria-hidden />
           </EuiBadge>

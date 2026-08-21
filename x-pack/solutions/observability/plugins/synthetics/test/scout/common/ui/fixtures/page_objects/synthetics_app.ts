@@ -456,7 +456,15 @@ export class SyntheticsAppPage {
     await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
       timeout: 30_000,
     });
-    await this.page.testSubj.click('superDatePickerApplyTimeButton');
+    await this.page.evaluate(() => {
+      const refreshButton = document.querySelector<HTMLButtonElement>(
+        '[data-test-subj="superDatePickerApplyTimeButton"]'
+      );
+      if (!refreshButton) {
+        throw new Error('The overview refresh button is not mounted');
+      }
+      refreshButton.click();
+    });
     await this.waitForLoadingToFinish();
   }
 

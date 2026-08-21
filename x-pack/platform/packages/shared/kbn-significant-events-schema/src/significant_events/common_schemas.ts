@@ -126,6 +126,15 @@ export const signalEvidenceSchema = z.object({
     ),
 });
 
+export const SIGNAL_VERDICTS = [
+  'confirms',
+  'refutes',
+  'off_topic',
+  'inconclusive',
+  'not_checked',
+] as const;
+export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
+
 const signalBaseSchema = z.object({
   stream_name: z
     .string()
@@ -136,21 +145,18 @@ const signalBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+      Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
-        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
-        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
+      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
 
-        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
-        ${NO_RAW_SENSITIVE_VALUES_RULE}
-      `
+      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      ${NO_RAW_SENSITIVE_VALUES_RULE}
+    `
     ),
-  confirmed: z
-    .boolean()
-    .optional()
+  verdict: z
+    .enum(SIGNAL_VERDICTS)
     .describe(
-      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -176,10 +182,53 @@ const detectionSignalMetadataSchema = detectionSchema
     'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
   );
 
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSignalMetadataSchema,
-});
+const detectionSignalSchema = signalBaseSchema
+  .extend({
+    type: z.literal('detection'),
+    metadata: detectionSignalMetadataSchema,
+  })
+  .superRefine((signal, context) => {
+    const result = signal.evidence?.result;
+    if (signal.verdict === 'confirms' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A confirming verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'off_topic' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'An off-topic verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'refutes' && result !== 'found' && result !== 'empty') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A refuting verdict requires found or empty query evidence.',
+      });
+    }
+    if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'An inconclusive verdict requires empty or error query evidence.',
+      });
+    }
+    if (
+      signal.verdict === 'not_checked' &&
+      signal.evidence !== undefined &&
+      signal.evidence !== null
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A not-checked verdict cannot include query evidence.',
+      });
+    }
+  });
 
 /** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
@@ -246,7 +295,7 @@ export const significantEventBaseSchema = z.object({
       Stable incident label. Format: "<Affected scope> — <observed condition>".
       Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
-      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, and current-cycle-only details.
+      Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
 
       Examples: "API gateway — upstream connection refused"; "Indexer — database pool exhausted"; "Platform tier — connection refused across worker, scheduler, and API services" (multi-service cascade grouped in one event).
     `
