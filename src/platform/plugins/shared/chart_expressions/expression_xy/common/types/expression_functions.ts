@@ -313,7 +313,7 @@ export interface LayeredXYArgs {
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   singleTable?: boolean;
   pointVisibility?: PointVisibility;
-  showExemplars?: boolean;
+  exemplars?: string;
 }
 
 export interface XYProps {
@@ -341,7 +341,7 @@ export interface XYProps {
   singleTable?: boolean;
   annotations?: ExpressionAnnotationResult;
   pointVisibility?: PointVisibility;
-  showExemplars?: boolean;
+  exemplars?: string;
 }
 
 export interface AnnotationLayerArgs {

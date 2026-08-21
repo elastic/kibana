@@ -153,5 +153,16 @@ export interface XYVisualizationState {
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   pointVisibility?: PointVisibility;
-  showExemplars?: boolean;
+  exemplars?: XYExemplarPoint[];
+}
+
+/**
+ * A clickable exemplar marker point overlaid on the XY chart. Consumers fetch and
+ * normalize exemplars (e.g. from `metrics.exemplars-*`) before passing them in.
+ */
+export interface XYExemplarPoint {
+  x: number;
+  y: number;
+  traceId?: string;
+  spanId?: string;
 }

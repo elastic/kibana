@@ -59,10 +59,10 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       help: strings.getPointVisibilityHelp(),
       options: Object.values(PointVisibilityOptions),
     },
-    showExemplars: {
-      types: ['boolean'],
-      help: strings.getShowExemplarsHelp(),
-      default: false,
+    exemplars: {
+      types: ['string'],
+      help: strings.getExemplarsHelp(),
+      default: '[]',
     },
   },
   async fn(data, args, handlers) {

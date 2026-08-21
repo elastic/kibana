@@ -142,9 +142,9 @@ export const strings = {
     i18n.translate('expressionXY.layeredXyVis.pointVisibility.help', {
       defaultMessage: 'Specifies the line/area chart point visibility',
     }),
-  getShowExemplarsHelp: () =>
-    i18n.translate('expressionXY.layeredXyVis.showExemplars.help', {
-      defaultMessage: 'Specifies whether clickable exemplar markers are shown on the chart',
+  getExemplarsHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.exemplars.help', {
+      defaultMessage: 'JSON array of exemplar points to render as clickable markers',
     }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {

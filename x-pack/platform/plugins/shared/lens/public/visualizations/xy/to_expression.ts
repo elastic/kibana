@@ -347,7 +347,7 @@ export const buildXYExpression = (
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
-    showExemplars: state.showExemplars ?? false,
+    exemplars: JSON.stringify(state.exemplars ?? []),
     areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,

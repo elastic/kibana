@@ -251,6 +251,7 @@ export type {
   ValidXYDataLayerConfig,
   ValidLayer,
   XYVisualizationState,
+  XYExemplarPoint,
 } from './visualizations/xy/types';
 export type {
   XYPersistedAnnotationLayerConfig,

@@ -96,7 +96,7 @@ export const ExemplarFlyout: React.FC<ExemplarFlyoutProps> = ({ exemplar, onClos
           label={i18n.translate('expressionXY.exemplarFlyout.traceIdLabel', {
             defaultMessage: 'Trace ID',
           })}
-          value={exemplar.traceId}
+          value={exemplar.traceId ?? ''}
         />
         {exemplar.spanId ? (
           <>

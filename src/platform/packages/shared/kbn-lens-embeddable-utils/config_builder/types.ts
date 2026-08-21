@@ -11,6 +11,7 @@ import type {
   FormulaPublicApi,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  XYExemplarPoint,
 } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -309,7 +310,7 @@ export interface LensXYConfigBase {
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
   valueLabels?: 'hide' | 'show';
-  showExemplars?: boolean;
+  exemplars?: XYExemplarPoint[];
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;

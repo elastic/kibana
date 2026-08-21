@@ -420,6 +420,7 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          metricName={metricItem.metricName}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

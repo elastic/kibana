@@ -39,8 +39,10 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
+import type { XYExemplarPoint } from '@kbn/lens-common';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
+import { fetchExemplars } from './fetch_exemplars';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -70,6 +72,7 @@ export const useLensProps = ({
   chartLayers,
   yBounds,
   legend,
+  metricName,
   error,
   userMessages,
   profileId,
@@ -83,6 +86,8 @@ export const useLensProps = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  /** Metric name used to fetch correlated exemplars from `metrics.exemplars-*`. */
+  metricName?: string;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -110,6 +115,7 @@ export const useLensProps = ({
     chartLayers,
     yBounds,
     legend,
+    metricName,
     effectiveError,
     userMessages,
     profileId,
@@ -121,6 +127,23 @@ export const useLensProps = ({
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !effectiveError) return null;
 
+    // Fetch correlated exemplars for this metric; failures (e.g. no exemplar index)
+    // just yield no markers and never block the chart.
+    const exemplars =
+      metricName && fetchParams.dataView
+        ? await fetchExemplars({
+            metricName,
+            search: services.data.search.search,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters,
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+            profileId,
+            signal: fetchParams.abortController?.signal,
+          }).catch(() => [] as XYExemplarPoint[])
+        : [];
+
     const lensParams = buildLensParams({
       query,
       title,
@@ -128,6 +151,7 @@ export const useLensProps = ({
       chartLayers,
       yBounds,
       legend,
+      exemplars,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -271,6 +295,7 @@ const buildLensParams = ({
   chartLayers,
   yBounds,
   legend,
+  exemplars,
 }: {
   query: string;
   title: string;
@@ -278,6 +303,7 @@ const buildLensParams = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  exemplars?: XYExemplarPoint[];
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -295,7 +321,7 @@ const buildLensParams = ({
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,
-    showExemplars: true,
+    exemplars,
   };
 };
 

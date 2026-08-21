@@ -102,7 +102,7 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getMaximumFractionDigits,
-  generateMockExemplars,
+  parseExemplars,
   EXEMPLARS_SERIES_ID,
   type ExemplarPoint,
 } from '../helpers';
@@ -250,7 +250,7 @@ export function XYChart({
     singleTable,
     annotations,
     pointVisibility,
-    showExemplars,
+    exemplars: exemplarsJson,
   } = args;
 
   const chartRef = useRef<Chart>(null);
@@ -373,16 +373,9 @@ export function XYChart({
     [renderComplete]
   );
 
-  // POC: exemplars are mocked from the chart's own data and only shown when the
-  // Metrics Experience turns the prop on. Keyed on `layers` (not the per-render
-  // `dataLayers` array) so the random ids stay stable across re-renders.
-  const exemplars = useMemo<ExemplarPoint[]>(
-    () =>
-      showExemplars && isTimeVis
-        ? generateMockExemplars(getFilteredLayers(layers).filter(isDataLayer))
-        : [],
-    [showExemplars, isTimeVis, layers]
-  );
+  // Exemplar markers are fetched by the consumer (e.g. Metrics Experience) and
+  // passed in as a JSON string through the expression.
+  const exemplars = useMemo<ExemplarPoint[]>(() => parseExemplars(exemplarsJson), [exemplarsJson]);
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
@@ -669,8 +662,12 @@ export function XYChart({
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
     // Exemplar markers open a flyout instead of triggering the normal filter path.
+    // Only exemplars carrying a trace id are clickable; the rest are hover-only.
     if (xySeries.specId === EXEMPLARS_SERIES_ID) {
-      setSelectedExemplar(xyGeometry.datum as ExemplarPoint);
+      const exemplar = xyGeometry.datum as ExemplarPoint;
+      if (exemplar.traceId) {
+        setSelectedExemplar(exemplar);
+      }
       return;
     }
 
