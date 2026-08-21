@@ -146,6 +146,8 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
+  const currentDataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
+
   const renderDocumentView = useCallback(
     (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
@@ -166,6 +168,7 @@ export function ContextAppContent({
     ),
     [
       addFilter,
+      currentDataSource,
       dataView,
       docViewerRef,
       initialDocViewerTabId,
@@ -198,7 +201,6 @@ export function ContextAppContent({
   }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
-  const currentDataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
   const timeRange = useObservable(
     services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),

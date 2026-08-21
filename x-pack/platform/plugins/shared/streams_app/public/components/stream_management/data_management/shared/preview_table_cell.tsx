@@ -13,6 +13,7 @@ import type {
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
 import { LazySummaryColumn } from '@kbn/discover-contextual-components';
+import { IndexPatternSource } from '@kbn/data-source';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import React, { useContext, memo, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -104,6 +105,7 @@ const PreviewTableCellContent = memo(function PreviewTableCellContent({
     return (
       <LazySummaryColumn
         dataView={dataView}
+        dataSource={new IndexPatternSource(dataView)}
         row={dataTableRecord}
         rowIndex={rowIndex}
         columnId={columnId}

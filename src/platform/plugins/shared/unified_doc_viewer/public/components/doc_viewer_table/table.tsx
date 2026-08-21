@@ -251,6 +251,7 @@ const InternalDocViewerTable = ({
     shouldShowOnlySelectedFields,
     mapping,
     dataView,
+    dataSource,
     columns,
     isEsqlMode,
     uiSettings,
