@@ -25,20 +25,7 @@ import { API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX } from '../fixtures/constan
 const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 
 /**
- * End-to-end assertions for the events-persistence contract (see Pierre's
- * PR review). Two things need to hold on real infrastructure, not just unit
- * tests:
- *   1. New conversations land on disk as events-native
- *      (`schema_version >= 1`, `events` present).
- *   2. GET serves the stored events projection verbatim for events-native
- *      docs — a `fromEs` bug that overwrites stored events with a fresh
- *      derivation would silently pass every in-memory test hooked after
- *      `fromEs`, but is caught here by comparing the API response to the
- *      raw `_source`.
- *
- * We seed the non-empty projection directly via `esClient.index` (rather
- * than driving a real converse round via the LLM proxy) so the spec has
- * no connector setup and stays a focused persistence test.
+ * End-to-end assertions for the events-persistence contract.
  */
 apiTest.describe(
   'Agent Builder — conversations events persistence',
@@ -65,10 +52,6 @@ apiTest.describe(
         expect(createRes).toHaveStatusCode(200);
         const created = createRes.body as CreateConversationResponse;
 
-        // Raw _source assertion — closes the in-memory "fromEs overwrites
-        // stored events with a fresh derivation" hole. CI's verifyRoundTrip
-        // hook runs after `fromEs`, so it cannot catch that bug; a raw doc
-        // read can.
         const rawDoc = await esClient.get<{
           schema_version?: number;
           events?: TimelineEvent[];
@@ -77,15 +60,9 @@ apiTest.describe(
           id: created.id,
         });
         expect(rawDoc._source?.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-        // No rounds ⇒ no round-derived events, but the field is present
-        // (array, not missing) so subsequent writes stay events-native.
         expect(Array.isArray(rawDoc._source?.events)).toBe(true);
         expect(rawDoc._source?.events).toHaveLength(0);
 
-        // GET surface — `fromEs` lifts `schema_version` onto the response
-        // and serves the stored events. On an empty stored projection it
-        // falls back to deriving from rounds (also empty), so the API
-        // response's `events` matches `_source.events` (both empty).
         const getRes = await asAdmin.get(
           `${CONVERSATIONS_PATH}/${encodeURIComponent(created.id)}`,
           { responseType: 'json' }
@@ -100,9 +77,6 @@ apiTest.describe(
     apiTest(
       'GET serves the stored events projection verbatim for events-native docs with a round',
       async ({ asAdmin, esClient }) => {
-        // Create via API first to get a valid identity (agent_id, user,
-        // access_control, space, …) — reusing these ensures the read path's
-        // converse-access gate still passes after we overwrite the doc.
         const createRes = await asAdmin.post(CONVERSATIONS_PATH, {
           body: { title: 'Events-native seed' },
           responseType: 'json',
@@ -176,10 +150,6 @@ apiTest.describe(
           },
         ];
 
-        // Spread the existing _source to preserve every field the read
-        // path needs (space, access_control, user_id/user_name, agent_id,
-        // read/pinned/read_only, timestamps, ...), then overlay one round
-        // plus its matching round-derived events projection.
         await esClient.index({
           index: CHAT_CONVERSATIONS_INDEX,
           id: created.id,
@@ -192,7 +162,6 @@ apiTest.describe(
           refresh: 'wait_for',
         });
 
-        // Snapshot what actually landed on disk after the overlay.
         const seededRawDoc = await esClient.get<{
           schema_version?: number;
           events?: TimelineEvent[];
@@ -207,9 +176,6 @@ apiTest.describe(
           `${roundId}::execution_terminated`,
         ]);
 
-        // The load-bearing assertion: the API-surfaced `events` array is
-        // the stored projection, not a fresh derivation from rounds. This
-        // is the events-native read gate proven end to end.
         const getRes = await asAdmin.get(
           `${CONVERSATIONS_PATH}/${encodeURIComponent(created.id)}`,
           { responseType: 'json' }
@@ -218,9 +184,6 @@ apiTest.describe(
         const fetched = getRes.body as GetConversationResponse;
         expect(fetched.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
         expect(fetched.events).toStrictEqual(seededRawDoc._source?.events);
-        // Rounds are still reconstructed from `conversation_rounds` for API
-        // compatibility — rounds remain the source of truth for the shape
-        // consumers rely on today.
         expect(fetched.rounds.map((round_) => round_.id)).toStrictEqual([roundId]);
       }
     );
