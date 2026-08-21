@@ -181,6 +181,10 @@ export class AgentBuilderPlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
+      },
     });
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
@@ -208,6 +212,11 @@ export class AgentBuilderPlugin
       },
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
       },
       topSnippets: this.config.topSnippets,
     };
@@ -256,8 +265,16 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -305,6 +322,7 @@ export class AgentBuilderPlugin
           return createConversationPublicClient({ client, agentRegistry });
         },
       },
+      conversationTemplates,
     };
   }
 
