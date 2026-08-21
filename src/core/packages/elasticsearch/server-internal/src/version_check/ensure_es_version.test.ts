@@ -136,9 +136,12 @@ describe('pollEsNodesVersion', () => {
     internalClient = elasticsearchClientMock.createInternalClient();
   });
 
-  const nodeInfosSuccessOnce = (infos: NodesInfo, timestamp = Date.now()) => {
+  const nodeInfosResponseOnce = (infos: NodesInfo) => {
     // @ts-expect-error not full interface
     internalClient.nodes.info.mockResponseOnce(infos);
+  };
+  const nodeInfosSuccessOnce = (infos: NodesInfo, timestamp = Date.now()) => {
+    nodeInfosResponseOnce(infos);
     internalClient.nodes.stats.mockResponseOnce({
       nodes: { 'node-0': { os: { timestamp } } },
     });
@@ -339,8 +342,31 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
+  it('returns compatibility results when the node stats request fails', (done) => {
+    const nodes = createNodes('5.1.0');
+    nodeInfosResponseOnce(nodes);
+    internalClient.nodes.stats.mockRejectedValueOnce(new Error('mock stats request error'));
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual(mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false));
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
   it('logs an error once when Elasticsearch and Kibana clocks differ by more than 60 seconds', (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
     jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
     const elasticsearchTime = kibanaTime - 61_000;
@@ -362,6 +388,14 @@ describe('pollEsNodesVersion', () => {
           expect(mockLogger.error).toHaveBeenCalledTimes(1);
           expect(mockLogger.error).toHaveBeenCalledWith(
             'Kibana and Elasticsearch clocks are out of sync by 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T11:58:59.000Z.'
+          );
+          expect(internalClient.nodes.stats).toHaveBeenCalledWith(
+            {
+              node_id: '_all',
+              metric: 'os',
+              filter_path: ['nodes.*.os.timestamp'],
+            },
+            { requestTimeout: expect.any(Number) }
           );
           done();
         },
