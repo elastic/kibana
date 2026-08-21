@@ -372,9 +372,11 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
+src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
+src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
 src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
@@ -2301,7 +2303,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/README.md @elastic/appex-qa
-/src/dev/code_coverage @elastic/appex-qa
 /src/platform/test/functional/services/common @elastic/appex-qa
 /src/platform/test/functional/services/lib @elastic/appex-qa
 /src/platform/packages/shared/kbn-test/src/functional_test_runner @elastic/appex-qa
@@ -3717,8 +3718,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/app-header @elastic/appex-sharedux
 /src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 /src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
+/src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
@@ -3830,6 +3833,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.claude/ @elastic/kibana-tech-leads
 /.agents/skills/ @elastic/kibana-tech-leads
 /.github/agents/ @elastic/kibana-tech-leads @elastic/kibana-operations
+/.libra/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
@@ -3881,6 +3885,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/agents/scout-reviewer.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+/.libra/specialists/scout.md @elastic/appex-qa
 /.github/workflows/label-scout-prs.yml @elastic/appex-qa
 /.github/labeler-scout.yml @elastic/appex-qa
 

@@ -158,12 +158,15 @@ describe('mergeSignalsLatestPerRule', () => {
 });
 
 describe('mergeEpisodeContext', () => {
-  const makeCausal = (featureId: string): CausalFeature => ({
+  const makeCausal = (featureId: string, subtype = 'service'): CausalFeature => ({
     feature_id: featureId,
+    type: 'entity',
+    subtype,
     name: featureId,
   });
-  const makeBlast = (featureId: string): BlastRadiusEntry => ({
+  const makeBlast = (featureId: string, subtype = 'service'): BlastRadiusEntry => ({
     type: 'entity',
+    subtype,
     feature_id: featureId,
     name: featureId,
     stream_name: 'logs.test',
@@ -210,6 +213,30 @@ describe('mergeEpisodeContext', () => {
     );
     expect(blastRadius).toHaveLength(1);
     expect(blastRadius[0].feature_id).toBe('feat-1');
+  });
+
+  // Dedup is keyed on feature_id alone, so when two episodes disagree about a feature's
+  // classification the newest document silently wins. Deliberate: the copied type/subtype is a
+  // point-in-time snapshot of the knowledge indicator, so the latest write is the freshest read.
+  it('takes the classification from the newest document when episodes disagree', () => {
+    const { causalFeatures, blastRadius } = mergeEpisodeContext(
+      [
+        {
+          '@timestamp': TS_EARLIER,
+          stream_names: ['logs.app'],
+          blast_radius: [makeBlast('feat-blast', 'database')],
+          causal_features: [makeCausal('feat-causal', 'database')],
+        },
+      ],
+      {
+        stream_names: ['logs.app'],
+        causal_features: [makeCausal('feat-causal', 'service')],
+        blast_radius: [makeBlast('feat-blast', 'service')],
+      },
+      TS_SUBMITTED
+    );
+    expect(causalFeatures).toEqual([makeCausal('feat-causal', 'service')]);
+    expect(blastRadius).toEqual([makeBlast('feat-blast', 'service')]);
   });
 });
 
