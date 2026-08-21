@@ -136,9 +136,9 @@ describe('pollEsNodesVersion', () => {
     internalClient = elasticsearchClientMock.createInternalClient();
   });
 
-  const nodeInfosSuccessOnce = (infos: NodesInfo) => {
+  const nodeInfosSuccessOnce = (infos: NodesInfo, date?: string) => {
     // @ts-expect-error not full interface
-    internalClient.nodes.info.mockResponseOnce(infos);
+    internalClient.nodes.info.mockResponseOnce(infos, date ? { headers: { date } } : undefined);
   };
   const nodeInfosErrorOnce = (error: any) => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
@@ -306,7 +306,7 @@ describe('pollEsNodesVersion', () => {
   });
 
   it('returns compatibility results', (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
 
     nodeInfosSuccessOnce(nodes);
@@ -326,6 +326,64 @@ describe('pollEsNodesVersion', () => {
         },
         complete: () => {
           expect(internalClient.nodes.info).toHaveBeenCalledTimes(1);
+          expect(internalClient.nodes.info).toHaveBeenCalledWith(expect.any(Object), {
+            requestTimeout: expect.any(Number),
+            meta: true,
+          });
+          done();
+        },
+        error: done,
+      });
+  });
+
+  it('logs an error once when Elasticsearch and Kibana clocks differ by more than 60 seconds', (done) => {
+    expect.assertions(2);
+    const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
+    jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
+    const elasticsearchDate = new Date(kibanaTime - 60_001).toUTCString();
+
+    nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchDate);
+    nodeInfosSuccessOnce(createNodes('5.2.0'), elasticsearchDate);
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(2))
+      .subscribe({
+        complete: () => {
+          expect(mockLogger.error).toHaveBeenCalledTimes(1);
+          expect(mockLogger.error).toHaveBeenCalledWith(
+            'Kibana and Elasticsearch clocks are out of sync by 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T11:58:59.000Z.'
+          );
+          done();
+        },
+        error: done,
+      });
+  });
+
+  it('does not log an error when clock skew is 60 seconds', (done) => {
+    expect.assertions(1);
+    const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
+    jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
+    nodeInfosSuccessOnce(createNodes('5.1.0'), new Date(kibanaTime - 60_000).toUTCString());
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(1))
+      .subscribe({
+        complete: () => {
+          expect(mockLogger.error).not.toHaveBeenCalled();
           done();
         },
         error: done,

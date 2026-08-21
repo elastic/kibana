@@ -38,6 +38,8 @@ import {
 } from './es_kibana_version_compatability';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 
+const MAX_CLOCK_SKEW_MS = 60_000;
+
 /** @public */
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
@@ -194,6 +196,7 @@ export const pollEsNodesVersion = ({
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
   const isCheckFailing$ = new BehaviorSubject(false);
+  let clockSkewLogged = false;
 
   let currentInterval = 0;
   const checkInterval$ = combineLatest([isStartup$, isCheckFailing$]).pipe(
@@ -224,7 +227,7 @@ export const pollEsNodesVersion = ({
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
-          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
+          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT, meta: true }
         );
       }).pipe(
         retry({
@@ -241,8 +244,30 @@ export const pollEsNodesVersion = ({
         })
       );
     }),
-    map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) => {
-      return mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch);
+    tap((nodesInfoResponse) => {
+      if (clockSkewLogged || !('headers' in nodesInfoResponse)) {
+        return;
+      }
+
+      const elasticsearchTime = Date.parse(nodesInfoResponse.headers.date as string);
+      const kibanaTime = Date.now();
+      const clockSkew = Math.abs(kibanaTime - elasticsearchTime);
+
+      if (clockSkew > MAX_CLOCK_SKEW_MS) {
+        log.error(
+          `Kibana and Elasticsearch clocks are out of sync by ${clockSkew}ms. Kibana time: ${new Date(
+            kibanaTime
+          ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`
+        );
+        clockSkewLogged = true;
+      }
+    }),
+    map((nodesInfoResponse) => {
+      const nodesInfo =
+        'body' in nodesInfoResponse
+          ? nodesInfoResponse.body
+          : (nodesInfoResponse as NodesInfo & { nodesInfoRequestError?: Error });
+      return mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch);
     }),
     // Only emit if there are new nodes or versions or if we return an error and that error changes
     distinctUntilChanged(compareNodes),
