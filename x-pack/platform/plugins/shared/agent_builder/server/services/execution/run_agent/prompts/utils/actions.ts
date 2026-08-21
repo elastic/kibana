@@ -131,14 +131,10 @@ const formatActions = async ({
             createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
           )
         );
-      }
-
-      // Inject image as a HumanMessage immediately after the tool result messages.
-      // attachment_read returns a small marker; we fetch the bytes here and push them as
-      // image_url content so the LLM can see the image visually. Only done for non-compacted
-      // cycles — compaction exists to reclaim context, and images are the most expensive item.
-      if (!compactThis && imageResolver) {
-        await injectImageMessages(action.tool_results, imageResolver, formatted);
+        // Tool results carry only a marker — push the actual image bytes as a follow-up user message.
+        if (imageResolver) {
+          await injectImageMessages(action.tool_results, imageResolver, formatted);
+        }
       }
 
       // Add system reminder about being close to the limit when only 5 cycles left.
@@ -163,16 +159,6 @@ const formatActions = async ({
   return formatted;
 };
 
-/**
- * For each image result in the action's tool_results, resolve the bytes and push
- * a single HumanMessage carrying all images for that action as image_url parts.
- *
- * The text part is wrapped in an <attachment_image> tag so the model's trust rules
- * apply: this is untrusted content (data, not instructions).
- *
- * TODO: no dedupe across results in the same action — re-reading the same attachment
- * twice sends the image twice (~1k tokens each). Rare in practice, cheap to fix later.
- */
 const injectImageMessages = async (
   toolResults: ToolCallResult[],
   imageResolver: PromptImageResolver,
