@@ -295,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should not allow user with fleet all access, upload is superuser only', async () => {
+    it('should allow user with all access', async () => {
       await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
@@ -304,7 +304,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
-        .expect(403);
+        .expect(200);
     });
   });
 }

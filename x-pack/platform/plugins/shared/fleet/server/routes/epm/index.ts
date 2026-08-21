@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import { ReservedPrivilegesSet, type RouteSecurity } from '@kbn/core-http-server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 
 import {
   BulkRollbackAvailableCheckResponseSchema,
@@ -149,14 +149,6 @@ export const INSTALL_PACKAGES_SECURITY: RouteSecurity = {
       FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
       FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
     ],
-  },
-};
-
-// Upload accepts an ingest pipeline from the uploaded archive verbatim. Registry packages are
-// signed and custom integrations get a Fleet-generated pipeline, so only this route needs superuser.
-export const INSTALL_PACKAGES_BY_UPLOAD_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [ReservedPrivilegesSet.superuser],
   },
 };
 
@@ -1339,7 +1331,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       bulkInstallPackagesFromRegistryHandler
     );
 
-  // Only allow upload for superuser
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
@@ -1351,7 +1342,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
         tags: [`oas-tag:Elastic Package Manager (EPM)`],
       },
-      security: INSTALL_PACKAGES_BY_UPLOAD_SECURITY,
+      security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
       description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.`,
     })

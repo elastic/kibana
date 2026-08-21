@@ -8,19 +8,34 @@
 import fs from 'fs/promises';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { InstallablePackage, Installation } from '../../../../common';
+import type {
+  ArchivePackage,
+  InstallablePackage,
+  Installation,
+  RegistryPackage,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';
-import { ConcurrentInstallOperationError, FleetError } from '../../../errors';
+import {
+  ConcurrentInstallOperationError,
+  FleetError,
+  PackageInvalidArchiveError,
+  PackageNotFoundError,
+} from '../../../errors';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import * as Registry from '../registry';
+import {
+  generatePackageInfoFromArchiveBuffer,
+  setPackageInfo,
+  deleteVerificationResult,
+} from '../archive';
 
 import {
   createInstallation,
@@ -32,7 +47,7 @@ import {
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstallationObject } from './get';
+import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 jest.mock('../../data_streams');
@@ -83,6 +98,11 @@ jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
 jest.mock('fs/promises');
 jest.mock('./bundled_packages');
+jest.mock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  getLastUploadInstallCache: jest.fn(),
+  setLastUploadInstallCache: jest.fn(),
+}));
 jest.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
     _stateMachineInstallPackage: jest.fn(() => Promise.resolve()),
@@ -119,6 +139,67 @@ jest.mock('../../utils/agentless', () => {
 
 const mockGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedAuditLoggingService = jest.mocked(auditLoggingService);
+
+const emptyPackageSavedObjects: SavedObjectsFindResponse<Installation> = {
+  page: 1,
+  per_page: 20,
+  total: 0,
+  saved_objects: [],
+};
+
+function archivePackageFixture(
+  overrides: Pick<ArchivePackage, 'name' | 'version'>
+): ArchivePackage {
+  return {
+    name: overrides.name,
+    version: overrides.version,
+    title: overrides.name,
+    description: 'test',
+    owner: { github: 'elastic' },
+  };
+}
+
+function parsedArchiveFixture(overrides: Pick<ArchivePackage, 'name' | 'version'>): {
+  paths: string[];
+  packageInfo: ArchivePackage;
+} {
+  return {
+    paths: [],
+    packageInfo: archivePackageFixture(overrides),
+  };
+}
+
+function registryPackageFixture(
+  overrides: Pick<RegistryPackage, 'name' | 'version'>
+): RegistryPackage {
+  return {
+    name: overrides.name,
+    version: overrides.version,
+    title: overrides.name,
+    description: 'test',
+    owner: { github: 'elastic' },
+  };
+}
+
+function uploadedInstallationSO(version: string): SavedObject<Installation> {
+  return {
+    id: 'apache',
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: {
+      name: 'apache',
+      version,
+      install_status: 'installed',
+      install_version: version,
+      install_started_at: '2020-01-01T00:00:00.000Z',
+      install_source: 'upload',
+      installed_kibana: [],
+      installed_es: [],
+      es_index_patterns: {},
+      verification_status: 'unknown',
+    },
+  };
+}
 
 describe('createInstallation', () => {
   const soClient = savedObjectsClientMock.create();
@@ -454,6 +535,32 @@ describe('install', () => {
       );
     });
 
+    it('skips upload validation for bundled installs', async () => {
+      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-1.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ installSource: 'bundled' })
+      );
+    });
+
     describe('name-only install when registry is reachable', () => {
       const actualBundledPackages = jest.requireActual('./bundled_packages');
 
@@ -721,10 +828,67 @@ describe('install', () => {
   });
 
   describe('upload', () => {
-    it('should send telemetry on update', async () => {
+    beforeEach(() => {
       jest
-        .mocked(getInstallationObject)
-        .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
+        .mocked(Registry.fetchFindLatestPackageOrThrow)
+        .mockRejectedValue(new PackageNotFoundError('not found'));
+      jest.mocked(getPackageSavedObjects).mockResolvedValue(emptyPackageSavedObjects);
+      jest.mocked(setPackageInfo).mockClear();
+      jest.mocked(deleteVerificationResult).mockClear();
+    });
+
+    it('validates real uploads and skips the install when validation fails', async () => {
+      jest
+        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining('Uploaded package name "bad.name" is invalid'),
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      expect(setPackageInfo).not.toHaveBeenCalled();
+      expect(deleteVerificationResult).not.toHaveBeenCalled();
+    });
+
+    it('rejects a registry package name when allowRegistryPackageUploads is unset', async () => {
+      jest
+        .mocked(Registry.fetchFindLatestPackageOrThrow)
+        .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            'Cannot upload a package whose name already exists in the package registry'
+          ),
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+    });
+
+    it('should send telemetry on update', async () => {
+      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,

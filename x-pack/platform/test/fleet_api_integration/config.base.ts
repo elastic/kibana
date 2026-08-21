@@ -109,6 +109,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
         `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
         `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
+        // Apache upload fixtures share registry package names. Default is false; install unit tests cover that path.
+        `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
         `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         `--xpack.fleet.internal.registry.spec.min=1.0`,
         `--logging.loggers=${JSON.stringify([

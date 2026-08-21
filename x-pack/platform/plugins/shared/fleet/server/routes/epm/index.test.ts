@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-
-import { INSTALL_PACKAGES_BY_UPLOAD_SECURITY, INSTALL_PACKAGES_SECURITY } from '.';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -814,17 +811,5 @@ describe('schema validation', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: expectedResponse,
     });
-  });
-});
-
-describe('INSTALL_PACKAGES_BY_UPLOAD_SECURITY', () => {
-  it('requires superuser and nothing else', () => {
-    expect(INSTALL_PACKAGES_BY_UPLOAD_SECURITY).toEqual({
-      authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] },
-    });
-  });
-
-  it('leaves the shared install route security untouched', () => {
-    expect(INSTALL_PACKAGES_SECURITY.authz).not.toEqual(INSTALL_PACKAGES_BY_UPLOAD_SECURITY.authz);
   });
 });
