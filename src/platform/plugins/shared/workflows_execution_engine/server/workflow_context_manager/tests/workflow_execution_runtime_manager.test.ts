@@ -334,6 +334,28 @@ describe('WorkflowExecutionRuntimeManager', () => {
         );
       });
 
+      it('labels alert-triggered executions with alerting attribution', async () => {
+        addTransactionLabelsMock.mockClear();
+        workflowExecution.triggeredBy = 'alert';
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        try {
+          await context.with(trace.setSpan(context.active(), span), async () => {
+            await underTest.start();
+          });
+
+          expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              transaction_hierarchy: 'alerting->workflow->steps',
+              triggered_by: 'alerting',
+            })
+          );
+          expect(addTransactionLabelsMock.mock.calls[0][0]).not.toHaveProperty('event_trigger_id');
+        } finally {
+          workflowExecution.triggeredBy = undefined;
+        }
+      });
+
       it('does not persist a trace id when no OTEL span is active either', async () => {
         await underTest.start();
 

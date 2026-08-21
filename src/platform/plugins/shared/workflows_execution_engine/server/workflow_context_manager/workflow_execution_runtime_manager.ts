@@ -428,16 +428,23 @@ export class WorkflowExecutionRuntimeManager {
 
         // Mirror the APM branches: addTransactionLabels also writes to the
         // active OTEL span, keeping trace -> execution lookup searchable.
+        // Under EDOT-only instrumentation there is no APM transaction, so
+        // alert-triggered executions land here too; attribute them via the
+        // execution's `triggeredBy` instead of mislabeling them as task manager.
+        const { triggeredBy } = this.workflowExecution;
+        const isTriggeredByAlerting = triggeredBy === 'alert';
+
         const otelLabels: Record<string, string | number | boolean> = {
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
-          transaction_hierarchy: 'task->steps',
-          triggered_by: 'task_manager',
+          transaction_hierarchy: isTriggeredByAlerting
+            ? 'alerting->workflow->steps'
+            : 'task->steps',
+          triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
         };
 
-        const { triggeredBy } = this.workflowExecution;
-        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (!isTriggeredByAlerting && isEventDrivenWorkflowTriggerSource(triggeredBy)) {
           otelLabels.event_trigger_id = triggeredBy;
         }
 
