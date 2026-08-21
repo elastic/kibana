@@ -6,6 +6,8 @@
  */
 
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import type {
   ExceptionListPreDeleteListBlocker,
   ExceptionsListPreDeleteListServerExtension,
@@ -30,6 +32,22 @@ export const getExceptionsPreDeleteListHandler = (
     if (!request) {
       throw new EndpointError(
         `Unable to verify detection rule references for exception list [${data.list.list_id}]: no request in context`
+      );
+    }
+
+    // Fail closed: rule search results are silently filtered to the rule types the
+    // caller may read. For a caller without detection rule read access, an empty
+    // result means "hidden from you", not "no rule is attached", so refuse instead
+    // of trusting it.
+    const alertingAuthorization = await endpointAppContextService.getAlertingAuthorization(request);
+    const authorizedRuleTypes = await alertingAuthorization.getAllAuthorizedRuleTypesFindOperation({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+    });
+
+    if (authorizedRuleTypes.size === 0) {
+      throw new EndpointError(
+        `Unable to verify detection rule references for exception list [${data.list.list_id}]: not authorized to read detection rules`
       );
     }
 

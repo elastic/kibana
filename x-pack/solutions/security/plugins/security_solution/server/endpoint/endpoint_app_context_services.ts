@@ -28,9 +28,11 @@ import type {
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type {
+  AlertingAuthorization,
   AlertingServerStart,
   RulesClient as RulesClientApi,
 } from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
@@ -518,6 +520,15 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.alerting.getRulesClientWithRequest(req);
+  }
+
+  public async getAlertingAuthorization(
+    req: KibanaRequest
+  ): Promise<PublicMethodsOf<AlertingAuthorization>> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.alerting.getAlertingAuthorizationWithRequest(req);
   }
 
   public getFeatureUsageService(): FeatureUsageService {

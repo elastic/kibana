@@ -45,6 +45,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
@@ -161,6 +162,14 @@ export const createMockEndpointAppContextService = (
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getRulesClient: jest.fn(async (_req: KibanaRequest) => rulesClientMock.create()),
+    getAlertingAuthorization: jest.fn(async (_req: KibanaRequest) => {
+      // Default to an authorized caller: one readable detection rule type.
+      const alertingAuthorization = alertingAuthorizationMock.create();
+      alertingAuthorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+        new Map([['siem.queryRule', { authorizedConsumers: {} }]])
+      );
+      return alertingAuthorization;
+    }),
     getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
     getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),

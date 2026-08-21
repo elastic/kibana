@@ -7,6 +7,8 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -38,6 +40,7 @@ describe('Exceptions pre delete list handler', () => {
 
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let alertingAuthorization: ReturnType<typeof alertingAuthorizationMock.create>;
   let handler: ReturnType<typeof getExceptionsPreDeleteListHandler>;
   let context: {
     request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -49,6 +52,13 @@ describe('Exceptions pre delete list handler', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 10000, total: 0 });
     (endpointAppContextService.getRulesClient as jest.Mock).mockResolvedValue(rulesClient);
+    alertingAuthorization = alertingAuthorizationMock.create();
+    alertingAuthorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
+      new Map([['siem.queryRule', { authorizedConsumers: {} }]])
+    );
+    (endpointAppContextService.getAlertingAuthorization as jest.Mock).mockResolvedValue(
+      alertingAuthorization
+    );
     handler = getExceptionsPreDeleteListHandler(endpointAppContextService);
     context = {
       exceptionListClient: {} as unknown as ExceptionListClient,
@@ -94,6 +104,28 @@ describe('Exceptions pre delete list handler', () => {
       handler({ context: { ...context, request: undefined }, data })
     ).rejects.toThrowError(/Unable to verify detection rule references/);
     expect(endpointAppContextService.getRulesClient).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the caller cannot read any detection rule type', async () => {
+    // For such a caller the rule search silently filters detection rules out and
+    // returns empty, so an empty result must not be trusted as "no references".
+    alertingAuthorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(new Map());
+    const data = { blockedBy: [], list: getListMock(), namespaceType: 'single' as const };
+
+    await expect(handler({ context, data })).rejects.toThrowError(
+      /not authorized to read detection rules/
+    );
+    expect(rulesClient.find).not.toHaveBeenCalled();
+  });
+
+  it('checks authorization against the detection rule types only', async () => {
+    const data = { blockedBy: [], list: getListMock(), namespaceType: 'single' as const };
+
+    await handler({ context, data });
+
+    expect(alertingAuthorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS })
+    );
   });
 
   it('propagates a rules client failure instead of treating it as "no references"', async () => {
