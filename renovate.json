@@ -62,7 +62,7 @@
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:build-webpack-bundle-analyzer"],
       "minimumReleaseAge": "60 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "@rspack",
@@ -96,7 +96,7 @@
       "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^[8-9].*/"],
-      "labels": ["Team:Operations", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:skip", "ci:cloud-deploy"],
       "enabled": true
     },
     {
@@ -104,7 +104,13 @@
       "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base-fips"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^9.[1-9].*/", "8.19"],
-      "labels": ["Team:Operations", "release_note:skip", "backport:skip", "ci:build-docker-fips"],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip",
+        "ci:build-docker-fips",
+        "ci:cloud-deploy"
+      ],
       "enabled": true
     },
     {
@@ -972,6 +978,7 @@
         "eslint-traverse",
         "@types/eslint"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
