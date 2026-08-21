@@ -14,7 +14,13 @@ import { css } from '@emotion/react';
 import { useSyntheticsSettingsContext } from '../../../../../contexts';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../../state';
 
-export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: string }) => {
+export const MetricErrorIcon = ({
+  configIdByLocation,
+  buttonRef,
+}: {
+  configIdByLocation: string;
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) => {
   const isPopoverOpen = useSelector(selectErrorPopoverState);
   const dispatch = useDispatch();
 
@@ -77,6 +83,7 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
     >
       <EuiToolTip content={ERROR_DETAILS} disableScreenReaderOutput>
         <EuiButtonIcon
+          buttonRef={buttonRef}
           data-test-subj="syntheticsMetricItemIconButton"
           iconType="warning"
           color="danger"
