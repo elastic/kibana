@@ -17478,8 +17478,6 @@
     "xpack.cases.jsonEditorField.defaultLabel": "JSON 编辑器",
     "xpack.cases.markdownEditor.noSimultaneousUploads.message": "不支持同时上传文件。",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "添加可视化",
-    "xpack.cases.markdownEditor.plugins.lens.betaDescription": "此模块不是 GA 版。目前每个注释只能插入一个 Lens。请通过报告错误来帮助我们。",
-    "xpack.cases.markdownEditor.plugins.lens.betaLabel": "公测版",
     "xpack.cases.markdownEditor.plugins.lens.closeButtonLabel": "关闭",
     "xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel": "新建",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel": "未找到匹配的 lens。",
