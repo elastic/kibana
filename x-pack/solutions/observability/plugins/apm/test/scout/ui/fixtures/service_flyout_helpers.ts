@@ -15,8 +15,8 @@ export async function assertFlyoutChartsRendered(
   for (const id of ids) {
     const chart = serviceFlyoutPage.getChartLocator(id);
     await expect(chart).toBeVisible();
-    // data-render-complete is set by embeddable framework on the container element that wraps the visualization.
-    await expect(chart.locator('xpath=ancestor::*[@data-render-complete="true"]')).toBeVisible();
+    // lens-embeddable is rendered by ExpressionWrapper when the Lens expression is active and rendering.
+    await expect(chart.locator('[data-test-subj="lens-embeddable"]')).toBeVisible();
     await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
   }
 }
