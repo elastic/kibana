@@ -55,7 +55,6 @@ const evaluate = base.extend<
           {
             datasets: [dataset],
             task: async ({ input }) => {
-              const startMs = Date.now();
               const response = await chatClient.converse({
                 messages: [{ message: input.instruction }],
                 ...(input.initialYaml
@@ -69,7 +68,6 @@ const evaluate = base.extend<
                     }
                   : {}),
               });
-              const latencyMs = Date.now() - startMs;
 
               const taskOutput = {
                 messages: response.messages,
@@ -88,7 +86,7 @@ const evaluate = base.extend<
               return {
                 ...taskOutput,
                 resultYaml,
-                latencyMs,
+                traceId: response.traceId,
               };
             },
           },

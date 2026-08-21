@@ -1180,30 +1180,6 @@ export function createToolTrajectoryEvaluator() {
 }
 
 /**
- * Wall-clock latency evaluator. Measures how long the task took and scores
- * proportionally: full marks at or under `maxSeconds`, degrading linearly above.
- */
-export function createLatencyEvaluator({ maxSeconds = 60 }: { maxSeconds?: number } = {}) {
-  return {
-    name: 'Latency',
-    kind: 'CODE' as const,
-    evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
-      const { latencyMs } = output;
-      if (latencyMs == null) {
-        return { score: null, label: 'N/A' as const, metadata: { reason: 'No latency data' } };
-      }
-      const seconds = latencyMs / 1000;
-      const score =
-        seconds <= maxSeconds ? 1 : Math.max(0, 1 - (seconds - maxSeconds) / maxSeconds);
-      return {
-        score: Math.round(score * 1000) / 1000,
-        metadata: { latencyMs, seconds, maxSeconds },
-      };
-    },
-  };
-}
-
-/**
  * Build a clean representation for the LLM judge instead of sending the
  * full conversation blob. Separates instruction, initial YAML (for edits),
  * and the resulting YAML so the judge can evaluate the actual workflow state.
