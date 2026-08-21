@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { random } from 'lodash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 const GLOBAL_CLAIM_NUDGE_ID = 'global';
-// The global checkpoint Elasticsearch reports for an index that has never been written to.
-const NEW_INDEX_CHECKPOINT = -1;
 // The signal document is never read back — only the index's global checkpoint matters — but the
 // fields are mapped anyway so the index is self-describing and easy to inspect when debugging.
 const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
@@ -27,20 +26,21 @@ const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
     },
   },
 };
-// Mirrors the settings Core applies to saved object indices: a single shard keeps the checkpoint
-// array to one entry, and auto-expanding replicas keeps the index green on single-node clusters.
-// Serverless Elasticsearch manages shards and replicas itself and rejects these settings.
+// Mirrors Core's saved-object index settings: one shard keeps the checkpoint array to one entry;
+// auto-expanding replicas keeps single-node clusters green. Serverless rejects these settings.
 const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
   number_of_shards: 1,
   auto_expand_replicas: '0-1',
 };
-// How long the ES `_fleet/global_checkpoints` request should long-poll for before
-// returning with `timed_out: true`. We simply re-issue the request in a loop.
-const CHECKPOINT_WAIT_TIMEOUT = '30s';
-// The ES client's default `requestTimeout` (30s) races the `CHECKPOINT_WAIT_TIMEOUT` above,
-// causing spurious client-side timeouts. Give the request extra headroom.
-const REQUEST_TIMEOUT_MS = 45_000;
-const ERROR_RETRY_DELAY_MS = 1_000;
+// Long-poll timeout for `_fleet/global_checkpoints`. Kept under 60s so idle proxies/load
+// balancers (which see no bytes while the request waits) don't close the connection first.
+const CHECKPOINT_WAIT_TIMEOUT = '50s';
+// Headroom above CHECKPOINT_WAIT_TIMEOUT so the client doesn't time out before the server does.
+const REQUEST_TIMEOUT_MS = 65_000;
+// Base and cap for the exponential backoff computed in calculateRetryDelayMs(); the failure
+// count resets on any resolved response, including a timeout.
+const ERROR_RETRY_BASE_DELAY_MS = 1_000;
+const ERROR_RETRY_MAX_DELAY_MS = 60_000;
 // Avoid flooding the logs with a warning on every failed long-poll iteration.
 const ERROR_LOG_THROTTLE_MS = 60_000;
 
@@ -76,7 +76,7 @@ export class TaskManagerClaimNudgeService {
   private baselineSet = false;
   private lastErrorLoggedAt = 0;
   private ensureIndexPromise: Promise<void> | undefined;
-  private createdIndex = false;
+  private consecutiveErrors = 0;
 
   constructor({ logger, esClient, index, isServerless }: TaskManagerClaimNudgeServiceOptions) {
     this.logger = logger;
@@ -117,8 +117,11 @@ export class TaskManagerClaimNudgeService {
   }
 
   /**
-   * Write a new signal document, advancing the claim nudge index's global checkpoint so that
-   * any node currently long-polling immediately observes the advance and triggers a claim cycle.
+   * Writes a new signal document, advancing the claim nudge index's global checkpoint so any
+   * node currently long-polling immediately observes it and triggers a claim cycle.
+   *
+   * No `refresh`: the checkpoint advances once the write replicates, which has nothing to do
+   * with searchability — a refresh would only add cost and latency for no benefit here.
    */
   public async notify() {
     await this.ensureIndexExists();
@@ -128,20 +131,19 @@ export class TaskManagerClaimNudgeService {
       nonce: v4(),
     };
 
-    // A single document, overwritten in place: its contents are irrelevant, the write itself is
-    // the signal. `nonce` guarantees every call is a real change rather than a no-op.
+    // Contents don't matter; the write itself is the signal. `nonce` ensures each call is a
+    // real change rather than a no-op.
     await this.esClient.index<ClaimNudgeSignal>({
       index: this.index,
       id: GLOBAL_CLAIM_NUDGE_ID,
       document,
-      refresh: true,
     });
   }
 
   /**
-   * Creates the signal index if it doesn't already exist. Unlike a saved object index, nothing
-   * creates this index during startup migrations, so both the notifying and the watching side
-   * have to be able to bring it into existence. Memoized so a healthy node only pays for it once.
+   * Creates the signal index if needed (nothing else does, unlike saved-object indices). Only
+   * `notify()` calls this — the watch loop relies on `wait_for_index: true` instead. Memoized
+   * so a healthy node only pays for it once.
    */
   private async ensureIndexExists() {
     if (!this.ensureIndexPromise) {
@@ -162,7 +164,6 @@ export class TaskManagerClaimNudgeService {
         mappings: CLAIM_NUDGE_MAPPINGS,
         ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
       });
-      this.createdIndex = true;
     } catch (err) {
       // Every Kibana node races to create the index; losing that race is the expected outcome.
       if (err?.body?.error?.type !== 'resource_already_exists_exception') {
@@ -178,16 +179,7 @@ export class TaskManagerClaimNudgeService {
       this.abortController = new AbortController();
 
       try {
-        await this.ensureIndexExists();
-
-        if (this.createdIndex && !this.baselineSet) {
-          // We created the index, so its checkpoint is known and there is no need to spend a round
-          // trip discovering it. That round trip would otherwise absorb a nudge written while we
-          // were still arming, silently dropping it.
-          checkpoints = [NEW_INDEX_CHECKPOINT];
-          this.baselineSet = true;
-        }
-
+        // wait_for_index lets this watch an index that doesn't exist yet (see ensureIndexExists).
         const { global_checkpoints: nextCheckpoints, timed_out: timedOut } =
           await this.esClient.fleet.globalCheckpoints(
             {
@@ -203,6 +195,9 @@ export class TaskManagerClaimNudgeService {
               retryOnTimeout: false,
             }
           );
+
+        // Any resolved response — even a timeout — counts as a success for backoff purposes.
+        this.consecutiveErrors = 0;
 
         const hasAdvanced =
           this.baselineSet &&
@@ -222,15 +217,30 @@ export class TaskManagerClaimNudgeService {
           return;
         }
 
-        this.logThrottledWarning(err);
-        await this.delay(ERROR_RETRY_DELAY_MS);
+        this.consecutiveErrors += 1;
+        const retryDelayMs = this.calculateRetryDelayMs();
+        this.logThrottledWarning(err, retryDelayMs);
+        await this.delay(retryDelayMs);
       } finally {
         this.abortController = undefined;
       }
     }
   }
 
-  private logThrottledWarning(err: unknown) {
+  /**
+   * Equal jitter: half the exponential backoff is guaranteed, the other half is randomized.
+   * Keeps nodes from retrying in lockstep without letting the delay collapse near zero.
+   */
+  private calculateRetryDelayMs() {
+    const half =
+      Math.min(
+        ERROR_RETRY_MAX_DELAY_MS,
+        ERROR_RETRY_BASE_DELAY_MS * 2 ** (this.consecutiveErrors - 1)
+      ) / 2;
+    return half + random(half);
+  }
+
+  private logThrottledWarning(err: unknown, retryDelayMs: number) {
     const now = Date.now();
     if (now - this.lastErrorLoggedAt < ERROR_LOG_THROTTLE_MS) {
       return;
@@ -239,7 +249,9 @@ export class TaskManagerClaimNudgeService {
     this.logger.warn(
       `Failed to watch Task Manager claim nudge checkpoints for index ${
         this.index
-      }, falling back to regular polling: ${this.getErrorMessage(err)}`
+      }, falling back to regular polling and retrying in ~${retryDelayMs}ms: ${this.getErrorMessage(
+        err
+      )}`
     );
   }
 
