@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 // DOMPurify requires a real DOM — pass-through in Jest
 jest.mock('dompurify', () => ({
@@ -55,7 +56,7 @@ const mockEuiTheme = {
     danger: '#BD271E',
     borderBasePlain: '#D3DAE6',
   },
-} as any;
+} as unknown as EuiThemeComputed;
 
 beforeEach(() => {
   jest.clearAllMocks();

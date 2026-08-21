@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../services');
 jest.mock('../utils/fetch_esql_data');
@@ -43,7 +44,7 @@ beforeEach(() => {
 
 const mockOnRunPreview = jest.fn();
 
-const mockEuiTheme = {} as any;
+const mockEuiTheme = {} as unknown as EuiThemeComputed;
 
 const baseParams = {
   esqlQuery: 'FROM logs | LIMIT 10',

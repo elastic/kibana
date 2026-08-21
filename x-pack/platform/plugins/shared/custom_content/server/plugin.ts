@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
@@ -22,8 +22,6 @@ interface StartDeps {
 }
 
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  constructor(_initializerContext: PluginInitializerContext) {}
-
   setup(core: CoreSetup<StartDeps>, { agentBuilder }: SetupDeps) {
     if (agentBuilder) {
       agentBuilder.attachments.registerType(

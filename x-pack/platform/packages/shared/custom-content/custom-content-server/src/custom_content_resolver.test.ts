@@ -6,6 +6,9 @@
  */
 
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
+import type { ModelProvider } from '@kbn/agent-builder-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { createCustomContentTemplateResolver } from './custom_content_resolver';
 
 const mockChatComplete = jest.fn();
@@ -15,15 +18,15 @@ const modelProvider = {
   getDefaultModel: jest.fn().mockResolvedValue({
     inferenceClient: { chatComplete: mockChatComplete },
   }),
-} as any;
+} as unknown as ModelProvider;
 
 const esClient = {
   asCurrentUser: {
     esql: { query: mockEsqlQuery },
   },
-} as any;
+} as unknown as IScopedClusterClient;
 
-const logger = { debug: jest.fn() } as any;
+const logger = { debug: jest.fn() } as unknown as Logger;
 
 beforeEach(() => {
   jest.clearAllMocks();

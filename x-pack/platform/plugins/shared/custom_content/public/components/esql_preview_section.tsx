@@ -146,6 +146,7 @@ export const EsqlPreviewSection = ({
         onClick={handleFetchData}
         disabled={!esqlQuery.trim()}
         iconType="play"
+        data-test-subj="customContentPreviewDataButton"
       >
         {i18n.translate('xpack.customContent.editFlyout.esqlSection.previewButton', {
           defaultMessage: 'Preview data',

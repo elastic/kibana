@@ -15,6 +15,8 @@ import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import type { openLazyFlyout } from '@kbn/presentation-util';
+import type { EditCustomContentFlyoutProps } from './components/edit_custom_content_flyout';
 
 jest.mock('@kbn/presentation-publishing', () => {
   const actual = jest.requireActual('@kbn/presentation-publishing');
@@ -55,7 +57,7 @@ let capturedFlyoutProps:
   | undefined;
 
 jest.mock('./components/edit_custom_content_flyout', () => ({
-  EditCustomContentFlyout: (props: any) => {
+  EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
     capturedFlyoutProps = props;
     return <div data-test-subj="mockEditCustomContentFlyout" />;
   },
@@ -73,7 +75,7 @@ let mockFlyoutClose: () => void = () => {};
 let mockFlyoutOnClose: Promise<void> = Promise.resolve();
 
 jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: (args: any) => {
+  openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
     capturedOpenLazyFlyoutArgs = args;
     let resolve: () => void;
     mockFlyoutOnClose = new Promise<void>((r) => {
@@ -82,8 +84,10 @@ jest.mock('@kbn/presentation-util', () => ({
     mockFlyoutClose = () => resolve();
     return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
   },
-  tracksOverlays: (api: any) =>
-    !!api && typeof api.clearOverlays === 'function' && typeof api.openOverlay === 'function',
+  tracksOverlays: (api: unknown) =>
+    !!api &&
+    typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
+    typeof (api as Record<string, unknown>).openOverlay === 'function',
 }));
 
 let mockAgentBuilder: unknown;
@@ -388,7 +392,7 @@ describe('customContentEmbeddableFactory', () => {
 
   describe('agent event subscription', () => {
     it('applies template update from RoundCompleteEvent attachment', async () => {
-      const chatEvents$ = new Subject<any>();
+      const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
 
       mockAgentBuilder = {
@@ -441,7 +445,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('ignores events for a different embeddable_id', async () => {
-      const chatEvents$ = new Subject<any>();
+      const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
 
       mockAgentBuilder = {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  isErrorResult,
+  type ToolResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
@@ -43,8 +47,10 @@ const callHandler = async (
   attachmentData?: Record<string, unknown>
 ) => {
   const tool = createUpdateCustomContentTool();
+  type HandlerParams = Parameters<typeof tool.handler>[0];
+  type HandlerCtx = Parameters<typeof tool.handler>[1];
   const ctx = makeContext(attachmentData);
-  const ret = await tool.handler(params as any, ctx as any);
+  const ret = await tool.handler(params as HandlerParams, ctx as unknown as HandlerCtx);
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
   return { results: ret.results, ctx };
 };
@@ -106,7 +112,9 @@ describe('createUpdateCustomContentTool handler', () => {
       mockResolver.mockRejectedValue(new Error('LLM failure'));
       const { results } = await callHandler({ prompt: 'Show KPIs' }, existing);
       expect(results[0].type).toBe(ToolResultType.error);
-      expect((results[0] as any).data.message).toMatch(/LLM failure/);
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toMatch(/LLM failure/);
     });
   });
 

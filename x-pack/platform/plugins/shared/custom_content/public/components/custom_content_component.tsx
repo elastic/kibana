@@ -45,6 +45,10 @@ const iframeCss = css({
   background: 'transparent',
 });
 
+const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
+  defaultMessage: 'Custom content panel',
+});
+
 export const CustomContentComponent = ({
   embeddableId,
   esqlQuery,
@@ -115,14 +119,14 @@ export const CustomContentComponent = ({
       )}
       {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
         </div>
       ) : (
         !error &&
         !noContent &&
         html && (
           <div css={iframeContainerCss}>
-            <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
           </div>
         )
       )}
