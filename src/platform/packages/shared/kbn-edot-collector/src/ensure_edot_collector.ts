@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import Path from 'path';
 import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -23,13 +23,18 @@ const DATA_DIR = Path.join(REPO_ROOT, 'data', 'edot_collector');
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const COLLECTOR_CONFIG_FILE_PATH = Path.join(DATA_DIR, 'otel-collector-config.yml');
 
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
+
 /**
  * Stops the EDOT Collector Docker containers.
  */
 async function down() {
-  await execa
-    .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup: true })
-    .catch(() => {});
+  await runCommand(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup: true }).catch(
+    () => {}
+  );
 }
 
 /**
@@ -135,7 +140,7 @@ export async function ensureEdotCollector({
     });
 
   // Start the Docker Compose services
-  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
+  await runCommand(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
     stdio: 'inherit',
     cleanup: true,
   });

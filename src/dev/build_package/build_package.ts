@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 import fsp from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
+import { execa } from 'execa';
 import { globbySync } from 'globby';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';

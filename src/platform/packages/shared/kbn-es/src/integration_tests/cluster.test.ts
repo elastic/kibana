@@ -59,7 +59,7 @@ const ensureNoResolve = async (promise: Promise<unknown>) => {
 };
 
 jest.mock('execa');
-const execaMock = jest.requireMock('execa');
+const execaMock = jest.requireMock('execa').execa;
 
 const mockEsBin = (
   {
@@ -73,7 +73,7 @@ const mockEsBin = (
   } = { start: false, ssl: false }
 ) => {
   execaMock.mockImplementationOnce((args: string[], options: {}) =>
-    jest.requireActual('execa')(
+    jest.requireActual('execa').execa(
       process.execPath,
       [
         '--require=@kbn/swc-register/install',

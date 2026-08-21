@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Fsp from 'fs/promises';
 import { join } from 'path';
 

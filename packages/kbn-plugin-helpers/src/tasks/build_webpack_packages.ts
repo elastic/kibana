@@ -8,7 +8,7 @@
  */
 
 import type { StdioOption } from 'execa';
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TaskContext } from '../task_context';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execaNode, type Subprocess } from 'execa';
 import * as Rx from 'rxjs';
 
 import { getActiveInspectFlag } from './get_active_inspect_flag';
@@ -15,7 +15,7 @@ import { getActiveInspectFlag } from './get_active_inspect_flag';
 const ACTIVE_INSPECT_FLAG = getActiveInspectFlag();
 
 interface ProcResource extends Rx.Unsubscribable {
-  proc: execa.ExecaChildProcess;
+  proc: Subprocess;
   unsubscribe(): void;
 }
 
@@ -27,11 +27,11 @@ interface Options {
 
 export function usingServerProcess<T>(
   options: Options,
-  fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
+  fn: (proc: Subprocess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(options.script, options.argv, {
+      const proc = execaNode(options.script, options.argv, {
         stdio: 'pipe',
         nodeOptions: [
           ...process.execArgv,

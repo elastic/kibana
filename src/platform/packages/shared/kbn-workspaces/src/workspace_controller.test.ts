@@ -21,7 +21,7 @@ import { getSha } from './utils/get_sha';
 // Helper to init a temporary git repo with an initial commit
 async function initGitRepo(dir: string) {
   await Fs.mkdir(dir, { recursive: true });
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   await execa('git', ['init'], { cwd: dir });
   await execa('git', ['config', 'user.email', 'you@example.com'], { cwd: dir });
   await execa('git', ['config', 'user.name', 'Your Name'], { cwd: dir });
@@ -72,7 +72,7 @@ describe('@kbn/workspaces controller', () => {
 
     // modify a file
     await Fs.writeFile(Path.join(source.getDir(), 'README.md'), '# temp repo modified\n');
-    const execa = (await import('execa')).default;
+    const { execa } = await import('execa');
     await execa('git', ['add', 'README.md'], { cwd: source.getDir() });
     const k2 = await (source as any).getCacheKey();
 
@@ -101,7 +101,7 @@ describe('@kbn/workspaces controller', () => {
     const firstKey = (wt as any).getCacheKey ? await (wt as any).getCacheKey() : 'none';
 
     // create new commit in base clone so ref advances
-    const execa = (await import('execa')).default;
+    const { execa } = await import('execa');
     await Fs.writeFile(Path.join(context.baseCloneDir, 'NEW.txt'), 'hello');
     await execa('git', ['add', '.'], { cwd: context.baseCloneDir });
     // use inline git config to avoid relying on global/local git identity in CI

@@ -8,7 +8,7 @@
  */
 
 import type { ExecaError } from 'execa';
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 

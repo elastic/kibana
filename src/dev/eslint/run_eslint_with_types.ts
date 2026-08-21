@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Os from 'os';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs';
 import { supportsColor } from 'chalk';

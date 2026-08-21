@@ -11,7 +11,7 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import chalk from 'chalk';
 import * as path from 'path';
-import execa from 'execa';
+import { execa, type Subprocess } from 'execa';
 import type { Readable } from 'stream';
 import { combineLatest, fromEvent, first } from 'rxjs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
@@ -109,7 +109,7 @@ export class Cluster {
   private log: ToolingLog;
   private ssl: boolean;
   private stopCalled: boolean;
-  private process: execa.ExecaChildProcess | null;
+  private process: Subprocess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
   private dockerContainerName: string | null;

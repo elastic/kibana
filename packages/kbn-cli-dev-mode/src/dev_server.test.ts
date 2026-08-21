@@ -41,11 +41,11 @@ class MockProc extends EventEmitter {
   }
 }
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+jest.mock('execa', () => ({ execaNode: jest.fn() }));
+const execaNode = jest.requireMock('execa').execaNode;
 
 let currentProc: MockProc | undefined;
-execa.node.mockImplementation(() => {
+execaNode.mockImplementation(() => {
   const proc = new MockProc();
   currentProc = proc;
   return proc;
@@ -124,7 +124,7 @@ describe('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
-    expect(execa.node.mock.calls).toMatchInlineSnapshot(`
+    expect(execaNode.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "some/script",

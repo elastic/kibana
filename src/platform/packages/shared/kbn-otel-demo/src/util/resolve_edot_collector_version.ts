@@ -8,9 +8,13 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 
 const EDOT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 /**
  * Resolves the latest available EDOT Collector image version by walking back
@@ -29,7 +33,7 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
   while (major > 0) {
     const version = `${major}.${minor}.${patch}`;
     try {
-      await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
+      await runCommand(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
         stdio: 'ignore',
         timeout: 10000,
       });

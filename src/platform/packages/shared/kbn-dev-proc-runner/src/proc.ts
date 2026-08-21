@@ -12,7 +12,7 @@ import Path from 'path';
 import { promisify } from 'util';
 import stripAnsi from 'strip-ansi';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import * as Rx from 'rxjs';
 import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
 import chalk from 'chalk';

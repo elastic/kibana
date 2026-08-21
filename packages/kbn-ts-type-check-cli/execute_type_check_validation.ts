@@ -129,7 +129,7 @@ export async function createTypeCheckConfigs(
 
 /** Detects uncommitted working-tree changes after a type-check run. */
 export async function detectLocalChanges(): Promise<string[]> {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const { stdout } = await execa(
     'git',
     // Some CI environments change these files dynamically, like FIPS but it shouldn't invalidate the cache

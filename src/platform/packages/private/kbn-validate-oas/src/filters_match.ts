@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ExecaError } from 'execa';
-import execa from 'execa';
+import { execa } from 'execa';
 import { toYamlSearchPath } from './path_filters';
 
 export async function filtersMatch(paths: string[], yamlPath: string): Promise<boolean> {

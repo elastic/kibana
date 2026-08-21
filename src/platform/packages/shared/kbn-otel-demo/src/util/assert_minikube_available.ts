@@ -8,7 +8,11 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 /**
  * Checks if minikube is installed and running.
@@ -16,7 +20,7 @@ import execa from 'execa';
  */
 export async function assertMinikubeAvailable(): Promise<void> {
   try {
-    await execa.command('minikube version');
+    await runCommand('minikube version');
   } catch (error) {
     throw new Error(
       'minikube is not installed. Please install minikube: https://minikube.sigs.k8s.io/docs/start/'
@@ -24,7 +28,7 @@ export async function assertMinikubeAvailable(): Promise<void> {
   }
 
   try {
-    const { stdout } = await execa.command('minikube status --format={{.Host}}');
+    const { stdout } = await runCommand('minikube status --format={{.Host}}');
     if (stdout.trim() !== 'Running') {
       throw new Error('not running');
     }
@@ -40,7 +44,7 @@ export async function assertMinikubeAvailable(): Promise<void> {
  */
 export async function assertKubectlAvailable(): Promise<void> {
   try {
-    await execa.command('kubectl version --client');
+    await runCommand('kubectl version --client');
   } catch (error) {
     throw new Error('kubectl is not installed. Please install kubectl.');
   }
@@ -51,7 +55,7 @@ export async function assertKubectlAvailable(): Promise<void> {
  */
 export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
   try {
-    const { stdout } = await execa.command('minikube status --format={{.Host}}');
+    const { stdout } = await runCommand('minikube status --format={{.Host}}');
     if (stdout.trim() === 'Running') {
       log?.info('minikube is already running');
       return;
@@ -61,7 +65,7 @@ export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
   }
 
   log?.info('Starting minikube (--cpus=4 --memory=4096) — this may take a minute...');
-  await execa.command('minikube start --driver=docker --memory=4096 --cpus=4', {
+  await runCommand('minikube start --driver=docker --memory=4096 --cpus=4', {
     stdio: 'inherit',
   });
   log?.info('minikube started');
@@ -71,7 +75,7 @@ export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
  * Gets the minikube IP address
  */
 export async function getMinikubeIp(): Promise<string> {
-  const { stdout } = await execa.command('minikube ip');
+  const { stdout } = await runCommand('minikube ip');
   return stdout.trim();
 }
 
@@ -107,13 +111,13 @@ export async function waitForPodsReady(
 
   while (Date.now() - startTime < timeoutMs) {
     try {
-      const { stdout } = await execa.command(
+      const { stdout } = await runCommand(
         `kubectl get pods -n ${namespace} -o jsonpath='{.items[*].status.phase}'`
       );
       const phases = stdout.replace(/'/g, '').trim().split(' ').filter(Boolean);
 
       if (phases.length > 0 && phases.every((phase) => phase === 'Running')) {
-        const { stdout: readyOutput } = await execa.command(
+        const { stdout: readyOutput } = await runCommand(
           `kubectl get pods -n ${namespace} -o jsonpath='{.items[*].status.containerStatuses[*].ready}'`
         );
         const readyStates = readyOutput.replace(/'/g, '').trim().split(' ').filter(Boolean);
@@ -140,17 +144,13 @@ export async function waitForPodsReady(
  */
 export async function deleteNamespace(namespace: string): Promise<void> {
   try {
-    await execa
-      .command(
-        `kubectl delete deployments --all -n ${namespace} --grace-period=0 --ignore-not-found`
-      )
-      .catch(() => {});
-    await execa
-      .command(
-        `kubectl delete pods --all -n ${namespace} --force --grace-period=0 --ignore-not-found`
-      )
-      .catch(() => {});
-    await execa.command(`kubectl delete namespace ${namespace} --ignore-not-found`);
+    await runCommand(
+      `kubectl delete deployments --all -n ${namespace} --grace-period=0 --ignore-not-found`
+    ).catch(() => {});
+    await runCommand(
+      `kubectl delete pods --all -n ${namespace} --force --grace-period=0 --ignore-not-found`
+    ).catch(() => {});
+    await runCommand(`kubectl delete namespace ${namespace} --ignore-not-found`);
   } catch {
     // Ignore errors
   }

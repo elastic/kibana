@@ -27,7 +27,7 @@ import {
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import execa from 'execa';
+import { execa } from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import { REPO_ROOT } from '@kbn/repo-info';

@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 import type { TaskContext } from '../task_context';
 

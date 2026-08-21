@@ -15,7 +15,7 @@ jest.mock('timers/promises', () => ({
 }));
 
 jest.mock('execa');
-const execa = jest.requireMock('execa');
+const execa = jest.requireMock('execa').execa;
 
 // Mock undici
 jest.mock('undici', () => {

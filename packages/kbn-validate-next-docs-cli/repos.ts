@@ -13,7 +13,7 @@ import Path from 'path';
 import Rl from 'readline';
 
 import Chalk from 'chalk';
-import execa from 'execa';
+import { execaSync } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { quietFail } from './error';
@@ -27,7 +27,7 @@ function lines(read: NodeJS.ReadableStream) {
 
 function getGithubBase(log: ToolingLog) {
   try {
-    const originUrl = execa.sync('git', ['remote', 'get-url', 'origin'], {
+    const originUrl = execaSync('git', ['remote', 'get-url', 'origin'], {
       encoding: 'utf8',
     }).stdout;
 

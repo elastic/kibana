@@ -13,7 +13,7 @@ import Fs from 'fs';
 import Path from 'path';
 import crypto from 'crypto';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import type { AxiosRequestConfig } from 'axios';
 import Axios from 'axios';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';

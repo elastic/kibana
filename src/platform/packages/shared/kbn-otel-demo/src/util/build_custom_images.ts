@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import { promises as Fs } from 'fs';
 import Path from 'path';
 import chalk from 'chalk';
@@ -16,6 +16,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createDirIfNotExists } from './file_utils';
 
 const REPOS_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments', 'repos');
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 export interface ImageBuildConfig {
   gitUrl: string;
@@ -47,7 +51,7 @@ async function repoUsesLfs(repoDir: string): Promise<boolean> {
 
 async function isGitLfsInstalled(): Promise<boolean> {
   try {
-    await execa.command('git lfs version', { stdio: 'pipe' });
+    await runCommand('git lfs version', { stdio: 'pipe' });
     return true;
   } catch {
     return false;
@@ -67,7 +71,7 @@ async function ensureLfsFiles(log: ToolingLog, repoDir: string): Promise<void> {
   }
 
   log.info('Pulling Git LFS files...');
-  await execa.command('git lfs pull', { cwd: repoDir, stdio: 'pipe' });
+  await runCommand('git lfs pull', { cwd: repoDir, stdio: 'pipe' });
 }
 
 async function cloneOrUpdateRepo(
@@ -78,7 +82,7 @@ async function cloneOrUpdateRepo(
   if (await dirExists(targetDir)) {
     log.debug(`Repository already exists at ${targetDir}, pulling latest...`);
     try {
-      await execa.command('git pull --ff-only', {
+      await runCommand('git pull --ff-only', {
         cwd: targetDir,
         stdio: 'pipe',
       });
@@ -91,7 +95,7 @@ async function cloneOrUpdateRepo(
 
   log.info(`Cloning ${gitUrl} (shallow)...`);
   await createDirIfNotExists(REPOS_DIR);
-  await execa.command(`git clone --depth 1 ${gitUrl} ${targetDir}`, {
+  await runCommand(`git clone --depth 1 ${gitUrl} ${targetDir}`, {
     stdio: 'pipe',
   });
   await ensureLfsFiles(log, targetDir);
@@ -99,7 +103,7 @@ async function cloneOrUpdateRepo(
 
 async function imageExistsInMinikube(imageName: string): Promise<boolean> {
   try {
-    const { stdout } = await execa.command(`minikube image ls`);
+    const { stdout } = await runCommand(`minikube image ls`);
     return stdout.includes(imageName);
   } catch {
     return false;
@@ -126,7 +130,7 @@ async function buildImageWithMinikube(
   }
 
   log.info(`  Building ${chalk.cyan(imageName)}...`);
-  const { stdout, stderr } = await execa.command(
+  const { stdout, stderr } = await runCommand(
     `minikube image build -t ${imageName} -f ${dockerfilePath} ${context}`,
     {
       stdio: 'pipe',
@@ -179,7 +183,7 @@ export async function buildCustomImages(
 
   if (config.preBuildCommand) {
     log.info(`Running pre-build command: ${config.preBuildCommand}`);
-    await execa.command(config.preBuildCommand, {
+    await runCommand(config.preBuildCommand, {
       cwd: repoDir,
       stdio: 'inherit',
       shell: true,

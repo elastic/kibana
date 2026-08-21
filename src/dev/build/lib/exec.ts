@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import chalk from 'chalk';
 import { fromEvent, merge, map, toArray, takeUntil } from 'rxjs';
 import type { ToolingLog, LogLevel } from '@kbn/tooling-log';

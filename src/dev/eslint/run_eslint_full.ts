@@ -12,7 +12,7 @@ import Os from 'os';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, execaSync } from 'execa';
 
 import { eslintBinPath } from './eslint_bin_path';
 
@@ -69,11 +69,10 @@ run(
 );
 
 function getLintableFileBatches(filePatterns: string[], workerCount: number) {
-  const files = execa
-    .sync('git', ['ls-files', ...filePatterns], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    })
+  const files = execaSync('git', ['ls-files', ...filePatterns], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  })
     .stdout.trim()
     .split('\n')
     .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
