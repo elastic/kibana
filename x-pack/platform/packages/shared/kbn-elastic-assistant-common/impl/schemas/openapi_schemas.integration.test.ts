@@ -8,7 +8,7 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 
-import execa from 'execa';
+import { execa } from 'execa';
 
 describe('Security AI Assistant OpenAPI route schemas', () => {
   jest.setTimeout(120000);

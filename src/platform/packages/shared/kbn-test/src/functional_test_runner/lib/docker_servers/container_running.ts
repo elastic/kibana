@@ -37,7 +37,7 @@ export function observeContainerRunning(name: string, containerId: string, log: 
         }
       })
       .catch((error) => {
-        if (error?.killed) {
+        if (error?.isTerminated) {
           // ignore errors thrown because the process was killed
           subscriber.complete();
           return;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Path from 'path';
 import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';

@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import execa from 'execa';
+import { execa, execaSync } from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
 import pRetry from 'p-retry';
@@ -40,6 +40,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import { KbnClientRequesterError } from '@kbn/kbn-client';
+import { runCommand } from '../run_command';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -375,15 +376,15 @@ const startFleetServerWithDocker = async ({
 
         fleetServerVersionInfo = isServerless
           ? (
-              await execa
-                .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
-                .catch((err) => {
-                  log.verbose(
-                    `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
-                    err
-                  );
-                  return { stdout: 'Unable to retrieve version information (serverless)' };
-                })
+              await runCommand(
+                `docker exec ${containerName} /usr/bin/fleet-server --version`
+              ).catch((err) => {
+                log.verbose(
+                  `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                  err
+                );
+                return { stdout: 'Unable to retrieve version information (serverless)' };
+              })
             ).stdout
           : (
               await execa('docker', [
@@ -451,7 +452,7 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
           log.info(
             `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
           );
-          execa.sync('docker', ['kill', containerId]);
+          execaSync('docker', ['kill', containerId]);
         },
       };
     });

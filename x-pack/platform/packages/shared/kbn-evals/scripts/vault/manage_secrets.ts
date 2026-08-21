@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import Path from 'path';
 import Fs from 'fs';
 import { writeFile, readFile } from 'fs/promises';

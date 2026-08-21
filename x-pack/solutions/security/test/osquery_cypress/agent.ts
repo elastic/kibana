@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa, execaSync } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -104,7 +104,7 @@ export class AgentManager extends Manager {
       );
 
       try {
-        execa.sync('docker', ['kill', this.agentContainerId]);
+        execaSync('docker', ['kill', this.agentContainerId]);
       } catch (err) {
         this.log.error('Error closing fleet agent process');
       }

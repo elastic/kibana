@@ -6,7 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { createInterface } from 'readline';
 import type { Observable } from 'rxjs';
 import { Subject, lastValueFrom } from 'rxjs';

@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import execa from 'execa';
+import { execa } from 'execa';
 import { createInterface } from 'readline';
 import normalize from 'normalize-path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -272,7 +272,7 @@ async function runTscWithProgress({
     builtProjectTimings,
   } = tracker.getSummary();
 
-  if (result.killed || result.signal) {
+  if (result.isTerminated || result.signal) {
     log.warning(
       `[${type}] Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`
     );

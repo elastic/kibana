@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { range } from 'lodash';
 import pLimit from 'p-limit';
 
