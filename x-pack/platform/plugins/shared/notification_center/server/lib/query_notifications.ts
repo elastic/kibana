@@ -34,16 +34,13 @@ export interface NotificationQueryDeps {
 }
 
 const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
-  const { namespace, type, severity, from, to } = params;
+  const { namespace, type, from, to } = params;
   const filters: QueryDslQueryContainer[] = [severityTTLQuery('visible')];
   if (namespace) {
     filters.push({ term: { namespace } });
   }
   if (type) {
     filters.push({ term: { type } });
-  }
-  if (severity?.length) {
-    filters.push({ terms: { severity } });
   }
   if (from || to) {
     // Caller-supplied instants, passed through unrounded
@@ -56,8 +53,9 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 
 /**
  * Fetch the notification list
- * - Return only the newest doc per `notification_id`, collapse duplicates.
- * - Filter by severity TTL, namespace, type, severity and time-range.
+ * - Return only the newest in-window doc per `notification_id`, collapse duplicates.
+ * - Filter by severity TTL, namespace, type and time-range, all at the document level so
+ *   the result limit bounds the filtered set.
  * - Sort by newest first.
  */
 export const queryNotifications = async (
