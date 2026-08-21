@@ -23,6 +23,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
