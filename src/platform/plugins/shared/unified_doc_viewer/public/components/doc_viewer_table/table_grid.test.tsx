@@ -17,10 +17,23 @@ import { buildHitMock } from '../../__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  euiFontSize: () => ({ fontSize: '12px' }),
-}));
+const mockEuiDataGrid = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  // jest.requireActual (not the top-level `React` import) since jest.mock factories
+  // cannot reference out-of-scope variables.
+  const ReactLib = jest.requireActual('react');
+  return {
+    ...actual,
+    euiFontSize: () => ({ fontSize: '12px' }),
+    // Records the props EuiDataGrid receives without changing its rendered output.
+    EuiDataGrid: ReactLib.forwardRef((props: Record<string, unknown>, ref: unknown) => {
+      mockEuiDataGrid(props);
+      return ReactLib.createElement(actual.EuiDataGrid, { ...props, ref });
+    }),
+  };
+});
 
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
@@ -129,8 +142,8 @@ describe('TableGrid', () => {
       buildFieldRow(`field${i}`, `value${i}`)
     );
     render(<TableGrid {...defaultProps} rows={manyRows} />);
-    expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
-    expect(screen.getByText('field0')).toBeInTheDocument();
-    expect(screen.getByText('field29')).toBeInTheDocument();
+    const gridProps = mockEuiDataGrid.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+    expect(gridProps.pagination).toBeUndefined();
+    expect(gridProps.rowCount).toBe(manyRows.length);
   });
 });
