@@ -62,6 +62,23 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export {
+  ATTACK_DISCOVERY_ACTION_CAPABILITIES,
+  ATTACK_DISCOVERY_MANUAL_ACTION_TYPES,
+  ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES,
+} from './recommended_actions';
+export type {
+  AttackDiscoveryCapabilityRef,
+  AttackDiscoveryKibanaActionType,
+  AttackDiscoveryKibanaRecommendedAction,
+  AttackDiscoveryManualActionType,
+  AttackDiscoveryManualRecommendedAction,
+  AttackDiscoveryRecommendedAction,
+  AttackDiscoveryRecommendedActionPriority,
+  AttackDiscoveryRecommendedActionTargets,
+  AttackDiscoveryRecommendedActionType,
+} from './recommended_actions';
+
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {

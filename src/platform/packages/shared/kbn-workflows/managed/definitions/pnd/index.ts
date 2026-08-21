@@ -132,7 +132,7 @@ export const PND_WATCH_ATTACK_DISCOVERY_WORKFLOW = {
   id: PND_WATCH_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: WORKER_VISIBILITY,
   yaml: WATCH_ATTACK_DISCOVERY_YAML,
 } as const satisfies ManagedWorkflowDefinition;
