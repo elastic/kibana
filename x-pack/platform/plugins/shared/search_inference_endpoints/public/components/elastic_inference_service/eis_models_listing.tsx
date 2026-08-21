@@ -7,7 +7,12 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  type EuiButtonGroupOptionProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ContentList, ContentListToolbar } from '@kbn/content-list';
 import { EisCardGrid } from './eis_card_grid';
@@ -17,11 +22,13 @@ import { EisTable } from './eis_table';
 
 export type EisViewMode = 'card' | 'table';
 
+type EisViewModeOption = Omit<EuiButtonGroupOptionProps, 'id'> & { id: EisViewMode };
+
 interface EisModelsListingProps {
   onViewModelDetails: (modelId: string) => void;
 }
 
-const VIEW_MODE_OPTIONS = [
+const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
   {
     id: 'card',
     iconType: 'grid',
@@ -37,6 +44,9 @@ const VIEW_MODE_OPTIONS = [
     }),
   },
 ];
+
+const isEisViewMode = (id: string): id is EisViewMode =>
+  VIEW_MODE_OPTIONS.some((option) => option.id === id);
 
 export const EisModelsListing = ({ onViewModelDetails }: EisModelsListingProps) => {
   const [viewMode, setViewMode] = useState<EisViewMode>('card');
@@ -59,7 +69,11 @@ export const EisModelsListing = ({ onViewModelDetails }: EisModelsListingProps) 
             })}
             options={VIEW_MODE_OPTIONS}
             idSelected={viewMode}
-            onChange={(id) => setViewMode(id as EisViewMode)}
+            onChange={(id) => {
+              if (isEisViewMode(id)) {
+                setViewMode(id);
+              }
+            }}
             // `m` is form-control height, matching the toolbar's search box and filter buttons.
             buttonSize="m"
             isIconOnly

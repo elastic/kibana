@@ -159,7 +159,13 @@ describe('createEisFindItems', () => {
 });
 
 describe('createEisFieldDefinitions', () => {
-  const [provider, category] = createEisFieldDefinitions(models);
+  const fields = createEisFieldDefinitions(models);
+  const provider = fields.find(({ fieldName }) => fieldName === EIS_PROVIDER_FILTER_ID);
+  const category = fields.find(({ fieldName }) => fieldName === EIS_CATEGORY_FILTER_ID);
+
+  if (!provider || !category) {
+    throw new Error('Expected provider and category field definitions');
+  }
 
   it('resolves providers case-insensitively and by partial match', () => {
     expect(provider.fieldName).toBe(EIS_PROVIDER_FILTER_ID);

@@ -101,7 +101,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
     const searchBox = getByTestId(SEARCH_BOX);
     fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
-    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
+    fireEvent.search(searchBox);
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
     const searchBox = getByTestId(SEARCH_BOX);
     fireEvent.change(searchBox, { target: { value: 'nonexistent-model-xyz-999' } });
-    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
+    fireEvent.search(searchBox);
 
     await waitFor(() => expect(getByText('No models found')).toBeInTheDocument());
   });
