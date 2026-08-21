@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
-import { buildRenderPageRequest, DEMO_BANNER } from './build_payload';
+import { buildRenderPageRequest, DEMO_BANNER, withPublicOrigin } from './build_payload';
 
 const REDIRECT_URL = 'http://localhost:5601/app/reportingRedirect?forceNow=2026-01-01';
 const LOCATOR_CONTEXT = {
@@ -43,8 +43,48 @@ function pngOptions(overrides: Partial<PngScreenshotOptions> = {}): PngScreensho
   };
 }
 
+describe('withPublicOrigin', () => {
+  it('swaps the origin while preserving path, query and hash', () => {
+    expect(
+      withPublicOrigin(
+        'https://localhost:5601/app/reportingRedirect?forceNow=2026-01-01#/view/abc',
+        'https://my-project.kb.eu-west-1.aws.qa.elastic.cloud'
+      )
+    ).toBe(
+      'https://my-project.kb.eu-west-1.aws.qa.elastic.cloud/app/reportingRedirect?forceNow=2026-01-01#/view/abc'
+    );
+  });
+
+  it('ignores any path on publicBaseUrl and uses only its origin', () => {
+    expect(withPublicOrigin('https://localhost:5601/app/x', 'https://kb.example.com/base')).toBe(
+      'https://kb.example.com/app/x'
+    );
+  });
+
+  it('returns the url untouched when publicBaseUrl is unset', () => {
+    expect(withPublicOrigin(REDIRECT_URL, undefined)).toBe(REDIRECT_URL);
+  });
+
+  it('returns the url untouched when either value is unparseable', () => {
+    expect(withPublicOrigin(REDIRECT_URL, 'not a url')).toBe(REDIRECT_URL);
+    expect(withPublicOrigin('not a url', 'https://kb.example.com')).toBe('not a url');
+  });
+});
+
 describe('buildRenderPageRequest', () => {
   const security = securityServiceMock.createStart();
+
+  it('rewrites the capture url origin to publicBaseUrl when provided', () => {
+    const { payload } = buildRenderPageRequest(
+      pdfOptions(),
+      security,
+      'https://my-project.kb.eu-west-1.aws.qa.elastic.cloud'
+    );
+
+    expect(payload.url).toBe(
+      'https://my-project.kb.eu-west-1.aws.qa.elastic.cloud/app/reportingRedirect?forceNow=2026-01-01'
+    );
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -36,11 +36,26 @@ export class PageRenderScreenshottingPlugin implements Plugin<void, PageRenderSc
   }
 
   public start(core: CoreStart): PageRenderScreenshottingStart {
+    // Reporting builds capture URLs from `xpack.reporting.kibanaServer.*`, which defaults to
+    // `server.host`/`server.port` — and `create_config.ts` silently rewrites a `0.0.0.0` host to
+    // `localhost`. That is correct for the real screenshotting plugin, whose Chromium runs inside
+    // the Kibana pod, but a remote render service resolves `localhost` to *itself* and fails with
+    // ERR_CONNECTION_REFUSED. `server.publicBaseUrl` is the only externally-valid origin Kibana
+    // knows about (the in-cluster Service is in a per-project namespace the pod cannot discover),
+    // so hand it to the client to substitute in.
+    const publicBaseUrl = core.http.basePath.publicBaseUrl;
+    if (this.config.enabled && !publicBaseUrl) {
+      this.logger.warn(
+        "server.publicBaseUrl is not set — capture URLs will keep Reporting's default host, which a remote render service cannot reach."
+      );
+    }
+
     return {
       getScreenshots: createGetScreenshots({
         config: this.config,
         logger: this.logger,
         security: core.security,
+        publicBaseUrl,
       }),
     };
   }

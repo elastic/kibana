@@ -56,10 +56,14 @@ export function createGetScreenshots({
   config,
   logger,
   security,
+  publicBaseUrl,
 }: {
   config: PluginConfig;
   logger: Logger;
   security: SecurityServiceStart;
+  /** `server.publicBaseUrl`, substituted into capture URLs so the remote render service can
+   * reach Kibana. See the note in `server/plugin.ts`. */
+  publicBaseUrl?: string;
 }): PageRenderScreenshottingStart['getScreenshots'] {
   return function getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
     if (options.expression) {
@@ -78,7 +82,7 @@ export function createGetScreenshots({
     let payload;
     let droppedUrlCount;
     try {
-      ({ payload, droppedUrlCount } = buildRenderPageRequest(options, security));
+      ({ payload, droppedUrlCount } = buildRenderPageRequest(options, security, publicBaseUrl));
     } catch (err) {
       return Rx.throwError(() => err);
     }
