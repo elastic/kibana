@@ -89,7 +89,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
       }
 
       return () => {
-        if (!isMounted()) {
+        if (!isMounted() && apiRef) {
           apiRef.current = undefined;
         }
       };
