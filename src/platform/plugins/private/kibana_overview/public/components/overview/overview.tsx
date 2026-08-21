@@ -265,7 +265,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         aria-labelledby="kbnOverviewApps__title"
         contentProps={{
           css: css({
-            paddingTop: 0,
+            paddingTop: euiTheme.size.xl,
           }),
         }}
       >
