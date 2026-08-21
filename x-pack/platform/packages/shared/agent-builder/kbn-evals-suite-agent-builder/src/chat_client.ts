@@ -95,6 +95,9 @@ export class AgentBuilderEvaluationChatClient {
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
+          // Local execution mode runs inside this HTTP request, so the eval worker's W3C `traceparent`
+          // propagates and all server-side gen_ai spans nest under the eval's trace.
+          _execution_mode: 'local',
         }),
       });
 
