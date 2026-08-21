@@ -48,6 +48,18 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
         deployment_modes: { agentless: { enabled: true } },
         inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
       },
+      // cloudtrail — ECF, dual-input (S3 + CloudWatch); needed for signal-filter test
+      {
+        name: 'cloudtrail',
+        data_streams: ['cloudtrail'],
+        inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
+      },
+      // waf — ECF, single-input (S3)
+      {
+        name: 'waf',
+        data_streams: ['waf'],
+        inputs: [{ type: 'aws-s3' }],
+      },
     ],
     data_streams: [
       {
@@ -59,6 +71,54 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
         path: 's3access',
         type: 'logs',
         streams: [{ input: 'aws-s3', vars: [] }],
+      },
+      {
+        path: 'cloudtrail',
+        type: 'logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+          {
+            input: 'aws-cloudwatch',
+            vars: [
+              {
+                name: 'log_group_arn',
+                type: 'text',
+                title: 'Log Group ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'waf',
+        type: 'logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'elb_logs',

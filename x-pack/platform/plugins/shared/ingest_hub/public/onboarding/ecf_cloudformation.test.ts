@@ -120,6 +120,27 @@ describe('getEcfServiceConfigs()', () => {
     expect(config.logGroupArns).toEqual([]);
   });
 
+  it('splits comma-joined multi-value ARNs into individual entries', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      cloudtrail: {
+        enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+        varsByInput: {
+          'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a, arn:aws:s3:::bucket-b' },
+          'aws-cloudwatch': {
+            log_group_arn:
+              'arn:aws:logs:us-east-1:123:log-group:ct-1, arn:aws:logs:us-east-1:123:log-group:ct-2',
+          },
+        },
+      },
+    };
+    const [config] = getEcfServiceConfigs([inst('cloudtrail')], serviceVars);
+    expect(config.bucketArns).toEqual(['arn:aws:s3:::bucket-a', 'arn:aws:s3:::bucket-b']);
+    expect(config.logGroupArns).toEqual([
+      'arn:aws:logs:us-east-1:123:log-group:ct-1',
+      'arn:aws:logs:us-east-1:123:log-group:ct-2',
+    ]);
+  });
+
   it('skips non-ECF services mixed in with ECF services', () => {
     // ec2_logs has agent_based delivery — no ecfLogType
     const result = getEcfServiceConfigs([inst('ec2_logs'), inst('vpcflow')], {});
