@@ -63,7 +63,9 @@ ${
     },
     {
       description: `ES serverless start script for Security project.
-This is a bypass utility that calls ${chalk.cyan('yarn es serverless')} along with some default options
+This is a bypass utility that calls ${chalk.cyan(
+        'yarn es serverless'
+      )} along with some default options
 that will enable users and roles to be loaded into ES.
 `,
       flags: {
