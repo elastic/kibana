@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import type { ParsedSkillMeta } from '@kbn/agent-builder-common';
 
 export interface ParsedSkillFileResult {
@@ -40,7 +40,7 @@ export const parseSkillFile = (rawContent: string): ParsedSkillFileResult => {
 const parseFrontmatter = (raw: string): ParsedSkillMeta => {
   let parsed: Record<string, unknown>;
   try {
-    parsed = (yaml.load(raw) as Record<string, unknown>) ?? {};
+    parsed = (parse(raw) as Record<string, unknown>) ?? {};
   } catch {
     return {};
   }
