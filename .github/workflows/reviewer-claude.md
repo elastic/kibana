@@ -139,6 +139,20 @@ jobs:
 
             try {
               const { owner, repo } = context.repo;
+              const { data: currentPullRequest } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber,
+              });
+              const currentLabels = currentPullRequest.labels.map((label) =>
+                typeof label === 'string' ? label : label.name
+              );
+              if (currentLabels.includes('reviewer:libra')) {
+                core.info('reviewer:libra is already present; keeping the PR routed to Libra.');
+                core.setOutput('diverted', 'true');
+                return;
+              }
+
               const events = await github.paginate(github.rest.issues.listEventsForTimeline, {
                 owner,
                 repo,
