@@ -168,7 +168,7 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
    - entity: `{ type: "entity", subtype, feature_id, name, stream_name? }`
    - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, stream_name? }`
 
-   In all four shapes, `subtype` is copied verbatim from the fetched KI's `subtype` — never invented, never normalized. On a cause entry, `type` is likewise copied verbatim from the fetched KI's own `type` (`entity`, `infrastructure`, `technology`, `dependency`, or `schema`); it is **not** the row-kind label used by the three blast radius shapes above, which only distinguishes those shapes from each other. Every entry references a fetched KI, so both values are always available — if you cannot find them on the KI, you have the wrong `feature_id`.
+   Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label shown above.
 4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and `not_checked` may inform narrative assessment but cannot establish active topology.
 
 </procedure>

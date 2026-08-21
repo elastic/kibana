@@ -31,6 +31,7 @@ const blastRadiusDependencySchema = z.object({
   subtype: z
     .string()
     .max(MAX_ID_LENGTH)
+    .optional()
     .describe(
       "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
@@ -68,6 +69,7 @@ const blastRadiusInfrastructureSchema = z.object({
   subtype: z
     .string()
     .max(MAX_ID_LENGTH)
+    .optional()
     .describe(
       "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
@@ -98,6 +100,7 @@ const blastRadiusEntitySchema = z.object({
   subtype: z
     .string()
     .max(MAX_ID_LENGTH)
+    .optional()
     .describe(
       "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
@@ -133,12 +136,14 @@ export const causalFeatureSchema = z.object({
   type: z
     .string()
     .max(MAX_ID_LENGTH)
+    .optional()
     .describe(
       'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
     ),
   subtype: z
     .string()
     .max(MAX_ID_LENGTH)
+    .optional()
     .describe(
       "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
