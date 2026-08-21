@@ -46,18 +46,22 @@ describe('generateOpenrouterConnectors', () => {
     );
   });
 
-  it('does not emit connectors for models that do not advertise tool calling', async () => {
+  it('includes the evaluation connector when a model filter is set', async () => {
     const connectors = await generateOpenrouterConnectors({
       baseUrl: BASE_URL,
       apiKey: API_KEY,
-      modelsRaw: 'openai/gpt-5.4,openai/gpt-5.4-image-2',
+      modelsRaw: 'eis/openai-gpt-5.4',
+      evaluationConnectorId: 'openrouter-anthropic-claude-sonnet-4-6',
       httpJsonFn: httpJsonFor([
         { id: 'openai/gpt-5.4', supported_parameters: TOOLS },
-        { id: 'openai/gpt-5.4-image-2', supported_parameters: ['temperature'] },
+        { id: 'anthropic/claude-sonnet-4.6', supported_parameters: TOOLS },
       ]),
     });
 
-    expect(Object.keys(connectors)).toEqual(['openrouter-openai-gpt-5-4']);
+    expect(Object.keys(connectors)).toEqual(['openrouter-anthropic-claude-sonnet-4-6']);
+    expect(connectors['openrouter-anthropic-claude-sonnet-4-6'].config.defaultModel).toBe(
+      'anthropic/claude-sonnet-4.6'
+    );
   });
 
   it('fails when a requested model is missing from GET /models/user', async () => {

@@ -156,6 +156,7 @@ function supportsToolCalling(entry) {
  *   baseUrl: string,
  *   apiKey: string,
  *   modelsRaw?: string,
+ *   evaluationConnectorId?: string,
  *   httpJsonFn?: (url: string, apiKey: string) => Promise<object>,
  * }} options
  * @returns {Promise<Record<string, object>>}
@@ -164,9 +165,14 @@ async function generateOpenrouterConnectors({
   baseUrl,
   apiKey,
   modelsRaw = '',
+  evaluationConnectorId = '',
   httpJsonFn = httpJson,
 }) {
   const rawList = parseModelList(modelsRaw);
+  const evalConnectorId = String(evaluationConnectorId).trim();
+  if (rawList.length > 0 && evalConnectorId.startsWith('openrouter-')) {
+    rawList.push(evalConnectorId);
+  }
   const deprecated = rawList.filter(
     (token) => token.startsWith('llm-gateway/') || token.startsWith('litellm-')
   );
@@ -260,6 +266,7 @@ async function main() {
       baseUrl,
       apiKey,
       modelsRaw,
+      evaluationConnectorId: process.env.EVAL_CONNECTOR_ID,
     });
   } catch (e) {
     die(e && e.message ? e.message : String(e));
