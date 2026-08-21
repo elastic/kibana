@@ -152,16 +152,16 @@ describe('fromStoredRuntimeFields', () => {
     describe('when the format is url', () => {
       it('returns the params for link subtype', () => {
         const result = getParams('url', {
-          type: 'link',
+          type: 'a',
           urlTemplate: 'https://example.com/{{value}}',
           labelTemplate: '{{value}}',
-          openInNewTab: true,
+          openLinkInCurrentTab: true,
         });
         expect(result).toEqual({
-          type: 'link',
+          type: 'a',
           url_template: 'https://example.com/{{value}}',
           label_template: '{{value}}',
-          open_in_new_tab: true,
+          open_link_in_current_tab: true,
         });
       });
 

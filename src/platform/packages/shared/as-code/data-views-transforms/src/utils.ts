@@ -11,7 +11,7 @@ import type {
   AsCodeDurationFormat,
   AsCodeFieldFormat,
   AsCodeHistogramFormat,
-} from '@kbn/as-code-data-views-schema/src/types';
+} from '@kbn/as-code-data-views-schema';
 import { camelCase, isPlainObject, snakeCase } from 'lodash';
 
 export function isDurationFormat(format: AsCodeFieldFormat): format is AsCodeDurationFormat {

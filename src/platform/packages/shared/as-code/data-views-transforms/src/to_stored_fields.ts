@@ -24,6 +24,7 @@ import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   type AsCodeCompositeRuntimeField,
   type AsCodeDataViewSpec,
+  type AsCodeFieldFormat,
   type AsCodeFieldSettings,
   type AsCodeRuntimeField,
   type AsCodeSavedCompositeRuntimeField,
@@ -31,7 +32,6 @@ import {
   type AsCodeSavedFieldSettings,
   type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
-import type { AsCodeFieldFormat } from '@kbn/as-code-data-views-schema/src/types';
 import { camelCase } from 'lodash';
 import { isDurationFormat, isHistogramFormat, camelCaseKeys } from './utils';
 

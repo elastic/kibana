@@ -158,17 +158,17 @@ describe('toStoredRuntimeFields', () => {
         const result = toStoredFieldFormatParams({
           type: 'url',
           params: {
-            type: 'link',
+            type: 'a',
             url_template: 'https://example.com/{{value}}',
             label_template: '{{value}}',
-            open_in_new_tab: true,
+            open_link_in_current_tab: true,
           },
         });
         expect(result).toEqual({
-          type: 'link',
+          type: 'a',
           urlTemplate: 'https://example.com/{{value}}',
           labelTemplate: '{{value}}',
-          openInNewTab: true,
+          openLinkInCurrentTab: true,
         });
       });
 

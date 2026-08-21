@@ -13,7 +13,7 @@ import type {
   AsCodeRuntimeField,
 } from '@kbn/as-code-data-views-schema';
 import { fromStoredFields } from './from_stored_fields';
-import { isCompositeRuntimeField, isRuntimeField } from './to_stored_fields';
+import { isCompositeRuntimeField, isRuntimeField, toStoredFieldFormats } from './to_stored_fields';
 
 function assertPrimitiveRuntimeEntry(
   entry: AsCodeFieldSettings | undefined
@@ -393,6 +393,50 @@ describe('fromStoredFields.field_settings (indexed)', () => {
       },
       mapped: {
         format: { type: 'bytes', params: undefined },
+      },
+    });
+  });
+
+  it('round-trips url link params with open_link_in_current_tab', () => {
+    const asCodeFieldSettings = {
+      my_field: {
+        format: {
+          type: 'url',
+          params: {
+            type: 'a',
+            url_template: 'https://example.com/{{value}}',
+            label_template: 'View {{value}}',
+            open_link_in_current_tab: true,
+          },
+        },
+      },
+    };
+
+    const storedFieldFormats = toStoredFieldFormats(asCodeFieldSettings);
+    expect(storedFieldFormats).toEqual({
+      my_field: {
+        id: 'url',
+        params: {
+          type: 'a',
+          urlTemplate: 'https://example.com/{{value}}',
+          labelTemplate: 'View {{value}}',
+          openLinkInCurrentTab: true,
+        },
+      },
+    });
+
+    const roundTrippedFieldSettings = fromStoredFields({}, storedFieldFormats);
+    expect(roundTrippedFieldSettings).toEqual({
+      my_field: {
+        format: {
+          type: 'url',
+          params: {
+            type: 'a',
+            url_template: 'https://example.com/{{value}}',
+            label_template: 'View {{value}}',
+            open_link_in_current_tab: true,
+          },
+        },
       },
     });
   });
