@@ -6,4 +6,4 @@
  */
 
 export { apiTest } from '@kbn/scout-oblt';
-export { COMMON_HEADERS } from './constants';
+export { COMMON_HEADERS, NO_AGENT_BUILDER_ROLE } from './constants';

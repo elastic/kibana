@@ -424,3 +424,52 @@ describe('NightshiftInvestigationsClient.list()', () => {
     });
   });
 });
+
+describe('NightshiftInvestigationsClient.start()', () => {
+  const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
+  const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
+
+  it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    const result = await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: WORKFLOW_ID }),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ source: 'alert', alert_id: 'alert-1' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+    expect(result).toEqual({ investigation_id: 'exec-123' });
+  });
+
+  it('includes concurrency_key in inputs when provided', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-456');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-99' },
+      concurrency_key: 'key-abc',
+    });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({ concurrency_key: 'key-abc' }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
+  it('throws when the workflow is not installed', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(null);
+
+    await expect(
+      makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })
+    ).rejects.toThrow('Investigations are not configured in this space');
+  });
+});

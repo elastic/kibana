@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout-oblt';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'true',
   'x-elastic-internal-origin': 'kibana',
 } as const;
+
+export const NO_AGENT_BUILDER_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: {}, spaces: ['*'] }],
+};

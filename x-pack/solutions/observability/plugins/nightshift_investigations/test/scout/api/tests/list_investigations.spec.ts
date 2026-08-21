@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS } from '../fixtures';
+import { apiTest, COMMON_HEADERS, NO_AGENT_BUILDER_ROLE } from '../fixtures';
 
 const INVESTIGATIONS_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
@@ -35,7 +35,7 @@ apiTest.describe(
     });
 
     apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      const { cookieHeader } = await samlAuth.asInteractiveUser(NO_AGENT_BUILDER_ROLE);
       const response = await apiClient.get(LIST_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',
