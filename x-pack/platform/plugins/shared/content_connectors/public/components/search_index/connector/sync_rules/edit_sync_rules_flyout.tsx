@@ -10,7 +10,6 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,6 +20,8 @@ import {
   EuiTabbedContent,
   EuiSpacer,
 } from '@elastic/eui';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -125,9 +126,8 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
           <EuiFlexGroup direction="column">
             {errors.map((error, index) => (
               <EuiFlexItem id={`${index}`} grow={false}>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
-                  color="danger"
                   title={i18n.translate(
                     'xpack.contentConnectors.content.index.connector.syncRules.flyout.errorTitle',
                     {
@@ -145,7 +145,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
                       <p id={message}>{message}</p>
                     ))}
                   </>
-                </EuiCallOut>
+                </KbnDangerCallout>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
