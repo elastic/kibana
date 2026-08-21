@@ -87,6 +87,7 @@ const toEvaluationScoreDocuments = (
       },
       evaluator: {
         name: score.evaluator.name,
+        ...(score.evaluator.version != null && { version: score.evaluator.version }),
         score: score.evaluator.score,
         label: score.evaluator.label,
         explanation: score.evaluator.explanation,
