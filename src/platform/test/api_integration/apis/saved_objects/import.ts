@@ -29,23 +29,23 @@ export default function ({ getService }: FtrProviderContext) {
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+      meta: { title: 'logstash-*', icon: 'pattern' },
     };
     const visualization = {
       type: 'visualization',
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+      meta: { title: 'Count of requests', icon: 'chartBarVertical' },
     };
     const dashboard = {
       type: 'dashboard',
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-      meta: { title: 'Requests', icon: 'dashboardApp' },
+      meta: { title: 'Requests', icon: 'productDashboard' },
     };
     const managedVis = {
       id: '3fdaa535-5baf-46bc-8265-705eda43b181',
       type: 'visualization',
       meta: {
-        icon: 'visualizeApp',
+        icon: 'chartBarVertical',
         title: 'Managed Count of requests',
       },
       managed: true,
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       id: '11fb046d-0e50-48a0-a410-a744b82cbffd',
       type: 'dashboard',
       meta: {
-        icon: 'dashboardApp',
+        icon: 'productDashboard',
         title: 'Managed Requests',
       },
       managed: true,
@@ -188,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               id: 'dashboard-b',
               meta: {
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
                 title: 'dashboard-b',
               },
               type: 'dashboard',
@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               id: 'dashboard-a',
               meta: {
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
                 title: 'dashboard-a',
               },
               type: 'dashboard',
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: '1',
-                  meta: { title: 'My visualization', icon: 'visualizeApp' },
+                  meta: { title: 'My visualization', icon: 'chartBarVertical' },
                   error: {
                     type: 'missing_references',
                     references: [

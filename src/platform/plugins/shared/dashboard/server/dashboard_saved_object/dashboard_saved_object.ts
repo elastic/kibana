@@ -32,7 +32,7 @@ export const createDashboardSavedObjectType = ({
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'dashboardApp',
+    icon: 'productDashboard',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
