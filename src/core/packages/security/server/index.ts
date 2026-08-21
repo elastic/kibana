@@ -20,6 +20,10 @@ export type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
+  ServiceAccountWorkloadAttacher,
+  ServiceAccountWorkloadBinding,
+  AttachServiceAccountWorkloadParams,
+  ServiceAccountWorkloadCoordinates,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,

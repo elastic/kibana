@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export {
+  registerWorkloadBindingSavedObjectType,
+  SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+} from './bindings';
+export type { ServiceAccountWorkloadBindingsApi } from './bindings';
 export { ServiceAccountsService } from './service_accounts_service';
 export type { ServiceAccountsServiceStartParams } from './service_accounts_service';
 export type { ServiceAccountsBackend, ServiceAccountsServiceStart } from './types';
