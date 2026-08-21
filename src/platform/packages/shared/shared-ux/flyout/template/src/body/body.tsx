@@ -10,7 +10,7 @@
 import React, { Fragment } from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { FlyoutBodyProps } from '../types';
 import { bodyAssembly, flyoutAssembly } from '../assembly';
 import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
@@ -42,8 +42,10 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
   const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
 
   return (
-    <EuiFlyoutBody data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body')}>
-      <KibanaErrorBoundary>{renderBodyItems(children)}</KibanaErrorBoundary>
-    </EuiFlyoutBody>
+    <KibanaErrorBoundaryProvider>
+      <EuiFlyoutBody data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body')}>
+        <KibanaErrorBoundary>{renderBodyItems(children)}</KibanaErrorBoundary>
+      </EuiFlyoutBody>
+    </KibanaErrorBoundaryProvider>
   );
 };

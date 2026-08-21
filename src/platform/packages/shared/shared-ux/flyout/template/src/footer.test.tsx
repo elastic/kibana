@@ -9,16 +9,11 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
-import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
-const WithErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <KibanaErrorBoundaryProvider>{children}</KibanaErrorBoundaryProvider>
-);
-
-const renderTemplate = (ui: React.ReactElement) => render(ui, { wrapper: WithErrorBoundary });
+const renderTemplate = (ui: React.ReactElement) => render(ui);
 
 describe('FlyoutTemplate footer', () => {
   it('renders the primary action to the right of the secondary action', () => {
