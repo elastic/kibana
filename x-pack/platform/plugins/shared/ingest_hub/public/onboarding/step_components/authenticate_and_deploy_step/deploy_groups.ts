@@ -167,7 +167,7 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? { trigger: null, vars: {} };
+      storedServiceVars[instance.serviceId] ?? { enabledInputs: [], vars: {} };
   }
 
   const services = group.members.map(({ service }) => service);

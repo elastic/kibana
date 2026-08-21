@@ -91,10 +91,10 @@ describe('useServiceSettings — incompleteInstances', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     act(() =>
-      result.current.setServiceFieldsAndTransport(
+      result.current.setServiceFieldsAndInputs(
         'svc_a',
         { bucket_arn: 'arn:aws:s3:::my-bucket' },
-        'aws-s3'
+        ['aws-s3']
       )
     );
     expect(result.current.incompleteInstances).toHaveLength(0);
@@ -103,7 +103,7 @@ describe('useServiceSettings — incompleteInstances', () => {
 
   it('duplicate instance also appears in incompleteInstances when its required var is empty', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, null));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
     expect(result.current.incompleteInstances.length).toBeGreaterThanOrEqual(2);
     expect(result.current.incompleteInstanceIds.has('svc_a__dup-1')).toBe(true);
   });
@@ -154,7 +154,7 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
@@ -165,10 +165,10 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
@@ -184,16 +184,16 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, []);
     });
     act(() => {
       result.current.removeInstance('guardduty__dup-1');
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 3]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 3]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);

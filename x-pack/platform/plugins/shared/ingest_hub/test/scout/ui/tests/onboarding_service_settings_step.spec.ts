@@ -21,9 +21,8 @@ const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 // Synthetic aws package manifest injected via page.route() to make all tests hermetic.
 // Covers every service used in this spec so assertions never depend on whatever
-// elastic/integrations happens to ship. ECF-only services need a minimal entry so
-// buildAwsServiceMatrix can derive their signalType and avoid the policy_templates?.[0]
-// fallback that would incorrectly inherit the agentless flag from a managed_integration service.
+// elastic/integrations happens to ship. ECF-only services (cloudtrail, waf, vpcflow) get
+// their names from the static matrix; only non-ECF services need policy_templates here.
 const MOCK_AWS_PACKAGE_RESPONSE = {
   item: {
     policy_templates: [
@@ -48,10 +47,6 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
         deployment_modes: { agentless: { enabled: true } },
         inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
       },
-      // cloudtrail — ECF-only; no agentless (prevents fallback to ec2 template)
-      { name: 'cloudtrail', data_streams: ['cloudtrail'], inputs: [] },
-      // waf — ECF-only; no agentless
-      { name: 'waf', data_streams: ['waf'], inputs: [] },
     ],
     data_streams: [
       {
@@ -95,9 +90,6 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
           },
         ],
       },
-      // ECF-only services: minimal entry so signal type is derivable from the manifest
-      { path: 'cloudtrail', type: 'logs', streams: [] },
-      { path: 'waf', type: 'logs', streams: [] },
     ],
   },
 };

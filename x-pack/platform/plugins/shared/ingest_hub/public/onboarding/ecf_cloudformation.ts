@@ -106,13 +106,16 @@ export const getEcfServiceConfigs = (
 
     const entryVars = serviceVars[instanceId];
     const vars = entryVars?.vars ?? {};
-    const trigger = entryVars?.trigger;
+    const enabledInputs = entryVars?.enabledInputs ?? [];
 
-    // Gate each ARN on the selected trigger so stale values from a previous transport
+    // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    const bucketArn = trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined;
-    const logGroupArn =
-      trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined;
+    const bucketArn = enabledInputs.includes('aws-s3')
+      ? vars.bucket_arn?.trim() || undefined
+      : undefined;
+    const logGroupArn = enabledInputs.includes('aws-cloudwatch')
+      ? vars.log_group_arn?.trim() || undefined
+      : undefined;
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {

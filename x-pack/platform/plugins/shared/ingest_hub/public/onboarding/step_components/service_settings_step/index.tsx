@@ -36,7 +36,6 @@ import {
   getRegionFieldName,
   hasConfigurableFlyoutFields,
 } from './field_config';
-import type { TransportType } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
@@ -64,7 +63,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     signalFilter,
     setSignalFilter,
     getServiceVars,
-    setServiceFieldsAndTransport,
+    setServiceFieldsAndInputs,
     addDuplicate,
     removeInstance,
     allInstanceNames,
@@ -95,18 +94,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     : null;
 
   const handleFlyoutApply =
-    (instanceId: string) => (fields: Record<string, string>, transport: TransportType | null) => {
-      setServiceFieldsAndTransport(instanceId, fields, transport);
+    (instanceId: string) => (fields: Record<string, string>, enabledInputs: string[]) => {
+      setServiceFieldsAndInputs(instanceId, fields, enabledInputs);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
     fields: Record<string, string>,
-    transport: TransportType | null
+    enabledInputs: string[]
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, fields, transport);
+    addDuplicate(duplicateSourceInstanceId, name, fields, enabledInputs);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -241,7 +240,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           const service = awsServicesMap?.get(inst.serviceId);
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
-          const regionField = getRegionFieldName(service, config.trigger);
+          const regionField = getRegionFieldName(service, config.enabledInputs[0] ?? null);
           const override = config.vars[regionField]?.trim();
           if (override) return override;
           if (globalRegion) return globalRegion;
@@ -495,6 +494,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         <ServiceSettingsFlyout
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
+          globalRegion={globalRegion}
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />
@@ -506,6 +506,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
           suggestedName={buildDuplicateName(duplicateSourceService.name, allInstanceNames)}
           existingNames={allInstanceNames}
+          globalRegion={globalRegion}
           onAdd={handleDuplicateAdd}
           onCancel={() => setDuplicateSourceInstanceId(null)}
         />

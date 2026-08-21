@@ -22,33 +22,40 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceVars } from './use_service_settings';
-import type { TransportType } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
 interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
-  onApply: (fields: Record<string, string>, transport: TransportType | null) => void;
+  globalRegion: string;
+  onApply: (fields: Record<string, string>, enabledInputs: string[]) => void;
   onClose: () => void;
 }
 
 export function ServiceSettingsFlyout({
   service,
   config,
+  globalRegion,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
   const [draft, setDraft] = useState<Record<string, string>>({ ...config.vars });
-  const [draftTransport, setDraftTransport] = useState<TransportType | null>(config.trigger);
+  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(config.enabledInputs);
 
   const handleFieldChange = (fieldName: string, value: string) => {
     setDraft((prev) => ({ ...prev, [fieldName]: value }));
   };
 
+  const handleInputToggle = (input: string, enabled: boolean) => {
+    setDraftEnabledInputs((prev) =>
+      enabled ? [...prev, input] : prev.filter((i) => i !== input)
+    );
+  };
+
   const handleApply = () => {
-    onApply(draft, draftTransport);
+    onApply(draft, draftEnabledInputs);
   };
 
   return (
@@ -75,9 +82,10 @@ export function ServiceSettingsFlyout({
         <ServiceFieldsForm
           service={service}
           draft={draft}
-          draftTransport={draftTransport}
+          enabledInputs={draftEnabledInputs}
+          globalRegion={globalRegion}
           onFieldChange={handleFieldChange}
-          onTransportChange={setDraftTransport}
+          onInputToggle={handleInputToggle}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

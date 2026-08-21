@@ -12,16 +12,15 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
-  getDefaultTransport,
   getRequiredTextFields,
   resolveFieldMeta,
   toTyped,
 } from './field_config';
-import type { TransportType } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceVars {
-  trigger: TransportType | null;
+  /** Input types that are enabled for this service instance (e.g. ['httpjson'], ['aws-s3']). */
+  enabledInputs: string[];
   vars: Record<string, string>;
 }
 
@@ -128,23 +127,24 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {
-      const existing = persisted?.serviceVars?.[instanceId];
-      if (existing) return existing;
-      // Fall back to the service-level defaults using the serviceId.
+      const raw = persisted?.serviceVars?.[instanceId] as ServiceVars | undefined;
+      if (raw) {
+        return raw;
+      }
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
-        trigger: service ? getDefaultTransport(service) : null,
+        enabledInputs: service?.defaultEnabledInputs ?? [],
         vars: {},
       };
     },
     [persisted, instances, awsServicesMap]
   );
 
-  // Applies multiple field changes (and optional transport) in a single write to avoid
+  // Applies multiple field changes (and optional enabled-inputs update) in a single write to avoid
   // stale-closure overwrites when several vars are committed at once (flyout Save).
-  const setServiceFieldsAndTransport = useCallback(
-    (instanceId: string, newFields: Record<string, string>, transport: TransportType | null) => {
+  const setServiceFieldsAndInputs = useCallback(
+    (instanceId: string, newFields: Record<string, string>, enabledInputs: string[]) => {
       const current = getServiceVars(instanceId);
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
@@ -152,7 +152,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [instanceId]: {
-            trigger: transport ?? current.trigger,
+            enabledInputs,
             vars: { ...current.vars, ...newFields },
           },
         },
@@ -166,7 +166,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       sourceInstanceId: string,
       newName: string,
       fields: Record<string, string>,
-      transport: TransportType | null
+      enabledInputs: string[]
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -192,7 +192,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [newInstanceId]: {
-            trigger: transport ?? sourceVars.trigger,
+            enabledInputs: enabledInputs.length ? enabledInputs : sourceVars.enabledInputs,
             vars: { ...sourceVars.vars, ...fields },
           },
         },
@@ -238,10 +238,14 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
-        const required = getRequiredTextFields(service, config.trigger);
+        const activeInputs = config.enabledInputs.length ? config.enabledInputs : service.inputs ?? [];
+        const required = [
+          ...new Set(activeInputs.flatMap((inp) => getRequiredTextFields(service, inp))),
+        ];
         return required.some((f) => {
           const meta = resolveFieldMeta(service, f);
           const effective = meta ? toTyped(config.vars[f], meta) : config.vars[f] ?? '';
+          if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         });
       }),
@@ -286,7 +290,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     signalFilter,
     setSignalFilter,
     getServiceVars,
-    setServiceFieldsAndTransport,
+    setServiceFieldsAndInputs,
     addDuplicate,
     removeInstance,
     allInstanceNames,

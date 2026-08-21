@@ -49,11 +49,11 @@ describe('getEcfServiceConfigs()', () => {
   it('reads bucket_arn and log_group_arn from serviceVars keyed by instanceId', () => {
     const serviceVars: Record<string, ServiceVars> = {
       vpcflow: {
-        trigger: 'aws-s3',
+        enabledInputs: ['aws-s3'],
         vars: { bucket_arn: 'arn:aws:s3:::my-bucket', region: 'us-east-1' },
       },
       waf: {
-        trigger: 'aws-cloudwatch',
+        enabledInputs: ['aws-cloudwatch'],
         vars: { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
       },
     };
@@ -72,11 +72,11 @@ describe('getEcfServiceConfigs()', () => {
     // User duplicated cloudtrail to collect from two S3 buckets.
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        trigger: 'aws-s3',
+        enabledInputs: ['aws-s3'],
         vars: { bucket_arn: 'arn:aws:s3:::bucket-a' },
       },
       'cloudtrail__dup-1': {
-        trigger: 'aws-s3',
+        enabledInputs: ['aws-s3'],
         vars: { bucket_arn: 'arn:aws:s3:::bucket-b' },
       },
     };
@@ -94,7 +94,7 @@ describe('getEcfServiceConfigs()', () => {
     // Only the log_group_arn (matching the active trigger) should appear in the config.
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        trigger: 'aws-cloudwatch',
+        enabledInputs: ['aws-cloudwatch'],
         vars: {
           bucket_arn: 'arn:aws:s3:::stale-bucket',
           log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct',
@@ -108,7 +108,7 @@ describe('getEcfServiceConfigs()', () => {
 
   it('trims whitespace from ARN values and treats blank as empty', () => {
     const serviceVars: Record<string, ServiceVars> = {
-      cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: '  ', log_group_arn: '' } },
+      cloudtrail: { enabledInputs: ['aws-s3'], vars: { bucket_arn: '  ', log_group_arn: '' } },
     };
     const [config] = getEcfServiceConfigs([inst('cloudtrail')], serviceVars);
     expect(config.bucketArns).toEqual([]);

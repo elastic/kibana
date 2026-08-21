@@ -44,12 +44,12 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
 }
 
 describe('getRegionFieldName', () => {
-  it('returns "region" for S3 transport when service has region in requiredConfig', () => {
+  it('returns "region" for S3 input when service has region in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region', 'bucket_arn'] });
     expect(getRegionFieldName(service, 'aws-s3')).toBe('region');
   });
 
-  it('returns "region_name" for CloudWatch transport when service has region_name in requiredConfig', () => {
+  it('returns "region_name" for CloudWatch input when service has region_name in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region_name', 'log_group_arn'] });
     expect(getRegionFieldName(service, 'aws-cloudwatch')).toBe('region_name');
   });
@@ -81,15 +81,15 @@ describe('resolveFieldMeta', () => {
     expect(meta?.def.title).toBe('Bucket ARN');
   });
 
-  it('derives transport from single input', () => {
+  it('derives input from single input', () => {
     const service = makeService({
       varDefs: { bucket_arn: makeVarDef('bucket_arn', 'text', { inputs: ['aws-s3'] }) },
     });
     const meta = resolveFieldMeta(service, 'bucket_arn');
-    expect(meta?.transport).toBe('aws-s3');
+    expect(meta?.input).toBe('aws-s3');
   });
 
-  it('derives no transport for a var shared between inputs', () => {
+  it('derives no input for a var shared between inputs', () => {
     const service = makeService({
       varDefs: {
         preserve_original_event: makeVarDef('preserve_original_event', 'bool', {
@@ -98,7 +98,7 @@ describe('resolveFieldMeta', () => {
       },
     });
     const meta = resolveFieldMeta(service, 'preserve_original_event');
-    expect(meta?.transport).toBeUndefined();
+    expect(meta?.input).toBeUndefined();
   });
 
   it('sets isBool true for type bool', () => {
@@ -184,7 +184,7 @@ describe('getRequiredTextFields', () => {
     expect(result).toContain('bucket_arn');
   });
 
-  it('excludes transport-mismatched fields', () => {
+  it('excludes input-mismatched fields', () => {
     const service = makeService({
       requiredConfig: ['bucket_arn', 'log_group_arn'],
       varDefs: {
@@ -197,14 +197,14 @@ describe('getRequiredTextFields', () => {
     expect(result).toContain('log_group_arn');
   });
 
-  it('includes a var with no transport restriction for any active transport', () => {
+  it('includes a var with no input restriction for any active input', () => {
     const service = makeService({
       requiredConfig: ['detector_id'],
       varDefs: {
         detector_id: makeVarDef('detector_id', 'text', { inputs: ['httpjson'] }),
       },
     });
-    // inputs: ['httpjson'] — not 'aws-s3' or 'aws-cloudwatch', so no transport derived
+    // inputs: ['httpjson'] — not 'aws-s3' or 'aws-cloudwatch', so no input derived
     expect(getRequiredTextFields(service, 'aws-s3')).toContain('detector_id');
     expect(getRequiredTextFields(service, 'aws-cloudwatch')).toContain('detector_id');
   });
@@ -236,7 +236,7 @@ describe('getFlyoutFields', () => {
     expect(getFlyoutFields(service, 'aws-s3')).not.toContain('collect_s3_logs');
   });
 
-  it('excludes transport-mismatched fields', () => {
+  it('excludes input-mismatched fields', () => {
     const service = makeService({
       requiredConfig: ['bucket_arn', 'log_group_arn'],
       varDefs: {
