@@ -15,7 +15,7 @@ import { METRICS_INFO_COLUMNS } from './columns_after';
 describe('METRICS_INFO > columnsAfter', () => {
   const mockCommand = { name: 'metrics_info' } as ESQLCommand;
 
-  it('appends METRICS_INFO columns to previous columns', () => {
+  it('replaces previous columns with METRICS_INFO columns', () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
@@ -23,11 +23,7 @@ describe('METRICS_INFO > columnsAfter', () => {
 
     const result = columnsAfter(mockCommand, previousColumns, '');
 
-    expect(result).toEqual<ESQLColumnData[]>([
-      { name: 'field1', type: 'keyword', userDefined: false },
-      { name: 'field2', type: 'double', userDefined: false },
-      ...METRICS_INFO_COLUMNS,
-    ]);
+    expect(result).toEqual<ESQLColumnData[]>([...METRICS_INFO_COLUMNS]);
   });
 
   it('returns only METRICS_INFO columns when previous columns is empty', () => {

@@ -16,6 +16,14 @@ import type {
   ConfigSchema,
 } from './types';
 import { setSidebarRuntimeContext } from './sidebar';
+import { AgentBuilderAccessChecker } from './services';
+
+jest.mock('./services/access', () => ({
+  ...jest.requireActual('./services/access'),
+  AgentBuilderAccessChecker: jest.fn(),
+}));
+
+const MockAgentBuilderAccessChecker = jest.mocked(AgentBuilderAccessChecker);
 
 jest.mock('@kbn/shared-ux-utility', () => ({
   dynamic: jest.fn(() => () => null),
@@ -27,6 +35,12 @@ jest.mock('./services', () => ({
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
+  ConversationTemplatesService: jest.fn(() => ({
+    registerTab: jest.fn(),
+    getTab: jest.fn(),
+    registerTemplateUIDefinition: jest.fn(),
+    getTemplateUIDefinition: jest.fn(),
+  })),
   DocLinksService: jest.fn(),
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
@@ -40,6 +54,10 @@ jest.mock('./services', () => ({
 
 jest.mock('./services/attachments', () => ({
   createPublicAttachmentContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_templates', () => ({
+  createPublicConversationTemplatesContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/renderers', () => ({
@@ -109,10 +127,17 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     http: {},
     docLinks: { links: {} },
     application: {
-      capabilities: { agentBuilder: { show: false } },
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        agentBuilder: { show: false },
+      },
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
+      navControls: { registerRight: jest.fn() },
+      next: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
@@ -161,6 +186,93 @@ const openSidebarAndRegisterCallbacks = (
 describe('AgentBuilderPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    MockAgentBuilderAccessChecker.mockImplementation(
+      () =>
+        ({
+          getAgentBuilderAccess: jest.fn().mockResolvedValue({
+            hasRequiredLicense: true,
+            hasLlmConnector: true,
+          }),
+        } as unknown as AgentBuilderAccessChecker)
+    );
+  });
+
+  describe('getAgentBuilderAccess', () => {
+    it('delegates to accessChecker.getAgentBuilderAccess when show privilege is granted', async () => {
+      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+        hasRequiredLicense: true,
+        hasLlmConnector: true,
+      });
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        agentBuilder: { show: true },
+      };
+
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: true,
+        hasLlmConnector: true,
+      });
+
+      expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
+
+    it('returns denied access without calling getAgentBuilderAccess when show privilege is missing', async () => {
+      const getAgentBuilderAccess = jest.fn();
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+
+      expect(getAgentBuilderAccess).not.toHaveBeenCalled();
+    });
+
+    it('returns denied access when accessChecker.getAgentBuilderAccess resolves denied', async () => {
+      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+      MockAgentBuilderAccessChecker.mockImplementation(
+        () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
+      );
+
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        agentBuilder: { show: true },
+      };
+
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(coreStart, createMockStartDeps());
+
+      await expect(start.getAgentBuilderAccess()).resolves.toEqual({
+        hasRequiredLicense: false,
+        hasLlmConnector: false,
+      });
+
+      expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
   });
 
   describe('openChat when sidebar is already open', () => {

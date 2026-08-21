@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import type { RootState } from '../types';
 
 // Selectors
@@ -134,7 +134,7 @@ export const selectIsWorkflowTab = createSelector(
  * These selectors are used to get the correct data for the editor based on the active tab (current workflow or previous execution).
  */
 
-const selectIsEditorExecutionYaml = createSelector(
+export const selectIsEditorExecutionYaml = createSelector(
   selectIsExecutionsTab,
   selectExecution,
   (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)
@@ -177,6 +177,17 @@ export const selectEditorFocusedStepInfo = createSelector(
   selectEditorWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectEditorFocusedTriggerInfo = createSelector(
+  selectFocusedTriggerId,
+  selectEditorWorkflowLookup,
+  (focusedTriggerId, workflowLookup) => {
+    if (!focusedTriggerId || !workflowLookup) return undefined;
+    const { triggersLineStart, triggersLineEnd } = workflowLookup;
+    if (triggersLineStart == null || triggersLineEnd == null) return undefined;
+    return { lineStart: triggersLineStart, lineEnd: triggersLineEnd };
+  }
 );
 
 export const selectEditorWorkflowGraph = createSelector(

@@ -36,15 +36,7 @@ function renderChannelLink(suite) {
 }
 
 function renderSuiteLine(suite) {
-  const parts = [
-    `\`${suite.suiteId}\``,
-    (suite.failingProjects || []).map((project) => String(project)).join(', '),
-  ];
-
-  const rootCause = extractSuiteRootCauseLine(suite.triageBody);
-  if (rootCause) {
-    parts.push(rootCause);
-  }
+  const headerParts = [`*\`${suite.suiteId}\`*`];
 
   const links = [];
   if (suite.jobUrl) {
@@ -55,20 +47,26 @@ function renderSuiteLine(suite) {
     links.push(channelLink);
   }
   if (links.length > 0) {
-    parts.push(links.join(' · '));
+    headerParts.push(links.join(' · '));
   }
 
-  return `• ${parts.join(' — ')}`;
-}
+  const lines = [headerParts.join(' · ')];
 
-function renderOverviewLine(suite) {
-  const modelCount = Array.isArray(suite.failingProjects) ? suite.failingProjects.length : 0;
-  const parts = [`\`${suite.suiteId}\``, `${modelCount} model${modelCount === 1 ? '' : 's'}`];
-  const channelLink = renderChannelLink(suite);
-  if (channelLink) {
-    parts.push(channelLink);
+  const projects = Array.isArray(suite.failingProjects) ? suite.failingProjects : [];
+  if (projects.length > 3) {
+    lines.push(`  ${projects.length} models`);
+  } else if (projects.length > 0) {
+    lines.push(`  ${projects.map((p) => String(p)).join(', ')}`);
   }
-  return `• ${parts.join(' — ')}`;
+
+  const rootCause = extractSuiteRootCauseLine(suite.triageBody);
+  if (rootCause) {
+    lines.push(`  ${rootCause}`);
+  } else {
+    lines.push(`  _(no triage)_`);
+  }
+
+  return lines.join('\n');
 }
 
 async function main() {
@@ -107,12 +105,7 @@ async function main() {
 
   lines.push('', '*Failed suites:*');
   for (const suite of suites) {
-    lines.push(renderOverviewLine(suite));
-  }
-
-  lines.push('', '*All failures:*');
-  for (const suite of suites) {
-    lines.push(renderSuiteLine(suite));
+    lines.push('', renderSuiteLine(suite));
   }
 
   lines.push(

@@ -32,7 +32,8 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback_delivery_service';
+import { CallbackDeliveryService } from './execution/callback';
+import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -45,6 +46,7 @@ interface ServiceInstances {
   metering: MeteringService;
   consumption: ConsumptionService;
   callbackDelivery: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export class ServiceManager {
@@ -79,6 +81,7 @@ export class ServiceManager {
       }),
       consumption: createConsumptionService(),
       callbackDelivery: new CallbackDeliveryService({ actions }),
+      conversationTemplates: new ConversationTemplatesService(),
     };
 
     const skillsSetup = this.services.skills.setup();
@@ -96,6 +99,7 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
+      conversationTemplates: this.services.conversationTemplates.setup(),
     };
 
     return this.internalSetup;
@@ -106,6 +110,7 @@ export class ServiceManager {
     security,
     spaces,
     elasticsearch,
+    http,
     inference,
     uiSettings,
     savedObjects,
@@ -139,6 +144,8 @@ export class ServiceManager {
       return executionService;
     };
 
+    const conversationTemplatesStart = this.services.conversationTemplates.start();
+
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
@@ -153,6 +160,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -189,6 +197,7 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      http,
       uiSettings,
       savedObjects,
       inference,
@@ -205,6 +214,7 @@ export class ServiceManager {
       hooks,
       getExecutionService,
       searchInferenceEndpoints,
+      conversationTemplates: conversationTemplatesStart,
     });
     runner = runnerFactory.getRunner();
 
@@ -286,6 +296,7 @@ export class ServiceManager {
       consumption,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      conversationTemplates: conversationTemplatesStart,
     };
 
     return this.internalStart;

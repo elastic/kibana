@@ -17,7 +17,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
+import { isAsExpression, isSource, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
@@ -25,6 +25,7 @@ import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../constants';
 
 export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -406,9 +407,15 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     type: 'source',
   });
 
-  if (sourceNode) {
-    return LeafPrinter.print(sourceNode);
+  if (!isSource(sourceNode)) {
+    return undefined;
   }
+
+  const isCoordinatorTarget = sourceNode.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
+  // FROM does not support the _coordinator prefix used by LOOKUP JOIN.
+  const sourceToPrint = isCoordinatorTarget && sourceNode.index ? sourceNode.index : sourceNode;
+
+  return LeafPrinter.print(sourceToPrint);
 };
 
 export function getIndexSourcesFromQuery(query: string): string[] {

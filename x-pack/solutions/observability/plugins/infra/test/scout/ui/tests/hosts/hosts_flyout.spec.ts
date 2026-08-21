@@ -12,25 +12,38 @@ import {
   HOST1_NAME,
   HOSTS,
   SERVICE_PER_HOST_COUNT,
-  DATE_WITH_HOSTS_DATA_FROM,
-  DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 import {
   cleanHostsFlyoutSynthtraceData,
+  cleanNonTsdsSystemTemplate,
+  ensureNonTsdsSystemTemplate,
   ingestHostsFlyoutSynthtraceData,
 } from '../../fixtures/sequential_hosts_synthtrace';
 
 const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
+const HOSTS_FLYOUT_DATA_FROM = '2024-04-04T18:20:00.000Z';
+const HOSTS_FLYOUT_DATA_TO = '2024-04-04T18:21:00.000Z';
 
-// Failing: See https://github.com/elastic/kibana/issues/267130
-test.describe.skip(
+test.describe(
   'Hosts Page - Flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, kbnUrl, log, config, kbnClient }) => {
+      // Install a shadow template that ensures metrics-system.* data streams have the expected settings for data ingestion.
+      log.info('Sequential suite: installing non-TSDS shadow template for metrics-system.*');
+      await ensureNonTsdsSystemTemplate(esClient, log);
+
+      // Delete any existing data streams so they are re-created under the shadow template
+      // (clean reset also prevents row-count pollution from previous runs).
+      log.info('Sequential suite: resetting existing synthtrace data before ingest');
+      await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+
       log.info('Sequential suite: ingesting ECS hosts + logs + APM services for flyout tests');
-      await ingestHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+      await ingestHostsFlyoutSynthtraceData(
+        { esClient, kbnUrl, log, config },
+        { from: HOSTS_FLYOUT_DATA_FROM, to: HOSTS_FLYOUT_DATA_TO }
+      );
 
       log.info('Sequential suite: waiting for hosts metrics to be searchable before navigating');
       await expect
@@ -41,8 +54,8 @@ test.describe.skip(
                 method: 'POST',
                 path: '/api/metrics/infra/host',
                 body: {
-                  from: DATE_WITH_HOSTS_DATA_FROM,
-                  to: DATE_WITH_HOSTS_DATA_TO,
+                  from: HOSTS_FLYOUT_DATA_FROM,
+                  to: HOSTS_FLYOUT_DATA_TO,
                   metrics: ['cpuV2', 'diskSpaceUsage', 'memory', 'memoryFree', 'normalizedLoad1m'],
                   limit: 100,
                   schema: 'ecs',
@@ -69,8 +82,8 @@ test.describe.skip(
       test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
-        from: DATE_WITH_HOSTS_DATA_FROM,
-        to: DATE_WITH_HOSTS_DATA_TO,
+        from: HOSTS_FLYOUT_DATA_FROM,
+        to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
@@ -83,8 +96,12 @@ test.describe.skip(
     });
 
     test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
+      // Delete data streams first, then the shadow template — so no window opens where
+      // a stream could be re-created against a template before the stream is gone.
       log.info('Sequential suite: cleaning synthtrace data for flyout tests');
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+      log.info('Sequential suite: removing non-TSDS shadow template for metrics-system.*');
+      await cleanNonTsdsSystemTemplate(esClient, log);
     });
 
     test('Overview Tab - KPI charts and collapsible sections', async ({
@@ -213,7 +230,7 @@ test.describe.skip(
       await test.step('verify date range is preserved', async () => {
         const datePicker = page.getByTestId('superDatePickerstartDatePopoverButton');
         await expect(datePicker).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-        await expect(datePicker).toContainText('Mar 28, 2023');
+        await expect(datePicker).toContainText('Apr 4, 2024');
       });
 
       await test.step('return to hosts view', async () => {
@@ -230,8 +247,8 @@ test.describe.skip(
       // Re-navigate so the page picks up the enabled setting (the beforeEach
       // navigation happened with the setting still off).
       await hostsPage.goToPage({
-        from: DATE_WITH_HOSTS_DATA_FROM,
-        to: DATE_WITH_HOSTS_DATA_TO,
+        from: HOSTS_FLYOUT_DATA_FROM,
+        to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);

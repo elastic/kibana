@@ -6,19 +6,22 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
+import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
+import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
 
-export interface EventCreateInput {
-  status?: SignificantEventStatus;
-  title: string;
-  summary: string;
-  root_cause: string;
-  stream_names: string[];
-  criticality: number;
-  confidence: number;
-  recommendations: string[];
-}
+/**
+ * Chat-initiated event input — a minimal subset of EventsWriteInput.
+ *
+ * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
+ * collapse chat creates onto an existing same-stream event. `status` defaults to 'open'.
+ */
+export type EventCreateInput = Pick<
+  EventsWriteInput,
+  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'severity' | 'confidence'
+> & {
+  status?: EventsWriteInput['status'];
+};
 
 export async function createEventToolHandler({
   eventClient,
@@ -26,25 +29,19 @@ export async function createEventToolHandler({
 }: {
   eventClient: EventClient;
   eventInput: EventCreateInput;
-}): Promise<{ event_id: string; acknowledged: true }> {
-  const now = new Date().toISOString();
-  const eventId = uuidv4();
-
-  const event: SignificantEvent = {
-    '@timestamp': now,
-    created_at: now,
-    event_id: eventId,
-    discovery_slug: `agent-event-${eventId.slice(0, 8)}`,
-    status: eventInput.status ?? 'promoted',
-    stream_names: eventInput.stream_names,
-    title: eventInput.title,
-    summary: eventInput.summary,
-    root_cause: eventInput.root_cause,
-    criticality: eventInput.criticality,
-    confidence: eventInput.confidence,
-    recommendations: eventInput.recommendations,
-  };
-
-  await eventClient.bulkCreate([event], { throwOnFail: true });
-  return { event_id: eventId, acknowledged: true };
+}): Promise<{ event_uuid: string; acknowledged: true }> {
+  const result = await eventsWriteHandler({
+    eventClient,
+    input: {
+      ...eventInput,
+      event_id: uuidv4(),
+      status: eventInput.status ?? 'open',
+    },
+  });
+  if (!result.written) {
+    throw createBulkWriteOutcomeUnknownError(
+      `Event write skipped (${result.reason}): event_id=${result.event_id}`
+    );
+  }
+  return { event_uuid: result.event_uuid, acknowledged: true };
 }

@@ -89,7 +89,9 @@ export const getHostRiskScoreColumns = ({
       if (riskScore != null) {
         return (
           <EuiToolTip content={`${riskScore}`}>
-            <span data-test-subj="risk-score-truncate">{formatRiskScore(riskScore)}</span>
+            <span data-test-subj="risk-score-truncate" tabIndex={0}>
+              {formatRiskScore(riskScore)}
+            </span>
           </EuiToolTip>
         );
       }

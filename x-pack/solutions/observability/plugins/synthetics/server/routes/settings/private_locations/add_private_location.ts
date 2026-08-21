@@ -31,6 +31,7 @@ export const PrivateLocationSchema = schema.object({
     })
   ),
   spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -137,9 +138,12 @@ const validateAgentPolicy = async (
   }
 };
 
-const getAgentPolicySpaceIds = (agentPolicy: AgentPolicy) => {
+export const getAgentPolicySpaceIds = (agentPolicy: AgentPolicy) => {
   const spaceIds = agentPolicy.space_ids;
-  if (!spaceIds || spaceIds?.includes(ALL_SPACES_ID)) {
+  // When Fleet space awareness is off (e.g. basic license) agent policies have
+  // `space_ids: []`. A non-space-aware policy is available everywhere, so treat
+  // it the same as an undefined value and map it to all spaces.
+  if (!spaceIds || spaceIds.length === 0 || spaceIds.includes(ALL_SPACES_ID)) {
     return [ALL_SPACES_ID];
   }
   return spaceIds;

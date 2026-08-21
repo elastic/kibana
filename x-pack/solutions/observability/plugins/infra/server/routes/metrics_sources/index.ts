@@ -74,18 +74,24 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
+        }),
+        query: schema.object({
+          includeStatus: schema.boolean({ defaultValue: true }),
         }),
       },
     },
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
+      const { includeStatus } = request.query;
       const soClient = (await requestContext.core).savedObjects.client;
 
       try {
         const [sourceSettled, statusSettled] = await Promise.allSettled([
           libs.sources.getSourceConfiguration(soClient, sourceId),
-          composeSourceStatus(requestContext, sourceId),
+          includeStatus
+            ? composeSourceStatus(requestContext, sourceId)
+            : Promise.resolve(defaultStatus),
         ]);
 
         const source = isFulfilled<InfraSource>(sourceSettled) ? sourceSettled.value : null;
@@ -98,7 +104,10 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         }
 
         const sourceResponse = {
-          source: { ...source, status },
+          source: {
+            ...source,
+            ...(includeStatus ? { status } : {}),
+          },
         };
 
         return response.ok({
@@ -121,7 +130,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
         body: createRouteValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
@@ -185,7 +194,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}/hasData',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
       },
     },

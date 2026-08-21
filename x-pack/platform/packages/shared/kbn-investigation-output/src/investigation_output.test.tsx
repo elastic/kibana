@@ -46,9 +46,53 @@ const finalState: InvestigationState = {
       reason: 'Pool metrics spiked exactly at deploy time.',
     },
   ],
-  conclusion:
-    '## Conclusion\n\nA deploy at 14:02 introduced a connection leak in the checkout service.',
-  gaps_found: ['No profiling data available'],
+  conclusion: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
+  recommendations: [
+    {
+      title: 'Roll back the deployment that introduced the regression',
+      code: 'kubectl rollout undo deployment/checkout-service',
+    },
+  ],
+  blind_spots: [
+    {
+      title: 'No profiling data available',
+      description: 'Could not confirm whether a leak compounded the exhaustion.',
+    },
+  ],
+};
+
+const finalStateWithUpdates: InvestigationState = {
+  ...finalState,
+  significant_event_updates: [
+    {
+      field: 'severity',
+      from: '40-medium',
+      to: '80-critical',
+      reason: 'Checkout is fully blocked for every user, not intermittently degraded as triaged.',
+      evidence: [
+        {
+          description: 'Zero successful checkout completions during the incident window.',
+          esql_query:
+            'FROM traces | WHERE service.name == "checkout" | STATS failures = COUNT(*) WHERE event.outcome == "failure"',
+        },
+        { description: 'All checkout pods in CrashLoopBackOff for the full window.' },
+      ],
+    },
+    {
+      field: 'status',
+      from: 'open',
+      to: 'dismissed',
+      reason: 'No actual failure was found — this is a false alarm from the triage model.',
+      evidence: [{ description: 'All metrics stayed within normal bounds.' }],
+    },
+    {
+      field: 'summary',
+      from: 'Checkout latency is elevated.',
+      to: 'Checkout is fully unavailable: no orders completed during the incident window.',
+      reason: 'The triaged summary understated the impact.',
+      evidence: [{ description: 'Order-completion rate dropped to zero.' }],
+    },
+  ],
 };
 
 describe('InvestigationOutput', () => {
@@ -108,8 +152,27 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent(
       'A deploy at 14:02 introduced a connection leak in the checkout service.'
     );
-    expect(finalResults).toHaveTextContent('Gaps found');
+    expect(finalResults).toHaveTextContent('Next steps');
+    expect(finalResults).toHaveTextContent(
+      'Roll back the deployment that introduced the regression'
+    );
+    expect(finalResults).toHaveTextContent('Blind spots');
     expect(finalResults).toHaveTextContent('No profiling data available');
+  });
+
+  it('renders agent text containing markdown control characters literally', () => {
+    const stateWithMarkdownChars: InvestigationState = {
+      ...finalState,
+      recommendations: [{ title: 'Bump *max_size* to 100' }],
+      blind_spots: [{ title: 'No `apm-*` indices', description: 'Needed for _tracing_.' }],
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdownChars} />);
+
+    const finalResults = screen.getByTestId('investigationOutputFinalResults');
+    expect(finalResults).toHaveTextContent('Bump *max_size* to 100');
+    expect(finalResults).toHaveTextContent('No `apm-*` indices');
+    expect(finalResults).toHaveTextContent('Needed for _tracing_.');
   });
 
   it('renders a loading state while the persisted result is being fetched', () => {
@@ -149,5 +212,47 @@ describe('InvestigationOutput', () => {
     expect(screen.getByText('Investigation result unavailable')).toBeInTheDocument();
     expect(screen.getByText("Couldn't load the investigation result.")).toBeInTheDocument();
     expect(screen.getByText(liveState.summary)).toBeInTheDocument();
+  });
+
+  describe('significant_event_updates', () => {
+    it('renders the proposed updates block with a severity and a status row when complete', () => {
+      renderWithI18n(<InvestigationOutput status="complete" state={finalStateWithUpdates} />);
+
+      expect(screen.getByTestId('investigationSignificantEventUpdates')).toBeInTheDocument();
+
+      const severityRow = screen.getByTestId('investigationSignificantEventUpdate-severity');
+      expect(severityRow).toHaveTextContent('Medium');
+      expect(severityRow).toHaveTextContent('Critical');
+      expect(severityRow).toHaveTextContent('Checkout is fully blocked for every user');
+      expect(severityRow).toHaveTextContent('Zero successful checkout completions');
+      expect(severityRow).toHaveTextContent('FROM traces | WHERE service.name == "checkout"');
+      expect(severityRow).toHaveTextContent('All checkout pods in CrashLoopBackOff');
+
+      const statusRow = screen.getByTestId('investigationSignificantEventUpdate-status');
+      expect(statusRow).toHaveTextContent('Open');
+      expect(statusRow).toHaveTextContent('Dismissed');
+      expect(statusRow).toHaveTextContent('No actual failure was found');
+    });
+
+    it('renders a summary update as From/To free text (non-badge field)', () => {
+      renderWithI18n(<InvestigationOutput status="complete" state={finalStateWithUpdates} />);
+
+      const summaryRow = screen.getByTestId('investigationSignificantEventUpdate-summary');
+      expect(summaryRow).toHaveTextContent('From: Checkout latency is elevated.');
+      expect(summaryRow).toHaveTextContent('To: Checkout is fully unavailable');
+      expect(summaryRow).toHaveTextContent('The triaged summary understated the impact.');
+    });
+
+    it('does not render the updates block when there are no updates', () => {
+      renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
+
+      expect(screen.queryByTestId('investigationSignificantEventUpdates')).not.toBeInTheDocument();
+    });
+
+    it('does not render the updates block while the investigation is still running', () => {
+      renderWithI18n(<InvestigationOutput status="running" state={finalStateWithUpdates} />);
+
+      expect(screen.queryByTestId('investigationSignificantEventUpdates')).not.toBeInTheDocument();
+    });
   });
 });

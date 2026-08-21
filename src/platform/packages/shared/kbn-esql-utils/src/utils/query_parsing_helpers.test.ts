@@ -16,7 +16,7 @@ import {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
@@ -126,32 +126,32 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('getTimeFieldFromESQLQuery', () => {
+  describe('parseTimeFieldFromESQLQuery', () => {
     it('should return undefined if there are no time params', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1')).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
+      expect(parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
         'time'
       );
     });
 
     it('should return undefined if there is one named param but is not ?_tstart or ?_tend', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
+        parseTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
     });
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
+        parseTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
@@ -159,7 +159,7 @@ describe('esql query helpers', () => {
 
     it('should return the time field if the column is casted', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
@@ -167,14 +167,14 @@ describe('esql query helpers', () => {
 
     it('should return @timestamp for PromQL if there is at least one time param', () => {
       expect(
-        getTimeFieldFromESQLQuery(
+        parseTimeFieldFromESQLQuery(
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe('@timestamp');
     });
 
     it('should return @timestamp for PromQL if there is no time param', () => {
-      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
+      expect(parseTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
   });
 

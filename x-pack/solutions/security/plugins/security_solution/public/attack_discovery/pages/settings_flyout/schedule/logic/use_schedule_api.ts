@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCreateAttackDiscoverySchedule } from './use_create_schedule';
 import { useDeleteAttackDiscoverySchedule } from './use_delete_schedule';
@@ -61,16 +62,15 @@ export interface ScheduleApi {
  * is deferred to a follow-up PR (Option C: Hybrid Scheduling Migration).
  */
 export const useScheduleApi = (): ScheduleApi => {
-  const { featureFlags } = useKibana().services;
+  const { featureFlags, uiSettings } = useKibana().services;
 
-  // Read the flag synchronously during render so the returned hook set is stable
-  // from the first render. Reading it asynchronously (useEffect + useState) would
-  // swap the returned hooks after mount when the flag is ON, violating the Rules
-  // of Hooks in consumers that call these hooks by identity.
-  const isWorkflowsEnabled = featureFlags.getBooleanValue(
-    'securitySolution.attackDiscoveryWorkflowsEnabled',
-    false
-  );
+  // Read the flag and per-space uiSetting synchronously during render so the returned hook set is
+  // stable from the first render. Reading asynchronously (useEffect + useState) would swap the
+  // returned hooks after mount when the flag is ON, violating the Rules of Hooks in consumers
+  // that call these hooks by identity.
+  const isWorkflowsEnabled =
+    featureFlags.getBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   return useMemo(
     () => ({

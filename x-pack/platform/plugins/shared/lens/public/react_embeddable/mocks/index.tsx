@@ -112,6 +112,9 @@ function getDefaultLensApiMock() {
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
     applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
+    usesEsql$: new BehaviorSubject<boolean>(false),
+    supportsJsonExport: true,
+    cancelRequests: jest.fn(),
   };
   return LensApiMock;
 }

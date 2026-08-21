@@ -58,7 +58,7 @@ export const queryTypeDistributionEvaluator: KIQueryGenerationEvaluator = {
         issues.length > 0
           ? `${issues.join('; ')} (${typeCounts.match} match, ${typeCounts.stats} stats)`
           : `Both query types present: ${typeCounts.match} match, ${typeCounts.stats} stats`,
-      details: typeCounts,
+      metadata: typeCounts,
     };
   },
 };

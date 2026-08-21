@@ -11,6 +11,30 @@ import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
+// All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
+// synthetic non-testable spec to cover the isTestable: false branch.
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorsSpecs: {
+      ...actual.connectorsSpecs,
+      StubNoTest: {
+        metadata: {
+          id: '.stub-no-test',
+          displayName: 'Stub (no test)',
+          minimumLicense: 'basic',
+          supportedFeatureIds: [],
+        },
+        auth: null,
+        schema: null,
+        actions: {},
+        test: { handler: async () => ({}), enabled: false },
+      },
+    },
+  };
+});
+
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 
@@ -91,6 +115,24 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result.metadata).toHaveProperty('displayName');
     expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
+  });
+
+  it('returns isTestable true when the spec opts in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.abuseipdb',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', true);
+  });
+
+  it('returns isTestable false when the spec does not opt in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.stub-no-test',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', false);
   });
 
   it('rejects with 404 when the connector type has no spec', async () => {

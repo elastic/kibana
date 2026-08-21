@@ -18,10 +18,10 @@ import { CasesAttachmentsV2Writer } from './attachments';
  *   - The cascade-by-case-ids path (`bulkDeleteAttachmentsByCaseIds`)
  *     uses `delete_by_query` rather than `_bulk` because the writer
  *     doesn't know which attachment SO ids existed for the deleted
- *     cases. Same reasoning as the activity writer's cascade path
+ *     case. Same reasoning as the activity writer's cascade path
  *     but with one extra dimension: the cascade must cover BOTH
  *     source SO types (legacy + unified) — handled implicitly by
- *     querying on the denormalized `cases.id` on the analytics index.
+ *     querying on the denormalized `case.id` on the analytics index.
  *   - The per-id delete path (`bulkDeleteAttachments`) which
  *     attachments need but activity doesn't (user-actions are
  *     immutable; attachments are mutable + per-id-deletable).
@@ -151,7 +151,7 @@ describe('CasesAttachmentsV2Writer', () => {
   });
 
   describe('bulkDeleteAttachmentsByCaseIds (cascade path)', () => {
-    it('dispatches a single delete_by_query against `cases.id` for every supplied case id', async () => {
+    it('dispatches a single delete_by_query against `case.id` for every supplied case id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
       (esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValue({ deleted: 0 });
 
@@ -161,11 +161,11 @@ describe('CasesAttachmentsV2Writer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const arg = (esClient.deleteByQuery as unknown as jest.Mock).mock.calls[0][0];
       expect(arg.index).toBe(ATTACHMENTS_INDEX_NAME);
-      // `terms` query on the denormalized cases.id — implicitly
+      // `terms` query on the denormalized case.id — implicitly
       // covers BOTH source SO types (legacy + unified) because the
       // analytics doc shape is unified and keyed only on the source
       // SO id.
-      expect(arg.query).toEqual({ terms: { 'cases.id': ['case-1', 'case-2'] } });
+      expect(arg.query).toEqual({ terms: { 'case.id': ['case-1', 'case-2'] } });
       expect(arg.refresh).toBe(false);
       expect(arg.conflicts).toBe('proceed');
     });

@@ -15,8 +15,10 @@ import {
   escapeRegExp,
   findDelimiterSplits,
   getCompiledGrammar,
+  normalizeDigits,
   type CompiledGrammar,
   type CompiledTemplate,
+  type DelimiterSpec,
 } from './locale_grammar';
 
 export type DateUnit = 'month' | 'day' | 'year' | 'hour' | 'minute' | 'second' | 'millisecond';
@@ -52,8 +54,10 @@ interface DelimiterSplit {
 /**
  * Shorthand datemath (`now-7d/d`) is locale-invariant technical syntax, not
  * natural language — it stays a standalone regex, untouched by localization.
+ * The `unit` group is permissive (any word, like in `LENIENT_UNIT_PATTERN`) so that
+ * localized unit aliases after a sign ("-7天") still decompose into parts.
  */
-const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
+const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([\p{L}\p{M}]+)(\/[smhdwMy])?$/u;
 
 // Absolute-date parsing is deliberately locale-invariant for now (localized
 // absolute dates are a deferred phase — see the i18n plan doc).
@@ -174,7 +178,10 @@ const addCapturedPart = (
  * first candidate whose sides both parse (see {@link findDelimiterSplits} for
  * why the first occurrence isn't automatically the right one).
  */
-const findDelimiterSplitCandidates = (value: string, delimiters: string[]): DelimiterSplit[] =>
+const findDelimiterSplitCandidates = (
+  value: string,
+  delimiters: DelimiterSpec[]
+): DelimiterSplit[] =>
   delimiters.flatMap((delimiter) =>
     findDelimiterSplits(value, delimiter).map(
       ({ left, right, rightOffset, delimiterStart, delimiterEnd }): DelimiterSplit => ({
@@ -182,7 +189,7 @@ const findDelimiterSplitCandidates = (value: string, delimiters: string[]): Deli
         right,
         rightOffset,
         separator: {
-          text: delimiter.trim(),
+          text: delimiter.text.trim(),
           start: delimiterStart,
           end: delimiterEnd,
           kind: 'separator',
@@ -567,6 +574,36 @@ const parseSide = (
   const trimmed = getTrimmedSide(side, offset);
   if (!trimmed.text) return [];
 
+  // The END side may carry a range-end suffix (Japanese "3日前から今まで" →
+  // right side "今まで"): parse the inner text and emit the suffix as a
+  // non-navigable literal, mirroring `parse_text.ts`'s suffix strip.
+  if (rangeIndex === 1) {
+    for (const suffix of compiled.rangeEndSuffixes) {
+      if (trimmed.text.length > suffix.length && trimmed.text.endsWith(suffix)) {
+        const inner = parseSide(
+          trimmed.text.slice(0, -suffix.length),
+          trimmed.offset,
+          rangeIndex,
+          compiled
+        );
+        if (inner.length) {
+          const suffixStart = trimmed.offset + trimmed.text.length - suffix.length;
+          return [
+            ...inner,
+            {
+              text: suffix,
+              start: suffixStart,
+              end: suffixStart + suffix.length,
+              kind: 'literal',
+              navigable: false,
+              rangeIndex,
+            },
+          ];
+        }
+      }
+    }
+  }
+
   if (compiled.nowKeywords.includes(trimmed.text)) {
     return [
       {
@@ -621,14 +658,18 @@ export function parseInputParts(
   locale?: string
 ): RangePart[] {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const candidates = findDelimiterSplitCandidates(input, [...compiled.delimiters, '-']);
+  const normalized = normalizeDigits(input);
+  const candidates = findDelimiterSplitCandidates(normalized, [
+    ...compiled.delimiters,
+    { text: '-' },
+  ]);
   for (const split of candidates) {
     const left = parseSide(split.left, 0, 0, compiled);
     const right = parseSide(split.right, split.rightOffset, 1, compiled);
     if (left.length && right.length) return [...left, split.separator, ...right];
   }
 
-  const single = parseSide(input, 0, getSingleRangeIndex(rangeType), compiled);
+  const single = parseSide(normalized, 0, getSingleRangeIndex(rangeType), compiled);
   if (single.length || candidates.length === 0) return single;
 
   return emitSplitParts(candidates[0], compiled);
@@ -642,10 +683,13 @@ export function parseInputParts(
  */
 export function parseDisplayParts(display: string, locale?: string): RangePart[] {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const [split] = findDelimiterSplitCandidates(display, [DATE_RANGE_DISPLAY_DELIMITER]);
+  const normalized = normalizeDigits(display);
+  const [split] = findDelimiterSplitCandidates(normalized, [
+    { text: DATE_RANGE_DISPLAY_DELIMITER },
+  ]);
   if (split) {
     return emitSplitParts(split, compiled);
   }
 
-  return parseSide(display, 0, getCompactDisplayRangeIndex(display, compiled), compiled);
+  return parseSide(normalized, 0, getCompactDisplayRangeIndex(normalized, compiled), compiled);
 }

@@ -19,6 +19,7 @@ import {
 } from './writer/attachments';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
+import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -32,7 +33,6 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
-    templatesEnabled: true,
   });
 
 describe('CasesAnalyticsV2Service', () => {
@@ -143,7 +143,6 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
-        templatesEnabled: false,
       });
 
     const startService = async (service: CasesAnalyticsV2Service) => {
@@ -202,6 +201,104 @@ describe('CasesAnalyticsV2Service', () => {
 
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('c-1');
+    });
+  });
+
+  describe('triggerBackfillReconciliation', () => {
+    const build = (enabled: boolean) =>
+      new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled,
+        reconciliationIntervalMinutes: 30,
+        enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
+      });
+
+    const startWithTaskManager = async (service: CasesAnalyticsV2Service) => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const taskManager = taskManagerMock.createStart();
+      await service.start({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        taskManager,
+        internalSavedObjectsClient: savedObjectsClientMock.create(),
+        dataViewsService: {} as unknown as DataViewsServerPluginStart,
+      });
+      return taskManager;
+    };
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('no-ops when v2 is disabled', async () => {
+      const service = build(false);
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
+    });
+
+    it('no-ops when the service has not started (no task manager captured yet)', async () => {
+      const service = build(true); // enabled but start() never called
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
+    });
+
+    it('schedules the dedicated full-reset task (throttled, cursor-seeding) rather than clearing the periodic cursor', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+
+      await service.triggerBackfillReconciliation();
+
+      // Routes through the one-shot reset task: removes any in-flight reset first (singleton id),
+      // then schedules a fresh one. It must NOT touch the periodic reconciliation task's state.
+      expect(taskManager.removeIfExists).toHaveBeenCalledWith(RESET_TASK_ID);
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ id: RESET_TASK_ID, taskType: RESET_TASK_TYPE })
+      );
+      expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
+    });
+
+    it('never throws when scheduling the reset task fails', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
+
+      await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
+    });
+
+    it('clears the per-space data-view bootstrap cache so migrated runtime fields project on next request', async () => {
+      const service = build(true);
+      await startWithTaskManager(service);
+
+      // The migration creates templates via raw `repo.create`, bypassing the lifecycle hook that
+      // normally refreshes per-space data views. Clearing the bootstrap cache is what forces the next
+      // cases request to recompute the runtime-field map instead of waiting out the cache TTL.
+      const dataViewService = (
+        service as unknown as {
+          dataViewService: { clearBootstrapCache: () => void };
+        }
+      ).dataViewService;
+      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+
+      await service.triggerBackfillReconciliation();
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('still clears the bootstrap cache even when scheduling the reset task fails', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
+
+      // The cache clear runs before (and independently of) the scheduling try/catch, so a Task
+      // Manager failure must not strand the stale data views.
+      const dataViewService = (
+        service as unknown as {
+          dataViewService: { clearBootstrapCache: () => void };
+        }
+      ).dataViewService;
+      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+
+      await service.triggerBackfillReconciliation();
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

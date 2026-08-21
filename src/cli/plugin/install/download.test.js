@@ -13,7 +13,7 @@ import http from 'http';
 
 import sinon from 'sinon';
 import nock from 'nock';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import del from 'del';
 
 import { Logger } from '../../logger';
@@ -33,13 +33,35 @@ describe('kibana cli', function () {
     };
     const logger = new Logger(settings);
 
+    // The downloader resolves proxies with `proxy-from-env`, which reads every
+    // `*_proxy` variable in either case (`http_proxy`, `HTTPS_PROXY`,
+    // `npm_config_proxy`, `all_proxy`, `no_proxy`, ...). An ambient proxy in the
+    // environment therefore both reroutes the request and adds a "Picked up proxy
+    // ... from environment variable." log line, which shifts the positional
+    // `logger.log` assertions below. Scrub them for the whole suite so the tests
+    // depend only on what they set themselves.
+    const originalProxyEnv = {};
+
+    beforeAll(function () {
+      for (const key of Object.keys(process.env)) {
+        if (/_proxy$/i.test(key)) {
+          originalProxyEnv[key] = process.env[key];
+          delete process.env[key];
+        }
+      }
+    });
+
+    afterAll(function () {
+      Object.assign(process.env, originalProxyEnv);
+    });
+
     function expectWorkingPathEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
+      const files = globbySync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       expect(files).toEqual([]);
     }
 
     function expectWorkingPathNotEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
+      const files = globbySync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       const expected = ['archive.part'];
 
       expect(files.sort()).toEqual(expected.sort());

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { firstValueFrom } from 'rxjs';
 
-export interface AgentBuilderAccess {
-  hasRequiredLicense: boolean;
-  hasLlmConnector: boolean;
-}
+export const deniedEmbeddableChatAccess = (): EmbeddableChatAccess => ({
+  hasRequiredLicense: false,
+  hasLlmConnector: false,
+});
 
 type PromiseValues<T> = {
   [Key in keyof T]: Promise<T[Key]>;
@@ -28,7 +29,7 @@ const resolveValues = async <T>(promiseObject: PromiseValues<T>): Promise<T> => 
 export class AgentBuilderAccessChecker {
   private readonly licensing: LicensingPluginStart;
   private readonly inference: InferencePublicStart;
-  private access: AgentBuilderAccess | null = null;
+  private access: EmbeddableChatAccess | null = null;
 
   constructor({
     licensing,
@@ -56,7 +57,7 @@ export class AgentBuilderAccessChecker {
       return;
     }
 
-    const accessPromise: PromiseValues<AgentBuilderAccess> = {
+    const accessPromise: PromiseValues<EmbeddableChatAccess> = {
       hasRequiredLicense: this.hasRequiredLicense(),
       hasLlmConnector: this.hasLlmConnector(),
     };
@@ -68,10 +69,19 @@ export class AgentBuilderAccessChecker {
     }
   }
 
-  public getAccess() {
+  public getAccess(): EmbeddableChatAccess {
     if (!this.access) {
       throw new Error('Agent Builder access was not initialized');
     }
     return this.access;
+  }
+
+  public async getAgentBuilderAccess(): Promise<EmbeddableChatAccess> {
+    try {
+      await this.initAccess();
+      return this.getAccess();
+    } catch {
+      return deniedEmbeddableChatAccess();
+    }
   }
 }

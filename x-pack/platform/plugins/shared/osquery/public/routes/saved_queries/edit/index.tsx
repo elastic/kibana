@@ -231,6 +231,7 @@ const EditSavedQueryPageComponent = () => {
           {backLink}
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
               defaultMessage: 'Failed to load saved query',
             })}
@@ -282,6 +283,7 @@ const EditSavedQueryPageComponent = () => {
     return (
       <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
             defaultMessage: 'Failed to load saved query',
           })}

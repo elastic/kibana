@@ -16,7 +16,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
+import { setupDfaSourceFixtures, cleanupDfaTest } from '../fixtures/helpers/dfa';
 
 // ── Test data ────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,7 @@ const editedDescription = 'Edited description';
 const jobId = `ihp_1_${Date.now()}`;
 
 const testData = {
-  jobType: 'outlier_detection',
+  jobType: 'outlier_detection' as const,
   jobId,
   jobDescription: 'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
   source: 'ft_ihp_outlier',
@@ -82,16 +82,17 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
   let dataViewId: string;
   let dashboardSavedObjectId: string;
 
-  test.beforeAll(async ({ apiServices, kbnClient, esArchiver }) => {
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
-
-    const { data: dataView } = await apiServices.dataViews.create({
-      title: 'ft_ihp_outlier',
-      name: 'ft_ihp_outlier',
-      override: true,
+  test.beforeAll(async ({ apiServices, kbnClient, esArchiver, esClient }) => {
+    const setup = await setupDfaSourceFixtures({
+      esArchiver,
+      apiServices,
+      kbnClient,
+      esClient,
+      archivePath: 'x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier',
+      indexName: 'ft_ihp_outlier',
     });
-    dataViewId = dataView.id;
-    dashboardSavedObjectId = await createMLTestDashboard(kbnClient);
+    dataViewId = setup.dataViewId;
+    dashboardSavedObjectId = setup.dashboardId;
   });
 
   test.afterAll(async ({ apiServices, kbnClient, esClient }) => {
@@ -99,6 +100,7 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
       apiServices,
       kbnClient,
       esClient,
+      jobId: testData.jobId,
       dataViewId,
       dashboardId: dashboardSavedObjectId,
       destinationIndex: testData.destinationIndex,
@@ -109,10 +111,11 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
     page,
     browserAuth,
     pageObjects: { dataFrameAnalytics },
+    apiServices,
     esClient,
   }) => {
-    // The DFA job can take up to 5 minutes to complete; allow 15 min for the full journey.
-    test.setTimeout(15 * 60 * 1000);
+    // The DFA job may run for up to 2 minutes; allow another minute for the UI journey.
+    test.setTimeout(3 * 60 * 1000);
 
     await browserAuth.loginWithCustomRole(ML_USERS.mlPoweruser);
 
@@ -255,24 +258,11 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
       // Create and start the job, navigate back to the job list
       await dataFrameAnalytics.createAndStartJob();
 
-      // Wait for the job to finish (up to 5 minutes)
-      // State is in the stats API, not the config returned by getAllJobs()
-      await expect
-        .poll(
-          async () => {
-            const { data_frame_analytics: statsList } =
-              await esClient.ml.getDataFrameAnalyticsStats({
-                id: testData.jobId,
-                allow_no_match: true,
-              });
-            return statsList[0]?.state;
-          },
-          { timeout: 5 * 60 * 1000, intervals: [5_000] }
-        )
-        .toBe('stopped');
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(testData.jobId);
+      await apiServices.ml.dataFrameAnalytics.waitForStopped(testData.jobId);
 
-      // Navigate to the job list and verify key table elements
-      await dataFrameAnalytics.gotoJobList();
+      // Already on the job list from createAndStartJob; wait for the table to finish loading.
+      await dataFrameAnalytics.waitForTableLoaded();
       await expect(page.testSubj.locator('~mlAnalyticsTable')).toBeVisible();
       await expect(page.testSubj.locator('mlAnalyticsStatsBar')).toBeVisible();
 
@@ -421,7 +411,7 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
       expect(countResult.count).toBeGreaterThan(0);
 
       // Results view
-      await dataFrameAnalytics.openResultsView(testData.jobId);
+      await dataFrameAnalytics.openResultsView(testData.jobId, testData.jobType);
       await expect(page.testSubj.locator('mlDFExpandableSection-results')).toBeVisible();
       await expect(page.testSubj.locator('mlExplorationDataGrid loaded')).toBeVisible({
         timeout: 10_000,

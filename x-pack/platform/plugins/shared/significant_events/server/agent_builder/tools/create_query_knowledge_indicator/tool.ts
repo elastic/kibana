@@ -67,8 +67,15 @@ export function createQueryKnowledgeIndicatorTool({
       Use this tool when the conversation discovers a new detection query that should be saved for
       future investigations.
     `,
+    annotations: {
+      title: 'Create Query Knowledge Indicator',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createQueryKnowledgeIndicatorSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {
@@ -89,12 +96,11 @@ export function createQueryKnowledgeIndicatorTool({
     },
     availability: {
       cacheMode: 'space',
-      handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
+      handler: async (): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({
             server,
             licensing: server.licensing,
-            uiSettingsClient: uiSettings,
           });
           return { status: 'available' };
         } catch (error) {
@@ -125,7 +131,6 @@ export function createQueryKnowledgeIndicatorTool({
         await assertSignificantEventsAccess({
           server,
           licensing: scopedClients.licensing,
-          uiSettingsClient: scopedClients.uiSettingsClient,
         });
 
         const definition = await scopedClients.streamsClient.getStream(streamName);

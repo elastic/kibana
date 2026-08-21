@@ -15,6 +15,7 @@
     "@kbn/zod",
     "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
+    "@kbn/esql-utils",
     "@kbn/product-doc-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/i18n",
@@ -30,11 +31,12 @@
     "@kbn/connector-schemas",
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-builder-sml-plugin",
     "@kbn/actions-plugin",
     "@kbn/code-editor",
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",
+    "@kbn/cloud-plugin",
   ]
 }

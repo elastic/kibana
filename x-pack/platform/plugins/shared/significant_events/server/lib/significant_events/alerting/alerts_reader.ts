@@ -6,19 +6,29 @@
  */
 
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
+  /** Analysis duration as ES date math (`now-40m`). */
   lookback: string;
+  /** Outer date_histogram interval (`1m`, `5m`, …). Must be ≥ 1m. */
   bucketInterval: string;
   spaceId: string;
+  ruleIds?: string[];
 }
+
+/**
+ * Single-entry map of the detector's verdict, keyed by change type. `stationary`
+ * carries `{}`; the rest carry `p_value` and `change_point`. Empty when the rule
+ * had no verdict or the reader dropped an `indeterminable` one.
+ */
+export type ChangePointTypeMap = Record<string, { p_value?: number; change_point?: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;
+  severity_score: number;
   doc_count: number;
   rule_name: {
     top: Array<{ metrics: Record<string, string> }>;
@@ -27,19 +37,14 @@ export interface ChangePointRuleBucket {
     buckets: Array<{ key: string }>;
   };
   change_points: {
-    type: Record<string, { p_value: number }>;
-  };
-  last_5m: {
-    doc_count: number;
-  };
-  last_floor_window: {
-    doc_count: number;
+    type: ChangePointTypeMap;
   };
 }
 
 export interface RuleMetadata {
   ruleName: string;
   streamName: string;
+  severityScore: number;
 }
 
 export interface CountDetectionAlertsParams {
@@ -54,52 +59,31 @@ export interface OccurrencesEsqlParams {
   esqlUnit: string;
   limit: number;
   spaceId: string;
+  /**
+   * Inclusive chart window as UTC ISO-8601 strings. Applied to source `bucket`
+   * (match minute), not write-time `@timestamp`. Strings (not `Date`) keep this
+   * boundary free of `toISOString` crashes if a caller omits the range.
+   */
+  rangeFromIso: string;
+  rangeToIso: string;
 }
 
 export interface ISignificantEventsAlertsReader {
   readonly index: string;
-  readonly ruleIdColumn: 'rule_uuid' | 'rule_id';
+  readonly ruleIdColumn: 'rule_id';
 
   buildOccurrencesEsqlRequest(params: OccurrencesEsqlParams): EsqlQueryRequest;
 
-  countAlerts(esClient: ElasticsearchClient, params: CountDetectionAlertsParams): Promise<number>;
+  countAlerts(
+    esClient: TracedElasticsearchClient,
+    params: CountDetectionAlertsParams
+  ): Promise<number>;
 
   runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ): Promise<{ took?: number; by_rule: { buckets: ChangePointRuleBucket[] } }>;
-
-  runRuleChangePoint(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      bucketInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
-
-  runRuleActivity(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      windowInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
-
-  runRuleAlertWindows(
-    esClient: ElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      currentLookback: string;
-      referenceLookbackGte: string;
-      referenceLookbackLt: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: Record<string, unknown> }>;
 }
 
 export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleMetadata> {
@@ -108,16 +92,11 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
     map.set(link.rule_id, {
       ruleName: link.query.title,
       streamName: link.stream_name,
+      severityScore: link.query.severity_score ?? 0,
     });
   }
   return map;
 }
 
-export const ALERTS_READER_V1: ISignificantEventsAlertsReader =
-  new SignificantEventsAlertsReaderV1();
 export const ALERTS_READER_V2: ISignificantEventsAlertsReader =
   new SignificantEventsAlertsReaderV2();
-
-export function createAlertsReader(alertingV2Active: boolean): ISignificantEventsAlertsReader {
-  return alertingV2Active ? ALERTS_READER_V2 : ALERTS_READER_V1;
-}

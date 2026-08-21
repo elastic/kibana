@@ -7,12 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { AppHeader } from '@kbn/app-header';
-import type { CaseUI } from '../../../../../../common';
+import type { CaseSeverity, CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../../case_view/types';
 import { PAGE_TITLE } from '../../../../../common/translations';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../../common/use_cases_features';
 import { ConfirmDeleteCaseModal } from '../../../../confirm_delete_case';
+import { CasesAppHeader } from '../../../../app/cases_app_header';
 import { CaseSettingsPopover } from './case_settings_popover';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 import { useCloseCaseFlow } from './hooks/use_close_case_flow';
@@ -31,7 +32,13 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
   onShowMetricsChange,
 }) => {
   const { permissions } = useCasesContext();
+  const { hasCaseSettings } = useCasesFeatures();
   const { onStatusChanged, closeCaseModal } = useCloseCaseFlow({ caseData, onUpdateField });
+
+  const onSeverityChanged = useCallback(
+    (severity: CaseSeverity) => onUpdateField({ key: 'severity', value: severity }),
+    [onUpdateField]
+  );
 
   const {
     headerTitle,
@@ -45,7 +52,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
-  } = useCaseViewHeader({ caseData, onStatusChanged, onUpdateField });
+  } = useCaseViewHeader({ caseData, onStatusChanged, onSeverityChanged, onUpdateField });
 
   const onSyncAlertsChanged = useCallback(
     (checked: boolean) =>
@@ -56,15 +63,23 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     [caseData.settings, onUpdateField]
   );
 
+  const onExtractObservablesChanged = useCallback(
+    (checked: boolean) =>
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables: checked },
+      }),
+    [caseData.settings, onUpdateField]
+  );
+
   return (
     <>
-      <AppHeader
+      <CasesAppHeader
         title={headerTitle}
         back={{ href: backHref, label: PAGE_TITLE }}
         badges={badges}
         menu={menu}
         metadata={metadata}
-        sticky={false}
       />
       {closeCaseModal}
       {isDeleteModalVisible && (
@@ -74,10 +89,12 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
           onConfirm={onConfirmDeletion}
         />
       )}
-      {settingsAnchor && permissions.update && (
+      {settingsAnchor && permissions.update && hasCaseSettings && (
         <CaseSettingsPopover
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
+          extractObservables={caseData.settings.extractObservables ?? false}
+          onExtractObservablesChange={onExtractObservablesChanged}
           showMetrics={showMetrics}
           onShowMetricsChange={onShowMetricsChange}
           isOpen={isSettingsOpen}

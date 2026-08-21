@@ -13,7 +13,9 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
@@ -38,9 +40,11 @@ const onboardingStartSchema = z.object({
 export const createKiIdentificationStartTool = ({
   telemetry,
   streamsKIsOnboardingClient,
+  maintenanceService,
 }: {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  maintenanceService: SignificantEventsMaintenanceService;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
@@ -48,15 +52,15 @@ export const createKiIdentificationStartTool = ({
     Start stream Knowledge Indicator (KI) identification as a background task.
 
     This tool schedules the KI identification background task and returns immediately with a
-    Kibana path to the Significant Events page where progress can be tracked.
+    Kibana path to the Significant Events knowledge indicators view where progress can be tracked.
 
     Use this tool to:
     - Kick off KI identification for a stream
     - Run feature identification and query generation steps in a background task
-    - Get a direct Kibana path to track background task progress in the Streams UI
+    - Get a direct Kibana path to track background task progress in the Significant Events UI
 
     Returns:
-    - On success: \`{ kibanaPath: "/app/streams/<stream>/management/significantEvents" }\`
+    - On success: \`{ kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=<stream>" }\`
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
@@ -72,6 +76,7 @@ export const createKiIdentificationStartTool = ({
         steps: resolvedSteps,
         connectors,
         streamsKIsOnboardingClient,
+        maintenanceService,
         request,
       });
 
