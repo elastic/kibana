@@ -129,8 +129,8 @@ describe('executeActionPolicyOperations', () => {
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.groupingMode).toBe('per_field');
-      expect(result.groupBy).toEqual(['host.name']);
+      expect(result.grouping_mode).toBe('per_field');
+      expect(result.group_by).toEqual(['host.name']);
     });
 
     it('throws when per_field grouping has no groupBy fields', () => {
@@ -232,7 +232,7 @@ describe('executeActionPolicyOperations', () => {
         { operation: 'set_throttle', strategy: 'time_interval', interval: '5m' },
       ];
 
-      expect(() => executeActionPolicyOperations({ groupingMode: 'per_episode' }, ops)).toThrow(
+      expect(() => executeActionPolicyOperations({ grouping_mode: 'per_episode' }, ops)).toThrow(
         'not valid for grouping mode'
       );
     });

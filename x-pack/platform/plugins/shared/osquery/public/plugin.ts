@@ -96,7 +96,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     core
       .getStartServices()
       .then(([coreStart, depsStart]) => {
-        plugins.cases?.attachmentFramework.registerUnified(
+        plugins.cases?.attachmentFramework.registerAttachment(
           getOsqueryCaseAttachment({
             ...coreStart,
             ...depsStart,
@@ -146,28 +146,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
     }
 
+    const services = {
+      ...core,
+      ...plugins,
+      security: { ...core.security, ...plugins.security },
+    };
+
     return {
-      OsqueryAction: getLazyOsqueryAction({
-        services: {
-          ...core,
-          ...plugins,
-        },
-      }),
-      LiveQueryField: getLazyLiveQueryField({
-        services: {
-          ...core,
-          ...plugins,
-        },
-      }),
+      OsqueryAction: getLazyOsqueryAction({ services }),
+      LiveQueryField: getLazyLiveQueryField({ services }),
       OsqueryResult: getLazyOsqueryResult({
-        ...core,
-        ...plugins,
+        ...services,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
       OsqueryResults: getLazyOsqueryResults({
-        ...core,
-        ...plugins,
+        ...services,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),

@@ -15,7 +15,7 @@ export {
   type HighContrastSeparatorOptions,
   getHighContrastBorder,
   getHighContrastSeparator,
-} from '@kbn/ui-chrome-layout-utils';
+} from '@kbn/ui-chrome-layout';
 
 export const highContrastHoverStyle = ({ euiTheme }: UseEuiTheme) => `
     outline-color: var(--high-contrast-hover-indicator-color, ${euiTheme.border.color});
