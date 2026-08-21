@@ -45,7 +45,6 @@ export const createInitialState = ({
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
   return {
-    mode,
     step: 0,
     recoveryType,
     activeTab: defaultTabForTabs(
