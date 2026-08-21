@@ -41,9 +41,9 @@ export function ServiceSettingsFlyout({
   onClose,
 }: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
-  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(
-    () => ({ ...config.varsByInput })
-  );
+  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(() => ({
+    ...config.varsByInput,
+  }));
   const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(config.enabledInputs);
 
   const handleFieldChange = (input: string, fieldName: string, value: string) => {

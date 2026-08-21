@@ -38,7 +38,11 @@ interface DuplicateServiceModalProps {
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
-  onAdd: (name: string, varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => void;
+  onAdd: (
+    name: string,
+    varsByInput: Record<string, Record<string, string>>,
+    enabledInputs: string[]
+  ) => void;
   onCancel: () => void;
 }
 
@@ -54,10 +58,12 @@ export function DuplicateServiceModal({
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(
-    () => ({ ...sourceConfig.varsByInput })
+  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(() => ({
+    ...sourceConfig.varsByInput,
+  }));
+  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(
+    sourceConfig.enabledInputs
   );
-  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(sourceConfig.enabledInputs);
 
   const handleFieldChange = (input: string, fieldName: string, value: string) => {
     setDraft((prev) => ({

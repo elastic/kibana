@@ -54,7 +54,9 @@ describe('getEcfServiceConfigs()', () => {
       },
       waf: {
         enabledInputs: ['aws-cloudwatch'],
-        varsByInput: { 'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' } },
+        varsByInput: {
+          'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+        },
       },
     };
     const result = getEcfServiceConfigs([inst('vpcflow'), inst('waf')], serviceVars);

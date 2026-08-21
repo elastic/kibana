@@ -23,7 +23,6 @@ import type { DeployGroup } from './deploy_groups';
 
 export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
-
 export interface UseDeployResult {
   namespace: string;
   setNamespace: (ns: string) => void;
