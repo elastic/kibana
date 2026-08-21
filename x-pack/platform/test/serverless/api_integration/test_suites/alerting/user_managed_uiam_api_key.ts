@@ -34,6 +34,18 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleWithActionId: string | undefined;
     let connectorId: string | undefined;
 
+    // Reads the raw rule saved object so tests can assert exactly which credential
+    // attributes are persisted. `apiKey`/`uiamApiKey` are ESO-encrypted, so only their
+    // presence/absence is asserted; `uiamApiKeyExternal` is plaintext.
+    const getRuleSoAttributes = async (id: string) => {
+      const response = await esClient.search({
+        index: '.kibana_alerting_cases*',
+        query: { ids: { values: [`alert:${id}`] } },
+      });
+      expect(response.hits.hits.length).to.eql(1);
+      return (response.hits.hits[0]._source as { alert: Record<string, unknown> }).alert;
+    };
+
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -212,6 +224,144 @@ export default function ({ getService }: FtrProviderContext) {
       expect((documentResponse.hits.hits[0]._source as { ruleName: string }).ruleName).to.eql(
         'rule with action and user-managed uiam key'
       );
+    });
+
+    // Alerting-minted Elasticsearch API keys are named `Alerting: <ruleTypeId>/<rule name>`
+    // (see `generateAPIKeyName`). Both rules in this suite were created with the raw key, so
+    // no such key may exist — the user's key is reused as-is and nothing is minted (no org
+    // API key quota impact).
+    it('does not mint any Elasticsearch API keys for rules created with the raw key', async () => {
+      const apiKeysResponse = await esClient.security.queryApiKeys({
+        query: { wildcard: { name: '*user-managed uiam key*' } },
+      });
+      expect(apiKeysResponse.total).to.eql(0);
+    });
+
+    it('persists the raw key UIAM-only with the external verdict on the rule saved object', async () => {
+      expect(ruleId).to.be.a('string');
+
+      const attributes = await getRuleSoAttributes(ruleId!);
+      // The raw `essu_` secret is stored on `uiamApiKey` (encrypted); no ES key exists.
+      expect(attributes.uiamApiKey).to.be.a('string');
+      expect(attributes.apiKey == null).to.be(true);
+      // UIAM's externality verdict, captured at creation, drives the run-time decision to
+      // withhold the shared secret. Without it the rule run would fail with 401 0x1D8502.
+      expect(attributes.uiamApiKeyExternal).to.eql(true);
+      expect(attributes.apiKeyCreatedByUser).to.eql(true);
+    });
+
+    it('disables and re-enables the rule with the raw key and the rule runs again', async () => {
+      expect(ruleId).to.be.a('string');
+
+      await supertestWithoutAuth
+        .post(`/api/alerting/rule/${ruleId}/_disable`)
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .expect(204);
+
+      const enableTime = new Date();
+      await supertestWithoutAuth
+        .post(`/api/alerting/rule/${ruleId}/_enable`)
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .expect(204);
+
+      // The enable path re-persists the raw key and its externality verdict.
+      const attributes = await getRuleSoAttributes(ruleId!);
+      expect(attributes.uiamApiKey).to.be.a('string');
+      expect(attributes.uiamApiKeyExternal).to.eql(true);
+      expect(attributes.apiKeyCreatedByUser).to.eql(true);
+
+      // Enabling schedules an immediate run; it must succeed with the raw key.
+      const eventLogResponse = await alertingApi.helpers.waiting.waitForExecutionEventLog({
+        esClient,
+        filter: enableTime,
+        ruleId: ruleId!,
+      });
+      const outcomes = eventLogResponse.hits.hits.map(
+        (hit) => (hit._source as { event: { outcome: string } }).event.outcome
+      );
+      expect(outcomes).to.contain('success');
+    });
+
+    // Rotating the credential must fully replace the UIAM attributes: a stale
+    // `uiamApiKeyExternal: true` next to a non-external key would make the cluster client
+    // withhold the shared secret from a credential that needs it.
+    it('switches to a user-supplied Elasticsearch API key and strips the UIAM attributes', async () => {
+      expect(ruleId).to.be.a('string');
+
+      const response = await supertestWithoutAuth
+        .put(`/api/alerting/rule/${ruleId}`)
+        .set(internalReqHeader)
+        .set(roleAdmin.apiKeyHeader)
+        .send({
+          name: 'updated rule with user-managed uiam key',
+          tags: [],
+          schedule: { interval: '5m' },
+          actions: [],
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: [TEST_INDEX],
+            timeField: 'date',
+            esQuery: '{"query":{"match_all":{}}}',
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+        });
+
+      expect(response.status).to.eql(200);
+      // The caller's ES API key is reused, so the rule stays user-managed.
+      expect(response.body.api_key_created_by_user).to.eql(true);
+
+      const attributes = await getRuleSoAttributes(ruleId!);
+      expect(attributes.apiKey).to.be.a('string');
+      expect(attributes.uiamApiKey == null).to.be(true);
+      expect(attributes.uiamApiKeyExternal == null).to.be(true);
+    });
+
+    it('restores the raw key via the update API key endpoint', async () => {
+      expect(ruleId).to.be.a('string');
+
+      await supertestWithoutAuth
+        .post(`/api/alerting/rule/${ruleId}/_update_api_key`)
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .expect(204);
+
+      const attributes = await getRuleSoAttributes(ruleId!);
+      expect(attributes.uiamApiKey).to.be.a('string');
+      expect(attributes.uiamApiKeyExternal).to.eql(true);
+      expect(attributes.apiKey == null).to.be(true);
+    });
+
+    it('deleting the rule with the raw key leaves the key valid', async () => {
+      expect(ruleId).to.be.a('string');
+      const deletedRuleId = ruleId!;
+
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${deletedRuleId}`)
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .expect(204);
+
+      // 404 (not 401) proves the key still authenticates after the rule is gone. Alerting
+      // never enqueues user-created keys for invalidation (the pending-invalidation entry is
+      // skipped at the source), so the key remains the user's to manage.
+      await supertestWithoutAuth
+        .get(`/api/alerting/rule/${deletedRuleId}`)
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .expect(404);
+
+      await esClient.deleteByQuery({
+        index: '.kibana-event-log-*',
+        conflicts: 'proceed',
+        query: { term: { 'rule.id': deletedRuleId } },
+      });
+      // Already cleaned up; the after hook should skip it.
+      ruleId = undefined;
     });
   });
 }
