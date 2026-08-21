@@ -96,9 +96,7 @@ export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): num
       unifiedAttachmentTypeRegistry
         .list()
         .filter(
-          (type) =>
-            type.id !== FILE_ATTACHMENT_TYPE &&
-            type.getAttachmentTabViewObject?.()?.children != null
+          (type) => type.id !== FILE_ATTACHMENT_TYPE && type.getAttachmentList?.()?.children != null
         )
         .map((type) => type.id)
     );
