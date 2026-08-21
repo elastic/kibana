@@ -135,16 +135,15 @@ A notification declares which variant it is with `kind` in the registry (`kind: 
 The list route returns a **collapsed** set (one document per `notification_id`) bounded by a
 result cap.
 
-> **A query param exists only if the server can apply it before the cap. Everything else is a
-> field on the response that clients filter.**
-
-A filter applied before the cap changes which items survive truncation, so `?namespace=x`
-means "the newest N notifications in namespace x".
+> **A query param exists only if it can be applied before truncation
+> and maintain an accurate representation of collapsed notification state**
 
 1. **Is it on the document?**
-2. **Does it define the set, or pick a copy within it?** A time window defines which copies form
-   the group, so the newest one in it is the right representative. A filter on mutable state
-   picks an arbitrary copy to stand for the group.
+2. **Does it define the set, or pick a copy within it?**
+
+   - e.g. a time window defines which copies form the group, so the newest one in
+     it is the right representative. A filter on mutable state
+     picks an arbitrary copy to stand for the group.
 
 | Candidate           | On document | Defines the set                             | Where          |
 | ------------------- | ----------- | ------------------------------------------- | -------------- |
