@@ -12,12 +12,15 @@ import { DefaultRequestHandler, JsonRpcTransportHandler, A2AError } from '@a2a-j
 import type { AgentCard } from '@a2a-js/sdk';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 
+import type { AgentBuilderConfig } from '../../config';
 import type { InternalStartServices } from '../../services';
 import { getDefaultAgentCreateRequest } from '../../services/agents/default_agent_definition';
 import { A2A_SERVER_PATH } from '../../routes/a2a';
-import { createAgentCard } from './create_agent_card';
+import { buildBearerAuthScheme, createAgentCard } from './create_agent_card';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
 import { KibanaTaskStore } from './kibana_task_store';
+
+type A2AOauth2Metadata = NonNullable<NonNullable<AgentBuilderConfig['a2a']>['oauth2']>['metadata'];
 
 /**
  * Reads the JSON-RPC `message/send` blocking flag from the raw request body.
@@ -47,7 +50,8 @@ export class KibanaA2AAdapter {
   constructor(
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
-    private getBaseUrl: (request: KibanaRequest) => Promise<string>
+    private getBaseUrl: (request: KibanaRequest) => Promise<string>,
+    private a2aOauth2Metadata?: A2AOauth2Metadata
   ) {}
 
   /**
@@ -70,6 +74,7 @@ export class KibanaA2AAdapter {
       baseUrl: await this.getBaseUrl(kibanaRequest),
       toolsService: tools,
       request: kibanaRequest,
+      a2aOauth2Metadata: this.a2aOauth2Metadata,
     });
 
     // Kibana load balancing lacks session affinity, so `tasks/get` polling for a non-blocking
@@ -150,12 +155,9 @@ export class KibanaA2AAdapter {
             in: 'header',
             description: 'Elastic API key (Authorization: ApiKey <encoded>)',
           },
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            description: `OAuth 2.0 Bearer token. To discover the authorization server, fetch ${baseUrl}${A2A_SERVER_PATH}/.well-known/oauth-protected-resource`,
-          },
+          bearerAuth: buildBearerAuthScheme(baseUrl, this.a2aOauth2Metadata),
         },
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
         defaultInputModes: ['text/plain'],
         defaultOutputModes: ['text/plain'],
         skills: [

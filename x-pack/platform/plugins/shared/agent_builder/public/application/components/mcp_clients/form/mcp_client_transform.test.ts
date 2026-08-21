@@ -249,6 +249,7 @@ describe('toUpdateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
+    isA2A: false,
   };
 
   it('never sends client_type, which is immutable after registration', () => {
@@ -386,6 +387,7 @@ describe('oauthClientToFormData', () => {
         uris: [{ value: 'https://example.com/callback' }],
       },
       isConfidential: true,
+      isA2A: false,
     });
   });
 

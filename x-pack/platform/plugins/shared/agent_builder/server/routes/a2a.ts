@@ -32,7 +32,12 @@ export function registerA2ARoutes({
     return getKibanaUrl(coreSetup, pluginsSetup.cloud, request);
   };
 
-  const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
+  const a2aAdapter = new KibanaA2AAdapter(
+    logger,
+    getInternalServices,
+    getBaseUrl,
+    config.a2a?.oauth2?.metadata
+  );
 
   router.versioned
     .get({
