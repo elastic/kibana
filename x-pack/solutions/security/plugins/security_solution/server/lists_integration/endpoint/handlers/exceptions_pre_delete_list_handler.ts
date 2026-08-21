@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import type {
   ExceptionListPreDeleteListBlocker,
@@ -15,30 +14,16 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
-// Endpoint artifact lists (trusted apps, blocklists, etc.) are pushed to endpoints via
-// policy and are never referenced by detection rules, so they skip the rule reference
-// check. The plain `endpoint` type is deliberately NOT in this set -- the Elastic
-// Endpoint exceptions list CAN be attached to detection rules, so it must go through
-// the reference check like any other detection list.
-const ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES: ReadonlySet<ExceptionListSchema['type']> = new Set([
-  'endpoint_trusted_apps',
-  'endpoint_trusted_devices',
-  'endpoint_events',
-  'endpoint_host_isolation_exceptions',
-  'endpoint_blocklists',
-  'endpoint_custom_yara_signatures',
-]);
-
 const MAX_REFERENCING_RULES = 10000;
 
+// Every list type goes through the rule reference check, including endpoint artifact
+// lists (trusted apps, blocklists, etc.). Artifact lists are never referenced by
+// detection rules, so the check is a no-op for them; exempting them would require a
+// caller-forgeable discriminator and would make the endpoint's behavior non-uniform.
 export const getExceptionsPreDeleteListHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreDeleteListServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
-    if (ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES.has(data.list.type)) {
-      return data;
-    }
-
     // Fail closed: without a request there is no way to check whether detection rules
     // reference this list, and treating "cannot verify" as "not referenced" would allow
     // deleting a list that rules still depend on.

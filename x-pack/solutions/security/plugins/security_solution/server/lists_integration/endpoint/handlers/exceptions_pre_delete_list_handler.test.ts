@@ -57,22 +57,35 @@ describe('Exceptions pre delete list handler', () => {
   });
 
   it.each([
-    'endpoint_trusted_apps',
-    'endpoint_trusted_devices',
-    'endpoint_events',
-    'endpoint_host_isolation_exceptions',
-    'endpoint_blocklists',
-    'endpoint_custom_yara_signatures',
-  ] as const)('skips the rule reference check for %s lists', async (type) => {
-    const data = {
-      blockedBy: [],
-      list: getListMock({ namespace_type: 'agnostic', type }),
-      namespaceType: 'agnostic' as const,
-    };
+    // Real Trusted Apps containers are stored with type `endpoint`, not
+    // `endpoint_trusted_apps` (the enum member aliases to `endpoint`).
+    { list_id: 'endpoint_trusted_apps', type: 'endpoint' } as const,
+    { list_id: 'endpoint_list', type: 'endpoint' } as const,
+    { list_id: 'endpoint_trusted_devices', type: 'endpoint_trusted_devices' } as const,
+    { list_id: 'endpoint_event_filters', type: 'endpoint_events' } as const,
+    {
+      list_id: 'endpoint_host_isolation_exceptions',
+      type: 'endpoint_host_isolation_exceptions',
+    } as const,
+    { list_id: 'endpoint_blocklists', type: 'endpoint_blocklists' } as const,
+    {
+      list_id: 'endpoint_custom_yara_signatures',
+      type: 'endpoint_custom_yara_signatures',
+    } as const,
+  ])(
+    'runs the rule reference check for the $list_id list (type $type)',
+    async ({ list_id: listId, type }) => {
+      const data = {
+        blockedBy: [],
+        list: getListMock({ list_id: listId, namespace_type: 'agnostic', type }),
+        namespaceType: 'agnostic' as const,
+      };
 
-    await expect(handler({ context, data })).resolves.toEqual(data);
-    expect(endpointAppContextService.getRulesClient).not.toHaveBeenCalled();
-  });
+      await expect(handler({ context, data })).resolves.toEqual(data);
+      expect(endpointAppContextService.getRulesClient).toHaveBeenCalledWith(context.request);
+      expect(rulesClient.find).toHaveBeenCalled();
+    }
+  );
 
   it('fails closed when no request is present in the callback context', async () => {
     const data = { blockedBy: [], list: getListMock(), namespaceType: 'single' as const };
@@ -81,6 +94,13 @@ describe('Exceptions pre delete list handler', () => {
       handler({ context: { ...context, request: undefined }, data })
     ).rejects.toThrowError(/Unable to verify detection rule references/);
     expect(endpointAppContextService.getRulesClient).not.toHaveBeenCalled();
+  });
+
+  it('propagates a rules client failure instead of treating it as "no references"', async () => {
+    rulesClient.find.mockRejectedValue(new Error('Unauthorized to find rules'));
+    const data = { blockedBy: [], list: getListMock(), namespaceType: 'single' as const };
+
+    await expect(handler({ context, data })).rejects.toThrowError('Unauthorized to find rules');
   });
 
   it('returns data unchanged when no rule references the list', async () => {
