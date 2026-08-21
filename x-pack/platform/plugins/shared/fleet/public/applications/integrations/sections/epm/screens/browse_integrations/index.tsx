@@ -11,6 +11,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 
 import { CardIcon } from '../../../../../../components/package_icon';
 import type { CollectionVariant } from '../home/card_utils';
+import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
@@ -33,7 +34,6 @@ import {
 } from './components/manage_integrations_table';
 
 const OBLT_DEFAULT_CATEGORIES = ['opentelemetry', 'observability'];
-const COLLECTION_QUERYPARAM = 'collection';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,

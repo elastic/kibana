@@ -39,6 +39,9 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
+/** URL query-param key that holds the currently-open collection group id. */
+export const COLLECTION_QUERYPARAM = 'collection';
+
 export interface CollectionStateRef {
   groupId: string;
   title: string;

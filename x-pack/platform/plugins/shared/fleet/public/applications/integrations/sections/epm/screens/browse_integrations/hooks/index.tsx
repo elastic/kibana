@@ -48,31 +48,27 @@ export function useBrowseIntegrationHook({
     allCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
-  // Alias for internal use; allCards is returned for callers that need the full unfiltered set
-  // (e.g. to resolve a collection card that may have been filtered out of the current view).
-  const originalFilteredCards = allCards;
-
   const urlFilters = useUrlFilters();
 
-  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const localSearch = useLocalSearch(allCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
 
   const sortedCards: IntegrationCardItem[] = useMemo(() => {
     const sortKey = urlFilters.sort ?? 'recent-old';
 
     if (sortKey === 'a-z') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
-      return [...originalFilteredCards].sort((a, b) => {
+      return [...allCards].sort((a, b) => {
         return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
-      return originalFilteredCards;
+      return allCards;
     }
-  }, [originalFilteredCards, urlFilters.sort]);
+  }, [allCards, urlFilters.sort]);
 
   // Cards filtered by non-category filters (search, status, setup method, signal).
   // Used to compute accurate category counts in the sidebar.

@@ -26,10 +26,9 @@ import { useAvailablePackages } from './hooks/use_available_packages';
 
 import type { ExtendedIntegrationCategory } from './category_facets';
 import type { CollectionVariant } from './card_utils';
+import { COLLECTION_QUERYPARAM } from './card_utils';
 
 import { CollectionFlyout } from './components/collection_flyout';
-
-const COLLECTION_QUERYPARAM = 'collection';
 
 export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
