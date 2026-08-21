@@ -626,6 +626,7 @@ describe('saveDiscoverSession', () => {
       const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
       expect(savedTab.density).toBeUndefined();
       expect(savedTab.rowHeight).toBeUndefined();
+      expect(savedTab.headerRowHeight).toBeUndefined();
     });
 
     it('keeps an explicit source view mode on the tab instead of the local storage value', async () => {

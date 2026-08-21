@@ -48,7 +48,11 @@ export {
   getStoredDataGridDensity,
   getDataGridDensityPadding,
 } from './src/hooks/use_data_grid_density';
-export { getRowHeight, getStoredRowHeightLines } from './src/hooks/use_row_height';
+export {
+  getRowHeight,
+  getStoredRowHeightLines,
+  HEADER_ROW_HEIGHT_STORAGE_KEY,
+} from './src/hooks/use_row_height';
 export {
   getStoredSourceDisplayMode,
   getStoredJsonModeSettings,

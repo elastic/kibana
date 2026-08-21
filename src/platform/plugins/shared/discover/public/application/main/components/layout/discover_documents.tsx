@@ -55,7 +55,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
-import { getDefaultRowsPerPage } from '../../../../../common/constants';
+import { DEFAULT_HEADER_ROW_HEIGHT, getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
   selectTabCombinedFilters,
   useAppStateSelector,
@@ -631,7 +631,7 @@ function DiscoverDocumentsComponent({
             onSetColumns={onSetColumns}
             onSort={onSort}
             onResize={onResizeDataGrid}
-            configHeaderRowHeight={3}
+            configHeaderRowHeight={DEFAULT_HEADER_ROW_HEIGHT}
             headerRowHeightState={headerRowHeight}
             onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
             rowHeightState={rowHeight}

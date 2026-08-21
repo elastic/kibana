@@ -14,6 +14,10 @@ import { isObject } from 'lodash';
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
+// Default "Max header cell lines" for the Discover data table. Used both as the header row height
+// config passed to the grid and to read the matching value back from local storage when saving.
+export const DEFAULT_HEADER_ROW_HEIGHT = 3;
+
 export { VIEW_MODE } from '@kbn/discover-utils';
 
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {

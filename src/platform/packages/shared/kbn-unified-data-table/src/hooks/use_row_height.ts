@@ -70,6 +70,7 @@ const resolveRowHeight = ({
 };
 
 export const ROW_HEIGHT_STORAGE_KEY = 'dataGridRowHeight';
+export const HEADER_ROW_HEIGHT_STORAGE_KEY = 'dataGridHeaderRowHeight';
 
 export const getRowHeight = ({
   storage,

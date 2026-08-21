@@ -22,8 +22,10 @@ import {
   getStoredDataGridDensity,
   getStoredJsonModeSettings,
   getStoredRowHeightLines,
+  HEADER_ROW_HEIGHT_STORAGE_KEY,
 } from '@kbn/unified-data-table';
 import { ROW_HEIGHT_OPTION } from '@kbn/discover-utils';
+import { DEFAULT_HEADER_ROW_HEIGHT } from '../../../../../../common/constants';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -95,6 +97,14 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             storage: services.storage,
             consumer: 'discover',
             configRowHeight: services.uiSettings.get(ROW_HEIGHT_OPTION),
+          });
+        updatedTab.headerRowHeight =
+          updatedTab.headerRowHeight ??
+          getStoredRowHeightLines({
+            storage: services.storage,
+            consumer: 'discover',
+            key: HEADER_ROW_HEIGHT_STORAGE_KEY,
+            configRowHeight: DEFAULT_HEADER_ROW_HEIGHT,
           });
 
         if (services.discoverFeatureFlags.getDataTableJsonViewEnabled()) {
