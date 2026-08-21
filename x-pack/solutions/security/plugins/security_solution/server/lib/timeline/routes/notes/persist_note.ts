@@ -51,42 +51,39 @@ export const persistNoteRoute = (
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const { note } = request.body;
-          const noteId = request.body?.noteId ?? null;
+          const incomingNoteId = request.body?.noteId ?? null;
+          const isCreate = incomingNoteId == null;
 
           const res = await persistNote({
             request: frameworkRequest,
-            noteId,
+            noteId: incomingNoteId,
             note,
             overrideOwner: true,
           });
 
           if (eventBus && note.eventId) {
-            const persistedNoteId = res.note.noteId;
-            if (!persistedNoteId) {
+            const { noteId } = res.note;
+            if (!noteId) {
               logger.warn('Skipping workflow trigger: noteId missing after note persist');
-            } else if (noteId == null) {
-              const actor = res.note.createdBy;
-              if (!actor) {
-                logger.warn(
-                  `Skipping noteCreated trigger: createdBy missing (noteId: ${persistedNoteId})`
-                );
+            } else if (isCreate) {
+              const { createdBy } = res.note;
+              if (!createdBy) {
+                logger.warn(`Skipping noteCreated trigger: createdBy missing (noteId: ${noteId})`);
               } else {
                 void eventBus.emitNoteCreated(request, {
-                  noteId: persistedNoteId,
-                  createdBy: actor,
+                  noteId,
+                  createdBy,
                   documentId: note.eventId,
                 });
               }
             } else {
-              const actor = res.note.updatedBy ?? res.note.createdBy;
-              if (!actor) {
-                logger.warn(
-                  `Skipping noteUpdated trigger: updatedBy missing (noteId: ${persistedNoteId})`
-                );
+              const updatedBy = res.note.updatedBy ?? res.note.createdBy;
+              if (!updatedBy) {
+                logger.warn(`Skipping noteUpdated trigger: updatedBy missing (noteId: ${noteId})`);
               } else {
                 void eventBus.emitNoteUpdated(request, {
-                  noteId: persistedNoteId,
-                  updatedBy: actor,
+                  noteId,
+                  updatedBy,
                   documentId: note.eventId,
                 });
               }
