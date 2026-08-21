@@ -60,9 +60,10 @@ spaceTest.describe('Lens dashboard chart interactions', { tag: '@local-stateful-
       await clickElasticChartCanvas(page, { x: 30, y: 5 });
 
       const applyFiltersButton = page.testSubj.locator('applyFiltersPopoverButton');
+      const applyFiltersDialog = page.getByRole('dialog').filter({ has: applyFiltersButton });
       await expect(applyFiltersButton).toBeVisible();
-      await expect(page.getByText(XY_TIME_FILTER_LABEL)).toBeVisible();
-      await expect(page.getByText(XY_IP_FILTER_LABEL)).toBeVisible();
+      await expect(applyFiltersDialog.getByText(XY_TIME_FILTER_LABEL)).toBeVisible();
+      await expect(applyFiltersDialog.getByText(XY_IP_FILTER_LABEL)).toBeVisible();
       await applyFiltersButton.click();
       await expect(applyFiltersButton).toBeHidden();
 
@@ -88,12 +89,13 @@ spaceTest.describe('Lens dashboard chart interactions', { tag: '@local-stateful-
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       // Tooltip actions: [0] Filter by time, [1] Filter N selected series (expression_xy).
+      const tooltipActions = page.locator('.echTooltipActions');
       await clickElasticChartCanvas(page, { x: 30, y: 5 }, { button: 'right' });
-      await page.getByText(/Filter \d+ selected series/).click();
+      await tooltipActions.getByText(/Filter \d+ selected series/).click();
       await expect(page.testSubj.locator('~filter-key-ip & ~filter-value-97.220.3.248')).toBeVisible();
 
       await clickElasticChartCanvas(page, { x: 35, y: 5 }, { button: 'right' });
-      await page.getByText('Filter by time').click();
+      await tooltipActions.getByText('Filter by time').click();
       const time = await datePicker.getTimeConfig();
       expect(time.start).toBe(XY_TIME_START);
       expect(time.end).toBe(XY_TIME_END);
