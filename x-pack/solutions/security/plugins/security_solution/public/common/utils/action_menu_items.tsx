@@ -44,22 +44,16 @@ export const withActionIcons = (
 
 export const withStatusDotIcons = (
   items: readonly EuiContextMenuPanelItemDescriptor[],
-  colorsByTestSubject: Readonly<Record<string, EuiIconProps['color']>>,
-  defaultColor?: EuiIconProps['color']
+  colorsByActionId: Readonly<Record<string, EuiIconProps['color']>>,
+  defaultColor: EuiIconProps['color'] = 'subdued'
 ): EuiContextMenuPanelItemDescriptor[] =>
   items.map((item) => {
     if (!isActionMenuItem(item)) {
       return item;
     }
 
-    const testSubject = item['data-test-subj'];
     const color =
-      (typeof testSubject === 'string' ? colorsByTestSubject[testSubject] : undefined) ??
-      defaultColor;
-
-    if (!color) {
-      return item;
-    }
+      (typeof item.key === 'string' ? colorsByActionId[item.key] : undefined) ?? defaultColor;
 
     return {
       ...item,
