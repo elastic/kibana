@@ -6,8 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { useAgentStats } from '../../settings/private_locations/hooks/use_agent_stats';
-import { isAgentVersionMwCompatible } from '../../../../../../common/utils/agent_mw_support';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import type { OutdatedMwAgentLocationsResponse } from '../../../../../../common/utils/agent_mw_support';
+import { apiService } from '../../../../../utils/api_service/api_service';
+import { useSyntheticsRefreshContext } from '../../../contexts';
+
+const fetchOutdatedMwAgentLocations = () =>
+  apiService.get<OutdatedMwAgentLocationsResponse>(
+    SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS
+  );
 
 /**
  * Private location ids with at least one enrolled agent whose version
@@ -15,17 +23,10 @@ import { isAgentVersionMwCompatible } from '../../../../../../common/utils/agent
  * window there may keep running through it.
  */
 export const useOutdatedMwAgentLocationIds = () => {
-  const { byLocation } = useAgentStats();
+  const { lastRefresh } = useSyntheticsRefreshContext();
+  const { data } = useFetcher(fetchOutdatedMwAgentLocations, [lastRefresh]);
 
-  const outdatedLocationIds = useMemo(() => {
-    const ids = new Set<string>();
-    byLocation.forEach((stats, locationId) => {
-      if (stats.agents.some((agent) => !isAgentVersionMwCompatible(agent.agentVersion))) {
-        ids.add(locationId);
-      }
-    });
-    return ids;
-  }, [byLocation]);
+  const outdatedLocationIds = useMemo(() => new Set(data?.outdatedLocationIds ?? []), [data]);
 
   return { outdatedLocationIds };
 };
