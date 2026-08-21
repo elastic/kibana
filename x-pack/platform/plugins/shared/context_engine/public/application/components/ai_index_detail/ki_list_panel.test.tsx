@@ -7,12 +7,14 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { KiListPanel } from './ki_list_panel';
 
@@ -41,22 +43,33 @@ const aiIndex: GetAiIndexResponse = {
 
 const SAMPLE_INDEX_MANAGEMENT_URL =
   '/app/management/data/index_management/indices/index_details?indexName=ai-index-idx-sample-ki';
+const SAMPLE_DISCOVER_URL = '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx-sample-ki))';
 
-const renderWithProviders = (ui: React.ReactElement) => {
+interface RenderOptions {
+  discoverShow?: boolean;
+}
+
+const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}) => {
+  const { discoverShow = true } = options;
   const services = {
     ...coreMock.createStart(),
     share: sharePluginMock.createStartContract(),
   };
   services.application.capabilities = {
     ...services.application.capabilities,
-    discover_v2: { show: true },
+    discover_v2: { show: discoverShow },
   };
 
   const indexManagementLocator = sharePluginMock.createLocator();
   indexManagementLocator.getUrl.mockResolvedValue(SAMPLE_INDEX_MANAGEMENT_URL);
+  const discoverLocator = sharePluginMock.createLocator();
+  discoverLocator.getRedirectUrl.mockReturnValue(SAMPLE_DISCOVER_URL);
   jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
     if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
       return indexManagementLocator;
+    }
+    if (locatorId === DISCOVER_APP_LOCATOR) {
+      return discoverLocator;
     }
     return undefined;
   });
@@ -151,5 +164,172 @@ describe('KiListPanel', () => {
     expect(screen.getByTestId('contextKiListPanelSummary')).toHaveTextContent(
       '6 Knowledge Indicators in ai-index-idx-sample-ki'
     );
+  });
+
+  it('shows a loading skeleton while the first page is loading', () => {
+    mockUseKiList.mockReturnValue({
+      kis: [],
+      total: 0,
+      totalAll: 0,
+      countsByType: [],
+      isLoading: true,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    expect(screen.getByTestId('contextKiListLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextKiListRows')).not.toBeInTheDocument();
+  });
+
+  it('shows an error message when the list request fails', () => {
+    mockUseKiList.mockReturnValue({
+      kis: [],
+      total: 0,
+      totalAll: 0,
+      countsByType: [],
+      isLoading: false,
+      error: new Error('boom'),
+      refetch: jest.fn(),
+    });
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    expect(screen.getByTestId('contextKiListError')).toHaveTextContent(
+      'Unable to load Knowledge Indicators.'
+    );
+  });
+
+  it('shows an empty state when there are no Knowledge Indicators', () => {
+    mockUseKiList.mockReturnValue({
+      kis: [],
+      total: 0,
+      totalAll: 0,
+      countsByType: [],
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    expect(screen.getByTestId('contextKiListEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextKiListTypeFilters')).not.toBeInTheDocument();
+  });
+
+  it('renders a Discover link when discover is available', () => {
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    expect(screen.getByTestId('contextKiListDiscoverLink')).toHaveAttribute(
+      'href',
+      SAMPLE_DISCOVER_URL
+    );
+  });
+
+  it('hides the Discover link when discover is unavailable', () => {
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { discoverShow: false });
+
+    expect(screen.queryByTestId('contextKiListDiscoverLink')).not.toBeInTheDocument();
+  });
+
+  it('renders the destination as plain text for index patterns', () => {
+    renderWithProviders(
+      <KiListPanel
+        aiIndex={{
+          ...aiIndex,
+          dest: { type: 'index', value: 'ai-index-idx-logs-*' },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('contextKiListPanelDest')).toHaveTextContent('ai-index-idx-logs-*');
+    expect(screen.queryByTestId('contextKiListPanelDestLink')).not.toBeInTheDocument();
+  });
+
+  it('requests a larger page size when load more is clicked', () => {
+    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+      kis: Array.from({ length: size }, (_, index) => ({
+        ki_id: `ki-${index}`,
+        type: 'playbook',
+        title: `KI ${index}`,
+      })),
+      total: 50,
+      totalAll: 50,
+      countsByType: [{ type: 'playbook', count: 50 }],
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }));
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+
+    expect(mockUseKiList).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        size: DEFAULT_KI_PAGE_SIZE * 2,
+      })
+    );
+  });
+
+  it('shows the cap reached message with a Discover link at the max page size', () => {
+    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+      kis: Array.from({ length: size }, (_, index) => ({
+        ki_id: `ki-${index}`,
+        type: 'playbook',
+        title: `KI ${index}`,
+      })),
+      total: 150,
+      totalAll: 150,
+      countsByType: [{ type: 'playbook', count: 150 }],
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }));
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />);
+
+    const loadMoreClicks = MAX_KI_PAGE_SIZE / DEFAULT_KI_PAGE_SIZE - 1;
+    for (let click = 0; click < loadMoreClicks; click++) {
+      fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+    }
+
+    expect(screen.getByTestId('contextKiListCapReached')).toHaveTextContent(
+      `Showing the first ${MAX_KI_PAGE_SIZE} results.`
+    );
+    expect(screen.getByTestId('contextKiListCapReachedDiscoverLink')).toHaveAttribute(
+      'href',
+      SAMPLE_DISCOVER_URL
+    );
+    expect(screen.queryByTestId('contextKiListLoadMoreButton')).not.toBeInTheDocument();
+  });
+
+  it('shows the cap reached message without a Discover link when discover is unavailable', () => {
+    mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
+      kis: Array.from({ length: size }, (_, index) => ({
+        ki_id: `ki-${index}`,
+        type: 'playbook',
+        title: `KI ${index}`,
+      })),
+      total: 150,
+      totalAll: 150,
+      countsByType: [{ type: 'playbook', count: 150 }],
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }));
+
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { discoverShow: false });
+
+    const loadMoreClicks = MAX_KI_PAGE_SIZE / DEFAULT_KI_PAGE_SIZE - 1;
+    for (let click = 0; click < loadMoreClicks; click++) {
+      fireEvent.click(screen.getByTestId('contextKiListLoadMoreButton'));
+    }
+
+    expect(screen.getByTestId('contextKiListCapReached')).toHaveTextContent(
+      `Showing the first ${MAX_KI_PAGE_SIZE} results.`
+    );
+    expect(screen.queryByTestId('contextKiListCapReachedDiscoverLink')).not.toBeInTheDocument();
   });
 });

@@ -533,6 +533,37 @@ describe('ai indices routes', () => {
 
       expect(response.notFound).toHaveBeenCalled();
     });
+
+    it('returns an empty list when the backing store has no documents yet', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          all_kis: { doc_count: 0, counts_by_type: { buckets: [] } },
+        },
+      });
+
+      await callRoute('GET', aiIndexKiListPath, {
+        params: { aiIndexId: 'customer_support' },
+        query: { from: 0, size: 25 },
+      });
+
+      expect(esSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: aiIndexItem.dest.value,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        })
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          total: 0,
+          total_all: 0,
+          counts_by_type: [],
+          kis: [],
+        },
+      });
+    });
   });
 
   describe('GET /api/context_engine/ai_index', () => {

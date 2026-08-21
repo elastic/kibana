@@ -159,4 +159,40 @@ describe('ki_list', () => {
       })
     );
   });
+
+  it('returns an empty list when the backing store has no documents', async () => {
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 0 },
+        hits: [],
+      },
+      aggregations: {
+        all_kis: {
+          doc_count: 0,
+          counts_by_type: { buckets: [] },
+        },
+      },
+    });
+
+    await expect(
+      getKis(esClient, {
+        destValue: 'ai-index-idx-missing',
+        from: 0,
+        size: 25,
+      })
+    ).resolves.toEqual({
+      kis: [],
+      total: 0,
+      total_all: 0,
+      counts_by_type: [],
+    });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'ai-index-idx-missing',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      })
+    );
+  });
 });
