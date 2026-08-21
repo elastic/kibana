@@ -16,11 +16,12 @@ import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useDispatch } from 'react-redux-v7';
-import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
+import { defaultDiscoverTimeRange } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { applyTimelineStateToDiscover } from './apply_timeline_state_to_discover';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
@@ -184,6 +185,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     return unSubscribeAll;
   }, [discoverStateContainer]);
 
+  // The timeline tabs are conditionally rendered, so this component unmounts whenever the user
+  // leaves the ES|QL tab, taking the Discover state container it published with it. Releasing the
+  // reference keeps callers from dispatching into a disposed container, where writes are accepted
+  // and silently dropped.
+  useEffect(() => () => setDiscoverStateContainer(undefined), [setDiscoverStateContainer]);
+
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
       setDiscoverStateContainer(stateContainer);
@@ -206,32 +213,15 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.getCurrentTab().appState.query as { esql: string })
-        ?.esql;
-
-      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
-        if (savedSearchAppState?.savedSearch.timeRange) {
-          stateContainer.internalState.dispatch(
-            stateContainer.injectCurrentTab(stateContainer.internalActions.updateGlobalState)({
-              globalState: {
-                timeRange: savedSearchAppState.savedSearch.timeRange,
-              },
-            })
-          );
-        }
-        stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(stateContainer.internalActions.setAppState)({
-            appState: finalAppState,
-          })
-        );
-        await stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(
-            stateContainer.internalActions.updateAppStateAndReplaceUrl
-          )({
-            appState: finalAppState,
-          })
-        );
-      }
+      // The timeline is the source of truth for its own ES|QL tab: a restored timeline gets its
+      // saved session's state, a timeline without one gets the default. This deliberately wins
+      // over leftover Discover URL state, which belongs to the previously opened timeline and
+      // would otherwise be restored in its place — silently, since the two often share a query.
+      await applyTimelineStateToDiscover({
+        stateContainer,
+        appState: finalAppState,
+        timeRange: savedSearchAppState?.savedSearch.timeRange ?? defaultDiscoverTimeRange,
+      });
 
       const unsubscribeState = stateContainer.createAppStateObservable().subscribe({
         next: setDiscoverAppState,

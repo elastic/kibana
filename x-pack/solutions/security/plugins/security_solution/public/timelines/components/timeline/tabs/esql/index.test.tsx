@@ -28,10 +28,12 @@ describe('Discover Tab Content', () => {
     });
   });
 
-  // issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
-  it.skip('should load saved search when a saved timeline is restored', () => {});
-  it.skip('should reset the discover state when new timeline is created', () => {});
+  // `DiscoverContainer` is mocked here (see `discoverPluginMock`), so this file can only assert
+  // that the tab renders. The state handed to Discover on mount — which saved search is restored
+  // and which time range comes with it — is covered against a real Discover state container in
+  // `apply_timeline_state_to_discover.test.ts`.
+  //
+  // Still uncovered, tracked by https://github.com/elastic/kibana/issues/165913:
   it.skip('should update saved search if timeline title and description are updated', () => {});
   it.skip('should should not update saved search if the fetched saved search is same as discover updated saved search', () => {});
-  it.skip('should update saved search if discover time is update', () => {});
 });
