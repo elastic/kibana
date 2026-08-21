@@ -252,45 +252,20 @@ export const fromEs = (document: Document): Conversation => {
   const storedEvents = document._source!.events;
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  const withVersion = (conversation: Conversation): Conversation =>
-    isEventsNative ? { ...conversation, schema_version: storedSchemaVersion } : conversation;
-
-  // Serve stored events only when the doc is events-native AND has a non-empty
-  // stored projection.
-  const withEvents = (conversation: Conversation): Conversation => ({
-    ...conversation,
-    events:
-      isEventsNative && storedEvents && storedEvents.length > 0
-        ? storedEvents
-        : roundsToEvents(conversation),
-  });
-
-  const decorate = (conversation: Conversation): Conversation =>
-    withEvents(withVersion(conversation));
-
-  if (existingAttachments && existingAttachments.length > 0) {
-    return decorate({
-      ...base,
-      rounds: roundsWithRefs,
-      attachments: existingAttachments,
-      ...(document._source!.state && { state: document._source!.state }),
-    });
-  }
-
-  if (hasLegacyRoundAttachments) {
-    return decorate({
-      ...base,
-      rounds: roundsWithRefs,
-      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-      ...(document._source!.state && { state: document._source!.state }),
-    });
-  }
-
-  return decorate({
+  const conversation: Conversation = {
     ...base,
     rounds: roundsWithRefs,
-    ...(document._source!.state && { state: document._source!.state }),
-  });
+    ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
+    ...(document._source!.state ? { state: document._source!.state } : {}),
+    ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+  };
+
+  const events =
+    isEventsNative && storedEvents && storedEvents.length > 0
+      ? storedEvents
+      : roundsToEvents(conversation);
+
+  return { ...conversation, events };
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
