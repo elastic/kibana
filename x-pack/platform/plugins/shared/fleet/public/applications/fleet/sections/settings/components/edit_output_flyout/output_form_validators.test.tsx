@@ -16,6 +16,10 @@ import {
   validateKafkaHosts,
   validateKibanaURL,
   validateKibanaAPIKey,
+  validateSSLCertificate,
+  validateSSLKey,
+  validateSslPathInput,
+  validateDynamicKafkaTopics,
 } from './output_form_validators';
 
 const validateYamlConfig = createValidateYamlConfig(parse);
@@ -338,6 +342,99 @@ describe('Output form validation', () => {
           message: 'Missing value for key "test3"',
         },
       ]);
+    });
+  });
+
+  describe('SSL certificate validators', () => {
+    describe('validateSSLCertificate', () => {
+      it('should return an error when value is empty', () => {
+        expect(validateSSLCertificate('')).toEqual(['SSL certificate is required']);
+      });
+
+      it('should return an error for a path containing whitespace', () => {
+        expect(validateSSLCertificate('/path/with spaces/cert.pem')).toBeDefined();
+      });
+
+      it('should return undefined for a valid file path', () => {
+        expect(validateSSLCertificate('/etc/ssl/cert.pem')).toBeUndefined();
+      });
+
+      it('should return undefined for inline PEM certificate content', () => {
+        expect(
+          validateSSLCertificate(
+            '-----BEGIN CERTIFICATE-----\nMIIBIjANBg==\n-----END CERTIFICATE-----'
+          )
+        ).toBeUndefined();
+      });
+    });
+
+    describe('validateSSLKey', () => {
+      it('should return an error when value is empty', () => {
+        expect(validateSSLKey('')).toEqual(['SSL key is required']);
+      });
+
+      it('should return an error for a path containing whitespace', () => {
+        expect(validateSSLKey('/path/with spaces/key.pem')).toBeDefined();
+      });
+
+      it('should return undefined for a valid file path', () => {
+        expect(validateSSLKey('/etc/ssl/key.pem')).toBeUndefined();
+      });
+
+      it('should return undefined for inline PEM key content', () => {
+        expect(
+          validateSSLKey(
+            '-----BEGIN RSA PRIVATE KEY-----\nMIIBIjANBg==\n-----END RSA PRIVATE KEY-----'
+          )
+        ).toBeUndefined();
+      });
+    });
+
+    describe('validateSslPathInput', () => {
+      it('should return undefined for an empty string — the field is optional', () => {
+        expect(validateSslPathInput('')).toBeUndefined();
+      });
+
+      it('should return undefined for a valid file path', () => {
+        expect(validateSslPathInput('/etc/ssl/ca.pem')).toBeUndefined();
+      });
+
+      it('should return undefined for inline PEM content', () => {
+        expect(
+          validateSslPathInput(
+            '-----BEGIN CERTIFICATE-----\nMIIBIjANBg==\n-----END CERTIFICATE-----'
+          )
+        ).toBeUndefined();
+      });
+
+      it('should return an error for a path containing whitespace', () => {
+        expect(validateSslPathInput('/path/with spaces/cert.pem')).toBeDefined();
+      });
+    });
+  });
+
+  describe('validateDynamicKafkaTopics', () => {
+    const validTopics = [
+      { label: 'field1', value: '%{[field]}' },
+      { label: 'field2', value: 'field2' },
+      { label: 'field3', value: '%{[field2]}-%{[field3]}' },
+      { label: 'field4', value: '%{[data_stream.type]}-%{[service.common_name]:agent-monitoring}' },
+    ];
+    const invalidBracketTopic = [{ label: '%{[field}', value: '%{[field}' }];
+    const invalidPercentTopic = [{ label: '{[field]}', value: '{[field]}' }];
+    it('should work with valid topics', () => {
+      const res = validateDynamicKafkaTopics(validTopics);
+      expect(res).toBeUndefined();
+    });
+    it("should return error with missing brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidBracketTopic);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it("should return error with missing percent sign before opening brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidPercentTopic);
+      expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
     });
   });
 });

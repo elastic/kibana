@@ -1,10 +1,14 @@
 {
-  "sha1": "a247337bdc6dd1ae39758cab92ce1c3f661c47df",
+  "sha1": "69d3365ef07589e54578bdeead4aca8c516a4263",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
       "title": "InternalActions/Cases should run create_get_update_case workflow successfully",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -15,7 +19,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/create_get_update_case.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 9
       }
     },
