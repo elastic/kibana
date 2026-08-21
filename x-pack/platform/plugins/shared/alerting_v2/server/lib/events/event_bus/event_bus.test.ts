@@ -65,6 +65,14 @@ describe('AsyncDomainEventBus', () => {
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(event);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ labels: { event_type: 'foo' } })
+      );
+      const debugMessage = (mockLogger.debug as jest.Mock).mock.calls.at(-1)![0] as () => string;
+      expect(debugMessage()).toBe('[alerting_v2.EventBus] Emitted foo');
+      expect(debugMessage()).not.toContain('world');
+      expect(debugMessage()).not.toContain('payload');
     });
 
     it('dispatches handlers asynchronously so publish() returns before handlers run', async () => {
@@ -159,7 +167,7 @@ describe('AsyncDomainEventBus', () => {
         expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
           labels: {
             event_type: reservedType,
-            code: ALERTING_LOG_CODES.EVENT_BUS_PUBLISH_REJECTED,
+            code: ALERTING_LOG_CODES.EVENTS_BUS_PUBLISH_SKIPPED,
           },
         });
       }
@@ -182,7 +190,7 @@ describe('AsyncDomainEventBus', () => {
       expect(failing).toHaveBeenCalledTimes(1);
       expect(succeeding).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledWith('boom', {
-        labels: { event_type: 'foo', code: ALERTING_LOG_CODES.EVENT_BUS_HANDLER_FAILURE },
+        labels: { event_type: 'foo', code: ALERTING_LOG_CODES.EVENTS_BUS_HANDLER_FAILED },
         error: expect.objectContaining({ message: 'boom' }),
       });
     });

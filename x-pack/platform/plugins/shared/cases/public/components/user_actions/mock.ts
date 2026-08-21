@@ -7,13 +7,12 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { UserActionActions } from '../../../common/types/domain';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from '../attachments/comment';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { allCasesPermissions } from '../../common/mock';
 import type { UserActionBuilderArgs } from './types';
 import type { CommentRenderingContextValue } from './comment/comment_rendering_context';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
@@ -25,8 +24,6 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
 
   const handleDeleteComment = jest.fn();
   const handleOutlineComment = jest.fn();
-  const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
 
@@ -35,9 +32,8 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     userAction,
     userProfiles: userProfilesMap,
     currentUserProfile: userProfiles[0],
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
+    permissions: allCasesPermissions(),
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
     attachments: basicCase.comments,

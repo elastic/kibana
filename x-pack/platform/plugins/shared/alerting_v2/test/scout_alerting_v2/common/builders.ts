@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateActionPolicyDataInput,
+  CreateRuleData,
+  RuleTemplateData,
+} from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -55,6 +59,25 @@ export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
   ...DEFAULTS,
   ...input,
+});
+
+export const buildRuleTemplateData = (rule: BuildCreateRuleDataInput = {}): RuleTemplateData => ({
+  engine: 'v2',
+  rule: buildCreateRuleData(rule),
+});
+
+export const buildV1RuleTemplateAttributes = ({
+  name = 'scout-v1-template',
+  tags = ['v1-only'],
+  engine,
+}: { name?: string; tags?: string[]; engine?: string } = {}) => ({
+  ...(engine ? { engine } : {}),
+  name,
+  tags,
+  description: 'Alerting v1 rule template',
+  ruleTypeId: '.index-threshold',
+  schedule: { interval: '1m' },
+  params: { threshold: [1000] },
 });
 
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;

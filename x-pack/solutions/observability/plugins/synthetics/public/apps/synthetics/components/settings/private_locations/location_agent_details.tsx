@@ -98,7 +98,7 @@ export const LocationAgentDetails = ({
       render: (host: string, agent: AgentStat) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="node" size="s" aria-hidden={true} />
+            <EuiIcon type="vectorTriangle" size="s" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <EuiLink

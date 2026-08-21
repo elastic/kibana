@@ -38,6 +38,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import { getChangePointLabel } from './change_point';
+import { getVerdictBadge } from './verdict';
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { EntityChip } from '../entity/entity_chip';
 import { EntityFlyout } from '../entity/entity_flyout';
@@ -94,6 +95,7 @@ export function DetectionFlyout({
 
   const title = detection.rule_name;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
+  const verdictBadge = getVerdictBadge(signal?.verdict);
   const summary = signal?.description;
   const esqlQuery = signal?.evidence?.esql_query;
 
@@ -171,13 +173,9 @@ export function DetectionFlyout({
                 <EuiBadge color="default">{changePointLabel}</EuiBadge>
               </EuiFlexItem>
             )}
-            {signal?.confirmed === false && (
+            {verdictBadge && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">
-                  {i18n.translate('xpack.nightshift.detectionFlyout.unconfirmedBadge', {
-                    defaultMessage: 'Unconfirmed',
-                  })}
-                </EuiBadge>
+                <EuiBadge color={verdictBadge.color}>{verdictBadge.label}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

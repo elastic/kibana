@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { z } from '@kbn/zod';
 
 const filterExpressionPattern = /^(-?)([^:]*):(.*)$/;
@@ -93,7 +92,7 @@ const NoValueFilterExpression = filterBase.extend({
   tagValue: z.undefined(),
 });
 
-const FilterExpressionSchema = z.union([
+export const FilterExpressionSchema = z.union([
   SingleValueFilterExpression,
   MultiValueFilterExpression,
   NoValueFilterExpression,
@@ -189,5 +188,9 @@ export type FilterExpressionCodecOutput = z.output<typeof FilterExpressionSchema
 
 /** Canonical Map key for a stored filter expression (matches encoded badge text semantics). */
 export function getFilterExpressionLookupKey(expression: FilterExpressionValue): string {
-  return filterExpressionCodec.encode(expression) as string;
+  const encoded = filterExpressionCodec.encode(expression);
+  if (encoded === undefined) {
+    throw new Error('Cannot encode filter expression lookup key');
+  }
+  return encoded;
 }
