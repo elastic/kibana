@@ -14,6 +14,8 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  UpdateConversationAccessControlRequestBody,
+  UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
@@ -86,6 +88,21 @@ export class ConversationsService {
     return await this.http.post<MarkPinnedConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
       { body: JSON.stringify({ pinned }) }
+    );
+  }
+
+  async updateAccessControl({
+    conversationId,
+    accessControl,
+  }: {
+    conversationId: string;
+    accessControl: UpdateConversationAccessControlRequestBody;
+  }): Promise<UpdateConversationAccessControlResponse> {
+    return await this.http.put<UpdateConversationAccessControlResponse>(
+      `${publicApiPath}/conversations/${conversationId}/access_control`,
+      {
+        body: JSON.stringify(accessControl),
+      }
     );
   }
 
