@@ -553,6 +553,7 @@ Heatmap — each row is one `view_by` field value, each column is a time bucket,
   "type": "ml_anomaly_swimlane",
   "grid": { "x": 0, "y": 0, "w": 24, "h": 10 },
   "config": {
+    "title": "Anomalies of my-job by host.name",
     "job_ids": ["my-job"],
     "swimlane_type": "viewBy",
     "view_by": "host.name"
@@ -562,6 +563,7 @@ Heatmap — each row is one `view_by` field value, each column is a time bucket,
 
 | Field | Notes |
 | --- | --- |
+| `title` | Optional. Descriptive panel title. Use the pattern `"Anomalies of <job-id> by <view_by>"` for viewBy, or `"Overall anomalies of <job-id>"` for overall. |
 | `job_ids` | Required. One or more existing job or group IDs. |
 | `swimlane_type` | Required. `"overall"` or `"viewBy"`. |
 | `view_by` | Required when `swimlane_type` is `"viewBy"`. Use the exact field name from the job config (e.g. `"host.name"`). |
@@ -577,6 +579,7 @@ Multi-series time series — one chart per anomalous entity/series — showing a
   "type": "ml_anomaly_charts",
   "grid": { "x": 0, "y": 10, "w": 24, "h": 15 },
   "config": {
+    "title": "Anomaly charts of my-job with severity > 50",
     "job_ids": ["my-job"],
     "severity_threshold": 50
   }
@@ -585,6 +588,7 @@ Multi-series time series — one chart per anomalous entity/series — showing a
 
 | Field | Notes |
 | --- | --- |
+| `title` | Optional. Descriptive panel title. Use the pattern `"Anomaly charts of <job-id>"`, appending `" with severity > <N>"` when a threshold is set. |
 | `job_ids` | Required. One or more existing job or group IDs. |
 | `severity_threshold` | Optional. Minimum anomaly score (0–100) to surface. Default 25; raise to 50 or 75 to focus on high-severity series. |
 | `time_range` | Set to the analysis window (`{"from": "...", "to": "..."}`) for historical/batch jobs — omitting it defaults the panel to "last 15 minutes" which shows no data. Omit only for realtime jobs that should track the current time range. |
@@ -601,6 +605,7 @@ Populate `selected_entities` directly from anomaly record fields (`partition_fie
   "type": "ml_single_metric_viewer",
   "grid": { "x": 0, "y": 10, "w": 24, "h": 18 },
   "config": {
+    "title": "Single metric view for my-job",
     "job_ids": ["my-job"],
     "selected_detector_index": 0,
     "selected_entities": { "host.name": "web-01" }
@@ -610,6 +615,7 @@ Populate `selected_entities` directly from anomaly record fields (`partition_fie
 
 | Field | Notes |
 | --- | --- |
+| `title` | Optional. Descriptive panel title. Use the pattern `"Single metric view for <job-id>"`, appending `" — <entity-value>"` when an entity is selected. |
 | `job_ids` | Required. Exactly **one** job ID. |
 | `selected_detector_index` | Zero-based detector index. Use the `detector_index` from the anomaly record. Defaults to 0. |
 | `selected_entities` | Key-value map of partition/by/over field → value (e.g. `{"host.name": "web-01"}`). Populate from RCA results. Omit for population-level jobs with no entity fields. |
