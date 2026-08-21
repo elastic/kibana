@@ -630,4 +630,45 @@ describe('Data Loader', () => {
       }
     );
   });
+
+  it('should abort in-flight searches on cleanup', async () => {
+    const abortController = new AbortController();
+    const abortSpy = jest.spyOn(abortController, 'abort');
+    const parentApi = {
+      ...createUnifiedSearchApi(),
+      searchSessionId$: new BehaviorSubject<string>(''),
+      esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+    };
+    const api: LensApi = {
+      ...getLensApiMock(),
+      parentApi,
+    };
+    const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+    const getState = jest.fn(() => runtimeState);
+    const internalApi = getLensInternalApiMock({
+      attributes$: new BehaviorSubject(runtimeState.attributes),
+      expressionAbortController$: new BehaviorSubject<AbortController | undefined>(abortController),
+    });
+    const services = {
+      ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+      }),
+      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    };
+    const { cleanup } = loadEmbeddableData(
+      faker.string.uuid(),
+      getState,
+      api,
+      parentApi,
+      internalApi,
+      services
+    );
+
+    expect(abortSpy).not.toHaveBeenCalled();
+
+    cleanup();
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+  });
 });
