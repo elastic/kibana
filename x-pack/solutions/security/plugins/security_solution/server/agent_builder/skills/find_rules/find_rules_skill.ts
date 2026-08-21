@@ -46,7 +46,9 @@ Use this skill to list, count, sort, or rank multiple Security detection rules.
 
 ## Read-Only
 
-This skill cannot enable, disable, delete, duplicate, or bulk-edit detection rules. For mutations, direct the user to the Detection Rules UI. Use detection-rule-edit only when a single rule attachment is present in the conversation.
+This skill cannot enable, disable, delete, duplicate, or bulk-edit detection rules.
+
+**Exception — single rule edit:** when the user selects a specific rule from the results and asks to edit it (query, severity, tags, MITRE, schedule, etc.), load the \`detection-rule-edit\` skill from \`skills/security/rules\`. Pass it the rule name and \`rule_id\` so it can find the attachment without a redundant search. The edit skill handles attachment lookup and applies the change.
 
 ## Tools
 
@@ -159,7 +161,9 @@ Examples:
 
 ## No Actions
 
-This skill is read-only. Never suggest or offer to enable, disable, edit, delete, duplicate, or bulk-edit rules. If the user asks to modify a rule, direct them to the Detection Rules UI.
+This skill is read-only. Never suggest or offer to enable, disable, delete, duplicate, or bulk-edit rules. Direct those requests to the Detection Rules UI.
+
+**Exception — single rule edit:** when the user picks one rule from the results to edit, load \`detection-rule-edit\` (see Read-Only above).
 
 **Exception — noise/FP queries:** if the user's request was about noisy rules, high alert volume, or false positives (e.g. "which rules fire the most?", "find my noisiest rules"), end your response with:
 "I can investigate any of these rules individually — just let me know which one."
