@@ -149,7 +149,7 @@ describe('toCreateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
-    isA2A: false,
+    resource: '',
   };
 
   it('builds a payload for a public client with no logo and a single redirect URI', () => {
@@ -249,7 +249,7 @@ describe('toUpdateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
-    isA2A: false,
+    resource: '',
   };
 
   it('never sends client_type, which is immutable after registration', () => {
@@ -387,7 +387,7 @@ describe('oauthClientToFormData', () => {
         uris: [{ value: 'https://example.com/callback' }],
       },
       isConfidential: true,
-      isA2A: false,
+      resource: 'resource-1',
     });
   });
 

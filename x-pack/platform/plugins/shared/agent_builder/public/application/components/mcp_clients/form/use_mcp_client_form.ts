@@ -108,7 +108,7 @@ const mcpClientFormSchema = z.object({
   clientLogo: clientLogoSchema,
   redirect: redirectSchema,
   isConfidential: z.boolean(),
-  isA2A: z.boolean(),
+  resource: z.string(),
 });
 
 export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
@@ -119,7 +119,7 @@ export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
     uris: [{ value: 'http://localhost/callback' }, { value: 'http://localhost/oauth/callback' }],
   },
   isConfidential: false,
-  isA2A: false,
+  resource: '',
 };
 
 export const useMcpClientForm = (initialValues?: McpClientFormData) => {

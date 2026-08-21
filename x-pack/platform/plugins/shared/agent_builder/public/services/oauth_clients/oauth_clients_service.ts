@@ -11,6 +11,7 @@ import type {
   CreateOAuthClientResponse,
   GetOAuthClientResponse,
   ListOAuthClientsResponse,
+  ListOAuthResourcesResponse,
   RevokeOAuthClientPayload,
   RevokeOAuthClientResponse,
   UpdateOAuthClientPayload,
@@ -28,6 +29,10 @@ export class OAuthClientsService {
 
   async list(): Promise<ListOAuthClientsResponse> {
     return await this.http.get<ListOAuthClientsResponse>(`${OAUTH_API_PATH}/clients`);
+  }
+
+  async listResources(): Promise<ListOAuthResourcesResponse> {
+    return await this.http.get<ListOAuthResourcesResponse>(`${OAUTH_API_PATH}/resources`);
   }
 
   async get(clientId: string): Promise<GetOAuthClientResponse> {

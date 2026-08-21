@@ -14,6 +14,7 @@ import {
   type KibanaSolution,
 } from '@kbn/projects-solutions-groups';
 
+import { getConfiguredOAuthResources } from './list_resources';
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -60,8 +61,8 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const mcpResource = config.mcp?.oauth2?.metadata?.resource;
-        if (!mcpResource) {
+        const configuredResources = getConfiguredOAuthResources(config);
+        if (!configuredResources) {
           return response.notFound({
             body: {
               message:
@@ -69,8 +70,14 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
-        const { is_a2a: isA2A, ...clientBody } = request.body;
-        const resource = isA2A ? mcpResource.replace(/\/mcp$/, '/a2a') : mcpResource;
+        const { resource: requestedResource, ...clientBody } = request.body;
+        const allowedValues = configuredResources.map((r) => r.value);
+        const resource = requestedResource ?? allowedValues[0];
+        if (!allowedValues.includes(resource)) {
+          return response.badRequest({
+            body: { message: `Invalid resource. Allowed values: ${allowedValues.join(', ')}` },
+          });
+        }
 
         if (!serverlessProjectId) {
           return response.notFound({

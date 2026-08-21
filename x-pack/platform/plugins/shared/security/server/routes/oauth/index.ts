@@ -14,6 +14,7 @@ import { defineGetOAuthClientRoute } from './get_client';
 import { defineGetOAuthConnectionRoute } from './get_connection';
 import { defineListOAuthClientsRoute } from './list_clients';
 import { defineListOAuthConnectionsRoute } from './list_connections';
+import { defineListOAuthResourcesRoute } from './list_resources';
 import { defineRevokeOAuthClientRoute } from './revoke_client';
 import { defineRevokeOAuthConnectionRoute } from './revoke_connection';
 import { defineUpdateOAuthClientRoute } from './update_client';
@@ -24,6 +25,7 @@ export function defineOAuthRoutes(params: RouteDefinitionParams) {
   defineCreateOAuthClientRoute(params);
   defineGetOAuthClientRoute(params);
   defineListOAuthClientsRoute(params);
+  defineListOAuthResourcesRoute(params);
   defineUpdateOAuthClientRoute(params);
   defineRevokeOAuthClientRoute(params);
   defineDeleteOAuthClientRoute(params);

@@ -378,6 +378,19 @@ export const ConfigSchema = schema.object({
       ),
     }),
   }),
+  // OAuth 2.0 Protected Resource Metadata for A2A authorization.
+  // Only the resource identifier is needed here; the full PRM document is served by the agent_builder plugin.
+  a2a: offeringBasedSchema({
+    serverless: schema.maybe(
+      schema.object({
+        oauth2: schema.object({
+          metadata: schema.object({
+            resource: schema.uri({ scheme: ['https', 'http'] }),
+          }),
+        }),
+      })
+    ),
+  }),
   // OAuth 2.0 Protected Resource Metadata for MCP authorization.
   // https://datatracker.ietf.org/doc/html/rfc9728
   mcp: offeringBasedSchema({

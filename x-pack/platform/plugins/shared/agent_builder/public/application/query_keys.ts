@@ -80,5 +80,6 @@ export const queryKeys = {
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
+    resources: ['oauthClients', 'resources'] as const,
   },
 };
