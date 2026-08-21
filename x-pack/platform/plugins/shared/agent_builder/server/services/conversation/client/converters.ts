@@ -48,7 +48,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { roundsToEvents } from './rounds_to_events';
+import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
 
 export type Document = Omit<
   Required<
@@ -75,22 +75,24 @@ export const isEventsNativeVersion = (v: number | undefined): v is number =>
   typeof v === 'number' && v >= 1;
 
 /**
- * Discriminates the ids produced by `roundToEvents` (see rounds_to_events.ts)
- * from any additive event that lives on the timeline but has no round shape
- * think errors, background agent completions, etc.
- */
-const isRoundDerivedEventId = (id: string): boolean =>
-  id.endsWith('::user_message') ||
-  id.endsWith('::execution_started') ||
-  id.endsWith('::execution_terminated');
-
-/**
- * Rebuilds the stored `events` projection on write for an events-native conversation.
+ * Rebuilds the stored timeline on write: round events keep their order, and additive events
+ * (like errors) get slotted in by timestamp. That keeps a future error where it actually
+ * happened instead of dumped at the end.
  */
 const reconcileEvents = (merged: Conversation) => {
   const roundDerived = roundsToEvents(merged);
   const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
-  return [...roundDerived, ...additive];
+
+  const events = [...roundDerived];
+  for (const event of additive) {
+    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
+    if (insertAt === -1) {
+      events.push(event);
+    } else {
+      events.splice(insertAt, 0, event);
+    }
+  }
+  return events;
 };
 
 const convertBaseFromEs = (document: Document) => {

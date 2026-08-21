@@ -1342,6 +1342,7 @@ describe('conversation model converters', () => {
       const newRound = {
         ...conversation.rounds[0],
         id: 'round-2',
+        started_at: '2025-08-04T07:42:22.000Z',
         input: { message: 'second' },
         response: { message: 'answered' },
       };
@@ -1424,10 +1425,106 @@ describe('conversation model converters', () => {
         updateDate: new Date(updateDate),
       });
 
-      // Additive event survives verbatim (same object identity irrelevant, but
-      // id/type match), and comes after the freshly regenerated round-derived
-      // set.
-      expect(updated.events).toEqual([...roundsToEvents(conversation), additive]);
+      expect(updated.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'orphan-failure-abc',
+        'round-1::execution_terminated',
+      ]);
+      expect(updated.events?.find((event) => event.id === additive.id)).toEqual(additive);
+    });
+
+    it('keeps additive events verbatim even when their round is removed (keep-all)', () => {
+      const conversation = eventsNativeStored();
+      const additive: ExecutionFailedEvent = {
+        id: 'failed-on-removed-round',
+        type: TimelineEventType.executionFailed,
+        created_at: '2025-08-04T07:42:30.000Z',
+        actor: { type: EventActorType.agent, id: 'agent_id' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          error: {
+            code: AgentBuilderErrorCode.internalError,
+            message: 'boom',
+          },
+        },
+      };
+      conversation.events = [...conversation.events!, additive];
+
+      // Regenerate: replace round-1 with a fresh round-2. The additive's
+      // execution_id / trigger_event_id now dangle.
+      const round2 = {
+        ...conversation.rounds[0],
+        id: 'round-2',
+        started_at: '2025-08-04T07:42:21.000Z',
+        input: { message: 'regenerated' },
+        response: { message: 'new answer' },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, rounds: [round2] },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      const preserved = updated.events?.find((event) => event.id === additive.id);
+      expect(preserved).toEqual(additive);
+      expect(preserved?.execution_id).toBe('round-1::execution');
+      expect(preserved?.trigger_event_id).toBe('round-1::user_message');
+      expect(updated.events?.some((event) => event.id.startsWith('round-1::'))).toBe(false);
+      expect(updated.events?.map((event) => event.id)).toEqual([
+        'round-2::user_message',
+        'round-2::execution_started',
+        'round-2::execution_terminated',
+        'failed-on-removed-round',
+      ]);
+    });
+
+    it('sorts the reconciled projection chronologically by created_at', () => {
+      const conversation = eventsNativeStored();
+      const round1 = {
+        ...conversation.rounds[0],
+        started_at: '2026-01-01T00:00:00.000Z',
+        time_to_last_token: 100,
+      };
+      const round2 = {
+        ...conversation.rounds[0],
+        id: 'round-2',
+        started_at: '2026-01-01T00:00:10.000Z',
+        time_to_last_token: 100,
+      };
+      const additive: ExecutionFailedEvent = {
+        id: 'between-rounds-failure',
+        type: TimelineEventType.executionFailed,
+        created_at: '2026-01-01T00:00:05.000Z',
+        actor: { type: EventActorType.agent, id: 'agent_id' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
+        },
+      };
+      conversation.rounds = [round1, round2];
+      conversation.events = [...roundsToEvents(conversation), additive];
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: conversation.id, title: 'unchanged' },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        'between-rounds-failure',
+        'round-2::user_message',
+        'round-2::execution_started',
+        'round-2::execution_terminated',
+      ]);
     });
 
     it('discards events and schema_version supplied in the update payload', () => {

@@ -18,8 +18,7 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-
-const EXECUTION_ID_SUFFIX = '::execution';
+import { EXECUTION_ID_SUFFIX } from './rounds_to_events';
 
 /**
  * Reconstructs rounds from a timeline.
