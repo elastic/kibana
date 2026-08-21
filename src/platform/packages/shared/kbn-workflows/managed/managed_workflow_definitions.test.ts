@@ -60,7 +60,23 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   },
   [PND_WATCH_DARK_WORKFLOW_ID]: {
     settingsVersion: 1,
-    autonomyLevel: 'manual',
+    autonomyLevel: 'supervised',
+    scheduleId: 'dark-overnight-sweep',
+    allowManualRun: true,
+    scopes: [
+      { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
+      { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
+      { name: 'Customer data', access: 'denied', label: 'No access' },
+    ],
+    connectorId: '',
+    tier2When: 'on_hits',
+    candidateLimit: 10,
+    fanOutMax: 10,
+    scheduleEveryMinutes: 240,
+    targetTechnology: 'aws_iam',
+    leadPollIntervalMinutes: 60,
+    leadMinPriority: 7,
+    intelEventTriggerEnabled: false,
   },
   [PND_WATCH_DEEP_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -146,7 +162,7 @@ function createContentFingerprint(content: string): string {
 it.each([
   [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
   [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
+  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '2:0c65247e'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
 ] as const)(

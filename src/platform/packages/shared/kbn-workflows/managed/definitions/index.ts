@@ -19,6 +19,11 @@ import {
 } from './discoveries';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import {
+  PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
+  PND_DARK_CORRELATION_WORKFLOW,
+  PND_DARK_COVERAGE_GAP_WORKFLOW,
+  PND_DARK_PACKAGE_REPORT_WORKFLOW,
+  PND_DARK_PROPOSAL_GATE_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
@@ -91,6 +96,12 @@ export {
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export {
+  PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_DARK_CORRELATION_WORKFLOW_ID,
+  PND_DARK_COVERAGE_GAP_WORKFLOW_ID,
+  PND_DARK_PACKAGE_REPORT_WORKFLOW_ID,
+  PND_DARK_PROPOSAL_GATE_WORKFLOW_ID,
+  PND_DARK_WATCH_WORKER_WORKFLOW_IDS,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
@@ -108,6 +119,12 @@ export {
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
+export type {
+  CommonWatchSettings,
+  DarkWatchSettings,
+  DarkWatchTemplateValues,
+  PndWatchTemplateValues,
+} from './pnd';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the
@@ -151,6 +168,11 @@ export const managedWorkflowDefinitions = [
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
+  PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
+  PND_DARK_COVERAGE_GAP_WORKFLOW,
+  PND_DARK_CORRELATION_WORKFLOW,
+  PND_DARK_PACKAGE_REPORT_WORKFLOW,
+  PND_DARK_PROPOSAL_GATE_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
   // in start() only when `threatIntelSupplyEnabled` is on.

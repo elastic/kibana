@@ -20,6 +20,9 @@ import {
   WatchAutonomyLevel,
   ApprovalRequirement,
   WatchSettings,
+  DarkWatchTier2When,
+  DarkWatchTargetTechnology,
+  DarkWatchScope,
 } from '../components/watch_settings.gen';
 import { Watch } from '../components/watch.gen';
 
@@ -84,6 +87,25 @@ export const UpdateWatchRequestBody = lazySchema(() =>
       .object({
         skillId: z.string().min(1).max(128),
         enabled: z.boolean(),
+      })
+      .optional(),
+    /**
+     * Partial Dark Watch settings patch. Only valid for system-security-watch-dark; other watches reject it.
+     */
+    dark: z
+      .object({
+        connectorId: z.string().max(256).optional(),
+        tier2When: DarkWatchTier2When.optional(),
+        candidateLimit: z.number().int().min(1).max(100).optional(),
+        fanOutMax: z.number().int().min(1).max(100).optional(),
+        scheduleEveryMinutes: z.number().int().min(1).max(10080).optional(),
+        targetTechnology: DarkWatchTargetTechnology.optional(),
+        leadPollIntervalMinutes: z.number().int().min(1).max(10080).optional(),
+        leadMinPriority: z.number().int().min(0).max(100).optional(),
+        intelEventTriggerEnabled: z.boolean().optional(),
+        scheduleId: z.string().min(1).max(128).optional(),
+        allowManualRun: z.boolean().optional(),
+        scopes: z.array(DarkWatchScope).max(32).optional(),
       })
       .optional(),
   })

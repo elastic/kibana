@@ -6,12 +6,22 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { PND_MANAGED_WATCH_WORKFLOW_IDS, PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import {
+  PND_DARK_WATCH_WORKER_WORKFLOW_IDS,
+  PND_MANAGED_WATCH_WORKFLOW_IDS,
+  PND_RULE_WORKFLOW_IDS,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 import { installRegisteredWatch, watchRegistry } from './watch_registry';
+
+/** Global static installs: Detection rule workflows + Dark Watch Workers. */
+const PND_STATIC_GLOBAL_WORKFLOW_IDS = [
+  ...PND_RULE_WORKFLOW_IDS,
+  ...PND_DARK_WATCH_WORKER_WORKFLOW_IDS,
+] as const;
 
 /** Matches `getManagedWorkflowDocumentsAllSpaces` (`size: 1000`) in workflow_crud_service. */
 const MANAGED_WORKFLOW_STATE_LIST_CAP = 1000;
@@ -31,14 +41,16 @@ export const initializeManagedWorkflows = async ({
   // the new definition. The next Kibana start retries the complete pass.
   let canReconcile = true;
 
-  const ruleWorkflowInstalls = await Promise.allSettled(
-    PND_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+  const staticWorkflowInstalls = await Promise.allSettled(
+    PND_STATIC_GLOBAL_WORKFLOW_IDS.map((id) =>
+      client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID })
+    )
   );
-  for (const [index, result] of ruleWorkflowInstalls.entries()) {
+  for (const [index, result] of staticWorkflowInstalls.entries()) {
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND rule workflow "${PND_RULE_WORKFLOW_IDS[index]}": ${
+        `Failed to install managed PND static workflow "${PND_STATIC_GLOBAL_WORKFLOW_IDS[index]}": ${
           result.reason instanceof Error ? result.reason.message : String(result.reason)
         }`
       );

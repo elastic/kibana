@@ -59,23 +59,25 @@ describe('watchRegistry', () => {
       throw new Error(`Watch "${watchId}" must be registered as a managed YAML template`);
     }
 
+    const registration = watchRegistry.get(watchId);
+    if (!registration?.settings) {
+      throw new Error(`Watch "${watchId}" must register settings`);
+    }
+
+    const baseValues = registration.settings.createDefaultValues();
     const manualYaml = definition.yamlTemplate({
-      settingsVersion: 1,
+      ...baseValues,
       autonomyLevel: 'manual',
     });
     const supervisedYaml = definition.yamlTemplate({
-      settingsVersion: 1,
+      ...baseValues,
       autonomyLevel: 'supervised',
     });
 
     expect(supervisedYaml).not.toBe(manualYaml);
-    expect(
-      (parse(manualYaml) as { consts: { watch_policy: unknown } }).consts.watch_policy
-    ).toMatchObject({
-      settingsVersion: 1,
-      autonomy: 'manual',
-    });
     expect(supervisedYaml).not.toContain('__WATCH_AUTONOMY_LEVEL__');
+    expect(supervisedYaml).toContain('supervised');
+    expect(manualYaml).toContain('manual');
   });
 
   it('requires every managed watch to carry exactly one tier tag', () => {

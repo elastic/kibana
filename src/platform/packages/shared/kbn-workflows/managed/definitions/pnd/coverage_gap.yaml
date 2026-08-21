@@ -1,0 +1,66 @@
+version: "1"
+name: Dark Watch - Coverage Gap
+description: >
+  Worker invoked by the Dark Watch Orchestrator after hunt. Diffs referenced
+  MITRE techniques against installed/enabled rules, emits a Detection Change
+  Signal on a new/changed gap, and appends a coverage-gap event. Runs
+  serially before correlation (elastic/security-team#18208 blocks running
+  them concurrently in a parallel branch).
+enabled: true
+tags:
+  - watch
+  - watch-dark
+  - dark-watch-worker
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    report_id:
+      description: Threat report id (dark:report:{report_id}).
+      type: string
+    investigation_id:
+      description: Conversation id of the report's Investigation.
+      type: string
+  required:
+    - report_id
+    - investigation_id
+steps:
+  - name: analyze_coverage_gap
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: /internal/pnd/threat_intel/coverage_gap
+        body:
+          report_id: "{{ inputs.report_id }}"
+
+  # Technique/rule pair + evidence, linked back to the report/Investigation.
+  - name: emit_detection_change_signal
+    type: kibana.request
+    if: "${{ steps.analyze_coverage_gap.output.new_or_changed_gap == true }}"
+    with:
+      request:
+        method: POST
+        path: /internal/pnd/detection_change_signals
+        body:
+          technique_id: "{{ steps.analyze_coverage_gap.output.technique_id }}"
+          report_id: "{{ inputs.report_id }}"
+          investigation_id: "{{ inputs.investigation_id }}"
+          reason: coverage_gap
+          evidence: "{{ steps.analyze_coverage_gap.output | json }}"
+
+  # Always appended, even with no new gap — audit trail for this pass.
+  - name: append_coverage_gap_event
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/events
+        body:
+          kind: coverage_gap
+          report_id: "{{ inputs.report_id }}"
+          techniques_referenced: "{{ steps.analyze_coverage_gap.output.techniques_referenced | json }}"
+          installed_enabled_rules: "{{ steps.analyze_coverage_gap.output.installed_enabled_rules | json }}"
+          coverage_overlap: "{{ steps.analyze_coverage_gap.output.coverage_overlap | json }}"
+          gaps: "{{ steps.analyze_coverage_gap.output.gaps | json }}"

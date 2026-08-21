@@ -1,12 +1,22 @@
 version: "1"
 name: Dark Watch
 description: >
-  Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC
-  sweeps and reviewable findings.
+  Dark Watch. Continuous, technology-aware hunting with overnight UTC sweeps
+  and reviewable findings.
 enabled: false
 tags:
   - watch
   - watch-dark
+settings:
+  # Ceiling for one sweep across concurrent report branches.
+  timeout: "6h"
+  # Drop the next tick if a sweep is still running. The `parallel` step below
+  # blocks until every branch joins, so this lock also closes the
+  # double-hunt window for a report still mid-sweep.
+  concurrency:
+    key: security-watch-dark
+    strategy: drop
+    max: 1
 triggers:
   - type: scheduled
     with:
@@ -18,16 +28,132 @@ triggers:
         byminute: [0]
   - type: manual
 consts:
-  watch_policy:
-    settingsVersion: __WATCH_SETTINGS_VERSION__
-    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+  # managedTemplateValues surface (RFC): CommonWatchSettings + Dark extension.
+  # Tokens substituted by yamlTemplate / install({ values }).
+  watch_settings:
+    # --- CommonWatchSettings (CWL) ---
     autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    triggers:
+      scheduleId: "__WATCH_SCHEDULE_ID__"
+      allowManualRun: __WATCH_ALLOW_MANUAL_RUN__
+    scopes: __WATCH_SCOPES_JSON__
+    # --- DarkWatchSettings ---
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    connectorId: "__WATCH_CONNECTOR_ID__"
+    tier2When: __WATCH_TIER2_WHEN__
+    candidateLimit: __WATCH_CANDIDATE_LIMIT__
+    fanOutMax: __WATCH_FAN_OUT_MAX__
+    scheduleEveryMinutes: __WATCH_SCHEDULE_EVERY_MINUTES__
+    targetTechnology: "__WATCH_TARGET_TECHNOLOGY__"
+    leadPollIntervalMinutes: __WATCH_LEAD_POLL_INTERVAL_MINUTES__
+    leadMinPriority: __WATCH_LEAD_MIN_PRIORITY__
+    intelEventTriggerEnabled: __WATCH_INTEL_EVENT_TRIGGER_ENABLED__
+  # Catalog / mandate / handoff / UI — not yet in CommonWatchSettings.
+  watch_policy:
     mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    handoff: brief
+    onDemand: true
+    draft: false
+    cadence: sweep
+    every: __WATCH_SCHEDULE_EVERY_MINUTES__
+    from: 22
+    to: 6
+    mode: window
     ui:
       color: "#f59e0b"
+      icon: bolt
       order: 30
+    scopeSummary: Mail · IdP · edge / VPN
+    callables: []
 steps:
-  - name: hunt_stub
-    type: console
+  # --- Stage 0: readiness gate + candidate selection ------------------
+  - name: check_ti_readiness
+    type: kibana.request
     with:
-      message: "Dark Watch skeleton hunt pass — add ai.agent / skill steps (see Floor)"
+      request:
+        method: GET
+        path: /internal/pnd/threat_intel/readiness
+
+  # Empty candidate set (no-op fan-out below) when TI supply chain is
+  # degraded, instead of hunting stale indicators.
+  - name: select_candidate_reports
+    type: elasticsearch.search
+    if: "${{ steps.check_ti_readiness.output.ready == true }}"
+    with:
+      index: ".kibana-threat-reports"
+      size: "{{ consts.watch_settings.candidateLimit }}"
+      query:
+        bool:
+          filter:
+            - term:
+                reportable: true
+            - range:
+                last_hunted_at:
+                  lte: "now-{{ consts.watch_settings.scheduleEveryMinutes }}m"
+
+  # --- Stage 1-5: one straight-line branch per selected report --------
+  # Branch body must be straight-line, atomic steps only (no nested
+  # if/foreach/parallel — #18208), so coverage-gap and correlation run
+  # serially below instead of concurrently.
+  - name: report_fan_out
+    type: parallel
+    foreach: "{{ steps.select_candidate_reports.output.hits.hits | json }}"
+    concurrency:
+      max: "{{ consts.watch_settings.fanOutMax }}"
+    steps:
+      - name: find_or_create_investigation
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            path: /internal/pnd/investigations
+            body:
+              report_id: "{{ foreach.item._source.report_id }}"
+              opportunity_id: "{{ foreach.item._source.opportunity_id }}"
+
+      - name: hunt
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-continuous-threat-hunt
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+            connector_id: "{{ consts.watch_settings.connectorId }}"
+            tier2_when: "{{ consts.watch_settings.tier2When }}"
+            target_technology: "{{ consts.watch_settings.targetTechnology }}"
+
+      - name: coverage_gap
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-coverage-gap
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: correlation
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-correlation
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: package_report
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-package-report
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      # Starts this report's gate(s) right away. Route handler creates
+      # dark_proposal_gate executions server-side (no-op if empty).
+      - name: start_proposal_gates
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            path: /internal/pnd/investigations/{{ steps.find_or_create_investigation.output.investigation_id }}/start_gates
+            body:
+              proposals: "{{ steps.package_report.output.proposals_to_gate | json }}"

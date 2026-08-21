@@ -262,3 +262,97 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchLedgerEntry'
+        dark:
+          $ref: '#/components/schemas/DarkWatchSettings'
+          description: >-
+            Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy).
+            Present only for system-security-watch-dark.
+
+    DarkWatchTier2When:
+      type: string
+      enum: [on_hits, always]
+      description: When Dark Watch runs Tier 2 LLM corroboration.
+
+    DarkWatchTargetTechnology:
+      type: string
+      enum: [aws_iam, fortigate]
+      description: Technology preference for environment-resolved hunt index scope.
+
+    DarkWatchScope:
+      type: object
+      required:
+        - name
+        - access
+        - label
+      properties:
+        name:
+          type: string
+          maxLength: 128
+        access:
+          type: string
+          maxLength: 64
+        label:
+          type: string
+          maxLength: 128
+
+    DarkWatchSettings:
+      type: object
+      description: >-
+        Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto
+        managedTemplateValues for system-security-watch-dark.
+      required:
+        - connectorId
+        - tier2When
+        - candidateLimit
+        - fanOutMax
+        - scheduleEveryMinutes
+        - targetTechnology
+        - leadPollIntervalMinutes
+        - leadMinPriority
+        - intelEventTriggerEnabled
+        - scheduleId
+        - allowManualRun
+        - scopes
+      properties:
+        connectorId:
+          type: string
+          maxLength: 256
+          description: Inference connector id for Tier 2; empty string degrades to Tier 1 only.
+        tier2When:
+          $ref: '#/components/schemas/DarkWatchTier2When'
+        candidateLimit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        fanOutMax:
+          type: integer
+          minimum: 1
+          maximum: 100
+        scheduleEveryMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+          description: Hunt cooldown / soft sweep cadence in minutes.
+        targetTechnology:
+          $ref: '#/components/schemas/DarkWatchTargetTechnology'
+        leadPollIntervalMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+        leadMinPriority:
+          type: integer
+          minimum: 0
+          maximum: 100
+        intelEventTriggerEnabled:
+          type: boolean
+        scheduleId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        allowManualRun:
+          type: boolean
+        scopes:
+          type: array
+          maxItems: 32
+          items:
+            $ref: '#/components/schemas/DarkWatchScope'

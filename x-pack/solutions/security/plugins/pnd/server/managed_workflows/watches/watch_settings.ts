@@ -71,6 +71,7 @@ export const createWatchSettingsRegistration = (
     }
     if (patch.worker) return { rejected: `worker "${patch.worker.workerId}"` };
     if (patch.skill) return { rejected: `skill "${patch.skill.skillId}"` };
+    if (patch.dark) return { rejected: 'dark watch settings' };
 
     return {
       values: {
