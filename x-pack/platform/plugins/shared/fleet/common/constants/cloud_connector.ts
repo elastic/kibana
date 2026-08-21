@@ -132,8 +132,39 @@ export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
     },
   ],
   aws_global_policy_group: [
+    // aws package — all agentless-enabled policy templates
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'awshealth' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'billing' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'cloudwatch' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'config' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'dynamodb' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ebs' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ec2' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ecs' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'elb' },
     { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'guardduty' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'inspector' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'lambda' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'rds' },
     { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 's3' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'securityhub' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'sns' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'sqs' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'transitgateway' },
+    // aws_bedrock — agentless CloudWatch metrics and logs (ingest-dev#8812)
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws_bedrock', policyTemplate: 'aws_bedrock' },
+    // aws_bedrock_agentcore — agentless CloudWatch metrics and logs (ingest-dev#8812)
+    {
+      provider: AWS_CLOUD_PROVIDER,
+      package: 'aws_bedrock_agentcore',
+      policyTemplate: 'aws_bedrock_agentcore',
+    },
+    // aws_logs — agentless CloudWatch Logs (ingest-dev#8812)
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws_logs', policyTemplate: 'aws_logs' },
+    // aws_mq — agentless CloudWatch metrics and logs (ingest-dev#8812)
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws_mq', policyTemplate: 'amazon_mq' },
+    // aws_securityhub — standalone agentless CEL findings (ingest-dev#8812)
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws_securityhub', policyTemplate: 'aws_securityhub' },
   ],
 };
 
