@@ -33,11 +33,13 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
   interface RoleOptions {
     withTargetIndex?: boolean;
+    withWriteOnTargetIndex?: boolean;
     withSavedObjectCreate?: boolean;
   }
 
   const buildRoleDescriptor = ({
     withTargetIndex = true,
+    withWriteOnTargetIndex = true,
     withSavedObjectCreate = true,
   }: RoleOptions = {}): ElasticsearchRoleDescriptor => {
     const indices = [
@@ -46,9 +48,12 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
     ];
 
     if (withTargetIndex) {
+      const targetPrivileges = withWriteOnTargetIndex
+        ? ENTITY_STORE_TARGET_INDICES_PRIVILEGES
+        : ENTITY_STORE_TARGET_INDICES_PRIVILEGES.filter((p) => p !== 'write');
       indices.push({
         names: [TARGET_INDEX_LATEST],
-        privileges: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+        privileges: targetPrivileges,
       });
     }
 
@@ -69,6 +74,8 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
 
   const getRoleWithAllPrivileges = () => buildRoleDescriptor();
   const getRoleWithoutTargetIndexPrivileges = () => buildRoleDescriptor({ withTargetIndex: false });
+  const getRoleWithoutWriteOnTargetIndex = () =>
+    buildRoleDescriptor({ withWriteOnTargetIndex: false });
   const getRoleWithoutSavedObjectCreate = () =>
     buildRoleDescriptor({ withSavedObjectCreate: false });
 
@@ -152,7 +159,35 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
   );
 
   apiTest(
-    'install - Should fail when user lacks permissions for entity store saved object descriptor',
+    'Should fail when user lacks write privilege on target index patterns',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutWriteOnTargetIndex()
+      );
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: {},
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: [
+            {
+              index: TARGET_INDEX_LATEST,
+              privileges: expect.arrayContaining(['write']),
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'Should fail when user lacks permissions for entity store saved object descriptor',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         getRoleWithoutSavedObjectCreate()
