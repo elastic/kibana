@@ -1,5 +1,9 @@
 {
-  "sha1": "7c03c27e0fc11b74207827e15b270043140b4fd7",
+  "sha1": "19098b207a27397dccdd42aac23a8e232725113f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "567909ceb07724b-3b647c7c5404028",
@@ -368,7 +372,7 @@
     {
       "id": "31c1bb347b9557c-d428ab40a194f03",
       "title": "pingList query returns a list of pings for the date range and given size",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
@@ -381,7 +385,7 @@
     {
       "id": "31c1bb347b9557c-71902d4960e506b",
       "title": "pingList query returns a list of pings for a monitor ID",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
@@ -394,7 +398,7 @@
     {
       "id": "31c1bb347b9557c-46c2ae1874d2be4",
       "title": "pingList query returns a list of pings sorted ascending",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
