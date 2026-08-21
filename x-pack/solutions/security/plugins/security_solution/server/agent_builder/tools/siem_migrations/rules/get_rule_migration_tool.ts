@@ -37,6 +37,13 @@ export const getRuleMigrationTool = (
   return {
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Rule Migration',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `Retrieve a single Automatic rule migration by id.
 

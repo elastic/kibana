@@ -61,6 +61,13 @@ export const getRuleMigrationTranslationStatsTool = (
   return {
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Rule Migration Translation Stats',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `Get translation stats for a single Automatic Rule Migration by id.
 

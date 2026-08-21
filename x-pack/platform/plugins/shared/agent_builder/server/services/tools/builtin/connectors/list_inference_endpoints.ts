@@ -24,6 +24,13 @@ export const createListInferenceEndpointsTool = ({
 }: ConnectorToolsOptions): BuiltinToolDefinition<typeof schema> => ({
   id: platformCoreTools.listInferenceEndpoints,
   type: ToolType.builtin,
+  annotations: {
+    title: 'List Inference Endpoints',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description: `
     List available inference endpoints (AI connectors/models) with their IDs, names, and types.
 `,

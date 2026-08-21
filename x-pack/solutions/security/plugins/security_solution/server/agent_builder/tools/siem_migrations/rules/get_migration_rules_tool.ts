@@ -81,6 +81,13 @@ export const getMigrationRulesTool = (
   return {
     id: SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Migration Rules',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `List the rules in an Automatic Rule Migration with their translation result and status.
 

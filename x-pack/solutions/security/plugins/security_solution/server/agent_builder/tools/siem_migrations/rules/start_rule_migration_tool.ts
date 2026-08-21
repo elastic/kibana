@@ -62,6 +62,13 @@ export const startRuleMigrationTool = (
   return {
     id: SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Start Rule Migration',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     confirmation: { askUser: 'always' },
     description: `Start or reprocess a SIEM rule migration.
