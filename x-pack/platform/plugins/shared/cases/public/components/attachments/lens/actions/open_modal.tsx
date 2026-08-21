@@ -21,7 +21,11 @@ import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../../common';
 import { useCasesConfig } from '../../../../common/lib/kibana';
-import { getLensCaseAttachment, getLensLibrarySavedObjectId } from './utils';
+import {
+  getLensByRefAttachment,
+  getLensByValueAttachment,
+  getLensLibrarySavedObjectId,
+} from './utils';
 import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { convertToAbsoluteTimeRange } from './convert_to_absolute_time_range';
 import { getNonEmptyField } from '../../../../../common/utils/attachments';
@@ -126,17 +130,22 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({
       ? getNonEmptyField(savedObjectId) ?? getLensLibrarySavedObjectId(lensApi)
       : undefined;
 
-    return [
-      getLensCaseAttachment({
-        attributes,
-        timeRange: appliedTimeRange,
-        savedObjectId: librarySavedObjectId,
-        title,
-        // Pass the Lens chart description (e.g. entity identity such as "host: web-server-1")
-        // as metadata so Cases can surface it alongside the attachment.
-        metadata: attributes.description ? { description: attributes.description } : undefined,
-      }),
-    ];
+    const attachment = librarySavedObjectId
+      ? getLensByRefAttachment({
+          attributes,
+          timeRange: appliedTimeRange,
+          savedObjectId: librarySavedObjectId,
+          title,
+        })
+      : getLensByValueAttachment({
+          attributes,
+          timeRange: appliedTimeRange,
+          // Pass the Lens chart description (e.g. entity identity such as "host: web-server-1")
+          // as metadata so Cases can surface it alongside the attachment.
+          metadata: attributes.description ? { description: attributes.description } : undefined,
+        });
+
+    return [attachment];
   }, [
     lensApi,
     services,

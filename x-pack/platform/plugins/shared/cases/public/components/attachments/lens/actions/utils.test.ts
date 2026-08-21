@@ -7,16 +7,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { LENS_ATTACHMENT_TYPE, LENS_SO_TYPE } from '../../../../../common/constants/attachments';
-import { getLensCaseAttachment, getLensLibrarySavedObjectId } from './utils';
+import {
+  getLensByRefAttachment,
+  getLensByValueAttachment,
+  getLensLibrarySavedObjectId,
+} from './utils';
 import { getMockLensApi, mockLensAttributes } from './mocks';
 
 describe('utils', () => {
-  describe('getLensCaseAttachment', () => {
+  describe('getLensByValueAttachment', () => {
     it('create a case lens attachment correctly', () => {
       const embeddable = { attributes: {}, timeRange: {} };
 
       // @ts-expect-error: extra attributes are not needed
-      expect(getLensCaseAttachment(embeddable)).toMatchInlineSnapshot(`
+      expect(getLensByValueAttachment(embeddable)).toMatchInlineSnapshot(`
         Object {
           "data": Object {
             "state": Object {
@@ -29,12 +33,14 @@ describe('utils', () => {
         }
       `);
     });
+  });
 
-    it('returns a by-ref payload when savedObjectId is set', () => {
+  describe('getLensByRefAttachment', () => {
+    it('returns a by-ref payload', () => {
       const timeRange = { from: 'now-24h', to: 'now' };
 
       expect(
-        getLensCaseAttachment({
+        getLensByRefAttachment({
           attributes: mockLensAttributes,
           timeRange,
           savedObjectId: 'lens-1',
@@ -51,7 +57,7 @@ describe('utils', () => {
       const attributes = { ...mockLensAttributes, title: '' };
 
       expect(
-        getLensCaseAttachment({
+        getLensByRefAttachment({
           attributes,
           timeRange: { from: 'now-24h', to: 'now' },
           savedObjectId: 'lens-1',
@@ -72,7 +78,7 @@ describe('utils', () => {
       };
 
       expect(
-        getLensCaseAttachment({
+        getLensByRefAttachment({
           attributes,
           timeRange: { from: 'now-24h', to: 'now' },
           savedObjectId: 'lens-1',
