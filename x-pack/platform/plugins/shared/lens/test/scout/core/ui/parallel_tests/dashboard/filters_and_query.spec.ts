@@ -23,6 +23,8 @@ spaceTest.describe('Lens dashboard filters and query', { tag: '@local-stateful-c
   let pieVisId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+    // Load here (not `loadLensArchives: true`): Dashboard API panels need `ref_id` UUIDs.
+    // `createNewCopies` replaces archive ids; `loadLensArchives` discards the import result.
     const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
     xyVisId = getImportedSavedObjectId(imported, 'lens', testData.LENS_BASIC_TITLES.XY_VIS);
     pieVisId = getImportedSavedObjectId(imported, 'lens', testData.LENS_BASIC_TITLES.PIE_VIS);

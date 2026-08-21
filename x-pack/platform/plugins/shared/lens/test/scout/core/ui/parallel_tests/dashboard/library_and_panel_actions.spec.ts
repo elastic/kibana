@@ -33,6 +33,8 @@ spaceTest.describe(
     let pieVisId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+      // Load here (not `loadLensArchives: true`): Dashboard API panels need `ref_id` UUIDs.
+      // `createNewCopies` replaces archive ids; `loadLensArchives` discards the import result.
       const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
       artistMetricId = getImportedSavedObjectId(
         imported,
