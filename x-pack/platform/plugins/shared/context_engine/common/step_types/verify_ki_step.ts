@@ -60,7 +60,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. ES|QL is read from the attributes listed in `esql_attributes`, defaulting to `attributes.{defaultAttribute}`; a listed attribute the knowledge indicator does not carry is skipped rather than failed. Verification both validates ES|QL syntax and runs each query against the cluster, bounded by a row limit, using the permissions of the user running the workflow. If no verifier applies, the step passes with empty results. Requires the Context Engine advanced setting.',
+        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a pass/fail result per verifier, each identified by the id listed below. Two verifiers apply to ES|QL: `esql-valid-syntax` statically validates each query without contacting the cluster, and `esql-executes` runs each query against the cluster, bounded by a row limit and using the permissions of the user running the workflow. Both read ES|QL from the attributes listed in `esql_attributes`, defaulting to `attributes.{defaultAttribute}`; a listed attribute the knowledge indicator does not carry is skipped rather than failed. If it carries none of them, no verifier applies and the step passes with empty results. Requires the Context Engine advanced setting.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID, defaultAttribute: DEFAULT_ESQL_ATTRIBUTE },
     }),
     examples: [
