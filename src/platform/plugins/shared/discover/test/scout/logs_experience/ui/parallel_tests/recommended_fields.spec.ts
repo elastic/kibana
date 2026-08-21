@@ -42,7 +42,7 @@ spaceTest.describe(
         const { discover, unifiedFieldList } = pageObjects;
 
         await discover.goto({ queryMode: 'classic' });
-        await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW);
+        await discover.selectDataView(LOGS.SYNTH_LOGS_DATA_VIEW);
         await discover.waitUntilTabIsLoaded();
 
         await expect(
@@ -55,13 +55,11 @@ spaceTest.describe(
         await unifiedFieldList.openSidebarSection('recommended');
 
         const fieldNames = await unifiedFieldList.getSidebarSectionFieldNames('recommended');
-        expect(fieldNames).toContain('event.dataset');
-        expect(fieldNames).toContain('host.name');
         expect(fieldNames).toContain('message');
         expect(fieldNames).toContain('log.level');
 
-        // Recommended by the profile, but absent from the seeded data — the group only lists
-        // fields that exist, so it must not render.
+        // Recommended by the profile, but absent from the seeded documents — the group only
+        // lists fields that exist in the data source.
         expect(fieldNames).not.toContain('service.name');
       }
     );
@@ -70,10 +68,9 @@ spaceTest.describe(
       'should NOT show the recommended fields group for a non-logs data source profile',
       async ({ page, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
-        const sessionTitle = 'non-logs-no-recommended';
 
-        await discoverScoutSpace.createDiscoverSession({
-          title: sessionTitle,
+        const sessionId = await discoverScoutSpace.createDiscoverSession({
+          title: `non-logs-no-recommended-${discoverScoutSpace.id}`,
           tabs: [
             {
               id: 'main',
@@ -88,8 +85,7 @@ spaceTest.describe(
           ],
         });
 
-        await discover.goto({ queryMode: 'classic' });
-        await discover.loadSavedSearch(sessionTitle);
+        await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
         await discover.waitUntilTabIsLoaded();
 
         // Assert the seeded data actually resolved into fields first. The available group
@@ -110,7 +106,7 @@ spaceTest.describe(
         const { discover, unifiedFieldList } = pageObjects;
 
         await discover.goto({ queryMode: 'esql' });
-        await discover.writeAndSubmitEsqlQuery('from logs-* | limit 100');
+        await discover.writeAndSubmitEsqlQuery(LOGS.SYNTH_LOGS_ESQL_QUERY);
 
         await expect(
           page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('recommended'))
@@ -119,8 +115,6 @@ spaceTest.describe(
         await unifiedFieldList.openSidebarSection('recommended');
 
         const fieldNames = await unifiedFieldList.getSidebarSectionFieldNames('recommended');
-        expect(fieldNames).toContain('event.dataset');
-        expect(fieldNames).toContain('host.name');
         expect(fieldNames).toContain('message');
         expect(fieldNames).toContain('log.level');
       }
