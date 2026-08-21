@@ -19,7 +19,9 @@ import {
   AgentExecutionMode,
   createInternalError,
   isAgentBuilderError,
+  normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ExperimentalFeatures,
@@ -53,6 +55,7 @@ import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
+import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ModelProviderFactoryFn } from './model_provider';
@@ -86,6 +89,7 @@ export interface CreateScopedRunnerDeps {
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
   conversationTemplates: ConversationTemplatesServiceStart;
@@ -118,6 +122,10 @@ export interface CreateScopedRunnerDeps {
   toolManager: ToolManager;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
+  /** Canonical interactivity config for this runner context. */
+  interactivity: InteractivityConfig;
+  /** Id of the parent execution that spawned this one, if any. */
+  parentExecutionId?: string;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -141,6 +149,8 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
+  | 'interactivity'
+  | 'parentExecutionId'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -224,6 +234,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState,
     abortSignal,
     executionMode,
+    interactivity,
+    parentExecutionId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
@@ -235,6 +247,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
+    interactivity: InteractivityConfig;
+    parentExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -298,6 +312,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       promptManager,
       toolManager,
       executionMode,
+      interactivity,
+      parentExecutionId,
       subAgentExecutor,
       experimentalFeatures,
     };
@@ -315,6 +331,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: { enabled: false },
       });
       return runner.runTool(otherParams);
     },
@@ -328,6 +345,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: { enabled: false },
       });
       return runner.runInternalTool(otherParams);
     },
@@ -340,9 +358,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         maxContentLength,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
+        interactive,
+        parentExecutionId,
         ...otherParams
       } = params;
       const { nextInput, conversation } = params.agentParams;
+      const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
@@ -353,6 +374,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         nextInput,
         abortSignal,
         executionMode,
+        interactivity,
+        parentExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
