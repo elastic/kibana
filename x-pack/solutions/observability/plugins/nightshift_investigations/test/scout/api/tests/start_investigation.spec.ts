@@ -41,24 +41,30 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('returns 400 when subject.id exceeds 500 characters', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
-      const response = await apiClient.post(START_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: { subject: { type: 'alert', id: 'x'.repeat(501) } },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(400);
-    });
+    apiTest(
+      'returns 400 when subject.id exceeds 500 characters',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const response = await apiClient.post(START_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { subject: { type: 'alert', id: 'x'.repeat(501) } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+      }
+    );
 
-    apiTest('returns 403 for a user without agentBuilder:write', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-      const response = await apiClient.post(START_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: { subject: { type: 'alert', id: 'some-id' } },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(403);
-    });
+    apiTest(
+      'returns 403 for a user without agentBuilder:write',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const response = await apiClient.post(START_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { subject: { type: 'alert', id: 'some-id' } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(403);
+      }
+    );
   }
 );
