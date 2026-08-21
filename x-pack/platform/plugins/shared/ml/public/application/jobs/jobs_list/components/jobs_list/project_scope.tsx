@@ -7,10 +7,10 @@
 
 import React, { useCallback, useId, useState } from 'react';
 import type { FC } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useFetchProjects } from '@kbn/cps-utils';
+import { useFetchProjects, ProjectPickerContent } from '@kbn/cps-utils';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
 import { useMlKibana } from '../../../../contexts/kibana';
 
@@ -64,15 +64,16 @@ export const ProjectScope: FC<Props> = ({ projectRouting }) => {
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
       aria-labelledby={popoverTitleId}
+      panelPaddingSize="none"
     >
-      <EuiPopoverTitle id={popoverTitleId}>
-        {i18n.translate('xpack.ml.jobsList.projectScopeLabel', {
+      <ProjectPickerContent
+        customHeaderText={i18n.translate('xpack.ml.jobsList.projectScopeLabel', {
           defaultMessage: 'Project scope',
         })}
-      </EuiPopoverTitle>
-      <EuiText size="s" data-test-subj="mlJobListProjectScopeValue">
-        {displayedProjectRouting}
-      </EuiText>
+        projectRouting={displayedProjectRouting as ProjectRouting}
+        fetchProjectsByRouting={fetchProjects}
+        controlsState="hidden"
+      />
     </EuiPopover>
   );
 };
