@@ -459,11 +459,19 @@ export enum ConversationOriginType {
 
 /**
  * Type of parent/child relationship between two conversations.
- * Set on the child alongside `parent_conversation_id`.
+ * Set on the child's `parent_conversation.relation` field.
  */
 export enum ConversationParentRelation {
   /** Child conversation is a persistent sub-agent spawned from the parent. */
   subagent = 'subagent',
+}
+
+/**
+ * Link from a child conversation to its parent.
+ */
+export interface ConversationParentLink {
+  id: string;
+  relation: ConversationParentRelation;
 }
 
 export interface ConversationRoundOrigin {
@@ -551,14 +559,9 @@ export interface Conversation {
    */
   workspace_id?: string;
   /**
-   * When this conversation was created as a child of another, the id of the parent conversation.
+   * When this conversation was created as a child of another, the link to the parent
    */
-  parent_conversation_id?: string;
-  /**
-   * Kind of parent/child relationship this conversation has with its parent.
-   * Only meaningful when `parent_conversation_id` is set.
-   */
-  parent_conversation_relation?: ConversationParentRelation;
+  parent_conversation?: ConversationParentLink;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */

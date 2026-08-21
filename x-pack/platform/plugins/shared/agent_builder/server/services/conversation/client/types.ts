@@ -29,6 +29,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -38,7 +39,7 @@ export type ConversationCreateRequest = Omit<
   /**
    * Optional user override. Used to set the parent conversation's user when creating a child conversation for a subagent
    */
-  user?: Conversation['user'];
+  user?: UserIdAndName;
   access_control?: ConversationAccessControl;
 };
 

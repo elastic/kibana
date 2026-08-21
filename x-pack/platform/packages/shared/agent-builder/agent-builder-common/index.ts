@@ -211,6 +211,7 @@ export {
   ConversationDisplayStatus,
   ConversationOriginType,
   ConversationParentRelation,
+  type ConversationParentLink,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,

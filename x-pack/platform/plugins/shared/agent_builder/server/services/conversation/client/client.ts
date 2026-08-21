@@ -254,7 +254,7 @@ class ConversationClientImpl implements ConversationClient {
             createSpaceDslFilter(this.space),
             buildReadAccessFilter({ user: this.user, agentIds }),
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
-            { bool: { must_not: [{ exists: { field: 'parent_conversation_id' } }] } },
+            { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
           ],
         },
       },
@@ -663,7 +663,7 @@ class ConversationClientImpl implements ConversationClient {
         query: {
           bool: {
             filter: [
-              { term: { parent_conversation_id: parentId } },
+              { term: { 'parent_conversation.id': parentId } },
               createSpaceDslFilter(this.space),
             ],
           },

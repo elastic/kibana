@@ -90,13 +90,12 @@ const convertBaseFromEs = (document: Document) => {
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
-    ...(document._source.parent_conversation_id
+    ...(document._source.parent_conversation
       ? {
-          parent_conversation_id: document._source.parent_conversation_id,
-          // Backfill: only relation that existed before this field was `subagent`
-          parent_conversation_relation:
-            (document._source.parent_conversation_relation as ConversationParentRelation) ??
-            ConversationParentRelation.subagent,
+          parent_conversation: {
+            id: document._source.parent_conversation.id,
+            relation: document._source.parent_conversation.relation as ConversationParentRelation,
+          },
         }
       : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
@@ -310,12 +309,8 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
-    ...(conversation.parent_conversation_id
-      ? {
-          parent_conversation_id: conversation.parent_conversation_id,
-          parent_conversation_relation:
-            conversation.parent_conversation_relation ?? ConversationParentRelation.subagent,
-        }
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
       : {}),
     // The timeline is derived from rounds on read (see fromEs), never persisted here.
     // Cast metadata to storage type — the flattened mapping requires string | string[].
@@ -392,12 +387,8 @@ export const createRequestToEs = ({
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
       : {}),
-    ...(conversation.parent_conversation_id
-      ? {
-          parent_conversation_id: conversation.parent_conversation_id,
-          parent_conversation_relation:
-            conversation.parent_conversation_relation ?? ConversationParentRelation.subagent,
-        }
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
       : {}),
   };
 };

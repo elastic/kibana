@@ -27,6 +27,7 @@ export {
   ConversationDisplayStatus,
   ConversationOriginType,
   ConversationParentRelation,
+  type ConversationParentLink,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,

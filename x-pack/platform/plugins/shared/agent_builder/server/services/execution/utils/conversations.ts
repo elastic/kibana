@@ -40,7 +40,7 @@ export const createConversation$ = ({
     | 'access_control'
     | 'origin'
     | 'user'
-    | 'parent_conversation_id'
+    | 'parent_conversation'
     | 'read_only'
   >;
   conversationClient: ConversationClient;
@@ -53,7 +53,7 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       // Persistent sub-agent creations: link to the parent and snapshot the parent's user
-      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation_id);
+      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
       const hasResolvedParentUser =
         Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
 
@@ -68,11 +68,8 @@ export const createConversation$ = ({
         status: roundCompletedEvent.data.round.status,
         rounds: [roundCompletedEvent.data.round],
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(isPersistentSubagentCreate
-          ? {
-              parent_conversation_id: conversation.parent_conversation_id,
-              parent_conversation_relation: ConversationParentRelation.subagent,
-            }
+        ...(conversation.parent_conversation
+          ? { parent_conversation: conversation.parent_conversation }
           : {}),
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
@@ -225,6 +222,10 @@ export const getConversation = async ({
 
   // Case 3a: Creating a child conversation for a persistent sub-agent.
   if (subagentCreation) {
+    const parentLink = {
+      id: subagentCreation.parentConversationId,
+      relation: ConversationParentRelation.subagent,
+    };
     const parentExists = await conversationClient.exists(subagentCreation.parentConversationId);
     if (parentExists) {
       const parent = await conversationClient.get(subagentCreation.parentConversationId);
@@ -237,8 +238,7 @@ export const getConversation = async ({
         }),
         title: subagentCreation.subagentName,
         user: parent.user,
-        parent_conversation_id: subagentCreation.parentConversationId,
-        parent_conversation_relation: ConversationParentRelation.subagent,
+        parent_conversation: parentLink,
         operation: 'CREATE',
       };
     }
@@ -251,8 +251,7 @@ export const getConversation = async ({
         readOnly,
       }),
       title: subagentCreation.subagentName,
-      parent_conversation_id: subagentCreation.parentConversationId,
-      parent_conversation_relation: ConversationParentRelation.subagent,
+      parent_conversation: parentLink,
       operation: 'CREATE',
     };
   }
