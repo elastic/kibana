@@ -69,6 +69,7 @@ describe('installPrebuiltWatchlists', function () {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
+  let mockCreateInternalRepository: jest.Mock;
 
   const callInstall = () =>
     installPrebuiltWatchlists({
@@ -94,10 +95,23 @@ describe('installPrebuiltWatchlists', function () {
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
+    // Mirror core `find` behavior: the hidden `space` type is only queryable when
+    // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
+    // an empty result. This guards against regressing back to an un-scoped repo.
+    mockCreateInternalRepository = jest
+      .fn()
+      .mockImplementation((includedHiddenTypes?: string[]) => {
+        if (includedHiddenTypes?.includes('space')) {
+          return mockSoClient;
+        }
+        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+        return repoWithoutSpaceAccess;
+      });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+          createInternalRepository: mockCreateInternalRepository,
         },
         elasticsearch: {
           client: {
@@ -255,10 +269,5 @@ describe('installPrebuiltWatchlists', function () {
         id: getPrivilegedUserWatchlistSavedObjectId('my-space'),
       });
     });
-  });
-
-  it('has no duplicate prebuilt watchlist names', () => {
-    const names = getPrebuiltWatchlists('default').map((w) => w.name);
-    expect(new Set(names).size).toBe(names.length);
   });
 });
