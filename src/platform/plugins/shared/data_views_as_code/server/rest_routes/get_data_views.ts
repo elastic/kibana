@@ -16,6 +16,7 @@ import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { RegisterRouteArgs } from './types';
 
 const GET_DATA_VIEWS_AS_CODE_PATH = BASE_PATH;
+const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 export const registerGetDataViewsAsCodeRoute = ({
   router,
@@ -41,9 +42,9 @@ export const registerGetDataViewsAsCodeRoute = ({
         validate: {
           request: {
             query: asCodePaginationParamsSchema.extend({
-              query: z.string().optional().meta({
+              query: z.string().max(MAX_SEARCH_QUERY_LENGTH).optional().meta({
                 description:
-                  'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
+                  'Filters results by `name` and `index_pattern` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax.',
               }),
             }),
           },
@@ -53,9 +54,6 @@ export const registerGetDataViewsAsCodeRoute = ({
             },
             400: {
               description: 'bad request',
-            },
-            403: {
-              description: 'forbidden',
             },
           },
         },

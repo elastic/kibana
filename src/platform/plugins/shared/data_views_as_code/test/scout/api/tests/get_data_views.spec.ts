@@ -7,9 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
+import { apiTest, tags, type KibanaRole, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { PAGINATION_DEFAULT_PER_PAGE, PAGINATION_MAX_SIZE } from '@kbn/as-code-shared-schemas';
 import { BASE_PATH, COMMON_HEADERS } from '../fixtures/constants';
+
+const INDEX_PATTERNS_READ_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { indexPatterns: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
 
 const buildUrl = (params: Record<string, string | number | undefined>) => {
   const searchParams = new URLSearchParams();
@@ -24,6 +38,7 @@ const buildUrl = (params: Record<string, string | number | undefined>) => {
 
 apiTest.describe('GET /api/data_views/v2 - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
+  let readOnlyApiCredentials: RoleApiCredentials;
 
   const runId = `${Date.now()}${Math.floor(Math.random() * 10000)}`;
   const uniquePrefix = `ScoutList${runId}`;
@@ -36,6 +51,7 @@ apiTest.describe('GET /api/data_views/v2 - as code', { tag: tags.deploymentAgnos
 
   apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     adminApiCredentials = await requestAuth.getApiKeyForAdmin();
+    readOnlyApiCredentials = await requestAuth.getApiKeyForCustomRole(INDEX_PATTERNS_READ_ROLE);
 
     const fixtures = [
       { suffix: 'Alpha', timeFieldName: 'timestamp' },
@@ -87,8 +103,25 @@ apiTest.describe('GET /api/data_views/v2 - as code', { tag: tags.deploymentAgnos
     expect(response.body.meta.total).toBe(createdDataViews.length);
     expect(response.body.data).toHaveLength(createdDataViews.length);
     expect(response.body.meta.page).toBe(1);
-    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.meta.per_page).toBe(PAGINATION_DEFAULT_PER_PAGE);
   });
+
+  apiTest(
+    'allows users with indexPatterns read privilege to list data views',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(buildUrl({ query: `${uniquePrefix}*` }), {
+        headers: {
+          ...COMMON_HEADERS,
+          ...readOnlyApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(createdDataViews.length);
+      expect(response.body.data).toHaveLength(createdDataViews.length);
+    }
+  );
 
   apiTest('returns the as-code list item shape', async ({ apiClient }) => {
     const fixture = createdDataViews[0];
@@ -217,7 +250,7 @@ apiTest.describe('GET /api/data_views/v2 - as code', { tag: tags.deploymentAgnos
   });
 
   apiTest('returns 400 when per_page exceeds the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(buildUrl({ per_page: 1001 }), {
+    const response = await apiClient.get(buildUrl({ per_page: PAGINATION_MAX_SIZE + 1 }), {
       headers: {
         ...COMMON_HEADERS,
         ...adminApiCredentials.apiKeyHeader,
