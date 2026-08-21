@@ -101,7 +101,7 @@ describe('getTraceId', () => {
   });
 
   describe('getActiveOtelSpanId', () => {
-    it('returns the active span id so entryTransactionId is persisted under EDOT-only', async () => {
+    it('returns the active span id', async () => {
       const span = spanWithTraceId(OTEL_TRACE_ID);
 
       await context.with(trace.setSpan(context.active(), span), async () => {

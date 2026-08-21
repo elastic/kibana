@@ -426,9 +426,8 @@ export class WorkflowExecutionRuntimeManager {
           entryTransactionId: getActiveOtelSpanId(),
         });
 
-        // Mirror the APM branches: attach the workflow context labels so the
-        // exported OTEL span stays searchable (trace -> execution direction).
-        // addTransactionLabels writes to the active OTEL span when present.
+        // Mirror the APM branches: addTransactionLabels also writes to the
+        // active OTEL span, keeping trace -> execution lookup searchable.
         const otelLabels: Record<string, string | number | boolean> = {
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,

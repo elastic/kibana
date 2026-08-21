@@ -36,12 +36,11 @@ export function getAlertingRuleId(transaction: agent.Transaction | null): string
 }
 
 /**
- * Resolves the trace ID for a transaction. Tries the documented `ids` field
- * first, then the private `traceId` / `trace.id` shapes that older builds of
- * `elastic-apm-node` expose. Returns `undefined` when the transaction carries
- * no APM-shaped trace id — the caller decides whether to fall back to the
- * active OTEL span context (`getActiveOtelTraceId`), which may hold a trace id
- * unrelated to this transaction.
+ * Resolves the trace ID for a transaction: the documented `ids` field first,
+ * then the private `traceId` / `trace.id` shapes older builds expose. Returns
+ * `undefined` when the transaction carries no APM-shaped trace id; whether to
+ * fall back to the active OTEL span context (`getActiveOtelTraceId`) is the
+ * caller's decision, as that id may be unrelated to this transaction.
  */
 export function getTraceId(transaction: agent.Transaction): string | undefined {
   const fromIds = transaction.ids?.['trace.id'];
@@ -72,7 +71,7 @@ export function getActiveOtelTraceId(): string | undefined {
 /**
  * Reads the span ID from the active OTEL span context, or `undefined` when no
  * span is active. Used as the `entryTransactionId` fallback under EDOT-only
- * instrumentation, where there is no APM transaction to read it from.
+ * instrumentation.
  */
 export function getActiveOtelSpanId(): string | undefined {
   const spanContext = trace.getActiveSpan()?.spanContext();

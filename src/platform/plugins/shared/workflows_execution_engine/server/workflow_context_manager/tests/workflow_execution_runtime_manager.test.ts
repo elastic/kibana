@@ -11,6 +11,7 @@ import { context, trace, TraceFlags } from '@opentelemetry/api';
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import agent from 'elastic-apm-node';
+import * as apmUtils from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
@@ -37,6 +38,17 @@ jest.mock('../build_workflow_context', () => {
     buildWorkflowContext: jest.fn(),
   };
 });
+
+jest.mock('@kbn/apm-utils', () => {
+  const actual = jest.requireActual('@kbn/apm-utils');
+  return {
+    ...actual,
+    addTransactionLabels: jest.fn(actual.addTransactionLabels),
+  };
+});
+const addTransactionLabelsMock = apmUtils.addTransactionLabels as jest.MockedFunction<
+  typeof apmUtils.addTransactionLabels
+>;
 const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
   typeof buildWorkflowContext
 >;
@@ -300,6 +312,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
 
       it('persists the active OTEL span trace id and span id on the execution', async () => {
+        addTransactionLabelsMock.mockClear();
         const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
 
         await context.with(trace.setSpan(context.active(), span), async () => {
@@ -310,6 +323,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
           traceId: '0af7651916cd43dd8448eb211c80319c',
           entryTransactionId: '0000000000000042',
         });
+        expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            workflow_execution_id: 'testWorkflowExecutionid',
+            workflow_id: 'test-workflow-id',
+            service_name: 'kibana',
+            transaction_hierarchy: 'task->steps',
+            triggered_by: 'task_manager',
+          })
+        );
       });
 
       it('does not persist a trace id when no OTEL span is active either', async () => {
