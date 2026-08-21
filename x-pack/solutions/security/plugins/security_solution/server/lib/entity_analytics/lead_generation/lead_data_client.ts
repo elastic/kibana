@@ -42,8 +42,8 @@ interface LeadActionCandidate {
 }
 
 type LeadPersistDecision =
-  | { readonly type: 'dedup'; readonly existingId: string }
-  | { readonly type: 'version'; readonly existingId: string; readonly allowReopen: boolean }
+  | { readonly type: 'refresh'; readonly existingId: string }
+  | { readonly type: 'update'; readonly existingId: string; readonly allowReopen: boolean }
   | { readonly type: 'create' }
   | { readonly type: 'skip' };
 
@@ -56,9 +56,9 @@ interface PersistLeadsParams {
   readonly executionId: string;
   readonly sourceType: LeadGenerationMode;
   readonly timestamp: string;
-  readonly dedups: ReadonlyArray<{ readonly existingId: string }>;
+  readonly refreshes: ReadonlyArray<{ readonly existingId: string }>;
   readonly creates: readonly SynthesizedLead[];
-  readonly versions: ReadonlyArray<{
+  readonly updates: ReadonlyArray<{
     readonly existingId: string;
     readonly lead: SynthesizedLead;
     readonly allowReopen: boolean;
@@ -321,10 +321,10 @@ if (ctx.op == 'create') {
 `.trim();
 
 /**
- * Dedup persist: refresh timestamp/metadata unless the lead was dismissed
+ * Refresh persist: stamp timestamp/metadata unless the lead was dismissed
  * after classify (do not reopen). Re-evaluates status on retry_on_conflict.
  */
-const LEAD_DEDUP_SCRIPT_SOURCE = `
+const LEAD_REFRESH_SCRIPT_SOURCE = `
 if (ctx._source.status == 'dismissed') {
   ctx.op = 'noop';
 } else {
@@ -399,8 +399,8 @@ export const createLeadDataClient = ({
 
   /**
    * Classify each candidate against existing leads using their observation set
-   * - Dedup: existing non-dismissed lead with observation set evidence
-   * - Version: existing lead whose observation set escalated or decayed
+   * - Refresh: existing non-dismissed lead with unchanged observation set
+   * - Update: existing lead whose observation set escalated or decayed
    * - Skip: dismissed lead whose observation set is equal or decayed
    * - Create: no matching lead for the entity
    */
@@ -430,40 +430,40 @@ export const createLeadDataClient = ({
         // Reopen the lead because the observation set escalated
         return {
           candidate,
-          decision: { type: 'version', existingId: matchingLead.id, allowReopen: true },
+          decision: { type: 'update', existingId: matchingLead.id, allowReopen: true },
         };
       }
 
       if (observationsDelta === 'equal') {
         return {
           candidate,
-          decision: { type: 'dedup', existingId: matchingLead.id },
+          decision: { type: 'refresh', existingId: matchingLead.id },
         };
       }
 
-      // Observation set changes, version the lead. allowReopen is false to prevent reopening the lead if it was dismissed between classify and persist.
+      // Observation set changed; overwrite evidence. allowReopen is false to prevent reopening the lead if it was dismissed between classify and persist.
       return {
         candidate,
-        decision: { type: 'version', existingId: matchingLead.id, allowReopen: false },
+        decision: { type: 'update', existingId: matchingLead.id, allowReopen: false },
       };
     });
   };
 
   /**
    * Persist the leads to the Elasticsearch index
-   * - Dedup: scripted refresh (same content); noops if dismissed since classify
-   * - Version / create: scripted update (create also passes upsert + scripted_upsert)
+   * - Refresh: scripted timestamp/metadata write (same content); noops if dismissed since classify
+   * - Update / create: scripted update (create also passes upsert + scripted_upsert)
    *   so concurrent writers share one `_id` and changed_at is stamped at apply time
    */
   const persistLeads = async ({
     executionId,
     sourceType,
     timestamp,
-    dedups,
+    refreshes,
     creates,
-    versions,
+    updates,
   }: PersistLeadsParams): Promise<number> => {
-    const actionCount = dedups.length + creates.length + versions.length;
+    const actionCount = refreshes.length + creates.length + updates.length;
     if (actionCount === 0) {
       return 0;
     }
@@ -478,9 +478,9 @@ export const createLeadDataClient = ({
 
       const bulkBody: object[] = [];
 
-      for (const { existingId } of dedups) {
+      for (const { existingId } of refreshes) {
         logger.debug(
-          `[LeadGeneration] Deduped lead ${existingId} (unchanged signal set, ` +
+          `[LeadGeneration] Refreshing lead ${existingId} (unchanged signal set, ` +
             `executionId=${executionId})`
         );
         bulkBody.push(
@@ -493,7 +493,7 @@ export const createLeadDataClient = ({
           },
           {
             script: {
-              source: LEAD_DEDUP_SCRIPT_SOURCE,
+              source: LEAD_REFRESH_SCRIPT_SOURCE,
               lang: 'painless',
               params: {
                 timestamp,
@@ -505,10 +505,10 @@ export const createLeadDataClient = ({
         );
       }
 
-      for (const { existingId, lead, allowReopen } of versions) {
+      for (const { existingId, lead, allowReopen } of updates) {
         const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(
-          `[LeadGeneration] Versioning lead ${existingId} (signal set changed, ` +
+          `[LeadGeneration] Updating lead ${existingId} (signal set changed, ` +
             `executionId=${executionId})`
         );
         bulkBody.push(
@@ -532,7 +532,7 @@ export const createLeadDataClient = ({
       for (const lead of creates) {
         const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(`[LeadGeneration] Creating lead ${doc.id} (executionId=${executionId})`);
-        // Upsert: insert if missing; if another writer won the race, script dedups or versions.
+        // Upsert: insert if missing; if another writer won the race, script refreshes or updates.
         // allow_reopen is unused on the create branch; it only guards the fallthrough
         // else-branch when a concurrent writer already created the document.
         bulkBody.push(
@@ -649,19 +649,12 @@ export const createLeadDataClient = ({
     }
 
     const buildCursor = (hit: estypes.SearchHit): string => {
-      const sortVals = hit.sort;
-      const lastChangedAt =
-        sortVals?.[0] != null
-          ? Number(sortVals[0])
-          : new Date(
-              ((hit._source as Record<string, unknown>)?.changed_at as string) ??
-                new Date(now).toISOString()
-            ).getTime();
-      const lastDocId =
-        sortVals?.[1] != null
-          ? String(sortVals[1])
-          : ((hit._source as Record<string, unknown>)?.id as string) ?? hit._id ?? '';
-      return encodeCursor(lastChangedAt, lastDocId);
+      const changedAt = hit.sort?.[0];
+      const docId = hit.sort?.[1];
+      if (changedAt == null || docId == null) {
+        throw new Error('Lead change hit missing sort values required for the cursor');
+      }
+      return encodeCursor(Number(changedAt), String(docId));
     };
 
     try {

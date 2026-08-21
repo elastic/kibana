@@ -83,7 +83,7 @@ describe('runLeadGenerationPipeline', () => {
     expect(mockSynthesizeLeads).not.toHaveBeenCalled();
   });
 
-  it('skips LLM for deduped candidates and only refreshes timestamps', async () => {
+  it('skips LLM for refresh candidates and only stamps timestamps', async () => {
     const mockEntity = {
       record: {
         entity: {
@@ -119,7 +119,7 @@ describe('runLeadGenerationPipeline', () => {
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
     mockClassifyLeadCandidates.mockResolvedValueOnce([
-      { candidate, decision: { type: 'dedup', existingId: 'existing-lead' } },
+      { candidate, decision: { type: 'refresh', existingId: 'existing-lead' } },
     ]);
 
     await runLeadGenerationPipeline({
@@ -138,9 +138,9 @@ describe('runLeadGenerationPipeline', () => {
       expect.objectContaining({
         executionId: 'exec-123',
         sourceType: 'adhoc',
-        dedups: [{ existingId: 'existing-lead' }],
+        refreshes: [{ existingId: 'existing-lead' }],
         creates: [],
-        versions: [],
+        updates: [],
       })
     );
   });
@@ -211,8 +211,8 @@ describe('runLeadGenerationPipeline', () => {
             id: mockLead.id,
           }),
         ],
-        versions: [],
-        dedups: [],
+        updates: [],
+        refreshes: [],
       })
     );
     const persisted = mockPersistLeads.mock.calls[0][0].creates[0];
@@ -226,7 +226,7 @@ describe('runLeadGenerationPipeline', () => {
     expect(persisted).not.toHaveProperty('sourceType');
   });
 
-  it('synthesizes and versions when content hash changed', async () => {
+  it('synthesizes and updates when content hash changed', async () => {
     const mockEntity = {
       record: {
         entity: { type: 'user', name: 'admin', id: 'euid-admin' },
@@ -248,7 +248,7 @@ describe('runLeadGenerationPipeline', () => {
     mockClassifyLeadCandidates.mockResolvedValueOnce([
       {
         candidate,
-        decision: { type: 'version', existingId: 'existing-admin', allowReopen: false },
+        decision: { type: 'update', existingId: 'existing-admin', allowReopen: false },
       },
     ]);
     mockSynthesizeLeads.mockResolvedValueOnce([
@@ -280,14 +280,14 @@ describe('runLeadGenerationPipeline', () => {
     expect(mockPersistLeads).toHaveBeenCalledWith(
       expect.objectContaining({
         sourceType: 'scheduled',
-        versions: [
+        updates: [
           expect.objectContaining({
             existingId: 'existing-admin',
             lead: expect.objectContaining({ id: 'lead-new' }),
           }),
         ],
         creates: [],
-        dedups: [],
+        refreshes: [],
       })
     );
   });
@@ -326,9 +326,9 @@ describe('runLeadGenerationPipeline', () => {
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
     expect(mockPersistLeads).toHaveBeenCalledWith(
       expect.objectContaining({
-        dedups: [],
+        refreshes: [],
         creates: [],
-        versions: [],
+        updates: [],
       })
     );
   });
@@ -372,7 +372,7 @@ describe('runLeadGenerationPipeline', () => {
       { candidate: skipCandidate, decision: { type: 'skip' } },
       {
         candidate: resurfaceCandidate,
-        decision: { type: 'dedup', existingId: 'existing-resurface' },
+        decision: { type: 'refresh', existingId: 'existing-resurface' },
       },
     ]);
     mockSynthesizeLeads.mockResolvedValueOnce([

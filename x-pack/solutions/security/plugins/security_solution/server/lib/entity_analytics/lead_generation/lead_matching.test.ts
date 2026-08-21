@@ -125,7 +125,7 @@ describe('computeContentHash', () => {
     expect(a).not.toBe(b);
   });
 
-  it('changes when a new moduleId:type is added (versioning signal)', () => {
+  it('changes when a new moduleId:type is added (update signal)', () => {
     const hashV1 = computeContentHash({
       observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' }],
     });

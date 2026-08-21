@@ -46,8 +46,8 @@ export interface RunPipelineParams {
 const shouldRunLLMSynthesis = (
   item: LeadActionDecision<LeadCandidate>
 ): item is LeadActionDecision<LeadCandidate> & {
-  decision: { type: 'create' } | { type: 'version'; existingId: string; allowReopen: boolean };
-} => item.decision.type === 'create' || item.decision.type === 'version';
+  decision: { type: 'create' } | { type: 'update'; existingId: string; allowReopen: boolean };
+} => item.decision.type === 'create' || item.decision.type === 'update';
 
 /**
  * Shared pipeline logic used by both the ad-hoc generate route and the
@@ -115,12 +115,12 @@ export const runLeadGenerationPipeline = async ({
   const classifyStart = Date.now();
   const decisions = await leadDataClient.classifyLeadCandidates(candidates);
   const toSynthesize = decisions.filter(shouldRunLLMSynthesis);
-  const dedups = decisions.flatMap((item) =>
-    item.decision.type === 'dedup' ? [{ existingId: item.decision.existingId }] : []
+  const refreshes = decisions.flatMap((item) =>
+    item.decision.type === 'refresh' ? [{ existingId: item.decision.existingId }] : []
   );
   logger.info(
     `[LeadGeneration][Telemetry] Classify leads: ${Date.now() - classifyStart}ms ` +
-      `(dedup=${dedups.length}, synthesize=${toSynthesize.length})`
+      `(refresh=${refreshes.length}, synthesize=${toSynthesize.length})`
   );
 
   const synthStart = Date.now();
@@ -136,7 +136,7 @@ export const runLeadGenerationPipeline = async ({
 
   const runTimestamp = new Date().toISOString();
   const creates: SynthesizedLead[] = [];
-  const versions: Array<{ existingId: string; lead: SynthesizedLead; allowReopen: boolean }> = [];
+  const updates: Array<{ existingId: string; lead: SynthesizedLead; allowReopen: boolean }> = [];
   for (const { candidate, decision } of toSynthesize) {
     const synthesizedLead = synthesized.find(
       (lead) => hashEuid(lead.entity.id) === candidate.leadId
@@ -145,8 +145,8 @@ export const runLeadGenerationPipeline = async ({
       logger.warn(
         `[LeadGeneration] Skipping persist; no synthesized lead for entity ${candidate.leadId}`
       );
-    } else if (decision.type === 'version') {
-      versions.push({
+    } else if (decision.type === 'update') {
+      updates.push({
         existingId: decision.existingId,
         lead: synthesizedLead,
         allowReopen: decision.allowReopen,
@@ -157,8 +157,8 @@ export const runLeadGenerationPipeline = async ({
   }
 
   const newLeads = creates.length;
-  const revisedLeads = versions.length;
-  const resurfacedLeads = dedups.length;
+  const revisedLeads = updates.length;
+  const resurfacedLeads = refreshes.length;
   const skippedLeads = decisions.filter((item) => item.decision.type === 'skip').length;
   const persistAttempted = newLeads + revisedLeads + resurfacedLeads;
 
@@ -172,9 +172,9 @@ export const runLeadGenerationPipeline = async ({
     executionId,
     sourceType,
     timestamp: runTimestamp,
-    dedups,
+    refreshes,
     creates,
-    versions,
+    updates,
   });
   logger.info(
     `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms ` +

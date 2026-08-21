@@ -120,7 +120,7 @@ describe('LeadDataClient', () => {
       expect(result.decision).toEqual({ type: 'create' });
     });
 
-    it('returns dedup when an active lead has equal evidence', async () => {
+    it('returns "refresh" when an active lead has equal evidence', async () => {
       const candidate = toCandidate(makeTestLead());
       mockExistingLead(candidate.leadId, {
         observations: candidate.observations,
@@ -130,12 +130,12 @@ describe('LeadDataClient', () => {
       const [result] = await client.classifyLeadCandidates([candidate]);
 
       expect(result.decision).toEqual({
-        type: 'dedup',
+        type: 'refresh',
         existingId: candidate.leadId,
       });
     });
 
-    it('classifies as "version" when an active lead escalates', async () => {
+    it('classifies as "update" when an active lead escalates', async () => {
       const base = makeTestLead();
       const candidate = toCandidate({
         ...base,
@@ -161,7 +161,7 @@ describe('LeadDataClient', () => {
       const [result] = await client.classifyLeadCandidates([candidate]);
 
       expect(result.decision).toEqual({
-        type: 'version',
+        type: 'update',
         existingId: candidate.leadId,
         allowReopen: false,
       });
@@ -179,7 +179,7 @@ describe('LeadDataClient', () => {
       expect(result.decision).toEqual({ type: 'skip' });
     });
 
-    it('classifies as "version" when a dismissed lead escalates', async () => {
+    it('classifies as "update" when a dismissed lead escalates', async () => {
       const base = makeTestLead();
       const candidate = toCandidate({
         ...base,
@@ -205,7 +205,7 @@ describe('LeadDataClient', () => {
       const [result] = await client.classifyLeadCandidates([candidate]);
 
       expect(result.decision).toEqual({
-        type: 'version',
+        type: 'update',
         existingId: candidate.leadId,
         allowReopen: true,
       });
@@ -247,9 +247,9 @@ describe('LeadDataClient', () => {
         executionId: 'exec-empty',
         sourceType: 'adhoc',
         timestamp: new Date().toISOString(),
-        dedups: [],
+        refreshes: [],
         creates: [],
-        versions: [],
+        updates: [],
       });
 
       expect(result).toBe(0);
@@ -265,9 +265,9 @@ describe('LeadDataClient', () => {
         executionId: 'exec-1',
         sourceType: 'adhoc',
         timestamp: lead.timestamp,
-        dedups: [],
+        refreshes: [],
         creates: [lead],
-        versions: [],
+        updates: [],
       });
 
       expect(result).toBe(0);
@@ -315,9 +315,9 @@ describe('LeadDataClient', () => {
         executionId: 'exec-partial',
         sourceType: 'adhoc',
         timestamp: leadOk.timestamp,
-        dedups: [],
+        refreshes: [],
         creates: [leadOk, leadFail],
-        versions: [],
+        updates: [],
       });
 
       expect(result).toBe(1);
@@ -334,9 +334,9 @@ describe('LeadDataClient', () => {
         executionId: 'exec-throw',
         sourceType: 'adhoc',
         timestamp: lead.timestamp,
-        dedups: [],
+        refreshes: [],
         creates: [lead],
-        versions: [],
+        updates: [],
       });
 
       expect(result).toBe(1);
@@ -352,9 +352,9 @@ describe('LeadDataClient', () => {
           executionId: 'exec-403',
           sourceType: 'adhoc',
           timestamp: new Date().toISOString(),
-          dedups: [],
+          refreshes: [],
           creates: [makeTestLead()],
-          versions: [],
+          updates: [],
         })
       ).rejects.toBe(securityException);
 

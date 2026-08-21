@@ -7,7 +7,10 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createLeadIndexService } from './lead_index_service';
-import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation';
+import {
+  getLeadsIndexName,
+  getLegacyLeadsIndexNames,
+} from '../../../../../common/entity_analytics/lead_generation';
 
 const mockCreateOrUpdateIndex = jest.fn();
 jest.mock('../../utils/create_or_update_index', () => ({
@@ -20,6 +23,7 @@ describe('LeadIndexService', () => {
   const spaceId = 'default';
 
   const indexName = getLeadsIndexName(spaceId);
+  const legacyIndexNames = getLegacyLeadsIndexNames(spaceId);
 
   let service: ReturnType<typeof createLeadIndexService>;
 
@@ -68,6 +72,25 @@ describe('LeadIndexService', () => {
 
       await service.deleteIndex();
 
+      expect(esClient.indices.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: indexName })
+      );
+    });
+
+    it('deletes legacy adhoc and scheduled indices when they exist', async () => {
+      esClient.indices.exists.mockImplementation(async ({ index }) =>
+        [...legacyIndexNames, indexName].includes(index as string)
+      );
+      esClient.indices.delete.mockResolvedValue({ acknowledged: true });
+
+      await service.deleteIndex();
+
+      expect(esClient.indices.delete).toHaveBeenCalledTimes(legacyIndexNames.length + 1);
+      for (const name of legacyIndexNames) {
+        expect(esClient.indices.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ index: name })
+        );
+      }
       expect(esClient.indices.delete).toHaveBeenCalledWith(
         expect.objectContaining({ index: indexName })
       );

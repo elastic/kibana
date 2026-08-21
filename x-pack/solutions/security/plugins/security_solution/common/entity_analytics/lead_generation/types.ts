@@ -79,6 +79,11 @@ export const leadSchema = z.object({
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
   createdAt: z.string(),
+  /**
+   * When lead content or status last changed (create, evidence update, dismiss).
+   * Not `updatedAt`: a last-seen refresh still writes the document (stamps `timestamp`)
+   * but leaves this field unchanged so the change feed only emits material changes.
+   */
   changedAt: z.string(),
   version: z.number().int().min(1),
 });

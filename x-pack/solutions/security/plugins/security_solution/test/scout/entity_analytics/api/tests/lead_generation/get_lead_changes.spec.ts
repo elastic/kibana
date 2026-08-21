@@ -17,6 +17,22 @@ import {
   cleanupLeadsIndex,
   DEFAULT_SPACE_ID,
 } from '../../fixtures/lead_generation_helpers';
+import { decodeCursor } from '../../../../../../server/lib/entity_analytics/lead_generation/change_cursor';
+
+const expectCursorMatchesLastLead = (
+  cursor: string,
+  leads: Array<{ id: string; changedAt: string }>
+): void => {
+  const lastLead = leads[leads.length - 1];
+  if (lastLead == null) {
+    throw new Error('Expected at least one lead to compare against the cursor');
+  }
+  expect(decodeCursor(cursor)).toMatchObject({
+    version: 1,
+    changedAt: new Date(lastLead.changedAt).getTime(),
+    docId: lastLead.id,
+  });
+};
 
 apiTest.describe(
   'Lead Generation - GET /internal/entity_analytics/leads/changes',
@@ -92,7 +108,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.changed).toHaveLength(2);
         expect(response.body.hasMore).toBe(false);
-        expect(typeof response.body.cursor).toBe('string');
+        expectCursorMatchesLastLead(response.body.cursor, response.body.changed);
       }
     );
 
@@ -111,7 +127,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.changed).toHaveLength(2);
         expect(response.body.hasMore).toBe(true);
-        expect(typeof response.body.cursor).toBe('string');
+        expectCursorMatchesLastLead(response.body.cursor, response.body.changed);
       }
     );
 
@@ -134,7 +150,7 @@ apiTest.describe(
         expect(page1).toHaveStatusCode(200);
         expect(page1.body.changed).toHaveLength(2);
         expect(page1.body.hasMore).toBe(true);
-        expect(typeof page1.body.cursor).toBe('string');
+        expectCursorMatchesLastLead(page1.body.cursor, page1.body.changed);
 
         const page2 = await apiClient.get(
           `${LEAD_GENERATION_ROUTES.GET_CHANGES}?perPage=2&cursor=${page1.body.cursor}`,
@@ -144,7 +160,8 @@ apiTest.describe(
         expect(page2).toHaveStatusCode(200);
         expect(page2.body.changed).toHaveLength(1);
         expect(page2.body.hasMore).toBe(false);
-        expect(typeof page2.body.cursor).toBe('string');
+        expectCursorMatchesLastLead(page2.body.cursor, page2.body.changed);
+        expect(page2.body.cursor).not.toBe(page1.body.cursor);
 
         const allNames = [...page1.body.changed, ...page2.body.changed].map(
           (l: { entity: { name: string } }) => l.entity.name
