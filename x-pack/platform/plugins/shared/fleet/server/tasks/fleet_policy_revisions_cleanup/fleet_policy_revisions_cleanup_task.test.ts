@@ -18,8 +18,16 @@ import {
   TYPE,
   VERSION,
 } from './fleet_policy_revisions_cleanup_task';
+import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
 jest.mock('../../services');
+// Mock the orphan sweep so that existing revision-cleanup tests are unaffected.
+// Dedicated tests for the sweep logic live in sweep_orphaned_fleet_policies.test.ts.
+jest.mock('./sweep_orphaned_fleet_policies');
+
+const mockedSweepOrphanedFleetPolicies = sweepOrphanedFleetPolicies as jest.MockedFunction<
+  typeof sweepOrphanedFleetPolicies
+>;
 
 const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -74,6 +82,9 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     mockAppContextService.getExperimentalFeatures.mockReturnValue({
       enableFleetPolicyRevisionsCleanupTask: true,
     } as any);
+
+    // Default: orphan sweep finds nothing to delete
+    mockedSweepOrphanedFleetPolicies.mockResolvedValue({ deletedCount: 0 });
 
     taskInstance = {
       id: `${TYPE}:${VERSION}`,
@@ -529,6 +540,25 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         {
           signal,
         }
+      );
+    });
+
+    it('should invoke the orphan sweep on every run and log deleted count when documents are removed', async () => {
+      mockedSweepOrphanedFleetPolicies.mockResolvedValueOnce({ deletedCount: 5 });
+
+      mockEsClient.search.mockResolvedValue({
+        aggregations: { latest_revisions_by_policy_id: { buckets: [] } },
+      } as any);
+
+      await mockTask.runTask(taskInstance, mockCore, signal);
+
+      expect(mockedSweepOrphanedFleetPolicies).toHaveBeenCalledTimes(1);
+      expect(mockedSweepOrphanedFleetPolicies).toHaveBeenCalledWith(
+        mockEsClient,
+        expect.objectContaining({ logger, signal })
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Orphan sweep removed 5 documents')
       );
     });
   });

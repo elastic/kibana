@@ -1808,6 +1808,10 @@ class AgentPolicyService {
         );
     }
 
+    // cleanup .fleet-policies docs BEFORE deleting the saved object so that if Elasticsearch is
+    // temporarily unavailable the saved object is preserved and the caller can retry the delete.
+    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+
     await soClient
       .delete(savedObjectType, id, {
         force: true, // need to delete through multiple space
@@ -1819,9 +1823,6 @@ class AgentPolicyService {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
-
-    // cleanup .fleet-policies docs on delete
-    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
 
     logger.debug(`Deleted agent policy ${id}`);
     return {

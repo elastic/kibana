@@ -979,6 +979,30 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should delete .fleet-policies entries BEFORE deleting the saved object', async () => {
+      // Arrange: track call order
+      const callOrder: string[] = [];
+
+      esClient.deleteByQuery.mockImplementationOnce(async () => {
+        callOrder.push('deleteByQuery');
+        return { deleted: 2 };
+      });
+
+      soClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      const deleteByQueryIdx = callOrder.indexOf('deleteByQuery');
+      const soDeleteIdx = callOrder.indexOf('soDelete');
+
+      expect(deleteByQueryIdx).toBeGreaterThanOrEqual(0);
+      expect(soDeleteIdx).toBeGreaterThanOrEqual(0);
+      expect(deleteByQueryIdx).toBeLessThan(soDeleteIdx);
+    });
+
     it('should only delete package polices that are not shared with other agent policies', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {

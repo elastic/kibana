@@ -11,6 +11,7 @@ import type { Context, Config } from './types';
 import { getPoliciesToClean } from './get_policies_to_clean';
 import { populateMinimumRevisionsUsedByAgents } from './populate_minimum_revisions_used_by_agents';
 import { deletePolicyRevisions } from './delete_policy_revisions';
+import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
 const defaultConfig = {
   maxRevisions: 10,
@@ -35,6 +36,18 @@ export const cleanupPolicyRevisions = async (
   logger.debug(
     `[FleetPolicyRevisionsCleanupTask] Starting cleanup with max_revisions: ${config.maxRevisions}, max_policies_per_run: ${config.maxPolicies}`
   );
+
+  // Sweep orphaned .fleet-policies documents first — these belong to agent policies that have
+  // been deleted (via bypass paths or after a previously failed cleanup) and must be removed
+  // before the revision-age cleanup runs so they don't inflate revision counts.
+  const sweepResult = await sweepOrphanedFleetPolicies(esClient, context);
+  if (sweepResult.deletedCount > 0) {
+    logger.info(
+      `[FleetPolicyRevisionsCleanupTask] Orphan sweep removed ${sweepResult.deletedCount} documents.`
+    );
+  }
+
+  throwIfAborted(signal);
 
   const policiesToClean = await getPoliciesToClean(esClient, {
     ...context,
