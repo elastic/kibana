@@ -46,8 +46,6 @@ Requires Docker with the Emscripten SDK image:
 
 ```bash
 cd x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm
-# Clean prior build intermediates when changing patches/flags:
-rm -rf .build
 # Image is pinned by digest (the 3.1.74 tag can be retagged).
 # To bump: docker buildx imagetools inspect emscripten/emsdk:<tag>
 LIBYARA_EMSDK_IMAGE=emscripten/emsdk:3.1.74@sha256:af45409f3199d88db4b1b03af0098532c8fb33a375ac257463eeb0a622870d06

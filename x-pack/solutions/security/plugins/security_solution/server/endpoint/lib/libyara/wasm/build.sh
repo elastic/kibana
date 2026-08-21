@@ -58,16 +58,14 @@ fi
 echo "Verifying ${YARA_TARBALL} sha256 ..."
 echo "${YARA_SHA256}  ${YARA_TARBALL}" | sha256sum -c -
 
-if [[ ! -d "${YARA_SRC}" ]]; then
-  echo "Extracting ${YARA_TARBALL} ..."
-  rm -rf "${BUILD_DIR}/yara-${YARA_VERSION}" "${BUILD_DIR}/yara-v${YARA_VERSION}"
-  tar -xzf "${YARA_TARBALL}" -C "${BUILD_DIR}"
+echo "Extracting ${YARA_TARBALL} ..."
+rm -rf "${BUILD_DIR}/yara-${YARA_VERSION}" "${BUILD_DIR}/yara-v${YARA_VERSION}"
+tar -xzf "${YARA_TARBALL}" -C "${BUILD_DIR}"
 
-  if [[ ! -d "${YARA_SRC}" ]]; then
-    echo "error: expected extracted dir ${YARA_SRC}" >&2
-    ls -la "${BUILD_DIR}"
-    exit 1
-  fi
+if [[ ! -d "${YARA_SRC}" ]]; then
+  echo "error: expected extracted dir ${YARA_SRC}" >&2
+  ls -la "${BUILD_DIR}"
+  exit 1
 fi
 
 #
@@ -143,40 +141,29 @@ apply_wasm_hash_table_free_adapters() {
 
 apply_wasm_hash_table_free_adapters
 
-if [[ ! -f "${YARA_SRC}/.libs/libyara.a" ]]; then
-  echo "Configuring and building libyara ${YARA_VERSION} (static, no crypto — compile-only) ..."
-  pushd "${YARA_SRC}" >/dev/null
+echo "Configuring and building libyara ${YARA_VERSION} (static, no crypto — compile-only) ..."
+pushd "${YARA_SRC}" >/dev/null
 
-  # Avoid network for autotools if already bootstrapped; otherwise bootstrap.
-  if [[ ! -f ./configure ]]; then
-    ./bootstrap.sh
-  fi
+./bootstrap.sh
 
-  # Compile-only: skip OpenSSL. Hash/pe crypto-dependent *scan* APIs will be
-  # unavailable; module *declarations* (needed for `import "pe"` syntax checks)
-  # still work.
-  emconfigure ./configure \
-    --disable-shared \
-    --enable-static \
-    --disable-cuckoo \
-    --disable-magic \
-    --disable-dex \
-    --disable-macho \
-    --disable-dotnet \
-    --without-crypto \
-    CFLAGS="-O2 -DNDEBUG"
+# Compile-only: skip OpenSSL. Hash/pe crypto-dependent *scan* APIs will be
+# unavailable; module *declarations* (needed for `import "pe"` syntax checks)
+# still work.
+emconfigure ./configure \
+  --disable-shared \
+  --enable-static \
+  --disable-cuckoo \
+  --disable-magic \
+  --disable-dex \
+  --disable-macho \
+  --disable-dotnet \
+  --without-crypto \
+  CFLAGS="-O2 -DNDEBUG"
 
-  # Only build the library — CLI binaries need POSIX semaphores unavailable under WASM.
-  emmake make -j"$(getconf _NPROCESSORS_ONLN || echo 2)" libyara.la
+# Only build the library — CLI binaries need POSIX semaphores unavailable under WASM.
+emmake make -j"$(getconf _NPROCESSORS_ONLN || echo 2)" libyara.la
 
-  popd >/dev/null
-else
-  # Adapters may have been applied after a prior lib build — rebuild affected objs.
-  echo "Rebuilding libyara after WASM adapter patches ..."
-  pushd "${YARA_SRC}" >/dev/null
-  emmake make -j"$(getconf _NPROCESSORS_ONLN || echo 2)" libyara.la
-  popd >/dev/null
-fi
+popd >/dev/null
 
 LIBYARA_A="${YARA_SRC}/.libs/libyara.a"
 INCLUDE_DIR="${YARA_SRC}/libyara/include"
