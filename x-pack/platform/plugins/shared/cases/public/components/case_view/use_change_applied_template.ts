@@ -16,6 +16,11 @@ import { isDisplayOnlyField, isInlineField } from '../../../common/types/domain/
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
+import type { TemplateChangeEntryPoint } from '../../analytics/templates/use_template_apply_ebt';
+import {
+  useTemplateAppliedEBT,
+  useTemplateClearedEBT,
+} from '../../analytics/templates/use_template_apply_ebt';
 import type { ServerError } from '../../types';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
@@ -46,6 +51,12 @@ interface ChangeAppliedTemplateArgs {
    * `computeNewExtendedFields`. Only meaningful when `newTemplate` is non-null.
    */
   extendedFields?: Record<string, string>;
+  /**
+   * The UI surface the change was confirmed from, reported on the resulting telemetry event. Omit it
+   * to report nothing: the deprecated legacy case view passes no entry point, so its writes stay out
+   * of the browser telemetry. Removing this argument removes the reporting with it.
+   */
+  entryPoint?: TemplateChangeEntryPoint;
 }
 
 /**
@@ -86,6 +97,8 @@ export const computeNewExtendedFields = (
 
 export const useChangeAppliedTemplate = () => {
   const { showErrorToast, showInfoToast } = useCasesToast();
+  const reportTemplateApplied = useTemplateAppliedEBT();
+  const reportTemplateCleared = useTemplateClearedEBT();
 
   return useMutation(
     ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
@@ -108,7 +121,7 @@ export const useChangeAppliedTemplate = () => {
     },
     {
       mutationKey: casesMutationsKeys.changeAppliedTemplate,
-      onSuccess: () => {
+      onSuccess: (_data, { caseData, newTemplate, entryPoint }) => {
         // Applying a template changes case fields and settings that several independently-cached
         // components render. Rather than forcing a disruptive automatic reload, surface a persistent
         // notification with a "Reload page" action so the user can refresh when ready to see all of
@@ -126,6 +139,19 @@ export const useChangeAppliedTemplate = () => {
           // Keep the toast until the user reloads or dismisses it.
           { toastLifeTimeMs: Infinity }
         );
+
+        // Reported from the mutation's own callback, and last: React Query skips a per-call callback
+        // once the caller unmounts, and routes a throw from here to onError.
+        if (entryPoint) {
+          if (!newTemplate) {
+            reportTemplateCleared({ entryPoint });
+          } else {
+            reportTemplateApplied({
+              entryPoint,
+              applyMode: caseData.template ? 'replacement' : 'initial',
+            });
+          }
+        }
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CHANGING_TEMPLATE });
