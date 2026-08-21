@@ -56,6 +56,10 @@ import { SearchPanelContent } from '../index_data_visualizer/components/search_p
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
 import { useDataDriftColors } from './use_data_drift_colors';
+import {
+  filtersNotAlreadyPresent,
+  toFilterArray,
+} from '../index_data_visualizer/utils/saved_search_utils';
 
 const maxInlineSizeStyles = css`
   max-inline-size: 100%;
@@ -175,7 +179,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
+  const forcePageRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
 
   const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
 
@@ -227,7 +231,12 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     dataComparisonListState
   );
 
-  const { documentStats, documentStatsProd, timefilter } = useData(
+  const {
+    documentStats,
+    documentStatsProd,
+    timefilter,
+    forceRefresh: forceDocCountRefresh,
+  } = useData(
     initialSettings,
     dataView,
     'data_drift',
@@ -238,6 +247,37 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     setGlobalState,
     undefined
   );
+
+  // Hydrate saved-search filters into FilterManager after render so doc counts and the
+  // primary search bar include them. Do not call addFilters from getEsQueryFromSavedSearch
+  // (that helper can run during render); mirror index data visualizer hydration instead.
+  // Track which saved search we hydrated: forceDocCountRefresh is an unstable inline
+  // callback, and FilterManager rewrites phrase query DSL on addFilters, so a naive
+  // dedupFilters(query) check + refresh would re-add forever (max update depth).
+  const hydratedSavedSearchKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const savedSearchKey = savedSearch?.id ?? savedSearch?.title ?? null;
+    if (!savedSearch || savedSearchKey == null) {
+      return;
+    }
+    if (hydratedSavedSearchKeyRef.current === savedSearchKey) {
+      return;
+    }
+
+    const savedFilters = toFilterArray(savedSearch.searchSource?.getField('filter'));
+    hydratedSavedSearchKeyRef.current = savedSearchKey;
+    if (!savedFilters.length) {
+      return;
+    }
+
+    const filterManager = dataService.query.filterManager;
+    const missing = filtersNotAlreadyPresent(filterManager.getFilters(), savedFilters);
+
+    if (missing.length > 0) {
+      filterManager.addFilters(missing);
+      forceDocCountRefresh();
+    }
+  }, [savedSearch, dataService.query.filterManager, forceDocCountRefresh]);
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
@@ -431,7 +471,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={referenceBrushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
@@ -458,7 +498,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={comparisonBrushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
@@ -494,7 +534,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
-                onRefresh={forceRefresh}
+                onRefresh={forcePageRefresh}
                 hasValidTimeField={hasValidTimeField}
               />
             </EuiPanel>

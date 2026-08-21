@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 48749
+  alertingVTwo: 50017
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 2359
+  contextEngine: 3172
   contextEngineAgentBuilder: 2284
   controls: 4166
   core: 320
@@ -101,7 +101,7 @@ pageLoadAssetSize:
   inference: 5564
   inferenceWorkflows: 895
   infra: 45673
-  ingestHub: 7906
+  ingestHub: 7845
   ingestPipelines: 270
   inputControlVis: 3216
   inspectComponent: 1152
@@ -187,8 +187,8 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 336543
-  shared-misc: 114567
+  shared-core: 316496
+  shared-misc: 141281
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
