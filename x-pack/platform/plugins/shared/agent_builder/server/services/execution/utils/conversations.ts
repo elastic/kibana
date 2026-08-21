@@ -35,13 +35,7 @@ export const createConversation$ = ({
 }: {
   conversation: Pick<
     Conversation,
-    | 'id'
-    | 'agent_id'
-    | 'access_control'
-    | 'origin'
-    | 'user'
-    | 'parent_conversation'
-    | 'read_only'
+    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation' | 'read_only'
   >;
   conversationClient: ConversationClient;
   title$: Observable<string>;

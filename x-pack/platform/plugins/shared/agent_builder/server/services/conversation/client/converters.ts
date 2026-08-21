@@ -15,8 +15,8 @@ import type {
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
-
-  ConversationParentRelation} from '@kbn/agent-builder-common';
+  ConversationParentRelation,
+} from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
