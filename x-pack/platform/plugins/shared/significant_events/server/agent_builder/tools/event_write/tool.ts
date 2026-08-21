@@ -11,8 +11,11 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  significantEventSchema,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -51,41 +54,72 @@ export const eventsWriteItemSchema = significantEventSchema
     event_id: z
       .string()
       .optional()
-      .transform((v) => (v === '' ? undefined : v)),
-    dedup_window: z
-      .string()
-      .max(256)
-      .optional()
+      .transform((v) => (v === '' ? undefined : v))
       .describe(
         dedent`
-          Deduplication window as an ES date math expression (e.g. "now-24h"). Mutually exclusive with event_id.
+          ID of an existing event to append a new version to (continuation/snapshot mode).
 
-          Provide this to write a new event candidate without an explicit event_id.
-          
-          If an active (status "open") event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is written with the caller-supplied status.
+          Omit to trigger find-or-create: the handler scans all currently-active events for one
+          whose rule set contains the submitted rules (subset match) and shares at least one
+          stream name. If found, the write is skipped and the existing event_id is returned
+          (written: false, reason: existing_active_event). Otherwise a new event is created with
+          a generated event_id.
+          Otherwise a new event is created with a generated event_id.
         `
       ),
   })
   .partial({ event_id: true })
-  .refine((item) => !(item.dedup_window !== undefined && item.event_id !== undefined), {
-    message: 'dedup_window and event_id are mutually exclusive',
-  })
   .refine(
     (item) =>
       (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
     {
       message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
     }
+  )
+  .refine(
+    (item) =>
+      item.symptom_hypothesis === undefined ||
+      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+    {
+      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+    }
+  )
+  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+  })
+  .refine(
+    (item) =>
+      item.assessment_note === undefined ||
+      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+    {
+      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
+    }
   );
 
+const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
+
 const eventsWriteItemsSchema = z
-  .array(eventsWriteItemSchema)
-  .min(1)
+  .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
+  .min(1, { error: ITEMS_REQUIRED_MESSAGE })
   .max(MAX_BULK_WRITE_ITEMS)
+  .refine(
+    (items) => {
+      const ruleUuids = items.flatMap((item) =>
+        (item.signals ?? [])
+          .filter((signal) => signal.type === 'detection')
+          .map((signal) => signal.metadata?.rule_uuid)
+          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+      );
+      return new Set(ruleUuids).size === ruleUuids.length;
+    },
+    {
+      message: 'Each detection rule UUID may appear in only one event item per write',
+    }
+  )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        "The significant event items to write. Provide a complete, non-empty array. Do not call this tool to plan or probe: `'{}'` and `'{ \"items\": [] }'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.",
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id for new events; supply the existing event_id for continuations. Each detection rule_uuid may appear in only one item.',
     })
   );
 
@@ -116,17 +150,27 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Write a batch of significant events. Submit at most one item per event_id.
+      Write a batch of significant events. Call once with a populated items array.
 
-      **dedup_window** (e.g. "now-24h"), no event_id: write a new event. Skipped if an open event
-      with the same stream and rule UUIDs already exists in the window (written: false,
-      reason: duplicate_within_window); otherwise written with the caller-supplied status.
+      **With event_id**: append a version to an existing event with the supplied status.
+      Signals and topology are merged with prior versions. No-op if severity and status are
+      unchanged (written: false, reason: unchanged_outcome). Keep an open continuation at or
+      above the prior severity unless grounding shows reduced impact. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
-      **event_id**, no dedup_window: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions.
-
-      **neither**: a synthetic event_id is generated.
+      **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
+      set contains the submitted rules and shares at least one stream name. If found, returns it
+      without writing (written: false, reason: existing_active_event). Otherwise creates a new
+      event with a generated event_id.
     `,
+    annotations: {
+      title: 'Write Significant Events',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventsWriteSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),

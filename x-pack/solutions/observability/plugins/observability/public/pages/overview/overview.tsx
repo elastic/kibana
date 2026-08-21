@@ -24,6 +24,8 @@ import {
 import React, { useEffect, useMemo } from 'react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { usePageReady } from '@kbn/ebt-tools';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
@@ -134,7 +136,7 @@ export function OverviewPage() {
     });
   }, [appsWithoutData, hasData, setScreenContext]);
 
-  const { absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { absoluteStart, absoluteEnd, relativeStart, relativeEnd } = useDatePickerContext();
 
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -146,6 +148,20 @@ export function OverviewPage() {
       }),
     [absoluteStart, absoluteEnd, timeBuckets]
   );
+
+  usePageReady({
+    isReady: isAllRequestsComplete,
+    isRefreshing: !isAllRequestsComplete,
+    meta: {
+      rangeFrom: relativeStart,
+      rangeTo: relativeEnd,
+      description: '[ttfmp_observability_overview] The Observability Overview page has loaded.',
+    },
+    customMetrics: {
+      key1: 'hasAnyData',
+      value1: hasAnyData ? 1 : 0,
+    },
+  });
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
@@ -217,6 +233,10 @@ export function OverviewPage() {
               color="primary"
               fill
               href={onboardingHref}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.ADD_DATA,
+                element: 'obsOverviewPageEmptyPrompt',
+              })}
             >
               {i18n.translate('xpack.observability.overview.emptyState.action', {
                 defaultMessage: 'Add data',

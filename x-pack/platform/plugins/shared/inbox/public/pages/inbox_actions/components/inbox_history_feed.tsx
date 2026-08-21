@@ -74,7 +74,7 @@ const formatTimestamp = (iso?: string | null): string => {
  * automations) without a Kibana code change.
  */
 const CHANNEL_DISPLAY: Record<string, { label: string; icon: IconType }> = {
-  [INBOX_CHANNELS.inbox]: { label: i18n.HISTORY_CHANNEL_INBOX, icon: 'email' },
+  [INBOX_CHANNELS.inbox]: { label: i18n.HISTORY_CHANNEL_INBOX, icon: 'mail' },
   [INBOX_CHANNELS.kibanaExecutionView]: {
     label: i18n.HISTORY_CHANNEL_KIBANA_EXECUTION_VIEW,
     icon: 'logoKibana',
@@ -342,7 +342,7 @@ const ChannelFilter: React.FC<ChannelFilterProps> = ({ selected, options, onChan
       button={
         <EuiFilterButton
           grow
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isOpen}
           numFilters={selectableOptions.length}
           numActiveFilters={selected.length}
@@ -447,7 +447,7 @@ const ResponderFilter: React.FC<ResponderFilterProps> = ({ selected, options, on
       button={
         <EuiFilterButton
           grow
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isOpen}
           numFilters={selectableOptions.length}
           numActiveFilters={selected.length}
@@ -670,7 +670,7 @@ export const InboxHistoryFeed: React.FC = () => {
         </EuiFlexGroup>
       ) : items.length === 0 ? (
         <EuiEmptyPrompt
-          iconType={hasActiveFilters ? 'search' : 'clock'}
+          iconType={hasActiveFilters ? 'magnify' : 'clock'}
           title={
             <h3>
               {hasActiveFilters ? i18n.HISTORY_FILTERED_EMPTY_TITLE : i18n.HISTORY_EMPTY_TITLE}

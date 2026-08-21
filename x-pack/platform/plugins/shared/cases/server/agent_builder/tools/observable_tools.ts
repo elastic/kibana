@@ -48,6 +48,13 @@ export const observablesTool = (
     id: platformCoreCasesTools.observables,
     type: ToolType.builtin,
     description: `Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: \`add\`, \`update\`, \`delete\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    annotations: {
+      title: 'Case Observables',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: observablesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

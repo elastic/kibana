@@ -423,7 +423,6 @@ export const GraphQLConnector: ConnectorSpec = {
 
         const typeName = result?.__typename ?? 'unknown';
         return {
-          ok: true,
           message: i18n.translate('connectorSpecs.graphQL.test.successMessage', {
             defaultMessage:
               'Successfully connected to the GraphQL endpoint (queryType: {typeName})',

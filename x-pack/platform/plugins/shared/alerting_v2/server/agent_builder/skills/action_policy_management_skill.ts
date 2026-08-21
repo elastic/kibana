@@ -13,7 +13,16 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { generateActionPolicySchemaDoc } from './schema_to_skill_docs';
+import {
+  generateActionPolicyOperationsDoc,
+  generateActionPolicySchemaDoc,
+  generateActionPolicyWorkflowPayloadDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
+  getEpisodeStatusValues,
+  formatEnumValuesList,
+  generateThrottleGroupingCompatibilityDoc,
+} from './schema_to_skill_docs';
 
 export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
   defineSkillType({
@@ -46,7 +55,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | Field | Description |
 |---|---|
 | \`episode_id\` | The episode UUID |
-| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, or \`recovering\` |
+| \`episode_status\` | ${formatEnumValuesList(getEpisodeStatusValues())} |
 | \`group_hash\` | Hash of the grouping fields |
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
@@ -54,16 +63,9 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`rule.tags\` | The rule's tags array |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
-### Grouping Modes
-- \`per_episode\` (default): one notification per alert episode lifecycle.
-- \`all\`: a single notification for all matching episodes.
-- \`per_field\`: group by specified \`groupBy\` fields.
+${generateGroupingModesDoc()}
 
-### Throttle Strategies
-- \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
-- \`per_status_interval\`: notify on transitions and at regular intervals.
-- \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
-- \`every_time\`: notify on every evaluation cycle (high volume).
+${generateThrottleStrategiesDoc()}
 
 ---
 
@@ -73,7 +75,7 @@ A workflow is a **concrete automation defined in YAML** that executes when dispa
 
 - Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the \`connector-id\` field on each step.
 - Action policy destinations reference **workflow IDs**, never connector IDs directly.
-- When triggered by action policies, workflows must use \`triggers: - type: manual\` (the \`alert\` trigger type is for the legacy v1 alerting connector path with a different event shape).
+- Destination workflows must use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
 
 ---
 
@@ -105,6 +107,16 @@ Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query 
         name: 'action-policy-schema',
         relativePath: './references',
         content: generateActionPolicySchemaDoc(),
+      },
+      {
+        name: 'action-policy-operations-schema',
+        relativePath: './references',
+        content: generateActionPolicyOperationsDoc(),
+      },
+      {
+        name: 'workflow-dispatch-payload',
+        relativePath: './references',
+        content: generateActionPolicyWorkflowPayloadDoc(),
       },
     ],
     content: `## Domain Knowledge
@@ -139,47 +151,39 @@ When a user asks about existing action policies:
 - Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
 - To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
-- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageActionPolicy} calls.
+- After attaching, use the returned \`attachment_id\` for subsequent ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } calls.
 
 ## Composing and Modifying Action Policies
 
-Build the request for ${ALERTING_TOOL_IDS.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } as an ordered \`operations\` array. Operations run in sequence.
 
 For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`.
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-### Operations
+Refer to the [action-policy-operations-schema reference](./references/action-policy-operations-schema.md) for every operation's fields, types, and constraints. Grouping modes and throttle strategies are also summarized in the [concepts reference](./references/concepts.md).
 
-1. **\`set_metadata\`** — set \`name\`, \`description\`, and \`tags\`.
-2. **\`set_destinations\`** — set workflow destinations. Each destination is \`{ type: "workflow", id: "<workflow-id>" }\`. Currently only \`workflow\` type is supported. At least one destination is required; maximum 10.
-3. **\`set_matcher\`** — set a KQL query to filter which alert episodes trigger this policy. Set to \`null\` for a catch-all that matches all episodes. Available matcher fields:
-   - \`episode_id\`, \`episode_status\` (inactive | pending | active | recovering)
-   - \`group_hash\`, \`last_event_timestamp\`
-   - \`rule.id\`, \`rule.name\`, \`rule.tags\`
-   - \`data.*\` (rule-specific fields)
-4. **\`set_grouping\`** — set \`groupingMode\` and optionally \`groupBy\` fields:
-   - \`per_episode\` (default): one notification per alert episode lifecycle.
-   - \`all\`: a single notification for all matching episodes.
-   - \`per_field\`: group by specified \`groupBy\` fields (required when using this mode).
-5. **\`set_throttle\`** — set the throttle \`strategy\` and optional \`interval\`:
-   - For \`per_episode\` grouping: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
-   - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
-   - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
+Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the concepts reference.
 
-Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
+${generateThrottleGroupingCompatibilityDoc()}
 
-### Throttle / Grouping Compatibility
-
-The throttle strategy must be compatible with the grouping mode. If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool validates compatibility after all operations run.
+If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool validates compatibility after all operations run.
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Action Policy Persistence
 
-The ${ALERTING_TOOL_IDS.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create policy** — create a new action policy from the in-memory attachment.
 - **Update Policy** — push changes back to the origin policy (only for attached saved policies).
@@ -188,7 +192,9 @@ Never attempt to create, update, delete, enable, or disable action policies dire
 
 After composing or modifying an action policy, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ---
 
@@ -209,9 +215,9 @@ Action policies only process alert episodes. If the rule is \`kind: signal\`, do
 ### Building the Workflow YAML
 
 The workflow template should reference the rule's ES|QL output columns explicitly via \`ep.data.*\`.
-The \`set_query\` operation validates the query with \`| LIMIT 0\` and returns the output column names and types.
-These columns are exactly the fields that will appear in \`episodes[].data\` when the rule fires — the rule
+Those columns are the fields that appear in \`episodes[].data\` when the rule fires — the rule
 executor writes each ES|QL result row as \`data: rowDoc\` on alert events.
+If the output columns are unclear, run the rule's ES|QL with \`| LIMIT 0\` to discover column names and types.
 
 For a rule with query: \`FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count >= 5\`
 
@@ -245,37 +251,13 @@ steps:
 
 **Key rules for the template:**
 
-- **Use \`triggers: - type: manual\`** — action policies invoke workflows programmatically via \`scheduleWorkflow\`.
-  The \`alert\` trigger type is for the v1 alerting connector path, which uses a completely different event shape.
-- **Hardcode the rule name** in the subject and message — the dispatch payload includes \`rule_id\` but not the
-  rule's human-readable name. The LLM knows the name from the rule attachment.
-- **Reference \`ep.data.*\` fields explicitly** based on the rule's ES|QL output columns. Dotted field names
-  (e.g. \`host.name\`, \`event.action\`) are reconstructed into nested objects, so access them as
-  \`ep.data.host.name\` (not \`ep.data["host.name"]\`).
-- **Guard for empty data** — \`data\` is populated for \`active\`/\`pending\` episodes but empty (\`{}\`) for
-  \`recovering\`/\`inactive\` episodes. Use \`| default: "..."\` filters or \`{% if ep.data %}\` guards.
-- **Do NOT use v1 variables** like \`{{ event.alerts }}\`, \`{{ event.rule.name }}\`, or \`{{ event.spaceId }}\` —
-  those are undefined in the action policy dispatch path.
-
-**Available Liquid variables from action policy dispatch:**
-
-| Variable | Description |
-|---|---|
-| \`inputs.payload.episodes\` | Array of alert episodes |
-| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
-| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.payload.policyId\` | The action policy ID |
-| \`inputs.payload.id\` | The action group ID |
-| \`inputs.payload.groupKey\` | The grouping key object |
-| \`triggeredBy\` | Always \`"action_policy"\` |
-| \`spaceId\` | The Kibana space |
-| \`execution.url\` | Direct link to the workflow execution in Kibana |
-| \`execution.id\` | The workflow execution ID |
-| \`workflow.name\` | The workflow's display name |
-| \`kibanaUrl\` | The Kibana base URL |
-| \`now\` | ISO timestamp of execution start |
+- Use **exactly one** \`triggers: - type: manual\` (never \`alert\`, never \`event.*\`).
+- Liquid payload fields: [workflow dispatch payload](./references/workflow-dispatch-payload.md)
+  (prefer \`inputs.payload.rules[ep.rule_id].name\`). Engine vars (\`execution.url\`, etc.) come from
+  the \`workflow-authoring\` skill.
+- Reference \`ep.data.*\` from the rule's ES|QL columns; dotted names nest
+  (\`ep.data.host.name\`, not \`ep.data["host.name"]\`).
+- Guard empty \`data\` on recovering/inactive (\`| default\` or \`{% if ep.data %}\`).
 
 5. After creating the workflow, render it inline for user review:
    \`<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>\`
@@ -298,7 +280,9 @@ Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order:
 
 Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ## Save Order Reminder
 

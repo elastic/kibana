@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { CoreStart } from '@kbn/core-di-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -115,8 +116,12 @@ export class RuleChangesHistorySubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
-        type: `RuleChangesHistorySubscriber:${event.type}`,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
+        labels: {
+          event_type: event.type,
+          rule_id: ruleId,
+          space_id: spaceId,
+        },
       });
     }
   }

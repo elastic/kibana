@@ -7,7 +7,12 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { backgroundTaskNodeMapping, taskMappings, apiKeyToInvalidateMappings } from './mappings';
+import {
+  backgroundTaskNodeMapping,
+  taskMappings,
+  apiKeyToInvalidateMappings,
+  taskExecutionControlMapping,
+} from './mappings';
 import { getMigrations } from './migrations';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
@@ -15,6 +20,7 @@ import {
   backgroundTaskNodeModelVersions,
   taskModelVersions,
   apiKeyToInvalidateModelVersions,
+  taskExecutionControlModelVersions,
 } from './model_versions';
 
 export {
@@ -26,6 +32,7 @@ export {
 export const TASK_SO_NAME = 'task';
 export const BACKGROUND_TASK_NODE_SO_NAME = 'background-task-node';
 export const INVALIDATE_API_KEY_SO_NAME = 'api_key_to_invalidate';
+export const TASK_EXECUTION_CONTROL_SO_NAME = 'task-execution-control';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
@@ -102,5 +109,14 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     mappings: apiKeyToInvalidateMappings,
     indexPattern: TASK_MANAGER_INDEX,
     modelVersions: apiKeyToInvalidateModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: TASK_EXECUTION_CONTROL_SO_NAME,
+    namespaceType: 'agnostic',
+    hidden: true,
+    mappings: taskExecutionControlMapping,
+    indexPattern: TASK_MANAGER_INDEX,
+    modelVersions: taskExecutionControlModelVersions,
   });
 }

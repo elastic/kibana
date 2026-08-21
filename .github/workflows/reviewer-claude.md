@@ -40,10 +40,11 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
+# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai or reviewer:libra is present.
 # - Draft PR events activate only when the ci:draft-checks label is present.
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
+# - Synchronize events for merge commits are ignored; only code pushes activate a new review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -52,6 +53,7 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:libra') &&
       github.event_name == 'pull_request_target' &&
       (
         (
@@ -93,6 +95,7 @@ env:
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
   REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none
@@ -102,7 +105,14 @@ network:
     - github
     - openrouter.ai
 jobs:
+  check_reviewable_commit:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/check-reviewable-commit.yml
+
   prefetch_pr_context:
+    needs: check_reviewable_commit
+    if: needs.check_reviewable_commit.outputs.should_review == 'true'
     permissions:
       contents: read
       issues: read

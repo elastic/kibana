@@ -38,6 +38,9 @@ export type SkillsDirectoryStructure = Directory<{
       workflows: FileDirectory;
     }>;
     observability: FileDirectory<{}>;
+    ml: FileDirectory<{
+      anomaly_detection: FileDirectory;
+    }>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
@@ -54,6 +57,7 @@ export type SkillsDirectoryStructure = Directory<{
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      siem_migrations: FileDirectory<{}>;
       entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
