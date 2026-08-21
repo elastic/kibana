@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
+import { SYSTEM_SECURITY_WATCH_DARK_ID, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { resetWatchStore } from '../watch_store/watch_store';
@@ -15,6 +15,7 @@ import type { WatchWorkflowsManagementClient } from './watch_workflows_managemen
 import { WatchesService } from './watches_service';
 
 const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
+const DARK = SYSTEM_SECURITY_WATCH_DARK_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 
@@ -346,6 +347,37 @@ describe('WatchesService', () => {
           request
         )
       ).resolves.toEqual({ outcome: 'conflict' });
+    });
+
+    it('persists a Dark-only settings patch', async () => {
+      const harness = createPersistentHarness();
+
+      const result = await harness
+        .createService()
+        .update(
+          DARK,
+          { dark: { connectorId: 'dark-inference-connector' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result.outcome).toBe('updated');
+      expect(
+        result.outcome === 'updated' ? result.response.settings?.dark?.connectorId : undefined
+      ).toBe('dark-inference-connector');
+      expect(harness.documents.get(`${DARK}-${SPACE}`)?.values).toEqual(
+        expect.objectContaining({ connectorId: 'dark-inference-connector' })
+      );
+    });
+
+    it('rejects a Dark settings patch aimed at another watch', async () => {
+      const harness = createPersistentHarness();
+
+      await expect(
+        harness
+          .createService()
+          .update(FLOOR, { dark: { connectorId: 'nope' }, settingsRevision: null }, SPACE, request)
+      ).resolves.toEqual({ outcome: 'rejected', what: 'dark watch settings' });
     });
 
     it('rejects a settings update that omits its revision', async () => {

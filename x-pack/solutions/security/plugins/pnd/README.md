@@ -28,7 +28,7 @@ Restart Kibana after changing config, then open `/app/pnd` (or use the Security 
 | Managed workflow initialization | Not called |
 | Leftover installed watches | Global Workflows orphan cleanup removes docs whose owner is unregistered |
 
-Definitions still exist in `@kbn/workflows/managed` (code registry only). Watch definitions are **not** installed into `.workflows-*` until a user enables that watch or saves settings on it. PND startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic watches.
+Definitions still exist in `@kbn/workflows/managed` (code registry only). Watch definitions are **not** installed into `.workflows-*` until a user enables that watch or saves settings on it. PND startup installs only the global static workflows (the three rule workflows plus the Dark Watch Workers) before `ready()` reconciles already-installed dynamic watches.
 
 The only always-on cost of a soft flag is the tiny public plugin entry bundle (~page-load limit); it registers nothing when disabled.
 

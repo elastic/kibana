@@ -129,7 +129,7 @@ paths:
                     fanOutMax:
                       type: integer
                       minimum: 1
-                      maximum: 100
+                      maximum: 20
                     scheduleEveryMinutes:
                       type: integer
                       minimum: 1

@@ -9,68 +9,34 @@
 
 import type { ManagedWorkflowTemplateValues } from '../../types';
 
-/**
- * Shared template values for PND watches that only template autonomy today
- * (Floor, Officer, Deep, Detection).
- */
+/** Template values for the watches that only persist autonomy so far. */
 export interface PndWatchTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
 }
 
 /**
- * CWL-owned common slice (RFC). Local stub until CWL exports the shared type.
- * Template values use `autonomyLevel` to match the PND PATCH / Floor install path;
- * `toSettings` maps it to API `autonomy`.
+ * The slice every built-in watch is expected to persist, owned by the Common
+ * Watch layer. Flattened here because template values are substituted as
+ * scalars, so `autonomy` and the `triggers` object of the settings contract
+ * arrive as `autonomyLevel`, `scheduleId`, and `allowManualRun`.
  */
-export interface CommonWatchSettings {
-  autonomy: 'manual' | 'assisted' | 'supervised';
-  triggers: {
-    scheduleId: string;
-    allowManualRun: boolean;
-  };
-  scopes: DarkWatchScope[];
-}
-
-export interface DarkWatchScope {
-  name: string;
-  access: string;
-  label: string;
-}
-
-export type DarkWatchTier2When = 'on_hits' | 'always';
-export type DarkWatchTargetTechnology = 'aws_iam' | 'fortigate';
-
-/** Dark-owned extension of CommonWatchSettings (RFC). */
-export interface DarkWatchSettings extends CommonWatchSettings {
+export interface CommonWatchTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
-  connectorId: string;
-  tier2When: DarkWatchTier2When;
-  candidateLimit: number;
-  fanOutMax: number;
-  scheduleEveryMinutes: number;
-  targetTechnology: DarkWatchTargetTechnology;
-  leadPollIntervalMinutes: number;
-  leadMinPriority: number;
-  intelEventTriggerEnabled: boolean;
-}
-
-/**
- * Values persisted as managedTemplateValues and passed to Dark's yamlTemplate.
- * Uses autonomyLevel (Floor/PATCH naming) rather than autonomy.
- */
-export interface DarkWatchTemplateValues extends ManagedWorkflowTemplateValues {
-  settingsVersion: number;
-  autonomyLevel: DarkWatchSettings['autonomy'];
+  autonomyLevel: 'manual' | 'assisted' | 'supervised';
   scheduleId: string;
   allowManualRun: boolean;
-  scopes: DarkWatchScope[];
+  scopes: Array<{ name: string; access: string; label: string }>;
+}
+
+/** Dark Watch extends the common slice with the dials only Dark exposes. */
+export interface DarkWatchTemplateValues extends CommonWatchTemplateValues {
   connectorId: string;
-  tier2When: DarkWatchTier2When;
+  tier2When: 'on_hits' | 'always';
   candidateLimit: number;
   fanOutMax: number;
   scheduleEveryMinutes: number;
-  targetTechnology: DarkWatchTargetTechnology;
+  targetTechnology: 'aws_iam' | 'fortigate';
   leadPollIntervalMinutes: number;
   leadMinPriority: number;
   intelEventTriggerEnabled: boolean;

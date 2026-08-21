@@ -50,7 +50,6 @@ export const PND_WATCH_DARK_WORKFLOW = {
   id: PND_WATCH_DARK_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bump when yamlTemplate tokens or DarkWatchTemplateValues shape change.
-  version: 2,
+  version: 1,
   yamlTemplate: renderPndWatchDarkYaml,
 } as const satisfies ManagedWorkflowDefinition<DarkWatchTemplateValues>;

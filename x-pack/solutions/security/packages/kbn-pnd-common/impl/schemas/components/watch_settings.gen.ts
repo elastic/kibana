@@ -217,6 +217,64 @@ export const WatchLedgerEntry = lazySchema(() =>
 export type WatchLedgerEntry = z.infer<typeof WatchLedgerEntry>;
 
 /**
+ * When Dark Watch runs Tier 2 LLM corroboration.
+ */
+export const DarkWatchTier2When = lazySchema(() => z.enum(['on_hits', 'always']));
+export type DarkWatchTier2When = z.infer<typeof DarkWatchTier2When>;
+export type DarkWatchTier2WhenEnum = typeof DarkWatchTier2When.enum;
+export const DarkWatchTier2WhenEnum = DarkWatchTier2When.enum;
+
+/**
+ * Technology preference for environment-resolved hunt index scope.
+ */
+export const DarkWatchTargetTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
+export type DarkWatchTargetTechnology = z.infer<typeof DarkWatchTargetTechnology>;
+export type DarkWatchTargetTechnologyEnum = typeof DarkWatchTargetTechnology.enum;
+export const DarkWatchTargetTechnologyEnum = DarkWatchTargetTechnology.enum;
+
+export const DarkWatchScope = lazySchema(() =>
+  z.object({
+    name: z.string().max(128),
+    access: z.string().max(64),
+    label: z.string().max(128),
+  })
+);
+export type DarkWatchScope = z.infer<typeof DarkWatchScope>;
+
+/**
+ * Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto managedTemplateValues for system-security-watch-dark.
+ */
+export const DarkWatchSettings = lazySchema(() =>
+  z.object({
+    /**
+     * Inference connector id for Tier 2; empty string degrades to Tier 1 only.
+     */
+    connectorId: z.string().max(256),
+    tier2When: DarkWatchTier2When,
+    /**
+     * Reports selected per sweep. Bounded by the parallel fan-out ceiling.
+     */
+    candidateLimit: z.number().int().min(1).max(100),
+    /**
+     * Concurrent report branches. Bounded by the parallel concurrency ceiling.
+     */
+    fanOutMax: z.number().int().min(1).max(20),
+    /**
+     * Hunt cooldown / soft sweep cadence in minutes.
+     */
+    scheduleEveryMinutes: z.number().int().min(1).max(10080),
+    targetTechnology: DarkWatchTargetTechnology,
+    leadPollIntervalMinutes: z.number().int().min(1).max(10080),
+    leadMinPriority: z.number().int().min(0).max(100),
+    intelEventTriggerEnabled: z.boolean(),
+    scheduleId: z.string().min(1).max(128),
+    allowManualRun: z.boolean(),
+    scopes: z.array(DarkWatchScope).max(32),
+  })
+);
+export type DarkWatchSettings = z.infer<typeof DarkWatchSettings>;
+
+/**
  * Per-watch settings. Optional sections are absent when a watch does not offer them, which is what lets each watch legitimately render a different set of sections.
  */
 export const WatchSettings = lazySchema(() =>
@@ -239,45 +297,3 @@ export const WatchSettings = lazySchema(() =>
   })
 );
 export type WatchSettings = z.infer<typeof WatchSettings>;
-
-export const DarkWatchTier2When = lazySchema(() => z.enum(['on_hits', 'always']));
-export type DarkWatchTier2When = z.infer<typeof DarkWatchTier2When>;
-
-export const DarkWatchTargetTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
-export type DarkWatchTargetTechnology = z.infer<typeof DarkWatchTargetTechnology>;
-
-export const DarkWatchScope = lazySchema(() =>
-  z.object({
-    name: z.string().max(128),
-    access: z.string().max(64),
-    label: z.string().max(128),
-  })
-);
-export type DarkWatchScope = z.infer<typeof DarkWatchScope>;
-
-/**
- * Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto managedTemplateValues for system-security-watch-dark.
- */
-export const DarkWatchSettings = lazySchema(() =>
-  z.object({
-    /**
-     * Inference connector id for Tier 2; empty string degrades to Tier 1 only.
-     */
-    connectorId: z.string().max(256),
-    tier2When: DarkWatchTier2When,
-    candidateLimit: z.number().int().min(1).max(100),
-    fanOutMax: z.number().int().min(1).max(100),
-    /**
-     * Hunt cooldown / soft sweep cadence in minutes.
-     */
-    scheduleEveryMinutes: z.number().int().min(1).max(10080),
-    targetTechnology: DarkWatchTargetTechnology,
-    leadPollIntervalMinutes: z.number().int().min(1).max(10080),
-    leadMinPriority: z.number().int().min(0).max(100),
-    intelEventTriggerEnabled: z.boolean(),
-    scheduleId: z.string().min(1).max(128),
-    allowManualRun: z.boolean(),
-    scopes: z.array(DarkWatchScope).max(32),
-  })
-);
-export type DarkWatchSettings = z.infer<typeof DarkWatchSettings>;

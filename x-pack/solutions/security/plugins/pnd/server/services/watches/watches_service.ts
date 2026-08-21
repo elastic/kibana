@@ -30,6 +30,7 @@ import {
   GetWatchResponse,
   ListWatchesResponse,
   type ApprovalRequirement,
+  type UpdateWatchRequestBody,
   type Watch,
   type WatchAutonomyLevel,
   type WatchSettings,
@@ -102,6 +103,8 @@ export interface WatchUpdatePatch {
   };
   worker?: { workerId: string; enabled: boolean };
   skill?: { skillId: string; enabled: boolean };
+  /** Dark Watch extension dials; every other watch rejects this section. */
+  dark?: UpdateWatchRequestBody['dark'];
 }
 
 /**
@@ -443,9 +446,10 @@ export class WatchesService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WatchUpdateResult> {
-    const { enabled, autonomyLevel, triggers, scopeRouting, approvalGate, worker, skill } = patch;
+    const { enabled, autonomyLevel, triggers, scopeRouting, approvalGate, worker, skill, dark } =
+      patch;
     const touchesSettings = Boolean(
-      autonomyLevel != null || triggers || scopeRouting || approvalGate || worker || skill
+      autonomyLevel != null || triggers || scopeRouting || approvalGate || worker || skill || dark
     );
     const registration = watchRegistry.get(watchId);
 
