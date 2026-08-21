@@ -2436,6 +2436,22 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   },
 };
 
+export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
+  projectCount: number;
+}> = {
+  eventType: 'analyzer_cross_project_render',
+  schema: {
+    projectCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct projects represented in an Analyzer tree that included at least one linked-project node. Counts only; no document content.',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2459,6 +2475,7 @@ export const events = [
   ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
+  ANALYZER_CROSS_PROJECT_RENDER_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
