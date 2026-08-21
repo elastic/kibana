@@ -37,6 +37,7 @@ describe('AgentMemoryPlugin', () => {
     initializerContext.config.get.mockReturnValue({
       enabled: true,
       writeConfirmation: 'never',
+      captureEveryNMessages: 0,
     });
     const plugin = new AgentMemoryPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -89,6 +90,8 @@ describe('AgentMemoryPlugin', () => {
       })
     );
 
+    // captureEveryNMessages: 0 so only the inject hook is registered.
+    expect(agentBuilder.hooks.register).toHaveBeenCalledTimes(1);
     const hook = agentBuilder.hooks.register.mock.calls[0]?.[0];
     expect(hook).toEqual(
       expect.objectContaining({
@@ -120,6 +123,7 @@ describe('AgentMemoryPlugin', () => {
     initializerContext.config.get.mockReturnValue({
       enabled: true,
       writeConfirmation: 'always',
+      captureEveryNMessages: 0,
     });
     const plugin = new AgentMemoryPlugin(initializerContext);
     const coreStart = coreMock.createStart();

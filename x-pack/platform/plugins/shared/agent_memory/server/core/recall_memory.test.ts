@@ -73,10 +73,11 @@ describe('recallMemory', () => {
     expect(search.mock.calls[1][0].retriever).toEqual(
       expect.objectContaining({
         standard: expect.objectContaining({
-          query: expect.objectContaining({ multi_match: expect.any(Object) }),
+          filter: expect.any(Object),
         }),
       })
     );
+    expect(JSON.stringify(search.mock.calls[1][0].retriever)).toContain('multi_match');
     expect(search.mock.calls[1][0].retriever).not.toHaveProperty('rrf');
     expect(JSON.stringify(search.mock.calls[1][0].retriever)).not.toContain('content.semantic');
   });

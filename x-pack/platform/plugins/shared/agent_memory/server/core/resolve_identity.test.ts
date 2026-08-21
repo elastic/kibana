@@ -42,8 +42,11 @@ describe('resolveIdentity', () => {
     ).toEqual({ author: 'native/default_native:alice', author_kind: 'username' });
   });
 
-  it('rejects a realm-less username', () => {
-    expect(resolve({ username: 'task-manager-user' })).toBeUndefined();
+  it('uses a bare username when no realm is present', () => {
+    expect(resolve({ username: 'task-manager-user' })).toEqual({
+      author: 'task-manager-user',
+      author_kind: 'username',
+    });
   });
 
   it('returns undefined when there is no current user', () => {

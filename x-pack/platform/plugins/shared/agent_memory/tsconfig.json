@@ -17,6 +17,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",
+    "@kbn/inference-plugin",
     "@kbn/inference-tracing",
     "@kbn/storage-adapter",
     "@kbn/features-plugin",

@@ -186,6 +186,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput: processedConversation.nextInput,
     agentId,
     agentConfiguration,
+    previousRounds: conversation?.rounds ?? [],
+    connectorId: model.connector.connectorId,
+    conversationId: conversation?.id,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 

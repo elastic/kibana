@@ -39,6 +39,8 @@ describe('runBeforeAgentWorkflows', () => {
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
     agentConfiguration: { tools: [] },
+    previousRounds: [],
+    connectorId: 'test-connector',
   });
 
   const createDeps = () => {

@@ -28,6 +28,8 @@ const baseContext: BeforeAgentHookContext = {
   nextInput: { message: 'hello', attachments: [] },
   request: {} as BeforeAgentHookContext['request'],
   agentConfiguration: { tools: [] },
+  previousRounds: [],
+  connectorId: 'test-connector',
 };
 
 const baseToolCallContext: BeforeToolCallHookContext = {

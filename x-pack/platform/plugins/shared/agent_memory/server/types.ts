@@ -11,6 +11,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { MemoryStorage } from './storage/memory_storage';
 
 // Plugin contracts — both are intentionally empty for Phase 1.
@@ -27,6 +28,7 @@ export interface AgentMemorySetupDependencies {
 
 export interface AgentMemoryStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  inference: InferenceServerStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }

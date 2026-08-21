@@ -8,7 +8,7 @@
 export type MemoryType = 'episodic' | 'semantic' | 'procedural';
 export type MemoryCategory = 'profile' | 'preferences' | 'events' | 'trajectories';
 export type AuthorKind = 'profile_uid' | 'username';
-export type CallSource = 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown';
+export type CallSource = 'agent' | 'hook' | 'user' | 'mcp' | 'workflow' | 'unknown';
 export type MemoryScopeKind = 'user' | 'agent' | 'space';
 
 export interface MemoryProvenance {

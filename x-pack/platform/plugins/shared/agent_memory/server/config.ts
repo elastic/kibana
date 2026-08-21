@@ -13,6 +13,8 @@ export const config = {
     writeConfirmation: schema.oneOf([schema.literal('always'), schema.literal('never')], {
       defaultValue: 'always',
     }),
+    /** When > 0, fire a capture hook after every N completed conversation rounds. 0 disables the hook. */
+    captureEveryNMessages: schema.number({ defaultValue: 0, min: 0, max: 1000 }),
   }),
 };
 

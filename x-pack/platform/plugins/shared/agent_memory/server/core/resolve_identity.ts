@@ -70,9 +70,11 @@ export const resolveIdentity = ({
   }
 
   const realm = authUser?.authentication_realm;
-  if (authUser?.username && realm) {
+  if (authUser?.username) {
     return {
-      author: `${realm.type}/${realm.name}:${authUser.username}`,
+      author: realm
+        ? `${realm.type}/${realm.name}:${authUser.username}`
+        : authUser.username,
       author_kind: 'username',
     };
   }
