@@ -394,11 +394,6 @@ const ChartItem = React.memo(
       return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
     }, [metricItem.metricName, searchTerm]);
 
-    const showExemplars = useMemo(
-      () => metricItem.metricTypes.some((type) => type === 'counter' || type === 'histogram'),
-      [metricItem.metricTypes]
-    );
-
     return (
       <A11yGridCell
         id={id}
@@ -425,7 +420,6 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
-          showExemplars={showExemplars}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}
