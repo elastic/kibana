@@ -53,6 +53,7 @@ import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
+import { useUrlPagination } from '../../hooks/use_url_pagination';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
@@ -64,6 +65,11 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
 import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
+import {
+  getPrototypeSampleItemsForList,
+  hasPrototypeSampleItemsForList,
+} from '../../pages/artifacts/version_history/artifact_prototype_sample_items';
+import { useArtifactItemHighlight } from '../../pages/artifacts/version_history/use_artifact_item_highlight';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -136,6 +142,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const {
       urlParams: { filter, includedPolicies },
     } = useUrlParams<ArtifactListPageUrlParams>();
+    const {
+      pagination: { page },
+    } = useUrlPagination();
     const { exportExceptionList } = useApi(http);
 
     const {
@@ -155,9 +164,40 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       }
     }, [error, toasts, isLoading]);
 
+    const prototypeSampleItems = useMemo(
+      () => getPrototypeSampleItemsForList(apiClient.listId),
+      [apiClient.listId]
+    );
+    const hasPrototypeSamples = hasPrototypeSampleItemsForList(apiClient.listId);
+    const shouldShowArtifactList = doesDataExist || hasPrototypeSamples;
+
+    const { isHighlighted, flashGeneration } = useArtifactItemHighlight({
+      isListReady: !isPageInitializing && shouldShowArtifactList && !isLoading,
+    });
+
     const items = useMemo(() => {
-      return listDataResponse?.data ?? [];
-    }, [listDataResponse?.data]);
+      const listItems = listDataResponse?.data ?? [];
+      const shouldIncludePrototypeSamples =
+        hasPrototypeSamples && page === 1 && !filter && !includedPolicies;
+
+      if (!shouldIncludePrototypeSamples) {
+        return listItems;
+      }
+
+      const existingItemIds = new Set(listItems.map((item) => item.item_id));
+      const uniquePrototypeItems = prototypeSampleItems.filter(
+        (item) => !existingItemIds.has(item.item_id)
+      );
+
+      return [...uniquePrototypeItems, ...listItems];
+    }, [
+      filter,
+      hasPrototypeSamples,
+      includedPolicies,
+      listDataResponse?.data,
+      page,
+      prototypeSampleItems,
+    ]);
 
     const [selectedItemForDelete, setSelectedItemForDelete] = useState<
       undefined | ExceptionListItemSchema
@@ -201,6 +241,57 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       allowCardDeleteAction,
       allowCardEditAction,
     });
+
+    const getCardPropsWithHighlight = useCallback(
+      (artifactItem: ExceptionListItemSchema) => ({
+        ...handleCardProps(artifactItem),
+        isHighlighted: isHighlighted(artifactItem.item_id),
+        highlightFlashKey: isHighlighted(artifactItem.item_id) ? flashGeneration : undefined,
+      }),
+      [flashGeneration, handleCardProps, isHighlighted]
+    );
+
+    const getArtifactCardItemKey = useCallback(
+      (
+        artifactItem: ExceptionListItemSchema,
+        props: ReturnType<typeof getCardPropsWithHighlight>
+      ) => {
+        if (props.highlightFlashKey !== undefined) {
+          return `${artifactItem.item_id}-${props.highlightFlashKey}`;
+        }
+
+        return artifactItem.item_id;
+      },
+      []
+    );
+
+    const listPagination = useMemo(() => {
+      if (!hasPrototypeSamples || filter || includedPolicies || page !== 1) {
+        return uiPagination;
+      }
+
+      const prototypeCount = prototypeSampleItems.filter(
+        (sampleItem) =>
+          !(listDataResponse?.data ?? []).some((item) => item.item_id === sampleItem.item_id)
+      ).length;
+
+      if (prototypeCount === 0) {
+        return uiPagination;
+      }
+
+      return {
+        ...uiPagination,
+        totalItemCount: uiPagination.totalItemCount + prototypeCount,
+      };
+    }, [
+      filter,
+      hasPrototypeSamples,
+      includedPolicies,
+      listDataResponse?.data,
+      page,
+      prototypeSampleItems,
+      uiPagination,
+    ]);
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
 
@@ -425,7 +516,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         )}
 
-        {!doesDataExist ? (
+        {!shouldShowArtifactList ? (
           <div
             css={css`
               > * {
@@ -496,7 +587,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <EuiSpacer size="m" />
 
             <EuiText color="subdued" size="xs" data-test-subj={getTestId('showCount')}>
-              {labels.getShowingCountLabel(uiPagination.totalItemCount)}
+              {labels.getShowingCountLabel(listPagination.totalItemCount)}
             </EuiText>
 
             <EuiSpacer size="s" />
@@ -504,11 +595,13 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
               items={items}
               ItemComponent={ArtifactEntryCard}
-              itemComponentProps={handleCardProps}
+              itemComponentProps={getCardPropsWithHighlight}
+              getItemKey={getArtifactCardItemKey}
+              itemId="item_id"
               onChange={handlePaginationChange}
               error={error as React.ReactNode}
               loading={isLoading}
-              pagination={uiPagination}
+              pagination={listPagination}
               contentClassName="card-container"
               data-test-subj={getTestId('list')}
               CardDecorator={CardDecorator}

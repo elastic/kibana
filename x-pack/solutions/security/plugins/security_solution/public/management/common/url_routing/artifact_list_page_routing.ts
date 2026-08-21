@@ -44,6 +44,9 @@ const normalizeArtifactListPageUrlSearchParams = (
     ...(!isDefaultOrMissing(urlSearchParams.includedPolicies, '')
       ? { includedPolicies: urlSearchParams.includedPolicies }
       : ''),
+    ...(!isDefaultOrMissing(urlSearchParams.highlightItemId, undefined)
+      ? { highlightItemId: urlSearchParams.highlightItemId }
+      : ''),
   };
 };
 
@@ -61,6 +64,7 @@ export const extractArtifactListPageUrlSearchParams = (
         ? showParamValue
         : undefined,
     itemId: extractFirstParamValue(query, 'itemId'),
+    highlightItemId: extractFirstParamValue(query, 'highlightItemId'),
   };
 };
 
