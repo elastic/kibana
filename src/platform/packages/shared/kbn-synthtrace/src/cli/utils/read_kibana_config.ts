@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
@@ -19,7 +19,7 @@ export const readKibanaConfig = () => {
   const kibanaDevConfig = path.join(kibanaConfigDir, 'kibana.dev.yml');
   const kibanaConfig = path.join(kibanaConfigDir, 'kibana.yml');
 
-  return (yaml.load(
+  return (parse(
     fs.readFileSync(fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig, 'utf8')
   ) || {}) as Record<string, any>;
 };
