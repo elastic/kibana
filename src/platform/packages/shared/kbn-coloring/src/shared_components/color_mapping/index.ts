@@ -20,13 +20,10 @@ export { getValueKey } from './color/utils';
 export {
   getOtherAssignment,
   getOtherBucketAssignment,
-  isOtherBucketAssignment,
+  normalizeColorMappingConfig,
 } from './config/utils';
 export { SPECIAL_TOKENS_STRING_CONVERSION, getSpecialString } from './special_tokens';
-export {
-  type ColorAssignmentMatcher,
-  getColorAssignmentMatcher,
-} from './color/color_assignment_matcher';
+export { type ColorAssignmentMatcher } from './color/color_assignment_matcher';
 export {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT,

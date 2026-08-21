@@ -8,10 +8,8 @@
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
-import { convertToOtherColorMappingFn } from './other_color_mapping';
 
 export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
   convertToLegendStats,
   convertToRawColorMappingsFn(datasourceStates),
-  convertToOtherColorMappingFn,
 ];

@@ -18,6 +18,7 @@ import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
 import type { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
+import { normalizeColorMappingConfig } from './config/utils';
 
 export interface ColorMappingInputCategoricalData {
   type: 'categories';
@@ -91,7 +92,7 @@ export class CategoricalColorMapping extends React.Component<ColorMappingProps> 
     // configure the store at mount time
     this.store = configureStore({
       preloadedState: {
-        colorMapping: props.model,
+        colorMapping: normalizeColorMappingConfig(props.model),
       },
       reducer: {
         colorMapping: colorMappingReducer,
