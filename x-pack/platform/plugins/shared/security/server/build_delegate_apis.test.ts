@@ -195,7 +195,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay', role_assignments: {} };
+    const params = { name: 'nightshift-relay' };
 
     it('resolves the service lazily rather than at build time', () => {
       const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);

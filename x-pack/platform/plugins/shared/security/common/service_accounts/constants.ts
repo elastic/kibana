@@ -17,12 +17,8 @@ export const SERVICE_ACCOUNT_NAME_MAX_LENGTH = 128;
 export const SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH = 1024;
 
 /**
- * Cap on the size of a create request body. The shape of `role_assignments` is
- * not pinned down by the upstream specification yet, so the field itself cannot
- * be tightly validated; this bounds the payload as a whole instead.
- *
- * TODO(https://github.com/elastic/kibana/issues/284463): tighten the
- * `role_assignments` schema once the specification is confirmed, and reassess
- * whether this cap is still needed.
+ * Cap on the size of a create request body. The body holds nothing but a name
+ * bounded by {@link SERVICE_ACCOUNT_NAME_MAX_LENGTH}, so this only needs to leave
+ * room for that field plus JSON overhead; revisit it if the body grows.
  */
-export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 16384;
+export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 1024;

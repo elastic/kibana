@@ -18,15 +18,12 @@ describe('ServiceAccountsAPIClient', () => {
         type: 'project' as const,
         name: 'nightshift-relay',
         organization_id: 'organization-id',
-        role_assignments: {},
+        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
         assumable_by: [],
       };
       http.post.mockResolvedValue(created);
 
-      const params = {
-        name: 'nightshift-relay',
-        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-      };
+      const params = { name: 'nightshift-relay' };
 
       await expect(new ServiceAccountsAPIClient(http).create(params)).resolves.toBe(created);
 

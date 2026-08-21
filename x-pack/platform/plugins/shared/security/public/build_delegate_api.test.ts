@@ -98,7 +98,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay', role_assignments: {} };
+    const params = { name: 'nightshift-relay' };
 
     it('properly delegates to the API client', async () => {
       await api.serviceAccounts.create(params);

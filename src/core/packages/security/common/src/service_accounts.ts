@@ -21,13 +21,14 @@ export interface ServiceAccountAssumableBy {
 }
 
 /**
- * Roles granted to a service account, referenced by name and resolved at
- * execution time.
+ * Roles granted to a service account, as resolved by UIAM and reported on a
+ * service account. Creating one does not take role assignments: UIAM's first
+ * iteration grants the service account the privileges of its creator, minus any
+ * control plane privileges, so there is nothing for a caller to choose.
  *
- * TODO(https://github.com/elastic/kibana/issues/284463): the upstream API
- * specification does not pin down this structure, and the endpoint that
- * consumes it has not been implemented yet. Modelled loosely on purpose;
- * tighten it once the specification is confirmed.
+ * TODO(https://github.com/elastic/kibana/issues/284463): modelled loosely
+ * because the upstream API specification does not pin the structure down;
+ * tighten it once it does.
  *
  * @public
  */
@@ -40,7 +41,6 @@ export type ServiceAccountRoleAssignments = Record<string, unknown>;
  */
 export interface CreateServiceAccountParams {
   name: string;
-  role_assignments: ServiceAccountRoleAssignments;
 }
 
 /**

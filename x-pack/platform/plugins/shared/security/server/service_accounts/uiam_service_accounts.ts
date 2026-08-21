@@ -17,6 +17,7 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
+import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
@@ -115,7 +116,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     try {
       const result = await this.uiam.createServiceAccount(accessToken, {
         name: params.name,
-        role_assignments: params.role_assignments,
+        role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
         assumable_by: buildAssumableBy({
           organizationId: this.organizationId,
           projectId: this.projectId,

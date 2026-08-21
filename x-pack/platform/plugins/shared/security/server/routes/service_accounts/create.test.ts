@@ -21,17 +21,14 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 const enabledConfig = { serviceAccounts: { enabled: true } };
 
-const requestBody = {
-  name: 'nightshift-relay',
-  role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-};
+const requestBody = { name: 'nightshift-relay' };
 
 const serviceAccount = {
   id: 'service-account-id',
   type: 'project' as const,
   name: 'nightshift-relay',
   organization_id: 'mock-organization-id',
-  role_assignments: requestBody.role_assignments,
+  role_assignments: { limit: { access: ['application'], resource: ['project'] } },
   assumable_by: [],
 };
 
@@ -182,13 +179,22 @@ describe('Create service account route', () => {
 
     const issuePathsFor = (body: unknown) => issuesFor(body).map((issue) => issue.path.join('.'));
 
-    it('accepts a name and role assignments', () => {
+    it('accepts a name', () => {
       expect(createServiceAccountBodySchema.parse(requestBody)).toEqual(requestBody);
     });
 
     it('rejects unknown fields, so callers cannot smuggle in `assumable_by`', () => {
       expect(issuesFor({ ...requestBody, assumable_by: [{ type: 'kibana' }] })).toEqual([
         expect.objectContaining({ code: 'unrecognized_keys', keys: ['assumable_by'] }),
+      ]);
+    });
+
+    // UIAM's first iteration takes a fixed payload, so callers do not get to choose privileges.
+    it('rejects `role_assignments`, which Kibana supplies itself', () => {
+      expect(
+        issuesFor({ ...requestBody, role_assignments: { limit: { access: ['application'] } } })
+      ).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['role_assignments'] }),
       ]);
     });
 
@@ -203,10 +209,6 @@ describe('Create service account route', () => {
           name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1),
         })
       ).toContain('name');
-    });
-
-    it('requires role assignments', () => {
-      expect(issuePathsFor({ name: 'nightshift-relay' })).toContain('role_assignments');
     });
   });
 });

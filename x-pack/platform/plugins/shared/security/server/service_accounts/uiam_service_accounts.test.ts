@@ -37,10 +37,7 @@ describe('UiamServiceAccounts', () => {
     },
   });
 
-  const createParams = {
-    name: 'nightshift-relay',
-    role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-  };
+  const createParams = { name: 'nightshift-relay' };
 
   const createMockRequest = (authHeader?: string): KibanaRequest =>
     httpServerMock.createKibanaRequest({
@@ -52,7 +49,7 @@ describe('UiamServiceAccounts', () => {
     type: 'project' as const,
     name: 'nightshift-relay',
     organization_id: 'organization-id',
-    role_assignments: createParams.role_assignments,
+    role_assignments: { limit: { access: ['application'], resource: ['project'] } },
     assumable_by: [
       {
         type: 'project-service-account' as const,
@@ -87,7 +84,7 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
-    it('forwards the caller access token and the derived `assumable_by`', async () => {
+    it('forwards the caller access token, the fixed `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
       await expect(
@@ -97,7 +94,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith('essu_my_token', {
         name: 'nightshift-relay',
-        role_assignments: createParams.role_assignments,
+        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
         assumable_by: [
           {
             type: 'project-service-account',
