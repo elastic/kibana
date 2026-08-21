@@ -41,8 +41,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
-    handleDeploy();
-  }, [handleDeploy]);
+    if (failedInstances.length > 0) {
+      handleDeploy(failedInstances);
+    } else {
+      handleDeploy();
+    }
+  }, [handleDeploy, failedInstances]);
 
   const miServiceIds = useMemo(
     () =>
