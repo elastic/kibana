@@ -52,6 +52,11 @@ import {
   ensureTemplateVersionIsPinned,
   resolveTemplateForCreate,
 } from './expand_template_defaults';
+import {
+  CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+  CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 
 /**
  * Creates a new case.
@@ -441,6 +446,15 @@ export const create = async (
         theCase: newCase,
       });
     }
+
+    // Bucketed on what was persisted, not on the request, so this reads the same way as the bulk
+    // path and stays true if template pinning ever stops mirroring the request one-for-one.
+    incrementCasesClientCounter(
+      clientArgs,
+      newCase.attributes.template?.id
+        ? CREATE_CASE_WITH_TEMPLATE_COUNTER
+        : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
+    );
 
     if (query.template?.id) {
       try {

@@ -57,6 +57,11 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
+import {
+  CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+  CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 
 /**
  * Internal (non-wire) options for bulkCreate. These are only settable by in-process callers
@@ -353,6 +358,21 @@ export const bulkCreate = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
       await notificationService.bulkNotifyAssignees(assigneesPerCase);
     }
+
+    const casesCreatedWithTemplate = casesSOs.filter(
+      (c) => c.attributes.template?.id != null
+    ).length;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      CREATE_CASE_WITH_TEMPLATE_COUNTER,
+      casesCreatedWithTemplate
+    );
+    incrementCasesClientCounter(
+      clientArgs,
+      CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+      casesSOs.length - casesCreatedWithTemplate
+    );
 
     const templateIds = [
       ...new Set(
