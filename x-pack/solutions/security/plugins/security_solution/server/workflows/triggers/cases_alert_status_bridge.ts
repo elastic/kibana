@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowStatus } from '../../../common/workflows/triggers/constants';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../common/workflows/triggers';
 import type { SecuritySolutionEventBus } from '../../events/event_bus';
+import { isAttackDiscoveryIndex } from '../../lib/detection_engine/routes/common/operations/is_attack_discovery_index';
 
 // Cases is multi-owner; only forward events for alerts that live in Security indices.
 const SECURITY_ALERT_INDEX_PREFIX = '.alerts-security.';
@@ -32,7 +33,10 @@ interface CasesAlertStatusPayload {
 const isSecurityIndex = (index: string): boolean =>
   index.startsWith(SECURITY_ALERT_INDEX_PREFIX) ||
   index.startsWith(SECURITY_ALERT_BACKING_INDEX_PREFIX) ||
-  index.startsWith(SIEM_SIGNALS_INDEX_PREFIX);
+  index.startsWith(SIEM_SIGNALS_INDEX_PREFIX) ||
+  // Adhoc AD index (.adhoc.alerts-security.attack.discovery.*) matches none of the
+  // prefixes above, so we must check it explicitly.
+  isAttackDiscoveryIndex(index);
 
 export const forwardCasesAlertStatusToSecuritySolution = (
   securitySolutionEventBus: SecuritySolutionEventBus,
@@ -40,24 +44,53 @@ export const forwardCasesAlertStatusToSecuritySolution = (
   request: KibanaRequest,
   payload: CasesAlertStatusPayload
 ): void => {
-  const securityAlertIds = payload.alertIds.filter((id) => {
+  const attackIds: string[] = [];
+  const alertIds: string[] = [];
+
+  for (const id of payload.alertIds) {
     const index = payload.alertIdToIndex[id];
-    return index !== undefined && isSecurityIndex(index);
-  });
-  if (securityAlertIds.length === 0) {
+    if (index !== undefined && isSecurityIndex(index)) {
+      if (isAttackDiscoveryIndex(index)) {
+        attackIds.push(id);
+      } else {
+        alertIds.push(id);
+      }
+    }
+  }
+
+  if (attackIds.length === 0 && alertIds.length === 0) {
     return;
   }
-  const securityIdSet = new Set(securityAlertIds);
-  try {
-    void securitySolutionEventBus.emitAlertStatusChanged(request, {
-      alertIds: securityAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-      status: payload.status,
-      previousStatuses: payload.previousStatuses
-        .filter(({ id }) => securityIdSet.has(id))
-        .slice(0, MAX_ALERTS_PER_TRIGGER),
-      truncated: securityAlertIds.length > MAX_ALERTS_PER_TRIGGER,
-    });
-  } catch (err) {
-    logger.warn(`Failed to forward Cases alertStatusChanged event to workflow triggers: ${err}`);
+
+  if (attackIds.length > 0) {
+    const attackIdSet = new Set(attackIds);
+    try {
+      void securitySolutionEventBus.emitAttackStatusChanged(request, {
+        attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+        status: payload.status,
+        previousStatuses: payload.previousStatuses
+          .filter(({ id }) => attackIdSet.has(id))
+          .slice(0, MAX_ALERTS_PER_TRIGGER),
+        truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
+      });
+    } catch (err) {
+      logger.warn(`Failed to forward Cases attackStatusChanged event to workflow triggers: ${err}`);
+    }
+  }
+
+  if (alertIds.length > 0) {
+    const alertIdSet = new Set(alertIds);
+    try {
+      void securitySolutionEventBus.emitAlertStatusChanged(request, {
+        alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+        status: payload.status,
+        previousStatuses: payload.previousStatuses
+          .filter(({ id }) => alertIdSet.has(id))
+          .slice(0, MAX_ALERTS_PER_TRIGGER),
+        truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
+      });
+    } catch (err) {
+      logger.warn(`Failed to forward Cases alertStatusChanged event to workflow triggers: ${err}`);
+    }
   }
 };

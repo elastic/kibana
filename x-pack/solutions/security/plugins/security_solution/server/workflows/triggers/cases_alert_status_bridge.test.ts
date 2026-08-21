@@ -28,6 +28,8 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   const securityAliasIndex = '.alerts-security.alerts-default';
   const securityBackingIndex = '.internal.alerts-security.alerts-default-000001';
   const siemSignalsIndex = '.siem-signals-default-000001';
+  const scheduledAdIndex = '.alerts-security.attack.discovery.alerts-default';
+  const adhocAdIndex = '.adhoc.alerts-security.attack.discovery.alerts-default';
   const obsIndex = '.alerts-observability.logs.alerts-default';
 
   it('emits alertStatusChanged with the correct payload', () => {
@@ -207,5 +209,112 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to forward Cases alertStatusChanged event')
     );
+  });
+
+  it('still emits alertStatusChanged when attackStatusChanged throws in a mixed batch', () => {
+    jest.spyOn(bus, 'emitAttackStatusChanged').mockImplementation(() => {
+      throw new Error('attack bus failure');
+    });
+    const alertListener = jest.fn();
+    bus.onAlertStatusChanged(alertListener);
+
+    expect(() =>
+      forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+        alertIds: ['alert-1', 'attack-1'],
+        status: 'closed',
+        previousStatuses: [],
+        alertIdToIndex: {
+          'alert-1': securityAliasIndex,
+          'attack-1': scheduledAdIndex,
+        },
+        indices: [securityAliasIndex, scheduledAdIndex],
+      })
+    ).not.toThrow();
+
+    expect(alertListener).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to forward Cases attackStatusChanged event')
+    );
+  });
+
+  describe('attack discovery index routing', () => {
+    it('emits attackStatusChanged (not alertStatusChanged) for scheduled AD docs', () => {
+      const alertListener = jest.fn();
+      const attackListener = jest.fn();
+      bus.onAlertStatusChanged(alertListener);
+      bus.onAttackStatusChanged(attackListener);
+
+      forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+        alertIds: ['attack-1'],
+        status: 'closed',
+        previousStatuses: [{ id: 'attack-1', previousStatus: 'open' }],
+        alertIdToIndex: { 'attack-1': scheduledAdIndex },
+        indices: [scheduledAdIndex],
+      });
+
+      expect(attackListener).toHaveBeenCalledTimes(1);
+      expect(alertListener).not.toHaveBeenCalled();
+      const { payload } = attackListener.mock.calls[0][0];
+      expect(payload.attackIds).toEqual(['attack-1']);
+      expect(payload.status).toBe('closed');
+      expect(payload.previousStatuses).toEqual([{ id: 'attack-1', previousStatus: 'open' }]);
+      expect(payload.truncated).toBe(false);
+    });
+
+    it('emits attackStatusChanged (not alertStatusChanged) for adhoc AD docs', () => {
+      const alertListener = jest.fn();
+      const attackListener = jest.fn();
+      bus.onAlertStatusChanged(alertListener);
+      bus.onAttackStatusChanged(attackListener);
+
+      forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+        alertIds: ['attack-1'],
+        status: 'acknowledged',
+        previousStatuses: [{ id: 'attack-1', previousStatus: 'open' }],
+        alertIdToIndex: { 'attack-1': adhocAdIndex },
+        indices: [adhocAdIndex],
+      });
+
+      expect(attackListener).toHaveBeenCalledTimes(1);
+      expect(alertListener).not.toHaveBeenCalled();
+      expect(attackListener.mock.calls[0][0].payload.attackIds).toEqual(['attack-1']);
+    });
+
+    it('emits both attackStatusChanged and alertStatusChanged for a mixed batch', () => {
+      const alertListener = jest.fn();
+      const attackListener = jest.fn();
+      bus.onAlertStatusChanged(alertListener);
+      bus.onAttackStatusChanged(attackListener);
+
+      forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+        alertIds: ['alert-1', 'attack-1', 'attack-2'],
+        status: 'closed',
+        previousStatuses: [
+          { id: 'alert-1', previousStatus: 'open' },
+          { id: 'attack-1', previousStatus: 'open' },
+          { id: 'attack-2', previousStatus: 'acknowledged' },
+        ],
+        alertIdToIndex: {
+          'alert-1': securityAliasIndex,
+          'attack-1': scheduledAdIndex,
+          'attack-2': adhocAdIndex,
+        },
+        indices: [securityAliasIndex, scheduledAdIndex, adhocAdIndex],
+      });
+
+      expect(attackListener).toHaveBeenCalledTimes(1);
+      expect(alertListener).toHaveBeenCalledTimes(1);
+
+      const attackPayload = attackListener.mock.calls[0][0].payload;
+      expect(attackPayload.attackIds).toEqual(['attack-1', 'attack-2']);
+      expect(attackPayload.previousStatuses).toEqual([
+        { id: 'attack-1', previousStatus: 'open' },
+        { id: 'attack-2', previousStatus: 'acknowledged' },
+      ]);
+
+      const alertPayload = alertListener.mock.calls[0][0].payload;
+      expect(alertPayload.alertIds).toEqual(['alert-1']);
+      expect(alertPayload.previousStatuses).toEqual([{ id: 'alert-1', previousStatus: 'open' }]);
+    });
   });
 });
