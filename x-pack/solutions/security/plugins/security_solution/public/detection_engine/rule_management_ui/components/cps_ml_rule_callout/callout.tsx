@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CallOutMessage } from '../../../../common/components/callouts';
 import { useCallOutStorage } from '../../../../common/components/callouts/use_callout_storage';
-import { useShouldShowCpsMlRuleCallout } from './use_should_show_cps_ml_rule_callout';
+import { useIsCpsLinkedSearchSpace } from '../../../../common/hooks/use_is_cps_linked_search_space';
 
 export const CPS_ML_RULE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.cpsMlRuleCallout.title',
@@ -42,7 +42,7 @@ const CPS_ML_RULE_CALLOUT_MESSAGE: CallOutMessage = {
 };
 
 const CpsMlRuleCalloutComponent = () => {
-  const cpsEnvironmentMatches = useShouldShowCpsMlRuleCallout();
+  const { isLinkedSearchSpace } = useIsCpsLinkedSearchSpace();
 
   const { isVisible, dismiss } = useCallOutStorage([CPS_ML_RULE_CALLOUT_MESSAGE], 'detections');
 
@@ -50,7 +50,7 @@ const CpsMlRuleCalloutComponent = () => {
     dismiss(CPS_ML_RULE_CALLOUT_MESSAGE);
   }, [dismiss]);
 
-  const shouldRender = cpsEnvironmentMatches && isVisible(CPS_ML_RULE_CALLOUT_MESSAGE);
+  const shouldRender = isLinkedSearchSpace && isVisible(CPS_ML_RULE_CALLOUT_MESSAGE);
 
   if (!shouldRender) {
     return null;
