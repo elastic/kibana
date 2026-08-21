@@ -672,7 +672,16 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
+    this.logger = createTaskRunnerLogger({
+      logger: this.logger,
+      labels: {
+        ruleId,
+        ruleType: this.ruleType.id,
+        spaceId,
+        executionId: this.executionId,
+        taskInstanceId: this.taskInstance.id,
+      },
+    });
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
@@ -722,7 +731,7 @@ export class TaskRunner<
           .join(',');
         const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
         this.logger.error(errorMessage, {
-          tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
+          tags: ['rule-run-failed', `${errorSource}-error`],
         });
         return {
           taskRunError: createTaskRunError(new Error(errorMessage), errorSource),
@@ -746,7 +755,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
+              tags: ['rule-run-failed', errorSourceTag],
             });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
@@ -755,7 +764,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
+              tags: ['rule-run-failed', errorSourceTag],
               error: { stack_trace: stack },
             });
           }
