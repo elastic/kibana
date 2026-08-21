@@ -136,6 +136,15 @@ export const MetricsExperienceGrid = ({
     isDiscoverLoading,
   ]);
 
+  const { toggleActions, leftSideActions, rightSideActions, searchInput } = useToolbarActions({
+    allDimensions,
+    metricItems,
+    renderToggleActions,
+    onDimensionsChange: onToolbarDimensionsChange,
+    isLoading: isDiscoverLoading,
+    onOpenGridSettings: toggleGridSettingsFlyout,
+  });
+
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
       if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
@@ -145,15 +154,6 @@ export const MetricsExperienceGrid = ({
     },
     [isFullscreen, onToggleFullscreen]
   );
-
-  const { toggleActions, leftSideActions, rightSideActions, searchInput } = useToolbarActions({
-    allDimensions,
-    metricItems,
-    renderToggleActions,
-    onDimensionsChange: onToolbarDimensionsChange,
-    isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
-  });
 
   if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
