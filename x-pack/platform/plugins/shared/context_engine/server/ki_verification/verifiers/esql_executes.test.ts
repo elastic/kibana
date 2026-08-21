@@ -367,7 +367,6 @@ describe('esql-executes verifier', () => {
         expect(esClient.esql.query).toHaveBeenCalledTimes(1);
         expect(outcome.passed).toBe(false);
         if (!outcome.passed) {
-          // The shape problem and the execution problem surface in one run.
           expect(outcome.reason).toContain('attributes.broken_shape');
           expect(outcome.reason).toContain('Unknown index [nope]');
         }

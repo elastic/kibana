@@ -262,7 +262,6 @@ describe('esql-valid-syntax verifier', () => {
 
         expect(outcome.passed).toBe(false);
         if (!outcome.passed) {
-          // The shape problem and the syntax problem surface in one run.
           expect(outcome.reason).toContain('attributes.broken_shape');
           expect(outcome.reason).toContain('attributes.sampling_query');
           expect(outcome.reason.toLowerCase()).toContain('not_a_function');

@@ -63,8 +63,6 @@ export const createEsqlExecutesVerifier = (): KiVerifier => ({
       return { passed: false, reason: extracted.reason };
     }
 
-    // A malformed attribute is reported alongside whatever the well-formed ones
-    // turn up, so one bad attribute does not hide the others.
     const failures: string[] = [...extracted.failures];
     for (const queryRef of extracted.queries) {
       abortSignal?.throwIfAborted();
@@ -86,9 +84,9 @@ export const createEsqlExecutesVerifier = (): KiVerifier => ({
           },
           { signal: abortSignal }
         );
-        // Belt and braces: the request parameter above should have turned this
-        // into an error, but a cluster that reports partial results anyway has
-        // not told us the query runs.
+        // The request parameter above should have made this an error already, but
+        // a cluster that reports partial results anyway has not told us the
+        // query runs.
         if (isPartial) {
           failures.push(
             `${source}: ES|QL query "${previewQuery(
