@@ -896,7 +896,16 @@ describe('create', () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(usageTemplateSO as never);
     });
 
+    // Read from the persisted case rather than the request, so the mock has to carry the template
+    // the way a real create would.
+    const persistedCaseWithTemplate = {
+      ...caseSO,
+      attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+    };
+
     it('increments template usage stats when a case is created with a template', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(persistedCaseWithTemplate);
+
       const caseWithTemplate = {
         ...theCase,
         template: { id: 'tmpl-1', version: 1 },
@@ -915,7 +924,21 @@ describe('create', () => {
       expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
     });
 
+    // Reading the request instead would credit a template the persisted case never received.
+    it('reads the template from the persisted case, not from the request', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(caseSO);
+
+      await create(
+        { ...theCase, template: { id: 'tmpl-1', version: 1 } },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
     it('does not fail case creation when template stats update fails', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(persistedCaseWithTemplate);
       clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
         new Error('stats update failed')
       );

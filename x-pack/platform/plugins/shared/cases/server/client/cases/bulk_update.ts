@@ -483,29 +483,56 @@ export interface UpdateRequestWithOriginalCase {
 const countTemplateChanges = (
   casesToUpdate: UpdateRequestWithOriginalCase[],
   persistedCaseIds: Set<string>
-): { appliedCases: number; clearedCases: number } => {
+): {
+  appliedCases: number;
+  clearedCases: number;
+  casesPerTemplateId: Map<string, number>;
+} => {
   const countedCaseIds = new Set<string>();
+  const casesPerTemplateId = new Map<string, number>();
   let appliedCases = 0;
   let clearedCases = 0;
 
   for (const { updateReq } of casesToUpdate) {
+    const { id, template } = updateReq;
     const isCountable =
-      updateReq.template !== undefined &&
-      persistedCaseIds.has(updateReq.id) &&
-      !countedCaseIds.has(updateReq.id);
+      template !== undefined && persistedCaseIds.has(id) && !countedCaseIds.has(id);
 
     if (isCountable) {
-      countedCaseIds.add(updateReq.id);
+      countedCaseIds.add(id);
 
-      if (updateReq.template === null) {
+      if (template === null) {
         clearedCases += 1;
       } else {
         appliedCases += 1;
+        casesPerTemplateId.set(template.id, (casesPerTemplateId.get(template.id) ?? 0) + 1);
       }
     }
   }
 
-  return { appliedCases, clearedCases };
+  return { appliedCases, clearedCases, casesPerTemplateId };
+};
+
+/**
+ * Adds the cases that just received a template to each template's usage tally.
+ *
+ * Best effort: the tally is a display concern, so a failure is logged and swallowed rather than
+ * failing an update whose cases are already persisted.
+ */
+const incrementTemplateUsageStats = async (
+  casesPerTemplateId: Map<string, number>,
+  templatesService: TemplatesService,
+  logger: CasesClientArgs['logger']
+): Promise<void> => {
+  await Promise.allSettled(
+    [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
+      try {
+        await templatesService.incrementUsageStats(templateId, caseCount);
+      } catch (error) {
+        logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+      }
+    })
+  );
 };
 
 /**
@@ -949,13 +976,15 @@ export const bulkUpdate = async (
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
 
-    const { appliedCases, clearedCases } = countTemplateChanges(
+    const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
       casesToUpdate,
       new Set(updatedCasesResponse.map(({ id }) => id))
     );
 
     incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
     incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
 
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {

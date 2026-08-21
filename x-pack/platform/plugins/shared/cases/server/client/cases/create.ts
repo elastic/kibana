@@ -449,19 +449,19 @@ export const create = async (
 
     // Bucketed on what was persisted, not on the request, so this reads the same way as the bulk
     // path and stays true if template pinning ever stops mirroring the request one-for-one.
+    const persistedTemplateId = newCase.attributes.template?.id;
+
     incrementCasesClientCounter(
       clientArgs,
-      newCase.attributes.template?.id
-        ? CREATE_CASE_WITH_TEMPLATE_COUNTER
-        : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
+      persistedTemplateId ? CREATE_CASE_WITH_TEMPLATE_COUNTER : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
     );
 
-    if (query.template?.id) {
+    if (persistedTemplateId) {
       try {
-        await templatesService.incrementUsageStats(query.template.id);
+        await templatesService.incrementUsageStats(persistedTemplateId);
       } catch (error) {
         logger.warn(
-          `Failed to update template usage stats for template ${query.template.id}: ${error}`
+          `Failed to update template usage stats for template ${persistedTemplateId}: ${error}`
         );
       }
     }

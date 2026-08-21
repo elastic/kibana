@@ -1236,6 +1236,83 @@ describe('update', () => {
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     });
 
+    it('adds one use per case to the applied template usage stats', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1',
+        2
+      );
+    });
+
+    it('does not touch usage stats when a template is only cleared', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the update when the template usage stats write fails', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
+    });
+
     it('does not count an update that failed', async () => {
       const clientArgs = setupArgs();
       clientArgs.services.caseService.patchCases.mockRejectedValueOnce(new Error('update failed'));

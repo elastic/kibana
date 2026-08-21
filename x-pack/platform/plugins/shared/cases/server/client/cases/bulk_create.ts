@@ -79,6 +79,26 @@ export interface BulkCreateCasesClientOptions {
   relaxRequiredFields?: boolean;
 }
 
+/**
+ * Tallies how many of the created cases carry each template, so the usage stats count cases rather
+ * than distinct templates while still writing once per template.
+ */
+const countCasesPerTemplateId = (
+  casesSOs: Array<SavedObject<CaseTransformedAttributes>>
+): Map<string, number> => {
+  const casesPerTemplateId = new Map<string, number>();
+
+  for (const { attributes } of casesSOs) {
+    const templateId = attributes.template?.id;
+
+    if (templateId != null) {
+      casesPerTemplateId.set(templateId, (casesPerTemplateId.get(templateId) ?? 0) + 1);
+    }
+  }
+
+  return casesPerTemplateId;
+};
+
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
   clientArgs: CasesClientArgs,
@@ -374,16 +394,12 @@ export const bulkCreate = async (
       casesSOs.length - casesCreatedWithTemplate
     );
 
-    const templateIds = [
-      ...new Set(
-        casesSOs.map((c) => c.attributes.template?.id).filter((id): id is string => id != null)
-      ),
-    ];
+    const casesPerTemplateId = countCasesPerTemplateId(casesSOs);
 
     await Promise.allSettled(
-      templateIds.map(async (templateId) => {
+      [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
         try {
-          await templatesService.incrementUsageStats(templateId);
+          await templatesService.incrementUsageStats(templateId, caseCount);
         } catch (error) {
           logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
         }

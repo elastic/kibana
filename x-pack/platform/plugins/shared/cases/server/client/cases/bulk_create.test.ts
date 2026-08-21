@@ -1700,11 +1700,12 @@ describe('bulkCreate', () => {
       await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
 
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        1
       );
     });
 
-    it('increments stats once per unique template ID', async () => {
+    it('adds one use per case, in a single call per template', async () => {
       const caseSOWithTemplate1 = {
         ...caseSO,
         id: 'case-1',
@@ -1731,12 +1732,16 @@ describe('bulkCreate', () => {
         casesClient
       );
 
+      // Two cases share tmpl-1, so it gains two uses from one call — the tally counts cases, while
+      // the call is still deduped per template to keep the writes down.
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(2);
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-1'
+        'tmpl-1',
+        2
       );
       expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
-        'tmpl-2'
+        'tmpl-2',
+        1
       );
     });
 
