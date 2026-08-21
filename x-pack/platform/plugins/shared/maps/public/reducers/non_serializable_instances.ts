@@ -7,6 +7,7 @@
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Map as MapApi } from '@kbn/mapbox-gl';
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
@@ -18,6 +19,7 @@ const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
 const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
 const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COLOR';
 const SET_ON_MAP_MOVE = 'SET_ON_MAP_MOVE';
+const SET_MAP_API = 'SET_MAP_API';
 
 export interface NonSerializableState {
   inspectorAdapters: Adapters;
@@ -25,6 +27,7 @@ export interface NonSerializableState {
   eventHandlers: Partial<EventHandlers>;
   chartsPaletteServiceGetColor: (value: string) => string | null;
   onMapMove?: (lat: number, lon: number, zoom: number) => void;
+  mapApi?: MapApi;
 }
 
 export interface ResultMeta {
@@ -120,6 +123,12 @@ export function nonSerializableInstancesReducers(
         onMapMove: action.onMapMove,
       };
     }
+    case SET_MAP_API: {
+      return {
+        ...state,
+        mapApi: action.mapApi
+      }
+    }
     default:
       return state;
   }
@@ -144,6 +153,10 @@ export function getChartsPaletteServiceGetColor({ nonSerializableInstances }: Ma
 
 export function getOnMapMove({ nonSerializableInstances }: MapStoreState) {
   return nonSerializableInstances.onMapMove;
+}
+
+export function getMapApi({ nonSerializableInstances }: MapStoreState) {
+  return nonSerializableInstances.mapApi;
 }
 
 // Actions
@@ -199,5 +212,12 @@ export function setOnMapMove(onMapMove: (lat: number, lon: number, zoom: number)
   return {
     type: SET_ON_MAP_MOVE,
     onMapMove,
+  };
+}
+
+export function setMapApi(mapApi?: MapApi) {
+  return {
+    type: SET_MAP_API,
+    mapApi,
   };
 }
