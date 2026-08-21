@@ -79,6 +79,7 @@ const evaluationsDataStreamMappings = {
       type: 'object',
       properties: {
         name: { type: 'keyword' },
+        version: { type: 'keyword' },
         score: { type: 'float' },
         label: { type: 'keyword' },
         explanation: { type: 'text', index: false },
@@ -100,7 +101,7 @@ const evaluationsDataStreamMappings = {
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.SCORES,
-  version: 3,
+  version: 4,
   hidden: true,
   template: {
     lifecycle: {

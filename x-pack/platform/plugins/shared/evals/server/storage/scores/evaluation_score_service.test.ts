@@ -219,6 +219,12 @@ describe('EvaluationScoreService', () => {
       expect(documents[0].evaluator.model).toEqual(request.evaluator_model);
     });
 
+    it('preserves the evaluator version', async () => {
+      const documents = await captureDocuments(withScoreEvaluator({ version: '1.2.0' }));
+
+      expect(documents[0].evaluator.version).toBe('1.2.0');
+    });
+
     it('attributes each score in one request independently', async () => {
       const request = getBaseRequest();
       const judgeModel = { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' };
