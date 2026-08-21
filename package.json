@@ -2260,7 +2260,7 @@
     "tough-cookie": "6.0.0",
     "trace": "3.2.0",
     "tree-kill": "1.2.2",
-    "ts-morph": "27.0.2",
+    "ts-morph": "28.0.0",
     "tsd": "0.33.0",
     "typescript": "6.0.3",
     "typescript-7": "npm:typescript@7.0.2",
