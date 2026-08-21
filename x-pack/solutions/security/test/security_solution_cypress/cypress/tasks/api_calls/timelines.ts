@@ -24,10 +24,42 @@ const SAVED_SEARCH_TYPE = 'search';
  */
 const TIMELINE_DISCOVER_SESSION_TITLE_PREFIX = 'Saved Discover session for Timeline';
 
+/**
+ * Id of the tag the ES|QL timeline tab applies to its Discover sessions, see `updateSavedSearch`
+ * in the security solution plugin. Surfaced as `Security_Solution` in Saved Objects management.
+ */
+export const SECURITY_SOLUTION_TAG_ID = 'security-solution-default';
+
 /** Partial shape of `GET api/saved_objects/_find`, everything is optional to stay tolerant of error bodies. */
 interface FindSavedObjectsResponse {
-  saved_objects?: Array<{ id: string; attributes?: { title?: string } }>;
+  saved_objects?: Array<{
+    id: string;
+    attributes?: { title?: string };
+    references?: Array<{ type: string; id: string; name?: string }>;
+  }>;
 }
+
+/**
+ * Returns the Discover sessions belonging to timelines, newest page first.
+ *
+ * Asserting against these directly keeps the Discover-session persistence tests independent of
+ * Saved Objects management, whose tag filter is a third-party surface this suite does not own —
+ * a duplicate tag option in that dropdown is what got the whole suite skipped in #236526.
+ */
+export const getTimelineDiscoverSessions = () =>
+  rootRequest<FindSavedObjectsResponse>({
+    // No `fields` filter: the tag assertion needs the saved object's references too.
+    method: 'GET',
+    url: `api/saved_objects/_find?type=${SAVED_SEARCH_TYPE}&per_page=100`,
+  }).then(({ body }) =>
+    (body?.saved_objects ?? []).filter(({ attributes }) =>
+      attributes?.title?.startsWith(TIMELINE_DISCOVER_SESSION_TITLE_PREFIX)
+    )
+  );
+
+/** Title the ES|QL timeline tab gives the Discover session of the timeline named `timelineName`. */
+export const getTimelineDiscoverSessionTitle = (timelineName: string) =>
+  `${TIMELINE_DISCOVER_SESSION_TITLE_PREFIX} - ${timelineName}`;
 
 /**
  * Creates a timeline saved object

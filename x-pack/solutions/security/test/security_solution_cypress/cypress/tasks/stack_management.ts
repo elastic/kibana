@@ -7,7 +7,6 @@
 
 import type { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM } from '@kbn/security-solution-plugin/common/constants';
 import {
-  GET_SAVED_OBJECTS_TAGS_OPTION,
   SAVED_OBJECTS_SETTINGS,
   SAVED_OBJECTS_TAGS_FILTER,
 } from '../screens/common/stack_management';
@@ -48,12 +47,4 @@ export const goToSavedObjectSettings = () => {
 
 export const clickSavedObjectTagsFilter = () => {
   cy.get(SAVED_OBJECTS_TAGS_FILTER).trigger('click');
-};
-
-export const clickSavedObjectTagOption = (optionId: string) => {
-  // EUI field_value_selection renders option elements in both the pre-mounted (hidden) popover
-  // panel and the open popover panel — both may pass :visible during the animation. The open
-  // panel's elements appear later in DOM order (EUI portals to document.body), so .last()
-  // reliably targets the active popover option.
-  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).filter(':visible').last().click();
 };
