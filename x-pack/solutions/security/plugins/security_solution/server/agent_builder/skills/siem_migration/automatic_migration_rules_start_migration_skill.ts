@@ -22,7 +22,7 @@ import {
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
-} from './shared/content';
+} from './rules/content';
 
 export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-start-migration',

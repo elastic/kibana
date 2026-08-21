@@ -18,7 +18,7 @@ import {
   AUTOMATIC_MIGRATION_NAVIGATION_BLOCK,
   NAME_NEVER_ID_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
-} from './shared/content';
+} from './rules/content';
 
 export const automaticMigrationRulesSummarizeSkill = defineSkillType({
   id: 'automatic-migration-rules-summarize',
