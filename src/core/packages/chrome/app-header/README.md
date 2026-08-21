@@ -12,13 +12,14 @@ Prefer inline rendering when the page owns its header placement. Use Chrome-owne
 Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
 Discover, Dashboard, and Lens.
 
+Presentation (shell, title, tabs, badges, menu rendering, stories) lives in private
+`@kbn/ui-app-header`. This package is the stable plugin facade: it keeps registration semantics,
+Chrome-connected adapters, and the public `@kbn/app-header` imports.
+
 ## Folder layout
 
-Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
-live as flat files directly in `src/app_header/`, with shared data resolution in
-`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
-its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
-that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
+Connected adapters and Chrome hooks live in `src/app_header/`. Presentation components live in
+`@kbn/ui-app-header`. Do not import the UI package from plugins.
 
 ## Which API should I use?
 
@@ -45,6 +46,9 @@ do not add new consumers.
 
 See the [AppHeader migration guide](https://github.com/elastic/kibana/issues/283673) for migration
 steps, examples, and tracking.
+
+Keep title and back visible at the top while route content scrolls. They replace always-visible
+breadcrumbs. Scroll to verify; see [Sticky positioning](#sticky-positioning) if they move away.
 
 ## Back navigation
 
@@ -241,10 +245,23 @@ standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
 
-`sticky` defaults to `true` and should normally be omitted. Use `sticky={false}` only when the
-full-page layout has its own mechanism that keeps the app header sticky within the correct scrolling
-container. Rendering an inline or full-width header is not by itself a reason to disable sticky
-positioning.
+In Chrome Next project layout, title and back replace always-visible breadcrumbs and must remain at
+the top while the page scrolls.
+
+- Inline `AppHeader`: omit `sticky` (defaults to `true`) to use CSS `position: sticky`.
+- `ChromeAppHeaderRegistration`: Chrome pins the header in the layout top-bar and renders the view
+  with `sticky={false}`.
+- Set `sticky={false}` only when the surrounding layout already pins the header in the correct
+  scroll container.
+
+`sticky={false}` does not make the header full-width. `flush` and bleed modes control inset.
+
+CSS sticky fails when:
+
+- A wrapper is only as tall as the header, so sticky is confined to that containing block.
+- An `overflow: hidden`, `auto`, or `scroll` ancestor sits between the header and the page scroller.
+
+Scroll the page. If title or back moves away, the migration is not done.
 
 ## Testing
 

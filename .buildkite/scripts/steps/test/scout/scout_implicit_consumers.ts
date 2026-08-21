@@ -21,7 +21,7 @@
  * files change.
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 interface ImplicitConsumerRule {
