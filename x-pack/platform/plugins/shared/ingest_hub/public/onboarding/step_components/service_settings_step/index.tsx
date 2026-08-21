@@ -29,7 +29,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
   getRegionFieldName,
@@ -73,6 +74,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
+  const { awsServicesMap } = useOnboardingFlow();
+
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [duplicateSourceInstanceId, setDuplicateSourceInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -81,14 +84,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     ? instances.find((i) => i.instanceId === activeFlyoutInstanceId) ?? null
     : null;
   const activeFlyoutService = activeFlyoutInstance
-    ? AWS_SERVICES_MAP.get(activeFlyoutInstance.serviceId) ?? null
+    ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
     : null;
 
   const duplicateSourceInstance = duplicateSourceInstanceId
     ? instances.find((i) => i.instanceId === duplicateSourceInstanceId) ?? null
     : null;
   const duplicateSourceService = duplicateSourceInstance
-    ? AWS_SERVICES_MAP.get(duplicateSourceInstance.serviceId) ?? null
+    ? awsServicesMap?.get(duplicateSourceInstance.serviceId) ?? null
     : null;
 
   const handleFlyoutApply =
@@ -156,7 +159,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           defaultMessage: 'Service Name',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const service = awsServicesMap?.get(inst.serviceId);
           const canConfigure = service ? hasConfigurableFlyoutFields(service) : false;
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -212,24 +215,30 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           defaultMessage: 'Collects',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const service = awsServicesMap?.get(inst.serviceId);
           return service ? <SignalTypeBadge signalType={service.signalType} /> : null;
         },
-        sortable: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.signalType ?? '',
+        sortable: (inst: ServiceInstance) => awsServicesMap?.get(inst.serviceId)?.signalType ?? '',
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
           defaultMessage: 'Category',
         }),
-        render: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.category ?? '',
-        sortable: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.category ?? '',
+        render: (inst: ServiceInstance) => {
+          const cat = awsServicesMap?.get(inst.serviceId)?.category;
+          return cat ? getCategoryTitle(cat) : '';
+        },
+        sortable: (inst: ServiceInstance) => {
+          const cat = awsServicesMap?.get(inst.serviceId)?.category;
+          return cat ? getCategoryTitle(cat) : '';
+        },
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.region', {
           defaultMessage: 'Region',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const service = awsServicesMap?.get(inst.serviceId);
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
           const regionField = getRegionFieldName(service, config.trigger);
@@ -315,7 +324,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         },
       },
     ],
-    [getServiceVars, globalRegion, incompleteInstanceIds, openMenuInstanceId, removeInstance]
+    [
+      awsServicesMap,
+      getServiceVars,
+      globalRegion,
+      incompleteInstanceIds,
+      openMenuInstanceId,
+      removeInstance,
+    ]
   );
 
   return (
