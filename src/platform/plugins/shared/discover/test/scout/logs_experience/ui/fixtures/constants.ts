@@ -18,9 +18,14 @@ export const LOGS = {
   DEFAULT_END_TIME: '2025-01-01T01:00:00.000Z',
 
   ALL_LOGS_DATA_VIEW: 'All logs',
-  METRICS_DATA_VIEW: 'metrics-system*',
 
   SYNTH_LOGS_DATASET: 'synth.recommended',
   SYNTH_LOGS_NAMESPACE: 'default',
-  SYNTH_METRICS_HOST: 'synth-metrics-host-01',
+
+  // A plain index, not a data stream: the `metrics-*` Fleet templates create TSDB data streams,
+  // which reject writes outside a moving window around now and so cannot hold the fixed
+  // timestamps above. The name also stays clear of `metrics-*-*` so no Fleet template claims it.
+  NON_LOGS_INDEX: 'synth-metrics-2025',
+  NON_LOGS_DATA_VIEW: 'synth-metrics*',
+  NON_LOGS_HOST: 'synth-metrics-host-01',
 } as const;

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "d3651c4bf568f479835bf7ce1677283a3f08eabd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -41,8 +41,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
-        "line": 26,
-        "column": 64
+        "line": 31,
+        "column": 15
       }
     },
     {
@@ -59,8 +59,44 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 45,
+        "column": 24
+      }
+    },
+    {
+      "id": "94ad8250756af26-c0c4f68f4cccb59",
+      "title": "Logs profile - Recommended fields should show the recommended fields group in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 78,
+        "column": 13
+      }
+    },
+    {
+      "id": "94ad8250756af26-acf6483fe1ba158",
+      "title": "Logs profile - Recommended fields should NOT show the recommended fields group for a non-logs ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 92,
+        "column": 24
       }
     }
   ]

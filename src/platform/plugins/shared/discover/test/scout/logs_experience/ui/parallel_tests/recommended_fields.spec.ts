@@ -16,6 +16,8 @@ import {
   teardownLogsExperience,
 } from '../fixtures';
 
+const NON_LOGS_FIELD = 'system.cpu.total.norm.pct';
+
 spaceTest.describe(
   'Logs profile - Recommended fields',
   {
@@ -26,10 +28,8 @@ spaceTest.describe(
       await setupLogsExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -41,6 +41,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
+        await discover.goto({ queryMode: 'classic' });
         await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW);
         await discover.waitUntilTabIsLoaded();
 
@@ -69,7 +70,7 @@ spaceTest.describe(
       'should NOT show the recommended fields group for a non-logs data source profile',
       async ({ page, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
-        const sessionTitle = 'metrics-system-no-recommended';
+        const sessionTitle = 'non-logs-no-recommended';
 
         await discoverScoutSpace.createDiscoverSession({
           title: sessionTitle,
@@ -79,21 +80,62 @@ spaceTest.describe(
               label: 'Untitled',
               data_source: {
                 type: 'data_view_spec',
-                index_pattern: LOGS.METRICS_DATA_VIEW,
+                index_pattern: LOGS.NON_LOGS_DATA_VIEW,
                 time_field: '@timestamp',
-                name: LOGS.METRICS_DATA_VIEW,
+                name: LOGS.NON_LOGS_DATA_VIEW,
               },
             },
           ],
         });
+
+        await discover.goto({ queryMode: 'classic' });
         await discover.loadSavedSearch(sessionTitle);
         await discover.waitUntilTabIsLoaded();
 
-        // Assert the seeded metrics data actually resolved into fields first. The available
-        // group renders even when empty, so without this the assertion below would also pass
-        // for an index pattern that matched nothing.
+        // Assert the seeded data actually resolved into fields first. The available group
+        // renders even when empty, so without this the assertion below would also pass for an
+        // index pattern that matched nothing.
         const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
-        expect(availableFields).toContain('system.cpu.total.norm.pct');
+        expect(availableFields).toContain(NON_LOGS_FIELD);
+
+        await expect(
+          page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('recommended'))
+        ).toBeHidden();
+      }
+    );
+
+    spaceTest(
+      'should show the recommended fields group in ES|QL mode',
+      async ({ page, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+
+        await discover.goto({ queryMode: 'esql' });
+        await discover.writeAndSubmitEsqlQuery('from logs-* | limit 100');
+
+        await expect(
+          page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('recommended'))
+        ).toBeVisible();
+
+        await unifiedFieldList.openSidebarSection('recommended');
+
+        const fieldNames = await unifiedFieldList.getSidebarSectionFieldNames('recommended');
+        expect(fieldNames).toContain('event.dataset');
+        expect(fieldNames).toContain('host.name');
+        expect(fieldNames).toContain('message');
+        expect(fieldNames).toContain('log.level');
+      }
+    );
+
+    spaceTest(
+      'should NOT show the recommended fields group for a non-logs ES|QL query',
+      async ({ page, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+
+        await discover.goto({ queryMode: 'esql' });
+        await discover.writeAndSubmitEsqlQuery(`from ${LOGS.NON_LOGS_DATA_VIEW} | limit 100`);
+
+        const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
+        expect(availableFields).toContain(NON_LOGS_FIELD);
 
         await expect(
           page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('recommended'))

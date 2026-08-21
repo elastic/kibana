@@ -22,11 +22,10 @@ globalTeardownHook('Teardown logs experience tests data', async ({ esClient, log
       log.warning(`[teardown:logs] Failed to delete logs data stream: ${err.message}`)
     );
 
-  // cpu, memory and network each land in their own metrics-system.* data stream.
   await esClient.indices
-    .deleteDataStream({ name: 'metrics-system.*' })
-    .then(() => log.debug('[teardown:logs] Deleted metrics-system.* data streams'))
+    .delete({ index: LOGS.NON_LOGS_INDEX })
+    .then(() => log.debug(`[teardown:logs] Deleted ${LOGS.NON_LOGS_INDEX}`))
     .catch((err: Error) =>
-      log.warning(`[teardown:logs] Failed to delete metrics-system.* data streams: ${err.message}`)
+      log.warning(`[teardown:logs] Failed to delete ${LOGS.NON_LOGS_INDEX}: ${err.message}`)
     );
 });
