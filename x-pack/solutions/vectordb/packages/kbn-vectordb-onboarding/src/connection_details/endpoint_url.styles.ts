@@ -17,14 +17,9 @@ export const urlStyle = ({ euiTheme }: UseEuiTheme) => css`
   white-space: nowrap;
 `;
 
-export const flexItemStyle = css`
+export const flexItemStyle = ({ euiTheme }: UseEuiTheme) => css`
   min-width: 0;
-  max-width: 400px;
-`;
-
-// Absorbs leftover space when the URL item hits its max-width, keeping the button at the panel edge
-export const copyButtonStyle = css`
-  margin-inline-start: auto;
+  max-width: ${euiTheme.base * 25}px;
 `;
 
 export const typeSelectorStyle = ({ euiTheme }: UseEuiTheme) => css`

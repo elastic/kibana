@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CompactApiKeys } from './compact_api_keys';
+import { endpointUrlItemStyle } from './connect_to_project.styles';
 import { OnboardingApiKeys } from './onboarding_api_keys';
 import { EndpointUrl } from './endpoint_url';
 import { ConnectionTypePopover, type ConnectionType } from './connection_type_popover';
@@ -54,8 +55,8 @@ export const ConnectToProject = ({
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false} css={endpointUrlItemStyle}>
           <EndpointUrl
             url={isMcpServer ? mcpServerUrl : elasticsearchUrl}
             copyAriaLabel={

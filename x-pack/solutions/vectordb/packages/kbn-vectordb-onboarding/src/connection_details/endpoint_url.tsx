@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { copyButtonStyle, flexItemStyle, typeSelectorStyle, urlStyle } from './endpoint_url.styles';
+import { flexItemStyle, typeSelectorStyle, urlStyle } from './endpoint_url.styles';
 
 interface EndpointUrlProps {
   url: string | null;
@@ -51,7 +51,7 @@ export const EndpointUrl = ({
             {url}
           </EuiCode>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={copyButtonStyle}>
+        <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={url || ''}>
             {(copy) => (
               <EuiToolTip
