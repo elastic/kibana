@@ -33,7 +33,9 @@ export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
       return { passed: false, reason: extracted.reason };
     }
 
-    const failures: string[] = [];
+    // A malformed attribute is reported alongside whatever the well-formed ones
+    // turn up, so one bad attribute does not hide the others.
+    const failures: string[] = [...extracted.failures];
     for (const queryRef of extracted.queries) {
       context.abortSignal?.throwIfAborted();
 

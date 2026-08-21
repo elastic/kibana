@@ -61,7 +61,13 @@ export const getOversizedQueryFailure = ({ source, query }: EsqlQueryRef): strin
     : undefined;
 
 export type EsqlQueriesResult =
-  | { ok: true; queries: EsqlQueryRef[] }
+  /**
+   * The queries worth verifying, plus a failure per attribute whose value was
+   * malformed. Both can be non-empty at once: one bad attribute does not hide
+   * problems in the others, so a run reports everything it can see.
+   */
+  | { ok: true; queries: EsqlQueryRef[]; failures: string[] }
+  /** Nothing was verified, because doing so would have cost too much. */
   | { ok: false; reason: string };
 
 /**
@@ -76,6 +82,7 @@ export const getEsqlQueries = (
 ): EsqlQueriesResult => {
   const { logger } = context;
   const queries: EsqlQueryRef[] = [];
+  const failures: string[] = [];
 
   for (const key of resolveEsqlAttributeKeys(context)) {
     const source = describeAttribute(key);
@@ -89,22 +96,22 @@ export const getEsqlQueries = (
     const candidates = typeof value === 'string' ? [value] : Array.isArray(value) ? value : null;
 
     if (!candidates || candidates.length === 0) {
-      return {
-        ok: false,
-        reason: `${source} must be a non-empty ES|QL query string or a non-empty array of query strings`,
-      };
+      failures.push(
+        `${source} must be a non-empty ES|QL query string or a non-empty array of query strings`
+      );
+      continue;
     }
 
     const invalidIndexes = candidates.flatMap((entry, index) =>
       typeof entry === 'string' && entry.trim().length > 0 ? [] : [index]
     );
     if (invalidIndexes.length > 0) {
-      return {
-        ok: false,
-        reason: `${source} must contain only non-empty query strings (invalid at index ${invalidIndexes.join(
+      failures.push(
+        `${source} must contain only non-empty query strings (invalid at index ${invalidIndexes.join(
           ', '
-        )})`,
-      };
+        )})`
+      );
+      continue;
     }
 
     queries.push(
@@ -115,7 +122,8 @@ export const getEsqlQueries = (
   }
 
   // Bounded across every configured attribute, not per attribute, so adding
-  // attributes cannot multiply the work a single verification run does.
+  // attributes cannot multiply the work a single verification run does. Unlike a
+  // malformed attribute, this stops the run: the point is to not do the work.
   if (queries.length > MAX_ESQL_QUERIES) {
     return {
       ok: false,
@@ -123,5 +131,5 @@ export const getEsqlQueries = (
     };
   }
 
-  return { ok: true, queries };
+  return { ok: true, queries, failures };
 };

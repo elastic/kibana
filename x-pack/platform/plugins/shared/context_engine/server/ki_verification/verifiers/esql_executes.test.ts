@@ -336,6 +336,43 @@ describe('esql-executes verifier', () => {
         }
       });
 
+      it('reports every malformed attribute rather than stopping at the first', async () => {
+        const ki: KnowledgeIndicator = { attributes: { first: 42, second: [] } };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['first', 'second'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('attributes.first');
+          expect(outcome.reason).toContain('attributes.second');
+        }
+      });
+
+      it('still executes the well-formed attributes when another is malformed', async () => {
+        esClient.esql.query.mockRejectedValue(
+          esResponseError('verification_exception', 'Unknown index [nope]')
+        );
+        const ki: KnowledgeIndicator = {
+          attributes: { broken_shape: 42, sampling_query: OTHER_QUERY },
+        };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['broken_shape', 'sampling_query'],
+        });
+
+        expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          // The shape problem and the execution problem surface in one run.
+          expect(outcome.reason).toContain('attributes.broken_shape');
+          expect(outcome.reason).toContain('Unknown index [nope]');
+        }
+      });
+
       it('bounds the query count across all attributes, not per attribute', async () => {
         const ki: KnowledgeIndicator = {
           attributes: {

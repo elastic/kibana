@@ -250,6 +250,25 @@ describe('esql-valid-syntax verifier', () => {
         expect(outcome).toEqual({ passed: true });
       });
 
+      it('still validates the well-formed attributes when another is malformed', async () => {
+        const ki: KnowledgeIndicator = {
+          attributes: { broken_shape: 42, sampling_query: INVALID_QUERY },
+        };
+
+        const outcome = await verifier.verify(ki, {
+          ...context,
+          esqlAttributes: ['broken_shape', 'sampling_query'],
+        });
+
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          // The shape problem and the syntax problem surface in one run.
+          expect(outcome.reason).toContain('attributes.broken_shape');
+          expect(outcome.reason).toContain('attributes.sampling_query');
+          expect(outcome.reason.toLowerCase()).toContain('not_a_function');
+        }
+      });
+
       it('still fails a configured attribute carrying a malformed value', async () => {
         const ki: KnowledgeIndicator = { attributes: { aggregation_query: 42 } };
 
