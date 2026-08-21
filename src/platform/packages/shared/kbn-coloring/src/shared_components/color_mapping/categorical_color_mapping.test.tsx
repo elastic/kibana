@@ -91,7 +91,6 @@ describe('color mapping', () => {
     const data: ColorMappingInputData = {
       type: 'categories',
       categories: [
-        // the other bucket is handled as a special assignment, not as a regular one
         '__other__',
         '__empty__',
         '',

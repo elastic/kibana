@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '../..';
-import { DEFAULT_OTHER_ASSIGNMENT } from './default_color_mapping';
-import { normalizeColorMappingConfig } from './utils';
+import { convertToOtherBucketColorMappings } from './converter';
+import { DEFAULT_COLOR_MAPPING_CONFIG, DEFAULT_OTHER_ASSIGNMENT } from '@kbn/coloring';
 
 describe('normalizeColorMappingConfig', () => {
   it('if there is an assignment for the other bucket, it should remove it and add a corresponding special assignment', () => {
-    const configRaw = normalizeColorMappingConfig({
+    const configRaw = convertToOtherBucketColorMappings({
       ...DEFAULT_COLOR_MAPPING_CONFIG,
       assignments: [
         {
@@ -29,7 +26,7 @@ describe('normalizeColorMappingConfig', () => {
       ],
     });
 
-    const configMatch = normalizeColorMappingConfig({
+    const configMatch = convertToOtherBucketColorMappings({
       ...DEFAULT_COLOR_MAPPING_CONFIG,
       assignments: [
         {
@@ -69,7 +66,7 @@ describe('normalizeColorMappingConfig', () => {
   });
 
   it('if there is no assignment for the other bucket, it should return the original config', () => {
-    const config = normalizeColorMappingConfig({
+    const config = convertToOtherBucketColorMappings({
       ...DEFAULT_COLOR_MAPPING_CONFIG,
       assignments: [],
     });

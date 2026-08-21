@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getColorAssignmentMatcher } from '../color/color_assignment_matcher';
-import { OTHER_BUCKET_VALUE } from '../special_tokens';
-import { DEFAULT_OTHERS_BUCKET_ASSIGNMENT } from './default_color_mapping';
 import type {
   Config,
   CategoricalConfig,
@@ -82,46 +79,4 @@ export function getOtherAssignmentColor(
   } else {
     return { isLoop: false, color: otherAssignment.color };
   }
-}
-
-export function normalizeColorMappingConfig(config: Config): Config {
-  const { assignments, specialAssignments } = config;
-  const assignmentMatcher = getColorAssignmentMatcher(assignments);
-
-  // if the other bucket is assigned, we need to remove it from the assignments and add a special assignment for it
-  if (assignmentMatcher.hasMatch(OTHER_BUCKET_VALUE)) {
-    const assignedColor = assignments[assignmentMatcher.getIndex(OTHER_BUCKET_VALUE)].color;
-
-    if (assignedColor.type === 'gradient') {
-      // we can't migrate gradient colors, so we don't add a special assignment for it, it will show as 'auto'
-      return config;
-    }
-
-    return {
-      ...config,
-      assignments: assignments
-        .map((assignment) => ({
-          ...assignment,
-          rules: assignment.rules.filter((rule) => {
-            if (rule.type === 'raw') {
-              return rule.value !== OTHER_BUCKET_VALUE;
-            }
-            if (rule.type === 'match') {
-              return rule.pattern !== OTHER_BUCKET_VALUE;
-            }
-            return true;
-          }),
-        }))
-        .filter((assignment) => assignment.rules.length > 0),
-      specialAssignments: [
-        ...specialAssignments.filter((assignment) => !isOtherBucketAssignment(assignment)),
-        {
-          ...DEFAULT_OTHERS_BUCKET_ASSIGNMENT,
-          color: assignedColor,
-        } satisfies OtherBucketAssignment,
-      ],
-    };
-  }
-
-  return config;
 }

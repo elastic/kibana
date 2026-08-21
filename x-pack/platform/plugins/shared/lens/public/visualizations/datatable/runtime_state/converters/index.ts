@@ -7,7 +7,9 @@
 
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
+import { convertToOtherColorMappingFn } from './other_color_mapping';
 
 export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
   convertToRawColorMappingsFn(datasourceStates),
+  convertToOtherColorMappingFn,
 ];

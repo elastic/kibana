@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './converters/raw_color_mappings';
-export * from './converters/other_bucket_color_mappings';
+export { convertToOtherBucketColorMappings } from './converter';
