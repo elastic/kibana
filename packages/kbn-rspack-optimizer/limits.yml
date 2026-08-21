@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 18827
+  alertingVTwo: 19182
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
@@ -142,7 +142,7 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7685
+  observabilityOnboarding: 8873
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   sessionView: 379
   share: 379
   shared-core: 336543
-  shared-misc: 114567
+  shared-misc: 141413
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
