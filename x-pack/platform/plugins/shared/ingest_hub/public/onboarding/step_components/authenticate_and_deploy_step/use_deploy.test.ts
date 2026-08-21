@@ -664,7 +664,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when all selected instances are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
-      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'receiving' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -846,6 +846,53 @@ describe('useDeploy', () => {
     // or similar and would fire a separate call or appear enabled in the single call).
     const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));
     expect(hasCloudtrailInput).toBe(false);
+  });
+
+  describe('isAlreadyDeployed', () => {
+    it('is false when serviceStatuses is empty', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: {} },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is false when status is instantiating (deploy in flight)', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is false when status is error', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'error' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is true when all members have status receiving', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'receiving' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
+    it('is true when all members have status detecting', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'detecting' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
   });
 
   it('includes non-managed_integration services as gray instantiating chips without deploying them', async () => {

@@ -73,10 +73,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     () =>
       deployGroups.length > 0 &&
       deployGroups.every((group) =>
-        group.members.every(({ instance }) => {
-          const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
-          return status !== undefined && status !== 'error' && status !== 'timeout';
-        })
+        group.members.every(
+          ({ instance }) => {
+            const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
+            return status === 'receiving' || status === 'detecting';
+          }
+        )
       ),
     [deployGroups, deployAndDetectStep.serviceStatuses]
   );
