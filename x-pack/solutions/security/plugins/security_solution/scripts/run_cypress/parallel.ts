@@ -80,6 +80,7 @@ export const cli = () => {
       const { argv } = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
+        .coerce('browser', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
           arg.split(',').reduce((acc, curr) => {
             const [key, value] = curr.split('=');
@@ -94,6 +95,15 @@ export const cli = () => {
         .boolean('inspect');
 
       const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
+
+      /**
+       * Browser Cypress runs in. Defaults to Chrome, which is what CI uses. `--browser` selects a
+       * different engine (`electron`, `firefox`, ...), which is the only way to make a local run
+       * possible when the host's Chrome cannot start the spec — otherwise the choice is hardcoded
+       * and an unrunnable Chrome blocks local runs entirely.
+       */
+      const browser =
+        (argv.browser as string | undefined) ?? (USE_CHROME_BETA ? 'chrome:beta' : 'chrome');
 
       _cliLogger.info(`
 ----------------------------------------------
@@ -554,7 +564,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                 }
 
                 return cypress.run({
-                  browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
+                  browser,
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -574,6 +584,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
               if (isOpen) {
                 await cypress.open({
+                  browser,
                   configFile: cypressConfigFilePath,
                   config: {
                     e2e: {
