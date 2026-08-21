@@ -1941,7 +1941,7 @@ groups:
       - setting: "securitySolution:defaultIndex"
         id: securitysolution-defaultindex
         description: |
-          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security).
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
 
           Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
 
