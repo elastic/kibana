@@ -340,7 +340,7 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(2);
     const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
     jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
-    const elasticsearchDate = new Date(kibanaTime - 60_001).toUTCString();
+    const elasticsearchDate = new Date(kibanaTime - 61_000).toUTCString();
 
     nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchDate);
     nodeInfosSuccessOnce(createNodes('5.2.0'), elasticsearchDate);
