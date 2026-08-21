@@ -81,7 +81,8 @@ export interface AgentClient {
    */
   getAgentStatusForAgentPolicy(
     agentPolicyId?: string,
-    filterKuery?: string
+    filterKuery?: string,
+    agentPolicyIds?: string[]
   ): Promise<GetAgentStatusResponse['results']>;
 
   /**
@@ -170,14 +171,19 @@ class AgentClientImpl implements AgentClient {
     return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
   }
 
-  public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {
+  public async getAgentStatusForAgentPolicy(
+    agentPolicyId?: string,
+    filterKuery?: string,
+    agentPolicyIds?: string[]
+  ) {
     await this.#runPreflight();
     return getAgentStatusForAgentPolicy(
       this.internalEsClient,
       this.soClient,
       agentPolicyId,
       filterKuery,
-      this.spaceId
+      this.spaceId,
+      agentPolicyIds
     );
   }
 
