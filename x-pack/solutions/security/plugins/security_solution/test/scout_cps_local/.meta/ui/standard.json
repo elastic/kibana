@@ -1,5 +1,5 @@
 {
-  "sha1": "ae9697f247f9766fa5f3a27c572bb6fa6e8461a3",
+  "sha1": "6bf05e1c334db66a6e812373629846233cf8018f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -10,12 +10,11 @@
       "title": "CPS brownout — alerts page degraded state alerts page shows a warning callout (not a hard error) when a linked project is unresponsive",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/alerts_page_brownout.spec.ts",
-        "line": 40,
+        "line": 31,
         "column": 1
       }
     },
