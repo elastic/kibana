@@ -11,7 +11,7 @@ import type { RenderHookResult } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
 import type { UseRowHeightProps } from './use_row_height';
-import { RowHeightType, useRowHeight } from './use_row_height';
+import { getStoredRowHeightLines, RowHeightType, useRowHeight } from './use_row_height';
 import { RowHeightMode } from '../components/row_height_settings';
 
 const CONFIG_ROW_HEIGHT = 3;
@@ -288,5 +288,45 @@ describe('useRowHeightsOptions', () => {
     expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
     expect(hook.result.current.rowHeightLines).toEqual(15);
     expect(hook.result.current.lineCountInput).toEqual(15);
+  });
+});
+
+describe('getStoredRowHeightLines', () => {
+  const seededStorage = () =>
+    createLocalStorageMock({
+      'discover:dataGridRowHeight': {
+        previousRowHeight: 5,
+        previousConfigRowHeight: CONFIG_ROW_HEIGHT,
+      },
+    });
+
+  it('returns the stored line count when the configured row height matches', () => {
+    expect(
+      getStoredRowHeightLines({
+        storage: seededStorage(),
+        consumer: 'discover',
+        configRowHeight: CONFIG_ROW_HEIGHT,
+      })
+    ).toBe(5);
+  });
+
+  it('returns undefined when the configured row height has changed since it was stored', () => {
+    expect(
+      getStoredRowHeightLines({
+        storage: seededStorage(),
+        consumer: 'discover',
+        configRowHeight: CONFIG_ROW_HEIGHT + 1,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when nothing is stored', () => {
+    expect(
+      getStoredRowHeightLines({
+        storage: createLocalStorageMock({}),
+        consumer: 'discover',
+        configRowHeight: CONFIG_ROW_HEIGHT,
+      })
+    ).toBeUndefined();
   });
 });

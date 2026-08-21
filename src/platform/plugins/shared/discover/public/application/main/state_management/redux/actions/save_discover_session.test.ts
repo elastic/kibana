@@ -584,4 +584,78 @@ describe('saveDiscoverSession', () => {
 
     expect(savedTab?.visContext).toEqual(visContext);
   });
+
+  describe('display settings pinning', () => {
+    it('pins the source view mode chosen in local storage when the JSON view is enabled', async () => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup();
+      services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => true);
+      services.storage.set('discover:sourceDisplayMode', 'json');
+
+      await toolkit.internalState.dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+      );
+
+      const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      // The tab has no source display mode in its app state, so the local storage value is pinned.
+      expect(savedTab.sourceDisplayMode).toBe('json');
+      // JSON settings were never chosen (absent from local storage), so they are not pinned.
+      expect(savedTab.jsonModeSettings).toBeUndefined();
+    });
+
+    it('pins the density chosen in local storage', async () => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup();
+      services.storage.set('discover:dataGridDensity', 'expanded');
+
+      await toolkit.internalState.dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+      );
+
+      const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      expect(savedTab.density).toBe('expanded');
+    });
+
+    it('does not pin display settings the user never chose', async () => {
+      const { toolkit, saveDiscoverSessionSpy } = await setup();
+
+      await toolkit.internalState.dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+      );
+
+      const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      expect(savedTab.density).toBeUndefined();
+      expect(savedTab.rowHeight).toBeUndefined();
+    });
+
+    it('keeps an explicit source view mode on the tab instead of the local storage value', async () => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+      services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => true);
+      services.storage.set('discover:sourceDisplayMode', 'json');
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: { sourceDisplayMode: 'summary' },
+        })
+      );
+
+      await toolkit.internalState.dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+      );
+
+      const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      expect(savedTab.sourceDisplayMode).toBe('summary');
+    });
+
+    it('does not persist source view settings when the JSON view is disabled', async () => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup();
+      services.storage.set('discover:sourceDisplayMode', 'json');
+
+      await toolkit.internalState.dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+      );
+
+      const [savedTab] = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      expect(savedTab.sourceDisplayMode).toBeUndefined();
+      expect(savedTab.jsonModeSettings).toBeUndefined();
+    });
+  });
 });

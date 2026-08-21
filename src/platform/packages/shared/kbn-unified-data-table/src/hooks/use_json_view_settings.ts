@@ -31,7 +31,7 @@ export const useSourceDisplayMode = ({
   onUpdateSourceDisplayMode,
 }: UseSourceDisplayModeProps) => {
   const sourceDisplayMode = useMemo<SourceDisplayMode>(
-    () => sourceDisplayModeState ?? getSourceDisplayMode(storage, consumer),
+    () => sourceDisplayModeState ?? getStoredSourceDisplayMode(storage, consumer) ?? 'summary',
     [sourceDisplayModeState, storage, consumer]
   );
 
@@ -66,7 +66,10 @@ export const useJsonModeSettings = ({
   onUpdateJsonModeSettings,
 }: UseJsonModeSettingsProps) => {
   const jsonModeSettings = useMemo<JsonModeSettings>(
-    () => jsonModeSettingsState ?? getJsonModeSettings(storage, consumer),
+    () =>
+      jsonModeSettingsState ??
+      getStoredJsonModeSettings(storage, consumer) ??
+      EMPTY_JSON_MODE_SETTINGS,
     [jsonModeSettingsState, storage, consumer]
   );
 
@@ -87,15 +90,27 @@ export const useJsonModeSettings = ({
   return { jsonModeSettings, onChangeJsonModeSettings };
 };
 
-export const getSourceDisplayMode = (storage: Storage, consumer: string): SourceDisplayMode => {
-  const stored = storage.get(getStorageKey(consumer, SOURCE_DISPLAY_MODE_STORAGE_KEY));
-  return stored === 'json' ? 'json' : 'summary';
-};
-
 const isJsonModeSettings = (value: unknown): value is JsonModeSettings =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export const getJsonModeSettings = (storage: Storage, consumer: string): JsonModeSettings => {
+/**
+ *  Returns the value stored in local storage, or `undefined` when the user has not chosen one.
+ */
+export const getStoredSourceDisplayMode = (
+  storage: Storage,
+  consumer: string
+): SourceDisplayMode | undefined => {
+  const stored = storage.get(getStorageKey(consumer, SOURCE_DISPLAY_MODE_STORAGE_KEY));
+  return stored === 'summary' || stored === 'json' ? stored : undefined;
+};
+
+/**
+ *  Returns the value stored in local storage, or `undefined` when the user has not chosen one.
+ */
+export const getStoredJsonModeSettings = (
+  storage: Storage,
+  consumer: string
+): JsonModeSettings | undefined => {
   const stored = storage.get(getStorageKey(consumer, JSON_MODE_SETTINGS_STORAGE_KEY));
-  return isJsonModeSettings(stored) ? stored : EMPTY_JSON_MODE_SETTINGS;
+  return isJsonModeSettings(stored) ? stored : undefined;
 };

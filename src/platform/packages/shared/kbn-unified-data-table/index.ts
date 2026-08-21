@@ -43,8 +43,16 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
-export { getRowHeight } from './src/hooks/use_row_height';
+export {
+  getDataGridDensity,
+  getStoredDataGridDensity,
+  getDataGridDensityPadding,
+} from './src/hooks/use_data_grid_density';
+export { getRowHeight, getStoredRowHeightLines } from './src/hooks/use_row_height';
+export {
+  getStoredSourceDisplayMode,
+  getStoredJsonModeSettings,
+} from './src/hooks/use_json_view_settings';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
