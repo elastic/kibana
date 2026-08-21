@@ -29,14 +29,14 @@ test.describe(
     // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
     test.describe.configure({ timeout: TEST_TIMEOUT });
 
-    // Guarantees the inspect setting never leaks to other tests/files, even on failure.
-    test.afterAll(async ({ uiSettings }) => {
-      await uiSettings.unset(ENABLE_INSPECT_ES_QUERIES);
-    });
-
     test.beforeEach(async ({ pageObjects, browserAuth }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.dashboard.openNewDashboard();
+    });
+
+    // Guarantees the inspect setting never leaks to other tests/files, even on failure.
+    test.afterAll(async ({ uiSettings }) => {
+      await uiSettings.unset(ENABLE_INSPECT_ES_QUERIES);
     });
 
     test('configures a single SLO overview panel from the add panel flyout', async ({
