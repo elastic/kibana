@@ -145,7 +145,6 @@ describe('updateRiskScoreMappings', () => {
       logger,
       kibanaVersion,
       getStartServices: getStartServicesMock,
-      hasEncryptionKey: true,
       spaceId: 'my-space',
     });
 

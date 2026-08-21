@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         for (const space of SPACE_TEST_SPACES) {
-          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+          await entityAnalyticsRouteHelpersFactory(supertest, space).runMigrations();
         }
 
         for (const space of SPACE_TEST_SPACES) {
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         for (const space of SPACE_TEST_SPACES) {
-          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+          await entityAnalyticsRouteHelpersFactory(supertest, space).runMigrations();
         }
 
         for (const space of SPACE_TEST_SPACES) {
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         for (const space of SPACE_TEST_SPACES) {
-          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+          await entityAnalyticsRouteHelpersFactory(supertest, space).runMigrations();
         }
 
         for (const space of SPACE_TEST_SPACES) {
@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
           await downgradeIndexVersion(space);
         }
         for (const space of SPACE_TEST_SPACES) {
-          await entityAnalyticsRouteHelpersFactory(supertest, log, space).runMigrations();
+          await entityAnalyticsRouteHelpersFactory(supertest, space).runMigrations();
         }
 
         for (const space of SPACE_TEST_SPACES) {

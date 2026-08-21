@@ -240,7 +240,6 @@ describe('renameRiskScoreComponentTemplate', () => {
         logger: mockLogger,
         getStartServices: mockGetStartServices,
         kibanaVersion: '8.0.0',
-        hasEncryptionKey: true,
         spaceId: 'my-space',
       });
 
@@ -258,7 +257,6 @@ describe('renameRiskScoreComponentTemplate', () => {
         logger: mockLogger,
         getStartServices: mockGetStartServices,
         kibanaVersion: '8.0.0',
-        hasEncryptionKey: true,
         spaceId: 'my-space',
       });
 

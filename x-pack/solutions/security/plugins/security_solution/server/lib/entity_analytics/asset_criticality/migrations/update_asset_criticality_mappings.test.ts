@@ -64,7 +64,6 @@ describe('updateAssetCriticalityMappings', () => {
       logger: mockLogger,
       getStartServices: mockGetStartServices,
       kibanaVersion: '8.0.0',
-      hasEncryptionKey: true,
       spaceId: 'my-space',
     });
 
@@ -79,7 +78,6 @@ describe('updateAssetCriticalityMappings', () => {
       logger: mockLogger,
       getStartServices: mockGetStartServices,
       kibanaVersion: '8.0.0',
-      hasEncryptionKey: true,
     });
 
     expect(mockmigrateMappings).toHaveBeenCalledWith(undefined);
