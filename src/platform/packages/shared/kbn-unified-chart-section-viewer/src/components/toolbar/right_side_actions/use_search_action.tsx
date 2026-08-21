@@ -68,7 +68,8 @@ export const useSearchAction = ({
   const onClearSearch = useCallback(() => {
     setShowSearchInput(false);
     setSearchTerm('');
-  }, [setSearchTerm]);
+    onSearchTermChange('');
+  }, [onSearchTermChange]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {

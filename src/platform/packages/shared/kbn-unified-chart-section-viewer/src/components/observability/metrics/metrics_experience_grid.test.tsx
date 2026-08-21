@@ -550,6 +550,46 @@ describe('MetricsExperienceGrid', () => {
     expect(onToggleFullscreen).toHaveBeenCalled();
   });
 
+  it('exits fullscreen exactly once on Escape even when the search input has focus', () => {
+    const onToggleFullscreen = jest.fn();
+
+    useMetricsExperienceStateMock.mockReturnValue({
+      currentPage: 0,
+      selectedDimensions: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      isFullscreen: true,
+      searchTerm: '',
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
+      onMetricsSortChange: jest.fn(),
+      profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    act(() => {
+      getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).click();
+    });
+
+    act(() => {
+      fireEvent.keyDown(getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ), {
+        key: 'Escape',
+      });
+    });
+
+    expect(onToggleFullscreen).toHaveBeenCalledTimes(1);
+  });
+
   describe('wipe orphan dimensions on stream switch (#264957)', () => {
     // Smoke tests only: these assert the grid wires `useDimensionsWipe`
     // correctly (selection + breakdown callbacks reach Discover). The full

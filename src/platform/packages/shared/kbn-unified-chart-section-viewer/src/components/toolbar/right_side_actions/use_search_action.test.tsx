@@ -120,7 +120,7 @@ describe('useSearchAction', () => {
     });
   });
 
-  it('collapses and clears the search on Escape', () => {
+  it('collapses and clears the search on Escape, immediately notifying the parent', () => {
     const onSearchTermChange = jest.fn();
     render(<Harness {...defaultProps} onSearchTermChange={onSearchTermChange} />);
 
@@ -142,6 +142,7 @@ describe('useSearchAction', () => {
       screen.queryByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
+    expect(onSearchTermChange).toHaveBeenCalledWith('');
   });
 
   it('does not collapse on Escape while in fullscreen', () => {
