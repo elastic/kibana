@@ -15,12 +15,16 @@ describe('renderSummaryTable', () => {
   });
 
   it('ignores missing spec results', () => {
-    expect(() =>
-      renderSummaryTable([
-        {
-          runs: [undefined],
-        } as CypressCommandLine.CypressRunResult,
-      ])
-    ).not.toThrow();
+    const result = {
+      runs: new Array<CypressCommandLine.RunResult>(1),
+      totalDuration: 0,
+      totalFailed: 0,
+      totalPassed: 0,
+      totalPending: 0,
+      totalSkipped: 0,
+      totalTests: 0,
+    };
+
+    expect(() => renderSummaryTable([result])).not.toThrow();
   });
 });

@@ -235,7 +235,14 @@ const getChars = (type: CharType) => {
  * Render
  */
 
-function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
+type CypressSummaryResult = Pick<
+  CypressCommandLine.CypressRunResult,
+  'totalDuration' | 'totalFailed' | 'totalPassed' | 'totalPending' | 'totalSkipped' | 'totalTests'
+> & {
+  runs: Array<CypressCommandLine.RunResult | undefined>;
+};
+
+function formatFooterSummary(results: CypressSummaryResult) {
   const { totalFailed, runs, totalDuration, totalTests, totalPassed, totalPending, totalSkipped } =
     results;
 
@@ -274,42 +281,31 @@ function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
   ];
 }
 
-export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[]) {
+export function renderSummaryTable(results: CypressSummaryResult[]) {
   const parsedResults = _.reduce(
     results,
-    (acc: CypressCommandLine.CypressRunResult, result) => {
-      acc.startedTestsAt =
-        acc.startedTestsAt && new Date(result.startedTestsAt) > new Date(acc.startedTestsAt)
-          ? acc.startedTestsAt
-          : result.startedTestsAt;
-      acc.endedTestsAt =
-        acc.endedTestsAt && new Date(result.endedTestsAt) < new Date(acc.endedTestsAt)
-          ? acc.endedTestsAt
-          : result.endedTestsAt;
-      acc.totalDuration = (acc.totalDuration ?? 0) + result.totalDuration;
-      acc.totalSuites = (acc.totalSuites ?? 0) + result.totalSuites;
-      acc.totalTests = (acc.totalTests ?? 0) + result.totalTests;
-      acc.totalPassed = (acc.totalPassed ?? 0) + result.totalPassed;
-      acc.totalPending = (acc.totalPending ?? 0) + result.totalPending;
-      acc.totalFailed = (acc.totalFailed ?? 0) + result.totalFailed;
-      acc.totalSkipped = (acc.totalSkipped ?? 0) + result.totalSkipped;
-      acc.browserPath = result.browserPath;
-      acc.browserName = result.browserName;
-      acc.browserVersion = result.browserVersion;
-      acc.osName = result.osName;
-      acc.osVersion = result.osVersion;
-      acc.cypressVersion = result.cypressVersion;
-      acc.config = result.config;
-      acc.runs = ([] as CypressCommandLine.RunResult[]).concat(
-        acc.runs ?? [],
-        _.compact(result.runs)
-      );
+    (acc, result) => {
+      acc.totalDuration += result.totalDuration;
+      acc.totalTests += result.totalTests;
+      acc.totalPassed += result.totalPassed;
+      acc.totalPending += result.totalPending;
+      acc.totalFailed += result.totalFailed;
+      acc.totalSkipped += result.totalSkipped;
+      acc.runs = acc.runs.concat(result.runs);
       return acc;
     },
-    {} as CypressCommandLine.CypressRunResult
+    {
+      totalDuration: 0,
+      totalTests: 0,
+      totalPassed: 0,
+      totalPending: 0,
+      totalFailed: 0,
+      totalSkipped: 0,
+      runs: [],
+    } as CypressSummaryResult
   );
 
-  const { runs } = parsedResults;
+  const runs = _.compact(parsedResults.runs);
 
   logEmptyLine();
   console.log(chalk.gray('='.repeat(100)));
@@ -355,7 +351,7 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
       colAligns,
       colWidths,
       type: 'noBorder',
-      head: formatFooterSummary(parsedResults),
+      head: formatFooterSummary({ ...parsedResults, runs }),
     });
 
     _.each(runs, (run) => {
