@@ -47,6 +47,7 @@ import {
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
 export type { PanelContent } from './panel_type';
+export type { CustomContentPanelConfig } from './custom_content';
 
 /**
  * A `source: 'config'` panel adds a panel from an already-resolved config passed

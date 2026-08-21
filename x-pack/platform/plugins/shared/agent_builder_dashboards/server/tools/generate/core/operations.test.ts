@@ -1783,7 +1783,6 @@ describe('executeDashboardOperations', () => {
           id: 'cc-1',
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: {
-            prompt: 'updated prompt',
             esqlQuery: undefined,
             template: '<div>Server generated</div>',
           },

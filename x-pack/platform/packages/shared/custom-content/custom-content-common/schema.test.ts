@@ -10,7 +10,7 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
-import { customContentStateSchema } from './schema';
+import { customContentStateSchema, customContentUpdateSchema } from './schema';
 
 describe('customContentStateSchema', () => {
   it('accepts an empty object (all fields optional)', () => {
@@ -20,19 +20,19 @@ describe('customContentStateSchema', () => {
   it('accepts all fields populated', () => {
     expect(
       customContentStateSchema.safeParse({
-        prompt: 'Show error rate',
         template: '<div>{{ row["rate"].value }}</div>',
         esqlQuery: 'FROM logs-* | STATS rate = AVG(error) BY host',
       }).success
     ).toBe(true);
   });
 
-  it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
-    expect(
-      customContentStateSchema.safeParse({
-        prompt: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1),
-      }).success
-    ).toBe(false);
+  it('does not persist a prompt', () => {
+    const parsed = customContentStateSchema.parse({
+      prompt: 'Show error rate',
+      template: '<div>hi</div>',
+    });
+
+    expect(parsed).not.toHaveProperty('prompt');
   });
 
   it('rejects a template exceeding CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH', () => {
@@ -49,5 +49,35 @@ describe('customContentStateSchema', () => {
         esqlQuery: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1),
       }).success
     ).toBe(false);
+  });
+});
+
+describe('customContentUpdateSchema', () => {
+  it('accepts a prompt on its own', () => {
+    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
+  });
+
+  it('accepts an esqlQuery on its own', () => {
+    expect(customContentUpdateSchema.safeParse({ esqlQuery: 'FROM logs-*' }).success).toBe(true);
+  });
+
+  it('requires at least one of prompt or esqlQuery', () => {
+    expect(customContentUpdateSchema.safeParse({}).success).toBe(false);
+  });
+
+  it('accepts a null esqlQuery to clear the query', () => {
+    expect(customContentUpdateSchema.safeParse({ esqlQuery: null }).success).toBe(true);
+  });
+
+  it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
+    expect(
+      customContentUpdateSchema.safeParse({
+        prompt: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1),
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects an empty prompt', () => {
+    expect(customContentUpdateSchema.safeParse({ prompt: '' }).success).toBe(false);
   });
 });

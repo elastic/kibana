@@ -12,9 +12,11 @@ import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 
-/** Zod schema for the content-only fields of a custom content panel. */
+/**
+ * Persisted content of a custom content panel. No `prompt`: on an edit the prompt is a delta
+ * ("remove the background color"), not a description, so the template is the source of truth.
+ */
 export const customContentStateSchema = z.object({
-  prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
   esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
   template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
 });
@@ -22,12 +24,11 @@ export const customContentStateSchema = z.object({
 export type CustomContentState = z.output<typeof customContentStateSchema>;
 
 /**
- * Shared schema for custom content panel update operations (create-panel tool and
- * update-panel tool). Omits `template` — the server generates it from `prompt`.
+ * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation
+ * only and is never persisted; the server generates `template`.
  */
-export const customContentUpdateSchema = customContentStateSchema
-  .omit({ template: true })
-  .extend({
+export const customContentUpdateSchema = z
+  .object({
     prompt: z
       .string()
       .min(1)

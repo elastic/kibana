@@ -70,7 +70,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     let isRetained = false;
-    let storedPrompt = initialState.prompt ?? '';
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -83,7 +82,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
-      prompt: storedPrompt || undefined,
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
@@ -110,13 +108,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
-        prompt: 'skip',
         esqlQuery: 'referenceEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
-        storedPrompt = lastSaved?.prompt ?? '';
         esqlQuery$.next(lastSaved?.esqlQuery);
         template$.next(lastSaved?.template);
       },

@@ -97,7 +97,6 @@ jest.mock('./services', () => ({
 }));
 
 const baseState: CustomContentEmbeddableState = {
-  prompt: 'Show KPI cards',
   esqlQuery: 'FROM logs | STATS count = COUNT(*)',
   template: '<div>static html</div>',
 };
@@ -144,7 +143,7 @@ describe('customContentEmbeddableFactory', () => {
   };
 
   describe('serializeState', () => {
-    it('round-trips prompt and template from initial state', async () => {
+    it('round-trips esqlQuery and template from initial state', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       expect(embeddable.api.serializeState()).toEqual(baseState);
     });
@@ -152,7 +151,6 @@ describe('customContentEmbeddableFactory', () => {
     it('reflects updates applied via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       const nextState: CustomContentEmbeddableState = {
-        prompt: 'Show a status board',
         template: '<div>new</div>',
       };
 
@@ -164,7 +162,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('serializes template as undefined when not provided', async () => {
-      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
+      const { embeddable } = await buildEmbeddable({ template: undefined });
       expect(embeddable.api.serializeState().template).toBeUndefined();
     });
 
