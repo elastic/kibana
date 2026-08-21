@@ -8,9 +8,9 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
-import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
+import { layoutVar, layoutLevels } from '../constants';
+import { getHighContrastBorder } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
