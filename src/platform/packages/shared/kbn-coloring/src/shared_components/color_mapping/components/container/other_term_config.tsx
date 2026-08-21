@@ -36,6 +36,7 @@ const colorModes: EuiButtonGroupOptionProps[] = [
     label: i18n.translate('coloring.colorMapping.container.otherTermMode.NoneLabel', {
       defaultMessage: 'Auto',
     }),
+    'data-test-subj': 'lns-colorMapping-otherBucketMode-none',
   },
   {
     id: 'neutral',
@@ -45,12 +46,14 @@ const colorModes: EuiButtonGroupOptionProps[] = [
     toolTipContent: i18n.translate('coloring.colorMapping.container.otherTermMode.NeutralTooltip', {
       defaultMessage: 'A theme-aware neutral color',
     }),
+    'data-test-subj': 'lns-colorMapping-otherBucketMode-neutral',
   },
   {
     id: 'static',
     label: i18n.translate('coloring.colorMapping.container.otherTermMode.Color', {
       defaultMessage: 'Color',
     }),
+    'data-test-subj': 'lns-colorMapping-otherBucketMode-static',
   },
 ];
 
@@ -107,6 +110,7 @@ export function OtherTermConfig({
   return (
     <EuiFormRow
       fullWidth
+      data-test-subj="lns-colorMapping-otherBucketConfig"
       label={i18n.translate('coloring.colorMapping.container.otherTermHeader', {
         defaultMessage: 'Color for "Other" aggregation',
       })}
