@@ -424,7 +424,6 @@ export class LensWorkspace {
     await this.shareModal.waitFor({ state: 'hidden' });
   }
 
-
   /** Toggles the auto-apply setting. */
   async toggleAutoApply() {
     await this.autoApplyToggle.click();
