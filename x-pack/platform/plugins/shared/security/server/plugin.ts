@@ -297,6 +297,9 @@ export class SecurityPlugin
       config,
       license,
       customBranding: core.customBranding,
+      // Deliberately non-throwing, unlike `getServiceAccountsService`: the unauthorized-error
+      // handler can fire before `start()` has run, and must treat that as "nothing to refresh".
+      getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
