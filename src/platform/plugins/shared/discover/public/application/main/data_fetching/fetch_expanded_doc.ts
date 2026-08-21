@@ -14,7 +14,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { escapeStringValue, getESQLResults, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  escapeStringValue,
+  getESQLResults,
+  injectWhereClauseAfterSourceCommand,
+} from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ExpandedDocRef } from '../utils/expanded_doc';
 
@@ -31,7 +35,9 @@ export interface FetchExpandedDocParams {
 export const fetchExpandedDoc = async (
   params: FetchExpandedDocParams
 ): Promise<DataTableRecord | undefined> =>
-  params.esqlQueryText === undefined ? fetchDslExpandedDoc(params) : fetchEsqlExpandedDoc(params);
+  params.esqlQueryText === undefined
+    ? fetchDslExpandedDoc(params)
+    : fetchEsqlExpandedDoc({ ...params, esqlQueryText: params.esqlQueryText });
 
 const fetchDslExpandedDoc = async ({
   ref,
@@ -57,34 +63,30 @@ const fetchDslExpandedDoc = async ({
 };
 
 const fetchEsqlExpandedDoc = async ({
-  ref,
+  ref: { id, index },
   esqlQueryText,
   data,
   abortSignal,
-}: FetchExpandedDocParams): Promise<DataTableRecord | undefined> => {
-  // Query the current index pattern because data stream backing indices cannot be queried directly.
-  // Kept independent of the current filters, time range, sort, and limit, so the document is always found.
-  const indexPattern = getIndexPatternFromESQLQuery(esqlQueryText);
-  const esqlQuery = `FROM ${indexPattern} METADATA _index, _id
-| WHERE _index == ${escapeStringValue(ref.index)} AND _id == ${escapeStringValue(ref.id)}
-| LIMIT 1`;
-
+}: FetchExpandedDocParams & { esqlQueryText: string }): Promise<DataTableRecord | undefined> => {
+  const whereClause = `_index == ${escapeStringValue(index)} AND _id == ${escapeStringValue(id)}`;
+  const filteredQuery = injectWhereClauseAfterSourceCommand(esqlQueryText, whereClause);
+  const limitedQuery = `${filteredQuery}\n| LIMIT 1`;
   const { response } = await getESQLResults({
-    esqlQuery,
+    esqlQuery: limitedQuery,
     search: data.search.search,
     signal: abortSignal,
   });
-  const [values] = response.values;
+  const [rowValues] = response.values;
 
-  if (!values) {
+  if (!rowValues) {
     return undefined;
   }
 
   // Match the row shape produced by the main ES|QL search.
   const row: DatatableRow = zipObject(
     response.columns.map(({ name }) => name),
-    values
+    rowValues
   );
 
-  return { id: getDocId({ _index: ref.index, _id: ref.id }), raw: row, flattened: row };
+  return { id: getDocId({ _index: index, _id: id }), raw: row, flattened: row };
 };

@@ -87,19 +87,19 @@ describe('fetchExpandedDoc', () => {
       },
     };
 
-    it('queries the index pattern from the current query rather than the backing index directly', async () => {
+    it('preserves the current query pipeline when fetching the document', async () => {
       const { data, getSearchParams } = setup(esqlResponse);
 
       await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        esqlQueryText: 'FROM logs-* METADATA _id, _index | WHERE a == 1 | LIMIT 10',
+        esqlQueryText: 'FROM logs-* METADATA _id, _index | EVAL derived = message',
         data,
         abortSignal: new AbortController().signal,
       });
 
       expect(getSearchParams().params.query).toBe(
-        `FROM logs-* METADATA _index, _id\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}"\n| LIMIT 1`
+        `FROM logs-* METADATA _id, _index\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}" | EVAL derived = message\n| LIMIT 1`
       );
     });
 
