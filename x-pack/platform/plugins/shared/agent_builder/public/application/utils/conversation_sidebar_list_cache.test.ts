@@ -71,6 +71,8 @@ describe('conversation_sidebar_list_cache', () => {
   const agentId = 'ag';
   const unpinnedKey = queryKeys.conversations.byAgent(agentId, { pinned: false });
   const pinnedKey = queryKeys.conversations.byAgent(agentId, { pinned: true });
+  // EmbeddableConversationList queries without a pinned filter → pinned: null key.
+  const allKey = queryKeys.conversations.byAgent(agentId);
 
   // -------------------------------------------------------------------------
   describe('insertSidebarConversationListRow', () => {
@@ -175,6 +177,58 @@ describe('conversation_sidebar_list_cache', () => {
       const cached = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(cached?.pages[0].results.map((c) => c.id)).toEqual(['c1']);
     });
+
+    it('also inserts into the pinned:null (all-conversations) cache used by EmbeddableConversationList', async () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      // Seed the all-conversations (pinned:null) cache that the embeddable uses.
+      queryClient.setQueryData<ConversationListCache>(
+        allKey,
+        buildCache(buildPage([buildItem('existing-1')], 1, 1))
+      );
+      // Also seed the unpinned cache so no prefetch is triggered.
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(buildPage([buildItem('existing-1')], 1, 1))
+      );
+      const conversationsService = buildConversationsService();
+
+      await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId,
+        conversationId: 'c-new',
+        title: 'New',
+      });
+
+      const cachedAll = queryClient.getQueryData<ConversationListCache>(allKey);
+      expect(cachedAll?.pages[0].results.map((c) => c.id)).toContain('c-new');
+      expect(cachedAll?.pages[0]._meta.total).toBe(2);
+    });
+
+    it('does not duplicate a row that already exists on a later loaded page', async () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      // c1 is on page 2; page 1 only contains c2.
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(buildPage([buildItem('c2')], 1, 2), buildPage([buildItem('c1')], 2, 2))
+      );
+      const conversationsService = buildConversationsService();
+
+      const inserted = await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId,
+        conversationId: 'c1',
+        title: 'placeholder',
+      });
+
+      expect(inserted).toBe(false);
+      const cached = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
+      // c1 must not appear in page 1.
+      expect(cached?.pages[0].results.map((c) => c.id)).not.toContain('c1');
+      // total must not be incremented.
+      expect(cached?.pages[0]._meta.total).toBe(2);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -217,6 +271,30 @@ describe('conversation_sidebar_list_cache', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       removeSidebarConversationListRow({ queryClient, agentId, conversationId: 'c1' });
       expect(queryClient.getQueryData<ConversationListCache>(unpinnedKey)).toBeUndefined();
+    });
+
+    it('only decrements total in the list variant that actually contained the deleted row', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      // c1 and c2 are unpinned; the pinned list contains a different conversation (c3).
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(buildPage([buildItem('c1'), buildItem('c2')], 1, 2))
+      );
+      queryClient.setQueryData<ConversationListCache>(
+        pinnedKey,
+        buildCache(buildPage([buildItem('c3', agentId, 't', { pinned: true })], 1, 1))
+      );
+
+      removeSidebarConversationListRow({ queryClient, agentId, conversationId: 'c1' });
+
+      const unpinned = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
+      expect(unpinned?.pages[0].results.map((c) => c.id)).toEqual(['c2']);
+      expect(unpinned?.pages[0]._meta.total).toBe(1); // correctly decremented
+
+      const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
+      expect(pinned?.pages[0].results.map((c) => c.id)).toEqual(['c3']); // unchanged
+      // Must NOT be decremented — c1 was never in the pinned list.
+      expect(pinned?.pages[0]._meta.total).toBe(1);
     });
   });
 
@@ -359,8 +437,45 @@ describe('conversation_sidebar_list_cache', () => {
         pinned: true,
       });
 
-      // Target list must be untouched.
+      // Target list data must be untouched (invalidateQueries only marks stale,
+      // it does not remove or overwrite stored data).
       expect(queryClient.getQueryData<ConversationListCache>(pinnedKey)).toBe(initialPinnedCache);
+    });
+
+    it('invalidates both lists when the conversation is not in any loaded page', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      // 60 total conversations but only page 1 (50 items) is loaded; c-offpage is on page 2.
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(buildPage([buildItem('c2')], 1, 60))
+      );
+      queryClient.setQueryData<ConversationListCache>(pinnedKey, buildCache(buildPage([], 1, 0)));
+
+      movePinnedConversationBetweenLists({
+        queryClient,
+        agentId,
+        conversationId: 'c-offpage',
+        pinned: true,
+      });
+
+      expect(queryClient.getQueryState(unpinnedKey)?.isInvalidated).toBe(true);
+      expect(queryClient.getQueryState(pinnedKey)?.isInvalidated).toBe(true);
+    });
+
+    it('preserves the source cache reference when no page was modified', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const sourceCache = buildCache(buildPage([buildItem('c2')], 1, 60));
+      queryClient.setQueryData<ConversationListCache>(unpinnedKey, sourceCache);
+
+      movePinnedConversationBetweenLists({
+        queryClient,
+        agentId,
+        conversationId: 'c-offpage', // not in any loaded page
+        pinned: true,
+      });
+
+      // The updater must return the original `prev` reference, not a new object.
+      expect(queryClient.getQueryData<ConversationListCache>(unpinnedKey)).toBe(sourceCache);
     });
   });
 });

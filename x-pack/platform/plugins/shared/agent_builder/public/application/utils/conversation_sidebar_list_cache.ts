@@ -58,8 +58,9 @@ const applyToAllListVariants = (
       if (!prev) return prev;
       const newPages = prev.pages.map((page) => {
         const newResults = updater(page.results);
-        const same = newResults === page.results && delta === 0;
-        if (same) return page;
+        // Only apply delta when results actually changed; otherwise a delete in
+        // the unpinned list would also decrement the pinned list's total.
+        if (newResults === page.results) return page;
         return {
           ...page,
           _meta: { ...page._meta, total: Math.max(0, page._meta.total + delta) },
@@ -73,9 +74,47 @@ const applyToAllListVariants = (
 };
 
 /**
+ * Prepend `row` to the first page of an infinite-query cache entry.
+ * Checks ALL loaded pages for duplicates before inserting (not just the first).
+ * Synthesises a minimal first page when the cache is empty so the row is
+ * visible immediately even if a prefetch failed.
+ * Returns true if the row was inserted, false if it was already present.
+ */
+const prependConversationToList = (
+  queryClient: QueryClient,
+  key: unknown[],
+  row: ListConversationsResponseItem
+): boolean => {
+  let inserted = false;
+  queryClient.setQueryData<ConversationListCache>(key, (prev) => {
+    const data: ConversationListCache = prev ?? {
+      pages: [{ _meta: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] }],
+      pageParams: [undefined],
+    };
+    if (data.pages.some((p) => p.results.some((c) => c.id === row.id))) return prev;
+    inserted = true;
+    const [firstPage, ...rest] = data.pages;
+    return {
+      ...data,
+      pages: [
+        {
+          ...firstPage,
+          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
+          results: [row, ...firstPage.results],
+        },
+        ...rest,
+      ],
+    };
+  });
+  return inserted;
+};
+
+/**
  * Ensure the unpinned list for `agentId` is in the cache, then prepend a
- * newly created conversation row. New conversations are never pinned so only
- * the `pinned: false` cache variant needs updating.
+ * newly created conversation row. New conversations are always unpinned, so
+ * both the `pinned: false` cache variant (sidebar) and the `pinned: null`
+ * variant (EmbeddableConversationList, which queries without a pinned filter)
+ * need updating.
  */
 export const insertSidebarConversationListRow = async ({
   queryClient,
@@ -92,6 +131,10 @@ export const insertSidebarConversationListRow = async ({
 }): Promise<boolean> => {
   const row = buildSidebarConversationListRow({ id: conversationId, agent_id: agentId, title });
   const key = unpinnedKey(agentId);
+  // EmbeddableConversationList calls useConversationList({ agentId }) without a
+  // pinned option, which resolves to pinned: null — a different React Query key
+  // from pinned: false. Both need the new row.
+  const allKey = queryKeys.conversations.byAgent(agentId);
 
   // Cold-cache warm-up: must use fetchInfiniteQuery so the stored shape is
   // { pages, pageParams } rather than a flat array.
@@ -111,29 +154,8 @@ export const insertSidebarConversationListRow = async ({
 
   await queryClient.cancelQueries({ queryKey: key });
 
-  let inserted = false;
-  queryClient.setQueryData<ConversationListCache>(key, (prev) => {
-    // When the prefetch failed (or the cache is otherwise empty), synthesise a
-    // minimal first page so the optimistic row is still visible immediately.
-    const data: ConversationListCache = prev ?? {
-      pages: [{ _meta: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] }],
-      pageParams: [undefined],
-    };
-    if (data.pages[0]?.results.some((c) => c.id === row.id)) return prev;
-    inserted = true;
-    const [firstPage, ...rest] = data.pages;
-    return {
-      ...data,
-      pages: [
-        {
-          ...firstPage,
-          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
-          results: [row, ...firstPage.results],
-        },
-        ...rest,
-      ],
-    };
-  });
+  const inserted = prependConversationToList(queryClient, key, row);
+  prependConversationToList(queryClient, allKey, row);
 
   return inserted;
 };
@@ -221,10 +243,18 @@ export const movePinnedConversationBetweenLists = ({
         results: [...page.results.slice(0, idx), ...page.results.slice(idx + 1)],
       };
     });
-    return { ...prev, pages: newPages };
+    const pagesChanged = newPages.some((p, i) => p !== prev.pages[i]);
+    return pagesChanged ? { ...prev, pages: newPages } : prev;
   });
 
-  if (!movedRow) return;
+  if (!movedRow) {
+    // The conversation wasn't in any loaded page (it's on a page not yet
+    // fetched). Invalidate both lists so the server state is re-fetched on the
+    // next render rather than leaving the view permanently stale.
+    queryClient.invalidateQueries({ queryKey: sourceKey });
+    queryClient.invalidateQueries({ queryKey: targetKey });
+    return;
+  }
   const row = { ...movedRow, pinned };
 
   // Prepend to the first page of the target list, if it's cached.
