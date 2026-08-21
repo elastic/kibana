@@ -142,8 +142,26 @@ describe('executeWorkflow – event/inputs synthesis', () => {
     expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
       expect.objectContaining({
         context: expect.objectContaining({
-          event: { type: 'manual', inputs },
+          event: { type: 'manual', inputs, spaceId: 'default' },
           inputs,
+        }),
+      })
+    );
+  });
+
+  it('includes spaceId in the synthesized manual event', async () => {
+    const inputs = { foo: 'bar' };
+
+    await pluginStart.executeWorkflow(
+      createWorkflow('wf-1'),
+      { spaceId: 'my-space', inputs },
+      request
+    );
+
+    expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          event: expect.objectContaining({ type: 'manual', spaceId: 'my-space' }),
         }),
       })
     );
