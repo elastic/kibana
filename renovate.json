@@ -72,6 +72,7 @@
         "@rsdoctor/rspack-plugin",
         "@swc/plugin-emotion"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -1987,6 +1988,7 @@
         "jest-snapshot",
         "jest-styled-components"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
@@ -2471,6 +2473,7 @@
     {
       "groupName": "moonrepo",
       "matchDepNames": ["@moonrepo/cli"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^[9].*/", "8.19"],
       "labels": ["Team:Operations", "release_note:skip", "backport:skip"],
@@ -2506,6 +2509,7 @@
     {
       "groupName": "@swc",
       "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
