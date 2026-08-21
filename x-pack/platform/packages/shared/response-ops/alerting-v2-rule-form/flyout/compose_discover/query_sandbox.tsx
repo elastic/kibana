@@ -216,9 +216,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     () => timeFieldOptions.some((option) => option.value === timeField),
     [timeFieldOptions, timeField]
   );
-  const timeFieldDisabled = !onTimeFieldChange || !hasSourceQuery || timeFieldOptions.length === 0;
-  const timeFieldInvalid =
-    hasSourceQuery && timeFieldOptions.length > 0 && !currentTimeFieldIsOption;
+  const timeFieldInvalid = hasSourceQuery && !currentTimeFieldIsOption;
 
   const {
     columns,
@@ -397,15 +395,15 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
-              value={hasSourceQuery && currentTimeFieldIsOption ? timeField : ''}
-              hasNoInitialSelection={!hasSourceQuery || !currentTimeFieldIsOption}
+              value={currentTimeFieldIsOption ? timeField : ''}
+              hasNoInitialSelection={!currentTimeFieldIsOption}
               isInvalid={timeFieldInvalid}
               aria-label={i18n.translate(
                 'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
                 { defaultMessage: 'Time field for rule execution' }
               )}
               onChange={(e) => onTimeFieldChange?.(e.target.value)}
-              disabled={timeFieldDisabled}
+              disabled={!onTimeFieldChange}
               compressed
               prepend={i18n.translate(
                 'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',

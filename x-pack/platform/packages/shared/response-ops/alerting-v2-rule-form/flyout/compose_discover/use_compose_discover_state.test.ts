@@ -48,14 +48,6 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(true);
   });
 
-  it('sets childOpen false, queryCommitted true, and preserves clone mode (not aliased to edit)', () => {
-    const state = createInitialState({ mode: 'clone', initialKind: 'signal' });
-
-    expect(state.mode).toBe('clone');
-    expect(state.childOpen).toBe(false);
-    expect(state.queryCommitted).toBe(true);
-  });
-
   it('sets recoveryType to default in edit mode with alert kind', () => {
     const state = createInitialState({ mode: 'edit', initialKind: 'alert' });
 

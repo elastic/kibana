@@ -301,7 +301,7 @@ export function ComposeDiscoverFlyout({
   );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
-    mode,
+    mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryPopulated,
@@ -510,14 +510,10 @@ export function ComposeDiscoverFlyout({
 
   const handleResolvedTimeFieldChange = useCallback(
     (field: string) => {
-      if (uiState.childOpen) {
-        setSandboxTimeField(field);
-        return;
-      }
       methods.setValue('timeField', field, { shouldDirty: false });
       setSandboxTimeField(field);
     },
-    [methods, uiState.childOpen]
+    [methods]
   );
 
   const { timeFieldOptions, isTimeFieldResolved } = useResolveTimeField({
