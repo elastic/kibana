@@ -40,6 +40,7 @@ function getConfig(overrides = {}) {
     stack: { enabled: true },
     incrementalId: { enabled: true },
     templates: { enabled: true },
+    workflows: { enabled: true },
     ...overrides,
   };
 }
@@ -257,6 +258,7 @@ describe('Cases Ui Plugin', () => {
           templatesEnabled: true,
           attachmentsEnabled: false,
           chatEnabled: false,
+          workflowsEnabled: true,
           casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {

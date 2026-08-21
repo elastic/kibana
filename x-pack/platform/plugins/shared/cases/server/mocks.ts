@@ -805,6 +805,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     templates: {
       enabled: true,
     },
+    workflows: {
+      enabled: false,
+    },
     chat: {
       enabled: true,
     },
