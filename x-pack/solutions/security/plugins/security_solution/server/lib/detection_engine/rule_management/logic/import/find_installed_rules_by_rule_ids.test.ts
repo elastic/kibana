@@ -54,10 +54,7 @@ describe('findInstalledRulesByRuleIds', () => {
   });
 
   it('a full outer batch stays under ES max_clause_count', async () => {
-    const ruleIds = Array.from(
-      { length: RULE_IMPORT_BATCH_SIZE },
-      (_, i) => `rule-${i}`
-    );
+    const ruleIds = Array.from({ length: RULE_IMPORT_BATCH_SIZE }, (_, i) => `rule-${i}`);
 
     await findInstalledRulesByRuleIds({ rulesClient, ruleIds });
 
