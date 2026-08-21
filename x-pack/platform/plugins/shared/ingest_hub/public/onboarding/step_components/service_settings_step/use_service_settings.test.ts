@@ -91,11 +91,9 @@ describe('useServiceSettings — incompleteInstances', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     act(() =>
-      result.current.setServiceFieldsAndInputs(
-        'svc_a',
-        { bucket_arn: 'arn:aws:s3:::my-bucket' },
-        ['aws-s3']
-      )
+      result.current.setServiceFieldsAndInputs('svc_a', { bucket_arn: 'arn:aws:s3:::my-bucket' }, [
+        'aws-s3',
+      ])
     );
     expect(result.current.incompleteInstances).toHaveLength(0);
     expect(result.current.isReady).toBe(true);

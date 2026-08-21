@@ -55,7 +55,9 @@ export function DuplicateServiceModal({
   const [nameTouched, setNameTouched] = useState(false);
 
   const [draft, setDraft] = useState<Record<string, string>>({ ...sourceConfig.vars });
-  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(sourceConfig.enabledInputs);
+  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(
+    sourceConfig.enabledInputs
+  );
 
   const handleFieldChange = (fieldName: string, value: string) => {
     setDraft((prev) => ({ ...prev, [fieldName]: value }));

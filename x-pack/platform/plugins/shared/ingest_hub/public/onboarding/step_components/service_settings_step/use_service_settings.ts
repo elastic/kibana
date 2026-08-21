@@ -11,11 +11,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import {
-  getRequiredTextFields,
-  resolveFieldMeta,
-  toTyped,
-} from './field_config';
+import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceVars {
@@ -238,7 +234,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
-        const activeInputs = config.enabledInputs.length ? config.enabledInputs : service.inputs ?? [];
+        const activeInputs = config.enabledInputs.length
+          ? config.enabledInputs
+          : service.inputs ?? [];
         const required = [
           ...new Set(activeInputs.flatMap((inp) => getRequiredTextFields(service, inp))),
         ];

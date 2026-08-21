@@ -391,11 +391,7 @@ describe('buildPackageInputs', () => {
 
   it('skips services with no resolvable input type', () => {
     const service = makeService({ id: 'no_input', inputs: [] });
-    const inputs = buildPackageInputs(
-      [service],
-      { no_input: { enabledInputs: [], vars: {} } },
-      ''
-    );
+    const inputs = buildPackageInputs([service], { no_input: { enabledInputs: [], vars: {} } }, '');
     expect(Object.keys(inputs)).toHaveLength(0);
   });
 });

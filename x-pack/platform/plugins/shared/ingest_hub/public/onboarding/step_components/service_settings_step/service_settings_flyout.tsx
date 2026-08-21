@@ -49,9 +49,7 @@ export function ServiceSettingsFlyout({
   };
 
   const handleInputToggle = (input: string, enabled: boolean) => {
-    setDraftEnabledInputs((prev) =>
-      enabled ? [...prev, input] : prev.filter((i) => i !== input)
-    );
+    setDraftEnabledInputs((prev) => (enabled ? [...prev, input] : prev.filter((i) => i !== input)));
   };
 
   const handleApply = () => {
