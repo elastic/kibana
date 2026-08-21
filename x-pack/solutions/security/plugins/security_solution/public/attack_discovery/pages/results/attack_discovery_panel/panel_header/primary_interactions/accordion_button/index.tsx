@@ -22,7 +22,7 @@ interface Props {
   replacements?: Replacements;
   showAnonymized?: boolean;
   title: string;
-  titleId?: string;
+  titleId: string;
 }
 
 const AccordionButtonComponent: React.FC<Props> = ({
