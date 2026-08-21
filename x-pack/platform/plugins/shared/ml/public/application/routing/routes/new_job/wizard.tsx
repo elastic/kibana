@@ -209,7 +209,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
   const projectRouting =
     typeof projectRoutingFromUrl === 'string' && projectRoutingFromUrl !== ''
       ? projectRoutingFromUrl
-      : (cps?.cpsManager?.getDefaultProjectRouting() ?? undefined);
+      : cps?.cpsManager?.getDefaultProjectRouting() ?? undefined;
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
