@@ -21,5 +21,7 @@ export type { WorkflowExecutionResult } from './execute_workflow_types';
 export {
   hasWorkflowReadPrivilege,
   hasWorkflowExecutePrivilege,
+  hasWorkflowCreatePrivilege,
+  hasWorkflowUpdatePrivilege,
   type CheckWorkflowPrivilegeParams,
 } from './check_privileges';
