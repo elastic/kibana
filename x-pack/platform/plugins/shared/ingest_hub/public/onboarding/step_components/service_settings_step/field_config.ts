@@ -22,8 +22,6 @@ export const AWS_REGION_OPTIONS = [
 
 export interface FieldMeta {
   def: RegistryVarsEntry;
-  /** Undefined when the var appears under both inputs — then it always renders. */
-  input?: string;
   isBool: boolean;
   multi: boolean;
   /** Whether the manifest marks this var as user-visible (show_user: true). */
@@ -40,29 +38,40 @@ export interface FieldMeta {
  */
 export const ECF_TRIGGER_VAR_NAMES = new Set(['bucket_arn', 'log_group_arn']);
 
-/** Resolve display metadata for a var straight from the package manifest. */
+/**
+ * Resolve display metadata for a var from the package manifest.
+ *
+ * Mirrors Fleet's positional scoping: scope is determined by which input's bucket the var sits in,
+ * not by a field on the var entry. When `activeInput` is non-null the lookup is direct
+ * (varDefsByInput[activeInput][fieldName]); when null, the first match across all inputs is used
+ * (for services with a single input or when no input is in scope yet).
+ */
 export function resolveFieldMeta(
   service: AwsServiceMatrixEntry,
+  activeInput: string | null,
   fieldName: string
 ): FieldMeta | undefined {
-  const vd = service.varDefs?.[fieldName];
-  if (!vd) return undefined;
-  // A var scoped to exactly one *known* input renders only when that input is active.
-  // Vars shared by multiple inputs, or scoped to an unknown input, always render.
-  const knownInputs = new Set<string>([
-    'aws-s3',
-    'aws-cloudwatch',
-    'httpjson',
-    'cel',
-    'aws/metrics',
-  ]);
-  const input = vd.inputs.length === 1 && knownInputs.has(vd.inputs[0]) ? vd.inputs[0] : undefined;
+  const varDefsByInput = service.varDefsByInput;
+  if (!varDefsByInput) return undefined;
+
+  let def: RegistryVarsEntry | undefined;
+  if (activeInput !== null) {
+    def = varDefsByInput[activeInput]?.[fieldName];
+  } else {
+    for (const byName of Object.values(varDefsByInput)) {
+      if (fieldName in byName) {
+        def = byName[fieldName];
+        break;
+      }
+    }
+  }
+  if (!def) return undefined;
+
   return {
-    def: vd.def,
-    input,
-    isBool: vd.def.type === 'bool',
-    multi: vd.def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
-    showUser: vd.def.show_user === true,
+    def,
+    isBool: def.type === 'bool',
+    multi: def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
+    showUser: def.show_user === true,
   };
 }
 
@@ -108,12 +117,11 @@ export function getFlyoutFields(
 ): string[] {
   const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   return allFields.filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
     if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
-    if (meta.input && activeInput && meta.input !== activeInput) return false;
     return true;
   });
 }
@@ -146,12 +154,11 @@ export function getRequiredTextFields(
   activeInput: string | null
 ): string[] {
   return (service.requiredConfig ?? []).filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
     if (!meta.showUser) return false;
     if (meta.isBool) return false;
     if (REGION_FIELD_NAMES.has(f)) return false;
-    if (meta.input && activeInput && meta.input !== activeInput) return false;
     return true;
   });
 }
@@ -172,11 +179,10 @@ export function getRequiredBooleanFields(
   activeInput: string | null
 ): string[] {
   return (service.requiredConfig ?? []).filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
     if (!meta.showUser) return false;
     if (!meta.isBool) return false;
-    if (meta.input && activeInput && meta.input !== activeInput) return false;
     return true;
   });
 }

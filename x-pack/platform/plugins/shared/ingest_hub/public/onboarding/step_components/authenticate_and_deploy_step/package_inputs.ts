@@ -35,14 +35,12 @@ export function buildStreamVars(
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
 
-  for (const [key, value] of Object.entries(serviceVars.vars)) {
-    const meta = resolveFieldMeta(service, key);
+  for (const [key, value] of Object.entries(serviceVars.varsByInput[activeInput] ?? {})) {
+    const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) {
       result[key] = value;
       continue;
     }
-    // Skip vars scoped to a different input.
-    if (meta.input && meta.input !== activeInput) continue;
     result[key] = toTyped(value, meta);
   }
 
@@ -50,9 +48,8 @@ export function buildStreamVars(
   const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   for (const key of allShowUserFields) {
     if (key in result) continue;
-    const meta = resolveFieldMeta(service, key);
+    const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
-    if (meta.input && meta.input !== activeInput) continue;
     const typed = toTyped(undefined, meta);
     if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
       result[key] = typed;
@@ -78,7 +75,7 @@ export function buildPackageInputs(
   for (const service of services) {
     const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
       enabledInputs: [],
-      vars: {},
+      varsByInput: {},
     };
     // Fall back to the first manifest input when no explicit selection has been saved.
     const activeInputs =

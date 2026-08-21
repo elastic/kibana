@@ -49,13 +49,6 @@ export interface DeploymentMethodEntry {
   preferred?: boolean;
 }
 
-/** A manifest var definition plus the input types it appears under. */
-export interface ServiceVarDef {
-  def: RegistryVarsEntry;
-  /** streams[].input values this var appears under, e.g. ['aws-s3'] */
-  inputs: string[];
-}
-
 export interface AwsServiceMatrixEntry {
   /** Data stream identifier, matching packages/<packageName>/data_stream/<id> */
   id: string;
@@ -75,8 +68,12 @@ export interface AwsServiceMatrixEntry {
   optionalConfig?: string[];
   /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
   varTypes?: Record<string, string>;
-  /** Full manifest var definitions keyed by name, with the inputs each var appears under. Derived from the package manifest. */
-  varDefs?: Record<string, ServiceVarDef>;
+  /**
+   * Manifest var definitions grouped by stream input type, then by var name.
+   * Mirrors Fleet's positional scoping — a var's input is where it sits in the manifest,
+   * not a field on the var entry. e.g. { 'aws-s3': { bucket_arn: RegistryVarsEntry } }
+   */
+  varDefsByInput?: Record<string, Record<string, RegistryVarsEntry>>;
   packageName: string;
   /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
   policyTemplate?: string;
@@ -503,7 +500,7 @@ export function buildAwsServiceMatrix(
     let managedIntegrations = false;
     let pt: any;
     const varTypes: Record<string, string> = {};
-    const varDefs: Record<string, ServiceVarDef> = {};
+    const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
@@ -541,25 +538,25 @@ export function buildAwsServiceMatrix(
         });
       }
 
-      // Walk streams preserving input attribution and full var definitions.
-      // First-wins on name collision: when a var appears under multiple inputs,
-      // the definition from the first stream wins and the additional input is appended.
+      // Walk streams building a positional var map: input → varName → definition.
+      // Matches Fleet's scope model — a var's input is where it sits in the manifest, not a field.
+      // First-wins within each input bucket when the same var name appears in multiple streams
+      // of the same input type.
       for (const s of ((ds as any)?.streams ?? []) as Array<{
         input?: string;
         vars?: RegistryVarsEntry[];
       }>) {
+        if (!s.input) continue;
+        const bucket = (varDefsByInput[s.input] ??= {});
         for (const v of s.vars ?? []) {
           if (!v.name) continue;
-          const existing = varDefs[v.name];
-          if (existing) {
-            if (s.input && !existing.inputs.includes(s.input)) existing.inputs.push(s.input);
-            continue;
-          }
-          varDefs[v.name] = { def: v, inputs: s.input ? [s.input] : [] };
+          bucket[v.name] ??= v;
         }
       }
 
-      const allVars: RegistryVarsEntry[] = Object.values(varDefs).map((d) => d.def);
+      const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
+        Object.values(byName)
+      );
 
       for (const v of allVars) {
         if (v.name && v.type) varTypes[v.name] = v.type;
@@ -574,9 +571,12 @@ export function buildAwsServiceMatrix(
         requiredConfig = reqVars;
       }
 
+      const reqVarSet = new Set(reqVars);
       const optVars: string[] = [
         ...new Set(
-          allVars.filter((v: any) => !v.required && v.show_user).map((v: any) => v.name as string)
+          allVars
+            .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
+            .map((v: any) => v.name as string)
         ),
       ];
       if (optVars.length > 0) {
@@ -637,7 +637,10 @@ export function buildAwsServiceMatrix(
     // Suppress the rest of the manifest vars so the flyout stays minimal.
     const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
     if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
-      const ecfVarNames = Object.keys(varDefs).filter((v) => ECF_TRIGGER_VARS.has(v));
+      const allVarNames = new Set(
+        Object.values(varDefsByInput).flatMap((byName) => Object.keys(byName))
+      );
+      const ecfVarNames = [...allVarNames].filter((v) => ECF_TRIGGER_VARS.has(v));
       if (ecfVarNames.length > 0) {
         requiredConfig = ecfVarNames;
         optionalConfig = undefined;
@@ -654,7 +657,7 @@ export function buildAwsServiceMatrix(
       requiredConfig,
       optionalConfig,
       varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
-      varDefs: Object.keys(varDefs).length > 0 ? varDefs : undefined,
+      varDefsByInput: Object.keys(varDefsByInput).length > 0 ? varDefsByInput : undefined,
       defaultEnabled,
       defaultEnabledInputs,
       showInUI,

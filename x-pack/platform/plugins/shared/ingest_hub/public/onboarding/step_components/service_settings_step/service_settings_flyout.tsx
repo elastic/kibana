@@ -29,7 +29,7 @@ interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
-  onApply: (fields: Record<string, string>, enabledInputs: string[]) => void;
+  onApply: (varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => void;
   onClose: () => void;
 }
 
@@ -41,11 +41,16 @@ export function ServiceSettingsFlyout({
   onClose,
 }: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
-  const [draft, setDraft] = useState<Record<string, string>>({ ...config.vars });
+  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(
+    () => ({ ...config.varsByInput })
+  );
   const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(config.enabledInputs);
 
-  const handleFieldChange = (fieldName: string, value: string) => {
-    setDraft((prev) => ({ ...prev, [fieldName]: value }));
+  const handleFieldChange = (input: string, fieldName: string, value: string) => {
+    setDraft((prev) => ({
+      ...prev,
+      [input]: { ...(prev[input] ?? {}), [fieldName]: value },
+    }));
   };
 
   const handleInputToggle = (input: string, enabled: boolean) => {
@@ -79,7 +84,7 @@ export function ServiceSettingsFlyout({
       <EuiFlyoutBody>
         <ServiceFieldsForm
           service={service}
-          draft={draft}
+          varsByInput={draft}
           enabledInputs={draftEnabledInputs}
           globalRegion={globalRegion}
           onFieldChange={handleFieldChange}

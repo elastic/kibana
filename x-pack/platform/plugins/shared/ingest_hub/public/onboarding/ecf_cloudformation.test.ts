@@ -50,11 +50,11 @@ describe('getEcfServiceConfigs()', () => {
     const serviceVars: Record<string, ServiceVars> = {
       vpcflow: {
         enabledInputs: ['aws-s3'],
-        vars: { bucket_arn: 'arn:aws:s3:::my-bucket', region: 'us-east-1' },
+        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket', region: 'us-east-1' } },
       },
       waf: {
         enabledInputs: ['aws-cloudwatch'],
-        vars: { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+        varsByInput: { 'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' } },
       },
     };
     const result = getEcfServiceConfigs([inst('vpcflow'), inst('waf')], serviceVars);
@@ -73,11 +73,11 @@ describe('getEcfServiceConfigs()', () => {
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
         enabledInputs: ['aws-s3'],
-        vars: { bucket_arn: 'arn:aws:s3:::bucket-a' },
+        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a' } },
       },
       'cloudtrail__dup-1': {
         enabledInputs: ['aws-s3'],
-        vars: { bucket_arn: 'arn:aws:s3:::bucket-b' },
+        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-b' } },
       },
     };
     const instances = [inst('cloudtrail'), inst('cloudtrail', 'cloudtrail__dup-1')];
@@ -95,9 +95,9 @@ describe('getEcfServiceConfigs()', () => {
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
         enabledInputs: ['aws-cloudwatch'],
-        vars: {
-          bucket_arn: 'arn:aws:s3:::stale-bucket',
-          log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct',
+        varsByInput: {
+          'aws-s3': { bucket_arn: 'arn:aws:s3:::stale-bucket' },
+          'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct' },
         },
       },
     };
@@ -108,7 +108,10 @@ describe('getEcfServiceConfigs()', () => {
 
   it('trims whitespace from ARN values and treats blank as empty', () => {
     const serviceVars: Record<string, ServiceVars> = {
-      cloudtrail: { enabledInputs: ['aws-s3'], vars: { bucket_arn: '  ', log_group_arn: '' } },
+      cloudtrail: {
+        enabledInputs: ['aws-s3'],
+        varsByInput: { 'aws-s3': { bucket_arn: '  ' }, 'aws-cloudwatch': { log_group_arn: '' } },
+      },
     };
     const [config] = getEcfServiceConfigs([inst('cloudtrail')], serviceVars);
     expect(config.bucketArns).toEqual([]);

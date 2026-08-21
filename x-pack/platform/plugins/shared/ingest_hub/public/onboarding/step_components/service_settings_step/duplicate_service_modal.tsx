@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceVars } from './use_service_settings';
-import { getRequiredTextFields } from './field_config';
+import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 
@@ -38,7 +38,7 @@ interface DuplicateServiceModalProps {
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
-  onAdd: (name: string, fields: Record<string, string>, enabledInputs: string[]) => void;
+  onAdd: (name: string, varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => void;
   onCancel: () => void;
 }
 
@@ -54,13 +54,16 @@ export function DuplicateServiceModal({
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const [draft, setDraft] = useState<Record<string, string>>({ ...sourceConfig.vars });
-  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(
-    sourceConfig.enabledInputs
+  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(
+    () => ({ ...sourceConfig.varsByInput })
   );
+  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(sourceConfig.enabledInputs);
 
-  const handleFieldChange = (fieldName: string, value: string) => {
-    setDraft((prev) => ({ ...prev, [fieldName]: value }));
+  const handleFieldChange = (input: string, fieldName: string, value: string) => {
+    setDraft((prev) => ({
+      ...prev,
+      [input]: { ...(prev[input] ?? {}), [fieldName]: value },
+    }));
   };
 
   const trimmedName = name.trim();
@@ -69,10 +72,15 @@ export function DuplicateServiceModal({
   const nameInvalid = nameEmpty || nameTaken;
 
   const activeInputs = draftEnabledInputs.length ? draftEnabledInputs : service.inputs ?? [];
-  const requiredTextFields = [
-    ...new Set(activeInputs.flatMap((inp) => getRequiredTextFields(service, inp))),
-  ];
-  const anyRequiredEmpty = requiredTextFields.some((f) => !(draft[f] ?? '').trim());
+  const anyRequiredEmpty = activeInputs.some((inp) =>
+    getRequiredTextFields(service, inp).some((f) => {
+      const meta = resolveFieldMeta(service, inp, f);
+      const raw = draft[inp]?.[f];
+      const effective = meta ? toTyped(raw, meta) : raw ?? '';
+      if (Array.isArray(effective)) return effective.length === 0;
+      return typeof effective === 'string' && !effective.trim();
+    })
+  );
 
   const canAdd = !nameInvalid && !anyRequiredEmpty;
 
@@ -146,7 +154,7 @@ export function DuplicateServiceModal({
 
         <ServiceFieldsForm
           service={service}
-          draft={draft}
+          varsByInput={draft}
           enabledInputs={draftEnabledInputs}
           globalRegion={globalRegion}
           onFieldChange={handleFieldChange}

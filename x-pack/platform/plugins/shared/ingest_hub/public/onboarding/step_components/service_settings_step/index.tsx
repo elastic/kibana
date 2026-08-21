@@ -94,18 +94,19 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     : null;
 
   const handleFlyoutApply =
-    (instanceId: string) => (fields: Record<string, string>, enabledInputs: string[]) => {
-      setServiceFieldsAndInputs(instanceId, fields, enabledInputs);
+    (instanceId: string) =>
+    (varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => {
+      setServiceFieldsAndInputs(instanceId, varsByInput, enabledInputs);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
-    fields: Record<string, string>,
+    varsByInput: Record<string, Record<string, string>>,
     enabledInputs: string[]
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, fields, enabledInputs);
+    addDuplicate(duplicateSourceInstanceId, name, varsByInput, enabledInputs);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -240,8 +241,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           const service = awsServicesMap?.get(inst.serviceId);
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
-          const regionField = getRegionFieldName(service, config.enabledInputs[0] ?? null);
-          const override = config.vars[regionField]?.trim();
+          const activeInput = config.enabledInputs?.[0] ?? null;
+          const regionField = getRegionFieldName(service, activeInput);
+          const override = activeInput
+            ? config.varsByInput?.[activeInput]?.[regionField]?.trim()
+            : undefined;
           if (override) return override;
           if (globalRegion) return globalRegion;
           return (

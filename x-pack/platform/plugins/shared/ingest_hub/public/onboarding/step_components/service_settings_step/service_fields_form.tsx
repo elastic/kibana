@@ -56,10 +56,10 @@ function getInputDisplayLabel(input: string): string {
 
 export interface ServiceFieldsFormProps {
   service: AwsServiceMatrixEntry;
-  draft: Record<string, string>;
+  varsByInput: Record<string, Record<string, string>>;
   enabledInputs: string[];
   globalRegion: string;
-  onFieldChange: (fieldName: string, value: string) => void;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
   onInputToggle: (input: string, enabled: boolean) => void;
 }
 
@@ -69,20 +69,22 @@ const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
 
 function VarField({
   service,
+  activeInput,
   fieldName,
   draft,
   onFieldChange,
   forceShowErrors,
 }: {
   service: AwsServiceMatrixEntry;
+  activeInput: string;
   fieldName: string;
-  draft: Record<string, string>;
-  onFieldChange: (fieldName: string, value: string) => void;
+  draft: Record<string, Record<string, string>>;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
 }) {
-  const meta = resolveFieldMeta(service, fieldName);
+  const meta = resolveFieldMeta(service, activeInput, fieldName);
   if (!meta) return null;
-  const value = toTyped(draft[fieldName], meta);
+  const value = toTyped(draft[activeInput]?.[fieldName], meta);
   const isRequired = !meta.isBool && (service.requiredConfig ?? []).includes(fieldName);
   const isEmpty = Array.isArray(value)
     ? value.length === 0
@@ -99,12 +101,12 @@ function VarField({
     ? { ...meta.def, description: undefined, multi: true }
     : meta.def;
   return (
-    <div data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}>
+    <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyPackagePolicyInputVarField
           varDef={varDef}
           value={value}
-          onChange={(next) => onFieldChange(fieldName, toDraft(next))}
+          onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
           errors={errors}
           forceShowErrors={forceShowErrors}
           packageName={service.packageName}
@@ -117,22 +119,22 @@ function VarField({
 function InputVarFields({
   service,
   activeInput,
-  draft,
+  varsByInput,
   globalRegion,
   onFieldChange,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
-  draft: Record<string, string>;
+  varsByInput: Record<string, Record<string, string>>;
   globalRegion: string;
-  onFieldChange: (fieldName: string, value: string) => void;
+  onFieldChange: (input: string, fieldName: string, value: string) => void;
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
   const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   const regionFieldName = getRegionFieldName(service, activeInput);
   const regionMeta = allConfigFields.includes(regionFieldName)
-    ? resolveFieldMeta(service, regionFieldName)
+    ? resolveFieldMeta(service, activeInput, regionFieldName)
     : undefined;
 
   const requiredTextFields = getRequiredTextFields(service, activeInput);
@@ -144,7 +146,7 @@ function InputVarFields({
   const requiredBoolFields = getRequiredBooleanFields(service, activeInput);
 
   const isAdvanced = (fieldName: string) => {
-    const meta = resolveFieldMeta(service, fieldName);
+    const meta = resolveFieldMeta(service, activeInput, fieldName);
     return meta ? isAdvancedVar(meta.def) : false;
   };
 
@@ -155,8 +157,9 @@ function InputVarFields({
 
   const hasAdvancedOptions = advancedBoolFields.length > 0 || advancedOtherFields.length > 0;
 
+  const draft = varsByInput[activeInput] ?? {};
   const anyRequiredEmpty = requiredTextFields.some((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     const effective = meta ? toTyped(draft[f], meta) : draft[f] ?? '';
     if (Array.isArray(effective)) return effective.length === 0;
     return typeof effective === 'string' && !effective.trim();
@@ -177,7 +180,7 @@ function InputVarFields({
             <EuiFieldText
               value={globalRegion}
               disabled
-              data-test-subj={`serviceSettingsFlyout-field-${regionFieldName}`}
+              data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${regionFieldName}`}
             />
           </EuiFormRow>
           {requiredTextFields.length > 0 && <EuiSpacer size="m" />}
@@ -203,8 +206,9 @@ function InputVarFields({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
                 forceShowErrors={anyRequiredEmpty}
               />
@@ -221,8 +225,9 @@ function InputVarFields({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
               />
             </React.Fragment>
@@ -238,8 +243,9 @@ function InputVarFields({
               {i > 0 && <EuiSpacer size="m" />}
               <VarField
                 service={service}
+                activeInput={activeInput}
                 fieldName={fieldName}
-                draft={draft}
+                draft={varsByInput}
                 onFieldChange={onFieldChange}
               />
             </React.Fragment>
@@ -273,8 +279,9 @@ function InputVarFields({
                   {i > 0 && <EuiSpacer size="m" />}
                   <VarField
                     service={service}
+                    activeInput={activeInput}
                     fieldName={fieldName}
-                    draft={draft}
+                    draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
                 </React.Fragment>
@@ -284,8 +291,9 @@ function InputVarFields({
                   {(i > 0 || advancedBoolFields.length > 0) && <EuiSpacer size="m" />}
                   <VarField
                     service={service}
+                    activeInput={activeInput}
                     fieldName={fieldName}
-                    draft={draft}
+                    draft={varsByInput}
                     onFieldChange={onFieldChange}
                   />
                 </React.Fragment>
@@ -300,7 +308,7 @@ function InputVarFields({
 
 export function ServiceFieldsForm({
   service,
-  draft,
+  varsByInput,
   enabledInputs,
   globalRegion,
   onFieldChange,
@@ -316,7 +324,7 @@ export function ServiceFieldsForm({
       <InputVarFields
         service={service}
         activeInput={singleInput}
-        draft={draft}
+        varsByInput={varsByInput}
         globalRegion={globalRegion}
         onFieldChange={onFieldChange}
       />
@@ -342,7 +350,7 @@ export function ServiceFieldsForm({
                 <InputVarFields
                   service={service}
                   activeInput={input}
-                  draft={draft}
+                  varsByInput={varsByInput}
                   globalRegion={globalRegion}
                   onFieldChange={onFieldChange}
                 />

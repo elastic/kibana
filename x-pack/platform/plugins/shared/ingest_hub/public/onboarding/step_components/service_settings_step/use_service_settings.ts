@@ -17,7 +17,12 @@ import type { SignalFilter } from '../services_step/use_services_step';
 export interface ServiceVars {
   /** Input types that are enabled for this service instance (e.g. ['httpjson'], ['aws-s3']). */
   enabledInputs: string[];
-  vars: Record<string, string>;
+  /**
+   * Var values keyed by input type, then var name.
+   * Mirrors Fleet's positional scoping (inputs[].streams[].vars).
+   * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
+   */
+  varsByInput: Record<string, Record<string, string>>;
 }
 
 /**
@@ -131,7 +136,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
         enabledInputs: service?.defaultEnabledInputs ?? [],
-        vars: {},
+        varsByInput: {},
       };
     },
     [persisted, instances, awsServicesMap]
@@ -140,17 +145,22 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   // Applies multiple field changes (and optional enabled-inputs update) in a single write to avoid
   // stale-closure overwrites when several vars are committed at once (flyout Save).
   const setServiceFieldsAndInputs = useCallback(
-    (instanceId: string, newFields: Record<string, string>, enabledInputs: string[]) => {
+    (
+      instanceId: string,
+      fieldsByInput: Record<string, Record<string, string>>,
+      enabledInputs: string[]
+    ) => {
       const current = getServiceVars(instanceId);
+      const merged: Record<string, Record<string, string>> = { ...current.varsByInput };
+      for (const [input, fields] of Object.entries(fieldsByInput)) {
+        merged[input] = { ...(merged[input] ?? {}), ...fields };
+      }
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [instanceId]: {
-            enabledInputs,
-            vars: { ...current.vars, ...newFields },
-          },
+          [instanceId]: { enabledInputs, varsByInput: merged },
         },
       });
     },
@@ -161,7 +171,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     (
       sourceInstanceId: string,
       newName: string,
-      fields: Record<string, string>,
+      fieldsByInput: Record<string, Record<string, string>>,
       enabledInputs: string[]
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
@@ -175,6 +185,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       }
 
       const sourceVars = getServiceVars(sourceInstanceId);
+      const mergedByInput: Record<string, Record<string, string>> = { ...sourceVars.varsByInput };
+      for (const [input, fields] of Object.entries(fieldsByInput)) {
+        mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+      }
       const newInstance: ServiceInstance = {
         instanceId: newInstanceId,
         serviceId: source.serviceId,
@@ -189,7 +203,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           ...(persisted?.serviceVars ?? {}),
           [newInstanceId]: {
             enabledInputs: enabledInputs.length ? enabledInputs : sourceVars.enabledInputs,
-            vars: { ...sourceVars.vars, ...fields },
+            varsByInput: mergedByInput,
           },
         },
       });
@@ -234,18 +248,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
-        const activeInputs = config.enabledInputs.length
+        const activeInputs = config.enabledInputs?.length
           ? config.enabledInputs
           : service.inputs ?? [];
-        const required = [
-          ...new Set(activeInputs.flatMap((inp) => getRequiredTextFields(service, inp))),
-        ];
-        return required.some((f) => {
-          const meta = resolveFieldMeta(service, f);
-          const effective = meta ? toTyped(config.vars[f], meta) : config.vars[f] ?? '';
-          if (Array.isArray(effective)) return effective.length === 0;
-          return typeof effective === 'string' && effective.trim() === '';
-        });
+        return activeInputs.some((inp) =>
+          getRequiredTextFields(service, inp).some((f) => {
+            const meta = resolveFieldMeta(service, inp, f);
+            const raw = config.varsByInput?.[inp]?.[f];
+            const effective = meta ? toTyped(raw, meta) : raw ?? '';
+            if (Array.isArray(effective)) return effective.length === 0;
+            return typeof effective === 'string' && effective.trim() === '';
+          })
+        );
       }),
     [instances, getServiceVars, awsServicesMap]
   );

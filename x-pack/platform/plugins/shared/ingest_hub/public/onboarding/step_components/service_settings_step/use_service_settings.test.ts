@@ -16,8 +16,9 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
-import type { AwsServiceMatrixEntry, ServiceVarDef } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
@@ -50,11 +51,8 @@ function makeEntry(
   } as AwsServiceMatrixEntry;
 }
 
-function makeTextVarDef(name: string): ServiceVarDef {
-  return {
-    def: { name, type: 'text', required: true, show_user: true } as any,
-    inputs: ['aws-s3'],
-  };
+function makeTextVarDef(name: string): RegistryVarsEntry {
+  return { name, type: 'text', required: true, show_user: true } as RegistryVarsEntry;
 }
 
 // --- incompleteInstances ---
@@ -64,7 +62,7 @@ describe('useServiceSettings — incompleteInstances', () => {
     signalType: 'logs',
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn'],
-    varDefs: { bucket_arn: makeTextVarDef('bucket_arn') },
+    varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
   });
 
   beforeEach(() => {
@@ -91,9 +89,11 @@ describe('useServiceSettings — incompleteInstances', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     act(() =>
-      result.current.setServiceFieldsAndInputs('svc_a', { bucket_arn: 'arn:aws:s3:::my-bucket' }, [
-        'aws-s3',
-      ])
+      result.current.setServiceFieldsAndInputs(
+        'svc_a',
+        { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+        ['aws-s3']
+      )
     );
     expect(result.current.incompleteInstances).toHaveLength(0);
     expect(result.current.isReady).toBe(true);

@@ -12,7 +12,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
+import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import {
   buildDeployGroups,
   buildInstanceStatuses,
@@ -23,11 +23,6 @@ import type { DeployGroup } from './deploy_groups';
 
 export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
-interface ServiceSettingsPersistedState {
-  globalRegion: string;
-  serviceVars: Record<string, ServiceVars>;
-  instances?: ServiceInstance[];
-}
 
 export interface UseDeployResult {
   namespace: string;
