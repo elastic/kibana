@@ -231,13 +231,14 @@ export class CasePlugin
 
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
-    const workflowRunService = plugins.workflowsManagement
-      ? new CasesWorkflowRunService({
-          management: plugins.workflowsManagement.management,
-          logger: this.logger,
-          audit: plugins.security.audit,
-        })
-      : undefined;
+    const workflowRunService =
+      this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
+        ? new CasesWorkflowRunService({
+            management: plugins.workflowsManagement.management,
+            logger: this.logger,
+            audit: plugins.security.audit,
+          })
+        : undefined;
 
     registerRoutes({
       router,
