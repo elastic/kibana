@@ -49,6 +49,7 @@ const mockUsePageReady = usePageReady as jest.Mock;
 
 const impactedService = (name: string, streamName = 'logs.app') => ({
   type: 'entity' as const,
+  subtype: 'service',
   feature_id: `feat-${name}`,
   name,
   stream_name: streamName,
