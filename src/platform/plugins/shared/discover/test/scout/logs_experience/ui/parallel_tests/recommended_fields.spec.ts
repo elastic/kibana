@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   spaceTest,
   LOGS,
@@ -66,24 +67,27 @@ spaceTest.describe(
 
     spaceTest(
       'should NOT show the recommended fields group for a non-logs data source profile',
-      async ({ page, discoverScoutSpace, pageObjects }) => {
+      async ({ page, apiServices, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
-        const sessionId = await discoverScoutSpace.createDiscoverSession({
-          title: `non-logs-no-recommended-${discoverScoutSpace.id}`,
-          tabs: [
-            {
-              id: 'main',
-              label: 'Untitled',
-              data_source: {
-                type: 'data_view_spec',
-                index_pattern: LOGS.NON_LOGS_DATA_VIEW,
-                time_field: '@timestamp',
-                name: LOGS.NON_LOGS_DATA_VIEW,
+        const sessionId = await apiServices.discover.create(
+          {
+            title: `non-logs-no-recommended-${discoverScoutSpace.id}`,
+            tabs: [
+              {
+                id: 'main',
+                label: 'Untitled',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: LOGS.NON_LOGS_DATA_VIEW,
+                  time_field: '@timestamp',
+                  name: LOGS.NON_LOGS_DATA_VIEW,
+                },
               },
-            },
-          ],
-        });
+            ],
+          } satisfies DiscoverSessionApiDataInput,
+          discoverScoutSpace.id
+        );
 
         await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
         await discover.waitUntilTabIsLoaded();
