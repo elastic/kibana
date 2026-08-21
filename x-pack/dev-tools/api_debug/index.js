@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 import { globby } from 'globby';
-import { bold } from 'chalk';
+import chalk from 'chalk';
 import { argv } from 'yargs';
 import { requestFromApi } from './request_from_api';
 
@@ -16,7 +16,7 @@ async function listFiles() {
   const files = await globby(pattern);
   files.forEach((file) => {
     const { name, description } = require(file); // eslint-disable-line import/no-dynamic-require
-    console.log('    ' + bold(`node ${argv.$0} ${name}`));
+    console.log('    ' + chalk.bold(`node ${argv.$0} ${name}`));
     console.log(`      ${description}`);
   });
 }

@@ -1030,8 +1030,7 @@
         "listr2",
         "ora",
         "@parcel/watcher",
-        "@types/cli-progress",
-        "@types/dedent"
+        "@types/cli-progress"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
