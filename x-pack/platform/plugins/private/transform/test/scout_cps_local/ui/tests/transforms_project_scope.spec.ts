@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Client, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { TransformApiService } from '../../../scout/api/services/transform_api_service';
 import { test, testData } from '../fixtures';
 
 const CREATED_TRANSFORM_ID = 'scout_cps_ui_create_project_scope';
@@ -62,14 +63,6 @@ const getTransformConfig = (
   },
 });
 
-const ignoreCleanupError = async (cleanup: () => Promise<unknown>): Promise<void> => {
-  try {
-    await cleanup();
-  } catch {
-    // Cleanup is idempotent because tests may fail before creating every resource.
-  }
-};
-
 const createDataView = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({
     method: 'DELETE',
@@ -91,35 +84,27 @@ const createDataView = async (kbnClient: KbnClient): Promise<void> => {
   });
 };
 
-const deleteTransform = async (esClient: Client, transformId: string): Promise<void> => {
-  await ignoreCleanupError(() =>
-    esClient.transform.stopTransform({
+const deleteTransformResources = async (
+  transformService: TransformApiService,
+  transformId: string
+): Promise<void> => {
+  await transformService.deleteTransform(
+    {
       transform_id: transformId,
       force: true,
-      wait_for_completion: true,
-    })
+    },
+    { ignoreErrors: true }
   );
-  await ignoreCleanupError(() =>
-    esClient.transform.deleteTransform({
-      transform_id: transformId,
-      force: true,
-    })
-  );
-  await ignoreCleanupError(() =>
-    esClient.indices.delete({
-      index: getDestinationIndex(transformId),
-      ignore_unavailable: true,
-    })
-  );
+  await transformService.deleteIndices({ index: getDestinationIndex(transformId) });
 };
 
 const createTransform = async (
-  esClient: Client,
+  transformService: TransformApiService,
   transformId: string,
   projectRouting?: ProjectRouting
 ): Promise<void> => {
-  await deleteTransform(esClient, transformId);
-  await esClient.transform.putTransform({
+  await deleteTransformResources(transformService, transformId);
+  await transformService.createTransform({
     transform_id: transformId,
     defer_validation: true,
     ...getTransformConfig(transformId, projectRouting),
@@ -127,11 +112,11 @@ const createTransform = async (
 };
 
 const getProjectRouting = async (
-  esClient: Client,
+  transformService: TransformApiService,
   transformId: string
 ): Promise<ProjectRouting | undefined> => {
-  const response = await esClient.transform.getTransform({ transform_id: transformId });
-  return response.transforms[0]?.source.project_routing;
+  const transform = await transformService.getTransform({ transform_id: transformId });
+  return transform.source.project_routing;
 };
 
 test.describe(
@@ -142,16 +127,16 @@ test.describe(
       await createDataView(kbnClient);
     });
 
-    test.beforeEach(async ({ browserAuth, esClient }) => {
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
       for (const transformId of TRANSFORM_IDS) {
-        await deleteTransform(esClient, transformId);
+        await deleteTransformResources(apiServices.transform, transformId);
       }
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterEach(async ({ esClient }) => {
+    test.afterEach(async ({ apiServices }) => {
       for (const transformId of TRANSFORM_IDS) {
-        await deleteTransform(esClient, transformId);
+        await deleteTransformResources(apiServices.transform, transformId);
       }
     });
 
@@ -165,7 +150,7 @@ test.describe(
     });
 
     test('creates a transform with project scope and verifies the table details', async ({
-      esClient,
+      apiServices,
       page,
       pageObjects,
     }) => {
@@ -184,7 +169,7 @@ test.describe(
 
       await test.step('verify project routing was saved', async () => {
         await expect
-          .poll(() => getProjectRouting(esClient, CREATED_TRANSFORM_ID))
+          .poll(() => getProjectRouting(apiServices.transform, CREATED_TRANSFORM_ID))
           .toBe(ORIGIN_PROJECT_ROUTING);
       });
 
@@ -207,14 +192,18 @@ test.describe(
     });
 
     test('shows linked-only project scope as a custom subset in the table', async ({
-      esClient,
+      apiServices,
       page,
       pageObjects,
     }) => {
       const { transform } = pageObjects;
 
       await test.step('set up a transform with only the linked project selected', async () => {
-        await createTransform(esClient, LINKED_ONLY_TRANSFORM_ID, LINKED_PROJECT_ROUTING);
+        await createTransform(
+          apiServices.transform,
+          LINKED_ONLY_TRANSFORM_ID,
+          LINKED_PROJECT_ROUTING
+        );
       });
 
       await test.step('verify the linked-only project scope column label', async () => {
@@ -228,14 +217,14 @@ test.describe(
     });
 
     test('edits a transform project scope through the Edit action', async ({
-      esClient,
+      apiServices,
       page,
       pageObjects,
     }) => {
       const { transform } = pageObjects;
 
       await test.step('set up a transform with all projects selected', async () => {
-        await createTransform(esClient, EDITED_TRANSFORM_ID, PROJECT_ROUTING.ALL);
+        await createTransform(apiServices.transform, EDITED_TRANSFORM_ID, PROJECT_ROUTING.ALL);
       });
 
       await test.step('change the project scope from the edit flyout', async () => {
@@ -258,13 +247,13 @@ test.describe(
 
       await test.step('verify the updated project routing', async () => {
         await expect
-          .poll(() => getProjectRouting(esClient, EDITED_TRANSFORM_ID))
+          .poll(() => getProjectRouting(apiServices.transform, EDITED_TRANSFORM_ID))
           .toBe(ORIGIN_PROJECT_ROUTING);
       });
     });
 
     test('edits multiple transform project scopes from the bulk action', async ({
-      esClient,
+      apiServices,
       page,
       pageObjects,
     }) => {
@@ -272,7 +261,7 @@ test.describe(
 
       await test.step('set up transforms with all projects selected', async () => {
         for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
-          await createTransform(esClient, transformId, PROJECT_ROUTING.ALL);
+          await createTransform(apiServices.transform, transformId, PROJECT_ROUTING.ALL);
         }
       });
 
@@ -311,7 +300,7 @@ test.describe(
           .poll(async () =>
             Promise.all(
               BULK_EDITED_TRANSFORM_IDS.map((transformId) =>
-                getProjectRouting(esClient, transformId)
+                getProjectRouting(apiServices.transform, transformId)
               )
             )
           )

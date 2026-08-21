@@ -76,11 +76,30 @@ apiTest.describe(
         const updatedProjectRouting = PROJECT_ROUTING.ALL;
 
         await apiTest.step('creates a transform with project routing', async () => {
-          await createTransformWithProjectRouting(
-            apiServices.transform,
-            transformId,
-            projectRouting
+          const transformConfig = generateTransformConfig(transformId);
+          const { statusCode, body } = await apiClient.put(
+            `internal/transform/transforms/${transformId}?deferValidation=true`,
+            {
+              headers: {
+                ...COMMON_HEADERS,
+                ...transformManagerCookieHeader,
+              },
+              body: {
+                ...transformConfig,
+                source: {
+                  ...transformConfig.source,
+                  project_routing: projectRouting,
+                },
+              },
+              responseType: 'json',
+            }
           );
+
+          expect(statusCode).toBe(200);
+          expect(body).toMatchObject({
+            errors: [],
+            transformsCreated: [{ transform: transformId }],
+          });
 
           const transform = await apiServices.transform.getTransform({
             transform_id: transformId,

@@ -21,14 +21,12 @@ export class TransformPage {
   async gotoManagement(): Promise<void> {
     await this.page.gotoApp('management/data/transform');
     await this.listContainer.waitFor({ state: 'visible' });
-    await this.dismissCpsIntroPopover();
   }
 
   async gotoCreate(dataViewId: string): Promise<void> {
     await this.page.gotoApp(`management/data/transform/create_transform/${dataViewId}`);
     await this.createPage.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('transformStepDefineForm').waitFor({ state: 'visible' });
-    await this.dismissCpsIntroPopover();
   }
 
   getTransformRow(transformId: string): Locator {
@@ -60,9 +58,7 @@ export class TransformPage {
 
   async selectTransformRows(transformIds: string[]): Promise<void> {
     for (const transformId of transformIds) {
-      await this.getTransformRow(transformId)
-        .locator('.euiTableRowCellCheckbox .euiCheckbox__input')
-        .click();
+      await this.getTransformRow(transformId).getByRole('checkbox').click();
     }
     await this.page.testSubj.locator('transformBulkActionsMenuButton').waitFor({
       state: 'visible',
@@ -156,22 +152,10 @@ export class TransformPage {
   }
 
   private async selectDropDownOption(testSubj: string, option: string): Promise<void> {
-    await this.page.testSubj.locator(testSubj).click({ force: true });
+    await this.page.testSubj.locator(testSubj).click();
     await this.page
       .locator(`[data-test-subj="${testSubj}"] [data-test-subj="comboBoxInput"] input`)
       .fill(option);
     await this.page.keyboard.press('Enter');
-  }
-
-  private async dismissCpsIntroPopover(): Promise<void> {
-    const gotItButton = this.page.getByRole('button', { name: 'Got it' });
-    if (
-      await gotItButton
-        .waitFor({ state: 'visible', timeout: 5000 })
-        .then(() => true)
-        .catch(() => false)
-    ) {
-      await gotItButton.click();
-    }
   }
 }
