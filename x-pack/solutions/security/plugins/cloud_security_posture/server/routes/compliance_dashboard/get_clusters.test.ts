@@ -6,7 +6,7 @@
  */
 
 import type { ClusterBucket } from './get_clusters';
-import { getClustersFromAggs } from './get_clusters';
+import { getClustersFromAggs, getClustersQuery } from './get_clusters';
 
 const mockClusterBuckets: ClusterBucket[] = [
   {
@@ -69,6 +69,17 @@ const mockClusterBuckets: ClusterBucket[] = [
     },
   },
 ];
+
+describe('getClustersQuery', () => {
+  it('restricts top_hits _source to only the fields consumed by getClustersFromAggs', () => {
+    const query = getClustersQuery({}, 'pit-id', {});
+    const topHits = (query.aggs as any)?.aggs_by_asset_identifier?.aggs?.latestFindingTopHit
+      ?.top_hits;
+    expect(topHits?._source).toEqual({
+      includes: ['@timestamp', 'rule.benchmark', 'cloud', 'orchestrator.cluster'],
+    });
+  });
+});
 
 describe('getClustersFromAggs', () => {
   it('should return value matching ComplianceDashboardData["clusters"]', async () => {
