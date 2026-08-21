@@ -55,7 +55,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
       resetPageDelayMs: 0,
     },
     templates: { enabled: true },
-    workflows: { enabled: true },
+    runWorkflows: { enabled: true },
     casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
     chat: { enabled: true },
@@ -311,13 +311,13 @@ describe('Cases Plugin', () => {
             "markdownPlugins": Object {
               "lens": true,
             },
+            "runWorkflows": Object {
+              "enabled": true,
+            },
             "stack": Object {
               "enabled": true,
             },
             "templates": Object {
-              "enabled": true,
-            },
-            "workflows": Object {
               "enabled": true,
             },
           },

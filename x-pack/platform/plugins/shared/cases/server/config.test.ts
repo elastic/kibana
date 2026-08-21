@@ -139,13 +139,13 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "runWorkflows": Object {
+            "enabled": false,
+          },
           "stack": Object {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": true,
-          },
-          "workflows": Object {
             "enabled": true,
           },
         }
@@ -202,14 +202,14 @@ describe('config validation', () => {
       expect(config.templates.enabled).toBe(false);
     });
 
-    it('sets workflows.enabled default to true', () => {
+    it('sets runWorkflows.enabled default to false', () => {
       const config = ConfigSchema.validate({});
-      expect(config.workflows.enabled).toBe(true);
+      expect(config.runWorkflows.enabled).toBe(false);
     });
 
-    it('allows workflows.enabled to be set to false explicitly', () => {
-      const config = ConfigSchema.validate({ workflows: { enabled: false } });
-      expect(config.workflows.enabled).toBe(false);
+    it('allows runWorkflows.enabled to be set to true explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
+      expect(config.runWorkflows.enabled).toBe(true);
     });
   });
 });

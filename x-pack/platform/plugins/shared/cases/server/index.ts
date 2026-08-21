@@ -22,7 +22,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
-    workflows: {
+    runWorkflows: {
       enabled: true,
     },
     // NOTE: these are visibility flags (expose to browser), not the feature flag values.

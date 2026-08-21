@@ -137,7 +137,7 @@ export interface CasesPublicStart {
     templatesEnabled: boolean;
     attachmentsEnabled: boolean;
     chatEnabled: boolean;
-    workflowsEnabled: boolean;
+    runWorkflowsEnabled: boolean;
     casesRedesign: {
       list: boolean;
       details: boolean;
