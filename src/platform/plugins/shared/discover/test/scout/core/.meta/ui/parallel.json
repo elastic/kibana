@@ -1,0 +1,213 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "44016f4041590ae-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
+      }
+    },
+    {
+      "id": "002955b6e2ba042-70753e6cedbcd4d",
+      "title": "Setup Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "f033b315932db6a-cf1d0ab3767cdfd",
+      "title": "Data view without timefield should not display a timepicker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-4dcd58d4d17dc8f",
+      "title": "Data view without timefield should adapt sidebar fields when switching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-689e4102c9d0f2c",
+      "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-2cb55638133f42c",
+      "title": "Data view without timefield should switch between with and without timefield using the browser back button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-23036590bd0ebdb",
+      "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-00c5477088e960e",
+      "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 133,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-c5b17d1e26ed8de",
+      "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 163,
+        "column": 12
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-28cdc8d1189eea3",
+      "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-00052ff5a8cd2fa",
+      "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-3f1dc73612eea1e",
+      "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-658b64ad2978e8b",
+      "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-c763afe8d7022e3",
+      "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 82,
+        "column": 14
+      }
+    },
+    {
+      "id": "69775aa52d4e75c-8b9c03c82c9a60e",
+      "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unmapped_fields.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "69775aa52d4e75c-f0f2d7d9751d7e2",
+      "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unmapped_fields.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    }
+  ]
+}
