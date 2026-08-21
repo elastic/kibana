@@ -206,7 +206,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     });
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setIsFormDirty(false);
     useTracker?.click(
       createMode ? AnalyticsEvents.rulesetCreateClicked : AnalyticsEvents.rulesetUpdateClicked
@@ -216,7 +216,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
       forceWrite: true,
       rules: unfilteredRules,
     });
-  };
+  }, [createMode, rulesetId, unfilteredRules, useTracker, createRuleset]);
 
   const [isFormDirty, setIsFormDirty] = useState(createMode);
 
@@ -270,7 +270,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
         testId: 'queryRulesetDetailHeaderSaveButton',
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       isConsoleAvailable,
       runInConsole,
@@ -280,6 +279,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
       isFormDirty,
       unfilteredRules?.length,
       rulesetId,
+      handleSave,
     ]
   );
 
