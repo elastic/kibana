@@ -506,7 +506,6 @@ function setupMocks({
     updateDeployAndDetectStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
-    retryDeploy: jest.fn(),
   });
 
   mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
