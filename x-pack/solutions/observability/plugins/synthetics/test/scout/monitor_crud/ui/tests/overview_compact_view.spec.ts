@@ -24,17 +24,16 @@ test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
     browserAuth,
     syntheticsServices,
   }) => {
-    await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.syntheticsApp.navigateToOverview(15);
-    });
-
     await test.step('create test monitor via API', async () => {
       await syntheticsServices.addMonitor('Test Overview Compact View Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
       });
-      await pageObjects.syntheticsApp.refreshOverview();
+    });
+
+    await test.step('login and navigate to overview', async () => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.syntheticsApp.navigateToOverview(15);
     });
 
     await test.step('switch to compact view', async () => {
