@@ -10,7 +10,6 @@
 import type { Observable, Subscription } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
-import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 import type { ProposalTracker } from './proposal_tracker';
@@ -59,32 +58,26 @@ export class AttachmentBridge {
   private attachmentId: string | undefined;
   private workflowId: string | undefined;
   private conversationId: string | undefined;
-  private broadSubscription: Subscription | null = null;
   private activeConversationSubscription: Subscription | null = null;
   private getChatEvents$: ((conversationId: string) => Observable<BrowserChatEvent>) | undefined;
 
   start(
-    chat$: Observable<BrowserChatEvent>,
     proposalManager: ProposalManager,
     editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
     tracker: ProposalTracker,
-    options?: {
+    options: {
+      /**
+       * Active conversation binding. The chat UI publishes it for any
+       * conversation it renders, and mints the id before the first request, so
+       * it is known before any event arrives.
+       */
+      activeConversation$: Observable<ActiveConversation | null>;
+      /** Per-conversation stream, so events from other conversations can't leak in. */
+      getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
       onError?: (err: unknown) => void;
       attachmentId?: string;
       /** Saved workflow id, or undefined on the `/workflows/create` route. */
       workflowId?: string;
-      /**
-       * Per-conversation stream factory. Once the conversation id is known we
-       * switch to `getChatEvents$(id)` so events from other conversations
-       * can't leak in.
-       */
-      getChatEvents$?: (conversationId: string) => Observable<BrowserChatEvent>;
-      /**
-       * Active conversation binding. The chat UI sets it for any conversation
-       * it renders, including a restored one, while `conversation_id_set` only
-       * fires for newly created ones.
-       */
-      activeConversation$?: Observable<ActiveConversation | null>;
       onProposalReceived?: (params: {
         proposalId: string;
         toolId: string;
@@ -95,35 +88,20 @@ export class AttachmentBridge {
     this.proposalManager = proposalManager;
     this.editorRef = editorRef;
     this.tracker = tracker;
-    this.onError = options?.onError ?? (() => {});
-    this.onProposalReceived = options?.onProposalReceived;
-    this.attachmentId = options?.attachmentId;
-    this.workflowId = options?.workflowId;
-    this.getChatEvents$ = options?.getChatEvents$;
+    this.onError = options.onError ?? (() => {});
+    this.onProposalReceived = options.onProposalReceived;
+    this.attachmentId = options.attachmentId;
+    this.workflowId = options.workflowId;
+    this.getChatEvents$ = options.getChatEvents$;
 
-    this.activeConversationSubscription =
-      options?.activeConversation$?.subscribe((activeConversation) => {
-        // A new conversation has no id yet — keep the current scope until one
-        // arrives, here or via `conversation_id_set`.
+    this.activeConversationSubscription = options.activeConversation$.subscribe(
+      (activeConversation) => {
+        // A conversation the UI has not minted an id for yet keeps the current scope.
         if (activeConversation?.id) {
           this.onConversationIdKnown(activeConversation.id);
         }
-      }) ?? null;
-
-    this.broadSubscription = chat$.subscribe((event) => {
-      if (isConversationIdSetEvent(event)) {
-        this.onConversationIdKnown(event.data.conversation_id);
-        return;
       }
-      // Fallback for callers that don't wire `getChatEvents$` — legacy path.
-      if (!this.getChatEvents$ && isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
-        try {
-          this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
-        } catch (err) {
-          this.onError(err);
-        }
-      }
-    });
+    );
   }
 
   private onConversationIdKnown(conversationId: string): void {
@@ -169,8 +147,6 @@ export class AttachmentBridge {
   stop(): void {
     this.subscription?.unsubscribe();
     this.subscription = null;
-    this.broadSubscription?.unsubscribe();
-    this.broadSubscription = null;
     this.activeConversationSubscription?.unsubscribe();
     this.activeConversationSubscription = null;
     this.proposalManager = null;

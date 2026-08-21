@@ -1126,10 +1126,10 @@ describe('useAgentBuilderIntegration', () => {
   describe('proposal telemetry conversation id', () => {
     const getOnProposalReceived = () => {
       const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
-      return bridge.start.mock.calls.at(-1)[4].onProposalReceived;
+      return bridge.start.mock.calls.at(-1)[3].onProposalReceived;
     };
 
-    it('reports the resumed conversation id without a conversation_id_set event', async () => {
+    it('reports the conversation id on a resumed conversation', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
 

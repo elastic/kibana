@@ -10,7 +10,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
-import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
@@ -216,11 +215,11 @@ export const useAgentBuilderIntegration = ({
     }
 
     const bridge = new AttachmentBridge();
-    bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
+    bridge.start(manager, editorRef, tracker, {
+      activeConversation$: agentBuilder.events.ui.activeConversation$,
+      getChatEvents$: agentBuilder.events.getChatEvents$.bind(agentBuilder.events),
       attachmentId,
       workflowId,
-      getChatEvents$: agentBuilder.events.getChatEvents$?.bind(agentBuilder.events),
-      activeConversation$: agentBuilder.events.ui?.activeConversation$,
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -232,12 +231,6 @@ export const useAgentBuilderIntegration = ({
       },
     });
     attachmentBridgeRef.current = bridge;
-
-    const conversationIdSub = agentBuilder.events.chat$.subscribe((event) => {
-      if (isConversationIdSetEvent(event)) {
-        conversationIdRef.current = event.data.conversation_id;
-      }
-    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__wfTestBridge = {
@@ -285,9 +278,10 @@ export const useAgentBuilderIntegration = ({
     attachmentTargetResolvedRef.current = !hasPersistedConversation(sessionId);
     let originLinkRequested = false;
 
-    // `conversation_id_set` only fires for newly created conversations, so a
-    // resumed one takes both its id and its attachment from here.
-    const activeConversationSub = agentBuilder.events.ui?.activeConversation$.subscribe(
+    // The chat UI publishes the conversation for every surface it renders, and
+    // mints the id before the first request, so this covers new and resumed
+    // conversations alike.
+    const activeConversationSub = agentBuilder.events.ui.activeConversation$.subscribe(
       (activeConversation) => {
         // `null` means no chat surface is bound, which says nothing about the
         // conversation the sidebar will restore.
@@ -368,8 +362,7 @@ export const useAgentBuilderIntegration = ({
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
-      conversationIdSub.unsubscribe();
-      activeConversationSub?.unsubscribe();
+      activeConversationSub.unsubscribe();
       // Don't close the sidebar here — this runs on every deps change
       // (including the workflowId flip after Save). Close lives in the
       // unmount-only effect below.
