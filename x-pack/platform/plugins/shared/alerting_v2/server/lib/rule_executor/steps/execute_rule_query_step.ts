@@ -84,7 +84,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
 
-          if (!loggedRowsDropped && totalRows === step.maxAlertsPerRun) {
+          if (!loggedRowsDropped && totalRows >= step.maxAlertsPerRun) {
             loggedRowsDropped = true;
             counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
             logger.debug({
