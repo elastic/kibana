@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { execa, parseCommandString, type Options } from 'execa';
+import { execa, parseCommandString } from 'execa';
 import { promises as Fs } from 'fs';
 import Path from 'path';
 import chalk from 'chalk';
@@ -16,9 +16,22 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createDirIfNotExists } from './file_utils';
 
 const REPOS_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments', 'repos');
-const runCommand = (command: string, options?: Options) => {
+interface CommandOptions {
+  cwd?: string;
+  shell?: boolean;
+  stdio?: 'pipe' | 'inherit' | 'ignore';
+  timeout?: number;
+}
+
+const runCommand = (command: string, options?: CommandOptions) => {
   const [file, ...args] = parseCommandString(command);
-  return execa(file, args, options);
+  return execa(file, args, { ...options, encoding: 'utf8' });
+};
+const getStdout = (stdout: string | undefined): string => {
+  if (stdout === undefined) {
+    throw new Error('Command did not produce standard output');
+  }
+  return stdout;
 };
 
 export interface ImageBuildConfig {
@@ -104,7 +117,7 @@ async function cloneOrUpdateRepo(
 async function imageExistsInMinikube(imageName: string): Promise<boolean> {
   try {
     const { stdout } = await runCommand(`minikube image ls`);
-    return stdout.includes(imageName);
+    return getStdout(stdout).includes(imageName);
   } catch {
     return false;
   }
@@ -136,7 +149,7 @@ async function buildImageWithMinikube(
       stdio: 'pipe',
     }
   );
-  const buildOutput = `${stdout}\n${stderr}`;
+  const buildOutput = `${getStdout(stdout)}\n${stderr ?? ''}`;
   if (
     buildOutput.includes('ERROR: failed to build') ||
     buildOutput.includes('failed to solve') ||

@@ -36,11 +36,15 @@ async function waitForStdout({
 
     proc.stdout?.on('data', handleData);
 
-    proc.on('exit', (code) =>
-      reject(new Error(`Process "${proc.spawnargs.join(' ')}" exited early with code ${code}`))
+    const { nodeChildProcess } = proc;
+    nodeChildProcess.on('exit', (code) =>
+      reject(
+        new Error(
+          `Process "${nodeChildProcess.spawnargs.join(' ')}" exited early with code ${code}`
+        )
+      )
     );
-
-    proc.on('error', reject);
+    nodeChildProcess.on('error', reject);
   });
 }
 
@@ -180,7 +184,7 @@ export async function stopGracefully(
     log: ToolingLog;
   }
 ) {
-  if (proc.exitCode !== null) {
+  if (proc.nodeChildProcess.exitCode !== null) {
     return;
   }
 
@@ -204,7 +208,7 @@ export async function stopGracefully(
   }
 
   // Already exited?
-  if (proc.exitCode !== null) return;
+  if (proc.nodeChildProcess.exitCode !== null) return;
 
   if (await sendAndWait('SIGINT', 30000)) {
     log.debug('Gracefully exited after SIGINT');

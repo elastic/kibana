@@ -86,11 +86,13 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     childProcess.stdin!.end(); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   }
 
+  const { nodeChildProcess } = childProcess;
+
   let stopCalled = false;
 
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent<[number, string]>(childProcess, 'exit').pipe(
+    Rx.fromEvent<[number, string]>(nodeChildProcess, 'exit').pipe(
       filter(([code]) => {
         if (stopCalled) {
           // when stop was already called, that's a graceful exit, let those events pass.
@@ -118,7 +120,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     ),
 
     // observe first error event
-    Rx.fromEvent(childProcess, 'error').pipe(
+    Rx.fromEvent(nodeChildProcess, 'error').pipe(
       take(1),
       mergeMap((err) => Rx.throwError(err))
     ),

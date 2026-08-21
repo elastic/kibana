@@ -8,7 +8,7 @@
  */
 
 import Url from 'url';
-import { execa } from 'execa';
+import { execa, execaSync } from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';

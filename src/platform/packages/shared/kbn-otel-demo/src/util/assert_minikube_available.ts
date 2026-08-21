@@ -8,10 +8,23 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { execa, parseCommandString, type Options } from 'execa';
-const runCommand = (command: string, options?: Options) => {
+import { execa, parseCommandString } from 'execa';
+interface CommandOptions {
+  cwd?: string;
+  shell?: boolean;
+  stdio?: 'pipe' | 'inherit' | 'ignore';
+  timeout?: number;
+}
+
+const runCommand = (command: string, options?: CommandOptions) => {
   const [file, ...args] = parseCommandString(command);
-  return execa(file, args, options);
+  return execa(file, args, { ...options, encoding: 'utf8' });
+};
+const getStdout = (stdout: string | undefined): string => {
+  if (stdout === undefined) {
+    throw new Error('Command did not produce standard output');
+  }
+  return stdout;
 };
 
 /**
@@ -29,7 +42,7 @@ export async function assertMinikubeAvailable(): Promise<void> {
 
   try {
     const { stdout } = await runCommand('minikube status --format={{.Host}}');
-    if (stdout.trim() !== 'Running') {
+    if (getStdout(stdout).trim() !== 'Running') {
       throw new Error('not running');
     }
   } catch (error) {
@@ -56,7 +69,7 @@ export async function assertKubectlAvailable(): Promise<void> {
 export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
   try {
     const { stdout } = await runCommand('minikube status --format={{.Host}}');
-    if (stdout.trim() === 'Running') {
+    if (getStdout(stdout).trim() === 'Running') {
       log?.info('minikube is already running');
       return;
     }
@@ -76,7 +89,7 @@ export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
  */
 export async function getMinikubeIp(): Promise<string> {
   const { stdout } = await runCommand('minikube ip');
-  return stdout.trim();
+  return getStdout(stdout).trim();
 }
 
 /**
@@ -114,13 +127,17 @@ export async function waitForPodsReady(
       const { stdout } = await runCommand(
         `kubectl get pods -n ${namespace} -o jsonpath='{.items[*].status.phase}'`
       );
-      const phases = stdout.replace(/'/g, '').trim().split(' ').filter(Boolean);
+      const phases = getStdout(stdout).replace(/'/g, '').trim().split(' ').filter(Boolean);
 
       if (phases.length > 0 && phases.every((phase) => phase === 'Running')) {
         const { stdout: readyOutput } = await runCommand(
           `kubectl get pods -n ${namespace} -o jsonpath='{.items[*].status.containerStatuses[*].ready}'`
         );
-        const readyStates = readyOutput.replace(/'/g, '').trim().split(' ').filter(Boolean);
+        const readyStates = getStdout(readyOutput)
+          .replace(/'/g, '')
+          .trim()
+          .split(' ')
+          .filter(Boolean);
 
         if (readyStates.length > 0 && readyStates.every((ready) => ready === 'true')) {
           log?.info('All pods ready');

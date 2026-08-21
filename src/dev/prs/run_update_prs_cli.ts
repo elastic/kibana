@@ -58,8 +58,8 @@ run(
 
       const proc = execa(cmd, args, {
         cwd: repoDir,
-        stdio: ['inherit', 'pipe', 'pipe'],
-      } as any);
+        stdio: ['inherit', 'pipe', 'pipe'] as const,
+      });
 
       await Promise.all([
         proc.then(() => log.debug(` - ${cmd} exited with 0`)),

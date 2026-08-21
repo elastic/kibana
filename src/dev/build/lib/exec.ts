@@ -70,6 +70,10 @@ export async function exec(
   });
 
   if (bufferLogs) {
+    const result = proc.then(
+      () => ({ error: undefined }),
+      (error) => ({ error })
+    );
     const isDockerBuild = cmd.startsWith('./build_docker');
     const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
       map((chunk) => handleBufferChunk(chunk, level))
@@ -78,16 +82,17 @@ export async function exec(
     const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
       map((chunk) => handleBufferChunk(chunk, isDockerBuild ? level : 'error'))
     );
-    const close$ = fromEvent(proc, 'close');
+    const close$ = fromEvent(proc.nodeChildProcess, 'close');
     const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
-    await proc
-      .then(() => {
-        outputBufferedLogs(log, build, logBuildCmd, logs, true);
-      })
-      .catch((error) => {
-        outputBufferedLogs(log, build, logBuildCmd, logs, false);
-        throw error;
-      });
+    const { error } = await result;
+
+    if (error === undefined) {
+      outputBufferedLogs(log, build, logBuildCmd, logs, true);
+      return;
+    }
+
+    outputBufferedLogs(log, build, logBuildCmd, logs, false);
+    throw error;
   } else {
     logBuildCmd();
 

@@ -48,8 +48,9 @@ let currentProc: MockProc | undefined;
 execaNode.mockImplementation(() => {
   const proc = new MockProc();
   currentProc = proc;
-  return proc;
+  return Object.assign(proc, { nodeChildProcess: proc });
 });
+
 function isProc(proc: MockProc | undefined): asserts proc is MockProc {
   expect(proc).toBeInstanceOf(MockProc);
 }

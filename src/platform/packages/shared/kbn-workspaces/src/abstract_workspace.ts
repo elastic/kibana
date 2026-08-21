@@ -110,6 +110,9 @@ export abstract class AbstractWorkspace implements IWorkspace {
       log: this.context.log,
       cwd: this.getDir(),
     });
+    if (typeof stdout !== 'string') {
+      throw new Error('Expected git show output to be text');
+    }
     return stdout;
   }
 }
