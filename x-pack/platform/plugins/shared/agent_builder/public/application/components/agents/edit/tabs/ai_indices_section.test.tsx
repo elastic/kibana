@@ -19,7 +19,7 @@ jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
   useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
 }));
 jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
-  useListAiIndices: () => ({ aiIndices: mockAiIndices, isLoading: false, error: undefined }),
+  useListAiIndices: () => ({ aiIndices: mockAiIndices, isLoading: false, error: mockListError }),
 }));
 jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
   useInheritedAiIndices: () => ({
@@ -34,6 +34,7 @@ const AGENT_ID = 'my-agent';
 let mockIsContextEngineEnabled = true;
 let mockInheritedIds: string[] = [];
 let mockAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
+let mockListError: Error | undefined;
 
 const onSubmit = jest.fn();
 
@@ -62,11 +63,16 @@ const renderSection = (props: Parameters<typeof TestForm>[0] = {}) =>
     </EuiProvider>
   );
 
+const comboBox = () => screen.getByTestId('agentBuilderAdditionalAiIndices');
 const openList = async () => {
-  await userEvent.click(screen.getByTestId('agentBuilderAdditionalAiIndicesButton'));
-  return screen.findByTestId('agentBuilderAdditionalAiIndicesSelectable');
+  await userEvent.click(within(comboBox()).getByTestId('comboBoxToggleListButton'));
+  return screen.findByRole('listbox');
 };
 const optionFor = (id: string) => screen.getByTestId(`agentBuilderAiIndexOption-${id}`);
+const removePill = async (id: string) =>
+  userEvent.click(
+    within(screen.getByTestId(`agentBuilderSelectedAiIndex-${id}`)).getByRole('button')
+  );
 const submittedAiIndices = () => onSubmit.mock.calls[0][0].configuration.ai_indices;
 
 describe('AiIndicesSection', () => {
@@ -74,6 +80,7 @@ describe('AiIndicesSection', () => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
     mockInheritedIds = [];
+    mockListError = undefined;
     mockAiIndices = [
       { id: 'elastic-ai-index', description: 'Ready', managed: false },
       { id: 'sales-outreach', description: 'Ready', managed: false },
@@ -93,6 +100,14 @@ describe('AiIndicesSection', () => {
     renderSection();
 
     expect(screen.getByText('AI Indices')).toBeInTheDocument();
+  });
+
+  it('says when the AI indices could not be loaded', () => {
+    mockListError = new Error('boom');
+
+    renderSection();
+
+    expect(screen.getByTestId('agentBuilderAiIndicesLoadError')).toBeInTheDocument();
   });
 
   describe('default indices', () => {
@@ -133,10 +148,22 @@ describe('AiIndicesSection', () => {
 
       expect(submittedAiIndices()).toEqual(['sales-outreach']);
     });
+
+    // An id in both layers has no pill of its own, so an edit must not silently drop it from the
+    // agent's configuration: it would stop applying if the type ever stops contributing it.
+    it('survive on the agent when the selection changes, if also assigned', async () => {
+      mockInheritedIds = ['sig-events'];
+
+      renderSection({ assignedIds: ['sig-events', 'sales-outreach'] });
+      await removePill('sales-outreach');
+      await userEvent.click(screen.getByText('submit'));
+
+      expect(submittedAiIndices()).toEqual(['sig-events']);
+    });
   });
 
   describe('additional indices', () => {
-    it('submits the id list when one is checked', async () => {
+    it('submits the id list when one is picked', async () => {
       renderSection();
       await openList();
 
@@ -146,35 +173,25 @@ describe('AiIndicesSection', () => {
       expect(submittedAiIndices()).toEqual(['sales-outreach']);
     });
 
-    // The whole point of the checkbox list: unlike a combo box, selected options stay listed and
-    // show their state, so unchecking is how you remove one.
-    it('keeps the assigned ones listed, and checked', async () => {
+    it('shows the assigned ones as pills, not as options', async () => {
       renderSection({ assignedIds: ['sales-outreach'] });
+
+      expect(screen.getByTestId('agentBuilderSelectedAiIndex-sales-outreach')).toBeInTheDocument();
+
       await openList();
 
-      expect(optionFor('sales-outreach')).toHaveAttribute('aria-checked', 'true');
-      expect(optionFor('elastic-ai-index')).toHaveAttribute('aria-checked', 'false');
+      expect(
+        screen.queryByTestId('agentBuilderAiIndexOption-sales-outreach')
+      ).not.toBeInTheDocument();
     });
 
-    it('submits without the id when one is unchecked', async () => {
+    it('submits without the id when its pill is removed', async () => {
       renderSection({ assignedIds: ['sales-outreach', 'elastic-ai-index'] });
-      await openList();
 
-      await userEvent.click(optionFor('sales-outreach'));
+      await removePill('sales-outreach');
       await userEvent.click(screen.getByText('submit'));
 
       expect(submittedAiIndices()).toEqual(['elastic-ai-index']);
-    });
-
-    it('shows the assigned ones as removable pills', async () => {
-      renderSection({ assignedIds: ['sales-outreach'] });
-
-      await userEvent.click(
-        within(screen.getByTestId('agentBuilderSelectedAiIndex-sales-outreach')).getByRole('button')
-      );
-      await userEvent.click(screen.getByText('submit'));
-
-      expect(submittedAiIndices()).toEqual([]);
     });
 
     it('describes each option in the list', async () => {
@@ -187,7 +204,7 @@ describe('AiIndicesSection', () => {
     it('is disabled when the user cannot edit the agent', () => {
       renderSection({ isFormDisabled: true });
 
-      expect(screen.getByTestId('agentBuilderAdditionalAiIndicesButton')).toBeDisabled();
+      expect(within(comboBox()).getByTestId('comboBoxSearchInput')).toBeDisabled();
     });
 
     // The API does not validate stored ids, so an agent can reference an index that was deleted or

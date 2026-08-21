@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,6 +25,7 @@ import { css } from '@emotion/react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
+import { getActiveAiIndices } from '../../../utils/ai_indices';
 import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
 
@@ -65,15 +68,22 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
-    enabled: isContextEngineEnabled,
-  });
+  const { inheritedAiIndicesByAgentId, isLoading: isLoadingInheritedAiIndices } =
+    useInheritedAiIndices({
+      enabled: isContextEngineEnabled,
+    });
   const inheritedAiIndices = inheritedAiIndicesByAgentId[agentId] ?? [];
+  const inheritedAiIndexSet = new Set(inheritedAiIndices);
   // Inherited indices are named as defaults, matching how the edit form labels them.
-  const aiIndicesSummary = [
-    ...inheritedAiIndices.map((id) => labels.aiIndices.defaultIndexBadge(id)),
-    ...assignedAiIndices.filter((id) => !inheritedAiIndices.includes(id)),
-  ].join(', ');
+  const aiIndicesSummary = getActiveAiIndices({
+    assigned: assignedAiIndices,
+    inherited: inheritedAiIndices,
+  })
+    .map((id) => (inheritedAiIndexSet.has(id) ? labels.aiIndices.defaultIndexBadge(id) : id))
+    .join(', ');
+  // While the inherited ids load, a missing entry does not mean "inherits nothing", so the row
+  // shows a placeholder rather than a premature "Not set" that flips once the query settles.
+  const hasAiIndices = isLoadingInheritedAiIndices || Boolean(aiIndicesSummary);
 
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};
@@ -260,23 +270,33 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                           <EuiFlexItem grow={false}>
                             <EuiText
                               size="s"
-                              color={
-                                aiIndicesSummary ? 'textPrimary' : euiTheme.colors.textDisabled
-                              }
+                              color={hasAiIndices ? 'textPrimary' : euiTheme.colors.textDisabled}
                             >
                               {overviewLabels.aiIndicesTitle}
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem
                             grow={false}
-                            css={aiIndicesSummary ? undefined : textDisabledStyles}
+                            css={hasAiIndices ? undefined : textDisabledStyles}
                           >
-                            <EuiIcon type="info" size="s" aria-hidden={true} />
+                            <EuiIconTip
+                              type="info"
+                              size="s"
+                              content={overviewLabels.aiIndicesTooltip}
+                            />
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        {aiIndicesSummary ? (
+                        {isLoadingInheritedAiIndices ? (
+                          <EuiSkeletonText
+                            lines={1}
+                            css={css`
+                              inline-size: calc(${euiTheme.size.xxl} * 3);
+                            `}
+                            data-test-subj="agentOverviewAiIndicesLoading"
+                          />
+                        ) : aiIndicesSummary ? (
                           <EuiText size="s" data-test-subj="agentOverviewAiIndices">
                             {aiIndicesSummary}
                           </EuiText>

@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
@@ -96,7 +96,11 @@ describe('AiIndicesSection (edit settings flyout)', () => {
   it('submits the AI indices the user picks', async () => {
     renderSection();
 
-    await userEvent.click(screen.getByTestId('agentBuilderAdditionalAiIndicesButton'));
+    await userEvent.click(
+      within(screen.getByTestId('agentBuilderAdditionalAiIndices')).getByTestId(
+        'comboBoxToggleListButton'
+      )
+    );
     await userEvent.click(await screen.findByTestId('agentBuilderAiIndexOption-sales-outreach'));
     await userEvent.click(screen.getByText('submit'));
 

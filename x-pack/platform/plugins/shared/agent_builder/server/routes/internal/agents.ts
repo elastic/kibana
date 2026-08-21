@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type { ListAgentBaseConfigurationResponse } from '../../../common/http_api/agents';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
+import { isContextEngineEnabled } from '../agents';
 
 export function registerInternalAgentRoutes({
   router,
@@ -32,13 +32,8 @@ export function registerInternalAgentRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const { uiSettings } = await ctx.core;
-      const contextEngineEnabled = Boolean(
-        await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID)
-      );
-
       // `ai_indices` is the only projected field, which is meaningless while the Context Engine is off
-      if (!contextEngineEnabled) {
+      if (!(await isContextEngineEnabled(ctx))) {
         return response.ok<ListAgentBaseConfigurationResponse>({ body: { results: [] } });
       }
 
@@ -46,15 +41,24 @@ export function registerInternalAgentRoutes({
       const registry = await agentsService.getRegistry({ request });
       const agents = await registry.list();
 
-      const results = await Promise.all(
-        agents.map(async (agent) => {
-          const base = await agentsService.resolveAgentBaseConfiguration({ agent, request });
-          return {
-            agent_id: agent.id,
-            configuration: { ai_indices: base?.ai_indices ?? [] },
-          };
-        })
+      // Base configuration belongs to the agent's type, so each distinct type resolves once.
+      const types = [...new Set(agents.map(({ type }) => type))];
+      const aiIndicesByType = new Map(
+        await Promise.all(
+          types.map(async (type) => {
+            const base = await agentsService.resolveAgentBaseConfiguration({
+              agent: { type },
+              request,
+            });
+            return [type, base?.ai_indices ?? []] as const;
+          })
+        )
       );
+
+      const results = agents.map((agent) => ({
+        agent_id: agent.id,
+        configuration: { ai_indices: aiIndicesByType.get(agent.type) ?? [] },
+      }));
 
       return response.ok<ListAgentBaseConfigurationResponse>({ body: { results } });
     })

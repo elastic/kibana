@@ -19,7 +19,7 @@ interface BadgeListProps {
   'data-test-subj'?: string;
 }
 
-const NUM_VISIBLE_BADGES = 3;
+const NUM_VISIBLE_BADGES = 4;
 
 /**
  * A row of hollow badges that collapses its overflow into a `+N` badge, so a table row stays one

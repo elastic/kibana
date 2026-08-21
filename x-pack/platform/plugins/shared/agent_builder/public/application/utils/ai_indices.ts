@@ -19,7 +19,7 @@ interface ActiveAiIndicesArgs {
 export const getActiveAiIndices = ({
   assigned = [],
   inherited = [],
-}: ActiveAiIndicesArgs): string[] => [
-  ...inherited,
-  ...assigned.filter((id) => !inherited.includes(id)),
-];
+}: ActiveAiIndicesArgs): string[] => {
+  const inheritedSet = new Set(inherited);
+  return [...inherited, ...assigned.filter((id) => !inheritedSet.has(id))];
+};

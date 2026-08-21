@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
+  EuiSkeletonText,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -40,6 +41,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { getActiveAiIndices } from '../../../utils/ai_indices';
+import { labels as i18nLabels } from '../../../utils/i18n';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
@@ -99,9 +101,8 @@ const columnNames = {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
-  aiIndices: i18n.translate('xpack.agentBuilder.agents.aiIndicesColumn', {
-    defaultMessage: 'AI indices',
-  }),
+  // The same label the cell component uses for its aria-label, so the two cannot diverge.
+  aiIndices: i18nLabels.aiIndices.columnTitle,
   createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
     defaultMessage: 'Created by',
   }),
@@ -133,9 +134,10 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const profileMap = useOwnerProfiles(agents ?? []);
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
-    enabled: isContextEngineEnabled,
-  });
+  const { inheritedAiIndicesByAgentId, isLoading: isLoadingInheritedAiIndices } =
+    useInheritedAiIndices({
+      enabled: isContextEngineEnabled,
+    });
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
@@ -229,14 +231,19 @@ export const AgentsList: React.FC = () => {
       width: '14%',
       valign: 'top',
       name: columnNames.aiIndices,
-      render: (agent) => (
-        <AgentAiIndices
-          aiIndices={getActiveAiIndices({
-            assigned: agent.configuration.ai_indices,
-            inherited: inheritedAiIndicesByAgentId[agent.id],
-          })}
-        />
-      ),
+      // While the inherited ids load, a missing entry does not mean "inherits nothing", so the
+      // cell shows a placeholder rather than claiming the agent has no AI indices.
+      render: (agent) =>
+        isLoadingInheritedAiIndices ? (
+          <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />
+        ) : (
+          <AgentAiIndices
+            aiIndices={getActiveAiIndices({
+              assigned: agent.configuration.ai_indices,
+              inherited: inheritedAiIndicesByAgentId[agent.id],
+            })}
+          />
+        ),
       'data-test-subj': 'agentBuilderAgentsListAiIndices',
     };
 
@@ -362,6 +369,7 @@ export const AgentsList: React.FC = () => {
     canManageAgentAccess,
     isContextEngineEnabled,
     inheritedAiIndicesByAgentId,
+    isLoadingInheritedAiIndices,
     profileMap,
     dateFormat,
   ]);

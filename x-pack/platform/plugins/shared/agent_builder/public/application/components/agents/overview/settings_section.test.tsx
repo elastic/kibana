@@ -19,7 +19,7 @@ jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
 jest.mock('../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
   useInheritedAiIndices: () => ({
     inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
-    isLoading: false,
+    isLoading: mockInheritedIsLoading,
     error: undefined,
   }),
 }));
@@ -28,6 +28,7 @@ const AGENT_ID = 'my-agent';
 
 let mockIsContextEngineEnabled = true;
 let mockInheritedIds: string[] = [];
+let mockInheritedIsLoading = false;
 
 const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
   render(
@@ -53,6 +54,7 @@ describe('SettingsSection', () => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
     mockInheritedIds = [];
+    mockInheritedIsLoading = false;
   });
 
   describe('AI indices row', () => {
@@ -105,6 +107,17 @@ describe('SettingsSection', () => {
       renderSection();
 
       expect(screen.getByTestId('agentOverviewAiIndices')).toHaveTextContent('Not set');
+    });
+
+    // A missing inherited entry means nothing while the query is in flight, so the row must not
+    // claim "Not set" and then flip once the defaults arrive.
+    it('shows a placeholder instead of "Not set" while the inherited ids load', () => {
+      mockInheritedIsLoading = true;
+
+      renderSection();
+
+      expect(screen.getByTestId('agentOverviewAiIndicesLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentOverviewAiIndices')).not.toBeInTheDocument();
     });
   });
 });

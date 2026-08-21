@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -37,7 +38,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { defer } from 'lodash';
@@ -498,31 +498,36 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   if (error) {
     return (
-      <KbnDangerCallout
+      <EuiCallOut
         announceOnMount
         title={i18n.translate('xpack.agentBuilder.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
-        text={i18n.translate('xpack.agentBuilder.agents.errorMessage', {
-          defaultMessage: 'Unable to load the agent. {errorMessage}',
-          values: {
-            errorMessage: (error as Error)?.message || String(error),
-          },
-        })}
-        actionProps={{
-          primary: {
-            children: i18n.translate('xpack.agentBuilder.agents.backToListButton', {
-              defaultMessage: 'Back to agents list',
-            }),
-            onClick: () => navigateToAgentBuilderUrl(appPaths.agents.list),
-            ...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.agentEdit.BACK_TO_LIST,
-              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-            }),
-          },
-        }}
-      />
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          {i18n.translate('xpack.agentBuilder.agents.errorMessage', {
+            defaultMessage: 'Unable to load the agent. {errorMessage}',
+            values: {
+              errorMessage: (error as Error)?.message || String(error),
+            },
+          })}
+        </p>
+        <EuiSpacer size="m" />
+        <EuiButton
+          onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentEdit.BACK_TO_LIST,
+            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+          })}
+        >
+          {i18n.translate('xpack.agentBuilder.agents.backToListButton', {
+            defaultMessage: 'Back to agents list',
+          })}
+        </EuiButton>
+      </EuiCallOut>
     );
   }
 
@@ -705,7 +710,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         aria-label={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
                           defaultMessage: 'Open menu',
                         })}
-                        iconType="ellipsis"
+                        iconType="boxesVertical"
                         onClick={() => setContextMenuOpen(!isContextMenuOpen)}
                         {...getEbtProps({
                           element: AGENT_BUILDER_UI_EBT.element.pageContent,

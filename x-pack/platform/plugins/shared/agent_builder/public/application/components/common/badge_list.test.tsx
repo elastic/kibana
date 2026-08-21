@@ -40,20 +40,20 @@ describe('BadgeList', () => {
   });
 
   it('collapses the overflow into a count badge', () => {
-    renderBadges(['a', 'b', 'c', 'd', 'e']);
+    renderBadges(['a', 'b', 'c', 'd', 'e', 'f']);
 
     expect(screen.getByTestId('thingHiddenCount')).toHaveTextContent('+2');
-    expect(screen.queryByTestId('thing-d')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('thing-e')).not.toBeInTheDocument();
   });
 
   it('names the hidden items on the count badge, for pointerless access', () => {
-    renderBadges(['a', 'b', 'c', 'd', 'e']);
+    renderBadges(['a', 'b', 'c', 'd', 'e', 'f']);
 
-    expect(screen.getByTestId('thingHiddenCount')).toHaveAttribute('aria-label', '2 more: d, e');
+    expect(screen.getByTestId('thingHiddenCount')).toHaveAttribute('aria-label', '2 more: e, f');
   });
 
   it('shows every item when they fit', () => {
-    renderBadges(['a', 'b', 'c']);
+    renderBadges(['a', 'b', 'c', 'd']);
 
     expect(screen.queryByTestId('thingHiddenCount')).not.toBeInTheDocument();
   });
@@ -67,7 +67,7 @@ describe('BadgeList', () => {
   // The count badge shares the badges' prefix, so it must not also match a `^prefix-` lookup or
   // callers reading "every badge" would count it as an item.
   it('keeps the count badge out of the item test-subj namespace', () => {
-    renderBadges(['a', 'b', 'c', 'd']);
+    renderBadges(['a', 'b', 'c', 'd', 'e']);
 
     expect(screen.getByTestId('thingHiddenCount')).toBeInTheDocument();
     expect(screen.queryByTestId('thing-hiddenCount')).not.toBeInTheDocument();
@@ -78,7 +78,9 @@ describe('Labels', () => {
   it('collapses overflow into a count badge instead of a "View more" popover', () => {
     render(
       <IntlProvider locale="en">
-        <Labels labels={['observability', 'streams', 'significant-events', 'discovery']} />
+        <Labels
+          labels={['observability', 'streams', 'significant-events', 'discovery', 'triage']}
+        />
       </IntlProvider>
     );
 

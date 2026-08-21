@@ -85,7 +85,6 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/doc-links'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ui-callout'
   - '@kbn/workflows'
   - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'

@@ -13,13 +13,10 @@ import { labels } from '../../../utils/i18n';
  * The AI indices an agent retrieves from, as read-only badges for the agents table. Assigned and
  * inherited ones are not told apart here — editing happens in the agent's AI indices section.
  */
-export const AgentAiIndices: React.FC<{ aiIndices: string[]; numVisible?: number }> = ({
-  aiIndices,
-  numVisible = 2,
-}) => (
+export const AgentAiIndices: React.FC<{ aiIndices: string[] }> = ({ aiIndices }) => (
   <BadgeList
     items={aiIndices}
-    numVisible={numVisible}
+    numVisible={2}
     ariaLabel={labels.aiIndices.columnTitle}
     testSubjPrefix="agentBuilderAgentAiIndex"
     data-test-subj="agentBuilderAgentAiIndices"

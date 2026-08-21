@@ -2766,6 +2766,10 @@ export const labels = {
     aiIndicesTitle: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTitle', {
       defaultMessage: 'AI indices',
     }),
+    aiIndicesTooltip: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTooltip', {
+      defaultMessage:
+        'The AI indices this agent retrieves from. Default indices apply to every agent and are always included.',
+    }),
     preExecutionWorkflowTitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }
@@ -2976,17 +2980,9 @@ export const labels = {
     optionalLabel: i18n.translate('xpack.agentBuilder.aiIndices.optionalLabel', {
       defaultMessage: 'Optional',
     }),
-    searchPlaceholder: i18n.translate('xpack.agentBuilder.aiIndices.searchPlaceholder', {
-      defaultMessage: 'Search AI indices',
+    loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
+      defaultMessage: 'Failed to fetch AI indices',
     }),
-    noAiIndicesMessage: i18n.translate('xpack.agentBuilder.aiIndices.noAiIndicesMessage', {
-      defaultMessage: 'No AI indices yet.',
-    }),
-    removeAiIndex: (id: string) =>
-      i18n.translate('xpack.agentBuilder.aiIndices.removeAiIndex', {
-        defaultMessage: 'Remove {id}',
-        values: { id },
-      }),
     columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
       defaultMessage: 'AI indices',
     }),

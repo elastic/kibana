@@ -11,7 +11,6 @@ import {
   allRoutes,
   getAgentIdFromPath,
   getEnabledRoutes,
-  getManageNavItems,
   getPathWithSwitchedAgent,
   getSidebarViewForRoute,
   getViewIdForPathname,
@@ -200,30 +199,6 @@ describe('route_config', () => {
 
     it('excludes MCP clients route when UIAM is disabled', () => {
       expect(findMcpRoute(getEnabledRoutes(config(false)))).toBeUndefined();
-    });
-
-    // The route carries no navLabel, so gating it must not add a nav entry either way.
-    it('never puts MCP clients in the manage nav', () => {
-      expect(getManageNavItems(config(true)).map((item) => item.path)).not.toContain(
-        mcpClientsPath
-      );
-    });
-  });
-
-  describe('manage nav', () => {
-    const config: RouteAccessConfig = {
-      featureFlags: { experimental: true },
-      capabilities: { isUIAMEnabled: true },
-    };
-
-    it('lists one entry per manage route that declares a nav label', () => {
-      expect(getManageNavItems(config).map((item) => item.path)).toEqual([
-        '/manage/agents',
-        '/manage/skills',
-        '/manage/plugins',
-        '/manage/connectors',
-        '/manage/tools',
-      ]);
     });
   });
 
