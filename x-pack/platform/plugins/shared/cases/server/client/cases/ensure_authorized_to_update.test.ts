@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Operations } from '../../authorization';
+import { WriteOperations } from '../../authorization';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { ensureAuthorizedToUpdate } from './ensure_authorized_to_update';
@@ -19,11 +20,20 @@ describe('ensureAuthorizedToUpdate', () => {
     clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
   });
 
-  it('authorizes the update operation against the stored case owner', async () => {
+  it('authorizes using the updateCase privilege (cases:<owner>/updateCase) with a workflow-run audit action', async () => {
     await ensureAuthorizedToUpdate({ id: theCase.id }, clientArgs);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-      operation: Operations.updateCase,
+      // The operation reuses WriteOperations.UpdateCase as the privilege name so the
+      // cases:<owner>/updateCase privilege string controls access, but overrides the audit
+      // action to `case_workflow_run_authz` (access, not change) to avoid writing a
+      // misleading "case updated" audit record when no mutation occurs.
+      operation: expect.objectContaining({
+        name: WriteOperations.UpdateCase,
+        action: 'case_workflow_run_authz',
+        ecsType: 'access',
+        savedObjectType: CASE_SAVED_OBJECT,
+      }),
       entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
     });
   });

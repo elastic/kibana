@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import { WorkflowsManagementApiActions, WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import {
@@ -29,12 +29,18 @@ describe('run workflow route', () => {
     });
   });
 
+  // The workflows plugin's route_privilege_consistency.test.ts only covers routes registered
+  // within that plugin. This route is registered by Cases and escapes that guard, so we assert
+  // the privilege explicitly here using the shared source of truth.
   it('requires the workflow execute privilege', () => {
     expect(route.security).toEqual({
       authz: {
         requiredPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
       },
     });
+    // Verify the concrete API action to catch any drift in WorkflowsManagementOperationPrivileges.
+    const authz = route.security?.authz as { requiredPrivileges?: string[] } | undefined;
+    expect(authz?.requiredPrivileges).toContain(WorkflowsManagementApiActions.execute);
   });
 
   it('delegates to the Cases workflow service and returns its result', async () => {

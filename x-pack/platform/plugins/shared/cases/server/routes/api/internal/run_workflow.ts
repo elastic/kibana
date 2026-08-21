@@ -16,7 +16,6 @@ import {
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../../common/types/api/workflow/v1';
-import type { RunCaseWorkflowRequest } from '../../../../common/types/api';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -57,6 +56,18 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
   createCasesRoute({
     method: 'post',
     path: INTERNAL_CASE_WORKFLOW_RUN_URL,
+    // AUTHORIZATION NOTE — this route enforces a two-layer privilege model:
+    //
+    // 1. Route-level (declared here): `workflowsManagement:execute` — the API action registered
+    //    by the `workflow_execute` sub-feature privilege in the Workflows Management feature.
+    //    This is a *separate* Kibana feature (minimumLicense: enterprise); a role granting Cases
+    //    `all` does NOT implicitly grant it, so admins must explicitly assign the sub-privilege.
+    //
+    // 2. Handler-level (inside CasesWorkflowRunService): `cases:<owner>/updateCase` — checked
+    //    by `casesClient.cases.ensureAuthorizedToUpdate`. This is owner-scoped and cannot be
+    //    declared statically on the route (which is why `DEFAULT_CASES_ROUTE_SECURITY` opts out
+    //    for all other Cases routes). It ensures the caller can only trigger workflows for cases
+    //    they are authorized to write to within the current space.
     security: {
       authz: {
         requiredPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
@@ -78,7 +89,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
       const result = await service.run({
         caseId,
         workflowId,
-        body: request.body as RunCaseWorkflowRequest,
+        body: request.body,
         request,
         context,
         casesClient,
