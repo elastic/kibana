@@ -53,9 +53,8 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 
 /**
  * Fetch the notification list
- * - Return only the newest in-window doc per `notification_id`, collapse duplicates.
- * - Filter by severity TTL, namespace, type and time-range, all at the document level so
- *   the result limit bounds the filtered set.
+ * - Return only the newest doc per `notification_id`, collapse duplicates.
+ * - Filter by severity TTL, namespace, type and time-range
  * - Sort by newest first.
  */
 export const queryNotifications = async (
