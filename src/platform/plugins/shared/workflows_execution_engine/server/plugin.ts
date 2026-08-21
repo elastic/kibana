@@ -988,7 +988,7 @@ export class WorkflowsExecutionEnginePlugin
       // Synthesize a minimal event so Liquid templates can access `event.inputs`.
       const event =
         !eventFromRawContext && inputs && Object.keys(inputs).length
-          ? { type: 'manual', inputs }
+          ? { type: 'manual', inputs, spaceId: args.context.spaceId }
           : eventFromRawContext;
       const newContext = {
         ...args.context,
