@@ -30,6 +30,7 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
@@ -61,8 +62,11 @@ const isPrivateLocationChanged = ({
     (!privateLocation.attributes.tags ||
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
+  const isShardingChanged =
+    typeof newParams.isAgentSharding === 'boolean' &&
+    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
 
-  return isLabelChanged || areTagsChanged;
+  return isLabelChanged || areTagsChanged || isShardingChanged;
 };
 
 const checkPrivileges = async ({
@@ -116,7 +120,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
-    const { label: newLocationLabel, tags: newTags } = request.body;
+    const {
+      label: newLocationLabel,
+      tags: newTags,
+      isAgentSharding: newIsAgentSharding,
+    } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -142,15 +150,23 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
           monitorsInLocation.length
         ) {
-          await checkPrivileges({
+          const privilegeResponse = await checkPrivileges({
             routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
+            monitorsSpaces: [
+              ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+            ],
           });
+          if (privilegeResponse) {
+            return privilegeResponse;
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
+          ...(typeof newIsAgentSharding === 'boolean'
+            ? { isAgentSharding: newIsAgentSharding }
+            : {}),
         });
 
         if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {

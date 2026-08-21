@@ -28,10 +28,43 @@ describe('buildRulesListFilter', () => {
     );
   });
 
+  it('negates a single excluded tag', () => {
+    expect(buildRulesListFilter({ excludedTags: ['prod'] })).toBe('NOT (metadata.tags: "prod")');
+  });
+
+  it('negates the whole OR group when several tags are excluded', () => {
+    expect(buildRulesListFilter({ excludedTags: ['prod', 'staging'] })).toBe(
+      'NOT (metadata.tags: "prod" OR metadata.tags: "staging")'
+    );
+  });
+
+  it('intersects included and excluded tags', () => {
+    expect(buildRulesListFilter({ tags: ['prod'], excludedTags: ['staging'] })).toBe(
+      '(metadata.tags: "prod") AND NOT (metadata.tags: "staging")'
+    );
+  });
+
   it('combines status, tags, and mode into a single KQL filter', () => {
     expect(buildRulesListFilter({ enabled: 'true', tags: ['prod'], kind: 'alert' })).toBe(
       'enabled: true AND (metadata.tags: "prod") AND kind: alert'
     );
+  });
+
+  it('combines status, included tags, excluded tags, and mode', () => {
+    expect(
+      buildRulesListFilter({
+        enabled: 'true',
+        tags: ['prod'],
+        excludedTags: ['staging'],
+        kind: 'alert',
+      })
+    ).toBe(
+      'enabled: true AND (metadata.tags: "prod") AND NOT (metadata.tags: "staging") AND kind: alert'
+    );
+  });
+
+  it('ignores empty tag arrays', () => {
+    expect(buildRulesListFilter({ tags: [], excludedTags: [] })).toBeUndefined();
   });
 
   it('escapes double quotes in tag values', () => {
@@ -42,5 +75,11 @@ describe('buildRulesListFilter', () => {
 
   it('escapes backslashes in tag values before escaping double quotes', () => {
     expect(buildRulesListFilter({ tags: ['test\\'] })).toBe('(metadata.tags: "test\\\\")');
+  });
+
+  it('escapes excluded tag values the same way as included ones', () => {
+    expect(buildRulesListFilter({ excludedTags: ['my "special" tag'] })).toBe(
+      'NOT (metadata.tags: "my \\"special\\" tag")'
+    );
   });
 });

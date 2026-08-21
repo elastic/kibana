@@ -76,3 +76,5 @@ export * from './specs/zabbix/zabbix';
 export * from './specs/okta/okta';
 export * from './specs/gcp_iam/gcp_iam';
 export * from './specs/gcp_secret_manager/gcp_secret_manager';
+export * from './specs/unifi/unifi';
+export * from './specs/urlscan_io/urlscan_io';
