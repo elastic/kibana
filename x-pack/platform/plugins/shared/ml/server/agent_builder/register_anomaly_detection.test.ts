@@ -13,6 +13,7 @@ import {
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
   QUERY_ANOMALIES_TOOL_ID,
 } from './tools/tool_ids';
+import type { MlClientFactoryDeps } from './ml_client_factory';
 
 const createAgentBuilderMock = () => ({
   tools: { register: jest.fn() },
@@ -26,6 +27,16 @@ const createAgentBuilderMock = () => ({
 
 const resolveMlCapabilities = jest.fn().mockResolvedValue(null);
 
+const mlClientFactoryDeps: MlClientFactoryDeps = {
+  getInternalSavedObjectsClient: jest.fn().mockReturnValue(null),
+  getAuditService: jest.fn().mockReturnValue(null),
+  spacesEnabled: false,
+  authorization: undefined,
+  mlLicense: { isSecurityEnabled: () => false } as any,
+  serverless: { isServerless: false, cpsEnabled: false },
+  isMlReady: () => Promise.resolve(),
+};
+
 describe('registerAnomalyDetectionAgentBuilder', () => {
   it('registers the anomaly detection skill with ML tools inline', async () => {
     const agentBuilder = createAgentBuilderMock();
@@ -33,6 +44,7 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
     registerAnomalyDetectionAgentBuilder({
       agentBuilder: agentBuilder as any,
       resolveMlCapabilities,
+      mlClientFactoryDeps,
     });
 
     expect(agentBuilder.tools.register).not.toHaveBeenCalled();
@@ -58,6 +70,7 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
     registerAnomalyDetectionAgentBuilder({
       agentBuilder: agentBuilder as any,
       resolveMlCapabilities,
+      mlClientFactoryDeps,
     });
 
     const skillArg = agentBuilder.skills.register.mock.calls[0][0];

@@ -56,6 +56,7 @@ const getCalendarsAssociatedWithJob = async (
 const schema = z.object({
   operation: z.enum([
     'get_jobs',
+    'get_job_stats',
     'get_datafeed_config',
     'get_job_messages',
     'get_model_snapshots',
@@ -67,7 +68,7 @@ const schema = z.object({
     .string()
     .optional()
     .describe(
-      'Job ID. Required for all operations except get_jobs (optional filter), get_available_metadata, and validate_permissions.'
+      'Job ID. Required for all operations except get_jobs, get_job_stats (optional filter), get_available_metadata, and validate_permissions.'
     ),
 });
 
@@ -80,7 +81,7 @@ export const createAdGetJobInfoTool = (
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
+    'Read ML job state, config, runtime stats, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty. Use get_job_stats to get processing counts, memory status, and datafeed state needed for scratch-run verdict evaluation.',
   experimental: true,
   schema,
   handler: async ({ operation, job_id: jobId }, { esClient, request }) => {
@@ -109,6 +110,11 @@ export const createAdGetJobInfoTool = (
       switch (operation) {
         case 'get_jobs': {
           const response = await ml.getJobs(jobId ? { job_id: jobId } : {});
+          return { results: [{ type: ToolResultType.other, data: response }] };
+        }
+
+        case 'get_job_stats': {
+          const response = await ml.getJobStats(jobId ? { job_id: jobId } : {});
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 

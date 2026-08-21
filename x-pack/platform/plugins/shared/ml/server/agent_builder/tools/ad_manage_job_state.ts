@@ -15,7 +15,18 @@ import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn } from '../ml_client_factory';
 import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
+
+/** Groups that mark a scratch job created by the agent builder. */
+const SCRATCH_GROUP = 'ml-agent-scratch';
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** Terminal datafeed states: the datafeed has stopped itself. */
+const TERMINAL_DATAFEED_STATES = new Set(['stopped', 'failed']);
+/** Datafeed states where the batch run is still in flight. */
+const ACTIVE_DATAFEED_STATES = new Set(['started', 'starting', 'stopping']);
 
 const schema = z.object({
   operation: z.enum([
@@ -25,6 +36,8 @@ const schema = z.object({
     'stop_datafeed',
     'revert_model_snapshot',
     'preview_datafeed',
+    'delete_job',
+    'await_batch_completion',
   ]),
   job_id: z.string().describe('The anomaly detection job ID.'),
   snapshot_id: z
@@ -39,23 +52,63 @@ const schema = z.object({
     .string()
     .optional()
     .describe('End time for start_datafeed (ISO 8601). Omit for open-ended.'),
+  allow_non_scratch: z
+    .boolean()
+    .optional()
+    .describe(
+      'For delete_job: allow deleting a job not in the ml-agent-scratch group. Default false.'
+    ),
+  delete_user_annotations: z
+    .boolean()
+    .optional()
+    .describe('For delete_job: also delete user annotations. Default true.'),
+  max_wait_seconds: z
+    .number()
+    .optional()
+    .describe(
+      'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the job has not closed by then. Call again to extend the wait.'
+    ),
+  datafeed_start_ms: z
+    .number()
+    .optional()
+    .describe(
+      'For await_batch_completion: epoch ms the datafeed was started from — used to compute progress_pct.'
+    ),
+  datafeed_end_ms: z
+    .number()
+    .optional()
+    .describe(
+      'For await_batch_completion: epoch ms the datafeed was started to — used to compute progress_pct.'
+    ),
 });
 
 export const createAdManageJobStateTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_MANAGE_JOB_STATE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, or preview a datafeed.',
+    'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, preview a datafeed, delete a scratch job, or block until a batch datafeed run completes.',
   experimental: true,
   schema,
   handler: async (
-    { operation, job_id: jobId, snapshot_id: snapshotId, start, end },
-    { esClient, request }
+    {
+      operation,
+      job_id: jobId,
+      snapshot_id: snapshotId,
+      start,
+      end,
+      allow_non_scratch: allowNonScratch,
+      delete_user_annotations: deleteUserAnnotations = true,
+      max_wait_seconds: maxWaitSeconds = 120,
+      datafeed_start_ms: datafeedStartMs,
+      datafeed_end_ms: datafeedEndMs,
+    },
+    { esClient, savedObjectsClient, request, events }
   ) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -66,17 +119,26 @@ export const createAdManageJobStateTool = (
     );
     const ml = esClient.asCurrentUser.ml;
     const datafeedId = `datafeed-${jobId}`;
+    const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
 
     try {
       switch (operation) {
         case 'open_job': {
           await hasMlCapabilities(['canOpenJob']);
+          if (mlClient) {
+            const response = await mlClient.openJob({ job_id: jobId });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.openJob({ job_id: jobId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'close_job': {
           await hasMlCapabilities(['canCloseJob']);
+          if (mlClient) {
+            const response = await mlClient.closeJob({ job_id: jobId });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.closeJob({ job_id: jobId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
@@ -86,12 +148,23 @@ export const createAdManageJobStateTool = (
           const body: Record<string, unknown> = {};
           if (start) body.start = start;
           if (end) body.end = end;
+          if (mlClient) {
+            const response = await mlClient.startDatafeed({
+              datafeed_id: datafeedId,
+              body: body as any,
+            });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.startDatafeed({ datafeed_id: datafeedId, body: body as any });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'stop_datafeed': {
           await hasMlCapabilities(['canStartStopDatafeed']);
+          if (mlClient) {
+            const response = await mlClient.stopDatafeed({ datafeed_id: datafeedId });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.stopDatafeed({ datafeed_id: datafeedId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
@@ -102,6 +175,13 @@ export const createAdManageJobStateTool = (
             return {
               results: [createErrorResult('snapshot_id is required for revert_model_snapshot')],
             };
+          }
+          if (mlClient) {
+            const response = await mlClient.revertModelSnapshot({
+              job_id: jobId,
+              snapshot_id: snapshotId,
+            });
+            return { results: [{ type: ToolResultType.other, data: response }] };
           }
           const response = await ml.revertModelSnapshot({
             job_id: jobId,

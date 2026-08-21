@@ -10,6 +10,7 @@ import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../../common/license';
 import type { MlFeatures } from '../../../../common/constants/app';
 import type { MlAuthorizationService } from '../../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn, BuildDataRecognizerFn } from '../../ml_client_factory';
 import { createAdGetJobInfoTool } from '../../tools/ad_get_job_info';
 import { createAdCreateJobTool } from '../../tools/ad_create_job';
 import { createAdManageJobStateTool } from '../../tools/ad_manage_job_state';
@@ -27,7 +28,9 @@ export const createAnomalyDetectionSkill = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn,
+  buildDataRecognizer?: BuildDataRecognizerFn
 ) =>
   defineSkillType({
     id: 'ml.anomaly-detection',
@@ -49,9 +52,28 @@ export const createAnomalyDetectionSkill = (
     ],
     getInlineTools: () => [
       createAdGetJobInfoTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
-      createAdCreateJobTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
-      createAdManageJobStateTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
-      createAdUpdateJobConfigTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
+      createAdCreateJobTool(
+        resolveMlCapabilities,
+        authorization,
+        mlLicense,
+        enabledFeatures,
+        buildMlClient,
+        buildDataRecognizer
+      ),
+      createAdManageJobStateTool(
+        resolveMlCapabilities,
+        authorization,
+        mlLicense,
+        enabledFeatures,
+        buildMlClient
+      ),
+      createAdUpdateJobConfigTool(
+        resolveMlCapabilities,
+        authorization,
+        mlLicense,
+        enabledFeatures,
+        buildMlClient
+      ),
       createQueryAnomaliesTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
     ],
   });

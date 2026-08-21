@@ -15,6 +15,7 @@ import type { MlLicense } from '../../../common/license';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
+import type { BuildMlClientFn } from '../ml_client_factory';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
 const calendarEventSchema = z.object({
@@ -174,7 +175,8 @@ export const createAdUpdateJobConfigTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
-  enabledFeatures?: MlFeatures
+  enabledFeatures?: MlFeatures,
+  buildMlClient?: BuildMlClientFn
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
   type: ToolType.builtin,
@@ -194,7 +196,7 @@ export const createAdUpdateJobConfigTool = (
       calendar_events,
       calendar_id,
     },
-    { esClient, request }
+    { esClient, savedObjectsClient, request }
   ) => {
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -204,6 +206,7 @@ export const createAdUpdateJobConfigTool = (
       enabledFeatures
     );
     const ml = esClient.asCurrentUser.ml;
+    const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
 
     try {
       switch (operation) {
@@ -224,6 +227,13 @@ export const createAdUpdateJobConfigTool = (
             };
           }
           await hasMlCapabilities(['canUpdateJob']);
+          if (mlClient) {
+            const response = await mlClient.updateJob({
+              job_id: resolved.jobId,
+              body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
+            });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.updateJob({
             job_id: resolved.jobId,
             body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
@@ -248,6 +258,13 @@ export const createAdUpdateJobConfigTool = (
             };
           }
           await hasMlCapabilities(['canUpdateDatafeed']);
+          if (mlClient) {
+            const response = await mlClient.updateDatafeed({
+              datafeed_id: `datafeed-${resolved.jobId}`,
+              body: { query_delay } as any,
+            });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.updateDatafeed({
             datafeed_id: `datafeed-${resolved.jobId}`,
             body: { query_delay } as any,
@@ -272,6 +289,13 @@ export const createAdUpdateJobConfigTool = (
             };
           }
           await hasMlCapabilities(['canUpdateDatafeed']);
+          if (mlClient) {
+            const response = await mlClient.updateDatafeed({
+              datafeed_id: `datafeed-${resolved.jobId}`,
+              body: { delayed_data_check_config: delayed_data_check } as any,
+            });
+            return { results: [{ type: ToolResultType.other, data: response }] };
+          }
           const response = await ml.updateDatafeed({
             datafeed_id: `datafeed-${resolved.jobId}`,
             body: { delayed_data_check_config: delayed_data_check } as any,
