@@ -65,8 +65,10 @@ export const getAssetCriticality = (entity: LeadEntity): string | undefined => {
 };
 
 /** Returns true when the entity's asset criticality is a high-impact tier. */
-export const isHighCriticality = (entity: LeadEntity): boolean => {
-  const criticality = getAssetCriticality(entity);
+export const isHighCriticality = (
+  params: { entity: LeadEntity } | { criticality: string }
+): boolean => {
+  const criticality = 'entity' in params ? getAssetCriticality(params.entity) : params.criticality;
   return criticality != null && HIGH_CRITICALITY_LEVELS.has(criticality);
 };
 

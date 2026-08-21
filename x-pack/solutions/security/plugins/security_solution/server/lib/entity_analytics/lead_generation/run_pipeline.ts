@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { RelationshipsClient } from '@kbn/entity-store/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
@@ -41,6 +42,7 @@ export interface RunPipelineParams {
   readonly ml?: MlPluginSetup;
   readonly request?: KibanaRequest;
   readonly soClient?: SavedObjectsClientContract;
+  readonly relationshipsClient: RelationshipsClient;
 }
 
 const shouldRunLLMSynthesis = (
@@ -70,6 +72,7 @@ export const runLeadGenerationPipeline = async ({
   ml,
   request,
   soClient,
+  relationshipsClient,
 }: RunPipelineParams): Promise<void> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
@@ -97,6 +100,7 @@ export const runLeadGenerationPipeline = async ({
     ml,
     request,
     soClient,
+    relationshipsClient,
   });
 
   const prepareStart = Date.now();

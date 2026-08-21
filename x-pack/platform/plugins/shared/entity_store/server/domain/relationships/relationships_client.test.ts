@@ -195,4 +195,59 @@ describe('RelationshipsClient', () => {
       expect(result.total).toBe(1);
     });
   });
+
+  describe('getEarliestObservationByTarget', () => {
+    it('returns an empty map without querying when no targets are given', async () => {
+      const result = await client.getEarliestObservationByTarget({
+        entityId: 'user:alice@corp',
+        kind: 'administers',
+        targets: [],
+      });
+
+      expect(result.size).toBe(0);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty map when there are no aggregation buckets', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0, relation: 'eq' as const } },
+        aggregations: { by_target: { buckets: [] } },
+      } as never);
+
+      const result = await client.getEarliestObservationByTarget({
+        entityId: 'user:alice@corp',
+        kind: 'administers',
+        targets: ['host:dc-01', 'host:dc-02'],
+      });
+
+      expect(result.size).toBe(0);
+    });
+
+    it('returns a target -> earliest ms map, skipping targets without history', async () => {
+      const earliest = 1_746_057_600_000;
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0, relation: 'eq' as const } },
+        aggregations: {
+          by_target: {
+            buckets: [
+              {
+                key: 'host:dc-01',
+                earliest: { value: earliest, value_as_string: '2025-05-01T00:00:00.000Z' },
+              },
+              { key: 'host:dc-02', earliest: { value: null } },
+            ],
+          },
+        },
+      } as never);
+
+      const result = await client.getEarliestObservationByTarget({
+        entityId: 'user:alice@corp',
+        kind: 'administers',
+        targets: ['host:dc-01', 'host:dc-02'],
+      });
+
+      expect(result.get('host:dc-01')).toBe(earliest);
+      expect(result.has('host:dc-02')).toBe(false);
+    });
+  });
 });
