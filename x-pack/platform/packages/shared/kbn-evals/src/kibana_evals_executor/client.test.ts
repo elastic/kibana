@@ -629,6 +629,32 @@ describe('KibanaEvalsClient', () => {
       });
     });
 
+    it('reads the evaluator version after the evaluator resolves', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      let resolvedVersion: string | undefined;
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'VersionedJudge',
+            kind: 'LLM',
+            evaluate: async () => {
+              resolvedVersion = '1.2.0';
+              return { score: 1 };
+            },
+            getVersion: () => resolvedVersion,
+          },
+        ]
+      );
+
+      expect(onEvaluationComplete.mock.calls[0][0].evaluationRun.version).toBe('1.2.0');
+    });
+
     it('uses stringified exampleIndex when example has no id', async () => {
       const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });

@@ -236,6 +236,8 @@ describe('ConversationClient', () => {
                     ],
                   },
                 },
+                // Hide sub-agent conversations from the nav list
+                { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
               ],
             },
           },

@@ -307,12 +307,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       // Read after `evaluate` so evaluators that learn their model from
                       // the `_evaluate` response have it by now.
                       model: evaluator.getModel?.(),
+                      version: evaluator.getVersion?.(),
                     };
                   } catch (error) {
                     // A single evaluator failing (e.g. an LLM judge's inference call
                     // erroring out) must not take down the run's other measurements:
                     // record an explicit error result so the gap is visible in the
-                    // exported scores rather than absent from them.
+                    // exported scores instead of silently dropping the document.
                     const message = error instanceof Error ? error.message : String(error);
                     attempts.errors += 1;
                     this.options.log.error(
@@ -328,14 +329,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       evaluatorTraceId: undefined,
                       kind: evaluator.kind,
                       model: evaluator.getModel?.(),
+                      version: evaluator.getVersion?.(),
                     };
                   }
                 })
               );
 
-              for (const { evaluatorName, result, evaluatorTraceId, kind, model } of results) {
+              for (const {
+                evaluatorName,
+                result,
+                evaluatorTraceId,
+                kind,
+                model,
+                version,
+              } of results) {
                 const evalRun = {
                   name: evaluatorName,
+                  ...(version && { version }),
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,

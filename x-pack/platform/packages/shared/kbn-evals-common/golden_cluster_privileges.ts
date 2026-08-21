@@ -29,7 +29,11 @@ export const goldenClusterPrivileges = {
             privileges: ['auto_configure', 'create_index', 'create', 'read', 'view_index_metadata'],
           },
           {
-            names: [`${EvaluationIndices.DATASETS}*`, `${EvaluationIndices.DATASET_EXAMPLES}*`],
+            names: [
+              `${EvaluationIndices.DATASETS}*`,
+              `${EvaluationIndices.DATASET_EXAMPLES}*`,
+              `${EvaluationIndices.EVALUATORS}*`,
+            ],
             privileges: [
               'auto_configure',
               'create_index',
