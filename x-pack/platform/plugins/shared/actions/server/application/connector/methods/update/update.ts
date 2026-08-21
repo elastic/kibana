@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
 import { isUndefined, omitBy } from 'lodash';
 import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
@@ -20,6 +19,10 @@ import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import {
+  applyInboundIngressCredentialsIfNeeded,
+  resolveInboundEventsSpaceId,
+} from '../../../../inbound/ensure_connector_ingress_credentials';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -158,6 +161,17 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
         )
       : validatedActionTypeConfig;
 
+  const storedConfig = attributes.config;
+
+  const { config: configWithIngress, ingestToken } = applyInboundIngressCredentialsIfNeeded({
+    actionTypeId,
+    connectorId: id,
+    spaceId: resolveInboundEventsSpaceId(context),
+    config: configForSave as Record<string, unknown>,
+    storedConfig,
+    forceMint: false,
+  });
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
@@ -167,8 +181,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configForSave as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configWithIngress,
+          secrets: validatedActionTypeSecrets,
         },
         omitBy(
           {
@@ -238,5 +252,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(ingestToken !== undefined ? { secrets: { ingestToken } } : {}),
   };
 }

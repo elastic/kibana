@@ -24,6 +24,7 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -870,6 +871,87 @@ describe('update()', () => {
           connectorId: 'connector-id',
           isUpdate: true,
           wasSuccessful: true,
+        })
+      );
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+    };
+
+    const storedHash = 'b'.repeat(64);
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'connector-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('keeps the stored hash and URL and does not return a new token', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: storedHash },
+        },
+      } as never);
+
+      const result = await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash: string };
+      };
+      expect(saved.config.ingestTokenHash).toBe(storedHash);
+      expect(result.secrets).toBeUndefined();
+    });
+
+    test('mints credentials when the stored hash is missing', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+        },
+      } as never);
+
+      const result = await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      expect(result.secrets?.ingestToken).toEqual(expect.any(String));
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash: string };
+      };
+      expect(saved.config.ingestTokenHash).toBe(
+        computeIngestTokenHash({
+          connectorId: 'connector-id',
+          spaceId: 'default',
+          token: result.secrets!.ingestToken!,
         })
       );
     });

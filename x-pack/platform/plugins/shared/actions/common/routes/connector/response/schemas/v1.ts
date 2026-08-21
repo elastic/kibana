@@ -50,6 +50,26 @@ export const connectorResponseSchema = schema.object(
         },
       })
     ),
+    secrets: schema.maybe(
+      schema.object(
+        {
+          ingest_token: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'One-time ingest token for inbound connector events. Returned only when credentials are minted (create, or update if missing). Store it; it cannot be retrieved again. Authenticate hub requests with `Authorization: Bearer` or the `token` query parameter.',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Secrets returned once after minting. Omitted on get and list. Never contains the stored ingest-token hash.',
+          },
+        }
+      )
+    ),
   },
   { meta: { id: 'connector_response' } }
 );

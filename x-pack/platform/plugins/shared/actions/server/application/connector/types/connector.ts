@@ -22,6 +22,13 @@ export interface Connector {
   isSystemAction: ConnectorSchemaType['isSystemAction'];
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
+  /**
+   * One-time secrets returned on create (or when credentials are minted on update).
+   * Never persisted. GET/list omit this field.
+   */
+  secrets?: {
+    ingestToken?: string;
+  };
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

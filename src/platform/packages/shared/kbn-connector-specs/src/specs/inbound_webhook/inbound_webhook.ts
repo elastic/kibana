@@ -63,12 +63,6 @@ export const InboundWebhook: ConnectorSpec = {
       .optional()
       .describe('HMAC-SHA256 hex digest of the ingest token. Set on create; never the raw token.')
       .meta({ hidden: true }),
-    webhookUrl: z
-      .string()
-      .max(2048)
-      .optional()
-      .describe('Public ingest URL for this connector instance. Set on create.')
-      .meta({ hidden: true }),
   }),
 
   actions: {},

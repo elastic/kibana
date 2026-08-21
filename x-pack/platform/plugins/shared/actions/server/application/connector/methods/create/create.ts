@@ -7,19 +7,22 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult } from '../../../../types';
+import type { HookServices, ActionResult, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
+import {
+  applyInboundIngressCredentialsIfNeeded,
+  resolveInboundEventsSpaceId,
+} from '../../../../inbound/ensure_connector_ingress_credentials';
 
 export async function create({
   context,
@@ -138,16 +141,24 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
+  const { config: configWithIngress, ingestToken } = applyInboundIngressCredentialsIfNeeded({
+    actionTypeId,
+    connectorId: id,
+    spaceId: resolveInboundEventsSpaceId(context),
+    config: configForSave as Record<string, unknown>,
+    forceMint: true,
+  });
+
   const result = await tryCatch(
     async () =>
-      await context.unsecuredSavedObjectsClient.create(
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configForSave as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configWithIngress,
+          secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }
@@ -216,5 +227,6 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(ingestToken !== undefined ? { secrets: { ingestToken } } : {}),
   };
 }
