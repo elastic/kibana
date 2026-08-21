@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,7 +30,6 @@ import { PresentationPanelHoverActionsWrapper } from './panel_header/presentatio
 import { PresentationPanelError } from './presentation_panel_error';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { VisibilityTracker } from './visibility_tracker';
-import { useSharingAttributes } from './use_sharing_attributes';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -48,6 +47,7 @@ const PresentationPanelChrome = <
   titleHighlight,
   setDragHandle,
   componentApi,
+  isSharedItem,
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelProps<ApiType, ComponentPropsType>,
@@ -72,6 +72,10 @@ const PresentationPanelChrome = <
     defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
+    blockingError,
+    dataLoading,
+    rendered,
+    renderCount,
   ] = useBatchedPublishingSubjects(
     componentApi.title$ ?? new BehaviorSubject(undefined),
     componentApi.hideTitle$ ?? new BehaviorSubject(false),
@@ -79,7 +83,11 @@ const PresentationPanelChrome = <
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
     viewModeSubject ?? new BehaviorSubject(undefined),
-    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false)
+    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
+    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+    componentApi.dataLoading$ ?? new BehaviorSubject(false),
+    componentApi.rendered$ ?? new BehaviorSubject(true),
+    componentApi.renderCount$ ?? new BehaviorSubject(undefined)
   );
   const viewMode = rawViewMode ?? 'view';
 
@@ -87,6 +95,40 @@ const PresentationPanelChrome = <
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
     !Boolean(panelTitle ?? defaultPanelTitle);
+
+  const dataAttributes = useMemo(() => {
+    const dataTitle = panelTitle ?? defaultPanelTitle;
+    const dataDescription = panelDescription ?? defaultPanelDescription;
+
+    return {
+      ['data-render-complete']: Boolean(blockingError) || (!dataLoading && rendered),
+      ...(renderCount !== undefined && { ['data-rendering-count']: renderCount }),
+      ...(isSharedItem && { 'data-shared-item': '' }),
+      ...(dataTitle && { ['data-title']: dataTitle }),
+      ...(dataDescription && { ['data-description']: dataDescription }),
+    };
+  }, [
+    blockingError,
+    defaultPanelDescription,
+    panelDescription,
+    panelTitle,
+    defaultPanelTitle,
+    dataLoading,
+    rendered,
+    renderCount,
+    isSharedItem,
+  ]);
+
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const firstRenderCompleteRef = useRef(false);
+  useEffect(() => {
+    if (!firstRenderCompleteRef.current && dataAttributes['data-render-complete']) {
+      firstRenderCompleteRef.current = true;
+      if (isSharedItem && panelRef.current) {
+        panelRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+      }
+    }
+  }, [dataAttributes, isSharedItem]);
 
   return (
     <PresentationPanelHoverActionsWrapper
@@ -109,6 +151,8 @@ const PresentationPanelChrome = <
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
+        {...dataAttributes}
+        panelRef={panelRef}
         css={styles.embPanel}
       >
         {!hideHeader && (
@@ -142,7 +186,6 @@ export const PresentationPanel = <
 
   setDragHandles,
   hidePanelChrome,
-  isSharedItem,
   ...rest
 }: PresentationPanelProps<ApiType, ComponentPropsType>) => {
   const [blockingError, panelHideBorder, parentHideBorder, fetchOnlyVisible] =
@@ -166,19 +209,6 @@ export const PresentationPanel = <
     [setDragHandles]
   );
 
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const onInitialRenderComplete = useCallback(() => {
-    if (isSharedItem && panelRef.current) {
-      panelRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
-    }
-  }, [isSharedItem]);
-
-  const sharingAttirbutes = useSharingAttributes(
-    componentApi,
-    onInitialRenderComplete,
-    Boolean(isSharedItem)
-  );
-
   const InnerPanel = useMemo(() => {
     return (
       <>
@@ -189,11 +219,6 @@ export const PresentationPanel = <
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
-          data-test-subj="embeddablePanelContent"
-          {...(isSharedItem
-            ? sharingAttirbutes
-            : { ['data-render-complete']: sharingAttirbutes['data-render-complete'] })}
-          ref={panelRef}
         >
           <EuiErrorBoundary>
             <Component {...(componentProps as React.ComponentProps<typeof Component>)} />
@@ -208,8 +233,6 @@ export const PresentationPanel = <
     componentProps,
     componentInternalApi.setVisibility,
     fetchOnlyVisible,
-    isSharedItem,
-    sharingAttirbutes,
   ]);
 
   return hidePanelChrome ? (

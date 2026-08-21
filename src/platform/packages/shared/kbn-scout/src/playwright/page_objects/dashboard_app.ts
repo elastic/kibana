@@ -497,7 +497,7 @@ export class DashboardApp {
     expectedCount: number,
     options: { timeout: number; selector: string } = {
       timeout: 20000,
-      selector: '[data-test-subj="embeddablePanelContent"][data-render-complete="true"]',
+      selector: '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
     }
   ) {
     await expect
