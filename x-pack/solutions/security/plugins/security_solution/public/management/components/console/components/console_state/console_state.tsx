@@ -6,15 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, {
-  useMemo,
-  useReducer,
-  memo,
-  createContext,
-  useContext,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { useEffect, useReducer, memo, createContext, useContext, useCallback } from 'react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ConsoleApi } from '../../types';
 import type { ConsoleProps } from '../..';
@@ -73,7 +65,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
       stateInitializer
     );
 
-    useMemo(() => {
+    useEffect(() => {
       state.consoleApi.setInput = (command: string) => {
         if (isMounted()) {
           dispatch({
@@ -91,13 +83,17 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
           dispatch({ type: 'addFocusToKeyCapture' });
         }
       };
-    }, [isMounted, state.consoleApi]);
 
-    useMemo(() => {
       if (apiRef) {
         Object.assign((apiRef.current = apiRef.current ?? ({} as ConsoleApi)), state.consoleApi);
       }
-    }, [apiRef, state.consoleApi]);
+
+      return () => {
+        if (!isMounted()) {
+          apiRef.current = undefined;
+        }
+      };
+    }, [isMounted, apiRef, state.consoleApi]);
 
     // Anytime `state` changes AND the console is under ConsoleManager's control, then
     // store the console's state to ConsoleManager. This is what enables a console to be
