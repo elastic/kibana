@@ -142,17 +142,20 @@ A filter applied before the cap changes which items survive truncation, so `?nam
 means "the newest N notifications in namespace x".
 
 1. **Is it on the document?**
-2. **Is it invariant across every copy of the `notification_id`?** Filtering on mutable state
-   changes which copy represents the collapsed group.
+2. **Does it define the set, or pick a copy within it?** A time window defines which copies form
+   the group, so the newest one in it is the right representative. A filter on mutable state
+   picks an arbitrary copy to stand for the group.
 
-| Candidate           | On document | Invariant per id                            | Where          |
+| Candidate           | On document | Defines the set                             | Where          |
 | ------------------- | ----------- | ------------------------------------------- | -------------- |
 | `namespace`, `type` | yes         | yes — both are encoded in `notification_id` | server param   |
-| `from` / `to`       | yes         | selects which copies form the group         | server param   |
-| `severity`          | yes         | no — mutable across copies                  | response field |
+| `from` / `to`       | yes         | yes — the window is the set                 | server param   |
+| `severity`          | yes         | no — picks an arbitrary copy                | response field |
 | read state, mute    | no          | n/a                                         | response field |
 
 The server annotates per-user read state, it does not filter or order by it.
+
+An older high-severity notification can now fall outside the cap; server-side pagination and/or a higher cap will address this.
 
 ## Submitting notifications (`forType`)
 
