@@ -126,6 +126,43 @@ describe('ProjectPickerFlyoutContent', () => {
     expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
   });
 
+  it('can apply the current routing when canApplyUnchangedProjectRouting is true', async () => {
+    const user = userEvent.setup();
+    const { onApplyChanges } = renderFlyout({
+      canApplyUnchangedProjectRouting: true,
+      projectRouting: PROJECT_ROUTING.ALL,
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(getProjectPickerListItemSwitchTestSubj(originProject._id))
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('projectPickerFlyoutDiscardButton')).toBeDisabled();
+    expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeEnabled();
+
+    await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+
+    expect(onApplyChanges).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
+  });
+
+  it('keeps Apply disabled while an initial filter proposal is pending', async () => {
+    const fetchProjectsByRouting = jest.fn(() => new Promise<never>(() => {}));
+    renderFlyout({
+      canApplyUnchangedProjectRouting: true,
+      defaultProjectRoutingGetter: () => PROJECT_ROUTING.ALL,
+      fetchProjectsByRouting,
+      projectRouting: '_type:security',
+    });
+
+    await waitFor(() => {
+      expect(fetchProjectsByRouting).toHaveBeenCalledWith('_type:security');
+    });
+
+    expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
+  });
+
   it('enables Discard and Apply after excluding a project and applies the staged routing', async () => {
     const user = userEvent.setup();
     const { onApplyChanges } = renderFlyout();
@@ -159,6 +196,9 @@ describe('ProjectPickerFlyoutContent', () => {
     await waitFor(() => {
       expect(
         screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectOne._id))
+      ).toHaveAttribute('aria-checked', 'true');
+      expect(
+        screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectTwo._id))
       ).toHaveAttribute('aria-checked', 'true');
     });
 
