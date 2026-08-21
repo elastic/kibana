@@ -18,6 +18,7 @@
     "@kbn/datemath",
     "@kbn/search-types",
     "@kbn/custom-content-common",
+    "@kbn/custom-content-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
@@ -28,7 +29,9 @@
     "@kbn/core-http-server",
     "@kbn/ui-callout",
     "@kbn/shared-ux-ai-components",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }
