@@ -8,7 +8,7 @@
  */
 
 import dedent from 'dedent';
-import getopts from 'getopts';
+import getopts = require('getopts');
 import { Cluster } from '../cluster';
 import { createCliError } from '../errors';
 import { parseTimeoutToMs } from '../utils';

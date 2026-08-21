@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { blue } from 'chalk';
+import chalk from 'chalk';
 import { HORIZONTAL_LINE } from '../../common/constants';
 import { RunServiceStatus } from './components/run_service_status_formatter';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
@@ -50,7 +50,7 @@ export class ActionResponderScreen extends ScreenBaseClass {
   EXECUTE:FAILURE               Failure execute output
 
 
-${blue(HORIZONTAL_LINE.substring(0, HORIZONTAL_LINE.length - 2))}
+${chalk.blue(HORIZONTAL_LINE.substring(0, HORIZONTAL_LINE.length - 2))}
   ${actionsAndStatus.output}`;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { bgCyan, red, dim } from 'chalk';
+import chalk from 'chalk';
 import type { BaseRunningService } from '../../../common/base_running_service';
 import { DataFormatter } from '../../../common/screen';
 
@@ -21,9 +21,9 @@ export class RunServiceStatus extends DataFormatter {
         : this.serviceOrIsRunning.isRunning;
 
     if (isRunning) {
-      return bgCyan(' Running ');
+      return chalk.bgCyan(' Running ');
     }
 
-    return dim(red(' Stopped '));
+    return chalk.dim(chalk.red(' Stopped '));
   }
 }

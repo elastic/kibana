@@ -8,7 +8,7 @@
  */
 
 import dedent from 'dedent';
-import getopts from 'getopts';
+import getopts = require('getopts');
 import { ToolingLog } from '@kbn/tooling-log';
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';

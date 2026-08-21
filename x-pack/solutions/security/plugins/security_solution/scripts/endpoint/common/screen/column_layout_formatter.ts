@@ -6,7 +6,7 @@
  */
 
 import stripAnsi from 'strip-ansi';
-import { blue } from 'chalk';
+import chalk from 'chalk';
 import { DataFormatter } from './data_formatter';
 import { SCREEN_ROW_MAX_WIDTH } from './constants';
 
@@ -24,7 +24,7 @@ interface ColumnLayoutFormatterOptions {
 }
 
 export class ColumnLayoutFormatter extends DataFormatter {
-  private readonly defaultSeparator = ` ${blue('\u2506')} `;
+  private readonly defaultSeparator = ` ${chalk.blue('\u2506')} `;
 
   constructor(
     private readonly columns: Array<string | DataFormatter>,

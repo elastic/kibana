@@ -17,7 +17,7 @@ import type {
   HorizontalAlignment,
 } from 'cli-table3';
 
-type ChalkColor = typeof Color | typeof Modifiers;
+type ChalkColor = Color | Modifiers;
 type CharType = 'border' | 'noBorder' | 'outsideBorder' | 'pageDivider' | 'allBorders';
 
 /**

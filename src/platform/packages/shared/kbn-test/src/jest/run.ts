@@ -22,7 +22,7 @@ import { resolve, relative, sep as osSep, join } from 'path';
 import { promises as fs, existsSync } from 'fs';
 import { run } from 'jest';
 import { readInitialOptions } from 'jest-config';
-import getopts from 'getopts';
+import getopts = require('getopts');
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createFailError } from '@kbn/dev-cli-errors';

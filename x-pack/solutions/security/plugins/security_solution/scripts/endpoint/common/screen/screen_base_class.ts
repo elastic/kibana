@@ -10,7 +10,7 @@
 import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdin, stdout } from 'node:process';
 import * as readline from 'node:readline';
-import { blue, green, red, bold, cyan } from 'chalk';
+import chalk from 'chalk';
 import type { QuestionCollection } from 'inquirer';
 import inquirer from 'inquirer';
 import { QuitChoice } from './common_choices';
@@ -69,10 +69,10 @@ export class ScreenBaseClass {
     const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT - 2)}` : '';
 
     return title || subTitle
-      ? `${blue(HORIZONTAL_LINE)}\n${blue(bold(paddedTitle))}${
-          subTitle ? `${cyan(paddedSubTitle)}` : ''
-        }\n${blue(HORIZONTAL_LINE)}\n`
-      : `${blue(HORIZONTAL_LINE)}\n`;
+      ? `${chalk.blue(HORIZONTAL_LINE)}\n${chalk.blue(chalk.bold(paddedTitle))}${
+          subTitle ? `${chalk.cyan(paddedSubTitle)}` : ''
+        }\n${chalk.blue(HORIZONTAL_LINE)}\n`
+      : `${chalk.blue(HORIZONTAL_LINE)}\n`;
   }
 
   /**
@@ -88,7 +88,7 @@ export class ScreenBaseClass {
         : '';
 
     return `
-${displayChoices}${blue(HORIZONTAL_LINE)}`;
+${displayChoices}${chalk.blue(HORIZONTAL_LINE)}`;
   }
 
   /**
@@ -169,14 +169,14 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
 
       switch (color) {
         case 'green':
-          coloredMessage = green(`\u2713 ${message}`);
+          coloredMessage = chalk.green(`\u2713 ${message}`);
           break;
         case 'red':
-          coloredMessage = red(`\u24e7  ${message}`);
+          coloredMessage = chalk.red(`\u24e7  ${message}`);
           break;
 
         case 'blue':
-          coloredMessage = blue(`\u24d8  ${message}`);
+          coloredMessage = chalk.blue(`\u24d8  ${message}`);
           break;
       }
 
@@ -209,7 +209,7 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
 
       // TODO:PT experiment with using `rl.prompt()` instead of `question()` and possibly only initialize `rl` once
 
-      rl.question(green(prompt ?? 'Enter choice: '), (selection) => {
+      rl.question(chalk.green(prompt ?? 'Enter choice: '), (selection) => {
         if (this.isPaused || this.isHidden) {
           return;
         }
@@ -324,7 +324,7 @@ ${displayChoices}${blue(HORIZONTAL_LINE)}`;
   public async prompt<TAnswers extends object = object>({
     questions,
     answers = {},
-    title = blue('Settings:'),
+    title = chalk.blue('Settings:'),
   }: {
     questions: QuestionCollection<TAnswers>;
     answers?: Partial<TAnswers>;
