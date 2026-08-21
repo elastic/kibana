@@ -166,6 +166,7 @@ const handleConversationExecution = async ({
     connectorId,
     telemetryMetadata,
     request,
+    executionOwner: execution.owner,
     ...deps,
   });
 

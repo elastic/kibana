@@ -48,6 +48,23 @@ describe('AgentExecutionClient', () => {
       );
     });
 
+    it('persists and returns the execution owner', async () => {
+      const execution = await client.create({
+        ...createParams,
+        owner: { id: 'profile-alice', username: 'alice' },
+      });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            owner_user_id: 'profile-alice',
+            owner_user_name: 'alice',
+          }),
+        })
+      );
+      expect(execution.owner).toEqual({ id: 'profile-alice', username: 'alice' });
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },

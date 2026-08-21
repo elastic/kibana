@@ -65,6 +65,23 @@ describe('ConversationServiceImpl', () => {
         expect.objectContaining({ esClient: asCurrentUser })
       );
     });
+
+    it('uses an explicit user override without changing request-scoped dependencies', async () => {
+      const requestUser = { id: 'profile-1', username: 'jane', isAdmin: false };
+      const executionOwner = { id: 'profile-alice', username: 'alice', isAdmin: false };
+      getUserFromRequestMock.mockResolvedValue(requestUser);
+
+      await createService({ agents }).getScopedClient({ request, user: executionOwner });
+
+      expect(createClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user: executionOwner,
+          esClient: asInternalUser,
+        })
+      );
+      expect(getUserFromRequestMock).not.toHaveBeenCalled();
+      expect(agents.getRegistry).toHaveBeenCalledWith({ request });
+    });
   });
 
   describe('getConversationRoundAuthor', () => {

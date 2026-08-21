@@ -14,6 +14,7 @@ import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
+import { getUserFromRequest } from '../utils';
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
@@ -30,6 +31,12 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
 jest.mock('./persistence', () => ({
   createAgentExecutionClient: () => mockExecutionClient,
 }));
+
+jest.mock('../utils', () => ({
+  getUserFromRequest: jest.fn(),
+}));
+
+const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
 
 const conflictError = () =>
   Object.assign(new Error('version conflict'), {
@@ -96,6 +103,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
+    security: {} as never,
     taskManager,
     inference: {} as any,
     conversationService: {} as any,
@@ -110,6 +118,11 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getUserFromRequestMock.mockResolvedValue({
+      id: 'profile-1',
+      username: 'jane',
+      isAdmin: false,
+    });
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
       '@timestamp': new Date().toISOString(),
@@ -158,6 +171,38 @@ describe('AgentExecutionService', () => {
           scope: ['agent-builder'],
         }),
         { request, cloneApiKey: true }
+      );
+    });
+
+    it('stores the owner resolved from the original request before scheduling', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      getUserFromRequestMock.mockResolvedValue({
+        id: 'realm:["native","native1","alice"]',
+        username: 'alice',
+        isAdmin: false,
+      });
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          owner: { id: 'realm:["native","native1","alice"]', username: 'alice' },
+        })
+      );
+      expect(getUserFromRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request,
+          security: expect.anything(),
+          esClient: expect.anything(),
+        })
       );
     });
   });

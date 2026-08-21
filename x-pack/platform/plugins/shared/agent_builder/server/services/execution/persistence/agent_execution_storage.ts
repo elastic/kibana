@@ -30,6 +30,8 @@ const storageSettings = {
       execution_mode: types.keyword({}),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
+      owner_user_id: types.keyword({}),
+      owner_user_name: types.keyword({}),
       agent_params: types.object({ dynamic: false, properties: {} }),
       error: types.object({
         dynamic: false,
@@ -54,6 +56,8 @@ export interface AgentExecutionProperties {
   execution_mode?: string;
   parent_execution_id?: string;
   space_id: string;
+  owner_user_id?: string;
+  owner_user_name?: string;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   event_count?: number;

@@ -12,6 +12,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
@@ -30,6 +31,7 @@ export const resolveServices = async ({
   uiSettings,
   savedObjects,
   searchInferenceEndpoints,
+  executionOwner,
 }: {
   agentId: string;
   connectorId?: string;
@@ -42,6 +44,7 @@ export const resolveServices = async ({
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  executionOwner?: UserIdAndName;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -78,7 +81,10 @@ export const resolveServices = async ({
     searchInferenceEndpoints,
   });
 
-  const conversationClient = await conversationService.getScopedClient({ request });
+  const conversationClient = await conversationService.getScopedClient({
+    request,
+    ...(executionOwner ? { user: { ...executionOwner, isAdmin: false } } : {}),
+  });
 
   return {
     conversationClient,

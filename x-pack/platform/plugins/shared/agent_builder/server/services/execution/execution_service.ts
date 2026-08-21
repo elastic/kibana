@@ -13,6 +13,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -28,6 +29,7 @@ import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
+import { getUserFromRequest } from '../utils';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {
@@ -42,6 +44,7 @@ import { followExecution$ } from './execution_follower';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
+  security: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
@@ -76,6 +79,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const owner = await getUserFromRequest({
+      request,
+      security: this.deps.security,
+      esClient: this.deps.elasticsearch.client.asScoped(request).asCurrentUser,
+    });
 
     const executionClient = this.createExecutionClient();
 
@@ -97,6 +105,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         agentParams: validatedParams,
         parentExecutionId: params.parentExecutionId,
         metadata,
+        owner: { id: owner.id, username: owner.username },
       });
     } catch (err) {
       if (isVersionConflictError(err)) {

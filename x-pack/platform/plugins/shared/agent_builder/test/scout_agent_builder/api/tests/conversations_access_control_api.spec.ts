@@ -457,6 +457,45 @@ apiTest.describe(
     // ── public conversation access ──────────────────────────────────────────
 
     apiTest(
+      'default Task Manager converse persists the Basic-auth owner user id',
+      async ({ apiClient, esClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-tm-owner-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Task Manager Owner Conversation',
+          response: 'Task Manager owner response',
+        });
+
+        const response = await apiClient.post(`${accessControlApiBase}/converse`, {
+          headers: headersFor(alice),
+          body: {
+            agent_id: agentId,
+            input: 'Create a public conversation through Task Manager',
+            connector_id: connectorId,
+            access_control: { access_mode: ConversationAccessControlMode.Public },
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const { conversation_id: conversationId } = response.body as ChatResponse;
+        const storedConversation = await esClient.get({
+          index: CHAT_CONVERSATIONS_INDEX,
+          id: conversationId,
+        });
+        const source = storedConversation._source as
+          | { user_id?: string; user_name?: string }
+          | undefined;
+
+        expect(typeof source?.user_id).toBe('string');
+        expect(source?.user_id?.length).toBeGreaterThan(0);
+        expect(source?.user_name).toBe(alice.username);
+      }
+    );
+
+    apiTest(
       'public conversations require conversation access and agent use access',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-agent-${testRunId.slice(0, 8)}`;

@@ -21,7 +21,10 @@ import type { ConversationClient } from './client';
 import { createClient } from './client';
 
 export interface ConversationService {
-  getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
+  getScopedClient(options: {
+    request: KibanaRequest;
+    user?: CurrentUser;
+  }): Promise<ConversationClient>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
@@ -51,8 +54,14 @@ export class ConversationServiceImpl implements ConversationService {
     this.agents = agents;
   }
 
-  async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = await this.getCurrentUser({ request });
+  async getScopedClient({
+    request,
+    user: userOverride,
+  }: {
+    request: KibanaRequest;
+    user?: CurrentUser;
+  }): Promise<ConversationClient> {
+    const user = userOverride ?? (await this.getCurrentUser({ request }));
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });

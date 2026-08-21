@@ -20,6 +20,7 @@ import type {
   ConversationRoundAuthor,
   ExecutionStatus,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
@@ -121,6 +122,8 @@ interface BaseAgentExecution {
   agentId: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
+  /** User identity resolved from the request that created the execution. */
+  owner?: UserIdAndName;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Number of events stored on the document (kept in sync with `events.length`). */

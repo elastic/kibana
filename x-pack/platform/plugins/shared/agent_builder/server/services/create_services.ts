@@ -258,6 +258,7 @@ export class ServiceManager {
     executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
+      security,
       taskManager,
       spaces,
       inference,

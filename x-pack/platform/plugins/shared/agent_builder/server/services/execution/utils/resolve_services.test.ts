@@ -29,9 +29,11 @@ const createDeps = () => {
   const agentRegistry = createMockedAgentRegistry();
   const agentService = createAgentsServiceStartMock();
   agentService.getRegistry.mockResolvedValue(agentRegistry);
+  const conversationService = { getScopedClient: jest.fn().mockResolvedValue({ id: 'client' }) };
 
   return {
     agentRegistry,
+    conversationService,
     deps: {
       agentId: 'private-agent',
       connectorId: 'connector-1',
@@ -39,7 +41,9 @@ const createDeps = () => {
       request: httpServerMock.createKibanaRequest(),
       logger: loggingSystemMock.createLogger(),
       inference: inferenceMock.createStartContract(),
-      conversationService: {} as Parameters<typeof resolveServices>[0]['conversationService'],
+      conversationService: conversationService as unknown as Parameters<
+        typeof resolveServices
+      >[0]['conversationService'],
       agentService,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
@@ -68,6 +72,21 @@ describe('resolveServices', () => {
         agentId: 'private-agent',
         statusCode: 404,
       },
+    });
+  });
+
+  it('passes the execution owner to the conversation client override', async () => {
+    const { agentRegistry, conversationService, deps } = createDeps();
+    agentRegistry.has.mockResolvedValue(true);
+
+    await resolveServices({
+      ...deps,
+      executionOwner: { id: 'profile-alice', username: 'alice' },
+    });
+
+    expect(conversationService.getScopedClient).toHaveBeenCalledWith({
+      request: deps.request,
+      user: { id: 'profile-alice', username: 'alice', isAdmin: false },
     });
   });
 });
