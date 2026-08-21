@@ -14,8 +14,10 @@ import type {
   ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import {
+  ConversationParentRelation,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -31,7 +33,10 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin' | 'read_only'>;
+  conversation: Pick<
+    Conversation,
+    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation' | 'read_only'
+  >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -41,6 +46,11 @@ export const createConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
+      // Persistent sub-agent creations: link to the parent and snapshot the parent's user
+      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+      const hasResolvedParentUser =
+        Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+
       return conversationClient.create({
         id: conversation.id,
         title,
@@ -50,8 +60,11 @@ export const createConversation$ = ({
         read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
-        read: false,
         rounds: [roundCompletedEvent.data.round],
+        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
+        ...(conversation.parent_conversation
+          ? { parent_conversation: conversation.parent_conversation }
+          : {}),
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
@@ -151,6 +164,7 @@ export const getConversation = async ({
   conversationClient,
   accessControl,
   origin,
+  subagentCreation,
   readOnly,
 }: {
   agentId: string;
@@ -159,6 +173,10 @@ export const getConversation = async ({
   conversationClient: ConversationClient;
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  subagentCreation?: {
+    parentConversationId: string;
+    subagentName: string;
+  };
   readOnly?: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
@@ -194,12 +212,60 @@ export const getConversation = async ({
       ...(await conversationClient.get(conversationId)),
       operation: 'UPDATE',
     };
-  } else {
+  }
+
+  // Case 3a: Creating a child conversation for a persistent sub-agent.
+  if (subagentCreation) {
+    const parentLink = {
+      id: subagentCreation.parentConversationId,
+      relation: ConversationParentRelation.subagent,
+    };
+    const parentExists = await conversationClient.exists(subagentCreation.parentConversationId);
+    if (parentExists) {
+      const parent = await conversationClient.get(subagentCreation.parentConversationId);
+      return {
+        ...placeholderConversation({
+          conversationId,
+          agentId,
+          accessControl: parent.access_control,
+          origin,
+        }),
+        title: subagentCreation.subagentName,
+        user: parent.user,
+        parent_conversation: parentLink,
+        operation: 'CREATE',
+      };
+    }
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, origin, readOnly }),
+      ...placeholderConversation({
+        conversationId,
+        agentId,
+        accessControl,
+        origin,
+        readOnly,
+      }),
+      title: subagentCreation.subagentName,
+      parent_conversation: parentLink,
       operation: 'CREATE',
     };
   }
+
+  return {
+    ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+    operation: 'CREATE',
+  };
+};
+
+/**
+ * Sentinel user attached to a placeholder conversation.
+ */
+export const PLACEHOLDER_USER: UserIdAndName = {
+  id: 'unknown',
+  username: 'unknown',
+};
+
+export const isPlaceholderUser = (user: UserIdAndName | undefined): boolean => {
+  return user?.id === PLACEHOLDER_USER.id && user?.username === PLACEHOLDER_USER.username;
 };
 
 export const placeholderConversation = ({
@@ -225,9 +291,6 @@ export const placeholderConversation = ({
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
-    user: {
-      id: 'unknown',
-      username: 'unknown',
-    },
+    user: PLACEHOLDER_USER,
   };
 };
