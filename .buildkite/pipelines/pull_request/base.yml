@@ -133,6 +133,9 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
+      # FTR result reuse rollout: 'shadow' only annotates what would be
+      # reused; 'true' applies it; 'false' disables it entirely.
+      FTR_RESULT_REUSE: 'shadow'
       FTR_TEST_CHANNELS: ci-on-commit
     plugins:
       - sparse-checkout#v1.6.0:

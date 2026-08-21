@@ -21,6 +21,12 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { ftrManifest } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
+import type { FtrReuseResolution } from './ftr_result_reuse';
+import {
+  getFtrResultReuseMode,
+  resolveFtrResultReuse,
+  writeCarriedResults,
+} from './ftr_result_reuse';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { shouldSkipFtrTests } from './selective_ftr';
 import { isScoutPathOnlyDiff } from './selective_scout';
@@ -127,6 +133,52 @@ export async function pickTestGroupRunOrder() {
         selectiveCtx
       );
     }
+
+    // Reuse green FTR results from a previous build of this PR when the dist,
+    // ES snapshot, PR labels, and FTR-relevant sources are unchanged
+    // (retriggers, test-only pushes). Fail-open: any error runs everything.
+    // FTR_RESULT_REUSE controls the mode: 'shadow' (default) only reports what
+    // would happen, 'true' applies the reuse, 'false' disables it entirely.
+    const reuseMode = getFtrResultReuseMode();
+    if (reuseMode !== 'off' && ftrManifestEntriesByQueue.size) {
+      const candidates = [...ftrManifestEntriesByQueue.values()].flat().map((e) => e.path);
+      const resolution = await resolveFtrResultReuse(bk, candidates).catch((error) => {
+        console.error('FTR result reuse: error resolving, running all configs', error);
+        return null;
+      });
+
+      if (resolution && reuseMode === 'shadow') {
+        annotateShadowResolution(bk, resolution, candidates.length);
+      } else if (
+        resolution &&
+        resolution.reusable.size &&
+        resolution.source &&
+        resolution.prevBuild
+      ) {
+        for (const [queue, queueEntries] of ftrManifestEntriesByQueue) {
+          const remaining = queueEntries.filter((entry) => !resolution.reusable.has(entry.path));
+          if (remaining.length) {
+            ftrManifestEntriesByQueue.set(queue, remaining);
+          } else {
+            ftrManifestEntriesByQueue.delete(queue);
+          }
+        }
+        const total = resolution.reusable.size;
+        console.log(
+          `FTR result reuse: carrying over ${total} green config result(s) from build #${resolution.prevBuild.number}`
+        );
+        bk.setAnnotation(
+          'selective-testing-ftr-reuse',
+          'info',
+          `Selective testing: ${total} FTR config result(s) reused from [build #${resolution.prevBuild.number}](${resolution.prevBuild.web_url}) — dist, ES snapshot, and FTR sources are unchanged.`
+        );
+        try {
+          writeCarriedResults(bk, resolution.reusable, resolution.source);
+        } catch (error) {
+          console.error('FTR result reuse: failed to write carried results', error);
+        }
+      }
+    }
   }
 
   if (
@@ -230,6 +282,27 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
+}
+
+/**
+ * Shadow-mode reporting: what reuse WOULD have done on this build. Keeps the
+ * message short — annotations render on every PR build.
+ */
+function annotateShadowResolution(
+  bk: BuildkiteClient,
+  resolution: FtrReuseResolution,
+  candidateCount: number
+) {
+  const { reusable, abortReason, prevBuild } = resolution;
+  const fromPrevBuild = prevBuild ? ` from [build #${prevBuild.number}](${prevBuild.web_url})` : '';
+
+  const message = reusable.size
+    ? `FTR result reuse (shadow): this build would have skipped ${reusable.size} of ${candidateCount} FTR configs — green results carried${fromPrevBuild}.`
+    : `FTR result reuse (shadow): this build would have run all ${candidateCount} FTR configs — ${
+        abortReason ?? `no green results to carry${fromPrevBuild}`
+      }.`;
+
+  bk.setAnnotation('selective-testing-ftr-reuse', 'info', message);
 }
 
 /**

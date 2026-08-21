@@ -237,6 +237,19 @@ export class BuildkiteClient {
     return response.data as Build[];
   };
 
+  getBuildsForBranch = async (
+    pipelineSlug: string,
+    branch: string,
+    numberOfBuilds = 10
+  ): Promise<Build[]> => {
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?branch=${encodeURIComponent(
+        branch
+      )}&per_page=${numberOfBuilds}`
+    );
+    return response.data as Build[];
+  };
+
   getBuildForCommit = async (pipelineSlug: string, commit: string): Promise<Build | null> => {
     if (commit.length !== 40) {
       throw new Error(`Invalid commit hash: ${commit}, this endpoint works with full SHAs only`);
@@ -364,6 +377,25 @@ export class BuildkiteClient {
     }
 
     return artifacts.flat();
+  };
+
+  getArtifactContent = async (artifact: Artifact): Promise<string> => {
+    // The client disallows absolute URLs, so rebuild the API-relative download
+    // path from the artifact's API URL. The endpoint 302s to signed storage
+    // URLs that reject requests carrying an Authorization header, so follow
+    // the redirect manually with a bare client.
+    const relative = `${artifact.url.replace(`${this.baseUrl}/`, '')}/download`;
+    const resp = await this.http.get(relative, {
+      responseType: 'text',
+      maxRedirects: 0,
+      validateStatus: (status) => status === 302 || (status >= 200 && status < 300),
+    });
+    if (resp.status === 302) {
+      const location = resp.headers.location as string;
+      const download = await axios.get(location, { responseType: 'text' });
+      return typeof download.data === 'string' ? download.data : JSON.stringify(download.data);
+    }
+    return typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data);
   };
 
   getArtifactsForCurrentBuild = (): Promise<Artifact[]> => {

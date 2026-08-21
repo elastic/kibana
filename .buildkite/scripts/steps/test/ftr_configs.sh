@@ -58,6 +58,7 @@ fi
 
 failedConfigs=""
 results=()
+resultRecords="[]"
 
 while read -r config; do
   if [[ ! "$config" ]]; then
@@ -134,6 +135,12 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
+  resultRecords=$(echo "$resultRecords" | jq \
+    --arg config "$config" \
+    --arg result "$([ $lastCode -eq 0 ] && echo pass || echo fail)" \
+    --argjson buildNumber "${BUILDKITE_BUILD_NUMBER:-0}" \
+    '. + [{config: $config, result: $result, sourceBuildNumber: $buildNumber}]')
+
   if [ $lastCode -eq 0 ]; then
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
@@ -169,5 +176,30 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+# Record per-config results for cross-build reuse on PRs (see
+# pipeline-utils/ci-stats/pick_test_group_run_order/ftr_result_reuse.ts).
+# Flaky-runner builds are excluded: their pass/fail semantics differ.
+if [[ "${GITHUB_PR_NUMBER:-}" && -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && "$resultRecords" != "[]" ]]; then
+  # Retry count in the name: a retried job only reruns previously-failed
+  # configs, so its records complement (not replace) earlier attempts'.
+  RESULTS_FILE="ftr_results_${BUILDKITE_JOB_ID:-unknown}_${BUILDKITE_RETRY_COUNT:-0}.json"
+  # The dist actually under test: the build step records which build produced
+  # it, and it can differ from KIBANA_BUILD_ID when a fresh build was forced.
+  if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
+    EFFECTIVE_DIST_ID=$(buildkite-agent meta-data get "kibana-effective-build-id" 2>/dev/null || echo "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}")
+  else
+    EFFECTIVE_DIST_ID="$BUILDKITE_BUILD_ID"
+  fi
+  jq -n \
+    --arg commit "${BUILDKITE_COMMIT:-}" \
+    --arg distId "$EFFECTIVE_DIST_ID" \
+    --arg esManifest "${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}" \
+    --arg prLabels "${GITHUB_PR_LABELS:-}" \
+    --argjson records "$resultRecords" \
+    '{commit: $commit, effectiveDistId: $distId, esSnapshotManifest: $esManifest, prLabels: $prLabels, records: $records}' \
+    > "$RESULTS_FILE"
+  buildkite-agent artifact upload "$RESULTS_FILE" || echo "failed to upload $RESULTS_FILE (non-fatal)"
+fi
 
 exit $exitCode
