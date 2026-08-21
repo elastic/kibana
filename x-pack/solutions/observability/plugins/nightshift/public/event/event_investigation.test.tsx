@@ -309,7 +309,7 @@ describe('EventInvestigation', () => {
       conversationId: undefined,
     });
 
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent(
       'Determine whether the deploy caused the spike.'
     );
@@ -414,5 +414,48 @@ Checkout deploy introduced a regression.
     });
 
     expect(screen.getByTestId('nightshiftInvestigationMissingWorkflowCallout')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it.each<InvestigationStatus>(['running', 'loading', 'failed', 'unavailable'])(
+    'does not offer the investigation flyout when the status is %s',
+    (status) => {
+      renderInvestigation(mockEvent(), {
+        investigation: {
+          workflow_execution_id: 'exec-latest',
+          started_at: '2026-07-10T12:00:00Z',
+          completed_at: '2026-07-10T12:05:00Z',
+        },
+        status,
+      });
+
+      expect(
+        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFlyout')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each<[InvestigationStatus, string]>([
+    ['failed', 'Failed'],
+    ['unavailable', 'Unavailable'],
+  ])('marks a %s investigation with its terminal status and error detail', (status, label) => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      status,
+      error: 'The investigation did not complete.',
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(label);
+    expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
+      'The investigation did not complete.'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
   });
 });
