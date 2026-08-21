@@ -12,7 +12,6 @@ import type { ListKisResponse } from '../../../common/http_api/knowledge_indicat
 
 interface ListKisArgs {
   aiIndexId: string;
-  from?: number;
   size?: number;
   type?: string;
   signal?: AbortSignal;
@@ -20,12 +19,11 @@ interface ListKisArgs {
 
 export const listKis = (
   http: HttpStart,
-  { aiIndexId, from = 0, size, type, signal }: ListKisArgs
+  { aiIndexId, size, type, signal }: ListKisArgs
 ): Promise<ListKisResponse> =>
   http.get<ListKisResponse>(buildPath(aiIndexKiListPath, { aiIndexId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: {
-      from,
       ...(size !== undefined ? { size } : {}),
       ...(type !== undefined ? { type } : {}),
     },

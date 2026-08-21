@@ -16,9 +16,6 @@ export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;
 
-/** Upper bound on `from + size` for KI list pagination. */
-export const MAX_KI_RESULT_WINDOW = 10000;
-
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */

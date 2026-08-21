@@ -55,7 +55,7 @@ export const AiIndexDetailPage = () => {
   const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
 
-  const { totalAll: kiTotal } = useKiList({
+  const { summary } = useKiList({
     aiIndexId: aiIndex?.id,
     size: DEFAULT_KI_PAGE_SIZE,
     enabled: aiIndex !== undefined,
@@ -115,7 +115,11 @@ export const AiIndexDetailPage = () => {
         <EuiTab
           isSelected={selectedTab === 'knowledge_indicators'}
           onClick={() => setSelectedTab('knowledge_indicators')}
-          append={kiTotal > 0 ? <EuiNotificationBadge>{kiTotal}</EuiNotificationBadge> : undefined}
+          append={
+            summary.total > 0 ? (
+              <EuiNotificationBadge>{summary.total}</EuiNotificationBadge>
+            ) : undefined
+          }
           data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
         >
           <FormattedMessage

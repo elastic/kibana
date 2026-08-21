@@ -30,7 +30,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { AiIndexDest, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKiList } from '../../hooks/use_ki_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { getKiTypeLabel } from '../../utils/ki_type_labels';
@@ -63,32 +62,13 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
   const [typeFilter, setTypeFilter] = useState<KiListTypeFilter>({ kind: 'all' });
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
 
-  const hasConnectorSources = useMemo(
-    () => aiIndex.sources.some((source) => source.type === 'connector'),
-    [aiIndex.sources]
-  );
-  const { connectorNameById } = useDataConnectors({ enabled: hasConnectorSources });
-
-  const defaultSourceLabel = useMemo(() => {
-    const firstSource = aiIndex.sources[0];
-    if (firstSource === undefined) {
-      return undefined;
-    }
-    if (firstSource.type === 'connector') {
-      return connectorNameById.get(firstSource.value) ?? firstSource.value;
-    }
-    return i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.defaultSourceLabel', {
-      defaultMessage: 'ES|QL',
-    });
-  }, [aiIndex.sources, connectorNameById]);
-
   const listType = typeFilter.kind === 'type' ? typeFilter.type : undefined;
 
   useEffect(() => {
     setSize(DEFAULT_KI_PAGE_SIZE);
   }, [typeFilter]);
 
-  const { kis, total, totalAll, countsByType, isLoading, error } = useKiList({
+  const { kis, total, summary, isLoading, error } = useKiList({
     aiIndexId: aiIndex.id,
     size,
     type: listType,
@@ -102,11 +82,11 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
         id: 'all',
         label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterAll', {
           defaultMessage: 'All ({count})',
-          values: { count: totalAll },
+          values: { count: summary.total },
         }),
         'data-test-subj': 'contextKiListFilter-all',
       },
-      ...countsByType.map(({ type, count }) => ({
+      ...summary.countsByType.map(({ type, count }) => ({
         id: type,
         label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterType', {
           defaultMessage: '{typeLabel} ({count})',
@@ -115,7 +95,7 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
         'data-test-subj': `contextKiListFilter-${type}`,
       })),
     ],
-    [totalAll, countsByType]
+    [summary.total, summary.countsByType]
   );
 
   const hasMore = kis.length < total;
@@ -151,8 +131,6 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
   const indexManagementHref =
     canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
 
-  const resolveSourceLabel = (sourceLabel: string | undefined) => sourceLabel ?? defaultSourceLabel;
-
   const destLink =
     indexManagementHref !== undefined ? (
       <EuiLink href={indexManagementHref} data-test-subj="contextKiListPanelDestLink">
@@ -180,7 +158,7 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
                 id="xpack.contextEngine.aiIndexDetail.kiList.summary"
                 defaultMessage="{count, plural, one {# {indicatorLabel}} other {# {indicatorLabel}}} in"
                 values={{
-                  count: totalAll,
+                  count: summary.total,
                   indicatorLabel: (
                     <strong>
                       {i18n.translate(
@@ -188,7 +166,7 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
                         {
                           defaultMessage:
                             '{count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
-                          values: { count: totalAll },
+                          values: { count: summary.total },
                         }
                       )}
                     </strong>
@@ -266,9 +244,9 @@ export const KiListPanel = ({ aiIndex }: KiListPanelProps) => {
         ) : (
           <div data-test-subj="contextKiListRows" role="list">
             {kis.map((ki, index) => (
-              <React.Fragment key={ki.ki_id}>
+              <React.Fragment key={ki.id}>
                 <div role="listitem">
-                  <KiRow ki={ki} sourceLabel={resolveSourceLabel(ki.source_label)} />
+                  <KiRow ki={ki} />
                 </div>
                 {index < kis.length - 1 && (
                   <>

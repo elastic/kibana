@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
+import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
 import { contextEngineQueryKeys } from './query_keys';
@@ -14,17 +15,20 @@ import { useKibana } from './use_kibana';
 
 interface UseKiListArgs {
   aiIndexId: string | undefined;
-  from?: number;
   size?: number;
   type?: string;
   enabled?: boolean;
 }
 
+interface UseKiListSummary {
+  total: number;
+  countsByType: KiTypeCount[];
+}
+
 interface UseKiListResult {
   kis: ListKisResponse['kis'];
   total: number;
-  totalAll: number;
-  countsByType: ListKisResponse['counts_by_type'];
+  summary: UseKiListSummary;
   isLoading: boolean;
   error: Error | undefined;
   refetch: () => void;
@@ -32,7 +36,6 @@ interface UseKiListResult {
 
 export const useKiList = ({
   aiIndexId,
-  from = 0,
   size = DEFAULT_KI_PAGE_SIZE,
   type,
   enabled = true,
@@ -42,14 +45,13 @@ export const useKiList = ({
   } = useKibana();
 
   const { data, isLoading, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.kiList(aiIndexId ?? '', from, size, type),
+    queryKey: contextEngineQueryKeys.aiIndex.kiList(aiIndexId ?? '', size, type),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
         throw new Error('AI index id is required');
       }
       return listKis(http, {
         aiIndexId,
-        from,
         size,
         ...(type !== undefined ? { type } : {}),
         signal,
@@ -62,8 +64,10 @@ export const useKiList = ({
   return {
     kis: data?.kis ?? [],
     total: data?.total ?? 0,
-    totalAll: data?.total_all ?? data?.total ?? 0,
-    countsByType: data?.counts_by_type ?? [],
+    summary: {
+      total: data?.summary?.total ?? data?.total ?? 0,
+      countsByType: data?.summary?.counts_by_type ?? [],
+    },
     isLoading,
     error: error ?? undefined,
     refetch,

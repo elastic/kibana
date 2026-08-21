@@ -15,22 +15,11 @@ const LENIENT_INDEX_OPTIONS = {
   allow_no_indices: true,
 } as const;
 
-const KI_LIST_SOURCE_FIELDS = [
-  'type',
-  'title',
-  'attributes.source',
-  'attributes.source_label',
-  'attributes.version',
-] as const;
+const KI_LIST_SOURCE_FIELDS = ['type', 'title'] as const;
 
 interface KiDocumentSource {
   type?: string;
   title?: string;
-  attributes?: {
-    source?: string;
-    source_label?: string;
-    version?: string | number;
-  };
 }
 
 interface TermsAggregationBucket {
@@ -49,46 +38,18 @@ interface KiSearchAggregations {
 
 export interface GetKisOptions {
   destValue: string;
-  from: number;
   size: number;
   type?: string;
 }
 
-const readAttributeString = (value: string | number | undefined): string | undefined => {
-  if (typeof value === 'string' && value.length > 0) {
-    return value;
-  }
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return String(value);
-  }
-  return undefined;
-};
-
-const toKiListItem = (kiId: string, source: KiDocumentSource): KiListItem | undefined => {
+const toKiListItem = (id: string, source: KiDocumentSource): KiListItem | undefined => {
   const type = source.type;
   const title = source.title;
   if (type === undefined || title === undefined) {
     return undefined;
   }
 
-  const sourceLabel =
-    readAttributeString(source.attributes?.source_label) ??
-    readAttributeString(source.attributes?.source);
-  const rawVersion = readAttributeString(source.attributes?.version);
-  const version =
-    rawVersion !== undefined
-      ? rawVersion.startsWith('v')
-        ? rawVersion
-        : `v${rawVersion}`
-      : undefined;
-
-  return {
-    ki_id: kiId,
-    type,
-    title,
-    ...(sourceLabel !== undefined ? { source_label: sourceLabel } : {}),
-    ...(version !== undefined ? { version } : {}),
-  };
+  return { id, type, title };
 };
 
 const buildKiListQuery = ({ type }: Pick<GetKisOptions, 'type'>) => {
@@ -131,12 +92,12 @@ const parseAllKisAggregation = (
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { destValue, from, size, type }: GetKisOptions
+  { destValue, size, type }: GetKisOptions
 ): Promise<ListKisResponse> => {
   const response = await esClient.search<KiDocumentSource, KiSearchAggregations>({
     index: destValue,
     ...LENIENT_INDEX_OPTIONS,
-    from,
+    from: 0,
     size,
     track_total_hits: true,
     _source: [...KI_LIST_SOURCE_FIELDS],
@@ -176,7 +137,9 @@ export const getKis = async (
   return {
     kis,
     total,
-    total_all: totalAll > 0 ? totalAll : total,
-    counts_by_type: countsByType,
+    summary: {
+      total: totalAll > 0 ? totalAll : total,
+      counts_by_type: countsByType,
+    },
   };
 };

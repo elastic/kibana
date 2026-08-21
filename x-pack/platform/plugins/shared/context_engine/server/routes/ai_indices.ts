@@ -26,7 +26,6 @@ import {
   aiIndexPath,
   DEFAULT_KI_PAGE_SIZE,
   MAX_KI_PAGE_SIZE,
-  MAX_KI_RESULT_WINDOW,
   MAX_KI_TYPE_FILTER_LENGTH,
 } from '../../common/constants';
 import type {
@@ -142,15 +141,7 @@ const aiIndexPropertiesSchema = {
 const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
 const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
-/** Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`. */
-const maxKiListFrom = MAX_KI_RESULT_WINDOW - MAX_KI_PAGE_SIZE;
-
 const listKisQuerySchema = schema.object({
-  from: schema.number({
-    min: 0,
-    max: maxKiListFrom,
-    defaultValue: 0,
-  }),
   size: schema.number({
     min: 1,
     max: MAX_KI_PAGE_SIZE,
@@ -376,13 +367,12 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const { from, size, type } = request.query;
+        const { size, type } = request.query;
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: ListKisResponse = await getKis(esClient, {
             destValue: aiIndex.dest.value,
-            from,
             size,
             ...(type !== undefined ? { type } : {}),
           });

@@ -8,21 +8,19 @@
 import type { KiTypeCount } from './ai_indices';
 
 export interface KiListItem {
-  ki_id: string;
+  id: string;
   type: string;
   title: string;
-  /** Human-readable source label when stored on the KI document. */
-  source_label?: string;
-  /** Version label when stored on the KI document (e.g. `1` → `v1`). */
-  version?: string;
+}
+
+/** Unfiltered store stats. */
+export interface KiListSummary {
+  total: number;
+  counts_by_type: KiTypeCount[];
 }
 
 export interface ListKisResponse {
   kis: KiListItem[];
-  /** Total matching the current list query (type filter). */
   total: number;
-  /** Total KIs in the backing store, ignoring type filters. */
-  total_all: number;
-  /** Top types by count, ignoring type filters. */
-  counts_by_type: KiTypeCount[];
+  summary: KiListSummary;
 }

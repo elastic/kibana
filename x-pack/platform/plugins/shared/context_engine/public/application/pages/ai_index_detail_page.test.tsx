@@ -64,12 +64,14 @@ jest.mock('../hooks/use_ki_list', () => ({
   useKiList: () => ({
     kis: [],
     total: 25,
-    totalAll: 25,
-    countsByType: [
-      { type: 'index_metadata', count: 10 },
-      { type: 'document', count: 8 },
-      { type: 'detection', count: 7 },
-    ],
+    summary: {
+      total: 25,
+      countsByType: [
+        { type: 'index_metadata', count: 10 },
+        { type: 'document', count: 8 },
+        { type: 'detection', count: 7 },
+      ],
+    },
     isLoading: false,
     error: undefined,
     refetch: jest.fn(),

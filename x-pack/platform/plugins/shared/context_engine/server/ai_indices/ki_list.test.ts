@@ -37,8 +37,6 @@ describe('ki_list', () => {
             _source: {
               type: 'playbook',
               title: 'Refund playbook',
-              description: 'Verify the order first.',
-              attributes: { source_label: 'Google Drive', version: 1 },
             },
           },
           {
@@ -59,27 +57,26 @@ describe('ki_list', () => {
     await expect(
       getKis(esClient, {
         destValue: 'ai-index-idx-sample',
-        from: 0,
         size: 25,
       })
     ).resolves.toEqual({
       total: 2,
-      total_all: 6,
-      counts_by_type: [
-        { type: 'playbook', count: 1 },
-        { type: 'policy', count: 1 },
-        { type: 'faq', count: 4 },
-      ],
+      summary: {
+        total: 6,
+        counts_by_type: [
+          { type: 'playbook', count: 1 },
+          { type: 'policy', count: 1 },
+          { type: 'faq', count: 4 },
+        ],
+      },
       kis: [
         {
-          ki_id: 'ki-1',
+          id: 'ki-1',
           type: 'playbook',
           title: 'Refund playbook',
-          source_label: 'Google Drive',
-          version: 'v1',
         },
         {
-          ki_id: 'ki-2',
+          id: 'ki-2',
           type: 'policy',
           title: 'Refund policy',
         },
@@ -133,19 +130,20 @@ describe('ki_list', () => {
     await expect(
       getKis(esClient, {
         destValue: 'ai-index-idx-sample',
-        from: 0,
         size: 10,
         type: 'playbook',
       })
     ).resolves.toEqual(
       expect.objectContaining({
         total: 1,
-        total_all: 6,
-        counts_by_type: [
-          { type: 'playbook', count: 1 },
-          { type: 'policy', count: 1 },
-          { type: 'faq', count: 4 },
-        ],
+        summary: {
+          total: 6,
+          counts_by_type: [
+            { type: 'playbook', count: 1 },
+            { type: 'policy', count: 1 },
+            { type: 'faq', count: 4 },
+          ],
+        },
       })
     );
 
@@ -177,14 +175,15 @@ describe('ki_list', () => {
     await expect(
       getKis(esClient, {
         destValue: 'ai-index-idx-missing',
-        from: 0,
         size: 25,
       })
     ).resolves.toEqual({
       kis: [],
       total: 0,
-      total_all: 0,
-      counts_by_type: [],
+      summary: {
+        total: 0,
+        counts_by_type: [],
+      },
     });
 
     expect(search).toHaveBeenCalledWith(

@@ -11,30 +11,18 @@ import type { KiListItem } from '../../../../common/http_api/knowledge_indicator
 import { KiRow } from './ki_row';
 
 const ki: KiListItem = {
-  ki_id: 'ki-1',
+  id: 'ki-1',
   type: 'playbook',
   title: 'Verify the order, check the SLA window, then issue store credit.',
-  source_label: 'Google Drive',
-  version: 'v1',
 };
 
 describe('KiRow', () => {
-  it('renders the title, metadata, and version badge', () => {
-    render(<KiRow ki={ki} sourceLabel="Google Drive" />);
+  it('renders the title and type', () => {
+    render(<KiRow ki={ki} />);
 
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent(
       'Verify the order, check the SLA window, then issue store credit.'
     );
-    expect(screen.getByTestId('contextKiRowMetadata')).toHaveTextContent('Playbook · Google Drive');
-    expect(screen.getByTestId('contextKiRowVersion')).toHaveTextContent('v1');
-  });
-
-  it('renders type-only metadata when no source label is available', () => {
-    render(
-      <KiRow ki={{ ...ki, source_label: undefined, version: undefined }} sourceLabel={undefined} />
-    );
-
-    expect(screen.getByTestId('contextKiRowMetadata')).toHaveTextContent('Playbook');
-    expect(screen.queryByTestId('contextKiRowVersion')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextKiRowType')).toHaveTextContent('Playbook');
   });
 });

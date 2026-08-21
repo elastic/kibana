@@ -435,8 +435,6 @@ describe('ai indices routes', () => {
               _source: {
                 type: 'playbook',
                 title: 'Refund playbook',
-                description: 'Verify the order first.',
-                attributes: { source_label: 'Google Drive', version: 1 },
               },
             },
           ],
@@ -453,7 +451,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
-        query: { from: 0, size: 25 },
+        query: { size: 25 },
       });
 
       expect(esSearch).toHaveBeenCalledWith(
@@ -480,15 +478,15 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           total: 1,
-          total_all: 12,
-          counts_by_type: [{ type: 'playbook', count: 12 }],
+          summary: {
+            total: 12,
+            counts_by_type: [{ type: 'playbook', count: 12 }],
+          },
           kis: [
             {
-              ki_id: 'ki-1',
+              id: 'ki-1',
               type: 'playbook',
               title: 'Refund playbook',
-              source_label: 'Google Drive',
-              version: 'v1',
             },
           ],
         },
@@ -507,7 +505,6 @@ describe('ai indices routes', () => {
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
         query: {
-          from: 0,
           size: 10,
           type: 'fact',
         },
@@ -545,7 +542,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
-        query: { from: 0, size: 25 },
+        query: { size: 25 },
       });
 
       expect(esSearch).toHaveBeenCalledWith(
@@ -558,8 +555,10 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           total: 0,
-          total_all: 0,
-          counts_by_type: [],
+          summary: {
+            total: 0,
+            counts_by_type: [],
+          },
           kis: [],
         },
       });

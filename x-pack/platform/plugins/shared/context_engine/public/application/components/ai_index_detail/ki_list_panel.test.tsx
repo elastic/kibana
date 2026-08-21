@@ -24,13 +24,6 @@ jest.mock('../../hooks/use_ki_list', () => ({
   useKiList: (...args: unknown[]) => mockUseKiList(...args),
 }));
 
-jest.mock('../../hooks/use_data_connectors', () => ({
-  useDataConnectors: () => ({
-    connectorNameById: new Map([['connector-1', 'Google Drive']]),
-    connectorActionTypeById: new Map(),
-  }),
-}));
-
 const aiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
   managed: false,
@@ -94,16 +87,16 @@ describe('KiListPanel', () => {
     mockUseKiList.mockImplementation(({ type }: { type?: string }) => ({
       kis: [
         {
-          ki_id: 'ki-1',
+          id: 'ki-1',
           type: 'playbook',
           title: 'Refund playbook',
-          source_label: 'Google Drive',
-          version: 'v1',
         },
       ],
       total: type === undefined ? 6 : 1,
-      totalAll: 6,
-      countsByType: stableCountsByType,
+      summary: {
+        total: 6,
+        countsByType: stableCountsByType,
+      },
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -170,8 +163,10 @@ describe('KiListPanel', () => {
     mockUseKiList.mockReturnValue({
       kis: [],
       total: 0,
-      totalAll: 0,
-      countsByType: [],
+      summary: {
+        total: 0,
+        countsByType: [],
+      },
       isLoading: true,
       error: undefined,
       refetch: jest.fn(),
@@ -187,8 +182,10 @@ describe('KiListPanel', () => {
     mockUseKiList.mockReturnValue({
       kis: [],
       total: 0,
-      totalAll: 0,
-      countsByType: [],
+      summary: {
+        total: 0,
+        countsByType: [],
+      },
       isLoading: false,
       error: new Error('boom'),
       refetch: jest.fn(),
@@ -205,8 +202,10 @@ describe('KiListPanel', () => {
     mockUseKiList.mockReturnValue({
       kis: [],
       total: 0,
-      totalAll: 0,
-      countsByType: [],
+      summary: {
+        total: 0,
+        countsByType: [],
+      },
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -250,13 +249,15 @@ describe('KiListPanel', () => {
   it('requests a larger page size when load more is clicked', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
-        ki_id: `ki-${index}`,
+        id: `ki-${index}`,
         type: 'playbook',
         title: `KI ${index}`,
       })),
       total: 50,
-      totalAll: 50,
-      countsByType: [{ type: 'playbook', count: 50 }],
+      summary: {
+        total: 50,
+        countsByType: [{ type: 'playbook', count: 50 }],
+      },
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -276,13 +277,15 @@ describe('KiListPanel', () => {
   it('shows the cap reached message with a Discover link at the max page size', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
-        ki_id: `ki-${index}`,
+        id: `ki-${index}`,
         type: 'playbook',
         title: `KI ${index}`,
       })),
       total: 150,
-      totalAll: 150,
-      countsByType: [{ type: 'playbook', count: 150 }],
+      summary: {
+        total: 150,
+        countsByType: [{ type: 'playbook', count: 150 }],
+      },
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -308,13 +311,15 @@ describe('KiListPanel', () => {
   it('shows the cap reached message without a Discover link when discover is unavailable', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
-        ki_id: `ki-${index}`,
+        id: `ki-${index}`,
         type: 'playbook',
         title: `KI ${index}`,
       })),
       total: 150,
-      totalAll: 150,
-      countsByType: [{ type: 'playbook', count: 150 }],
+      summary: {
+        total: 150,
+        countsByType: [{ type: 'playbook', count: 150 }],
+      },
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
