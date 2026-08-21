@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { getAnySourceCommandFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../../data_fetching/fetch_expanded_doc';
 import {
@@ -93,11 +93,14 @@ export const useExpandedDocSync = ({
     !expandedDoc ||
     (expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER && Boolean(getExpandedDocRef(expandedDoc)));
 
-  // Gate unresolved fetches by query because transformational rows cannot be refetched by ID.
-  const isEsqlTransformational = useMemo(
-    () => isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql),
-    [query]
-  );
+  // Gate unresolved fetches by query because only non-transformational FROM rows can be refetched.
+  const isEsqlUnrestorable = useMemo(() => {
+    return (
+      isOfAggregateQueryType(query) &&
+      (getAnySourceCommandFromESQLQuery(query.esql) !== 'FROM' ||
+        hasTransformationalCommand(query.esql))
+    );
+  }, [query]);
 
   const rowFromResults = useMemo(
     () =>
@@ -119,16 +122,12 @@ export const useExpandedDocSync = ({
     !isRefResolved &&
     !resolvedDoc &&
     isRestorable &&
-    !isEsqlTransformational;
+    !isEsqlUnrestorable;
   const shouldClear =
-    Boolean(expandedDoc) &&
-    !isRefResolved &&
-    isRestorable &&
-    !isEsqlTransformational &&
-    !resolvedDoc;
+    Boolean(expandedDoc) && !isRefResolved && isRestorable && !isEsqlUnrestorable && !resolvedDoc;
 
   // Drop an unresolvable reference without closing the flyout the user still has open.
-  const shouldClearRef = Boolean(expandedDocRef) && isEsqlTransformational;
+  const shouldClearRef = Boolean(expandedDocRef) && isEsqlUnrestorable;
 
   useEffect(() => {
     if (shouldClear) {

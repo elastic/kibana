@@ -251,6 +251,13 @@ describe('DiscoverDocumentFlyout', () => {
 
   it.each([
     {
+      name: 'an ES|QL result from an unsupported source command',
+      query: { esql: 'ROW message = "hello"' },
+      expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
+      linkability: ExpandedDocLinkability.EsqlUnsupportedSource,
+      ebtDetail: 'esqlUnsupportedSource',
+    },
+    {
       name: 'an ES|QL result without document metadata',
       query: { esql: 'FROM logs' },
       expandedDoc: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
@@ -552,10 +559,11 @@ describe('DiscoverDocumentFlyout', () => {
     });
   });
 
-  it('clears a restored reference for a transformational ES|QL query without fetching', async () => {
-    const { toolkit, services } = await setup({
-      query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
-    });
+  it.each([
+    ['a transformational query', 'FROM logs METADATA _id, _index | STATS count() BY host'],
+    ['an unsupported source command', 'ROW message = "hello"'],
+  ])('clears a restored reference for %s without fetching', async (_, esql) => {
+    const { toolkit, services } = await setup({ query: { esql } });
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();

@@ -11,6 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   ExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
   getExpandedDocLinkability,
   getExpandedDocRef,
   matchesExpandedDocRef,
@@ -69,6 +70,15 @@ describe('getExpandedDocLinkability', () => {
     ).toBe(ExpandedDocLinkability.Linkable);
   });
 
+  it.each(['ROW message = "hello"', 'PROMQL index=metrics query="up"', 'TS metrics-*'])(
+    'reports the %s source command as unsupported',
+    (esql) => {
+      expect(getExpandedDocLinkability({ esql }, docWithMetadata)).toBe(
+        ExpandedDocLinkability.EsqlUnsupportedSource
+      );
+    }
+  );
+
   it('reports an ES|QL document missing _id/_index as unlinkable', () => {
     // Linkability follows the open document, not later query edits.
     expect(
@@ -89,5 +99,19 @@ describe('getExpandedDocLinkability', () => {
         docWithMetadata
       )
     ).toBe(ExpandedDocLinkability.EsqlTransformational);
+  });
+});
+
+describe('getExpandedDocLinkDisabledReason', () => {
+  it('explains that only FROM queries support links to individual results', () => {
+    expect(getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlUnsupportedSource)).toBe(
+      'Links to individual results are only available for FROM queries.'
+    );
+  });
+
+  it('explains how to include the required metadata in a FROM query', () => {
+    expect(getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)).toBe(
+      'Add "METADATA _id, _index" to your query to link to individual results.'
+    );
   });
 });

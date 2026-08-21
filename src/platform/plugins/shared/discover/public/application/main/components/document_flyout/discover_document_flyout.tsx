@@ -47,6 +47,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const expandedDocLinkabilityEbtDetails: Record<ExpandedDocLinkability, string> = {
   [ExpandedDocLinkability.Linkable]: 'linkable',
+  [ExpandedDocLinkability.EsqlUnsupportedSource]: 'esqlUnsupportedSource',
   [ExpandedDocLinkability.EsqlMissingMetadata]: 'esqlMissingMetadata',
   [ExpandedDocLinkability.EsqlTransformational]: 'esqlTransformational',
 };
