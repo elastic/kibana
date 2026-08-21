@@ -321,11 +321,11 @@ describe('NightshiftInvestigationsClient.list()', () => {
   });
 
   describe('sort field mapping', () => {
-    it('maps started_at to startedAt', async () => {
+    it('maps started_at to createdAt', async () => {
       mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
       await makeClient().list({ sort_field: 'started_at' });
       expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'startedAt' }),
+        expect.objectContaining({ sortField: 'createdAt' }),
         SPACE_ID
       );
     });
