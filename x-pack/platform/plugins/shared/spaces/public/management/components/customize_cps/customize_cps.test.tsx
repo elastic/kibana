@@ -46,6 +46,7 @@ describe('CustomizeCps', () => {
 
   const mockCpsManager = {
     fetchProjects: mockFetchProjects,
+    getConfigurationLinks: jest.fn(),
   };
 
   const defaultSpace: { id: string; name: string; projectRouting?: string } = {

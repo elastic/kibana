@@ -240,13 +240,14 @@ export class SpacesPage {
     return this.page.testSubj.locator('projectPickerIncludeAllVisibleBtn');
   }
 
-  /** Picker header's "Global actions" menu trigger (clear filters / revert to space defaults). */
-  globalActionsButtonLocator() {
-    return this.page.testSubj.locator('projectPickerGlobalActionsButton');
+  /** Container listing the active project-tag filter badges; only rendered while filters exist. */
+  projectTagFilterDisplayLocator() {
+    return this.page.testSubj.locator('projectPickerFilterDisplayContainer');
   }
 
-  clearProjectTagFiltersMenuItemLocator() {
-    return this.page.testSubj.locator('projectPickerClearFiltersMenuItem');
+  /** The remove ("x") icon buttons on the project-tag filter badges. */
+  projectTagFilterRemoveButtonLocator() {
+    return this.projectTagFilterDisplayLocator().locator('[aria-label="Remove filter"]');
   }
 
   projectPickerListLoadingIndicatorLocator() {
@@ -254,21 +255,23 @@ export class SpacesPage {
   }
 
   /**
-   * Clears any active project-tag filter via the picker's global actions menu; a no-op that
-   * just closes the menu when no filter is active. Needed because a space configured with the
-   * legacy `_alias:_origin`/`_alias:*` routing strings decodes as a stray project-tag filter
-   * (the picker's codec only understands `_id`-based selection), not an excluded-project
-   * override, so `includeAllVisibleButtonLocator` alone can't undo it.
+   * Clears any active project-tag filter by removing each filter badge; a no-op when no filter
+   * is active. Needed because a space configured with the legacy `_alias:_origin`/`_alias:*`
+   * routing strings decodes as a stray project-tag filter (the picker's codec only understands
+   * `_id`-based selection), not an excluded-project override, so
+   * `includeAllVisibleButtonLocator` alone can't undo it. The space config view renders the
+   * picker without its header (and thus without the "Clear project tag filters" global action),
+   * so filters are removed badge-by-badge via each badge's remove icon.
    */
   async clearProjectTagFilters() {
-    await this.globalActionsButtonLocator().click();
-    const clearFiltersItem = this.clearProjectTagFiltersMenuItemLocator();
-    await clearFiltersItem.waitFor({ state: 'visible' });
-    if (await clearFiltersItem.isEnabled()) {
-      await clearFiltersItem.click();
+    // Each removal kicks off a filter-proposal refetch that temporarily makes the remaining
+    // badges non-interactive, so wait out the loading indicator between clicks.
+    await this.projectPickerListLoadingIndicatorLocator().waitFor({ state: 'hidden' });
+    const removeButtons = await this.projectTagFilterRemoveButtonLocator().all();
+    // Click in reverse DOM order so earlier badges keep their index as later ones are removed.
+    for (const removeButton of removeButtons.reverse()) {
+      await removeButton.click();
       await this.projectPickerListLoadingIndicatorLocator().waitFor({ state: 'hidden' });
-    } else {
-      await this.page.keyboard.press('Escape');
     }
   }
 

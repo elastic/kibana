@@ -307,6 +307,9 @@ export function ProjectPickerFilterDisplay({
                           defaultMessage: 'Click to view filter actions',
                         }
                       ),
+                      closeButtonProps: {
+                        'data-test-subj': `filterBadgeCloseButton-${id}`,
+                      },
                     })}
               />
             </EuiFlexItem>

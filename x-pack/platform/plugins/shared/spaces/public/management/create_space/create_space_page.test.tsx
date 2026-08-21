@@ -500,7 +500,10 @@ describe('ManageSpacePage', () => {
       <KibanaContextProvider
         services={{
           cps: {
-            cpsManager: { fetchProjects: mockFetchProjects },
+            cpsManager: {
+              fetchProjects: mockFetchProjects,
+              getConfigurationLinks: jest.fn(),
+            },
           },
           application: {
             capabilities: {
