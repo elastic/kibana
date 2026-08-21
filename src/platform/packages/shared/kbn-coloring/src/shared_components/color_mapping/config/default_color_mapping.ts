@@ -11,7 +11,7 @@ import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
-import { getOtherAssignmentColor } from './utils';
+import { getOtherAssignmentColor, getOtherBucketAssignment } from './utils';
 import { getColorAssignmentMatcher } from '../color/color_assignment_matcher';
 import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
@@ -94,14 +94,29 @@ export function getColorsFromMapping(
     const otherColors = otherColor.isLoop
       ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
       : [getColor(otherColor.color, palettes)];
+
+    const otherAssignmentIndex = assignmentMatcher.getIndex(OTHER_BUCKET_VALUE);
+
+    const otherAssignment =
+      otherAssignmentIndex !== -1 && assignments[otherAssignmentIndex].rules.length === 1
+        ? assignments[otherAssignmentIndex]
+        : getOtherBucketAssignment(specialAssignments)?.assignment;
+
+    const otherBucketColor =
+      otherAssignment && otherAssignment.color.type !== 'gradient'
+        ? getColor(otherAssignment.color, palettes, isDarkMode)
+        : '';
+
     return [
-      ...assignments.map((a) => {
-        if (assignmentMatcher.hasMatch(OTHER_BUCKET_VALUE)) {
-          return '';
+      ...assignments.map((a, i) => {
+        if (i === otherAssignmentIndex) {
+          // covered by the other bucket color
+          if (a.rules.length === 1) return '';
         }
-        return a.color.type === 'gradient' ? '' : getColor(a.color, palettes);
+        return a.color.type === 'gradient' ? '' : getColor(a.color, palettes, isDarkMode);
       }),
       ...otherColors,
+      otherBucketColor,
     ].filter((color) => color !== '');
   }
 }
