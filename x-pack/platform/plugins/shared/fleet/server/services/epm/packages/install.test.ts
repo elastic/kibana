@@ -6,7 +6,7 @@
  */
 
 import fs from 'fs/promises';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
@@ -148,18 +148,21 @@ const emptyPackageSavedObjects: SavedObjectsFindResponse<Installation> = {
 };
 
 function archivePackageFixture(
-  overrides: Pick<ArchivePackage, 'name' | 'version'>
+  overrides: Pick<ArchivePackage, 'name' | 'version'> &
+    Partial<Pick<ArchivePackage, 'data_streams'>>
 ): ArchivePackage {
   return {
-    name: overrides.name,
-    version: overrides.version,
     title: overrides.name,
     description: 'test',
     owner: { github: 'elastic' },
+    ...overrides,
   };
 }
 
-function parsedArchiveFixture(overrides: Pick<ArchivePackage, 'name' | 'version'>): {
+function parsedArchiveFixture(
+  overrides: Pick<ArchivePackage, 'name' | 'version'> &
+    Partial<Pick<ArchivePackage, 'data_streams'>>
+): {
   paths: string[];
   packageInfo: ArchivePackage;
 } {
@@ -855,6 +858,67 @@ describe('install', () => {
       expect(response.error).toEqual(
         expect.objectContaining({
           message: expect.stringContaining('Uploaded package name "bad.name" is invalid'),
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      expect(setPackageInfo).not.toHaveBeenCalled();
+      expect(deleteVerificationResult).not.toHaveBeenCalled();
+    });
+
+    it('rejects an upload that claims an existing generic-logs data stream', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-payroll.records-default',
+            timestamp_field: { name: '@timestamp' },
+            indices: [
+              {
+                index_name: '.ds-logs-payroll.records-default-000001',
+                index_uuid: 'uuid',
+              },
+            ],
+            generation: 1,
+            hidden: false,
+            next_generation_managed_by: 'Index Lifecycle Management',
+            prefer_ilm: true,
+            rollover_on_write: false,
+            settings: {},
+            status: 'GREEN',
+            template: 'logs',
+          },
+        ],
+      });
+      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+        parsedArchiveFixture({
+          name: 'evilclaim',
+          version: '1.0.0',
+          data_streams: [
+            {
+              dataset: 'payroll.records',
+              type: 'logs',
+              title: 'Payroll records',
+              release: 'ga',
+              package: 'evilclaim',
+              path: 'payroll.records',
+            },
+          ],
+        })
+      );
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining('logs-payroll.records-default'),
         })
       );
       expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();

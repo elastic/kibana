@@ -6,11 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../common';
 import type { Installation } from '../../../../common';
 import {
+  dataStreamUsesOtelInput,
   getRegistryDataStreamAssetBaseName,
   isValidDataset,
   isValidDataStreamType,
@@ -32,6 +37,8 @@ interface UploadDataStream {
   dataset: string;
   type?: string;
   hidden?: boolean;
+  dataset_is_prefix?: boolean;
+  streams?: Array<{ input?: string }>;
   elasticsearch?: {
     privileges?: { cluster?: string[] };
     dynamic_dataset?: boolean;
@@ -41,7 +48,7 @@ interface UploadDataStream {
 
 interface UploadPolicyTemplate {
   dynamic_signal_types?: boolean;
-  inputs?: Array<{ dynamic_signal_types?: boolean }>;
+  inputs?: Array<{ dynamic_signal_types?: boolean; name?: string; type?: string }>;
 }
 
 interface UploadPackageInfo {
@@ -71,11 +78,13 @@ export async function validatePackageUpload({
   paths,
   installedPkg,
   savedObjectsClient,
+  esClient,
 }: {
   packageInfo: UploadPackageInfo;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
   savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
 }): Promise<void> {
   assertValidUploadPackageName(packageInfo.name);
   assertNoForbiddenArchiveAssets(paths);
@@ -89,6 +98,7 @@ export async function validatePackageUpload({
   // Residual: Kibana saved objects in the archive are still imported with overwrite: true.
   // Preflight only; an upload can race any first install (upload, registry, or setup).
   await assertNoOwnedDatasetCollision(packageInfo, savedObjectsClient);
+  await assertNoUnownedLiveDataStreams(packageInfo, esClient);
 }
 
 function assertValidUploadPackageName(name: string): void {
@@ -352,4 +362,128 @@ function assetNamesOverlap(left: string, right: string): boolean {
 function assetBaseNameFromTemplateId(id: string): string | undefined {
   const base = id.split('@')[0];
   return base || undefined;
+}
+
+async function assertNoUnownedLiveDataStreams(
+  packageInfo: UploadPackageInfo,
+  esClient: ElasticsearchClient
+): Promise<void> {
+  for (const dataStream of packageInfo.data_streams ?? []) {
+    const matching = await fetchMatchingLiveDataStreams(
+      esClient,
+      liveDataStreamIndexPattern(dataStream, packageInfo),
+      dataStream.dataset
+    );
+    const unowned = matching.find(
+      (liveStream) => ownedPackageName(liveStream) !== packageInfo.name
+    );
+
+    if (!unowned) {
+      continue;
+    }
+
+    throw new PackageInvalidArchiveError(
+      i18n.translate('xpack.fleet.packageUpload.existingDataStream', {
+        defaultMessage:
+          'Uploaded package declares dataset "{dataset}" that matches existing Elasticsearch data stream "{dataStreamName}" which this package does not own.',
+        values: {
+          dataset: dataStream.dataset,
+          dataStreamName: unowned.name,
+        },
+      })
+    );
+  }
+}
+
+function liveDataStreamIndexPattern(
+  dataStream: UploadDataStream,
+  packageInfo: UploadPackageInfo
+): string {
+  const isOtelInputType = isOtelUploadDataStream(packageInfo, dataStream);
+  const assetBaseName = getRegistryDataStreamAssetBaseName(
+    {
+      type: dataStream.type ?? '',
+      dataset: dataStream.dataset,
+      hidden: dataStream.hidden,
+    },
+    isOtelInputType
+  );
+  return dataStream.dataset_is_prefix ? `${assetBaseName}.*-*` : `${assetBaseName}-*`;
+}
+
+function isOtelUploadDataStream(
+  packageInfo: UploadPackageInfo,
+  dataStream: UploadDataStream
+): boolean {
+  if (!appContextService.getExperimentalFeatures()?.enableOtelIntegrations) {
+    return false;
+  }
+
+  return dataStreamUsesOtelInput(
+    {
+      policy_templates: packageInfo.policy_templates?.map((template) => ({
+        name: '',
+        title: '',
+        description: '',
+        inputs: (template.inputs ?? []).map((input) => ({
+          type: input.type ?? '',
+          title: '',
+          description: '',
+          name: input.name,
+        })),
+      })),
+    },
+    {
+      streams: (dataStream.streams ?? []).map((stream) => ({
+        input: stream.input ?? '',
+        title: '',
+      })),
+    }
+  );
+}
+
+async function fetchMatchingLiveDataStreams(
+  esClient: ElasticsearchClient,
+  pattern: string,
+  dataset: string
+): Promise<Array<{ name: string; _meta?: Record<string, unknown> }>> {
+  try {
+    const body = await esClient.indices.getDataStream({
+      name: pattern,
+      expand_wildcards: ['open', 'hidden'],
+    });
+    return body.data_streams ?? [];
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return [];
+    }
+
+    throw new PackageInvalidArchiveError(
+      i18n.translate('xpack.fleet.packageUpload.dataStreamLookupFailed', {
+        defaultMessage:
+          'Could not verify that uploaded package dataset "{dataset}" does not match an existing Elasticsearch data stream.',
+        values: { dataset },
+      })
+    );
+  }
+}
+
+function isNotFoundError(error: unknown): boolean {
+  return (
+    typeof error === 'object' && error !== null && 'statusCode' in error && error.statusCode === 404
+  );
+}
+
+function ownedPackageName(dataStream: { _meta?: Record<string, unknown> }): string | undefined {
+  const meta = dataStream._meta;
+  if (!meta || typeof meta !== 'object') {
+    return undefined;
+  }
+
+  const pkg = meta.package;
+  if (!pkg || typeof pkg !== 'object' || !('name' in pkg)) {
+    return undefined;
+  }
+
+  return typeof pkg.name === 'string' ? pkg.name : undefined;
 }

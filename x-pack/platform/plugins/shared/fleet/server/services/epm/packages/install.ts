@@ -960,6 +960,7 @@ async function installPackageByUpload({
         paths,
         installedPkg,
         savedObjectsClient,
+        esClient,
       });
     }
 

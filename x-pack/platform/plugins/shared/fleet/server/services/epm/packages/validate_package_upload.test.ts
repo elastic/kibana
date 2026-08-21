@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
+import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../common';
+import type { Installation } from '../../../../common';
 import { PackageInvalidArchiveError, PackageNotFoundError, RegistryError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -15,12 +19,10 @@ import * as Registry from '../registry';
 import { getPackageSavedObjects } from './get';
 import { validatePackageUpload } from './validate_package_upload';
 
-import type { Installation } from '../../../../common';
-import type { SavedObject } from '@kbn/core/server';
-
 jest.mock('../../app_context', () => ({
   appContextService: {
     getConfig: jest.fn(() => ({})),
+    getExperimentalFeatures: jest.fn(() => ({ enableOtelIntegrations: true })),
   },
 }));
 
@@ -33,26 +35,60 @@ jest.mock('./get', () => ({
 }));
 
 const mockedGetConfig = appContextService.getConfig as jest.Mock;
+const mockedGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
 const mockedFetchLatest = Registry.fetchFindLatestPackageOrThrow as jest.Mock;
 const mockedGetPackageSavedObjects = getPackageSavedObjects as jest.Mock;
 
 const soClient = savedObjectsClientMock.create();
+const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
 const validPackage = {
   name: 'my_integration',
   data_streams: [{ dataset: 'my_integration.logs', type: 'logs' }],
 };
 
-async function expectUploadRejected(params: Parameters<typeof validatePackageUpload>[0]) {
-  await expect(validatePackageUpload(params)).rejects.toBeInstanceOf(PackageInvalidArchiveError);
+function liveDataStream(
+  overrides: Pick<IndicesDataStream, 'name' | 'template'> & Partial<IndicesDataStream>
+): IndicesDataStream {
+  return {
+    timestamp_field: { name: '@timestamp' },
+    indices: [
+      {
+        index_name: `.ds-${overrides.name}-000001`,
+        index_uuid: 'uuid',
+      },
+    ],
+    generation: 1,
+    hidden: false,
+    next_generation_managed_by: 'Index Lifecycle Management',
+    prefer_ilm: true,
+    rollover_on_write: false,
+    settings: {},
+    status: 'GREEN',
+    ...overrides,
+  };
+}
+
+function validateUpload(
+  params: Omit<Parameters<typeof validatePackageUpload>[0], 'esClient'> & {
+    esClient?: ElasticsearchClient;
+  }
+) {
+  return validatePackageUpload({ esClient, ...params });
+}
+
+async function expectUploadRejected(params: Parameters<typeof validateUpload>[0]) {
+  await expect(validateUpload(params)).rejects.toBeInstanceOf(PackageInvalidArchiveError);
 }
 
 describe('validatePackageUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedGetConfig.mockReturnValue({});
+    mockedGetExperimentalFeatures.mockReturnValue({ enableOtelIntegrations: true });
     mockedFetchLatest.mockRejectedValue(new PackageNotFoundError('not found'));
     mockedGetPackageSavedObjects.mockResolvedValue({ saved_objects: [] });
+    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
   });
 
   describe('V5 package name', () => {
@@ -90,7 +126,7 @@ describe('validatePackageUpload', () => {
 
     it('accepts a lowercase underscored name', async () => {
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
@@ -134,7 +170,7 @@ describe('validatePackageUpload', () => {
 
     it('allows a dataset-scoped ingest pipeline', async () => {
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: [
             'my_integration-1.0.0/data_stream/logs/elasticsearch/ingest_pipeline/default.yml',
@@ -186,7 +222,7 @@ describe('validatePackageUpload', () => {
 
     it('allows a knowledge base asset', async () => {
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: ['my_integration-1.0.0/docs/knowledge_base/guide.md'],
           savedObjectsClient: soClient,
@@ -209,7 +245,7 @@ describe('validatePackageUpload', () => {
 
     it('allows upgrading an already uploaded package', async () => {
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
@@ -244,7 +280,7 @@ describe('validatePackageUpload', () => {
     });
 
     it('searches the registry without compatibility constraints', async () => {
-      await validatePackageUpload({
+      await validateUpload({
         packageInfo: validPackage,
         paths: [],
         savedObjectsClient: soClient,
@@ -272,7 +308,7 @@ describe('validatePackageUpload', () => {
       mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
 
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
@@ -365,7 +401,7 @@ describe('validatePackageUpload', () => {
       });
 
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: {
             name: 'hostile',
             data_streams: [{ dataset: 'foo', type: 'metrics' }],
@@ -391,7 +427,7 @@ describe('validatePackageUpload', () => {
       });
 
       await expect(
-        validatePackageUpload({
+        validateUpload({
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
@@ -474,6 +510,205 @@ describe('validatePackageUpload', () => {
         },
         paths: [],
         savedObjectsClient: soClient,
+      });
+    });
+
+    it('rejects a dataset that matches an existing generic-logs data stream', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-payroll.records-default',
+            template: 'logs',
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: {
+          name: 'evilclaim',
+          data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
+        },
+        paths: [
+          'evilclaim-1.0.0/data_stream/payroll.records/elasticsearch/ingest_pipeline/default.yml',
+        ],
+        savedObjectsClient: soClient,
+      });
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+        name: 'logs-payroll.records-*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+    });
+
+    it('rejects a live data stream owned by a different Fleet package', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-nginx.access-default',
+            template: 'logs-nginx.access',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'nginx' } },
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: {
+          name: 'hostile',
+          data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
+        },
+        paths: [],
+        savedObjectsClient: soClient,
+      });
+    });
+
+    it('allows an upgrade when live data streams are owned by this package', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+            _meta: {
+              managed_by: 'fleet',
+              managed: true,
+              package: { name: 'my_integration' },
+            },
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: {
+            attributes: { name: 'my_integration', install_source: 'upload' },
+          } as SavedObject<Installation>,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('treats a missing data stream as unclaimed', async () => {
+      esClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'evilclaim',
+            data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('rejects the upload when live data stream lookup fails', async () => {
+      esClient.indices.getDataStream.mockRejectedValue({
+        statusCode: 503,
+        message: 'cluster unavailable',
+      });
+
+      await expectUploadRejected({
+        packageInfo: {
+          name: 'evilclaim',
+          data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
+        },
+        paths: [],
+        savedObjectsClient: soClient,
+      });
+    });
+
+    it('rejects a direct otelcol stream that matches an existing .otel data stream', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-payroll.records.otel-default',
+            template: 'logs-payroll.records',
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: {
+          name: 'evilclaim',
+          data_streams: [
+            {
+              dataset: 'payroll.records',
+              type: 'logs',
+              streams: [{ input: 'otelcol' }],
+            },
+          ],
+        },
+        paths: [],
+        savedObjectsClient: soClient,
+      });
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+        name: 'logs-payroll.records.otel-*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+    });
+
+    it('rejects a named otelcol stream that matches an existing .otel data stream', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-payroll.records.otel-default',
+            template: 'logs-payroll.records',
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: {
+          name: 'evilclaim',
+          policy_templates: [
+            {
+              inputs: [{ name: 'otel_logs', type: 'otelcol' }],
+            },
+          ],
+          data_streams: [
+            {
+              dataset: 'payroll.records',
+              type: 'logs',
+              streams: [{ input: 'otel_logs' }],
+            },
+          ],
+        },
+        paths: [],
+        savedObjectsClient: soClient,
+      });
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+        name: 'logs-payroll.records.otel-*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+    });
+
+    it('does not query the .otel pattern when enableOtelIntegrations is off', async () => {
+      mockedGetExperimentalFeatures.mockReturnValue({ enableOtelIntegrations: false });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'evilclaim',
+            data_streams: [
+              {
+                dataset: 'payroll.records',
+                type: 'logs',
+                streams: [{ input: 'otelcol' }],
+              },
+            ],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+        name: 'logs-payroll.records-*',
+        expand_wildcards: ['open', 'hidden'],
       });
     });
   });
