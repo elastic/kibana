@@ -136,9 +136,15 @@ export const buildExperimentFilterQuery = (
  */
 export const buildExampleScoresQuery = (
   exampleId: string,
-  options?: { spaceId?: string }
+  options?: { spaceId?: string; executionId?: string; modelId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.executionId) {
+    must.push({ term: { 'metadata.execution_id': options.executionId } });
+  }
+  if (options?.modelId) {
+    must.push({ term: { 'task.model.id': options.modelId } });
+  }
   if (options?.spaceId) {
     must.push(buildSpaceFilter(options.spaceId));
   }

@@ -18,6 +18,21 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
 
+export const GetExampleScoresRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter by execution ID (the full composite execution identifier)
+     */
+    execution_id: z.string().max(1024).optional(),
+    /**
+     * Filter by task model ID
+     */
+    model_id: z.string().max(256).optional(),
+  })
+);
+export type GetExampleScoresRequestQuery = z.infer<typeof GetExampleScoresRequestQuery>;
+export type GetExampleScoresRequestQueryInput = z.input<typeof GetExampleScoresRequestQuery>;
+
 export const GetExampleScoresRequestParams = lazySchema(() =>
   z.object({
     exampleId: z.string().max(1024),

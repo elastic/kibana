@@ -317,14 +317,25 @@ export class EvalsClient {
    * unbounded fields (`task.output`, `example.input`, `example.metadata`),
    * because this route does not apply `_source_excludes`.
    */
-  async getExampleScores(exampleId: string): Promise<EvaluationScoreDocument[]> {
+  async getExampleScores(
+    exampleId: string,
+    filters?: { executionId?: string; modelId?: string }
+  ): Promise<EvaluationScoreDocument[]> {
     try {
+      const query: Record<string, string> = {};
+      if (filters?.executionId) {
+        query.execution_id = filters.executionId;
+      }
+      if (filters?.modelId) {
+        query.model_id = filters.modelId;
+      }
       const response = await this.kbnClient.request({
         path: this.path(
           EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId))
         ),
         method: 'GET',
         headers: VERSIONED_HEADERS,
+        ...(Object.keys(query).length > 0 ? { query } : {}),
       });
       const parsed = GetExampleScoresResponse.parse(getResponseData(response));
 

@@ -13,6 +13,7 @@ import {
   buildExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetExampleScoresRequestParams,
+  GetExampleScoresRequestQuery,
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -46,17 +47,19 @@ export const registerGetExampleScoresRoute = ({
         validate: {
           request: {
             params: buildRouteValidationWithZod(GetExampleScoresRequestParams),
+            query: buildRouteValidationWithZod(GetExampleScoresRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
           const { exampleId } = request.params;
+          const { execution_id: executionId, model_id: modelId } = request.query;
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildExampleScoresQuery(exampleId, { spaceId }),
+            query: buildExampleScoresQuery(exampleId, { spaceId, executionId, modelId }),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });

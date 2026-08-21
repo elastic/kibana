@@ -19,6 +19,20 @@ paths:
           schema:
             type: string
             maxLength: 1024
+        - name: execution_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: Filter by execution ID (the full composite execution identifier)
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter by task model ID
       responses:
         "200":
           description: Successful response

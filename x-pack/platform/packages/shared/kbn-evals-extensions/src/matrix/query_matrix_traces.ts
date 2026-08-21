@@ -277,28 +277,63 @@ export const queryMatrixTraces = async (
     }
   }
 
-  // 2. Fetch full score documents once per example (the route returns every
-  //    document for that example; we share the result across runs).
+  // 2. Fetch full score documents per (run, example) with the execution filter
+  //    applied server-side. The unfiltered route returns EVERY historical run
+  //    of an example (tens of MB), which outgrew the HTTP transport and made
+  //    traces silently disappear; the filtered fetch is ~one execution's docs.
+  //    Examples of one run are fetched in parallel; runs stay sequential.
+  //
+  //    Backward compatibility: an older evals plugin ignores the unknown query
+  //    params and returns all executions. Detect that from the first response
+  //    and fall back to fetching once per example, shared across runs.
   const exampleScores = new Map<string, EvaluationScoreDocument[]>();
-  const allExampleIds = new Set<string>();
-  for (const ref of runRefs) {
-    for (const id of ref.exampleIds) allExampleIds.add(id);
-  }
+  const cacheKey = (ref: RunRef, exampleId: string) => `${ref.executionId}::${exampleId}`;
+  let serverSupportsFilter: boolean | undefined;
 
-  for (const exampleId of allExampleIds) {
-    try {
-      exampleScores.set(exampleId, await evalsClient.getExampleScores(exampleId));
-    } catch (error) {
-      // A single example whose combined documents exceed the transport's size
-      // limit must not abort the whole report: scores are already aggregated,
-      // only this example's trace detail is lost.
-      log.warning(
-        `Skipping trace details for example ${exampleId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      exampleScores.set(exampleId, []);
+  const fetchExample = async (ref: RunRef, exampleId: string): Promise<void> => {
+    if (serverSupportsFilter === false) {
+      const shared = exampleScores.get(exampleId);
+      if (shared) {
+        exampleScores.set(cacheKey(ref, exampleId), shared);
+        return;
+      }
     }
+    const scores = await evalsClient.getExampleScores(exampleId, {
+      executionId: ref.executionId,
+      modelId: ref.modelId,
+    });
+    if (serverSupportsFilter === undefined) {
+      serverSupportsFilter =
+        scores.length === 0 || scores.every((s) => s.metadata?.execution_id === ref.executionId);
+      if (!serverSupportsFilter) {
+        log.debug(
+          'Example-scores route ignores execution filters (older evals plugin) — falling back to shared per-example fetches'
+        );
+      }
+    }
+    if (serverSupportsFilter === false) {
+      exampleScores.set(exampleId, scores);
+    }
+    exampleScores.set(cacheKey(ref, exampleId), scores);
+  };
+
+  for (const ref of runRefs) {
+    await Promise.all(
+      [...ref.exampleIds].map(async (exampleId) => {
+        try {
+          await fetchExample(ref, exampleId);
+        } catch (error) {
+          // A single failed fetch must not abort the whole report: scores are
+          // already aggregated, only this cell's trace detail is lost.
+          log.warning(
+            `Skipping trace details for example ${exampleId} (execution ${ref.executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          exampleScores.set(cacheKey(ref, exampleId), []);
+        }
+      })
+    );
   }
 
   // Category prefixes come from the same synthetic `prefix:*` dataset ids the
@@ -319,7 +354,7 @@ export const queryMatrixTraces = async (
   for (const ref of runRefs) {
     let completeCount = 0;
     for (const exampleId of ref.exampleIds) {
-      const scores = exampleScores.get(exampleId) ?? [];
+      const scores = exampleScores.get(cacheKey(ref, exampleId)) ?? [];
       const ok = processExampleBatch(
         scores,
         ref.modelId,
