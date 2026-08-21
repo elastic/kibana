@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
@@ -42,7 +42,7 @@ import { isEntityAttachment, matchesSearchTerm, CASE_ATTACHMENT_TABLE_CONFIG } f
  * Filters comments by `searchTerm` in-memory before delegating to `EntityTabTable`,
  * short-circuiting with an empty prompt when there are no matching entity attachments.
  */
-export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
+export const EntityTabContent: React.FC<CommonAttachmentListViewProps> = ({
   caseData,
   searchTerm,
 }) => {

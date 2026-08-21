@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useMlKibana } from '../../../../../../contexts/kibana';
@@ -36,15 +35,14 @@ export const ProjectRoutingSelect: FC = () => {
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState(jobCreator.projectRouting);
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
     [cpsManager]
   );
 
-  const projectsResult = useFetchProjects(fetchProjects, jobCreator.projectRouting ?? undefined);
-  const projects = projectsResult.isLoading ? undefined : projectsResult;
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   useEffect(() => {
     setProjectRouting(jobCreator.projectRouting ?? null);
@@ -63,12 +61,13 @@ export const ProjectRoutingSelect: FC = () => {
   return (
     <Description titleId={titleId}>
       <MlProjectPickerPanel
-        projectRouting={projectRouting ?? undefined}
+        projectRouting={projectRouting || undefined}
         onProjectRoutingChange={onProjectRoutingChange}
-        projects={projects}
+        fetchProjectsByRouting={fetchProjectsByRouting}
+        defaultProjectRoutingGetter={defaultProjectRoutingGetter}
         totalProjectCount={totalProjectCount}
         isReadonly={false}
-        disabled={projects === undefined}
+        disabled={!projectRouting}
       />
     </Description>
   );
