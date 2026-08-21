@@ -302,11 +302,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerUnified(getIndicatorAttachment());
-    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
-    cases.attachmentFramework.registerUnified(getEventType());
-    cases.attachmentFramework.registerUnified(getSecurityAlertType());
-    cases.attachmentFramework.registerUnified(getTimelineAttachment());
+    cases.attachmentFramework.registerAttachment(getIndicatorAttachment());
+    cases.attachmentFramework.registerAttachment(getEndpointUnifiedAttachment());
+    cases.attachmentFramework.registerAttachment(getEventType());
+    cases.attachmentFramework.registerAttachment(getSecurityAlertType());
+    cases.attachmentFramework.registerAttachment(getTimelineAttachment());
 
     // Always register the entity attachment renderer so that attachments created
     // while the feature flag was enabled continue to display correctly after the
@@ -315,7 +315,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Lazily imported to keep the entity attachment module out of the page-load bundle.
     import('./cases/attachments/entity')
       .then(({ getEntityAttachment }) => {
-        cases.attachmentFramework.registerUnified(getEntityAttachment());
+        cases.attachmentFramework.registerAttachment(getEntityAttachment());
       })
       .catch((e) => {
         this.logger.error('Failed to register entity attachment type', e);
