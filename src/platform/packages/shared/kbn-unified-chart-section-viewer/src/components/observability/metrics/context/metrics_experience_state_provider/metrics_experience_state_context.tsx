@@ -30,7 +30,6 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   gridSettings: MetricsGridSettings;
   searchTerm: string;
   metricsSort: MetricsSort;
-  /** Derived from the persisted dimension names. */
   selectedDimensions: Dimension[];
   recentlyExploredMetrics: readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;

@@ -46,7 +46,6 @@ export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
   histogramPercentile: HistogramPercentile;
-  /** Names of the dimensions the metrics grid is broken down by. */
   dimensions: string[];
   searchTerm: string;
 }
