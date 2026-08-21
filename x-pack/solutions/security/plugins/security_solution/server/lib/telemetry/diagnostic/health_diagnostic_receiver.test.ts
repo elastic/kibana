@@ -911,7 +911,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       expect(results).toEqual([{ health: 'green' }]);
     });
 
-    it('throws when responsePath points to a scalar', async () => {
+    it('completes with zero items when responsePath resolves to a scalar', async () => {
       mockEsClient.transport.request.mockResolvedValue({ count: 42 });
       const query = buildExecutableApiQuery({
         api: '_cluster/stats',
@@ -924,9 +924,48 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         apiQueryAllowlist: [{ path: '_cluster/stats' }],
       };
 
-      await expect(
-        lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }))
-      ).rejects.toThrow(/scalar/);
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
+    });
+
+    it('completes with zero items when responsePath resolves to null', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ jobs: null });
+      const query = buildExecutableApiQuery({
+        api: '_ml/anomaly_detectors/_stats',
+        pathParams: {},
+        responsePath: 'jobs',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_ml/anomaly_detectors/_stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
+    });
+
+    it('completes with zero items when responsePath key is absent from the response', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ count: 0 });
+      const query = buildExecutableApiQuery({
+        api: '_ml/anomaly_detectors/_stats',
+        pathParams: {},
+        responsePath: 'jobs',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_ml/anomaly_detectors/_stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
     });
 
     it('emits root-array items when responsePath is absent', async () => {
