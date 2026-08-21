@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
-  AGENT_BUILDER_IMAGE_FILE_KIND,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
@@ -74,7 +74,7 @@ export class AgentBuilderPlugin
     this.home = setupDeps.home;
 
     setupDeps.files.registerFileKind({
-      id: AGENT_BUILDER_IMAGE_FILE_KIND,
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
       http: {

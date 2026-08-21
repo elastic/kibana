@@ -130,7 +130,7 @@ export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Ty
 export const SUPPORTED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number];
 
-export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
+export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
 
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 

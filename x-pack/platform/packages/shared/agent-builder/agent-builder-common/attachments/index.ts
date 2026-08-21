@@ -30,7 +30,7 @@ export {
   imageAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
   SUPPORTED_IMAGE_MIME_TYPES,
-  AGENT_BUILDER_IMAGE_FILE_KIND,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   MAX_IMAGE_BYTES,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
