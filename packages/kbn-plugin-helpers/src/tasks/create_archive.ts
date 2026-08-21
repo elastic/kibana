@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import archiver from 'archiver';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import type { TaskContext } from '../task_context';
 

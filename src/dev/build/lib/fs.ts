@@ -20,7 +20,7 @@ import { inspect } from 'util';
 import archiver from 'archiver';
 import { globby } from 'globby';
 import pMap from 'p-map';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import * as tar from 'tar';
 import { pack as tarFsPack } from 'tar-fs';
 import type { ToolingLog } from '@kbn/tooling-log';

@@ -11,7 +11,7 @@ import { resolve, dirname } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { comparePngs } from '../lib/compare_pngs';

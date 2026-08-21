@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import {
   mkdirp,

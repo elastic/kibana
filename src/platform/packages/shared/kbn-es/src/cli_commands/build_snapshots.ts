@@ -15,7 +15,7 @@ import { pipeline, Transform } from 'stream';
 import Fs from 'fs';
 
 import getopts from 'getopts';
-import del from 'del';
+import { deleteSync as del } from 'del';
 
 import { buildSnapshot, log } from '../utils';
 import type { Command } from './types';
@@ -47,7 +47,7 @@ export const buildSnapshots: Command = {
     });
 
     const outputDir = resolve(process.cwd(), options.output);
-    del.sync(outputDir);
+    del(outputDir);
     Fs.mkdirSync(outputDir, { recursive: true });
 
     for (const platform of ['darwin', 'win32', 'linux']) {

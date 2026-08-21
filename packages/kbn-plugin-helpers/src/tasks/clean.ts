@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import type { TaskContext } from '../task_context';
 

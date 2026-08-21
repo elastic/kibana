@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { access } from 'fs/promises';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';

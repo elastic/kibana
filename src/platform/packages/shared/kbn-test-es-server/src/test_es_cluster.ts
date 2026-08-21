@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import { format } from 'url';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { v4 as uuidv4 } from 'uuid';
 import { glob } from 'fast-glob';
 import createArchiver from 'archiver';

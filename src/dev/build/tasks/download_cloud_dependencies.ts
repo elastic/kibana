@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import Axios from 'axios';
 import Fsp from 'fs/promises';
 import type { Task } from '../lib';

@@ -15,7 +15,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { globby } from 'globby';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');

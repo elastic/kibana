@@ -11,7 +11,7 @@ import type { ConfigType } from '@kbn/screenshotting-server';
 import { args } from '@kbn/screenshotting-server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';

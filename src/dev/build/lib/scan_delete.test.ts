@@ -10,7 +10,7 @@
 import { readdirSync } from 'fs';
 import { relative, resolve } from 'path';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 // @ts-ignore
 import { mkdirp, write } from './fs';

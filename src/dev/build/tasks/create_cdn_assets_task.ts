@@ -19,7 +19,7 @@ import {
 } from '@kbn/core-i18n-server-internal';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { globbySync } from 'globby';
 
 import type { Task } from '../lib';

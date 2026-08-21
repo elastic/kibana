@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 export const clean = async ({ log }: { log: ToolingLog }) => {
   log.info('Cleaning Storybook build folder');

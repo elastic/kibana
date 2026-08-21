@@ -12,7 +12,7 @@ import path from 'path';
 
 import chalk from 'chalk';
 import execa from 'execa';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { extract } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 

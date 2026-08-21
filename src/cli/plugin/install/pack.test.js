@@ -12,7 +12,7 @@ import { join } from 'path';
 
 import sinon from 'sinon';
 import { globbySync } from 'globby';
-import del from 'del';
+import { deleteSync as del } from 'del';
 
 import { Logger } from '../../logger';
 import { extract, getPackData } from './pack';
@@ -54,7 +54,7 @@ describe('kibana cli', function () {
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      del.sync(workingPathRoot);
+      del(workingPathRoot);
     });
 
     function copyReplyFile(filename) {

@@ -11,7 +11,7 @@ import { join } from 'path';
 import fs from 'fs';
 
 import sinon from 'sinon';
-import del from 'del';
+import { deleteSync as del } from 'del';
 
 import { existingInstall, assertVersion } from './kibana';
 import { Logger } from '../../logger';
@@ -42,7 +42,7 @@ describe('kibana cli', function () {
 
       describe('assertVersion', function () {
         beforeEach(function () {
-          del.sync(testWorkingPath);
+          del(testWorkingPath);
           fs.mkdirSync(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
@@ -51,7 +51,7 @@ describe('kibana cli', function () {
         afterEach(function () {
           logger.log.restore();
           logger.error.restore();
-          del.sync(testWorkingPath);
+          del(testWorkingPath);
         });
 
         it('should succeed with exact match', function () {

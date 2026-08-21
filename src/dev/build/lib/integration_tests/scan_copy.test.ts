@@ -10,7 +10,7 @@
 import { chmodSync, statSync } from 'fs';
 import { resolve } from 'path';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import { getChildPaths } from '../fs';
 import { scanCopy } from '../scan_copy';

@@ -20,7 +20,7 @@ import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { globby, globbySync } from 'globby';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 
 import type { Task } from '../lib';
 import { write } from '../lib';

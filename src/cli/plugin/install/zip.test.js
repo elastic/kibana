@@ -11,7 +11,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 
-import del from 'del';
+import { deleteSync as del } from 'del';
 import { globbySync } from 'globby';
 
 import { analyzeArchive, extractArchive } from './zip';
@@ -32,7 +32,7 @@ describe('kibana cli', function () {
     });
 
     afterEach(() => {
-      del.sync(tempPath, { force: true });
+      del(tempPath, { force: true });
     });
 
     describe('analyzeArchive', function () {

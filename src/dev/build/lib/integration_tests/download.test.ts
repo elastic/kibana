@@ -13,7 +13,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';

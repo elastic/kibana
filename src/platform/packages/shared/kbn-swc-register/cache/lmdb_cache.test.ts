@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import LmdbStore = require('lmdb');
 import type { RootDatabaseOptions } from 'lmdb';
 

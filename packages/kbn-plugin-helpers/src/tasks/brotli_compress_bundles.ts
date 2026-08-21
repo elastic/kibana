@@ -12,7 +12,7 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import gulpBrotli from 'gulp-brotli';
 import zlib from 'zlib';
 import { REPO_ROOT } from '@kbn/repo-info';

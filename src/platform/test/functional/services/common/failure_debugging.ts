@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

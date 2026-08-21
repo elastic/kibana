@@ -10,7 +10,7 @@
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 
-import del from 'del';
+import { deleteSync as del } from 'del';
 
 import { list } from './list';
 
@@ -42,12 +42,12 @@ describe('kibana cli', function () {
 
     beforeEach(function () {
       logger.messages.length = 0;
-      del.sync(pluginDir);
+      del(pluginDir);
       mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
-      del.sync(pluginDir);
+      del(pluginDir);
     });
 
     it('list all of the folders in the plugin folder, ignoring dot prefixed plugins and regular files', function () {

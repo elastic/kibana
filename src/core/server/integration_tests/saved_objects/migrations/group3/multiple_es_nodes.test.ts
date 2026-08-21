@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import del from 'del';
+import { deleteAsync as del } from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
