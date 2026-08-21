@@ -468,8 +468,8 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('throws when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
-    await expect(
-      makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })
-    ).rejects.toThrow('Investigations are not configured in this space');
+    await expect(makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
+      'Investigations are not configured in this space'
+    );
   });
 });
