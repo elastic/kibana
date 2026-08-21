@@ -49,6 +49,39 @@ const isTool = isToolId;
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
   [...calledTools].some((toolId) => isTool(toolId, canonical));
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const hasSchemaValidationFailure = ({
+  results,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  results.some(
+    (result) =>
+      isRecord(result) &&
+      isRecord(result.data) &&
+      typeof result.data.message === 'string' &&
+      result.data.message.includes('Received tool input did not match expected schema')
+  );
+
+const hasCompletedItems = ({
+  params,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  Array.isArray(params.items) && params.items.length > 0;
+
+const isSerializationRecovery = (
+  eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
+): boolean => {
+  const [failedWrite, recoveredWrite] = eventWrites;
+  return (
+    eventWrites.length === 2 &&
+    failedWrite !== undefined &&
+    !hasCompletedItems(failedWrite) &&
+    recoveredWrite !== undefined &&
+    hasCompletedItems(recoveredWrite) &&
+    !hasSchemaValidationFailure(recoveredWrite)
+  );
+};
+
 const findDuplicateEventWriteRule = (
   eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
 ): { ruleUuid: string; firstItemIndex: number; secondItemIndex: number } | undefined => {
@@ -104,16 +137,12 @@ const scoreOutputTool = (
       explanation: `${TOOL_ID_EVENTS_WRITE} assigns rule UUID ${duplicateRule.ruleUuid} to items ${duplicateRule.firstItemIndex} and ${duplicateRule.secondItemIndex}; merge those components before writing`,
     };
   }
-  const schemaFailureIndex = eventWrites.findIndex(({ results }) =>
-    results.some(
-      (result) =>
-        isRecord(result) &&
-        isRecord(result.data) &&
-        typeof result.data.message === 'string' &&
-        result.data.message.includes('Received tool input did not match expected schema')
-    )
-  );
+  const schemaFailureIndex = eventWrites.findIndex(hasSchemaValidationFailure);
   if (schemaFailureIndex !== -1) {
+    if (schemaFailureIndex === 0 && isSerializationRecovery(eventWrites)) {
+      return null;
+    }
+
     const retriedAfterSchemaFailure = eventWrites.length > schemaFailureIndex + 1;
     return {
       score: 0,
@@ -149,9 +178,6 @@ const scoreOutputTool = (
   }
   return null;
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 const didRuleSearchReturnNoCandidates = ({
   params,

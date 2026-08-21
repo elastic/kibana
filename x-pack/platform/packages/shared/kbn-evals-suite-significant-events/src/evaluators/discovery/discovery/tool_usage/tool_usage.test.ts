@@ -106,6 +106,29 @@ describe('scoreToolUsage', () => {
     }
   );
 
+  it('allows one completed-payload recovery after a bare events_write call', () => {
+    const missingItemsWrite = toolCall(TOOL_ID_EVENTS_WRITE, {}, [
+      {
+        data: {
+          message:
+            'Error: Received tool input did not match expected schema\nPass items as a non-empty array of event objects.',
+        },
+      },
+    ]);
+    const completedWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'open' }] });
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      missingItemsWrite,
+      completedWrite,
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toEqual({
+      score: 1,
+      label: 'correct',
+      explanation: 'Correctly called all tools',
+    });
+  });
+
   it('rejects duplicate rule ownership before the schema-error retry', () => {
     const duplicateRule = {
       type: 'detection',

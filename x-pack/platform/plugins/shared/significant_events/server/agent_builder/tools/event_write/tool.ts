@@ -114,13 +114,13 @@ const eventsWriteItemsSchema = z
     },
     {
       message:
-        'Each detection rule UUID may appear in only one event item per write. Correct ownership before the single write; never retry with an empty placeholder.',
+        'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
     }
   )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id for new events; supply the existing event_id for continuations. Each detection rule_uuid may appear in only one item.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item.',
     })
   );
 
@@ -151,7 +151,10 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Write a batch of significant events. Call once with a populated items array.
+      Write a batch of significant events. Call once with the completed object
+      \`{ "items": [ ... ] }\`. A bare call or \`{}\` is invalid and writes nothing.
+      If that specific argument error occurs, submit the already-completed object once. Do not
+      retry a populated payload rejected for ownership or field validation.
 
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
