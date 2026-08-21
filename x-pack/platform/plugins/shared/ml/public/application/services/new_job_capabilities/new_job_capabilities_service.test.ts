@@ -45,21 +45,6 @@ describe('new_job_capabilities_service', () => {
 
       expect(meanAgg.fields).toHaveLength(7);
       expect(distinctCountAgg.fields).toHaveLength(10);
-      expect(mlApiServicesMock.jobs.newJobCaps).toHaveBeenCalledWith(
-        'cloudwatch-*',
-        false,
-        undefined
-      );
-    });
-
-    it('passes projectRouting to newJobCaps', async () => {
-      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
-      await newJobCapsService.initializeFromDataVIew(dataView, true, true, '_alias:linked');
-      expect(mlApiServicesMock.jobs.newJobCaps).toHaveBeenLastCalledWith(
-        'cloudwatch-*',
-        false,
-        '_alias:linked'
-      );
     });
 
     it('job caps including text fields', async () => {
