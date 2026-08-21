@@ -28,6 +28,7 @@ import {
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../event/significant_event_status';
+import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
@@ -43,12 +44,10 @@ import { EventFlyout } from '../event/event_flyout';
 import { NightshiftHeader } from './header';
 import { NightshiftEmptyState } from './empty_state';
 import {
-  BLAST_RADIUS_QUERY_PARAM,
-  clearNightshiftEventSelectionParams,
-  getNightshiftEventSelectionFromSearch,
-  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
-  NIGHTSHIFT_EVENT_UUID_QUERY_PARAM,
-  setNightshiftEventSelectionParams,
+  clearNightshiftEventIdParam,
+  getNightshiftEventIdFromSearch,
+  IMPACTED_SERVICES_QUERY_PARAM,
+  setNightshiftEventIdParam,
 } from '../common/url_params';
 
 const COMPACT_APP_HEADER_HEIGHT_PX = 48;
@@ -80,29 +79,6 @@ const setElementInert = (element: HTMLDivElement | null): void => {
   element?.setAttribute('inert', '');
 };
 
-const resolveSelectedEvent = ({
-  events,
-  eventIdFromUrl,
-  eventUuidFromUrl,
-}: {
-  events: SignificantEvent[];
-  eventIdFromUrl?: string;
-  eventUuidFromUrl?: string;
-}): SignificantEvent | undefined => {
-  if (eventUuidFromUrl) {
-    const byUuid = events.find(({ event_uuid: eventUuid }) => eventUuid === eventUuidFromUrl);
-    if (byUuid) {
-      return byUuid;
-    }
-  }
-
-  if (eventIdFromUrl) {
-    return events.find(({ event_id: eventId }) => eventId === eventIdFromUrl);
-  }
-
-  return undefined;
-};
-
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
@@ -118,25 +94,41 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
 
+  const selectedEventIdFromUrl = useMemo(() => getNightshiftEventIdFromSearch(search), [search]);
+
   // Derived from the freshest fetched list (not a click-time snapshot), so
   // background refetches keep the open flyout current.
-  const { eventId: selectedEventIdFromUrl, eventUuid: selectedEventUuid } = useMemo(
-    () => getNightshiftEventSelectionFromSearch(search),
-    [search]
+  const eventFromList = useMemo(
+    () => events.find(({ event_id: eventId }) => eventId === selectedEventIdFromUrl),
+    [events, selectedEventIdFromUrl]
   );
-  const selectedEvent = useMemo(
-    () =>
-      resolveSelectedEvent({
-        events,
-        eventIdFromUrl: selectedEventIdFromUrl,
-        eventUuidFromUrl: selectedEventUuid,
-      }),
-    [events, selectedEventIdFromUrl, selectedEventUuid]
-  );
-  const [eventNotFound, setEventNotFound] = useState(false);
+
+  const shouldFetchById = Boolean(selectedEventIdFromUrl) && !eventFromList && !isLoading;
+  const eventByIdQuery = useFetchEventById(selectedEventIdFromUrl, { enabled: shouldFetchById });
+  const selectedEvent = eventFromList ?? eventByIdQuery.data;
+
+  const [notFoundEventId, setNotFoundEventId] = useState<string>();
+
+  useEffect(() => {
+    if (!selectedEventIdFromUrl || isLoading) {
+      return;
+    }
+    if (selectedEvent) {
+      setNotFoundEventId(undefined);
+      return;
+    }
+    if (!eventByIdQuery.isFetched) {
+      return;
+    }
+
+    setNotFoundEventId(selectedEventIdFromUrl);
+    const params = new URLSearchParams(history.location.search);
+    clearNightshiftEventIdParam(params);
+    history.replace({ search: params.toString() });
+  }, [eventByIdQuery.isFetched, history, isLoading, selectedEvent, selectedEventIdFromUrl]);
 
   const selectedBlastRadiusKey = useMemo(
-    () => new URLSearchParams(search).get(BLAST_RADIUS_QUERY_PARAM) ?? undefined,
+    () => new URLSearchParams(search).get(IMPACTED_SERVICES_QUERY_PARAM) ?? undefined,
     [search]
   );
 
@@ -161,21 +153,17 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
-      setEventNotFound(false);
+      setNotFoundEventId(undefined);
       const params = new URLSearchParams(history.location.search);
-      setNightshiftEventSelectionParams(params, {
-        eventId: event.event_id,
-        eventUuid: event.event_uuid,
-      });
+      setNightshiftEventIdParam(params, event.event_id);
       history.replace({ search: params.toString() });
     },
     [history]
   );
 
   const handleFlyoutClose = useCallback(() => {
-    setEventNotFound(false);
     const params = new URLSearchParams(history.location.search);
-    clearNightshiftEventSelectionParams(params);
+    clearNightshiftEventIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
 
@@ -220,9 +208,9 @@ export function NightshiftApp(): React.ReactElement {
       const params = new URLSearchParams(history.location.search);
       const nextKey = activeBlastRadiusChip === chipKey ? undefined : chipKey;
       if (nextKey) {
-        params.set(BLAST_RADIUS_QUERY_PARAM, nextKey);
+        params.set(IMPACTED_SERVICES_QUERY_PARAM, nextKey);
       } else {
-        params.delete(BLAST_RADIUS_QUERY_PARAM);
+        params.delete(IMPACTED_SERVICES_QUERY_PARAM);
       }
       history.replace({ search: params.toString() });
     },
@@ -237,48 +225,6 @@ export function NightshiftApp(): React.ReactElement {
     () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, { features }),
     [resolvedEvents, activeBlastRadiusChip, features]
   );
-
-  const selectedEventVisible = useMemo(() => {
-    if (!selectedEvent) {
-      return false;
-    }
-    return (
-      needsActionEvents.some(
-        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
-      ) ||
-      resolvedEvents.some(({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid)
-    );
-  }, [needsActionEvents, resolvedEvents, selectedEvent]);
-
-  useEffect(() => {
-    const hasSelectionInUrl = Boolean(selectedEventUuid || selectedEventIdFromUrl);
-    if (hasSelectionInUrl && !selectedEvent && !isLoading) {
-      setEventNotFound(true);
-      const params = new URLSearchParams(history.location.search);
-      if (
-        params.has(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM) ||
-        params.has(NIGHTSHIFT_EVENT_ID_QUERY_PARAM)
-      ) {
-        clearNightshiftEventSelectionParams(params);
-        history.replace({ search: params.toString() });
-      }
-      return;
-    }
-    if (selectedEvent) {
-      setEventNotFound(false);
-      if (
-        selectedEventUuid !== selectedEvent.event_uuid ||
-        selectedEventIdFromUrl !== selectedEvent.event_id
-      ) {
-        const params = new URLSearchParams(history.location.search);
-        setNightshiftEventSelectionParams(params, {
-          eventId: selectedEvent.event_id,
-          eventUuid: selectedEvent.event_uuid,
-        });
-        history.replace({ search: params.toString() });
-      }
-    }
-  }, [history, isLoading, selectedEvent, selectedEventIdFromUrl, selectedEventUuid]);
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -361,7 +307,7 @@ export function NightshiftApp(): React.ReactElement {
     selectedEventUuid: selectedEvent?.event_uuid,
   };
 
-  const eventNotFoundCallout = eventNotFound ? (
+  const eventNotFoundCallout = notFoundEventId ? (
     <div
       css={css`
         margin-top: ${euiTheme.size.m};
@@ -374,7 +320,8 @@ export function NightshiftApp(): React.ReactElement {
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
-          defaultMessage: 'Significant Event not found',
+          defaultMessage: 'Significant Event {eventId} not found',
+          values: { eventId: notFoundEventId },
         })}
       >
         <EuiText size="s">
@@ -570,7 +517,7 @@ export function NightshiftApp(): React.ReactElement {
         </div>
       )}
 
-      {selectedEvent && selectedEventVisible && (
+      {selectedEvent && (
         <EventFlyout
           key={selectedEvent.event_id}
           event={selectedEvent}
