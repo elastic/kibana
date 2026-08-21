@@ -18,7 +18,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
 import type { GetResolverClusterClient } from '../utils/scoped_client';
-import { stripRemoteIndexPatterns } from '../../../utils/cps_read_routing';
+import { stripRemoteIndexPatterns } from '../utils/index_routing';
 import { reportAnalyzerCrossProjectRender } from '../utils/cross_project_telemetry';
 
 export function handleTree(

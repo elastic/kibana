@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { toLocalIndexName } from '../../../../utils/cps_read_routing';
+import { toLocalIndexName } from '../../utils/index_routing';
 
 /**
  * Picks the search hit that matches the clicked document when the same `_id` can exist in more

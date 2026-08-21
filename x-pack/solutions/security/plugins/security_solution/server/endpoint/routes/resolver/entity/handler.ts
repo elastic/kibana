@@ -18,7 +18,7 @@ import {
   firstProjectQualifiedConcreteIndex,
   stripRemoteIndexPatterns,
   toLocalIndexName,
-} from '../../../utils/cps_read_routing';
+} from '../utils/index_routing';
 import type { GetResolverClusterClient } from '../utils/scoped_client';
 
 // How many `_id` matches to fetch so we can pick the clicked document when the same id exists in

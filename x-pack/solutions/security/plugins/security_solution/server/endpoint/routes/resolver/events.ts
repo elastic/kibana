@@ -15,7 +15,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
 import type { GetResolverClusterClient } from './utils/scoped_client';
-import { stripRemoteIndexPatterns } from '../../utils/cps_read_routing';
+import { stripRemoteIndexPatterns } from './utils/index_routing';
 
 /**
  * Creates an object that the events handler would return
