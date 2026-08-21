@@ -68,9 +68,6 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-/**
- * Answers "does this conversation carry a stored events projection?".
- */
 export const isEventsNativeVersion = (v: number | undefined): v is number =>
   typeof v === 'number' && v >= 1;
 
