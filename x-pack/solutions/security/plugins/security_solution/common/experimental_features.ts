@@ -340,6 +340,13 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.5
+   */
+  perOsPolicySettings: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
