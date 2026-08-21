@@ -14,9 +14,14 @@ import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_object_types';
+import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from './saved_object_types';
 
 type ValueOf<T> = T[keyof T];
 type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
@@ -120,6 +125,11 @@ export interface AlertingV2FeatureDefinition {
   readonly id: string;
   readonly name: string;
   readonly managementApp: string;
+  /**
+   * Extra management apps granted by this feature. Used when a feature owns
+   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   */
+  readonly additionalManagementApps?: readonly string[];
   readonly privileges: {
     readonly all: AlertingV2FeaturePrivilege;
     readonly read: AlertingV2FeaturePrivilege;
@@ -127,18 +137,25 @@ export interface AlertingV2FeatureDefinition {
   readonly subFeatures: readonly AlertingV2SubFeature[];
 }
 
+export const getFeatureManagementApps = (
+  feature: AlertingV2FeatureDefinition
+): readonly string[] => [feature.managementApp, ...(feature.additionalManagementApps ?? [])];
+
 export const ALERTING_V2_FEATURES = {
   rules: {
     id: 'alerting_v2_rules',
     name: 'Rules',
     managementApp: ALERTING_V2_RULES_APP_ID,
+    additionalManagementApps: [ALERTING_V2_RULE_LIBRARY_APP_ID],
     privileges: {
       all: {
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
+          // Templates are Fleet-installed catalog objects — grant read only so
+          // rules.all cannot mutate them through the SO client.
           all: [RULE_SAVED_OBJECT_TYPE],
-          read: [],
+          read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
       read: {
@@ -146,7 +163,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [RULE_SAVED_OBJECT_TYPE],
+          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
     },

@@ -1,5 +1,5 @@
 {
-  "sha1": "e4d44af62b683b403bc3da3a1bb24b6ec9ed5d73",
+  "sha1": "1fbd8237e9b1615fbf7672ce963504c28b31aca2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -320,6 +320,129 @@
       }
     },
     {
+      "id": "6b1025ac4f5bcfd-06badc4f79a5bca",
+      "title": "Data streams API - Get (serverless) lists the data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 43,
+        "column": 27
+      }
+    },
+    {
+      "id": "6b1025ac4f5bcfd-57cfd888c19962a",
+      "title": "Data streams API - Get (serverless) includes stats when asked for them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 57,
+        "column": 68
+      }
+    },
+    {
+      "id": "6b1025ac4f5bcfd-3142d83a42315c3",
+      "title": "Data streams API - Get (serverless) returns a single data stream by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
+        "line": 81,
+        "column": 37
+      }
+    },
+    {
+      "id": "83408411fd238ac-d0f779b5b0291eb",
+      "title": "Data streams API - Get (stateful) lists the data streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 38,
+        "column": 5
+      }
+    },
+    {
+      "id": "83408411fd238ac-7daf56dad24bc02",
+      "title": "Data streams API - Get (stateful) includes stats when asked for them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "83408411fd238ac-3e412c92edd5863",
+      "title": "Data streams API - Get (stateful) returns a single data stream by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
+        "line": 75,
+        "column": 52
+      }
+    },
+    {
       "id": "8ad7525e05f0604-f6a17aebfdd7c3f",
       "title": "Data streams index mode API correctly returns index mode property based on index settings",
       "expectedStatus": "passed",
@@ -355,11 +478,7 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
@@ -383,11 +502,7 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
@@ -411,11 +526,7 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_logsdb_settings_serverless.spec.ts",
@@ -484,13 +595,12 @@
       "title": "Data streams API - Security MKI lists the data streams",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 49,
+        "column": 13
       }
     },
     {
@@ -498,13 +608,12 @@
       "title": "Data streams API - Security MKI includes stats when asked for them",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
-        "line": 73,
-        "column": 54
+        "line": 62,
+        "column": 9
       }
     },
     {
@@ -512,73 +621,12 @@
       "title": "Data streams API - Security MKI returns a single data stream by name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_mki_security.spec.ts",
-        "line": 97,
-        "column": 68
-      }
-    },
-    {
-      "id": "8f252721ed484f8-ff4c4a46279ac9b",
-      "title": "Data streams API lists the data streams",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 58,
-        "column": 77
-      }
-    },
-    {
-      "id": "8f252721ed484f8-35bde8650202b32",
-      "title": "Data streams API includes stats when asked for them",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 77,
-        "column": 35
-      }
-    },
-    {
-      "id": "8f252721ed484f8-d4942e42b5ad4ef",
-      "title": "Data streams API returns a single data stream by name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 103,
-        "column": 22
+        "line": 88,
+        "column": 14
       }
     },
     {
@@ -597,8 +645,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 121,
-        "column": 18
+        "line": 32,
+        "column": 25
       }
     },
     {
@@ -617,8 +665,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 47,
+        "column": 35
       }
     },
     {
@@ -637,8 +685,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 62,
+        "column": 37
       }
     },
     {
@@ -657,8 +705,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 164,
-        "column": 12
+        "line": 76,
+        "column": 22
       }
     },
     {
@@ -677,8 +725,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 181,
-        "column": 14
+        "line": 89,
+        "column": 35
       }
     },
     {
@@ -697,8 +745,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 200,
-        "column": 66
+        "line": 110,
+        "column": 12
       }
     },
     {
@@ -717,8 +765,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams.spec.ts",
-        "line": 224,
-        "column": 27
+        "line": 132,
+        "column": 37
       }
     },
     {
@@ -1069,15 +1117,11 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 23
       }
     },
@@ -1097,15 +1141,11 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 23
       }
     },
@@ -1125,15 +1165,11 @@
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
-        "@local-serverless-vectordb",
-        "@cloud-serverless-vectordb"
+        "@cloud-serverless-security_ease"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/index_templates/index_templates_logsdb_settings_serverless.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 23
       }
     },
@@ -1567,8 +1603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 38,
-        "column": 46
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -1581,8 +1617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 46,
+        "column": 27
       }
     },
     {
@@ -1595,8 +1631,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 47,
-        "column": 50
+        "line": 51,
+        "column": 5
       }
     },
     {
@@ -1609,7 +1645,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 57,
+        "line": 54,
         "column": 12
       }
     },
@@ -1623,8 +1659,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 66,
-        "column": 75
+        "line": 61,
+        "column": 47
       }
     },
     {
@@ -1637,8 +1673,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 67,
-        "column": 21
+        "line": 62,
+        "column": 27
       }
     },
     {
@@ -1651,8 +1687,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 74,
-        "column": 5
+        "line": 67,
+        "column": 12
       }
     },
     {
@@ -1956,31 +1992,55 @@
       }
     },
     {
-      "id": "88c84fd03a5b09f-785bc08408d1873",
-      "title": "Snapshot repositories API reports no default repository when none is configured",
+      "id": "c79682d37967bab-049ea69364d9e2b",
+      "title": "Snapshot repositories API (Cloud) reports no default repository when none is configured",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories.spec.ts",
-        "line": 29,
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 28,
         "column": 5
       }
     },
     {
-      "id": "88c84fd03a5b09f-f0c58092b98020c",
-      "title": "Snapshot repositories API reports the configured default repository",
+      "id": "c79682d37967bab-7e4ca5b47630031",
+      "title": "Snapshot repositories API (Cloud) reports the configured default repository",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories.spec.ts",
-        "line": 42,
-        "column": 21
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 39,
+        "column": 22
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-c7dc783b449b6df",
+      "title": "Snapshot repositories API (local) reports no default repository when none is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 32,
+        "column": 31
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-80d971c4441c5bc",
+      "title": "Snapshot repositories API (local) reports the configured default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 43,
+        "column": 22
       }
     },
     {
