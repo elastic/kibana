@@ -8,7 +8,7 @@
  */
 
 import { TEST_PROFILE_STATE_DEF } from '../../public/context_awareness/__mocks__/profile_state';
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
   createProfileSavedStateTransform,
   type ProfileStateDefinition,
@@ -19,7 +19,7 @@ import { METRICS_STATE_DEF } from './profile_state_definitions/metrics_grid_prof
 import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';
 
 const createSavedMetricsSettings = (dimensions: string[]) => ({
-  ...METRICS_STATE_DEF.defaultState,
+  ...METRICS_GRID_SETTINGS_DEFAULTS,
   dimensions,
 });
 

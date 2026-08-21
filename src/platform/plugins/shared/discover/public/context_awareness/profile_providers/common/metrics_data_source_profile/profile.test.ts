@@ -8,7 +8,6 @@
  */
 import { DiscoverTabType } from '@kbn/discover-utils';
 import { DataSourceType } from '../../../../../common/data_sources';
-import { METRICS_STATE_DEF } from '../../../../../common/context_awareness';
 import type { MetricsExperienceDataSourceProfileProvider } from './profile';
 import { METRICS_DATA_SOURCE_PROFILE_ID, createMetricsDataSourceProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';

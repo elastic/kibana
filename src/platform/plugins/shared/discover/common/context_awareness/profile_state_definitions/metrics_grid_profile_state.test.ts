@@ -54,7 +54,12 @@ describe('METRICS_STATE_DEF', () => {
     });
 
     // The sibling default is filled in so a shared link is self-contained.
-    expect(expanded[KEY]).toEqual({ sortField: 'recency', sortDirection: 'asc' });
+    expect(expanded[KEY]).toEqual({
+      sortField: 'recency',
+      sortDirection: 'asc',
+      dimensions: [],
+      searchTerm: '',
+    });
   });
 
   it('strips an all-default sort so it does not reach the URL', () => {
