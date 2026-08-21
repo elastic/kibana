@@ -17,6 +17,7 @@ import type {
 } from '../../../common/types';
 import { isCloudProvider } from '../../../common/types';
 import { getIacTemplateUrlFromVarGroupSelection } from '../../../common/services/cloud_connectors';
+import { CLOUD_CONNECTOR_PERMISSION_ALLOWLIST } from '../../../common/constants/cloud_connector';
 
 import type {
   AwsCloudConnectorCredentials,
@@ -503,6 +504,18 @@ export const updateInputVarsWithCredentials = (
   return updatedVars;
 };
 
+/**
+ * Returns true if the given package name appears in any cloud connector policy group.
+ * Used to determine reusability for packages that use the Fleet var_groups UI (as opposed
+ * to packages that supply their own onboarding wizard and pass a policy template name like
+ * 'cspm' or 'asset_inventory').
+ */
+function isPackageNameInAnyPolicyGroup(packageName: string): boolean {
+  return Object.values(CLOUD_CONNECTOR_PERMISSION_ALLOWLIST).some((entries) =>
+    entries.some((e) => e.package === packageName)
+  );
+}
+
 export const isCloudConnectorReusableEnabled = (
   provider: string,
   packageInfoVersion: string,
@@ -516,7 +529,9 @@ export const isCloudConnectorReusableEnabled = (
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
 
-    if (templateName === 'aws') {
+    // For packages using Fleet's var_groups UI (e.g. 'aws', 'aws_securityhub', 'aws_bedrock'),
+    // enable connector reuse for any package registered in the allowlist.
+    if (isPackageNameInAnyPolicyGroup(templateName)) {
       return true;
     }
   } else if (provider === AZURE_PROVIDER) {
