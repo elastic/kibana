@@ -80,8 +80,9 @@ describe('registerSecurityWorkflowEventBridge', () => {
           alertIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
+          truncated: false,
         }),
-      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [] },
+      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [], truncated: false },
     },
     {
       name: 'alertAssigneesChanged',
@@ -91,11 +92,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
           alertIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
+          truncated: false,
         }),
       expectedPayload: {
         alertIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
+        truncated: false,
       },
     },
     {
@@ -123,11 +126,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
+          truncated: false,
         }),
       expectedPayload: {
         attackIds: ['a'],
         tagsToAdd: ['t'],
         tagsToRemove: [],
+        truncated: false,
       },
     },
     {
@@ -138,11 +143,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
+          truncated: false,
         }),
       expectedPayload: {
         attackIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
+        truncated: false,
       },
     },
     {
