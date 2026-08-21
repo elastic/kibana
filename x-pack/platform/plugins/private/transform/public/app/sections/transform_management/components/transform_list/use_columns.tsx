@@ -28,7 +28,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { PROJECT_ROUTING, useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
@@ -135,43 +135,32 @@ export const useColumns = (
   const { canStartStopTransform } = useTransformCapabilities();
   const { cps } = useAppDependencies();
   const cpsManager = cps?.cpsManager;
-  const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
-    () => cpsManager?.hasLinkedProjects() ?? false
-  );
+  const hasLinkedProjects = useIsCpsMultiProject(cpsManager);
   const [originProjectId, setOriginProjectId] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     let isMounted = true;
-    setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
     setOriginProjectId(undefined);
 
-    if (!cpsManager) {
-      return;
+    if (cpsManager && hasLinkedProjects) {
+      cpsManager
+        .fetchProjects(PROJECT_ROUTING.ORIGIN)
+        .then((projects) => {
+          if (isMounted) {
+            setOriginProjectId(projects?.origin?._id);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setOriginProjectId(undefined);
+          }
+        });
     }
-
-    cpsManager.whenReady().then(async () => {
-      const nextHasLinkedProjects = cpsManager.hasLinkedProjects();
-      let nextOriginProjectId: string | undefined;
-
-      if (nextHasLinkedProjects) {
-        try {
-          const projects = await cpsManager.fetchProjects(PROJECT_ROUTING.ORIGIN);
-          nextOriginProjectId = projects?.origin?._id;
-        } catch {
-          nextOriginProjectId = undefined;
-        }
-      }
-
-      if (isMounted) {
-        setHasLinkedProjects(nextHasLinkedProjects);
-        setOriginProjectId(nextOriginProjectId);
-      }
-    });
 
     return () => {
       isMounted = false;
     };
-  }, [cpsManager]);
+  }, [cpsManager, hasLinkedProjects]);
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
