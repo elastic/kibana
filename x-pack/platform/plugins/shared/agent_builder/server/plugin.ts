@@ -42,6 +42,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 
 export class AgentBuilderPlugin
   implements
@@ -78,11 +79,11 @@ export class AgentBuilderPlugin
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
       http: {
-        create: { requiredPrivileges: ['agentBuilder'] },
-        download: { requiredPrivileges: ['agentBuilder'] },
-        getById: { requiredPrivileges: ['agentBuilder'] },
-        list: { requiredPrivileges: ['agentBuilder'] },
-        delete: { requiredPrivileges: ['agentBuilder'] },
+        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
       },
     });
 
