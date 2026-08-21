@@ -299,7 +299,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
 
   return (
     <EuiFlyout
-      size="l"
+      size="m"
       aria-labelledby={headerId}
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
@@ -330,7 +330,9 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs">{badges}</EuiFlexGroup>
+                <EuiFlexGroup responsive wrap gutterSize="xs">
+                  {badges}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
