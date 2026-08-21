@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -32,22 +33,24 @@ export const createImageResolver = ({
   spaceId,
   logger,
 }: CreateImageResolverOptions): PromptImageResolver => {
-  const cache = new Map<string, { base64: string; mimeType: string } | null>();
+  const cache = new LRUCache<string, { value: { base64: string; mimeType: string } | null }>({
+    max: 32,
+  });
 
   return async ({ attachmentId, version }) => {
     const cacheKey = `${attachmentId}:${version ?? 'current'}`;
     if (cache.has(cacheKey)) {
-      return cache.get(cacheKey) ?? undefined;
+      return cache.get(cacheKey)?.value ?? undefined;
     }
     try {
       const snapshot = attachmentStateManager.get(attachmentId, { version });
       if (!snapshot) {
-        cache.set(cacheKey, null);
+        cache.set(cacheKey, { value: null });
         return undefined;
       }
       const definition = attachments.getTypeDefinition(snapshot.type);
       if (!definition) {
-        cache.set(cacheKey, null);
+        cache.set(cacheKey, { value: null });
         return undefined;
       }
       const formatted = await definition.format(
@@ -55,22 +58,22 @@ export const createImageResolver = ({
         { request, spaceId }
       );
       if (!formatted.getRepresentation) {
-        cache.set(cacheKey, null);
+        cache.set(cacheKey, { value: null });
         return undefined;
       }
       // Using the deprecated getRepresentation API - no alternative exists yet;
       const representation = await formatted.getRepresentation();
       if (representation.type !== 'image') {
-        cache.set(cacheKey, null);
+        cache.set(cacheKey, { value: null });
         return undefined;
       }
       const base64 = await representation.getBase64();
       const result = { base64, mimeType: representation.mimeType };
-      cache.set(cacheKey, result);
+      cache.set(cacheKey, { value: result });
       return result;
     } catch (e) {
       logger.debug(`imageResolver failed for attachment "${attachmentId}": ${e}`);
-      cache.set(cacheKey, null);
+      cache.set(cacheKey, { value: null });
       return undefined;
     }
   };
