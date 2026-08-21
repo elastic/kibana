@@ -19,7 +19,7 @@ You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}**
 
 Gmail connectors support the following authentication types:
 
-Elastic managed authentication (recommended, read-only)
+Elastic-managed authentication (recommended, read-only)
 :   Uses Elastic's managed Google OAuth integration. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type.
 
 OAuth 2.0 authorization code (required for write actions)
