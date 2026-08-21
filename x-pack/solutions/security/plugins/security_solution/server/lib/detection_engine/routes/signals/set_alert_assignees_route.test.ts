@@ -149,6 +149,7 @@ describe('setAlertAssigneesRoute', () => {
           alertIds: ['alert-1'],
           assigneesToAdd: ['user-1'],
           assigneesToRemove: [],
+          truncated: false,
         })
       );
     });

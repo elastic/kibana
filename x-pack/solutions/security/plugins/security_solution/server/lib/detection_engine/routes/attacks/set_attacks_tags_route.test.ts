@@ -347,6 +347,7 @@ describe('set attacks tags', () => {
           attackIds: ['attack1', 'attack2'],
           tagsToAdd: defaultTags.tags_to_add,
           tagsToRemove: defaultTags.tags_to_remove,
+          truncated: false,
         })
       );
       expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
@@ -363,11 +364,11 @@ describe('set attacks tags', () => {
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ attackIds: ['attack1'] })
+        expect.objectContaining({ attackIds: ['attack1'], truncated: false })
       );
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ alertIds: ['alertA'] })
+        expect.objectContaining({ alertIds: ['alertA'], truncated: false })
       );
     });
 

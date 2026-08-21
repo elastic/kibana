@@ -350,6 +350,7 @@ describe('set attacks assignees', () => {
           attackIds: ['attack1', 'attack2'],
           assigneesToAdd: ['user1'],
           assigneesToRemove: [],
+          truncated: false,
         })
       );
       expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
@@ -366,11 +367,11 @@ describe('set attacks assignees', () => {
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ attackIds: ['attack1'] })
+        expect.objectContaining({ attackIds: ['attack1'], truncated: false })
       );
       expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ alertIds: ['alertA'] })
+        expect.objectContaining({ alertIds: ['alertA'], truncated: false })
       );
     });
 

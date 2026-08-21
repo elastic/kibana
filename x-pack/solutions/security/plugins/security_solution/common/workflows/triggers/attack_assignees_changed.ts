@@ -15,6 +15,7 @@ import {
 } from './constants';
 import {
   ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
+  ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_TITLE,
@@ -45,6 +46,9 @@ const attackAssigneesChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
     .max(MAX_ASSIGNEES_PER_OPERATION)
     .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION }),
+  truncated: z
+    .boolean()
+    .meta({ description: ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
 });
 
 export const attackAssigneesChangedTriggerDef: CommonTriggerDefinition = {

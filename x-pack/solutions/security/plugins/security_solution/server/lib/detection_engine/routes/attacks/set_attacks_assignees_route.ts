@@ -100,6 +100,7 @@ export const setAttacksAssigneesRoute = (
                 attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
                 assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
               });
               return result;
             }
@@ -149,12 +150,14 @@ export const setAttacksAssigneesRoute = (
               attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
               assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
               assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+              truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
                 assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             return result;

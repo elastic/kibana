@@ -11,6 +11,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import type { Logger } from '@kbn/core/server';
 
 import { SetUnifiedAlertsAssigneesRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -25,10 +26,13 @@ import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
+import { fetchAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
+  logger: Logger,
   eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
@@ -62,13 +66,48 @@ export const setUnifiedAlertsAssigneesRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
+        const alertIds: string[] = [];
+        const attackIds: string[] = [];
+
+        if (eventBus) {
+          try {
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const idToIndex = await fetchAlertIdToIndex(esClient, index, ids);
+            for (const id of ids) {
+              const docIndex = idToIndex.get(id);
+              if (docIndex != null) {
+                if (isAttackDiscoveryIndex(docIndex)) {
+                  attackIds.push(id);
+                } else {
+                  alertIds.push(id);
+                }
+              }
+            }
+          } catch {
+            logger.warn('Failed to pre-fetch alert indices for workflow trigger (assignees)');
+          }
+        }
+
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
-          void eventBus?.emitAlertAssigneesChanged(request, {
-            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-            assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-          });
+          if (eventBus) {
+            if (attackIds.length > 0) {
+              void eventBus.emitAttackAssigneesChanged(request, {
+                attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
+            if (alertIds.length > 0) {
+              void eventBus.emitAlertAssigneesChanged(request, {
+                alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
+          }
           return result;
         });
       }

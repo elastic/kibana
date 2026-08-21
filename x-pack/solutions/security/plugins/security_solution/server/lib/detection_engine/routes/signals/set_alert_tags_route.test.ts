@@ -133,6 +133,7 @@ describe('setAlertTagsRoute', () => {
           alertIds: ['alert-1'],
           tagsToAdd: ['tag-add'],
           tagsToRemove: ['tag-remove'],
+          truncated: false,
         })
       );
     });

@@ -60,6 +60,27 @@ export const prefetchPreviousStatusesByIds = async (
   return { previousStatuses, idToIndex };
 };
 
+export const fetchAlertIdToIndex = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[]
+): Promise<Map<string, string>> => {
+  const searchResponse = await esClient.search({
+    index: resolveIndex(index),
+    query: { terms: { _id: ids } },
+    _source: false,
+    size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+    ignore_unavailable: true,
+  });
+  const idToIndex = new Map<string, string>();
+  for (const hit of searchResponse.hits.hits) {
+    if (hit._id != null && hit._index != null) {
+      idToIndex.set(hit._id, hit._index);
+    }
+  }
+  return idToIndex;
+};
+
 export const prefetchPreviousStatusesByQuery = async (
   esClient: ElasticsearchClient,
   index: string | string[],

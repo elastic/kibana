@@ -11,10 +11,6 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
-import {
-  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
-  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
-} from '@kbn/elastic-assistant-common';
 import type { Logger } from '@kbn/core/server';
 
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
@@ -30,17 +26,8 @@ import {
   prefetchPreviousStatusesByIds,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
-
-const isAttackDiscoveryIndex = (index: string): boolean => {
-  // ES returns the concrete backing index (`.internal.alerts-security.*`),
-  // not the read alias, so normalise the prefix before matching.
-  const normalized = index.startsWith('.internal.') ? index.replace('.internal.', '.') : index;
-  return (
-    normalized.startsWith(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX) ||
-    normalized.startsWith(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX)
-  );
-};
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,

@@ -74,6 +74,7 @@ export const setAlertTagsRoute = (
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
             tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
             tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+            truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
           });
           return result;
         });

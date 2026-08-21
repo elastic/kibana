@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
@@ -14,11 +16,26 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsTagsRoute } from './set_alert_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+
+const makeSearchResponse = (
+  hits: Array<{ _id: string; _index: string }>
+): estypes.SearchResponse<unknown> => ({
+  hits: {
+    total: { value: hits.length, relation: 'eq' },
+    max_score: null,
+    hits: hits.map((h) => ({ ...h, _score: null })),
+  },
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+});
 
 describe('set unified alerts tags', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,8 +45,9 @@ describe('set unified alerts tags', () => {
       getSuccessfulSignalUpdateResponse()
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
+    mockLogger = loggingSystemMock.createLogger();
 
-    setUnifiedAlertsTagsRoute(server.router, ruleDataClient);
+    setUnifiedAlertsTagsRoute(server.router, ruleDataClient, mockLogger);
   });
 
   afterEach(() => {
@@ -192,19 +210,26 @@ describe('set unified alerts tags', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertTagsChanged: jest.Mock };
+    let mockEventBus: { emitAlertTagsChanged: jest.Mock; emitAttackTagsChanged: jest.Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertTagsChanged: jest.fn() };
+      mockEventBus = { emitAlertTagsChanged: jest.fn(), emitAttackTagsChanged: jest.fn() };
       setUnifiedAlertsTagsRoute(
         server.router,
         ruleDataClient,
+        mockLogger,
         mockEventBus as unknown as SecuritySolutionEventBus
       );
     });
 
-    test('emits alertTagsChanged after a successful update', async () => {
+    test('emits alertTagsChanged for detection alert documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
@@ -221,7 +246,108 @@ describe('set unified alerts tags', () => {
           alertIds: ['alert-1', 'alert-2'],
           tagsToAdd: ['tag-add'],
           tagsToRemove: ['tag-remove'],
+          truncated: false,
         })
+      );
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackTagsChanged for attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['attack-1'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack-1'],
+          tagsToAdd: ['tag-add'],
+          tagsToRemove: [],
+          truncated: false,
+        })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackTagsChanged for adhoc attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'attack-1', _index: '.adhoc.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['attack-1'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'] })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits both events for a mixed batch of detection and attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'] })
+      );
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'] })
+      );
+    });
+
+    test('does not emit either event when prefetch throws', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+        new Error('ES error')
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to pre-fetch alert indices for workflow trigger (tags)')
       );
     });
 
@@ -237,6 +363,28 @@ describe('set unified alerts tags', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('sets truncated: true when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: oversizedIds,
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ truncated: true })
+      );
     });
   });
 });

@@ -70,6 +70,7 @@ export const setAlertAssigneesRoute = (
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
             assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
             assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+            truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
           });
           return result;
         });

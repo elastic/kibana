@@ -11,6 +11,7 @@ import { requestContextMock } from '../../__mocks__';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/triggers';
 import {
   extractWorkflowStatus,
+  fetchAlertIdToIndex,
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
 } from './prefetch_previous_statuses';
@@ -398,5 +399,66 @@ describe('prefetchPreviousStatusesByQuery', () => {
 
     const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
+  });
+});
+
+describe('fetchAlertIdToIndex', () => {
+  let context: SecuritySolutionRequestHandlerContextMock;
+  let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
+
+  const makeIdToIndexResponse = (hits: Array<{ _id: string; _index: string }>) => ({
+    hits: {
+      total: { value: hits.length, relation: 'eq' },
+      hits: hits.map((h) => ({ _id: h._id, _index: h._index })),
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ context } = requestContextMock.createTools());
+    esClient = context.core.elasticsearch.client.asCurrentUser;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(makeIdToIndexResponse([]) as any);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it('returns an empty map when no hits are returned', async () => {
+    const result = await fetchAlertIdToIndex(esClient, 'index', []);
+    expect(result.size).toBe(0);
+  });
+
+  it('maps each hit _id to its _index', async () => {
+    const response = makeIdToIndexResponse([
+      { _id: 'id-1', _index: '.alerts-security.alerts-default' },
+      { _id: 'id-2', _index: '.internal.alerts-security.alerts-default-000001' },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(response as any);
+    const result = await fetchAlertIdToIndex(esClient, 'index', ['id-1', 'id-2']);
+    expect(result.get('id-1')).toBe('.alerts-security.alerts-default');
+    expect(result.get('id-2')).toBe('.internal.alerts-security.alerts-default-000001');
+  });
+
+  it('calls search with _source: false and ignore_unavailable: true', async () => {
+    await fetchAlertIdToIndex(esClient, 'my-index', ['id-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: false, ignore_unavailable: true })
+    );
+  });
+
+  it('passes a terms._id query for the provided ids', async () => {
+    await fetchAlertIdToIndex(esClient, 'my-index', ['a', 'b']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { terms: { _id: ['a', 'b'] } } })
+    );
+  });
+
+  it('joins an array index with commas before calling search', async () => {
+    await fetchAlertIdToIndex(esClient, ['idx-a', 'idx-b'], ['id-1']);
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'idx-a,idx-b' }));
   });
 });

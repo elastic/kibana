@@ -63,11 +63,21 @@ export const ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.translate(
   { defaultMessage: 'IDs of the affected alerts.' }
 );
 
+export const ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.alertTagsChanged.schema.truncated',
+  { defaultMessage: 'True if the number of affected alerts exceeded the capture limit.' }
+);
+
 // Alert assignees changed
 
 export const ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.schema.alertIds',
   { defaultMessage: 'IDs of the affected alerts.' }
+);
+
+export const ALERT_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.schema.truncated',
+  { defaultMessage: 'True if the number of affected alerts exceeded the capture limit.' }
 );
 
 // Attack status changed
@@ -94,11 +104,21 @@ export const ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION = i18n.translate(
   { defaultMessage: 'IDs of the affected attack discoveries.' }
 );
 
+export const ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.attackTagsChanged.schema.truncated',
+  { defaultMessage: 'True if the number of affected attacks exceeded the capture limit.' }
+);
+
 // Attack assignees changed
 
 export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.schema.attackIds',
   { defaultMessage: 'IDs of the affected attack discoveries.' }
+);
+
+export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.schema.truncated',
+  { defaultMessage: 'True if the number of affected attacks exceeded the capture limit.' }
 );
 
 // Note created

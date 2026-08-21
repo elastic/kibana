@@ -15,6 +15,7 @@ import {
 } from './constants';
 import {
   ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
+  ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
   ALERT_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ALERT_TAGS_CHANGED_TRIGGER_TITLE,
@@ -45,6 +46,7 @@ const alertTagsChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
     .max(MAX_TAGS_PER_OPERATION)
     .meta({ description: TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION }),
+  truncated: z.boolean().meta({ description: ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
 });
 
 export const alertTagsChangedTriggerDef: CommonTriggerDefinition = {

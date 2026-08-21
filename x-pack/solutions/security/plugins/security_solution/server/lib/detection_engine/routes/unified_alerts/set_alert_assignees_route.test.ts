@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
@@ -14,11 +16,26 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsAssigneesRoute } from './set_alert_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+
+const makeSearchResponse = (
+  hits: Array<{ _id: string; _index: string }>
+): estypes.SearchResponse<unknown> => ({
+  hits: {
+    total: { value: hits.length, relation: 'eq' },
+    max_score: null,
+    hits: hits.map((h) => ({ ...h, _score: null })),
+  },
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+});
 
 describe('set unified alerts assignees', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,8 +45,9 @@ describe('set unified alerts assignees', () => {
       getSuccessfulSignalUpdateResponse()
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
+    mockLogger = loggingSystemMock.createLogger();
 
-    setUnifiedAlertsAssigneesRoute(server.router, ruleDataClient);
+    setUnifiedAlertsAssigneesRoute(server.router, ruleDataClient, mockLogger);
   });
 
   afterEach(() => {
@@ -175,19 +193,32 @@ describe('set unified alerts assignees', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertAssigneesChanged: jest.Mock };
+    let mockEventBus: {
+      emitAlertAssigneesChanged: jest.Mock;
+      emitAttackAssigneesChanged: jest.Mock;
+    };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertAssigneesChanged: jest.fn() };
+      mockEventBus = {
+        emitAlertAssigneesChanged: jest.fn(),
+        emitAttackAssigneesChanged: jest.fn(),
+      };
       setUnifiedAlertsAssigneesRoute(
         server.router,
         ruleDataClient,
+        mockLogger,
         mockEventBus as unknown as SecuritySolutionEventBus
       );
     });
 
-    test('emits alertAssigneesChanged after a successful update', async () => {
+    test('emits alertAssigneesChanged for detection alert documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
@@ -204,7 +235,87 @@ describe('set unified alerts assignees', () => {
           alertIds: ['alert-1', 'alert-2'],
           assigneesToAdd: ['user-1'],
           assigneesToRemove: [],
+          truncated: false,
         })
+      );
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackAssigneesChanged for attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['attack-1'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack-1'],
+          assigneesToAdd: ['user-1'],
+          assigneesToRemove: [],
+          truncated: false,
+        })
+      );
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits both events for a mixed batch of detection and attack discovery documents', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'] })
+      );
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'] })
+      );
+    });
+
+    test('does not emit either event when prefetch throws', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+        new Error('ES error')
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to pre-fetch alert indices for workflow trigger (assignees)'
+        )
       );
     });
 
@@ -220,6 +331,28 @@ describe('set unified alerts assignees', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('sets truncated: true when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: oversizedIds,
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ truncated: true })
+      );
     });
   });
 });

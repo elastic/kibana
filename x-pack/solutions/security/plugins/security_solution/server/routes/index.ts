@@ -128,8 +128,8 @@ export const initRoutes = (
   // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
   searchUnifiedAlertsRoute(router, ruleDataClient);
   setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient, logger, eventBus);
-  setUnifiedAlertsTagsRoute(router, ruleDataClient, eventBus);
-  setUnifiedAlertsAssigneesRoute(router, ruleDataClient, eventBus);
+  setUnifiedAlertsTagsRoute(router, ruleDataClient, logger, eventBus);
+  setUnifiedAlertsAssigneesRoute(router, ruleDataClient, logger, eventBus);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
