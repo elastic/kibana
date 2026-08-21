@@ -148,12 +148,16 @@ export const createCustomContentTemplateResolver = ({
       const promptPrefix = prompt ? `${prompt}\n\n` : '';
       let schemaSection: string;
       if (columns.length > 0) {
-        const schemaLines = columns.map((c) => `  - ${c.name} (${c.type})`).join('\n');
+        const schemaLines = columns
+          .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
+          .join('\n');
         const sampleSection =
           values.length > 0
             ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
             : '\n\nNote: no rows available for the current time range.';
-        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${columns[0].name}"].value.`;
+        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
+          columns[0].name
+        )}"].value.`;
       } else {
         schemaSection =
           'Note: schema unavailable. Generate a suitable template for this ES|QL query.';

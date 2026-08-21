@@ -57,6 +57,14 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
   });
 
+  it('does not flash the time picker hint while detection is still pending', () => {
+    mockGetESQLTimeField.mockReturnValue(new Promise(() => {}));
+
+    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+
+    expect(screen.queryByText(/connect to the dashboard time picker/i)).not.toBeInTheDocument();
+  });
+
   it('does not show the time picker hint on mount when a time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue('@timestamp');
 

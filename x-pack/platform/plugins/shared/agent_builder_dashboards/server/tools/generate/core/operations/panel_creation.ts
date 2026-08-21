@@ -265,16 +265,19 @@ export const mergeAndResolveCustomContentEdit = async (
   resolveTemplate: ResolveCustomContentTemplate
 ): Promise<CustomContentState> => {
   const mergedPrompt = editConfig.prompt ?? existing.prompt ?? '';
-  const mergedEsqlQuery =
-    editConfig.esqlQuery === undefined
-      ? existing.esqlQuery
-      : editConfig.esqlQuery === null
-      ? undefined
-      : editConfig.esqlQuery;
+  const isQueryChanging = editConfig.esqlQuery !== undefined;
+  const mergedEsqlQuery = !isQueryChanging
+    ? existing.esqlQuery
+    : editConfig.esqlQuery === null
+    ? undefined
+    : editConfig.esqlQuery;
+  // An unchanged query is passed as `hasExistingQuery` rather than `esqlQuery` so the resolver
+  // refines the existing template instead of re-sampling data that did not change.
   const template = await resolveTemplate({
     prompt: mergedPrompt,
-    esqlQuery: mergedEsqlQuery,
+    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
+    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
   return { prompt: mergedPrompt, esqlQuery: mergedEsqlQuery, template };
 };

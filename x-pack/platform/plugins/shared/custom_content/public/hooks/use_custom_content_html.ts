@@ -58,15 +58,17 @@ export function useCustomContentHtml({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const trimmedTemplate = savedTemplate?.trim() || undefined;
+
   useEffect(() => {
-    if (savedTemplate && !esqlQuery) {
-      setProcessedHtml(sanitizeHtml(stripMarkdownFences(savedTemplate)));
+    if (trimmedTemplate && !esqlQuery) {
+      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate)));
       setIsLoading(false);
       setError(undefined);
       return;
     }
 
-    if (savedTemplate && esqlQuery) {
+    if (trimmedTemplate && esqlQuery) {
       const controller = new AbortController();
       const { core, search } = getServices();
       const fetchOptions = {
@@ -76,7 +78,7 @@ export function useCustomContentHtml({
         filters,
         esQueryConfig: getEsQueryConfig(core.uiSettings),
       };
-      const template = stripMarkdownFences(savedTemplate);
+      const template = stripMarkdownFences(trimmedTemplate);
 
       setIsLoading(true);
       setError(undefined);
@@ -103,7 +105,7 @@ export function useCustomContentHtml({
     embeddableId,
     esqlQuery,
     generationVersion,
-    savedTemplate,
+    trimmedTemplate,
     timeRange,
     isApproximate,
     projectRouting,
@@ -116,5 +118,5 @@ export function useCustomContentHtml({
     [processedHtml, colorMode, euiTheme]
   );
 
-  return { html, isLoading, error, noContent: !savedTemplate };
+  return { html, isLoading, error, noContent: !trimmedTemplate };
 }

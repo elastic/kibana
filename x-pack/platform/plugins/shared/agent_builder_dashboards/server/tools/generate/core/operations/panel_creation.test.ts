@@ -133,21 +133,27 @@ describe('mergeAndResolveCustomContentEdit', () => {
   });
 
   it('falls back to existing.prompt when editConfig.prompt is undefined', async () => {
-    await mergeAndResolveCustomContentEdit({}, { prompt: 'Old prompt' }, resolveTemplate);
+    const result = await mergeAndResolveCustomContentEdit(
+      {},
+      { prompt: 'Old prompt' },
+      resolveTemplate
+    );
 
     expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ prompt: 'Old prompt' }));
+    expect(result.prompt).toBe('Old prompt');
   });
 
-  it('keeps existing esqlQuery when editConfig.esqlQuery is undefined', async () => {
-    await mergeAndResolveCustomContentEdit(
+  it('keeps the existing esqlQuery in the result without re-sampling it', async () => {
+    const result = await mergeAndResolveCustomContentEdit(
       { prompt: 'Updated' },
       { prompt: 'Old', esqlQuery: 'FROM logs-*' },
       resolveTemplate
     );
 
     expect(resolveTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({ esqlQuery: 'FROM logs-*' })
+      expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
     );
+    expect(result.esqlQuery).toBe('FROM logs-*');
   });
 
   it('clears esqlQuery when editConfig.esqlQuery is null', async () => {
@@ -160,7 +166,7 @@ describe('mergeAndResolveCustomContentEdit', () => {
     expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlQuery: undefined }));
   });
 
-  it('uses the new esqlQuery when editConfig.esqlQuery is a string', async () => {
+  it('uses the new esqlQuery and samples it when editConfig.esqlQuery is a string', async () => {
     await mergeAndResolveCustomContentEdit(
       { esqlQuery: 'FROM metrics-*' },
       { prompt: 'Old', esqlQuery: 'FROM logs-*' },
@@ -168,7 +174,7 @@ describe('mergeAndResolveCustomContentEdit', () => {
     );
 
     expect(resolveTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({ esqlQuery: 'FROM metrics-*' })
+      expect.objectContaining({ esqlQuery: 'FROM metrics-*', hasExistingQuery: false })
     );
   });
 

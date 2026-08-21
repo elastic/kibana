@@ -1773,6 +1773,7 @@ describe('executeDashboardOperations', () => {
         prompt: 'updated prompt',
         esqlQuery: undefined,
         existingTemplate: '<div>Old template</div>',
+        hasExistingQuery: false,
       });
       expect(result.failures).toEqual([]);
 

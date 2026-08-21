@@ -94,6 +94,25 @@ describe('useCustomContentHtml', () => {
       expect(result.current.noContent).toBe(true);
     });
 
+    it('treats a whitespace-only template as no content rather than rendering a blank panel', () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...baseParams, savedTemplate: '   \n  ' })
+      );
+      expect(result.current.noContent).toBe(true);
+      expect(result.current.html).toBe('');
+    });
+
+    it('does not fetch ES|QL for a whitespace-only template', () => {
+      renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: '   ',
+          esqlQuery: 'FROM logs | LIMIT 10',
+        })
+      );
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+    });
+
     it('clears a stale error and html when savedTemplate transitions to undefined', async () => {
       mockFetchEsqlData.mockRejectedValueOnce(new Error('index not found'));
 
