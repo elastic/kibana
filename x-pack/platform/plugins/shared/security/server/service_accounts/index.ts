@@ -12,4 +12,7 @@ export { buildAssumableBy } from './assumable_by';
 export { EsServiceAccounts } from './es_service_accounts';
 export { UiamServiceAccounts } from './uiam_service_accounts';
 export { ServiceAccountFakeRequests } from './fake_requests';
-export type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+export type {
+  CreateServiceAccountFakeRequestParams,
+  ServiceAccountMintInterceptor,
+} from './fake_requests';

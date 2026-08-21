@@ -196,6 +196,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     return await this.fakeRequests.create(params);
   }
 
+  releaseFakeRequest(request: KibanaRequest): void {
+    this.fakeRequests.release(request);
+  }
+
   async getLoopbackAuthHeaders(serviceAccountId: string): Promise<Record<string, string>> {
     const { token } = await this.exchangeToken(serviceAccountId);
 

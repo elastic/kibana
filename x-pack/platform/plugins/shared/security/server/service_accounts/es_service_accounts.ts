@@ -44,4 +44,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   async reauthenticateFakeRequest(): Promise<{ authorization: string } | null> {
     return null;
   }
+
+  // Nothing is ever registered by this backend, so there is nothing to release.
+  releaseFakeRequest(): void {}
 }

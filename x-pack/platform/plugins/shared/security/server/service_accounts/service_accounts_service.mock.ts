@@ -28,5 +28,6 @@ export const serviceAccountsServiceMock = {
       authorization: 'Bearer essu_mock-service-account-token',
     }),
     reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+    releaseFakeRequest: jest.fn(),
   }),
 };
