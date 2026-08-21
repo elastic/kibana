@@ -98,7 +98,7 @@ function VarField({
         ]
       : null;
   const varDef = ECF_TRIGGER_VARS.has(fieldName)
-    ? { ...meta.def, description: undefined, multi: true }
+    ? { ...meta.def, description: undefined, multi: true, required: true }
     : meta.def;
   return (
     <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
