@@ -77,7 +77,13 @@ export const applyGrouping = ({
     const groupConfig = INTEGRATION_GROUPS[groupId];
 
     const memberCards = representativeItems.map((item) => ({
-      ...mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId }),
+      ...mapToCard({
+        getAbsolutePath,
+        getHref,
+        item,
+        addBasePath,
+        packageVerificationKeyId,
+      }),
       fromCollection: { groupId, title: groupConfig.title },
     }));
 

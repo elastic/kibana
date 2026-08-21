@@ -80,15 +80,6 @@ const buildServices = ({
     observability: { config: { managedOtlpServiceUrl: '' } },
     cloud: undefined,
     context: { isServerless, isCloud: false, isDev: false },
-    share: {
-      url: {
-        locators: {
-          get: jest.fn(() => ({
-            getRedirectUrl: jest.fn(() => '/app/synthetics/add-monitor'),
-          })),
-        },
-      },
-    },
   };
 };
 
@@ -227,9 +218,15 @@ describe('useObservabilityCuratedCategories', () => {
     );
     const tiles = result.current.flatMap((category) => category.tiles);
     const hrefById = Object.fromEntries(tiles.map((tile) => [tile.id, tile.href]));
-    expect(hrefById.opentelemetry).toBe('/app/apm/tutorial');
-    expect(hrefById.apm).toBe('/app/apm/tutorial');
-    expect(hrefById.synthetic_monitor).toBe('/app/synthetics/add-monitor');
+    expect(hrefById.opentelemetry).toBe(
+      '/app/apm/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.apm).toBe(
+      '/app/apm/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.synthetic_monitor).toBe(
+      '/app/synthetics/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
   });
 
   it('prefers the OTel quickstart and APM onboarding on serverless', () => {
@@ -305,8 +302,12 @@ describe('useObservabilityMiniTiles', () => {
       }
     );
     const hrefById = Object.fromEntries(result.current.map((tile) => [tile.id, tile.href]));
-    expect(hrefById.auto_import).toBe('/app/integrations/create');
-    expect(hrefById.upload_file).toBe('/app/home#/tutorial_directory/fileDataViz');
+    expect(hrefById.auto_import).toBe(
+      '/app/integrations/create?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
+    expect(hrefById.upload_file).toBe(
+      '/app/home#/tutorial_directory/fileDataViz?returnAppId=observabilityOnboarding&returnPath=%3F'
+    );
   });
 
   it('leaves no mini tile without a destination', () => {

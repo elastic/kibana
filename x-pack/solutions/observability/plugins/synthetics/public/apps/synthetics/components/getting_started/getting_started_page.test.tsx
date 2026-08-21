@@ -61,7 +61,7 @@ describe('GettingStartedPage', () => {
   });
 
   it('serves on prem getting started experience when locations are not available', () => {
-    const { getByText } = render(<GettingStartedPage />, {
+    const { getByText, queryByText } = render(<GettingStartedPage />, {
       state: {
         serviceLocations: {
           locations: [],
@@ -73,7 +73,31 @@ describe('GettingStartedPage', () => {
 
     // page is loaded
     expect(getByText('Get started with synthetic monitoring')).toBeInTheDocument();
+    expect(queryByText('Back to selection')).not.toBeInTheDocument();
   });
+
+  it('shows Back to selection when arriving from Add Data', () => {
+    const { getByRole } = render(<GettingStartedPage />, {
+      url: '/monitors/getting-started?returnAppId=observabilityOnboarding&returnPath=%3F',
+      core: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path ?? ''}`,
+        },
+      },
+      state: {
+        serviceLocations: {
+          locations: [],
+          locationsLoaded: true,
+          loading: false,
+        },
+      },
+    });
+
+    const link = getByRole('link', { name: 'Back to selection' });
+    expect(link).toHaveAttribute('href', '/app/observabilityOnboarding?');
+  });
+
 
   it('shows need agent flyout when isAddingNewPrivateLocation is true and agentPolicies.length === 0', async () => {
     jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({

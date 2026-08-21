@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-function TutorialRedirect() {
+export function TutorialRedirect() {
+  const { search } = useLocation();
   const {
     config: { serverlessOnboarding },
     core: {
@@ -23,7 +25,7 @@ function TutorialRedirect() {
     });
   } else {
     navigateToApp('home', {
-      path: '#/tutorial/apm',
+      path: `#/tutorial/apm${search}`,
       replace: true,
     });
   }

@@ -9,13 +9,13 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../../../../../hooks';
+import { useStartServices } from '../../../../../hooks';
 
 import { BackLink } from './back_link';
 
-jest.mock('../../../../../../../hooks', () => {
+jest.mock('../../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../../../../../hooks'),
+    ...jest.requireActual('../../../../../hooks'),
     useStartServices: jest.fn().mockReturnValue({
       application: { navigateToApp: jest.fn() },
     }),

@@ -589,4 +589,27 @@ describe('useAddUrlFilters', () => {
       search: expect.stringContaining('showContent=true'),
     });
   });
+
+  it('keeps returnAppId and returnPath when updating filters', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: {
+        returnAppId: 'observabilityOnboarding',
+        returnPath: '?',
+      },
+      toUrlParams: mockToUrlParams,
+    });
+
+    const { result } = renderHook(() => useAddUrlFilters());
+
+    act(() => {
+      result.current({ q: 'nginx' });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: expect.stringContaining('returnAppId=observabilityOnboarding'),
+    });
+    expect(mockPush).toHaveBeenCalledWith({
+      search: expect.stringContaining('returnPath'),
+    });
+  });
 });

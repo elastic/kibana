@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorAddPage } from './monitor_add_page';
 import * as useCloneMonitorModule from './hooks/use_clone_monitor';
@@ -86,6 +87,38 @@ describe('MonitorAddPage', () => {
     });
 
     expect(history.location.pathname).toBe(GETTING_STARTED_ROUTE);
+    useCloneMonitorSpy.mockRestore();
+  });
+
+  it('preserves return params when redirecting to getting started', async () => {
+    const useCloneMonitorSpy = jest
+      .spyOn(useCloneMonitorModule, 'useCloneMonitor')
+      .mockReturnValue({
+        data: undefined,
+        status: 'success' as any,
+        loading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      });
+    const history = createMemoryHistory({
+      initialEntries: ['/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'],
+    });
+
+    act(() => {
+      render(<MonitorAddPage />, {
+        history,
+        state: {
+          serviceLocations: {
+            locations: [],
+            locationsLoaded: true,
+            loading: false,
+          },
+        },
+      });
+    });
+
+    expect(history.location.pathname).toBe(GETTING_STARTED_ROUTE);
+    expect(history.location.search).toBe('?returnAppId=observabilityOnboarding&returnPath=%3F');
     useCloneMonitorSpy.mockRestore();
   });
 
