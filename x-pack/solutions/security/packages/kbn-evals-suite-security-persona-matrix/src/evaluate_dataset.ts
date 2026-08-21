@@ -347,7 +347,12 @@ export function createEvaluatePersonaMatrixDataset({
           // result and correctnessAnalysis() is invoked exactly once per
           // example (was: once here + once again as a registered evaluator).
           const expected = example.output as PersonaMatrixDatasetExpected;
-          const [correctnessResult, groundednessResult] = await Promise.all([
+
+          // The judges already retry internally; if they still fail, degrade this
+          // example's qualitative scores to "unavailable" (the quantitative
+          // evaluators handle a missing analysis) rather than discarding the
+          // agent's real trajectory, which the deterministic evaluators can score.
+          const [correctnessSettled, groundednessSettled] = await Promise.allSettled([
             withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
               evaluators.correctnessAnalysis().evaluate({
                 input,
@@ -365,6 +370,25 @@ export function createEvaluatePersonaMatrixDataset({
               })
             ),
           ]);
+
+          for (const [name, settled] of [
+            ['CorrectnessAnalysis', correctnessSettled],
+            ['GroundednessAnalysis', groundednessSettled],
+          ] as const) {
+            if (settled.status === 'rejected') {
+              const reason = settled.reason;
+              log.error(
+                `[persona-matrix] ${name} failed for example "${example.id ?? question}": ${
+                  reason instanceof Error ? reason.message : String(reason)
+                }`
+              );
+            }
+          }
+
+          const correctnessResult =
+            correctnessSettled.status === 'fulfilled' ? correctnessSettled.value : undefined;
+          const groundednessResult =
+            groundednessSettled.status === 'fulfilled' ? groundednessSettled.value : undefined;
 
           return {
             ...(taskOutput as object),

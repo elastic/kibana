@@ -7,14 +7,16 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { TaskOutput } from '@kbn/evals';
+import type { DefaultEvaluators, EvalsExecutorClient, TaskOutput } from '@kbn/evals';
 import {
   toDatasetExample,
+  createEvaluatePersonaMatrixDataset,
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
+import type { PersonaMatrixChatClient } from './chat_client';
 import {
   PERSONA_MATRIX_EXAMPLES,
   type PersonaMatrixExample,
@@ -327,5 +329,64 @@ describe('task output shape', () => {
     const messages = (taskOutput as { messages?: Array<{ message?: string }> }).messages ?? [];
     const latestMessage = messages[messages.length - 1]?.message;
     expect(latestMessage).toBe('the real answer');
+  });
+});
+
+describe('task judge failure isolation', () => {
+  it('keeps the trajectory and degrades qualitative scores when a judge call rejects', async () => {
+    // Regression guard for the determinism-sweep suite deaths: a single judge
+    // call failing (e.g. inference 500 toolValidationError) must not throw out
+    // of the task and take down all remaining examples.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: 'the real answer' }],
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: jest.fn(),
+        correctnessAnalysis: () => ({
+          evaluate: jest.fn().mockRejectedValue(new Error('toolValidationError')),
+        }),
+        groundednessAnalysis: () => ({
+          evaluate: jest.fn().mockResolvedValue({ metadata: { verdict: 'grounded' } }),
+        }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    expect(capturedTask).toBeDefined();
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+
+    // The failed judge degrades to an absent analysis (quantitative evaluators
+    // then report "unavailable"); the successful judge and the agent's real
+    // trajectory are preserved.
+    expect(output.correctnessAnalysis).toBeUndefined();
+    expect(output.groundednessAnalysis).toEqual({ verdict: 'grounded' });
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe('the real answer');
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('CorrectnessAnalysis failed'));
+    expect((log.error as jest.Mock).mock.calls.flat().join(' ')).toContain('toolValidationError');
   });
 });
