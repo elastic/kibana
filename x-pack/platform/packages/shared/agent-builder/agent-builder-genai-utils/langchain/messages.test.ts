@@ -9,7 +9,7 @@ import type { ToolMessage } from '@langchain/core/messages';
 
 import {
   createToolResultMessage,
-  createUserImageMessage,
+  createUserMessage,
   extractToolReturn,
   wrapToolResultContent,
 } from './messages';
@@ -108,15 +108,21 @@ describe('wrapToolResultContent', () => {
   });
 });
 
-describe('createUserImageMessage', () => {
-  it('creates a HumanMessage with only a text part when there are no images', () => {
-    const message = createUserImageMessage({ text: 'hello', images: [] });
-    expect(message.content).toEqual([{ type: 'text', text: 'hello' }]);
+describe('createUserMessage with images', () => {
+  it('produces plain string content when called without images', () => {
+    const message = createUserMessage('hi');
+    expect(typeof message.content).toBe('string');
+    expect(message.content).toBe('hi');
+  });
+
+  it('produces plain string content when called with an empty images array', () => {
+    const message = createUserMessage('hi', { images: [] });
+    expect(typeof message.content).toBe('string');
+    expect(message.content).toBe('hi');
   });
 
   it('creates a HumanMessage with a single image_url part in the correct data URL shape', () => {
-    const message = createUserImageMessage({
-      text: 'hello',
+    const message = createUserMessage('hello', {
       images: [{ base64: 'AAA', mimeType: 'image/png' }],
     });
     expect(message.content).toEqual([
@@ -126,8 +132,7 @@ describe('createUserImageMessage', () => {
   });
 
   it('creates a HumanMessage with multiple image_url parts, one per image', () => {
-    const message = createUserImageMessage({
-      text: 'hello',
+    const message = createUserMessage('hello', {
       images: [
         { base64: 'AAA', mimeType: 'image/png' },
         { base64: 'BBB', mimeType: 'image/jpeg' },

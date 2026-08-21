@@ -11,7 +11,6 @@ import {
   createAIMessage,
   createToolResultMessage,
   createToolCallMessage,
-  createUserImageMessage,
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -245,8 +244,7 @@ const injectImageMessages = async (
       .join('\n');
 
     formatted.push(
-      createUserImageMessage({
-        text: textParts,
+      createUserMessage(textParts, {
         images: succeeded.map((s) => ({ base64: s.base64, mimeType: s.mimeType })),
       })
     );

@@ -108,34 +108,24 @@ export const generateFakeToolCallId = () => {
 
 export const createUserMessage = (
   content: string,
-  { clean = false }: { clean?: boolean } = {}
+  {
+    clean = false,
+    images,
+  }: { clean?: boolean; images?: Array<{ base64: string; mimeType: string }> } = {}
 ): HumanMessage => {
-  return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
-};
-
-/**
- * Creates a HumanMessage carrying both a text part and one or more image_url parts.
- * Used by the prompt builder to inject images as visual input after an attachment_read tool result.
- *
- * createUserMessage is string-only with many call sites — adding multimodal content
- * here rather than widening its param keeps callers stable.
- */
-export const createUserImageMessage = ({
-  text,
-  images,
-}: {
-  text: string;
-  images: Array<{ base64: string; mimeType: string }>;
-}): HumanMessage => {
-  return new HumanMessage({
-    content: [
-      { type: 'text', text },
-      ...images.map((i) => ({
-        type: 'image_url' as const,
-        image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
-      })),
-    ],
-  });
+  const text = clean ? cleanPrompt(content) : content;
+  if (images && images.length > 0) {
+    return new HumanMessage({
+      content: [
+        { type: 'text', text },
+        ...images.map((i) => ({
+          type: 'image_url' as const,
+          image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
+        })),
+      ],
+    });
+  }
+  return new HumanMessage({ content: text });
 };
 
 export const createAIMessage = (
