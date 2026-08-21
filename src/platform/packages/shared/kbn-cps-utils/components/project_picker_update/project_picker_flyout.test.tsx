@@ -208,9 +208,7 @@ describe('ProjectPickerFlyoutContent', () => {
     await user.click(
       screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectOne._id))
     );
-    await user.click(
-      screen.getByTestId(getProjectPickerListItemSwitchTestSubj(linkedProjectTwo._id))
-    );
+    await user.click(screen.getByTestId(getProjectPickerListItemSwitchTestSubj(originProject._id)));
 
     await waitFor(() => {
       expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeEnabled();
@@ -218,7 +216,7 @@ describe('ProjectPickerFlyoutContent', () => {
 
     await user.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onApplyChanges).toHaveBeenCalledWith('_id:origin');
+    expect(onApplyChanges).toHaveBeenCalledWith(`_alias:* AND _id:${linkedProjectTwo._id}`);
   });
 
   it('disables Discard and Apply after round-tripping back to the baseline selection', async () => {
