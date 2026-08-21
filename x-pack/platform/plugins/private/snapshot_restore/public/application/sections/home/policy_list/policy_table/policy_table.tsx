@@ -371,7 +371,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
-        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

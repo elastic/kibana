@@ -455,7 +455,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="success"
                 iconType="refresh"
                 onClick={reload}
                 data-test-subj="reloadButton"
