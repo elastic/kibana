@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, distinctUntilChanged } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -76,7 +77,10 @@ export function initializeUnsavedChangesManager({
   ]).pipe(
     map(([settings, unifiedSearch, layout, projectRouting]) => {
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
-    })
+    }),
+    // the comparators above re-emit identical diffs with new object identities; only emit
+    // when the content actually changed so subscribers (e.g. top nav menu items) stay stable
+    distinctUntilChanged(deepEqual)
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
