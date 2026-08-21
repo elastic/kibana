@@ -16,7 +16,6 @@ import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers'
 
 export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) => {
   const options = parseServerFlags(flagsReader);
-  process.env.KBN_HMR ??= 'false';
 
   if (options.logsDir) {
     await initLogsDir(log, options.logsDir);

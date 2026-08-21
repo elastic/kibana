@@ -25,12 +25,8 @@ jest.mock('../servers', () => ({
 describe('runStartServer', () => {
   let flagsReader: jest.Mocked<FlagsReader>;
   let log: jest.Mocked<ToolingLog>;
-  let originalKbnHmr: string | undefined;
 
   beforeEach(() => {
-    originalKbnHmr = process.env.KBN_HMR;
-    delete process.env.KBN_HMR;
-
     flagsReader = {
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
@@ -41,15 +37,6 @@ describe('runStartServer', () => {
       error: jest.fn(),
       warn: jest.fn(),
     } as any;
-  });
-
-  afterEach(() => {
-    if (originalKbnHmr === undefined) {
-      delete process.env.KBN_HMR;
-      return;
-    }
-
-    process.env.KBN_HMR = originalKbnHmr;
   });
 
   it('calls parseServerFlags with the correct flagsReader', async () => {
@@ -65,19 +52,5 @@ describe('runStartServer', () => {
   it('starts the servers with the correct options', async () => {
     await runStartServer(flagsReader, log);
     expect(startServers).toHaveBeenCalledWith(log, { logsDir: 'path/to/logs/directory' });
-  });
-
-  it('disables Rspack HMR by default', async () => {
-    await runStartServer(flagsReader, log);
-
-    expect(process.env.KBN_HMR).toBe('false');
-  });
-
-  it('preserves an explicit Rspack HMR setting', async () => {
-    process.env.KBN_HMR = 'true';
-
-    await runStartServer(flagsReader, log);
-
-    expect(process.env.KBN_HMR).toBe('true');
   });
 });
