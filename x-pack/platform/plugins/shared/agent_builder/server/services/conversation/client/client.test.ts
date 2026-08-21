@@ -473,9 +473,7 @@ describe('ConversationClient', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              filter: expect.arrayContaining([
-                { bool: { must_not: { term: { pinned: true } } } },
-              ]),
+              filter: expect.arrayContaining([{ bool: { must_not: { term: { pinned: true } } } }]),
             }),
           }),
         })
