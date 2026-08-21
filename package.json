@@ -2268,7 +2268,7 @@
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.0",
     "vscode-languageserver-textdocument": "1.0.12",
-    "watchpack": "1.7.5",
+    "watchpack": "2.4.4",
     "web-streams-polyfill": "4.3.0",
     "webpack": "5.96.1",
     "webpack-bundle-analyzer": "4.10.2",
