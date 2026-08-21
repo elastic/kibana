@@ -21,12 +21,17 @@ const makeServer = () => {
   const getUnsafeInternalClient = jest.fn(() => unsafeClient);
   const fleetBulkCreate = jest.fn().mockResolvedValue({ created: [], failed: [] });
   const fleetGetByIDs = jest.fn().mockResolvedValue([]);
+  const fleetDelete = jest.fn().mockResolvedValue([]);
   const getByIds = jest.fn();
 
   const server = {
     logger: loggerMock.create(),
     fleet: {
-      packagePolicyService: { bulkCreate: fleetBulkCreate, getByIDs: fleetGetByIDs },
+      packagePolicyService: {
+        bulkCreate: fleetBulkCreate,
+        getByIDs: fleetGetByIDs,
+        delete: fleetDelete,
+      },
       agentPolicyService: { getByIds },
     },
     coreStart: {
@@ -42,6 +47,7 @@ const makeServer = () => {
     getUnsafeInternalClient,
     fleetBulkCreate,
     fleetGetByIDs,
+    fleetDelete,
     getByIds,
   };
 };
@@ -140,6 +146,27 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
 
     expect(getByIds).not.toHaveBeenCalled();
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
+  });
+});
+
+describe('PackagePolicyService.bulkDelete', () => {
+  it('still deletes an orphaned package policy whose policy_ids is an empty array', async () => {
+    const { server, fleetGetByIDs, fleetDelete, getByIds } = makeServer();
+    // No agent policy attached — Fleet normalizes this to policy_ids: [].
+    fleetGetByIDs.mockResolvedValue([{ id: 'orphaned-policy', name: 'orphaned', policy_ids: [] }]);
+    getByIds.mockResolvedValue([]);
+
+    await new PackagePolicyService(server).bulkDelete({
+      policyIdsToDelete: ['orphaned-policy'],
+      spaceId: 'naims',
+    });
+
+    expect(fleetDelete).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      ['orphaned-policy'],
+      expect.objectContaining({ force: true, asyncDeploy: true })
+    );
   });
 });
 

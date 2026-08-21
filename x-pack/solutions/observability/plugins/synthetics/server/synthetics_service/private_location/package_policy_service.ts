@@ -313,8 +313,8 @@ export class PackagePolicyService {
     const spacePackagePolicies: T[] = [];
 
     for (const pkgPolicy of policies) {
-      if (pkgPolicy.policy_ids) {
-        pkgPolicy.policy_ids?.forEach((policyId) => {
+      if (pkgPolicy.policy_ids && pkgPolicy.policy_ids.length > 0) {
+        pkgPolicy.policy_ids.forEach((policyId) => {
           const agentPolicy = agentPolicyById.get(policyId);
           if (
             agentPolicy?.space_ids?.includes(spaceId) ||
