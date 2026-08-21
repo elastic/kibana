@@ -55,11 +55,13 @@ const completeState: InvestigationState = {
       status: 'confirmed',
     },
   ],
-  conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · Revert commit abc123 and monitor error rate.`,
+  conclusion: 'Checkout deploy introduced a regression.',
+  recommendations: [
+    {
+      title: 'Roll back checkout deployment',
+      description: 'Revert commit abc123 and monitor error rate.',
+    },
+  ],
   blind_spots: [
     { title: 'Missing trace coverage', description: 'No spans for payment gateway calls.' },
   ],
@@ -360,7 +362,7 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion\n${longConclusionBody}`,
+        conclusion: longConclusionBody,
       },
     });
 
@@ -387,11 +389,12 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · ${longRecommendationDescription}`,
+        recommendations: [
+          {
+            title: 'Roll back checkout deployment',
+            description: longRecommendationDescription,
+          },
+        ],
       },
     });
 
