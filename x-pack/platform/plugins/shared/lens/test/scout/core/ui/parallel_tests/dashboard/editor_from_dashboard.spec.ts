@@ -131,7 +131,7 @@ spaceTest.describe('Lens editor from dashboard', { tag: '@local-stateful-classic
       await inspector.panel.waitFor({ state: 'visible' });
       await inspector.openInspectorRequestsView();
       await inspector.requests.requestChooser.click();
-      await expect(page.getByRole('option')).toHaveCount(2);
+      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(2);
     }
   );
 
