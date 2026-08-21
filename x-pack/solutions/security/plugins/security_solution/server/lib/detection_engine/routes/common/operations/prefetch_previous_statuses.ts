@@ -37,11 +37,13 @@ export const prefetchPreviousStatusesByIds = async (
 ): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
   // Use search (not mget) so ignore_unavailable: true tolerates missing indices
   // (e.g. the adhoc attack-discovery index may not exist yet).
+  // Slice to MAX_ALERTS_PER_TRIGGER to stay within ES index.max_result_window.
+  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
-    query: { terms: { _id: ids } },
+    query: { ids: { values: cappedIds } },
     _source_includes: [ALERT_WORKFLOW_STATUS],
-    size: ids.length,
+    size: cappedIds.length,
     ignore_unavailable: true,
   });
   const previousStatuses: PreviousStatus[] = [];

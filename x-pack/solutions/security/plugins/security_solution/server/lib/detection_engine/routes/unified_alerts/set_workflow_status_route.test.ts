@@ -8,8 +8,10 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL } from '../../../../../common/constants';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 import {
   typicalSetStatusSignalByIdsPayload,
   getSuccessfulSignalUpdateResponse,
@@ -18,6 +20,19 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsWorkflowStatusRoute } from './set_workflow_status_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+
+const makeSearchResponse = (
+  hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
+): estypes.SearchResponse<unknown> => ({
+  hits: {
+    hits: hits.map((h) => ({ ...h, _score: 1 })),
+    total: { value: hits.length, relation: 'eq' },
+    max_score: 1,
+  },
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+});
 
 describe('set unified alerts workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -259,22 +274,20 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('emits alertStatusChanged for detection alert documents', async () => {
-      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
-        docs: [
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
           {
-            found: true,
             _id: 'somefakeid1',
             _index: '.alerts-security.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'open' },
           },
           {
-            found: true,
             _id: 'somefakeid2',
             _index: '.alerts-security.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'acknowledged' },
           },
-        ],
-      });
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -294,22 +307,20 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('emits attackStatusChanged for attack discovery documents', async () => {
-      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
-        docs: [
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
           {
-            found: true,
             _id: 'somefakeid1',
             _index: '.alerts-security.attack.discovery.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'open' },
           },
           {
-            found: true,
             _id: 'somefakeid2',
             _index: '.adhoc.alerts-security.attack.discovery.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'acknowledged' },
           },
-        ],
-      });
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -329,16 +340,15 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('emits attackStatusChanged when _index is the concrete backing index (.internal.* prefix)', async () => {
-      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
-        docs: [
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
           {
-            found: true,
             _id: 'somefakeid1',
             _index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
             _source: { 'kibana.alert.workflow_status': 'open' },
           },
-        ],
-      });
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -354,22 +364,20 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('emits both triggers when IDs span detection alerts and attack discovery documents', async () => {
-      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
-        docs: [
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
           {
-            found: true,
             _id: 'somefakeid1',
             _index: '.alerts-security.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'open' },
           },
           {
-            found: true,
             _id: 'somefakeid2',
             _index: '.alerts-security.attack.discovery.alerts-default',
             _source: { 'kibana.alert.workflow_status': 'acknowledged' },
           },
-        ],
-      });
+        ])
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -388,7 +396,9 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('emits nothing and logs warn when prefetch fails', async () => {
-      context.core.elasticsearch.client.asCurrentUser.mget.mockRejectedValue(new Error('ES error'));
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+        new Error('ES error')
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -400,6 +410,34 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Failed to pre-fetch previous alert statuses for workflow trigger'
+      );
+    });
+
+    test('caps search size at MAX_ALERTS_PER_TRIGGER and sets truncated: true when ids.length exceeds the limit', async () => {
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          {
+            _id: oversizedIds[0],
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: { signal_ids: oversizedIds, status: 'acknowledged' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+
+      const searchCall = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
+      expect((searchCall as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
+
+      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ truncated: true })
       );
     });
   });

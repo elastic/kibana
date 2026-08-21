@@ -161,13 +161,13 @@ describe('prefetchPreviousStatusesByIds', () => {
     expect(previousStatuses).toEqual([]);
   });
 
-  it('calls search with a string index as-is and a terms._id query', async () => {
+  it('calls search with a string index as-is and an ids query', async () => {
     await prefetchPreviousStatusesByIds(esClient, 'my-index', ['id1']);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'my-index',
-        query: { terms: { _id: ['id1'] } },
+        query: { ids: { values: ['id1'] } },
       })
     );
   });
@@ -202,6 +202,14 @@ describe('prefetchPreviousStatusesByIds', () => {
     await expect(prefetchPreviousStatusesByIds(esClient, 'index', ['id1'])).rejects.toThrow(
       'ES error'
     );
+  });
+
+  it('caps search size at MAX_ALERTS_PER_TRIGGER when ids.length exceeds the limit', async () => {
+    const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+    await prefetchPreviousStatusesByIds(esClient, 'index', oversizedIds);
+
+    const call = esClient.search.mock.calls[0][0] as { size?: number };
+    expect(call.size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
   });
 });
 

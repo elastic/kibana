@@ -114,20 +114,21 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             reason: closingReason.reason,
           });
           if (prefetchSucceeded) {
+            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
               void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                attackIds,
                 status,
-                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
+                previousStatuses: attackPreviousStatuses,
+                truncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                alertIds,
                 status,
-                previousStatuses: alertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
+                previousStatuses: alertPreviousStatuses,
+                truncated,
               });
             }
           }
