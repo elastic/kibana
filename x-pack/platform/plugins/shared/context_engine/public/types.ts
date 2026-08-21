@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
+import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -24,22 +28,53 @@ export interface AnalyzeAndImproveContext {
   tag?: string;
 }
 
-/** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
-export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
+/** Opens Agent Builder to analyze the given signals. */
+export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginSetup {}
-
-export interface ContextEnginePluginStart {
-  /**
-   * Registers the opener used by the "Analyze & improve" button. Until an opener is registered
-   * the button is hidden.
-   */
-  registerChatOpener: (opener: ChatOpener) => void;
+/** Options passed to Agent Builder `openChat` for an Analyze & improve hand-off. */
+export interface AnalyzeChatOptions {
+  /** Feedback agent to open. */
+  agentId?: string;
+  /** When true, start a new conversation. */
+  newConversation: boolean;
+  /** Session tag for this AI index's conversation. */
+  sessionTag: string;
+  /** Attachments passed to Agent Builder. */
+  attachments: AttachmentInput[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineSetupDependencies {}
+export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
+
+export interface SuggestAutomationParams {
+  aiIndex: GetAiIndexResponse;
+  onSaved: () => void;
+}
+
+/** Powers the Suggest automation button. Registered via {@link AgentBuilderIntegration}. */
+export interface SuggestAutomationProvider {
+  canSuggest: (params: { aiIndex: GetAiIndexResponse | undefined; isManaged: boolean }) => boolean;
+  suggestAutomation: (params: SuggestAutomationParams) => void;
+  /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
+  subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
+}
+
+/** Suggest-automation hooks registered by context_engine_agent_builder. */
+export interface AgentBuilderIntegration {
+  suggestAutomation: SuggestAutomationProvider;
+}
+
+export interface ContextEnginePluginSetup {
+  registerAppChromeAdapter: (adapter: ContextEngineAppChromeAdapter) => void;
+}
+
+export interface ContextEnginePluginStart {
+  /** Registers suggest-automation hooks used by the Context Engine UI. */
+  registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => void;
+}
+
+export interface ContextEngineSetupDependencies {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface ContextEngineStartDependencies {
   data: DataPublicPluginStart;
@@ -48,3 +83,10 @@ export interface ContextEngineStartDependencies {
   console?: ConsolePluginStart;
   spaces?: SpacesPluginStart;
 }
+
+export interface ContextEngineServicesContextDeps {
+  history: AppMountParameters['history'];
+  appChrome?: ContextEngineAppChromeAdapter;
+}
+
+export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;

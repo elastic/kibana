@@ -9,15 +9,14 @@ import React, { Fragment, PureComponent, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFormErrorText,
   EuiFormRow,
   EuiSpacer,
   EuiSelect,
   EuiFieldText,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { routing } from '../services/routing';
 
@@ -218,30 +217,28 @@ export class RemoteClustersFormField extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={title}
-          color="danger"
-          iconType="cross"
           data-test-subj="noClusterFoundError"
-        >
-          <p>{this.errorMessages.noClusterFound()}</p>
-
-          <EuiButton
-            href={routing.getHrefToRemoteClusters(
-              '/add',
-              { redirect: `/data/cross_cluster_replication${currentUrl}` },
-              true
-            )}
-            iconType="plusCircle"
-            color="danger"
-            data-test-subj="addButton"
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
-              defaultMessage="Add remote cluster"
-            />
-          </EuiButton>
-        </EuiCallOut>
+          text={this.errorMessages.noClusterFound()}
+          actionProps={{
+            primary: {
+              href: routing.getHrefToRemoteClusters(
+                '/add',
+                { redirect: `/data/cross_cluster_replication${currentUrl}` },
+                true
+              ),
+              iconType: 'plusCircle',
+              'data-test-subj': 'addButton',
+              children: (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
+                  defaultMessage="Add remote cluster"
+                />
+              ),
+            },
+          }}
+        />
       </Fragment>
     );
   };
@@ -259,30 +256,30 @@ export class RemoteClustersFormField extends PureComponent<Props> {
     }
     const { title, description } = resolver(name);
 
-    return (
-      <EuiCallOut
-        title={title}
-        color={fatal ? 'danger' : 'warning'}
-        iconType="cross"
-        data-test-subj="notConnectedError"
-      >
-        <p>{description}</p>
+    const CalloutComponent = fatal ? KbnDangerCallout : KbnWarningCallout;
 
-        <EuiButton
-          href={routing.getHrefToRemoteClusters(
-            `/edit/${name}`,
-            { redirect: `/data/cross_cluster_replication${currentUrl}` },
-            true
-          )}
-          color={fatal ? 'danger' : 'warning'}
-          data-test-subj="editButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.remoteClustersFormField.viewRemoteClusterButtonLabel"
-            defaultMessage="Edit remote cluster"
-          />
-        </EuiButton>
-      </EuiCallOut>
+    return (
+      <CalloutComponent
+        title={title}
+        data-test-subj="notConnectedError"
+        text={description}
+        actionProps={{
+          primary: {
+            href: routing.getHrefToRemoteClusters(
+              `/edit/${name}`,
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
+              true
+            ),
+            'data-test-subj': 'editButton',
+            children: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.remoteClustersFormField.viewRemoteClusterButtonLabel"
+                defaultMessage="Edit remote cluster"
+              />
+            ),
+          },
+        }}
+      />
     );
   };
 
@@ -297,24 +294,27 @@ export class RemoteClustersFormField extends PureComponent<Props> {
     );
 
     return (
-      <EuiCallOut title={title} color="danger" iconType="cross">
-        <p>{this.errorMessages.remoteClusterDoesNotExist?.(name)}</p>
-        <EuiButton
-          href={routing.getHrefToRemoteClusters(
-            `/add`,
-            { redirect: `/data/cross_cluster_replication${currentUrl}` },
-            true
-          )}
-          iconType="plusCircle"
-          color="danger"
-          data-test-subj="addButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
-            defaultMessage="Add remote cluster"
-          />
-        </EuiButton>
-      </EuiCallOut>
+      <KbnDangerCallout
+        title={title}
+        text={this.errorMessages.remoteClusterDoesNotExist?.(name)}
+        actionProps={{
+          primary: {
+            href: routing.getHrefToRemoteClusters(
+              `/add`,
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
+              true
+            ),
+            iconType: 'plusCircle',
+            'data-test-subj': 'addButton',
+            children: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel"
+                defaultMessage="Add remote cluster"
+              />
+            ),
+          },
+        }}
+      />
     );
   };
 

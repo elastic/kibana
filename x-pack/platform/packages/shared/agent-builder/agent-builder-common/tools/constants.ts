@@ -39,6 +39,7 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -89,6 +90,7 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
@@ -97,6 +99,7 @@ export const internalTools = {
   readFile: 'read_file',
   listFiles: 'list_files',
   bash: 'bash',
+  setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
   executeApi: 'execute_api',
