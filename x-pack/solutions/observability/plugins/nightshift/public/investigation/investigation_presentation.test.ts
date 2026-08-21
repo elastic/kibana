@@ -47,7 +47,7 @@ describe('investigation_presentation', () => {
       expect(getInvestigationWorkflowStatusLabel('complete')).toBe('Investigated');
       expect(getInvestigationWorkflowStatusLabel('running')).toBe('Investigating');
       expect(getInvestigationWorkflowStatusLabel('failed')).toBe('Investigation failed');
-      expect(getInvestigationWorkflowStatusLabel('unavailable')).toBe('Investigation failed');
+      expect(getInvestigationWorkflowStatusLabel('unavailable')).toBe('Investigation unavailable');
       expect(getInvestigationWorkflowStatusLabel('loading')).toBe('Loading investigation');
     });
   });

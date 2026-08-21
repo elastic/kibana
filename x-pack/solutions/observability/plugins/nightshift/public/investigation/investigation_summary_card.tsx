@@ -64,9 +64,15 @@ const getSummaryStatusLabel = (status: InvestigationStatus): string => {
     return getInvestigationCompleteStatusLabel();
   }
 
-  if (isInvestigationTerminalFailure(status)) {
+  if (status === 'failed') {
     return i18n.translate('xpack.nightshift.investigation.summaryFailedStatusLabel', {
       defaultMessage: 'Failed',
+    });
+  }
+
+  if (status === 'unavailable') {
+    return i18n.translate('xpack.nightshift.investigation.summaryUnavailableStatusLabel', {
+      defaultMessage: 'Unavailable',
     });
   }
 

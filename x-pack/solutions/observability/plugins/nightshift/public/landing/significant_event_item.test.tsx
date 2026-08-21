@@ -211,6 +211,23 @@ describe('SignificantEventItem', () => {
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     });
 
+    it('marks an unreadable run as unavailable', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'unavailable' });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation unavailable'
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('hides the badge when the execution does not exist', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: null });
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigatingStatusDots')).not.toBeInTheDocument();
+    });
+
     it('marks a pending run as investigating', () => {
       renderItem({ event: investigatedEvent, investigationRunStatus: 'pending' });
 

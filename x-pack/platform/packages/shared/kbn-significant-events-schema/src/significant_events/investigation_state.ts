@@ -30,7 +30,7 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
-export type InvestigationRunStatus = 'pending' | 'complete' | 'failed';
+export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
 /**
  * A source file the agent read, recorded as parts rather than a URL so that consumers — not the

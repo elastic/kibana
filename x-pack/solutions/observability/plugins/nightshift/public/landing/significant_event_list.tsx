@@ -32,9 +32,12 @@ import { SignificantEventItem } from './significant_event_item';
 const getEventInvestigationRunStatus = (
   event: SignificantEvent,
   investigationStatuses: Record<string, InvestigationRunStatus> | undefined
-): InvestigationRunStatus | undefined => {
+): InvestigationRunStatus | null | undefined => {
   const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
-  return workflowExecutionId ? investigationStatuses?.[workflowExecutionId] : undefined;
+  if (!workflowExecutionId || !investigationStatuses) {
+    return undefined;
+  }
+  return investigationStatuses[workflowExecutionId] ?? null;
 };
 
 export interface SignificantEventListProps {

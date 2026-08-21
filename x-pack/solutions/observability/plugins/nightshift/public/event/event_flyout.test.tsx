@@ -273,9 +273,12 @@ describe('EventFlyout', () => {
     expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
   });
 
-  it.each(['failed', 'unavailable'] as const)(
+  it.each([
+    ['failed', 'Investigation failed', 'Failed'],
+    ['unavailable', 'Investigation unavailable', 'Unavailable'],
+  ] as const)(
     'marks an already-completed %s investigation and withholds the details button',
-    (status) => {
+    (status, badgeLabel, summaryLabel) => {
       mockUseInvestigationState.mockReturnValue({
         status,
         state: undefined,
@@ -297,10 +300,10 @@ describe('EventFlyout', () => {
       });
 
       expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-        'Investigation failed'
+        badgeLabel
       );
       expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
-        'Failed'
+        summaryLabel
       );
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
       expect(
@@ -308,6 +311,30 @@ describe('EventFlyout', () => {
       ).not.toBeInTheDocument();
     }
   );
+
+  it('shows no investigation when the execution does not exist', () => {
+    mockInvestigationRunStatuses = {};
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSummaryCard')).not.toBeInTheDocument();
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined, isRunning: false })
+    );
+  });
 
   it('stops following a run with no completed_at once the API reports it failed', () => {
     mockInvestigationRunStatuses = { 'exec-1': 'failed' };

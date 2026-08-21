@@ -360,7 +360,7 @@ const investigationStatusesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve the outcome of investigation runs',
     description:
-      'Reports whether each investigation run is pending, complete or failed, resolved from its workflow execution. Runs whose execution cannot be found or read are omitted from the response.',
+      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
   },
   security: {
     authz: {

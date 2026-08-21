@@ -13,6 +13,7 @@ const RUN_STATUS_TO_INVESTIGATION_STATUS: Record<InvestigationRunStatus, Investi
   pending: 'running',
   complete: 'complete',
   failed: 'failed',
+  unavailable: 'unavailable',
 };
 
 export const toInvestigationStatus = (status: InvestigationRunStatus): InvestigationStatus =>
@@ -41,9 +42,12 @@ export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus)
 
   switch (status) {
     case 'failed':
-    case 'unavailable':
       return i18n.translate('xpack.nightshift.investigation.statusFailed', {
         defaultMessage: 'Investigation failed',
+      });
+    case 'unavailable':
+      return i18n.translate('xpack.nightshift.investigation.statusUnavailable', {
+        defaultMessage: 'Investigation unavailable',
       });
     case 'loading':
       return i18n.translate('xpack.nightshift.investigation.statusLoading', {

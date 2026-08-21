@@ -438,26 +438,24 @@ Checkout deploy introduced a regression.
     }
   );
 
-  it.each<InvestigationStatus>(['failed', 'unavailable'])(
-    'marks a %s investigation with a failure status and its error detail',
-    (status) => {
-      renderInvestigation(mockEvent(), {
-        investigation: {
-          workflow_execution_id: 'exec-latest',
-          started_at: '2026-07-10T12:00:00Z',
-          completed_at: '2026-07-10T12:05:00Z',
-        },
-        status,
-        error: 'The investigation did not complete.',
-      });
+  it.each<[InvestigationStatus, string]>([
+    ['failed', 'Failed'],
+    ['unavailable', 'Unavailable'],
+  ])('marks a %s investigation with its terminal status and error detail', (status, label) => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      status,
+      error: 'The investigation did not complete.',
+    });
 
-      expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
-        'Failed'
-      );
-      expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
-        'The investigation did not complete.'
-      );
-      expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
-    }
-  );
+    expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(label);
+    expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
+      'The investigation did not complete.'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
+  });
 });

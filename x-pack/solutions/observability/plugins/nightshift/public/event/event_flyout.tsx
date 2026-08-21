@@ -73,6 +73,11 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const latestRunStatus = latestInvestigation
     ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
     : undefined;
+  const investigationNotFound =
+    latestInvestigation != null &&
+    investigationRunStatuses != null &&
+    latestRunStatus === undefined;
+  const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
 
   const {
     conversationId,
@@ -81,11 +86,11 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     status: investigationStatus,
   } = useInvestigationState({
     http,
-    workflowExecutionId: latestInvestigation?.workflow_execution_id,
+    workflowExecutionId: availableInvestigation?.workflow_execution_id,
     isRunning:
       latestRunStatus != null
         ? latestRunStatus === 'pending'
-        : latestInvestigation != null && latestInvestigation.completed_at == null,
+        : availableInvestigation != null && availableInvestigation.completed_at == null,
   });
 
   useEffect(() => {
@@ -209,7 +214,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
           <EuiFlexItem grow={false}>
             <InvestigationStatusBadge
               event={event}
-              investigationStatus={latestInvestigation ? investigationStatus : undefined}
+              investigationStatus={
+                investigationNotFound ? null : latestInvestigation ? investigationStatus : undefined
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -244,7 +251,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
         <EventInvestigation
           event={event}
-          investigation={latestInvestigation}
+          investigation={availableInvestigation}
           status={investigationStatus}
           state={investigationState}
           error={investigationError}
@@ -262,7 +269,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         />
       )}
 
-      {agentBuilder && latestInvestigation && (
+      {agentBuilder && availableInvestigation && (
         <EuiFlyoutFooter
           css={css`
             /* The design uses a plain footer instead of EUI's shaded one. */
@@ -272,7 +279,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         >
           <EventFlyoutChatFooter
             event={event}
-            investigation={latestInvestigation}
+            investigation={availableInvestigation}
             conversationId={conversationId}
             status={investigationStatus}
           />

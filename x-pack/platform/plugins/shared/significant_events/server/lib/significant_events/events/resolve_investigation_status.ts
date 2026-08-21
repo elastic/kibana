@@ -53,12 +53,12 @@ export const resolveInvestigationStatuses = async ({
   workflowExecutionIds: string[];
   logger: Logger;
 }): Promise<Record<string, InvestigationRunStatus>> => {
+  const uniqueIds = [...new Set(workflowExecutionIds.filter(Boolean))];
+
   if (!workflowsManagement) {
     logger.debug('Workflows management not available, cannot resolve investigation statuses');
-    return {};
+    return Object.fromEntries(uniqueIds.map((id) => [id, 'unavailable'] as const));
   }
-
-  const uniqueIds = [...new Set(workflowExecutionIds.filter(Boolean))];
 
   const entries = await Promise.all(
     uniqueIds.map(async (id) => {
@@ -72,7 +72,7 @@ export const resolveInvestigationStatuses = async ({
         logger.debug(
           `Could not resolve investigation status for workflow execution "${id}": ${reason}`
         );
-        return undefined;
+        return [id, 'unavailable'] as const;
       }
     })
   );

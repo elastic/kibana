@@ -384,8 +384,12 @@ export function InvestigationStatusBadge({
   investigationStatus,
 }: {
   event: Pick<SignificantEvent, 'investigations'>;
-  investigationStatus?: InvestigationStatus;
+  investigationStatus?: InvestigationStatus | null;
 }): React.ReactElement | null {
+  if (investigationStatus === null) {
+    return null;
+  }
+
   const hasInvestigation = investigationStatus != null || (event.investigations?.length ?? 0) > 0;
   if (!hasInvestigation) {
     return null;

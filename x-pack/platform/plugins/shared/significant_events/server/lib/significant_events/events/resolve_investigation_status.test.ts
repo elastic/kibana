@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { INVESTIGATE_STEP_ID, type InvestigationState } from '@kbn/significant-events-schema';
-import { resolveStatusFromExecution } from './resolve_investigation_status';
+import {
+  resolveInvestigationStatuses,
+  resolveStatusFromExecution,
+} from './resolve_investigation_status';
 
 const investigationState: InvestigationState = {
   summary: 'Investigate the latency spike.',
@@ -17,8 +21,9 @@ const investigationState: InvestigationState = {
 const execution = (
   status: ExecutionStatus,
   stepExecutions: Array<Partial<WorkflowExecutionDto['stepExecutions'][number]>> = []
-): Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'> =>
-  ({ status, stepExecutions } as Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>);
+): Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'> => {
+  return { status, stepExecutions } as Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>;
+};
 
 describe('resolveStatusFromExecution', () => {
   it.each([ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING])(
@@ -112,5 +117,33 @@ describe('resolveStatusFromExecution', () => {
         ])
       )
     ).toBe('pending');
+  });
+});
+
+describe('resolveInvestigationStatuses', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  const resolve = (getWorkflowExecution?: jest.Mock) =>
+    resolveInvestigationStatuses({
+      workflowsManagement: getWorkflowExecution
+        ? ({ management: { getWorkflowExecution } } as never)
+        : undefined,
+      spaceId: 'default',
+      workflowExecutionIds: ['exec-1'],
+      logger,
+    });
+
+  it('omits an execution that does not exist', async () => {
+    await expect(resolve(jest.fn().mockResolvedValue(null))).resolves.toEqual({});
+  });
+
+  it('reports an execution that cannot be read as unavailable', async () => {
+    await expect(resolve(jest.fn().mockRejectedValue(new Error('corrupt')))).resolves.toEqual({
+      'exec-1': 'unavailable',
+    });
+  });
+
+  it('reports unavailable when workflow management cannot read executions', async () => {
+    await expect(resolve()).resolves.toEqual({ 'exec-1': 'unavailable' });
   });
 });

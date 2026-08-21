@@ -32,7 +32,7 @@ import { nightshiftBackgroundTransition } from '../common/transition';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;
-  investigationRunStatus?: InvestigationRunStatus;
+  investigationRunStatus?: InvestigationRunStatus | null;
   isSelected?: boolean;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
@@ -127,7 +127,11 @@ export function SignificantEventItem({
             <InvestigationStatusBadge
               event={event}
               investigationStatus={
-                investigationRunStatus ? toInvestigationStatus(investigationRunStatus) : undefined
+                investigationRunStatus === null
+                  ? null
+                  : investigationRunStatus
+                  ? toInvestigationStatus(investigationRunStatus)
+                  : undefined
               }
             />
           </EuiFlexItem>
