@@ -6,17 +6,25 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
-import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { usePolicyListContext } from './policy_list_context';
 import { useIsReadOnly } from '../../lib/use_is_read_only';
 import type { PolicyFromES } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 import { getPoliciesListPath, getPolicyCreatePath } from '../../services/navigation';
 import { PolicyTable, ListActionHandler } from './components';
 import { ViewPolicyFlyout } from './policy_flyout';
+
+const createPolicyButtonLabel = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel',
+  { defaultMessage: 'Create policy' }
+);
 
 interface Props {
   policies: PolicyFromES[];
@@ -25,6 +33,9 @@ interface Props {
 
 export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
   const history = useHistory();
+  const {
+    services: { docLinks },
+  } = useKibana();
   const isReadOnly = useIsReadOnly();
   const { setListAction } = usePolicyListContext();
   const [flyoutPolicy, setFlyoutPolicy] = useState<PolicyFromES | null>(null);
@@ -46,10 +57,7 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
       iconType="plusCircle"
       data-test-subj="createPolicyButton"
     >
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
-        defaultMessage="Create policy"
-      />
+      {createPolicyButtonLabel}
     </EuiButton>
   );
 
@@ -80,7 +88,18 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
     );
   }
 
-  const rightSideItems = isReadOnly ? [] : [createPolicyButton];
+  const menu: AppHeaderMenu | undefined = isReadOnly
+    ? undefined
+    : {
+        primaryActionItem: {
+          id: 'createPolicy',
+          label: createPolicyButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'createPolicyButton',
+          run: () => history.push(getPolicyCreatePath()),
+        },
+      };
+
   return (
     <>
       <ListActionHandler
@@ -91,25 +110,17 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
           updatePolicies();
         }}
       />
-
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="ilmPageHeader">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-              defaultMessage="Index Lifecycle Policies"
-            />
-          </span>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-            defaultMessage="Manage your indices as they age.  Attach a policy to automate
-                        when and how to transition an index through its lifecycle."
-          />
-        }
-        bottomBorder
-        rightSideItems={rightSideItems}
+      <AppHeader
+        title={i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionHeading', {
+          defaultMessage: 'Index Lifecycle Policies',
+        })}
+        description={i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionDescription', {
+          defaultMessage:
+            'Manage your indices as they age.  Attach a policy to automate when and how to transition an index through its lifecycle.',
+        })}
+        menu={menu}
+        docLink={docLinks.links.elasticsearch.ilm}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />

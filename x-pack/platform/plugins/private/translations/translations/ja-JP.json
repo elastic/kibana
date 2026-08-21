@@ -26180,7 +26180,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deleteSearchableSnapshotFieldLabel": "検索可能スナップショットを削除",
     "xpack.indexLifecycleMgmt.editPolicy.dependenciesMessage": "行ったすべての変更は、このポリシーに関連付けられた{count, plural, one {is} other {}}{dependenciesLinks}に影響します。",
     "xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError": "ポリシー名は異なるものである必要があります。",
-    "xpack.indexLifecycleMgmt.editPolicy.documentationLinkText": "ドキュメンテーション",
     "xpack.indexLifecycleMgmt.editPolicy.downsampleDescription": "固定間隔でドキュメントをロールアップし、1つの集約されたドキュメントを作成します。粒度を下げて時系列データを保存することで、インデックスのフットプリントを減らします。",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError": "ホットフェーズ値（{value}）より大きく、ホットフェーズ値の倍数でなければなりません",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseWarmError": "ホットフェーズ値（{value}）より大きく、ウォームフェーズ値の倍数でなければなりません",

@@ -21,10 +21,10 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiPageHeader,
   EuiTimeline,
   useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 
 import {
   TextField,
@@ -197,32 +197,25 @@ export const EditPolicy: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="policyTitle">
-            {isNewPolicy
-              ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                  defaultMessage: 'Create policy',
-                })
-              : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                  defaultMessage: 'Edit policy {originalPolicyName}',
-                  values: { originalPolicyName },
-                })}
-          </span>
+      <AppHeader
+        title={
+          isNewPolicy
+            ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                defaultMessage: 'Create policy',
+              })
+            : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                defaultMessage: 'Edit policy {originalPolicyName}',
+                values: { originalPolicyName },
+              })
         }
-        bottomBorder
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.elasticsearch.ilm}
-            target="_blank"
-            iconType="question"
-          >
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        back={{
+          href: history.createHref({ pathname: getPoliciesListPath() }),
+          label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionHeading', {
+            defaultMessage: 'Index Lifecycle Policies',
+          }),
+        }}
+        docLink={docLinks.links.elasticsearch.ilm}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />

@@ -22,7 +22,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
   return {
     async pageHeaderText() {
-      return await testSubjects.getVisibleText('ilmPageHeader');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
     async createPolicyButton() {
       return await testSubjects.find('createPolicyButton');

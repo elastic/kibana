@@ -26027,7 +26027,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle": "Attendre la stratégie de snapshot",
     "xpack.indexLifecycleMgmt.editPolicy.deleteSearchableSnapshotFieldLabel": "Supprimer le snapshot qu'il est possible de rechercher",
     "xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError": "Le nom de la stratégie doit être différent.",
-    "xpack.indexLifecycleMgmt.editPolicy.documentationLinkText": "Documentation",
     "xpack.indexLifecycleMgmt.editPolicy.downsampleDescription": "Cumulez les documents d'un intervalle fixe dans un document récapitulatif unique. Cela réduit l'empreinte de l'index en stockant des données temporelles à une granularité réduite.",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError": "Doit être supérieur à la valeur de phase \"hot\" ({value}) et un multiple de cette valeur",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseWarmError": "Doit être supérieur à la valeur de phase \"warm\" ({value}) et un multiple de cette valeur",
