@@ -25,7 +25,10 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import {
+  executeAsReasoningAgent,
+  type ReasoningPromptDiagnostics,
+} from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -243,6 +246,7 @@ export async function identifyKIQueries({
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  reasoningDiagnostics: ReasoningPromptDiagnostics;
   queryAttempts?: QueryAttempt[];
 }> {
   logger.debug('Starting Significant Events KI query generation');
@@ -556,10 +560,27 @@ export async function identifyKIQueries({
 
   logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
 
+  if (validatedQueries.length === 0) {
+    const observed =
+      toolUsage.add_queries.calls === 0
+        ? 'no_add_queries_calls'
+        : 'add_queries_called_no_accepted_queries';
+
+    logger.warn(
+      `Significant Events KI query generation produced no queries: ` +
+        `observed=${observed}, features_returned=${returnedFeatureMap.size}, ` +
+        `get_stream_features_calls=${toolUsage.get_stream_features.calls}, ` +
+        `get_stream_features_failures=${toolUsage.get_stream_features.failures}, ` +
+        `add_queries_calls=${toolUsage.add_queries.calls}, ` +
+        `add_queries_failures=${toolUsage.add_queries.failures}`
+    );
+  }
+
   return {
     queries: validatedQueries,
     tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
+    reasoningDiagnostics: response.diagnostics,
     ...(collectQueryAttempts && queryAttempts ? { queryAttempts } : {}),
   };
 }

@@ -39,6 +39,190 @@ function makePrompt() {
   } satisfies Prompt;
 }
 
+describe('external text with non-planning tool calls', () => {
+  const LONG_EXTERNAL = 'this is external text long enough to exceed the 25 character buffer';
+
+  test('continues the loop instead of forcing completion, then completes normally', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({
+          content: 'more reasoning',
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'y' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    // The second turn must be a normal continuation with toolChoice auto, not forced none.
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toBe('auto');
+
+    // Both task callbacks must run.
+    expect(fetchData).toHaveBeenCalledTimes(2);
+
+    // The second turn sees the first tool result in prevMessages.
+    const secondPrevMessages = secondCall.prevMessages!;
+    const firstToolMsg = secondPrevMessages.find(
+      (m): m is ToolMessage => m.role === MessageRole.Tool && m.name === 'fetch_data'
+    );
+    expect(firstToolMsg?.toolCallId).toBe('x');
+    expect(firstToolMsg?.response).toEqual({ result: 'ok', stepsLeft: 2 });
+
+    // The final turn is forced only after the normal step decrement.
+    const thirdCall = inferenceClient.prompt.mock.calls[2][0];
+    expect(thirdCall.toolChoice).toBe('none');
+
+    // Diagnostics record the corrected continuation.
+    expect(result.diagnostics.externalContentToolContinuations).toBe(1);
+  });
+
+  test('executes two task tools and counts the turn once', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'y' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({ content: 'mid', toolCalls: [], tokens: 1 })
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    // Both tool callbacks run concurrently on the same turn.
+    expect(fetchData).toHaveBeenCalledTimes(2);
+
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toBe('auto');
+
+    // The counter is per turn, not per tool call.
+    expect(result.diagnostics.externalContentToolContinuations).toBe(1);
+  });
+
+  test('external text with only a reason tool call still completes', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+          toolCalls: [
+            { type: 'function', function: { name: 'reason', arguments: {} }, toolCallId: 'r' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    // The following turn is forced to complete; no continuation is recorded.
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toBe('none');
+    expect(result.diagnostics.externalContentToolContinuations).toBe(0);
+  });
+
+  test('external text with no tool calls still forces a final response', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+          toolCalls: [],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toBe('none');
+    expect(result.diagnostics.externalContentToolContinuations).toBe(0);
+  });
+
+  test('low power continues correctly after external text with a task tool', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({ content: 'mid', toolCalls: [], tokens: 1 })
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      power: 'low',
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    expect(fetchData).toHaveBeenCalledTimes(1);
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toBe('auto');
+    expect(result.diagnostics.externalContentToolContinuations).toBe(1);
+  });
+});
+
 describe('executeAsReasoningAgent', () => {
   test('returns final tool call when finalToolChoice is provided', async () => {
     const prompt = makePrompt();
@@ -588,5 +772,37 @@ describe('executeAsReasoningAgent', () => {
 
     const callArgs = inferenceClient.prompt.mock.calls[0][0];
     expect(callArgs.abortSignal).toBe(abortController.signal);
+  });
+});
+
+describe('external text with a configured final tool', () => {
+  const LONG_EXTERNAL = 'this is external text long enough to exceed the 25 character buffer';
+
+  test('returns the final tool immediately without an additional inference turn', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest.fn().mockResolvedValue({
+        content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+        toolCalls: [
+          { type: 'function', function: { name: 'complete', arguments: {} }, toolCallId: 'c' },
+        ],
+        tokens: 1,
+      }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      input: { foo: '' },
+      finalToolChoice: { type: 'function', function: 'complete' },
+    });
+
+    // The final tool returns immediately: exactly one inference call.
+    expect(inferenceClient.prompt).toHaveBeenCalledTimes(1);
+    expect(result.toolCalls).toHaveLength(1);
+    expect(result.toolCalls?.[0].function.name).toBe('complete');
+    expect(result.diagnostics.externalContentToolContinuations).toBe(0);
   });
 });

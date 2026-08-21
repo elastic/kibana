@@ -8,6 +8,7 @@
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
 import type { QueryAttempt, SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -58,6 +59,8 @@ interface KIQueryGenerationTaskOutput {
   /** Resolved KI source and grounding mode for this task's run. */
   ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
   grounding_mode?: 'baseline' | 'grounded';
+  /** Reasoning-loop diagnostics from the shared agent, for treatment verification. */
+  reasoning_diagnostics?: ReasoningPromptDiagnostics;
   sample_logs?: string[];
   sample_docs?: Array<Record<string, unknown>>;
   query_attempts?: QueryAttempt[];

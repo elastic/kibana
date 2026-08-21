@@ -378,40 +378,41 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   .filter(Boolean)
                   .join('\n');
 
-                const { queries, toolUsage, tokensUsed, queryAttempts } = await identifyKIQueries({
-                  stream,
-                  esClient,
-                  inferenceClient,
-                  logger,
-                  signal: new AbortController().signal,
-                  systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
-                  // Mirror production: the plugin excludes these at retrieval,
-                  // but the fixture still builds them — filter here to match.
-                  getFeatures: async () =>
-                    kis.filter(
-                      (feature) =>
-                        !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
-                          feature.type
-                        )
-                    ),
-                  additionalTools: {
-                    ...memoryTools.tools,
-                    ...eventSearchTool.tools,
-                    ...groundingTools?.additionalTools,
-                  },
-                  additionalToolCallbacks: {
-                    ...memoryTools.callbacks,
-                    ...eventSearchTool.callbacks,
-                    ...groundingTools?.additionalToolCallbacks,
-                  },
-                  maxSteps: effectiveMaxSteps,
-                  requireQueryIntent: true,
-                  collectQueryAttempts: true,
-                  existingQueries: input.existing_queries?.map((q) => ({
-                    ...q,
-                    description: q.description.slice(0, 200),
-                  })),
-                });
+                const { queries, toolUsage, tokensUsed, queryAttempts, reasoningDiagnostics } =
+                  await identifyKIQueries({
+                    stream,
+                    esClient,
+                    inferenceClient,
+                    logger,
+                    signal: new AbortController().signal,
+                    systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
+                    // Mirror production: the plugin excludes these at retrieval,
+                    // but the fixture still builds them — filter here to match.
+                    getFeatures: async () =>
+                      kis.filter(
+                        (feature) =>
+                          !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
+                            feature.type
+                          )
+                      ),
+                    additionalTools: {
+                      ...memoryTools.tools,
+                      ...eventSearchTool.tools,
+                      ...groundingTools?.additionalTools,
+                    },
+                    additionalToolCallbacks: {
+                      ...memoryTools.callbacks,
+                      ...eventSearchTool.callbacks,
+                      ...groundingTools?.additionalToolCallbacks,
+                    },
+                    maxSteps: effectiveMaxSteps,
+                    requireQueryIntent: true,
+                    collectQueryAttempts: true,
+                    existingQueries: input.existing_queries?.map((q) => ({
+                      ...q,
+                      description: q.description.slice(0, 200),
+                    })),
+                  });
 
                 logger.info(
                   `[DEBUG] Tool usage: get_stream_features calls=${toolUsage.get_stream_features.calls}, failures=${toolUsage.get_stream_features.failures}; add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}; generated_queries=${queries.length}`
@@ -422,6 +423,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   toolUsage,
                   tokens_used: tokensUsed,
                   query_attempts: queryAttempts,
+                  reasoning_diagnostics: reasoningDiagnostics,
                   evaluation_arm: input.existing_queries ? ('rerun' as const) : ('clean' as const),
                   traceId: getCurrentTraceId(),
                   ki_source: kiSource,
@@ -559,7 +561,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 emptyDataStreamTestIndex!
               );
 
-              const { queries } = await identifyKIQueries({
+              const { queries, reasoningDiagnostics } = await identifyKIQueries({
                 stream: streamFromApi as Streams.all.Definition,
                 esClient,
                 inferenceClient,
@@ -572,6 +574,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
               return {
                 queries,
+                reasoning_diagnostics: reasoningDiagnostics,
                 traceId: getCurrentTraceId(),
                 ki_source: 'none' as const,
                 grounding_mode: 'baseline' as const,

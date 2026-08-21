@@ -77,6 +77,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
         get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
         add_queries: { calls: 0, failures: 0, latency_ms: 0 },
       },
+      reasoningDiagnostics: { externalContentToolContinuations: 0 },
     });
   });
 
