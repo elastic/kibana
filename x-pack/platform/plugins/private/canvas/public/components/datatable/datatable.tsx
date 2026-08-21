@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
@@ -58,7 +58,7 @@ interface Props {
   showHeader?: boolean;
 }
 
-export const Datatable: FC<Props> = ({
+export const Datatable: CanvasFunctionComponent<Props> = ({
   datatable,
   paginate = false,
   perPage = 10,
@@ -106,7 +106,6 @@ export const Datatable: FC<Props> = ({
 );
 
 Datatable.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   datatable: PropTypes.object.isRequired,
   paginate: PropTypes.bool,
   perPage: PropTypes.number,

@@ -19,47 +19,6 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
-/**
- * Compile an exact, kibana-root-relative file path (forward slashes) into an
- * anchored regex. A regex is required because the `module_migration` rule matches
- * each `exclude` with `RegExp.test()` against a path that uses the OS-native
- * separator, so each `/` is matched as `[\/\\]` to also work on Windows.
- */
-const exactFilePathMatcher = (relativePath) =>
-  new RegExp(
-    `^${relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '[\\/\\\\]')}$`
-  );
-
-/**
- * Files that already import js-yaml. New js-yaml imports must not be added here;
- * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Each entry is an exact file path, so adding a new js-yaml import (even in an
- * already-listed directory) is flagged until that file is migrated or added here.
- * The `module_migration` rule evaluates each mapping independently, so this list
- * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
- */
-const JS_YAML_LEGACY_CONSUMERS = [
-  'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
-  'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_eis_gateway_config.ts',
-  'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_service_configuration.ts',
-  'x-pack/platform/packages/shared/kbn-inference-cli/src/util/write_kibana_config.ts',
-  'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/graphs/ecs/pipeline.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/integration_builder/build_integration.test.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/integration_builder/build_integration.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/integration_builder/data_stream.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/integration_builder/fields.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/integration_builder/pipeline.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/util/processors.ts',
-  'x-pack/platform/plugins/shared/integration_assistant/server/util/samples.ts',
-  'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
-  'x-pack/solutions/security/test/security_solution_playwright/api_utils/api_key.ts',
-].map(exactFilePathMatcher);
-
 const USES_ELASTIC_APM_AGENT = [
   // Core platform APM integration & agent infrastructure
   /src[\/\\]core[\/\\]/,
@@ -271,10 +230,8 @@ module.exports = {
         {
           from: 'js-yaml',
           to: false,
-          exclude: JS_YAML_LEGACY_CONSUMERS,
           disallowedMessage:
-            "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). " +
-            'Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.',
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
         },
       ],
     ],

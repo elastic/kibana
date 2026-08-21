@@ -193,7 +193,10 @@ export class RuleTypeRunner<
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`,
+              {
+                labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
+              }
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -357,7 +360,10 @@ export class RuleTypeRunner<
           await alertsClient.persistAlerts();
         } else {
           context.logger.debug(
-            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
+            {
+              labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
+            }
           );
         }
       })
@@ -380,7 +386,10 @@ export class RuleTypeRunner<
         }
       } else {
         context.logger.debug(
-          `skipping updating alerts with maintenance windows for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+          `skipping updating alerts with maintenance windows for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
+          {
+            labels: { ruleId: context.ruleId, ruleType: ruleTypeId, spaceId: context.spaceId },
+          }
         );
       }
     });

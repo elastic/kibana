@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -209,7 +209,7 @@ export interface Props {
   hasPasteData: boolean;
 }
 
-export const EditMenu: FunctionComponent<Props> = ({
+export const EditMenu: CanvasFunctionComponent<Props> = ({
   cutNodes,
   copyNodes,
   pasteNodes,
@@ -529,7 +529,6 @@ EditMenu.propTypes = {
   distributeHorizontally: PropTypes.func.isRequired,
   distributeVertically: PropTypes.func.isRequired,
   createCustomElement: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   selectedNodes: PropTypes.arrayOf(PropTypes.object).isRequired,
   groupIsSelected: PropTypes.bool.isRequired,
   groupNodes: PropTypes.func.isRequired,
