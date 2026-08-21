@@ -153,6 +153,7 @@ export const importRules = async ({
           actionsClient,
           rulesClient,
           ruleAssetsClient,
+          matchingAssetsByRuleId: prebuiltContext.matchingAssetsByRuleId,
           changeTracking,
           allowMissingConnectorSecrets,
         }))
@@ -321,6 +322,7 @@ const updateRules = async ({
   actionsClient,
   rulesClient,
   ruleAssetsClient,
+  matchingAssetsByRuleId,
   changeTracking,
   allowMissingConnectorSecrets,
 }: {
@@ -329,6 +331,7 @@ const updateRules = async ({
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
+  matchingAssetsByRuleId: PrebuiltImportContext['matchingAssetsByRuleId'];
   changeTracking?: SecurityRuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
 }): Promise<Array<ImportRuleSuccess | RuleImportErrorObject>> => {
@@ -359,6 +362,7 @@ const updateRules = async ({
             exceptions_list: [...(p.exceptionsList ?? [])],
             ...overrideFields,
           },
+          matchingAsset: matchingAssetsByRuleId[p.rule.rule_id] ?? null,
         });
         ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };
 

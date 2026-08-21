@@ -9,6 +9,7 @@ import type {
   RuleResponse,
   RuleUpdateProps,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from './apply_rule_defaults';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';
@@ -17,12 +18,14 @@ interface ApplyRuleUpdateProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
   ruleUpdate: RuleUpdateProps;
+  matchingAsset?: PrebuiltRuleAsset | null;
 }
 
 export const applyRuleUpdate = async ({
   prebuiltRuleAssetClient,
   existingRule,
   ruleUpdate,
+  matchingAsset,
 }: ApplyRuleUpdateProps): Promise<RuleResponse> => {
   const nextRule: RuleResponse = {
     ...applyRuleDefaults(ruleUpdate),
@@ -47,6 +50,7 @@ export const applyRuleUpdate = async ({
     nextRule,
     currentRule: existingRule,
     prebuiltRuleAssetClient,
+    matchingAsset,
   });
 
   return nextRule;

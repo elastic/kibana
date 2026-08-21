@@ -18,26 +18,31 @@ interface CalculateRuleSourceProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   nextRule: RuleResponse;
   currentRule: RuleResponse | undefined;
+  matchingAsset?: PrebuiltRuleAsset | null;
 }
 
 export async function calculateRuleSource({
   prebuiltRuleAssetClient,
   nextRule,
   currentRule,
+  matchingAsset,
 }: CalculateRuleSourceProps): Promise<RuleSource> {
   if (nextRule.immutable) {
     // This is a prebuilt rule and, despite the name, they are not immutable. So
     // we need to recalculate `ruleSource.isCustomized` based on the rule's contents.
-    const { assets } = await prebuiltRuleAssetClient.fetchAssetsByVersion([
-      {
-        rule_id: nextRule.rule_id,
-        version: nextRule.version,
-      },
-    ]);
-    const baseRule: PrebuiltRuleAsset | undefined = assets.at(0);
+    let asset = matchingAsset;
+    if (asset === undefined) {
+      const { assets } = await prebuiltRuleAssetClient.fetchAssetsByVersion([
+        {
+          rule_id: nextRule.rule_id,
+          version: nextRule.version,
+        },
+      ]);
+      asset = assets.at(0);
+    }
 
     return calculateExternalRuleSource({
-      baseRule,
+      baseRule: asset ?? undefined,
       nextRule,
       currentRule,
     });

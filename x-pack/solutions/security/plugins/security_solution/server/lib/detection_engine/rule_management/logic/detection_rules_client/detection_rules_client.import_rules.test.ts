@@ -24,6 +24,7 @@ import { getMockRulesAuthz } from '../../__mocks__/authz';
 import { createRuleImportErrorObject, isRuleImportError } from '../import/errors';
 import { RULE_IMPORT_BATCH_SIZE } from '../../api/constants';
 import { getChanges } from './methods/utils/get_changes';
+import { getPrebuiltRuleMock } from '../../../prebuilt_rules/model/rule_assets/prebuilt_rule_asset.mock';
 
 jest.mock('../import/check_rule_exception_references');
 jest.mock('../import/fetch_prebuilt_import_context');
@@ -40,6 +41,7 @@ const emptyPrebuiltContext = () => ({
 
 describe('detectionRulesClient.importRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let subject: ReturnType<typeof createDetectionRulesClient>;
   const rulesAuthz = getMockRulesAuthz();
 
@@ -50,6 +52,7 @@ describe('detectionRulesClient.importRules', () => {
     (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValue({});
 
     rulesClient = rulesClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
       errors: [],
@@ -78,7 +81,7 @@ describe('detectionRulesClient.importRules', () => {
       userProfile: userProfileServiceMock.createStart(),
       mlAuthz: buildMlAuthz(),
       rulesAuthz,
-      savedObjectsClient: savedObjectsClientMock.create(),
+      savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
     });
@@ -225,6 +228,35 @@ describe('detectionRulesClient.importRules', () => {
 
     expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
     expect(responses).toEqual([{ rule_id: 'existing-rule' }]);
+  });
+
+  it('overwrite of a prebuilt rule does not refetch assets per rule', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), rule_id: 'existing-rule', version: 1 };
+    const existing = {
+      ...getRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      id: 'existing-id',
+      immutable: true,
+      version: 1,
+    };
+    (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existing,
+    });
+    (fetchPrebuiltImportContext as jest.Mock).mockResolvedValueOnce({
+      matchingAssetsByRuleId: {
+        'existing-rule': getPrebuiltRuleMock({ rule_id: 'existing-rule', version: 1 }),
+      },
+      availableRuleAssetIds: new Set(['existing-rule']),
+    });
+    (getChanges as jest.Mock).mockReturnValueOnce([]);
+
+    await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [ruleToImport],
+    });
+
+    expect(savedObjectsClient.search).not.toHaveBeenCalled();
   });
 
   it('overwrite that only flips enabled skips the write and still calls bulkEnableRules', async () => {
