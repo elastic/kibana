@@ -6,49 +6,50 @@
  */
 
 import { WatchAutonomyLevel } from '@kbn/pnd-common';
-import {
-  PND_WATCH_FLOOR_WORKFLOW_ID,
-  type ManagedWorkflowTemplateValuesForId,
-} from '@kbn/workflows/managed';
+import type { SYSTEM_SECURITY_WATCH_IDS } from '@kbn/pnd-common';
+import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
 import type { WatchSettingsRegistration } from './types';
 
-export type WatchFloorTemplateValues = ManagedWorkflowTemplateValuesForId<
-  typeof PND_WATCH_FLOOR_WORKFLOW_ID
->;
+type RegisteredWatchId = (typeof SYSTEM_SECURITY_WATCH_IDS)[number];
+type WatchTemplateValues = ManagedWorkflowTemplateValuesForId<RegisteredWatchId>;
 
-const WATCH_FLOOR_SETTINGS_VERSION = 1;
+const WATCH_SETTINGS_VERSION = 1;
 
-const parseWatchFloorValues = (raw: Record<string, unknown>) => {
+const parseWatchValues = (watchId: RegisteredWatchId, raw: Record<string, unknown>) => {
   const { settingsVersion, autonomyLevel } = raw;
-  if (settingsVersion !== undefined && settingsVersion !== WATCH_FLOOR_SETTINGS_VERSION) {
-    throw new Error(`Unsupported Watch Floor settings version: ${String(settingsVersion)}`);
+  if (settingsVersion !== undefined && settingsVersion !== WATCH_SETTINGS_VERSION) {
+    throw new Error(
+      `Unsupported settings version for PND watch "${watchId}": ${String(settingsVersion)}`
+    );
   }
   const parsedAutonomyLevel = WatchAutonomyLevel.safeParse(autonomyLevel);
   if (!parsedAutonomyLevel.success) {
-    throw new Error('Watch Floor settings contain an invalid autonomy level');
+    throw new Error(`PND watch "${watchId}" settings contain an invalid autonomy level`);
   }
   return {
-    settingsVersion: WATCH_FLOOR_SETTINGS_VERSION,
+    settingsVersion: WATCH_SETTINGS_VERSION,
     autonomyLevel: parsedAutonomyLevel.data,
-  } satisfies WatchFloorTemplateValues;
+  } satisfies WatchTemplateValues;
 };
 
-export const watchFloorSettings = {
-  createDefaultValues: (): WatchFloorTemplateValues => ({
-    settingsVersion: WATCH_FLOOR_SETTINGS_VERSION,
+export const createWatchSettingsRegistration = (
+  watchId: RegisteredWatchId
+): WatchSettingsRegistration => ({
+  createDefaultValues: (): WatchTemplateValues => ({
+    settingsVersion: WATCH_SETTINGS_VERSION,
     autonomyLevel: 'manual',
   }),
   migrate: (raw: Record<string, unknown>) => {
-    const values = parseWatchFloorValues(raw);
+    const values = parseWatchValues(watchId, raw);
     return {
       values,
       migrated:
-        raw.settingsVersion !== WATCH_FLOOR_SETTINGS_VERSION ||
+        raw.settingsVersion !== WATCH_SETTINGS_VERSION ||
         Object.keys(raw).some((key) => !(key in values)),
     };
   },
   applyPatch: (raw, patch) => {
-    const values = parseWatchFloorValues(raw);
+    const values = parseWatchValues(watchId, raw);
     if (patch.triggers) return { rejected: 'trigger settings' };
     if (patch.scopeRouting) return { rejected: 'scope and routing settings' };
     if (patch.approvalGate) {
@@ -65,10 +66,10 @@ export const watchFloorSettings = {
     };
   },
   toSettings: (raw) => {
-    const values = parseWatchFloorValues(raw);
+    const values = parseWatchValues(watchId, raw);
     return {
-      watchId: PND_WATCH_FLOOR_WORKFLOW_ID,
+      watchId,
       autonomy: values.autonomyLevel,
     };
   },
-} satisfies WatchSettingsRegistration;
+});

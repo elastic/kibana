@@ -6,21 +6,16 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  WatchSettings,
-  WATCH_TIER_TAGS,
-} from '@kbn/pnd-common';
+import { SYSTEM_SECURITY_WATCH_IDS, WatchSettings, WATCH_TIER_TAGS } from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { watchRegistry } from './watch_registry';
-import { watchFloorSettings } from './watches';
 
 describe('watchRegistry', () => {
-  it('registers the managed catalog while limiting durable settings to the converted watch', () => {
+  it('registers durable settings for every managed watch', () => {
     expect(watchRegistry.list()).toHaveLength(5);
-    expect(watchRegistry.get(SYSTEM_SECURITY_WATCH_FLOOR_ID)?.settings).toBe(watchFloorSettings);
-    expect(watchRegistry.get(SYSTEM_SECURITY_WATCH_OFFICER_ID)?.settings).toBeUndefined();
+    for (const watchId of SYSTEM_SECURITY_WATCH_IDS) {
+      expect(watchRegistry.get(watchId)?.settings).toBeDefined();
+    }
   });
 
   it('does not silently strip undeclared settings projection keys', () => {
@@ -34,10 +29,10 @@ describe('watchRegistry', () => {
     }
   });
 
-  it('renders Watch Floor settings into the managed YAML', () => {
-    const definition = getManagedWorkflowDefinition(SYSTEM_SECURITY_WATCH_FLOOR_ID);
+  it.each(SYSTEM_SECURITY_WATCH_IDS)('renders %s settings into the managed YAML', (watchId) => {
+    const definition = getManagedWorkflowDefinition(watchId);
     if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
-      throw new Error('Watch Floor must be registered as a managed YAML template');
+      throw new Error(`Watch "${watchId}" must be registered as a managed YAML template`);
     }
 
     const manualYaml = definition.yamlTemplate({

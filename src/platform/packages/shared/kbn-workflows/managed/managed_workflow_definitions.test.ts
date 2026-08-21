@@ -13,12 +13,20 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_WATCH_DARK_WORKFLOW_ID,
+  PND_WATCH_DEEP_WORKFLOW_ID,
+  PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_FLOOR_WORKFLOW_ID,
+  PND_WATCH_OFFICER_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
+import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
+import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
 import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
+import WATCH_OFFICER_YAML from './definitions/pnd/watch_officer.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -43,6 +51,22 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     recipient: 'World',
   },
   [PND_WATCH_FLOOR_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_OFFICER_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_DARK_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_DEEP_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_DETECTION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -119,17 +143,24 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
-it('requires an explicit Watch Floor version decision when imported YAML changes', () => {
-  const definition = managedWorkflowDefinitions.find(
-    ({ id }) => id === PND_WATCH_FLOOR_WORKFLOW_ID
-  );
-  if (!definition) throw new Error('Watch Floor definition is not registered');
-  const contentFingerprint = createContentFingerprint(WATCH_FLOOR_YAML);
+it.each([
+  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
+  [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
+  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
+  [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
+  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
+] as const)(
+  'requires an explicit %s version decision when imported YAML changes',
+  (workflowId, importedYaml, expectedFingerprint) => {
+    const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
+    if (!definition) throw new Error(`Managed watch "${workflowId}" is not registered`);
+    const contentFingerprint = createContentFingerprint(importedYaml);
 
-  // yamlTemplate hashing sees only the function source, not this imported string. Update this
-  // fingerprint only together with an intentional definition-version decision.
-  expect(`${definition.version}:${contentFingerprint}`).toBe('1:29aa5f25');
-});
+    // yamlTemplate hashing sees only the function source, not this imported string. Update this
+    // fingerprint only together with an intentional definition-version decision.
+    expect(`${definition.version}:${contentFingerprint}`).toBe(expectedFingerprint);
+  }
+);
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
