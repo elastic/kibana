@@ -81,7 +81,18 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
  */
 export const getYaraEngineVersion = async (): Promise<string> => {
   const mod = await loadModule();
-  return mod.ccall<string>('yara_engine_version', 'string', [], []);
+  try {
+    return mod.ccall<string>('yara_engine_version', 'string', [], []);
+  } catch (error) {
+    if (isWasmTrap(error)) {
+      modulePromise = undefined;
+      logger?.error(
+        'libyara WASM trap during yara_engine_version; module will be reloaded on next call'
+      );
+    }
+    logger?.error(error);
+    throw error;
+  }
 };
 
 /**
