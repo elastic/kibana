@@ -230,6 +230,21 @@ export const matrixConfigSchema = schema.object({
       ),
     })
   ),
+  /**
+   * Opt-in provenance extras rendered into the HTML footer. The fixture
+   * fingerprint pins which dataset/tool seed revision the scores came from
+   * (drift between benchmark fixture generations is a known divergence
+   * source), and methodology notes document scoring-semantics changes a
+   * reader must know before comparing against older matrices.
+   */
+  provenance: schema.maybe(
+    schema.object({
+      fixtureFingerprint: schema.maybe(schema.string({ maxLength: MAX_STRING_LENGTH })),
+      methodologyNotes: schema.maybe(
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: 2000 }), { maxSize: 20 })
+      ),
+    })
+  ),
 });
 
 export type MatrixConfig = TypeOf<typeof matrixConfigSchema>;

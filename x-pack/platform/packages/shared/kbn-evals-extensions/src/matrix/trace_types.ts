@@ -32,6 +32,14 @@ export interface MatrixTraceEntry {
   stepCount?: number;
   /** Number of tool calls (cached for summary table). */
   toolCount?: number;
+  /**
+   * Per-evaluator mean scores for this example within the experiment
+   * (evaluator name → mean over repetitions). Lets the report render a
+   * per-prompt score instead of repeating the column aggregate on every card.
+   */
+  scores?: Record<string, number>;
+  /** Number of repetitions aggregated into this entry's scores. */
+  repetitions?: number;
 }
 
 /**

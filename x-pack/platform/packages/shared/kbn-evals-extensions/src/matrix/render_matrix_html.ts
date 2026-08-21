@@ -6,7 +6,7 @@
  */
 
 import type { Matrix, MatrixRow, MatrixDisplayColumn } from './build_matrix';
-import type { MatrixConfig } from './load_matrix_config';
+import type { MatrixColumnConfig, MatrixConfig } from './load_matrix_config';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey } from './trace_types';
@@ -41,6 +41,9 @@ const REPORT_CSS = `
   .ok-dot { color:var(--ok); font-weight:700; }
   .sub-num { color:var(--muted); font-size:11px; }
   .legend { color:var(--muted); font-size:12px; margin:4px 0 30px; }
+  details.methodology { margin:10px 0 14px; }
+  details.methodology summary { cursor:pointer; color:var(--muted); font-size:13px; }
+  details.methodology ul { margin:8px 0 0; padding-left:20px; color:var(--muted); font-size:13px; }
   .status { padding:2px 9px; border-radius:20px; font-size:12px; font-weight:600; flex:none; }
   .status.ok { background:rgba(95,208,160,.15); color:var(--ok); }
   .status.err { background:rgba(255,93,108,.15); color:var(--err); }
@@ -83,9 +86,15 @@ const REPORT_CSS = `
   .trace-body { border-left:2px solid var(--border); padding-left:12px; margin:6px 0 6px 4px; }
   .step { font-size:12.5px; margin:5px 0; display:flex; gap:8px; align-items:baseline; }
   .step-tag { flex:none; font-size:10px; text-transform:uppercase; letter-spacing:.05em;
-    color:var(--muted); width:16px; }
+    color:var(--muted); }
+  /* Text tags (SKILL/THINK) reserve a real column so they never overlap the
+     paragraph; numbered tool badges keep their own 18px circle via .tool-tag. */
+  .step.reasoning .step-tag { min-width:44px; }
   .step.reasoning { color:#bcc4d2; }
   .step.tool { color:var(--text); }
+  .step-text { flex:1; min-width:0; }
+  .step-text code { display:inline; white-space:normal; font-size:11.5px;
+    vertical-align:baseline; }
   .tool-tag { width:18px; height:18px; border-radius:50%; background:var(--border);
     color:var(--text); display:inline-grid; place-items:center; font-size:10px; font-weight:700; }
   .tool-id { color:#ffd9a8; }
@@ -292,13 +301,13 @@ const stepHtml = (step: TraceStep, index: number): string => {
     )}</code><span class="tool-params">${esc(step.toolParams ?? '')}</span></div>`;
   }
   if (step.type === 'skill') {
-    return `<div class="step reasoning"><span class="step-tag">skill</span>Selected: ${esc(
+    return `<div class="step reasoning"><span class="step-tag">skill</span><span class="step-text">Selected: ${esc(
       (step.skills ?? []).join(', ')
-    )}</div>`;
+    )}</span></div>`;
   }
-  return `<div class="step reasoning"><span class="step-tag">think</span>${inlineMd(
+  return `<div class="step reasoning"><span class="step-tag">think</span><span class="step-text">${inlineMd(
     esc(step.text ?? '')
-  )}</div>`;
+  )}</span></div>`;
 };
 
 const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
@@ -341,6 +350,36 @@ const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
     )
     .join('');
   return `<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+};
+
+/**
+ * Per-prompt score for a trace card, computed from the example's own
+ * per-evaluator scores using the column's evaluator semantics (allowlist or
+ * global exclusions) and scale. Returns an empty string when the trace
+ * carries no score data — the caller falls back to the column aggregate.
+ */
+const variantScore = (
+  trace: MatrixTraceEntry | undefined,
+  column: MatrixColumnConfig | undefined,
+  config: MatrixConfig
+): string => {
+  const scores = trace?.scores;
+  if (!scores) {
+    return '';
+  }
+  const excluded = config.excludeEvaluators ?? [];
+  const allow = column?.evaluators;
+  const values = Object.entries(scores)
+    .filter(([name]) =>
+      allow ? allow.includes(name) : !excluded.some((prefix) => name.startsWith(prefix))
+    )
+    .map(([, value]) => value);
+  if (values.length === 0) {
+    return '';
+  }
+  const scale = column?.scale ?? config.defaultScale ?? 10;
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  return `score ${(mean * scale).toFixed(config.decimals ?? 2)}`;
 };
 
 const renderModelCard = (
@@ -401,9 +440,14 @@ const renderModelCard = (
             variantTraces.length > 0 ? variantTraces : [{ label: col.id, trace: fallbackTrace }];
           return cards
             .map(({ label, trace }) => {
-              const scoreStr = cell.kind === 'score' ? `score ${cell.value}` : '';
+              const scoreStr =
+                variantScore(trace, column, config) ||
+                (cell.kind === 'score' ? `score ${cell.value}` : '');
               const metaParts = [
                 scoreStr,
+                trace?.repetitions
+                  ? `${trace.repetitions} rep${trace.repetitions === 1 ? '' : 's'}`
+                  : '',
                 trace?.stepCount ? `${trace.stepCount} steps` : '',
                 trace?.toolCount ? `${trace.toolCount} tools` : '',
               ].filter(Boolean);
@@ -468,9 +512,16 @@ export const renderMatrixHtml = (
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
     provenance.commitSha ? `commit \`${provenance.commitSha}\`` : undefined,
     provenance.buildUrl ? `<a href="${esc(provenance.buildUrl)}">build</a>` : undefined,
+    provenance.fixtureFingerprint ? `fixtures \`${provenance.fixtureFingerprint}\`` : undefined,
   ]
     .filter(Boolean)
     .join(' · ');
+
+  const methodologyBlock = provenance.methodologyNotes?.length
+    ? `<details class="methodology"><summary>Methodology &amp; scoring-semantics notes</summary><ul>${provenance.methodologyNotes
+        .map((note) => `<li>${esc(note)}</li>`)
+        .join('')}</ul></details>`
+    : '';
 
   const summaryTable = renderSummaryTable(matrix, config);
   const modelCards =
@@ -493,6 +544,7 @@ export const renderMatrixHtml = (
 <div class="wrap">
 <h1>${esc(config.title)}</h1>
 <p class="sub">${provenanceLine}</p>
+${methodologyBlock}
 ${summaryTable}
 <p class="legend">Each cell shows the model's score (0–10). Expand a prompt below to read the agent's full answer, tool trail, and reasoning trace.</p>
 ${modelCards}

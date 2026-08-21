@@ -95,6 +95,36 @@ const isCompleteScore = (score: EvaluationScoreDocument): boolean => {
 };
 
 /**
+ * Per-evaluator mean scores for one example, computed over all of the
+ * example's score documents in the experiment (one doc per evaluator per
+ * repetition). Pure for unit testing.
+ */
+export const exampleScoresByEvaluator = (
+  docs: EvaluationScoreDocument[]
+): Record<string, number> => {
+  const sums = new Map<string, { sum: number; count: number }>();
+  for (const doc of docs) {
+    const name = doc.evaluator?.name;
+    const score = doc.evaluator?.score;
+    if (!name || typeof score !== 'number') {
+      continue;
+    }
+    const agg = sums.get(name) ?? { sum: 0, count: 0 };
+    agg.sum += score;
+    agg.count += 1;
+    sums.set(name, agg);
+  }
+  return Object.fromEntries([...sums.entries()].map(([name, agg]) => [name, agg.sum / agg.count]));
+};
+
+/**
+ * Number of distinct repetitions present in a batch of score documents.
+ * Pure for unit testing.
+ */
+export const countRepetitions = (docs: EvaluationScoreDocument[]): number =>
+  new Set(docs.map((doc) => doc.task?.repetition_index ?? 0)).size;
+
+/**
  * Merges a batch of full (unstripped) score documents for one example into
  * `traces`. Documents arrive in unknown order and span every experiment and
  * repetition that ever scored this example, so this filters to the requested
@@ -121,6 +151,13 @@ const processExampleBatch = (
   if (relevant.length === 0) return false;
 
   const entry = extractTraceFromScore(relevant[0]);
+  // Per-evaluator means over every repetition of this example — powers the
+  // per-prompt score on trace cards, so cards no longer repeat the column
+  // aggregate for every variant in a category.
+  entry.scores = exampleScoresByEvaluator(relevant);
+  // How many repetitions of this example fed the scores above — the report
+  // badges it so 1-rep cells are visually distinguishable from 3-rep cells.
+  entry.repetitions = countRepetitions(relevant);
   const exampleId = relevant[0].example?.id;
   const datasetId = relevant[0].example?.dataset?.id;
 
@@ -162,6 +199,7 @@ const processExampleBatch = (
     const firstComplete = relevant.find(isCompleteScore);
     if (firstComplete) {
       const fallbackEntry = extractTraceFromScore(firstComplete);
+      fallbackEntry.scores = exampleScoresByEvaluator(relevant.filter(isCompleteScore));
       const fid = firstComplete.example?.id;
       if (fid) traces[traceKey(modelId, fid)] = fallbackEntry;
       if (traces[suiteTraceKey] === undefined) {

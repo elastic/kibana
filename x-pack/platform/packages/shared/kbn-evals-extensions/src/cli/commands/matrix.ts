@@ -213,6 +213,8 @@ export const matrixCmd: Command<void> = {
           suiteIds,
           commitSha: process.env.BUILDKITE_COMMIT,
           buildUrl: process.env.BUILDKITE_BUILD_URL,
+          fixtureFingerprint: config.provenance?.fixtureFingerprint,
+          methodologyNotes: config.provenance?.methodologyNotes,
         },
         traces
       );

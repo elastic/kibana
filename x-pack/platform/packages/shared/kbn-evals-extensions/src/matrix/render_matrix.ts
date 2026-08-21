@@ -25,6 +25,10 @@ export interface MatrixProvenance {
   commitSha?: string;
   /** CI build URL that produced the artifact, when known. */
   buildUrl?: string;
+  /** sha256 of the dataset/tool seed files the runs were scored against. */
+  fixtureFingerprint?: string;
+  /** Scoring-semantics notes a reader needs before comparing matrices. */
+  methodologyNotes?: string[];
 }
 
 export interface RenderedMatrix {

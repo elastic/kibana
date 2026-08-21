@@ -109,6 +109,89 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('Trace unavailable');
   });
 
+  it('renders each variant card with its own per-example score, not the column aggregate', () => {
+    const configWithPrefixes: MatrixConfig = {
+      ...mockConfig,
+      columns: [
+        {
+          id: 'alert-analysis',
+          label: 'Alert Analysis',
+          group: 'Agent Builder',
+          suites: ['security-persona-matrix'],
+          examplePrefixes: ['alert-analysis'],
+          weight: 1,
+        },
+      ],
+    };
+    const matrixWithAggregate: Matrix = {
+      columns: [{ id: 'alert-analysis', label: 'Alert Analysis', group: 'Agent Builder' }],
+      composites: [],
+      displayColumns: [{ id: 'alert-analysis', label: 'Alert Analysis', kind: 'base' }],
+      overallLabel: 'Overall',
+      proprietary: [
+        {
+          modelId: 'test-model',
+          modelLabel: 'Test Model',
+          openSource: false,
+          // Category aggregate across variants a/b/c — must not leak onto cards.
+          cells: { 'alert-analysis': { kind: 'score', value: 8.48 } },
+          overall: { kind: 'missing' },
+        },
+      ],
+      openSource: [],
+    };
+    const traces: MatrixTraceData = {
+      'test-model:alert-analysis-a': {
+        question: 'prompt a',
+        stepCount: 22,
+        toolCount: 13,
+        scores: { ExpectedToolCalled: 0.95, Correctness: 0.9 },
+      },
+      'test-model:alert-analysis-b': {
+        question: 'prompt b',
+        stepCount: 27,
+        toolCount: 16,
+        scores: { ExpectedToolCalled: 0.6, Correctness: 0.62 },
+      },
+    };
+
+    const html = renderMatrixHtml(matrixWithAggregate, configWithPrefixes, {}, traces);
+
+    // Each variant card shows its own mean (0.925 -> 9.25, 0.61 -> 6.10).
+    expect(html).toContain('score 9.25');
+    expect(html).toContain('score 6.10');
+    // The aggregate still appears exactly once: the summary table cell.
+    expect(html).not.toContain('score 8.48');
+    expect(html.match(/8\.48/g)).toHaveLength(1);
+  });
+
+  it('renders think/skill step tags in a reserved column with inline code chips in the body', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        steps: [
+          { type: 'skill', skills: ['alert-analysis'] },
+          { type: 'reasoning', text: 'I will load the `alert-analysis` skill first.' },
+        ],
+        stepCount: 2,
+        toolCount: 0,
+      },
+    };
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    // Tag lives in its own span, body wrapped in .step-text (flex layout keeps
+    // SKILL/THINK from overlapping the paragraph).
+    expect(html).toContain('<span class="step-tag">skill</span><span class="step-text">');
+    expect(html).toContain('<span class="step-tag">think</span><span class="step-text">');
+    // Backticks in reasoning render as inline <code> inside the paragraph.
+    expect(html).toContain(
+      '<span class="step-text">I will load the <code>alert-analysis</code> skill first.</span>'
+    );
+    // CSS: text tags get a reserved column; the old fixed 16px width is gone.
+    expect(html).toContain('.step.reasoning .step-tag { min-width:44px; }');
+    expect(html).not.toContain(
+      '.step-tag { flex:none; font-size:10px; text-transform:uppercase; letter-spacing:.05em;\n    color:var(--muted); width:16px; }'
+    );
+  });
+
   it('includes provenance when provided', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig, {
       branch: 'feature-branch',
@@ -311,5 +394,35 @@ describe('renderMatrixHtml', () => {
     // No literal asterisk-bullet paragraphs remain.
     expect(html).not.toMatch(/<p>\s*\* /);
     expect(html).not.toContain('**');
+  });
+
+  it('badges the repetition count on trace cards', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': { question: 'q', stepCount: 3, toolCount: 2, repetitions: 3 },
+    };
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('3 reps');
+  });
+
+  it('renders the fixture fingerprint in the provenance line', () => {
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {
+      fixtureFingerprint: 'sha256:abc123',
+    });
+    expect(html).toContain('fixtures `sha256:abc123`');
+  });
+
+  it('renders methodology notes as a collapsible block, escaped', () => {
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {
+      methodologyNotes: [
+        'ExpectedToolCalled checks the full declared set',
+        'note with <b>html</b>',
+      ],
+    });
+    expect(html).toContain('<details class="methodology">');
+    expect(html).toContain('<li>ExpectedToolCalled checks the full declared set</li>');
+    expect(html).toContain('&lt;b&gt;html&lt;/b&gt;');
+    expect(html).not.toContain('<li>note with <b>');
+    // No block at all when notes are absent.
+    expect(renderMatrixHtml(mockMatrix, mockConfig)).not.toContain('class="methodology"');
   });
 });
