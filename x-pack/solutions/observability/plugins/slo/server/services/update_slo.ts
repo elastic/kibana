@@ -35,6 +35,14 @@ import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getSloApmLabels } from './utils';
 
+const NON_BREAKING_SUMMARY_UPDATE_SCRIPT = `
+  ctx._source.slo.name = params.name;
+  ctx._source.slo.description = params.description;
+  ctx._source.slo.tags = params.tags;
+  ctx._source.slo.updatedAt = params.updatedAt;
+  ctx._source.slo.updatedBy = params.updatedBy;
+`;
+
 export class UpdateSLO {
   constructor(
     private repository: SLODefinitionRepository,
@@ -124,6 +132,15 @@ export class UpdateSLO {
 
         throw err;
       }
+
+      // Best-effort: immediately propagate non-breaking field changes (name, description, tags, ...)
+      // to existing summary docs without waiting for the next transform run.
+      // Runs asynchronously so it does not block the response or affect pipeline rollback.
+      this.updateSummaryDocuments(updatedSlo).catch((err) => {
+        this.logger.debug(
+          `Failed to immediately update summary documents for SLO [id: ${updatedSlo.id}]. ${err}`
+        );
+      });
 
       return this.toResponse(updatedSlo);
     }
@@ -324,6 +341,30 @@ export class UpdateSLO {
         }),
       { logger: this.logger }
     );
+  }
+
+  private async updateSummaryDocuments(slo: SLODefinition): Promise<void> {
+    await this.scopedClusterClient.asCurrentUser.updateByQuery({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      conflicts: 'proceed',
+      wait_for_completion: false,
+      query: {
+        bool: {
+          filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
+        },
+      },
+      script: {
+        source: NON_BREAKING_SUMMARY_UPDATE_SCRIPT,
+        lang: 'painless',
+        params: {
+          name: slo.name,
+          description: slo.description,
+          tags: slo.tags,
+          updatedAt: slo.updatedAt,
+          updatedBy: slo.updatedBy ?? '',
+        },
+      },
+    });
   }
 
   private toResponse(slo: SLODefinition): UpdateSLOResponse {
