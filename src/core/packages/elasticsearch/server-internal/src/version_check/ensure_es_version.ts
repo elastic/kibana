@@ -246,44 +246,61 @@ export const pollEsNodesVersion = ({
     }),
     switchMap((nodesInfoResponse) => {
       if (clockSkewLogged || 'nodesInfoRequestError' in nodesInfoResponse) {
-        return of({ nodesInfoResponse, elasticsearchTime: undefined });
+        return of({
+          nodesInfoResponse,
+          elasticsearchTime: undefined,
+          kibanaTimeBoundary: undefined,
+        });
       }
 
-      return defer(() =>
-        internalClient.nodes.stats(
+      return defer(async () => {
+        const kibanaRequestTime = Date.now();
+        const nodesStatsResponse = await internalClient.nodes.stats(
           {
             node_id: '_all',
             metric: 'os',
-            filter_path: ['nodes.*.os.timestamp'],
+            filter_path: ['nodes.*.timestamp'],
           },
           { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
-        )
-      ).pipe(
-        map((nodesStatsResponse) => {
+        );
+        return { nodesStatsResponse, kibanaRequestTime, kibanaResponseTime: Date.now() };
+      }).pipe(
+        map(({ nodesStatsResponse, kibanaRequestTime, kibanaResponseTime }) => {
           const elasticsearchTime = Object.values(nodesStatsResponse.nodes).find(
-            (node) => node.os?.timestamp !== undefined
-          )?.os?.timestamp;
-          return { nodesInfoResponse, elasticsearchTime };
+            ({ timestamp }) =>
+              timestamp !== undefined &&
+              (kibanaRequestTime - timestamp > MAX_CLOCK_SKEW_MS ||
+                timestamp - kibanaResponseTime > MAX_CLOCK_SKEW_MS)
+          )?.timestamp;
+          const kibanaTimeBoundary =
+            elasticsearchTime === undefined
+              ? undefined
+              : Math.min(kibanaResponseTime, Math.max(kibanaRequestTime, elasticsearchTime));
+
+          return { nodesInfoResponse, elasticsearchTime, kibanaTimeBoundary };
         }),
-        catchError(() => of({ nodesInfoResponse, elasticsearchTime: undefined }))
+        catchError(() =>
+          of({
+            nodesInfoResponse,
+            elasticsearchTime: undefined,
+            kibanaTimeBoundary: undefined,
+          })
+        )
       );
     }),
-    tap(({ elasticsearchTime }) => {
-      if (elasticsearchTime === undefined) {
+    tap(({ elasticsearchTime, kibanaTimeBoundary }) => {
+      if (elasticsearchTime === undefined || kibanaTimeBoundary === undefined) {
         return;
       }
 
-      const kibanaTime = Date.now();
-      const clockSkew = Math.abs(kibanaTime - elasticsearchTime);
+      const clockSkew = Math.abs(kibanaTimeBoundary - elasticsearchTime);
 
-      if (clockSkew > MAX_CLOCK_SKEW_MS) {
-        log.error(
-          `Kibana and Elasticsearch clocks are out of sync by ${clockSkew}ms. Kibana time: ${new Date(
-            kibanaTime
-          ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`
-        );
-        clockSkewLogged = true;
-      }
+      log.error(
+        `Kibana and Elasticsearch clocks are out of sync by at least ${clockSkew}ms. Kibana time: ${new Date(
+          kibanaTimeBoundary
+        ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`
+      );
+      clockSkewLogged = true;
     }),
     map(({ nodesInfoResponse }) => {
       const nodesInfo =
