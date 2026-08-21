@@ -42,7 +42,7 @@ export interface PresentationPanelProps<
   /**
    * Set to true when rendering within data-shared-items-container
    * to enable sharing "data-share-item" attribute for panel.
-   * 
+   *
    * isSharedItem is ignored when hideHeader is true
    */
   isSharedItem?: boolean;
