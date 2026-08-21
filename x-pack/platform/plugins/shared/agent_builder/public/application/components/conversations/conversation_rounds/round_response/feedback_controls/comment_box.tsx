@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTextArea, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const MAX_CHARS = 500;
@@ -21,7 +20,16 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
   const remaining = MAX_CHARS - value.length;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiText size="s">
+          <strong>
+            {i18n.translate('xpack.agentBuilder.feedback.commentLabel', {
+              defaultMessage: 'Add comment',
+            })}
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiTextArea
           placeholder={i18n.translate('xpack.agentBuilder.feedback.commentPlaceholder', {
@@ -29,47 +37,28 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
           })}
           value={value}
           onChange={(e) => onChange(e.target.value.slice(0, MAX_CHARS))}
-          rows={2}
+          rows={4}
           resize="vertical"
           fullWidth
           data-test-subj="roundFeedbackCommentInput"
         />
+        <EuiText size="xs" color={remaining < 50 ? 'warning' : 'subdued'} textAlign="right">
+          {remaining}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
-                defaultMessage:
-                  'Your comment may be shared with Elastic to improve the product. {privacyLink}',
-                values: {
-                  privacyLink: (
-                    <EuiLink
-                      href="https://www.elastic.co/legal/privacy-statement"
-                      target="_blank"
-                      external
-                    >
-                      {i18n.translate('xpack.agentBuilder.feedback.commentDisclosurePrivacyLink', {
-                        defaultMessage: 'Privacy Statement',
-                      })}
-                    </EuiLink>
-                  ),
-                },
+        <EuiCallOut size="s" color="primary" iconType="info">
+          <EuiText size="s">
+            {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
+              defaultMessage: 'Your comment and metadata will be shared with Elastic.',
+            })}{' '}
+            <EuiLink href="https://www.elastic.co/legal/privacy-statement" target="_blank" external>
+              {i18n.translate('xpack.agentBuilder.feedback.commentDisclosurePrivacyLink', {
+                defaultMessage: 'Privacy statement',
               })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="xs"
-              color={remaining < 50 ? 'warning' : 'subdued'}
-              css={css`
-                text-align: right;
-              `}
-            >
-              {remaining}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiLink>
+          </EuiText>
+        </EuiCallOut>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

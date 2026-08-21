@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 
@@ -67,32 +67,43 @@ export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) =>
   const chips = vote === 'down' ? DOWN_CHIPS : UP_CHIPS;
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      wrap
-      responsive={false}
-      role="group"
-      aria-label={i18n.translate('xpack.agentBuilder.feedback.chipRow.legend', {
-        defaultMessage: 'Feedback options',
-      })}
-    >
-      {chips.map(({ id, label }) => {
-        const isSelected = selected.includes(id);
-        return (
-          <EuiFlexItem key={id} grow={false}>
-            <EuiButton
-              size="s"
-              color={isSelected ? 'primary' : 'text'}
-              fill={isSelected}
-              onClick={() => onToggle(id)}
-              aria-pressed={isSelected}
-              data-test-subj={`roundFeedbackChip-${id}`}
-            >
-              {label}
-            </EuiButton>
-          </EuiFlexItem>
-        );
-      })}
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {i18n.translate('xpack.agentBuilder.feedback.chipRow.pickOptions', {
+            defaultMessage: 'Pick any of the following options',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="s"
+          wrap
+          responsive={false}
+          role="group"
+          aria-label={i18n.translate('xpack.agentBuilder.feedback.chipRow.legend', {
+            defaultMessage: 'Feedback options',
+          })}
+        >
+          {chips.map(({ id, label }) => {
+            const isSelected = selected.includes(id);
+            return (
+              <EuiFlexItem key={id} grow={false}>
+                <EuiButton
+                  size="s"
+                  color="text"
+                  fill={isSelected}
+                  onClick={() => onToggle(id)}
+                  aria-pressed={isSelected}
+                  data-test-subj={`roundFeedbackChip-${id}`}
+                >
+                  {label}
+                </EuiButton>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
