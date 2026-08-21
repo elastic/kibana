@@ -312,7 +312,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     // A single evaluator failing (e.g. an LLM judge's inference call
                     // erroring out) must not take down the run's other measurements:
                     // record an explicit error result so the gap is visible in the
-                    // exported scores instead of silently dropping the document.
+                    // exported scores rather than absent from them.
                     const message = error instanceof Error ? error.message : String(error);
                     attempts.errors += 1;
                     this.options.log.error(
