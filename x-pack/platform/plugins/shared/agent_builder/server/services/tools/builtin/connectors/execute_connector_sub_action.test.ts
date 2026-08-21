@@ -46,6 +46,10 @@ const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
   })
 ) as unknown as ConnectorToolsOptions['getActions'];
 
+const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
+  Promise.resolve({} as unknown as ReturnType<ConnectorToolsOptions['getInference']>)
+);
+
 const mockCheckAuthorizationStatus = jest.fn();
 const mockAskForAuthorization = jest.fn();
 
@@ -97,7 +101,7 @@ describe('createExecuteConnectorSubActionTool', () => {
   });
 
   it('has correct id, type, and tags', () => {
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     expect(tool.id).toBe(platformCoreTools.executeConnectorSubAction);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['connector', 'sub-action']);
@@ -105,7 +109,7 @@ describe('createExecuteConnectorSubActionTool', () => {
 
   describe('schema (strict, no structural normalization)', () => {
     it('rejects flattened sub-action fields at the root (unknown keys)', () => {
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = tool.schema.safeParse({
         connectorId: 'conn-123',
         subAction: 'searchMessages',
@@ -115,7 +119,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
 
     it('rejects snake_case aliases (strict canonical keys only)', () => {
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = tool.schema.safeParse({
         connector_id: 'conn-123',
         sub_action: 'searchMessages',
@@ -125,7 +129,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
 
     it('rejects payloads missing connectorId and subAction', () => {
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = tool.schema.safeParse({ messageId: '123' });
       expect(result.success).toBe(false);
     });
@@ -161,7 +165,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       data: { messages: [{ text: 'hello' }] },
     });
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -191,7 +195,7 @@ describe('createExecuteConnectorSubActionTool', () => {
   it('defaults params to empty object', async () => {
     mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     await tool.handler(
       {
         connectorId: 'conn-123',
@@ -224,7 +228,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
     isToolActionMock.mockReturnValue(false);
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -246,7 +250,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     mockGet.mockResolvedValue({ id: 'conn-123', actionTypeId: '.unknown' });
     getConnectorSpecMock.mockReturnValue(undefined);
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -267,7 +271,7 @@ describe('createExecuteConnectorSubActionTool', () => {
   it('returns error when connector resolution fails', async () => {
     mockGet.mockRejectedValue(new Error('Saved object not found'));
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'bad-id',
@@ -288,7 +292,7 @@ describe('createExecuteConnectorSubActionTool', () => {
   it('returns error result when execute throws', async () => {
     mockExecute.mockRejectedValue(new Error('Connector execution failed'));
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -314,7 +318,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       serviceMessage: 'Too many requests',
     });
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -333,7 +337,7 @@ describe('createExecuteConnectorSubActionTool', () => {
   it('returns success message when data is null', async () => {
     mockExecute.mockResolvedValue({ status: 'ok', data: null });
 
-    const tool = createExecuteConnectorSubActionTool({ getActions });
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
@@ -368,7 +372,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     it('raises an authorization prompt for an oauth_authorization_code connector', async () => {
       mockExecute.mockResolvedValue(authErrorResult());
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
@@ -397,7 +401,7 @@ describe('createExecuteConnectorSubActionTool', () => {
         })
       );
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
@@ -420,7 +424,7 @@ describe('createExecuteConnectorSubActionTool', () => {
         })
       );
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
@@ -438,7 +442,7 @@ describe('createExecuteConnectorSubActionTool', () => {
         })
       );
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
@@ -452,7 +456,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.declined });
       mockExecute.mockResolvedValue(authErrorResult());
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
@@ -472,7 +476,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.authorized });
       mockExecute.mockResolvedValue(authErrorResult());
 
-      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
         { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
         mockContext
