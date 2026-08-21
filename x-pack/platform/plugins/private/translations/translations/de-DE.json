@@ -17423,8 +17423,6 @@
     "xpack.cases.jsonEditorField.defaultLabel": "JSON Editor",
     "xpack.cases.markdownEditor.noSimultaneousUploads.message": "Gleichzeitige Datei-Uploads werden nicht unterstützt.",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "Visualisierung hinzufügen",
-    "xpack.cases.markdownEditor.plugins.lens.betaDescription": "Dieses Modul ist nicht GA. Sie können vorerst nur ein Lens pro Kommentar einfügen. Bitte helfen Sie uns, indem Sie Bugs melden.",
-    "xpack.cases.markdownEditor.plugins.lens.betaLabel": "Beta",
     "xpack.cases.markdownEditor.plugins.lens.closeButtonLabel": "Schließen",
     "xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel": "Neu erstellen",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel": "Keine übereinstimmendes Lens gefunden.",
