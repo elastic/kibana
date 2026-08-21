@@ -42,6 +42,10 @@ import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 import type { CallbackDeliveryService } from './execution/callback';
+import type {
+  ConversationTemplatesServiceSetup,
+  ConversationTemplatesServiceStart,
+} from './conversation/templates';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -52,6 +56,7 @@ export interface InternalSetupServices {
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
+  conversationTemplates: ConversationTemplatesServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -75,6 +80,7 @@ export interface InternalStartServices {
   consumption: ConsumptionServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface ServiceSetupDeps {
