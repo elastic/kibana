@@ -170,7 +170,7 @@ const createDeferred = <T,>() => {
 };
 
 const clickRevertToSpaceDefaults = async (user: UserEvent) => {
-  const [globalActionsButton] = screen.getAllByRole('button');
+  const globalActionsButton = screen.getByTestId('projectPickerGlobalActionsButton');
   await user.click(globalActionsButton);
   await user.click(screen.getByText('Revert to space defaults').closest('button')!);
 };

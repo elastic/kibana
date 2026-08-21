@@ -75,7 +75,7 @@ const getContextMenuItems = (
   },
 ];
 
-interface ProjectPickerFrameHeaderActionsProps {
+export interface ProjectPickerFrameHeaderActionsProps {
   customContextMenuItems?: HeaderContextMenuItemProps[];
 }
 
