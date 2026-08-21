@@ -119,6 +119,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "action_task_params|3",
         "action_task_params|2",
         "action_task_params|1",
+        "ad_hoc_run_params|5",
         "ad_hoc_run_params|4",
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
