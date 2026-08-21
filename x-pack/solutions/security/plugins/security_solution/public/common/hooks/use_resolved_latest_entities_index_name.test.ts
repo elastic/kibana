@@ -19,6 +19,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 const NEUTRAL_INDEX = '.entities.v2.latest.default-00001';
 const LEGACY_INDEX = '.entities.v2.latest.security_default-00001';
+const COLLIDING_SPACE_ALIAS = 'entities-latest-security_default';
 
 describe('useResolvedLatestEntitiesIndexName', () => {
   const mockSearch = jest.fn();
@@ -55,6 +56,24 @@ describe('useResolvedLatestEntitiesIndexName', () => {
     );
 
     await expect(getQueryFn()()).resolves.toEqual({ indexName: LEGACY_INDEX });
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ index: COLLIDING_SPACE_ALIAS }),
+      })
+    );
+  });
+
+  it('skips the legacy fallback when space security_{ns} owns the colliding names', async () => {
+    // Space "security_default" is migrated: its neutral index IS this space's
+    // legacy name, and its entities-latest-security_default alias is live.
+    mockSearch.mockImplementation(({ params }: { params: { index: string } }) =>
+      shardsResponse(params.index === NEUTRAL_INDEX ? 0 : 1)
+    );
+
+    await expect(getQueryFn()()).resolves.toEqual({ indexName: null });
+    expect(mockSearch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ params: expect.objectContaining({ index: LEGACY_INDEX }) })
+    );
   });
 
   it('returns null when neither naming scheme has a live index', async () => {
@@ -63,10 +82,20 @@ describe('useResolvedLatestEntitiesIndexName', () => {
     await expect(getQueryFn()()).resolves.toEqual({ indexName: null });
   });
 
-  it('treats search errors (e.g. 403) as the index being unavailable', async () => {
-    mockSearch.mockReturnValue(throwError(() => new Error('security_exception')));
+  it('treats 403/security_exception errors as the index being unavailable', async () => {
+    mockSearch.mockReturnValue(
+      throwError(() => Object.assign(new Error('security_exception'), { statusCode: 403 }))
+    );
 
     await expect(getQueryFn()()).resolves.toEqual({ indexName: null });
+  });
+
+  it('rethrows transient errors instead of caching a wrong answer', async () => {
+    mockSearch.mockReturnValue(
+      throwError(() => Object.assign(new Error('Internal Server Error'), { statusCode: 500 }))
+    );
+
+    await expect(getQueryFn()()).rejects.toThrow('Internal Server Error');
   });
 
   it('does not run until the space id is known', () => {

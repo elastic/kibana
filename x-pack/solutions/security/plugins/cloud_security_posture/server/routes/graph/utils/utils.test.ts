@@ -116,16 +116,9 @@ describe('utils', () => {
       expect(result).toBe(indexName);
     });
 
-    it('should return the legacy Security-scoped name on un-migrated deployments', async () => {
-      const legacyName = '.entities.v2.latest.security_default-00001';
-      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(legacyName);
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
-      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
-      expect(result).toBe(legacyName);
-    });
+    // Legacy vs neutral resolution itself is covered by the entity_store resolver
+    // tests (resolve_entity_store_indices.test.ts) — this suite only verifies the
+    // pass-through, existence check, and error handling around it.
 
     it('should return null when the index does not exist', async () => {
       (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
