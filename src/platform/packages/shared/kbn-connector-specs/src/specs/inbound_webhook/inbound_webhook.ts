@@ -20,9 +20,44 @@ import {
 } from './constants';
 import { InboundWebhookReceivedEventSchema } from './types';
 
+/** Bound echoed challenge so a handshake cannot become an unbounded response. */
+const MAX_HANDSHAKE_CHALLENGE_LENGTH = 1024;
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Generic POST handshake: top-level string `challenge` (sibling keys ignored).
+ * Echo `{ challenge }` and skip emit. Nested `payload.challenge` is not a handshake.
+ */
+const getHandshakeChallenge = (rawBody: unknown): string | undefined => {
+  if (!isPlainObject(rawBody)) {
+    return undefined;
+  }
+  const { challenge } = rawBody;
+  if (typeof challenge !== 'string' || challenge.length === 0) {
+    return undefined;
+  }
+  if (challenge.length > MAX_HANDSHAKE_CHALLENGE_LENGTH) {
+    return undefined;
+  }
+  return challenge;
+};
+
 const handleInboundWebhookEvents = async (
   ctx: ConnectorIngressContext
 ): Promise<HandleEventsResult> => {
+  const challenge = getHandshakeChallenge(ctx.rawBody);
+  if (challenge !== undefined) {
+    return {
+      type: 'http',
+      httpResponse: {
+        status: 200,
+        body: { challenge },
+      },
+    };
+  }
+
   return {
     type: 'emit',
     events: [

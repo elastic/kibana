@@ -53,7 +53,7 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Registered only when `xpack.actions.inboundEvents.enabled` is true.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Registered only when `xpack.actions.inboundEvents.enabled` is true. A successful emit returns 202; a spoke `handleEvents` HTTP ack (challenge / handshake) is forwarded as a custom status and does not emit.',
       options: {
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],

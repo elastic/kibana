@@ -35,6 +35,7 @@ export type {
   ConnectorIngressContext,
   EventDefinition,
   EventPayload,
+  HandleEventsHttpResponse,
   HandleEventsResult,
   ConnectorSpecEvents,
 } from './src/connector_spec_events';

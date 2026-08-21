@@ -25,6 +25,7 @@ describe('logInboundIngressOutcome', () => {
       'handle_fail',
       'validate_fail',
       'emit_partial',
+      'http_ack',
       'accepted',
     ]);
   });

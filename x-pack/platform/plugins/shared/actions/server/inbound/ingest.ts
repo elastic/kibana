@@ -11,6 +11,8 @@ import {
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
   validateEmittedEvents,
+  type HandleEventsHttpResponse,
+  type HandleEventsResult,
 } from '@kbn/connector-specs';
 
 import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
@@ -28,7 +30,13 @@ export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
   | { status: 'not_found' }
   | { status: 'error'; statusCode: 500; body: string }
-  | { status: 'accepted'; body: { ok: true } };
+  | { status: 'accepted'; body: { ok: true } }
+  | {
+      status: 'spoke_http';
+      statusCode: number;
+      body?: unknown;
+      headers?: Record<string, string>;
+    };
 
 export interface IngestInboundEventInput {
   connectorTypeId: string;
@@ -53,6 +61,45 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
   const { ingestTokenHash: _omit, ...spokeConfig } = config;
   return spokeConfig;
+};
+
+const SPOKE_HTTP_STATUS_MIN = 200;
+const SPOKE_HTTP_STATUS_MAX = 599;
+
+const isValidSpokeHttpHeaders = (
+  headers: HandleEventsHttpResponse['headers']
+): headers is Record<string, string> | undefined => {
+  if (headers === undefined) {
+    return true;
+  }
+  return Object.entries(headers).every(
+    ([key, value]) => key.length > 0 && typeof value === 'string'
+  );
+};
+
+/**
+ * Validates a spoke `type: 'http'` result. Invalid shapes fail closed (500)
+ * rather than forwarding an unbounded status to the caller.
+ */
+const parseSpokeHttpResponse = (
+  result: HandleEventsResult
+): HandleEventsHttpResponse | 'not_http' | 'invalid' => {
+  if (result.type === 'emit') {
+    return 'not_http';
+  }
+  if (result.type !== 'http' || result.httpResponse === undefined) {
+    return 'invalid';
+  }
+  const { httpResponse } = result;
+  if (
+    !Number.isInteger(httpResponse.status) ||
+    httpResponse.status < SPOKE_HTTP_STATUS_MIN ||
+    httpResponse.status > SPOKE_HTTP_STATUS_MAX ||
+    !isValidSpokeHttpHeaders(httpResponse.headers)
+  ) {
+    return 'invalid';
+  }
+  return httpResponse;
 };
 
 /**
@@ -159,6 +206,33 @@ export async function ingestInboundEvent({
       rawBody: body,
       log: logger,
     });
+
+    const spokeHttp = parseSpokeHttpResponse(result);
+    if (spokeHttp === 'invalid') {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'handle_fail',
+        detail: 'unexpected_handleEvents_type',
+      });
+      return {
+        status: 'error',
+        statusCode: 500,
+        body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+      };
+    }
+    if (spokeHttp !== 'not_http') {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'http_ack',
+        detail: `status=${spokeHttp.status}`,
+      });
+      return {
+        status: 'spoke_http',
+        statusCode: spokeHttp.status,
+        ...(spokeHttp.body !== undefined ? { body: spokeHttp.body } : {}),
+        ...(spokeHttp.headers !== undefined ? { headers: spokeHttp.headers } : {}),
+      };
+    }
 
     if (result.type !== 'emit') {
       logInboundIngressOutcome(logger, {

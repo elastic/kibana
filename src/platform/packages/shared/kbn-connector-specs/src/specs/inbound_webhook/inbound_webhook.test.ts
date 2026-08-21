@@ -12,7 +12,7 @@ import { getConnectorSpec } from '../../get_connector_spec';
 import { buildEventId } from '../../event_type_id';
 import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { validateEmittedEvents } from '../../validate_emitted_events';
-import type { ConnectorIngressContext } from '../../connector_spec_events';
+import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { InboundWebhook } from './inbound_webhook';
 import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
@@ -64,11 +64,18 @@ describe('InboundWebhook', () => {
       rawBody,
     });
 
+    const expectEmit = (result: HandleEventsResult) => {
+      expect(result.type).toBe('emit');
+      if (result.type !== 'emit') {
+        throw new Error('expected emit');
+      }
+      return result;
+    };
+
     it('emits inboundWebhook.received with body and a correlationKey', async () => {
       const rawBody = { eventType: 'order.created', orderId: '1' };
-      const result = await events.handleEvents(createContext(rawBody));
+      const result = expectEmit(await events.handleEvents(createContext(rawBody)));
 
-      expect(result.type).toBe('emit');
       expect(result.events).toHaveLength(1);
       expect(result.events[0].eventId).toBe('inboundWebhook.received');
       expect(result.events[0].correlationKey).toEqual(expect.any(String));
@@ -83,16 +90,47 @@ describe('InboundWebhook', () => {
 
     it('assigns a distinct correlationKey per request', async () => {
       const ctx = createContext({ ping: true });
-      const first = await events.handleEvents(ctx);
-      const second = await events.handleEvents(ctx);
+      const first = expectEmit(await events.handleEvents(ctx));
+      const second = expectEmit(await events.handleEvents(ctx));
 
       expect(first.events[0].correlationKey).not.toBe(second.events[0].correlationKey);
     });
 
     it('passes through a non-object body unchanged', async () => {
-      const result = await events.handleEvents(createContext('plain-text'));
+      const result = expectEmit(await events.handleEvents(createContext('plain-text')));
 
       expect(result.events[0].payload).toEqual({ body: 'plain-text' });
+    });
+
+    const expectHttpAck = (result: HandleEventsResult, challenge: string) => {
+      expect(result).toEqual({
+        type: 'http',
+        httpResponse: { status: 200, body: { challenge } },
+      });
+    };
+
+    it('acks a top-level challenge without emitting', async () => {
+      expectHttpAck(await events.handleEvents(createContext({ challenge: 'ping-1' })), 'ping-1');
+    });
+
+    it('acks a top-level challenge when sibling keys are present', async () => {
+      expectHttpAck(
+        await events.handleEvents(
+          createContext({ type: 'ping', token: 'ignored', challenge: 'abc' })
+        ),
+        'abc'
+      );
+    });
+
+    it('emits when challenge is only nested', async () => {
+      const rawBody = { payload: { challenge: 'nested' } };
+      const result = expectEmit(await events.handleEvents(createContext(rawBody)));
+      expect(result.events[0].payload).toEqual({ body: rawBody });
+    });
+
+    it('emits when the challenge string is empty or too long', async () => {
+      expectEmit(await events.handleEvents(createContext({ challenge: '' })));
+      expectEmit(await events.handleEvents(createContext({ challenge: 'x'.repeat(1025) })));
     });
   });
 });

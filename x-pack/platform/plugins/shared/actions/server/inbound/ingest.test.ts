@@ -249,6 +249,44 @@ describe('ingestInboundEvent', () => {
     expectOutcome('debug', 'auth_fail');
   });
 
+  it('returns 404 for the previous token after the stored hash is reminted', async () => {
+    const rotatedToken = 'rotated-ingest-token';
+    const rotatedHash = computeIngestTokenHash({
+      connectorId,
+      spaceId,
+      token: rotatedToken,
+    });
+    const eventId = buildEventId('.myConnector', 'received');
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: connectorId,
+      type: 'action',
+      references: [],
+      attributes: {
+        actionTypeId: '.myConnector',
+        name: 'Test',
+        isMissingSecrets: false,
+        config: { ingestTokenHash: rotatedHash },
+        secrets: {},
+      },
+    });
+
+    const { response: rejected } = await run({ query: { token } });
+    expect(rejected.notFound).toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+
+    const { response: accepted } = await run({ query: { token: rotatedToken } });
+    expect(accepted.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).toHaveBeenCalled();
+  });
+
   it('accepts Authorization Bearer when query token is absent', async () => {
     const eventId = buildEventId('.myConnector', 'received');
     const handleEvents = jest.fn().mockResolvedValue({
@@ -439,7 +477,48 @@ describe('ingestInboundEvent', () => {
     expectOutcome('error', 'handle_fail');
   });
 
-  it('returns 500 when handleEvents returns a non-emit type', async () => {
+  it('returns spoke HTTP without emitters when handleEvents type is http', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: {
+            status: 200,
+            body: { challenge: 'abc' },
+            headers: { 'content-type': 'application/json' },
+          },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({
+      statusCode: 200,
+      body: { challenge: 'abc' },
+      headers: { 'content-type': 'application/json' },
+    });
+    expect(res.accepted).not.toHaveBeenCalled();
+    expect(res.customError).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'http_ack');
+  });
+
+  it('returns 500 when handleEvents http status is out of range', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: { status: 99 },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(res.custom).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
+
+  it('returns 500 when handleEvents returns an unknown type', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
         jest.fn().mockResolvedValue({

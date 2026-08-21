@@ -32,16 +32,26 @@ export interface EventPayload {
 }
 
 /**
- * Result of handleEvents: publish each payload.
- *
- * Before publish, the actions hub must run `validateEmittedEvents` so every
- * emitted `eventId` exists in `definitions` and each `payload` matches the
- * corresponding `eventSchema`.
+ * Spoke-defined HTTP ack (challenge / handshake). The hub returns this to the
+ * caller and does **not** call emitters.
  */
-export interface HandleEventsResult {
-  type: 'emit';
-  events: EventPayload[];
+export interface HandleEventsHttpResponse {
+  readonly status: number;
+  readonly body?: unknown;
+  readonly headers?: Record<string, string>;
 }
+
+/**
+ * Result of handleEvents: either publish payloads or return a custom HTTP ack.
+ *
+ * - `emit`: hub runs `validateEmittedEvents` then dispatches; HTTP 202.
+ * - `http`: hub returns `httpResponse` as-is (no emitters). Use for vendor
+ *   challenge / handshake replies when a generic webhook must ack instead of
+ *   emitting.
+ */
+export type HandleEventsResult =
+  | { type: 'http'; httpResponse: HandleEventsHttpResponse }
+  | { type: 'emit'; events: EventPayload[] };
 
 /**
  * Declared event on a connector spec.
