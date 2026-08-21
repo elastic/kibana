@@ -30,9 +30,13 @@ export const useSourceDisplayMode = ({
   sourceDisplayModeState,
   onUpdateSourceDisplayMode,
 }: UseSourceDisplayModeProps) => {
+  // Resolve to the per-context value or the safe "summary" default. Local storage is intentionally
+  // not read here: it only seeds new authoring contexts (see getStoredSourceDisplayMode usages), so
+  // that objects saved without an explicit mode keep rendering as "Table" instead of following the
+  // viewer's last-used mode.
   const sourceDisplayMode = useMemo<SourceDisplayMode>(
-    () => sourceDisplayModeState ?? getStoredSourceDisplayMode(storage, consumer) ?? 'summary',
-    [sourceDisplayModeState, storage, consumer]
+    () => sourceDisplayModeState ?? 'summary',
+    [sourceDisplayModeState]
   );
 
   const onChangeSourceDisplayMode = useMemo(
@@ -65,6 +69,8 @@ export const useJsonModeSettings = ({
   jsonModeSettingsState,
   onUpdateJsonModeSettings,
 }: UseJsonModeSettingsProps) => {
+  // Unlike sourceDisplayMode, these are cosmetic "how it looks" preferences (like density), so they
+  // fall back to the viewer's last-used value from local storage when no per-context state is set.
   const jsonModeSettings = useMemo<JsonModeSettings>(
     () =>
       jsonModeSettingsState ??

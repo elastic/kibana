@@ -24,6 +24,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { cloneDeep } from 'lodash';
+import { getStoredSourceDisplayMode } from '@kbn/unified-data-table';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   DISCOVER_QUERY_MODE_KEY,
@@ -174,7 +175,7 @@ function getDefaultAppState({
   hasGlobalState: boolean;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }) {
-  const { uiSettings, storage } = services;
+  const { uiSettings, storage, discoverFeatureFlags } = services;
   const query = getDefaultQuery({
     persistedTab,
     services,
@@ -194,6 +195,16 @@ function getDefaultAppState({
   const chartHidden = getChartHidden(storage, 'discover');
   const tableHidden = getTableHidden(storage, 'discover');
   const sidebarHidden = getSidebarHidden(storage, 'discover');
+
+  // For not persisted tabs, the default value is the last-used one taken from local storage.
+  // For persisted ones, it's set to undefined so the persisted value takes precendence, or in case of
+  // not being set, being undefined it will default to the "Table" default mode.
+  // Key for saved objects that do not have this setting set.
+  const sourceDisplayMode =
+    discoverFeatureFlags.getDataTableJsonViewEnabled() && !persistedTab
+      ? getStoredSourceDisplayMode(storage, 'discover')
+      : undefined;
+
   const dataSource = createDataSource({
     dataView: dataView ?? persistedTab?.serializedSearchSource.index,
     query,
@@ -226,7 +237,7 @@ function getDefaultAppState({
     grid: undefined,
     breakdownField: undefined,
     density: undefined,
-    sourceDisplayMode: undefined,
+    sourceDisplayMode,
     jsonModeSettings: undefined,
   };
 
