@@ -69,6 +69,7 @@ import {
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
+import { useJsonModeSettings, useSourceDisplayMode } from '../hooks/use_json_view_settings';
 import type {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -542,7 +543,7 @@ interface InternalUnifiedDataTableProps {
    * Set to 'json' to display a JSON representation of the source document
    * instead of the Summary column. Defualt is summary.
    */
-  sourceDisplayMode?: SourceDisplayMode;
+  sourceDisplayModeState?: SourceDisplayMode;
   /**
    * Update the source display mode state. When omitted, the view mode toggle is hidden.
    */
@@ -550,14 +551,12 @@ interface InternalUnifiedDataTableProps {
   /**
    * Settings that only apply while the source column is rendered in JSON mode.
    */
-  jsonModeSettings?: JsonModeSettings;
+  jsonModeSettingsState?: JsonModeSettings;
   /**
    * Update the JSON mode settings state.
    */
   onUpdateJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
 }
-
-const EMPTY_JSON_MODE_SETTINGS: JsonModeSettings = {};
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -648,9 +647,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
-      sourceDisplayMode = 'summary',
+      sourceDisplayModeState,
       onUpdateSourceDisplayMode,
-      jsonModeSettings = EMPTY_JSON_MODE_SETTINGS,
+      jsonModeSettingsState,
       onUpdateJsonModeSettings,
     },
     ref
@@ -664,6 +663,20 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+
+    const { sourceDisplayMode, onChangeSourceDisplayMode } = useSourceDisplayMode({
+      storage,
+      consumer,
+      sourceDisplayModeState,
+      onUpdateSourceDisplayMode,
+    });
+    const { jsonModeSettings, onChangeJsonModeSettings } = useJsonModeSettings({
+      storage,
+      consumer,
+      jsonModeSettingsState,
+      onUpdateJsonModeSettings,
+    });
+
     const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
@@ -673,15 +686,15 @@ const InternalUnifiedDataTable = React.forwardRef<
       Boolean(onUpdateSourceDisplayMode)
     );
 
-    const onUpdateSourceDisplayModeWithSeen = useMemo(
+    const onChangeSourceDisplayModeWithSeen = useMemo(
       () =>
-        onUpdateSourceDisplayMode
+        onChangeSourceDisplayMode
           ? (mode: SourceDisplayMode) => {
               markViewModeSeen();
-              onUpdateSourceDisplayMode(mode);
+              onChangeSourceDisplayMode(mode);
             }
           : undefined,
-      [markViewModeSeen, onUpdateSourceDisplayMode]
+      [markViewModeSeen, onChangeSourceDisplayMode]
     );
 
     const docMap = useMemo<DocMap>(
@@ -1408,9 +1421,9 @@ const InternalUnifiedDataTable = React.forwardRef<
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
               sourceDisplayMode={sourceDisplayMode}
-              onChangeSourceDisplayMode={onUpdateSourceDisplayModeWithSeen}
+              onChangeSourceDisplayMode={onChangeSourceDisplayModeWithSeen}
               jsonModeSettings={jsonModeSettings}
-              onChangeJsonModeSettings={onUpdateJsonModeSettings}
+              onChangeJsonModeSettings={onChangeJsonModeSettings}
               isViewModeNew={isViewModeNew}
             />
           </>
@@ -1432,9 +1445,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       lineCountInput,
       headerLineCountInput,
       sourceDisplayMode,
-      onUpdateSourceDisplayModeWithSeen,
+      onChangeSourceDisplayModeWithSeen,
       jsonModeSettings,
-      onUpdateJsonModeSettings,
+      onChangeJsonModeSettings,
       isViewModeNew,
     ]);
 

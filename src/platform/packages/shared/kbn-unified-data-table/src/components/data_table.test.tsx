@@ -1370,7 +1370,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'json',
+          sourceDisplayModeState: 'json',
           rowHeightState: 2,
         });
 
@@ -1384,7 +1384,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'summary',
+          sourceDisplayModeState: 'summary',
           rowHeightState: 2,
         });
 
@@ -1402,7 +1402,7 @@ describe('UnifiedDataTable', () => {
           ...getProps(),
           onUpdateRowHeight: jest.fn(),
           onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'summary',
+          sourceDisplayModeState: 'summary',
         });
 
         await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));

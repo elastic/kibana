@@ -290,11 +290,13 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
-      sourceDisplayMode={isDataTableJsonViewEnabled ? savedSearch.sourceDisplayMode : undefined}
+      sourceDisplayModeState={
+        isDataTableJsonViewEnabled ? savedSearch.sourceDisplayMode : undefined
+      }
       onUpdateSourceDisplayMode={
         isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateSourceDisplayMode : undefined
       }
-      jsonModeSettings={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
+      jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
       onUpdateJsonModeSettings={
         isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateJsonModeSettings : undefined
       }

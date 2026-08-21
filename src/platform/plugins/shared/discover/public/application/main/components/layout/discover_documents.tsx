@@ -664,11 +664,11 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayMode={isDataTableJsonViewEnabled ? sourceDisplayMode : undefined}
+            sourceDisplayModeState={isDataTableJsonViewEnabled ? sourceDisplayMode : undefined}
             onUpdateSourceDisplayMode={
               isDataTableJsonViewEnabled ? onUpdateSourceDisplayMode : undefined
             }
-            jsonModeSettings={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
+            jsonModeSettingsState={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
             onUpdateJsonModeSettings={
               isDataTableJsonViewEnabled ? onUpdateJsonModeSettings : undefined
             }
