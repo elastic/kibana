@@ -40,6 +40,14 @@ export const buildSecurityApi = ({
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
 
+  const getWorkloads = () => {
+    const serviceAccounts = getServiceAccounts();
+    if (!serviceAccounts) {
+      throw new Error('Service accounts are not enabled');
+    }
+    return serviceAccounts.workloads;
+  };
+
   return {
     authc: {
       getCurrentUser: (request) => {
@@ -101,6 +109,16 @@ export const buildSecurityApi = ({
         }
         return serviceAccounts.create(request, params);
       },
+      attachWorkload: async (operationType, request, params) =>
+        getWorkloads().attach(operationType, request, params),
+      detachWorkload: async (operationType, request, params) =>
+        getWorkloads().detach(operationType, request, params),
+      getWorkloadBinding: async (operationType, params) =>
+        getWorkloads().getBinding(operationType, params),
+      withScopedRequestForWorkload: async (operationType, params, fn) =>
+        getWorkloads().withScopedRequest(operationType, params, fn),
+      getWorkloadLoopbackAuthHeaders: async (operationType, params) =>
+        getWorkloads().getLoopbackAuthHeaders(operationType, params),
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

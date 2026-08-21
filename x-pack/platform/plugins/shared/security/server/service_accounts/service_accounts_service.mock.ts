@@ -10,7 +10,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountsServiceStart } from './types';
 
 export const serviceAccountsServiceMock = {
-  createStart: (): jest.Mocked<ServiceAccountsServiceStart> => ({
+  createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     create: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
       type: 'project' as const,
