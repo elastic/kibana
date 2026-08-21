@@ -32,7 +32,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/cps",
-    "@kbn/cps-utils",
     "@kbn/dashboard-plugin",
     "@kbn/data-lifecycle-phases",
     "@kbn/data-plugin",
