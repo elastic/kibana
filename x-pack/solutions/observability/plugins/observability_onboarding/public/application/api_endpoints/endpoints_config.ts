@@ -65,7 +65,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     }) => {
       // Serverless or ECH with mOTLP PRW endpoint enabled
       if (managedOtlpServiceUrl && (isServerless || managedOtlpPrwEndpointEnabled)) {
-        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/api/v1/write`;
+        const managedUrl = trimTrailingSlashes(managedOtlpServiceUrl);
+        return `${managedUrl}/inputs/prometheus-remote-write/_default_/api/v1/write`;
       }
       // ECH with mOTLP PRW endpoint disabled or on-prem
       if (elasticsearchUrl) {
@@ -157,7 +158,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     ),
     logo: 'supabase',
     placements: ['opentelemetryTab', 'morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/supabase/v1/logs'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/supabase/_default_/v1/logs'),
   },
   {
     id: ApiEndpointId.Vercel,
@@ -170,7 +171,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     logo: 'vercel_black',
     darkLogo: 'vercel_white',
     placements: ['morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/vercel'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/vercel/_default_'),
   },
 ];
 

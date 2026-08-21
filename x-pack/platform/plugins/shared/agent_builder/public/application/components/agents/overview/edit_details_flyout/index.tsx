@@ -74,7 +74,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
       access_control: {
-        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Private,
+        // Legacy agents without access control resolve to Public server-side.
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Public,
       },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,

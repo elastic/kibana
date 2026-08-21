@@ -82,11 +82,19 @@ export function TransactionTabs({
     timestamp: transaction?.['@timestamp'],
   });
 
+  const {
+    services: { analytics },
+  } = useKibana();
+
+  const transactionId = transaction?.transaction?.id;
+
   const tabs: Partial<Record<TransactionTab, TabContentDefinition>> = useMemo(() => {
     const genAiTabContent = getGenAiTabContent({
       isGenAiSpan,
       genAi,
       ebt: { element: TRACE_SAMPLE_EBT_ELEMENTS.TABS },
+      reportEvent: analytics.reportEvent,
+      resourceId: transactionId,
     });
 
     return {
@@ -151,9 +159,11 @@ export function TransactionTabs({
         : {}),
     };
   }, [
+    analytics.reportEvent,
     entryTransactionId,
     genAi,
     isGenAiSpan,
+    transactionId,
     isMetadataLoading,
     logsTableConfig,
     metadata,

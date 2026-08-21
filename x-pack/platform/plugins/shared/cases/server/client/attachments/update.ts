@@ -34,8 +34,6 @@ export async function update(
     services: { attachmentService, userActionService },
     logger,
     authorization,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
@@ -51,19 +49,13 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequestV2(
-      queryRestAttributes,
-      externalReferenceAttachmentTypeRegistry,
-      unifiedAttachmentTypeRegistry
-    );
+    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
 
     // Also enforce registry registration and the unified zod schema for
     // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
     // paths so PATCH stays in sync with POST.
     validateRegisteredAttachments({
       query: queryRestAttributes,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
     });
 

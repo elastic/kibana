@@ -1698,6 +1698,7 @@ describe('xy_suggestions', () => {
         fittingFunction: 'Carry',
         curveType: 'CURVE_MONOTONE_X',
         fillOpacity: 0.3,
+        areaFill: 'solid',
         xTitle: 'Custom X',
         yTitle: 'Custom Y',
         yRightTitle: 'Custom Y Right',
@@ -1744,6 +1745,7 @@ describe('xy_suggestions', () => {
       expect(suggestion.state.fittingFunction).toBe('Carry');
       expect(suggestion.state.curveType).toBe('CURVE_MONOTONE_X');
       expect(suggestion.state.fillOpacity).toBe(0.3);
+      expect(suggestion.state.areaFill).toBe('solid');
       expect(suggestion.state.xTitle).toBe('Custom X');
       expect(suggestion.state.yTitle).toBe('Custom Y');
       expect(suggestion.state.yRightTitle).toBe('Custom Y Right');

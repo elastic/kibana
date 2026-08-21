@@ -68,6 +68,7 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  pageSizeOptions?: number[];
   search: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
@@ -91,6 +92,7 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -100,7 +102,10 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onUpdateApiKey: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
+  /** When provided, adds View change history to each row actions menu. */
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
   /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
@@ -110,11 +115,14 @@ export interface RulesListTableProps {
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const RulesListTable: React.FC<RulesListTableProps> = ({
   items,
   totalItemCount,
   page,
   perPage,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   search,
   hasActiveFilters,
   sortField,
@@ -132,6 +140,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -139,7 +148,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onUpdateApiKey,
   onRun,
+  onViewChangeHistory,
   togglingRuleId,
   isBulkTogglingEnabled,
   onTableChange,
@@ -161,11 +172,13 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageIndex: page - 1,
     pageSize: perPage,
     totalItemCount,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    const showActionsColumn = canWrite || onViewChangeHistory;
+
+    return [
       ...(canWrite
         ? ([
             {
@@ -207,7 +220,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               color="text"
               onClick={() => onExpand(rule)}
               aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
@@ -307,7 +320,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'kind',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Outcome" />
         ),
         width: '10%',
         sortable: true,
@@ -363,7 +376,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(canWrite
+      ...(showActionsColumn
         ? ([
             {
               name: (
@@ -381,31 +394,39 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   responsive={false}
                   justifyContent="flexEnd"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                        defaultMessage: 'Quick edit rule',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => onQuickEdit(rule)}
-                        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                  {canWrite ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
                           defaultMessage: 'Quick edit rule',
                         })}
-                        data-test-subj={`quickEditRule-${rule.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="pencil"
+                          color="text"
+                          onClick={() => onQuickEdit(rule)}
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.rulesList.action.quickEdit',
+                            {
+                              defaultMessage: 'Quick edit rule',
+                            }
+                          )}
+                          data-test-subj={`quickEditRule-${rule.id}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <RuleActionsMenu
                       rule={rule}
+                      canWrite={canWrite}
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
+                      onUpdateApiKey={onUpdateApiKey}
                       onRun={onRun}
+                      onViewChangeHistory={onViewChangeHistory}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -413,25 +434,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
-    ],
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      onRun,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
+    ];
+  }, [
+    canWrite,
+    isPageSelected,
+    isRowSelected,
+    onSelectPage,
+    onSelectRow,
+    onNavigateToDetails,
+    onExpand,
+    onQuickEdit,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onUpdateApiKey,
+    onRun,
+    onViewChangeHistory,
+    togglingRuleId,
+    isBulkTogglingEnabled,
+  ]);
 
   const noItemsMessage =
     search || hasActiveFilters
@@ -479,6 +501,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onClearSelection={onClearSelection}
             onBulkEnable={onBulkEnable}
             onBulkDisable={onBulkDisable}
+            onBulkUpdateApiKey={onBulkUpdateApiKey}
             onBulkDelete={onBulkDelete}
           />
         ) : null}
