@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { useSelector } from 'react-redux-v7';
 import { SearchRow } from './search_row';
 import {
   ASSOCIATED_NOT_SELECT_TEST_ID,
@@ -27,6 +28,7 @@ jest.mock('react-redux-v7', () => {
   return {
     ...original,
     useDispatch: () => mockDispatch,
+    useSelector: jest.fn(),
   };
 });
 
@@ -37,6 +39,8 @@ describe('SearchRow', () => {
       isLoading: false,
       data: [{ user: { username: 'test' } }, { user: { username: 'elastic' } }],
     });
+    // default: no stored filters
+    (useSelector as jest.Mock).mockReturnValue('');
   });
 
   it('should render the component', () => {
@@ -77,5 +81,35 @@ describe('SearchRow', () => {
     await userEvent.selectOptions(associatedNoteSelect, [AssociatedFilter.documentOnly]);
 
     expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should restore a previously applied search value from the store on mount', () => {
+    (useSelector as jest.Mock).mockImplementation((selector: unknown) => {
+      const { selectNotesTableSearch } = jest.requireActual('..');
+      return selector === selectNotesTableSearch ? 'previous search' : AssociatedFilter.all;
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
+
+    expect(getByTestId(SEARCH_BAR_TEST_ID)).toHaveValue('previous search');
+  });
+
+  it('should restore a previously applied associated filter from the store on mount', () => {
+    (useSelector as jest.Mock).mockImplementation((selector: unknown) => {
+      const { selectNotesTableAssociatedFilter } = jest.requireActual('..');
+      return selector === selectNotesTableAssociatedFilter ? AssociatedFilter.documentOnly : '';
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
+
+    expect(getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID)).toHaveValue(AssociatedFilter.documentOnly);
   });
 });
