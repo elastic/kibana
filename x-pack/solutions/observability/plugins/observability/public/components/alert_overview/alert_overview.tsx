@@ -48,22 +48,23 @@ import { getSources } from '../alert_sources/get_sources';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import type { TimeRange } from '../../../common/typings';
 
+export type RuleLinkStatus = 'ok' | 'deleted' | 'disabled' | 'unknown';
+
+export interface AlertOverviewProps {
+  alert: TopAlert;
+  pageId?: string;
+  alertStatus?: AlertStatus;
+  ruleStatus?: RuleLinkStatus;
+}
+
 export const AlertOverview = memo(
-  ({
-    alert,
-    pageId,
-    alertStatus,
-  }: {
-    alert: TopAlert;
-    pageId?: string;
-    alertStatus?: AlertStatus;
-  }) => {
+  ({ alert, pageId, alertStatus, ruleStatus }: AlertOverviewProps) => {
     const {
       http: {
         basePath: { prepend },
       },
     } = useKibana().services;
-    const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+    const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
 
@@ -71,19 +72,17 @@ export const AlertOverview = memo(
     const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
 
     const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
-    const alertConsumer = alert.fields[ALERT_RULE_CONSUMER];
     const alertStart = alert.fields[ALERT_START];
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
 
-    // Rule read is authorized per rule type (and consumer), so gate the rule links
-    // on the specific rule behind this alert rather than a coarse "any rules" flag.
-    const canReadAlertRule = Boolean(
-      alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+    const canReadAlertRule = authorizedToReadRuleType(
+      alertRuleTypeId,
+      alert.fields[ALERT_RULE_CONSUMER]
     );
 
     const linkToRule =
-      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId && ruleStatus !== 'deleted'
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 

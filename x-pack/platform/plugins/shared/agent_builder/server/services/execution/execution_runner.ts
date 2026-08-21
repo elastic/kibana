@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -17,10 +27,12 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -31,6 +43,8 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -72,6 +86,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -117,12 +145,16 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
     action,
     telemetryMetadata,
+    maxContentLength,
     accessControl,
+    readOnly,
+    projectRouting,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -137,13 +169,20 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation
+  // Get conversation — only the conversation-level part of the origin is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    readOnly,
+    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+  });
+
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    origin,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -158,6 +197,8 @@ const handleConversationExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput,
+    origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
@@ -165,21 +206,26 @@ const handleConversationExecution = async ({
     conversation,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     browserApiTools,
     configurationOverrides,
     action,
+    projectRouting,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
-    conversation.operation === 'CREATE'
+  // Generate title when creating a new conversation
+  // OR when the conversation still carries the default placeholder title
+  const needsTitle = conversation.operation === 'CREATE' || conversationNeedsTitle(conversation);
+  const title$ = (
+    needsTitle
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
-      : of(conversation.title);
+      : of(conversation.title)
+  ).pipe(shareReplay(1));
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
@@ -191,10 +237,6 @@ const handleConversationExecution = async ({
         action,
       })
     : EMPTY;
-
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
@@ -217,14 +259,37 @@ const handleConversationExecution = async ({
       agentId,
       agentName,
       providerName: connectorProvider,
-      conversationId: effectiveConversationId,
+      conversationId: conversation.id,
       spaceId,
       opikHeaders,
     },
-    () =>
-      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+    (span) => {
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes(span, {
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
+      const titleAttr$ = storeConversation
+        ? title$.pipe(
+            tap((title) => {
+              span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+            }),
+            ignoreElements()
+          )
+        : EMPTY;
+
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
+          if (isConversationCreatedEvent(event) && !author) {
+            setUserAttributes(span, {
+              id: event.data.user.id,
+              username: event.data.user.username,
+            });
+          }
+
           try {
             if (isRoundCompleteEvent(event)) {
               const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
@@ -235,7 +300,7 @@ const handleConversationExecution = async ({
               // metering
               meteringService
                 .reportExecution({
-                  conversationId: effectiveConversationId,
+                  conversationId: conversation.id,
                   executionId: execution.executionId,
                   roundCount: currentRoundCount,
                   agentId,
@@ -247,13 +312,11 @@ const handleConversationExecution = async ({
                 });
 
               // snapshot telemetry tracking
-              if (effectiveConversationId) {
-                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
-              }
+              trackingService?.trackConversationRound(conversation.id, currentRoundCount);
 
               // EBT tracking
               analyticsService?.reportRoundComplete({
-                conversationId: effectiveConversationId,
+                conversationId: conversation.id,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
@@ -271,10 +334,11 @@ const handleConversationExecution = async ({
           analyticsService,
           trackingService,
           modelProvider: connectorProvider,
-          conversationId: effectiveConversationId,
+          conversationId: conversation.id,
           executionId: execution.executionId,
         })
-      )
+      );
+    }
   );
 };
 
@@ -387,6 +451,9 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
     : undefined;
 };
 
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
@@ -414,9 +481,9 @@ const buildPersistenceEvents = ({
   return updateConversation$({
     conversationClient,
     conversation,
-    title$,
     roundCompletedEvents$,
     action,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
   });
 };
 
@@ -437,7 +504,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -457,7 +524,9 @@ const handleStandaloneExecution = async ({
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
   });
 

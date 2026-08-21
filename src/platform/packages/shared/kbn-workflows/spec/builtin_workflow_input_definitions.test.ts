@@ -20,11 +20,35 @@ describe('builtinWorkflowInputDefinitions', () => {
   it('registers alertingV2NotificationGroup with required top-level fields', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
     expect(schema.type).toBe('object');
-    expect(schema.required).toEqual(['id', 'policyId', 'groupKey', 'episodes']);
+    expect(schema.required).toEqual(['id', 'policyId', 'groupKey', 'episodes', 'rules']);
     expect(schema.properties?.id?.type).toBe('string');
     expect(schema.properties?.policyId?.type).toBe('string');
     expect(schema.properties?.groupKey?.type).toBe('object');
     expect(schema.properties?.episodes?.type).toBe('array');
+    expect(schema.properties?.rules?.type).toBe('object');
+  });
+
+  it('registers alertingV2NotificationGroup with severity on episode items', () => {
+    const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
+    const episodeItems = schema.properties?.episodes?.items as {
+      properties?: Record<string, { type?: string | string[]; enum?: unknown[] }>;
+    };
+    expect(episodeItems?.properties?.severity?.type).toBe('string');
+    expect(episodeItems?.properties?.severity?.enum).toEqual([
+      'info',
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ]);
+  });
+
+  it('allows null rule_id on episode items to support external alerts', () => {
+    const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
+    const episodeItems = schema.properties?.episodes?.items as {
+      properties?: Record<string, { type?: string | string[] }>;
+    };
+    expect(episodeItems?.properties?.rule_id?.type).toEqual(['string', 'null']);
   });
 
   it('keeps Monaco $ref enum values in sync with registry keys', () => {

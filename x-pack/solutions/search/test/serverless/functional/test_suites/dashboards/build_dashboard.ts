@@ -26,6 +26,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
+  /**
+   * Purpose: Serverless dashboard smoke test
+   *
+   * Migration: Migrate to Scout.
+   */
   describe('Building a new dashboard', function () {
     // see details: https://github.com/elastic/kibana/issues/207097
     this.tags(['failsOnMKI']);

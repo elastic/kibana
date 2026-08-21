@@ -187,6 +187,13 @@ const services: Partial<KibanaServices> = {
         state$: of({}),
       },
     },
+    dateRangePickerPresets: {
+      getDefaultPresets: () => [],
+      getPresets$: () => of([]),
+      canPersist: () => false,
+      savePreset: () => Promise.resolve('saved'),
+      deletePreset: () => Promise.resolve(),
+    },
   },
   dataViewEditor: {
     userPermissions: {

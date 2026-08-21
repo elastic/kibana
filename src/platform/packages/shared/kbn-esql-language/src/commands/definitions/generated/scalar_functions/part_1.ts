@@ -2730,6 +2730,24 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'flattened',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'flattened',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
           type: 'geo_point',
           optional: false,
           description: 'Expression to evaluate.',
@@ -5619,10 +5637,48 @@ const fieldExtractDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the value of a single sub-field from a `flattened` field root as `keyword`.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description:
+            'The root of a `flattened` mapping field. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'path',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Literal name of the flattened sub-field to extract (e.g. `"host.name"`). Brackets and array indices are not supported. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description:
+            'The root of a `flattened` mapping field. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'path',
+          type: 'text',
+          optional: false,
+          description:
+            'Literal name of the flattened sub-field to extract (e.g. `"host.name"`). Brackets and array indices are not supported. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -6810,7 +6866,13 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE KQL("author: Faulkner")',
     'FROM employees\n| WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})',
@@ -8863,7 +8925,13 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
     'FROM books\n| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})\n| KEEP title;',
@@ -8948,7 +9016,13 @@ const matchPhraseDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: ['FROM books\n| WHERE MATCH_PHRASE(author, "William Faulkner")'],
 };
 
@@ -9171,6 +9245,23 @@ const mvAppendDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -9732,6 +9823,24 @@ const mvContainsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'superset',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+          supportsMultiValues: true,
+        },
+        {
+          name: 'subset',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'superset',
           type: 'geo_point',
           optional: false,
           description: 'Expression that can be null, a single value, or multiple values.',
@@ -10085,6 +10194,17 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: 'Expression that can be null, a single value, or multiple values.',
@@ -10308,6 +10428,17 @@ const mvDedupeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -10585,6 +10716,25 @@ const mvDifferenceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -10955,6 +11105,17 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'flattened',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: 'Expression that can be null, a single value, or multiple values.',
@@ -11227,6 +11388,25 @@ const mvIntersectionDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -11637,6 +11817,23 @@ const mvIntersectsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
           type: 'geo_point',
           optional: false,
           description: 'Expression that can be null, a single value, or multiple values.',
@@ -11971,6 +12168,17 @@ const mvLastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'Expression that can be null, a single value, or multiple values.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [

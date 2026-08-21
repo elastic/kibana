@@ -16,12 +16,20 @@ import { manageWatchlistsSkill } from './manage_watchlists';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
+import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
+import {
+  automaticMigrationRulesStartMigrationSkill,
+  automaticMigrationRulesSummarizeSkill,
+} from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -62,7 +70,11 @@ export const registerSkills = async ({
     agentBuilder.skills.register(manageWatchlistsSkill);
   }
 
-  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  agentBuilder.skills.register(
+    getDetectionRuleEditSkill({
+      rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
+    })
+  );
   if (experimentalFeatures.dexAiSkillRecommendPrebuiltRules) {
     await agentBuilder.skills.register(
       createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
@@ -75,10 +87,23 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(alertTriageSkill);
   if (experimentalFeatures.dexAiSkillFindRules) {
     await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
   }
-  await agentBuilder.skills.register(siemReadinessSkill);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    await agentBuilder.skills.register(siemReadinessSkill);
+  }
+
+  // Automatic Migration sibling skills: gated by the Automatic Migration feature flag and the
+  // dedicated agent-builder experimental flag, so skills ship in lockstep with their tools.
+  if (
+    !experimentalFeatures.siemMigrationsDisabled &&
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
+  ) {
+    await agentBuilder.skills.register(automaticMigrationRulesSummarizeSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesStartMigrationSkill);
+  }
 
   if (experimentalFeatures.leadGenerationEnabled) {
     agentBuilder.skills.register(entityAnalyticsLeadsSkill);
@@ -86,5 +111,13 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    await agentBuilder.skills.register(endpointForensicAnalysisSkill);
+  }
+
+  if (experimentalFeatures.investigateRuleSkill) {
+    await agentBuilder.skills.register(createInvestigateRuleSkill());
   }
 };

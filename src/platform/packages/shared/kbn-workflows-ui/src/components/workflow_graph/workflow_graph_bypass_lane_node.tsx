@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import type { NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
-import { EDGE_STROKE_DEFAULT } from './workflow_graph_edge';
 
 /**
  * Invisible layout-only node rendered for the missing branch lane of an `if`
@@ -23,7 +23,13 @@ import { EDGE_STROKE_DEFAULT } from './workflow_graph_edge';
  * making the bypass lane appear continuous regardless of the rendered height.
  */
 function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
-  const { targetPosition = Position.Top, sourcePosition = Position.Bottom } = props;
+  const { targetPosition = Position.Top, sourcePosition = Position.Bottom, data } = props;
+  const { euiTheme } = useEuiTheme();
+
+  // When this empty branch is the one that executed, tint the bridge line with
+  // the same `success` token as traversed edges so the lane reads as one
+  // continuous green path.
+  const traversed = (data as { traversed?: boolean } | undefined)?.traversed ?? false;
 
   return (
     <>
@@ -37,7 +43,7 @@ function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
           height: 12,
           width: 1,
           transform: 'translateX(-50%)',
-          background: EDGE_STROKE_DEFAULT,
+          background: traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain,
           pointerEvents: 'none',
         }}
       />

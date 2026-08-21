@@ -135,6 +135,10 @@ Object {
           "type": "string",
         },
         Object {
+          "const": "webhook-oauth2-password",
+          "type": "string",
+        },
+        Object {
           "const": null,
           "type": "null",
         },
@@ -1063,7 +1067,6 @@ Object {
           "type": "number",
         },
         "verificationMode": Object {
-          "default": "full",
           "enum": Array [
             "full",
             "certificate",
@@ -1173,6 +1176,10 @@ Object {
         },
         Object {
           "const": "webhook-oauth2-client-credentials",
+          "type": "string",
+        },
+        Object {
+          "const": "webhook-oauth2-password",
           "type": "string",
         },
         Object {
@@ -4883,6 +4890,10 @@ Object {
         },
         Object {
           "const": "webhook-oauth2-client-credentials",
+          "type": "string",
+        },
+        Object {
+          "const": "webhook-oauth2-password",
           "type": "string",
         },
         Object {

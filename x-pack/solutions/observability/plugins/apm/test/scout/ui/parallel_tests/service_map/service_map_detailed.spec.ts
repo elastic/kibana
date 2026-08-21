@@ -8,9 +8,11 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
 import {
   DEPENDENCY_POSTGRESQL,
   EDGE_OPBEANS_JAVA_TO_POSTGRESQL,
+  EXTENDED_TIMEOUT,
   SERVICE_MAP_KUERY_OPBEANS,
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
@@ -78,11 +80,19 @@ test.describe(
       expect(flyoutTitle).toContain(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.content).toBeVisible();
 
-      await serviceFlyoutPage.expectChartsRendered([
+      await assertFlyoutChartsRendered(serviceFlyoutPage, [
         'latency',
         'throughput',
         'failedTransactionRate',
       ]);
+
+      await expect(serviceFlyoutPage.transactionsSection).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await expect(serviceFlyoutPage.transactionSparklines).toHaveCount(3, {
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     test('dismisses service flyout when clicking the close button', async ({
@@ -123,7 +133,7 @@ test.describe(
       await expect(serviceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
     });
 
-    test('navigates to Discover (traces)', async ({
+    test('navigates to Discover (traces) from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
     }) => {
@@ -133,14 +143,14 @@ test.describe(
 
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openTracesInDiscover');
+      await serviceFlyoutPage.clickFooterAction('openTracesInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
       await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('traces-'));
     });
 
-    test('navigates to Discover (logs)', async ({
+    test('navigates to Discover (logs) from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
     }) => {
@@ -150,14 +160,14 @@ test.describe(
 
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openLogsInDiscover');
+      await serviceFlyoutPage.clickFooterAction('openLogsInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
       await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
     });
 
-    test('navigates to Service Details (alerts) and page loads', async ({
+    test('navigates to Observability Alerts from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage },
     }) => {
@@ -166,13 +176,13 @@ test.describe(
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openAlerts');
+      await serviceFlyoutPage.clickFooterAction('openAlerts');
 
-      await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/alerts`));
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/app/observability/alerts`));
+      await expect(page.getByTestId('alertsPageWithData')).toBeVisible();
     });
 
-    test('navigates to SLOs and page loads', async ({
+    test('navigates to SLOs from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage },
     }) => {
@@ -181,7 +191,7 @@ test.describe(
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openSlos');
+      await serviceFlyoutPage.clickFooterAction('openSlos');
 
       await expect(page).toHaveURL(new RegExp(`/app/slos`));
       await expect(
@@ -202,7 +212,7 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+      await expect(page.getByTestId('appHeaderTitle')).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({

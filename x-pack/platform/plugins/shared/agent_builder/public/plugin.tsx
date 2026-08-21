@@ -19,17 +19,10 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
-
-const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
-  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
-    default: m.AgentBuilderAnnouncementChromeInner,
-  }))
-);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -37,6 +30,7 @@ import {
   RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -47,7 +41,9 @@ import {
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
+import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
@@ -156,7 +152,7 @@ export class AgentBuilderPlugin
 
     startDependencies.cps?.cpsManager?.registerAppAccess(
       AGENTBUILDER_APP_ID,
-      () => ProjectRoutingAccess.READONLY
+      () => ProjectRoutingAccess.EDITABLE
     );
 
     const agentService = new AgentService({ http });
@@ -166,6 +162,7 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
@@ -233,6 +230,7 @@ export class AgentBuilderPlugin
       renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
@@ -316,9 +314,16 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      getAgentBuilderAccess: createPublicEmbeddableChatAccess({
+        accessChecker,
+        application: core.application,
+      }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
@@ -364,24 +369,6 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <LazyAgentBuilderAnnouncementChromeInner
-              coreStart={core}
-              pluginsStart={startDependencies}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        order: 1000,
-      });
-
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(

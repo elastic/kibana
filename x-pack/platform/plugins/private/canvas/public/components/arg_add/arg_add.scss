@@ -2,16 +2,4 @@
   padding: $euiSizeM;
   text-align: left;
   width: 100%;
-
-  &:not(:last-child) {
-    border-bottom: $euiBorderThin;
-  }
-
-  &:hover {
-    background-color: $euiColorLightestShade;
-
-    label {
-      color: $euiColorDarkestShade;
-    }
-  }
 }

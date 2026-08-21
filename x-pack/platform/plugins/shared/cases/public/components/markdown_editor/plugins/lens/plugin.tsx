@@ -20,7 +20,7 @@ import {
   EuiBetaBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
@@ -33,12 +33,14 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useMarkdownEditorPluginClickedEBT } from '../../../../analytics/use_markdown_editor_ebt';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
 import { convertToAbsoluteTimeRange } from '../../../attachments/lens/actions/convert_to_absolute_time_range';
+import { getPendingLensAttach } from '../../../attachments/lens/lens_return/storage';
 import { toLensAttributes } from './to_lens_attributes';
 
 const DEFAULT_TIMERANGE: TimeRange = {
@@ -80,6 +82,18 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const markdownContext = useContext(EuiMarkdownContext);
   const isMainApplication = useIsMainApplication();
   const { euiTheme } = useEuiTheme();
+  const trackMarkdownEditorPluginClicked = useMarkdownEditorPluginClickedEBT();
+  const hasReportedRef = useRef(false);
+
+  // Reports when the Lens plugin is opened via the markdown toolbar (new insert),
+  // not when editing an existing Lens block (`node` is defined).
+  useEffect(() => {
+    if (!node && !hasReportedRef.current) {
+      hasReportedRef.current = true;
+      trackMarkdownEditorPluginClicked('lens');
+    }
+  }, [node, trackMarkdownEditorPluginClicked]);
+
   const handleClose = useCallback(() => {
     if (currentAppId) {
       embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
@@ -250,26 +264,37 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     if (!currentAppId) {
       return;
     }
-    // `draftComment` hydrates asynchronously; wait for it so we don't drain the
-    // package before the draft is ready and drop the edit.
+    // A pending SO-attach marker means the incoming Lens package belongs to
+    // the "Open in Lens -> Save and return" round trip, not the markdown flow.
+    // Leave the package for the SO-attach consumer to claim.
+    if (getPendingLensAttach(storage)) {
+      return;
+    }
+    // Wait until the draft has loaded from storage before consuming the
+    // incoming package. `useLensDraftComment` hydrates `draftComment`
+    // asynchronously; if we drained the package here on the first render
+    // (before the draft resolved), the second run — the one that actually
+    // has a draft to update against — would find nothing and silently drop
+    // the user's "Save and return" edit.
     if (!draftComment) {
       return;
     }
 
+    const stateTransfer = embeddable?.getStateTransfer();
     // Peek first so we only drain when we are committing an add/update.
-    const incomingEmbeddablePackage = embeddable
-      ?.getStateTransfer()
-      .getIncomingEmbeddablePackage(currentAppId, false);
-
-    const lensEmbeddablePackage = incomingEmbeddablePackage?.find(
-      (pkg) => pkg.type === LENS_EMBEDDABLE_TYPE
-    ) as LensIncomingEmbeddablePackage;
+    const peeked = stateTransfer?.getIncomingEmbeddablePackage(currentAppId, false);
+    // Lens transfers its package back keyed by the embeddable type
+    // (LENS_EMBEDDABLE_TYPE, "vis"), not the app id ("lens").
+    const lensEmbeddablePackage = peeked?.find((pkg) => pkg.type === LENS_EMBEDDABLE_TYPE) as
+      | LensIncomingEmbeddablePackage
+      | undefined;
 
     if (!lensEmbeddablePackage?.serializedState?.attributes) {
       return;
     }
 
-    embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
+    // Drain so a re-render or sibling consumer can't double-process it.
+    stateTransfer?.getIncomingEmbeddablePackage(currentAppId, true);
 
     const lensTime = timefilter.getTime();
     const newTimeRange =

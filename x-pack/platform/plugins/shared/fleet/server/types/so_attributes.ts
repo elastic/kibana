@@ -105,6 +105,7 @@ export interface AgentSOAttributes {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
@@ -315,6 +316,7 @@ export interface DownloadSourceSOAttributes {
   name: string;
   host: string;
   is_default: boolean;
+  is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field

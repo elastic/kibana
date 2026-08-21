@@ -9,16 +9,10 @@
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
-import type {
-  ESQLColumn,
-  ESQLAstItem,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLAstAllCommands,
-} from '@elastic/esql/types';
+import type { ESQLColumn, ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
-import { SuggestionOrderingEngine } from './utils';
+import { SuggestionOrderingEngine, SuggestionCategory } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -47,13 +41,6 @@ function isSourceCommandSuggestion({ label }: { label: string }) {
 }
 function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
-}
-
-function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
-  const sourceCommandNames = new Set(esqlCommandRegistry.getSourceCommandNames());
-  const sourceCommand = commands.find(({ name }) => sourceCommandNames.has(name));
-
-  return sourceCommand?.name.toLowerCase() === 'from';
 }
 
 const orderingEngine = new SuggestionOrderingEngine();
@@ -98,7 +85,6 @@ export async function suggest(
 
     const commands = esqlCommandRegistry
       .getAllCommands({
-        isCursorInSubquery: astContext.isCursorInSubquery,
         isStartingSubquery,
         queryContainsSubqueries: astContext.queryContainsSubqueries,
       })
@@ -237,7 +223,7 @@ export async function suggest(
       return columnMapPromise;
     };
 
-    const commands = [...(root.header ?? []), ...root.commands];
+    const commands = [...(root.header ?? []), ...astContext.astForContext.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
       commands,
@@ -249,7 +235,13 @@ export async function suggest(
       hasMinimumLicenseRequired
     );
 
-    return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
+    const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
+    const isAtStartOfLine = fullText.slice(lineStart, offset).trim() === '';
+    const visibleSuggestions = isAtStartOfLine
+      ? commandsSpecificSuggestions.filter((s) => s.category !== SuggestionCategory.NEW_LINE)
+      : commandsSpecificSuggestions;
+
+    return attachReplacementRanges(innerText, visibleSuggestions, {
       commandContext: { columns: await getColumnMapOnce() },
       tokens,
     });
@@ -271,9 +263,7 @@ async function getSuggestionsWithinCommandExpression(
   commands: ESQLAstAllCommands[],
   astContext: {
     command: ESQLAstAllCommands;
-    node?: ESQLAstItem;
     option?: ESQLCommandOption;
-    containingFunction?: ESQLFunction;
     isCursorInSubquery: boolean;
   },
   getColumnsByType: GetColumnsByTypeFn,
@@ -314,14 +304,11 @@ async function getSuggestionsWithinCommandExpression(
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
-  const subquerySupport =
-    commandDefinition.metadata.subquerySupport === true && isFromSourceCommand(commands);
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
-    subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,

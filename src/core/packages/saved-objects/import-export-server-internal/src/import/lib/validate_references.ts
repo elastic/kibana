@@ -11,7 +11,7 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject, SavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsImportError } from '../errors';
@@ -79,7 +79,8 @@ async function getNonExistingReferenceAsKeys({
 
   // Error handling
   const erroredObjects = bulkGetResponse.saved_objects.filter(
-    (obj) => isSavedObjectErrorResult(obj) && obj.error.statusCode !== 404
+    (obj): obj is SavedObjectErrorResult =>
+      isSavedObjectErrorResult(obj) && obj.error.statusCode !== 404
   );
   if (erroredObjects.length) {
     throw SavedObjectsImportError.referencesFetchError(erroredObjects);

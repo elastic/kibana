@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -16,7 +15,10 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { registerRoutes } from './api/register_routes';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
@@ -30,21 +32,22 @@ import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import { createProfileStateRegistry } from '../common/context_awareness';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
-  private subscriptions: Subscription[] = [];
-  private embeddableTransformsEnabled = true;
+  private readonly logger: Logger;
+  private readonly profileStateRegistry = createProfileStateRegistry();
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
@@ -55,10 +58,18 @@ export class DiscoverServerPlugin
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
+
+    registerRoutes(
+      core.http,
+      core.userActivity,
+      this.logger,
+      plugins.usageCollection?.createUsageCounter('discover_sessions_api')
+    );
 
     if (plugins.home) {
       registerSampleData(plugins.home.sampleData);
@@ -68,7 +79,14 @@ export class DiscoverServerPlugin
       plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: (params) => {
-          return appLocatorGetLocationCommon({ useHash: false, setStateToKbnUrl }, params);
+          return appLocatorGetLocationCommon(
+            {
+              useHash: false,
+              setStateToKbnUrl,
+              profileStateRegistry: this.profileStateRegistry,
+            },
+            params
+          );
         },
       });
     }
@@ -76,12 +94,8 @@ export class DiscoverServerPlugin
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
       title: 'Discover session',
-      getTransforms: (drilldownTransforms) =>
-        getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
-      getSchema: (getDrilldownsSchema) =>
-        this.embeddableTransformsEnabled
-          ? getDiscoverSessionEmbeddableSchema(getDrilldownsSchema)
-          : undefined,
+      getTransforms: (drilldownTransforms) => getSearchEmbeddableTransforms(drilldownTransforms),
+      getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
     });
 
     if (plugins.agentBuilder) {
@@ -109,18 +123,6 @@ export class DiscoverServerPlugin
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
-    this.subscriptions.push(
-      core.featureFlags
-        .getBooleanValue$(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, this.embeddableTransformsEnabled)
-        .subscribe((value) => {
-          this.embeddableTransformsEnabled = value;
-        })
-    );
-
     return { locator: initializeLocatorServices(core, deps) };
-  }
-
-  public stop() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

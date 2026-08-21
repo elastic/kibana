@@ -30,6 +30,8 @@ export const FEATURE_KEYS = {
   MEMORY_DUMP: 'Memory dump',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
+  CUSTOM_YARA_SIGNATURE: 'Custom YARA signature',
+  CUSTOM_YARA_SIGNATURE_BY_POLICY: 'Custom YARA signature by policy',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURE_KEYS;

@@ -146,7 +146,22 @@ export interface ElasticsearchCommandDefinition {
   name: string;
   license?: LicenseType;
   observability_tier?: string;
+  output?: ElasticsearchCommandOutputDefinition;
 }
+
+export interface ElasticsearchCommandOutputDefinition {
+  vary_by: string;
+  selected_by?: string;
+  variants: Record<string, ElasticsearchCommandOutputVariant>;
+}
+
+export type ElasticsearchCommandOutputVariant = Record<
+  string,
+  {
+    type: SupportedDataType;
+    default?: boolean;
+  }
+>;
 
 export interface ElasticsearchSettingsDefinition {
   name: string;
@@ -488,6 +503,22 @@ export interface ValidationErrors {
   mmrOnFieldWrongType: {
     message: string;
     type: { type: string };
+  };
+  invalidMapParameterValue: {
+    message: string;
+    type: { paramName: string; value: string; allowedValues: string };
+  };
+  highlightMissingOnClause: {
+    message: string;
+    type: {};
+  };
+  highlightInvalidPrefixModifier: {
+    message: string;
+    type: { keyword: string };
+  };
+  highlightInvalidQueryExpression: {
+    message: string;
+    type: { expression: string };
   };
   tsdbIncompatibleFunction: {
     message: string;

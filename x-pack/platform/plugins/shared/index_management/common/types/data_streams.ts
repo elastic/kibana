@@ -27,6 +27,7 @@ interface PrivilegesFromEs {
   delete_index: boolean;
   manage_data_stream_lifecycle: boolean;
   read_failure_store: boolean;
+  manage: boolean;
 }
 
 type Privileges = PrivilegesFromEs;
@@ -57,6 +58,7 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
     read_failure_store: boolean;
+    manage: boolean;
   };
   // Override failure_store to support lifecycle property
   failure_store?: IndicesFailureStore & {
@@ -107,9 +109,6 @@ export interface DataStream {
     retentionDeterminedBy?: 'default_failures_retention' | 'data_stream_configuration';
   };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
-    enabled?: boolean;
-    effective_retention?: string;
-    retention_determined_by?: string;
     globalMaxRetention?: string;
   };
   indexMode: IndexMode;
@@ -137,6 +136,10 @@ export interface DataRetention {
 export interface DataStreamOptions {
   failure_store?: {
     enabled: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string | -1;
+    };
   };
   [key: string]: unknown;
 }

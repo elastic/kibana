@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
 
@@ -19,6 +20,8 @@ export interface ExecuteQueryParams {
   filter?: EsqlQueryRequest['filter'];
   params?: EsqlQueryRequest['params'];
   abortSignal?: AbortSignal;
+  /** Maximum allowed response body size in bytes. Passed to the ES transport. */
+  maxResponseSize?: number;
 }
 
 export interface QueryServiceContract {
@@ -26,6 +29,8 @@ export interface QueryServiceContract {
   executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]>;
   executeQueryStream<T = Record<string, unknown>>(params: ExecuteQueryParams): AsyncIterable<T[]>;
 }
+
+const DROP_NULL_COLUMNS = true;
 
 @injectable()
 export class QueryService implements QueryServiceContract {
@@ -39,6 +44,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
       message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
@@ -48,11 +54,11 @@ export class QueryService implements QueryServiceContract {
       const response = await this.esClient.esql.query(
         {
           query,
-          drop_null_columns: false,
+          drop_null_columns: DROP_NULL_COLUMNS,
           filter,
           params,
         },
-        { signal: abortSignal }
+        { signal: abortSignal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
       );
 
       this.logger.debug({
@@ -63,8 +69,7 @@ export class QueryService implements QueryServiceContract {
     } catch (error) {
       this.logger.error({
         error,
-        code: 'ESQL_QUERY_ERROR',
-        type: 'QueryServiceError',
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });
 
       throw error;
@@ -81,6 +86,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
@@ -93,17 +99,24 @@ export class QueryService implements QueryServiceContract {
     try {
       context.throwIfAborted();
 
+      // Note: Arrow streaming uses chunked transfer encoding so the transport's
+      // maxResponseSize guard (which checks Content-Length) will not fire.
+      // The per-run alerts.max row limit acts as the primary guardrail here.
       reader = await this.esClient.helpers
         .esql(
           {
             query,
-            drop_null_columns: false,
+            drop_null_columns: DROP_NULL_COLUMNS,
             filter,
             params,
           },
-          { signal: context.signal }
+          { signal: context.signal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
         )
         .toArrowReader();
+
+      if (!reader) {
+        throw new Error('toArrowReader returned undefined');
+      }
 
       yield* this.iterateReader<T>(reader, context);
 
@@ -118,8 +131,7 @@ export class QueryService implements QueryServiceContract {
       } else {
         this.logger.error({
           error,
-          code: 'ESQL_QUERY_ERROR',
-          type: 'QueryServiceError',
+          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
         });
       }
 

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
@@ -44,6 +44,7 @@ import type {
 } from './types';
 import { invalidateKeys, prepareRule } from './utils';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -417,7 +418,7 @@ async function runBatch<Params extends RuleParams>({
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
 
   for (const so of bulkResponse.saved_objects) {
-    if (so.error) {
+    if (isSavedObjectErrorResult(so)) {
       errors.push({
         message: so.error.message ?? 'Error saving rule SO',
         status: so.error.statusCode,
@@ -436,7 +437,7 @@ async function runBatch<Params extends RuleParams>({
       }
     } else {
       batchSuccessfulIds.push(so.id);
-      successfulSavedObjects.push(so as SavedObject<RawRule>);
+      successfulSavedObjects.push(so);
     }
   }
 
@@ -472,6 +473,21 @@ async function runBatch<Params extends RuleParams>({
         metadata: changeTracking?.metadata,
       },
     });
+
+    for (const so of successfulSavedObjects) {
+      const prepared = preparedRules.get(so.id);
+      if (prepared) {
+        reportRuleCreatedEvent(context, {
+          id: prepared.id,
+          templateId: prepared.templateId,
+          createTime: prepared.createdAt,
+          alertTypeId: prepared.ruleTypeId,
+          enabled: prepared.enabled,
+          consumer: prepared.consumer,
+          producer: prepared.producer,
+        });
+      }
+    }
   }
 
   return { successfulIds: batchSuccessfulIds, errors };

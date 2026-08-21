@@ -14,10 +14,11 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath } from '../../../../data_view_manager/utils/paths';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -101,7 +102,8 @@ export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { addError } = useAppToasts();
   const pageScope = getScopeFromPath(pathname);
 
-  const browserFields = useBrowserFields(pageScope);
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   return useCallback(() => {
     try {

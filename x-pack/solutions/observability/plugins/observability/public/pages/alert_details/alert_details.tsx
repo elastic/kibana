@@ -118,15 +118,11 @@ export function AlertDetails() {
     ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
     : undefined;
 
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
-  // Rule read authorization is enforced per rule type (and consumer), so we
-  // determine access for the specific rule behind this alert rather than relying
-  // on a coarse "can read any rules" flag.
-  const alertRuleTypeId = alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID];
-  const alertConsumer = alertDetail?.formatted.fields[ALERT_RULE_CONSUMER];
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  const canReadAlertRule = authorizedToReadRuleType(
+    alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID],
+    alertDetail?.formatted.fields[ALERT_RULE_CONSUMER]
   );
 
   // Related dashboards are derived from the rule (a rule-read operation), so
@@ -138,10 +134,24 @@ export function AlertDetails() {
     refetchRelatedDashboards,
   } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
 
-  const { rule, refetch } = useFetchRule({
+  const {
+    rule,
+    isLoading: isLoadingRule,
+    isRuleNotFound,
+    refetch,
+  } = useFetchRule({
     ruleId: ruleId || '',
     enabled: canReadAlertRule,
   });
+
+  const ruleStatus =
+    !canReadAlertRule || isLoadingRule
+      ? 'unknown'
+      : isRuleNotFound
+      ? 'deleted'
+      : rule?.enabled === false
+      ? 'disabled'
+      : 'ok';
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
@@ -318,6 +328,7 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <StaleAlert
           alert={alertDetail.formatted}
+          alertIndex={alertDetail.raw._index}
           alertStatus={alertStatus}
           rule={rule}
           onUntrackAlert={onUntrackAlert}
@@ -370,7 +381,11 @@ export function AlertDetails() {
           />
         )}
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
+        <AlertOverview
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          ruleStatus={ruleStatus}
+        />
       </EuiPanel>
     )
   ) : (
@@ -505,7 +520,7 @@ export function AlertDetails() {
                 </span>
               </EuiToolTip>
               <EuiSpacer size="xs" />
-              <AlertSubtitle alert={alertDetail.formatted} />
+              <AlertSubtitle alert={alertDetail.formatted} ruleStatus={ruleStatus} />
             </>
           ) : (
             <EuiLoadingSpinner />

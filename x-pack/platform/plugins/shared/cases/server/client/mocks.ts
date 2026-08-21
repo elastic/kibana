@@ -29,6 +29,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
+import type { CasesClientSource } from './types';
 import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -42,11 +43,7 @@ import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-  createUnifiedAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
+import { createUnifiedAttachmentTypeRegistryMock } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -63,6 +60,7 @@ import {
 import { ConfigSchema } from '../config';
 import {
   V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from '../cases_analytics_v2';
@@ -104,6 +102,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
+    getApplicableFields: jest.fn(),
   });
 };
 
@@ -168,6 +167,8 @@ const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
     deleteTemplate: jest.fn(),
+    validateCreateTemplate: jest.fn(),
+    validateUpdateTemplate: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
   });
@@ -276,8 +277,6 @@ export const createCasesClientMockArgs = () => {
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     },
     spaceId: 'default',
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
@@ -289,9 +288,14 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
-    config: ConfigSchema.validate({}),
+    // Assignee-identity population is on by default
+    config: {
+      ...ConfigSchema.validate({}),
+      assigneeIdentity: { enabled: true },
+    },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
+    clientSource: 'rest_api' as CasesClientSource,
   };
 };
 
@@ -315,8 +319,6 @@ export const createCasesClientFactoryMockArgs = () => {
         {}
       )
     ),
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),
@@ -326,6 +328,7 @@ export const createCasesClientFactoryMockArgs = () => {
     // any wiring.
     analyticsV2Writer: V2_NOOP_WRITER,
     analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
   };
 };

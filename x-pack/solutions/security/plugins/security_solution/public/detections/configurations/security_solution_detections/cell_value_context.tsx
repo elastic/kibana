@@ -17,6 +17,7 @@ import { getAllFieldsByName } from '../../../common/containers/source';
 import type { AlertColumnHeaders } from './columns';
 import { eventRenderedViewColumns, getColumns } from './columns';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;
@@ -35,7 +36,8 @@ export const AlertTableCellContextProvider = ({
   sourcererScope: PageScope;
   children: React.ReactNode;
 }) => {
-  const browserFields = useBrowserFields(sourcererScope);
+  const { dataView } = useDataView(sourcererScope);
+  const browserFields = useBrowserFields(dataView);
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const license = useLicense();
   const gridColumns = useMemo(() => {

@@ -12,9 +12,12 @@ import { KibanaPage } from './kibana_page';
 
 export class ProjectPage extends KibanaPage {
   async waitForHeader() {
-    return this.page.waitForSelector(subj('kibanaProjectHeader'), {
-      state: 'attached',
-    });
+    return this.page.waitForSelector(
+      `${subj('chromeNextGlobalHeader')}, ${subj('kibanaProjectHeader')}`,
+      {
+        state: 'attached',
+      }
+    );
   }
 
   async backToDashboardListing() {

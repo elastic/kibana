@@ -13,6 +13,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createResolveContextMock } from '../../../../test_utils';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -109,6 +110,38 @@ describe('attachment tools', () => {
       expect(result.results[0].type).toBe(ToolResultType.other);
       expect((result.results[0] as any).data.attachment_id).toBe('custom-id');
       expect((result.results[0] as any).data.type).toBe('text');
+    });
+
+    it('rejects unknown type at schema level when registered types are provided', () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: () => ({ isReadonly: false }),
+        getRegisteredTypeIds: () => ['text', 'esql'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.add)!;
+
+      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
+      expect(tool.schema.safeParse({ type: 'json', data: {} }).success).toBe(false);
+    });
+
+    it('excludes readonly types from the schema enum', () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: (type: string) => ({ isReadonly: type === 'screen_context' }),
+        getRegisteredTypeIds: () => ['text', 'esql', 'screen_context'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.add)!;
+
+      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
+      expect(tool.schema.safeParse({ type: 'screen_context', data: {} }).success).toBe(false);
     });
 
     it('returns error for unknown attachment type with list of valid types', async () => {
@@ -215,11 +248,7 @@ describe('attachment tools', () => {
       });
 
       // Add the attachment with origin — content is resolved during add()
-      const resolveContext = {
-        request: httpServerMock.createKibanaRequest(),
-        spaceId: 'default',
-        savedObjectsClient: {} as any,
-      };
+      const resolveContext = createResolveContextMock();
       const attachment = await resolveAttachmentManager.add(
         {
           type: VISUALIZATION_ATTACHMENT_TYPE,

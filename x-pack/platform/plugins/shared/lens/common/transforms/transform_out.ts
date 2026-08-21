@@ -32,7 +32,11 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(storedState, panelReferences, containerReferences, id) {
+    // Capture savedObjectId prior to stripInheritedContext
+    const legacySavedObjectId =
+      'savedObjectId' in storedState ? storedState.savedObjectId : undefined;
+
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -49,6 +53,11 @@ export const getTransformOut = (
         ...state,
         ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
+    }
+
+    // Fallback to handle legacy SO with missing savedObjectRef reference
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
     }
 
     const migratedAttributes = migrateAttributes(attributes);
@@ -105,12 +114,14 @@ export const getTransformOut = (
         ? { description: attributesDescription }
         : {};
 
-    return {
+    const apiPanelConfig = {
       ...titleFallback,
       ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    return apiPanelConfig;
   };
 };
 

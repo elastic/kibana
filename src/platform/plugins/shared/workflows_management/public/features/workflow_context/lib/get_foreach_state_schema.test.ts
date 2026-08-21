@@ -217,6 +217,62 @@ describe('getForeachCollectionDiagnostic', () => {
     expect(unresolved.description).toBe(FOREACH_ITEM_SCHEMA_DESC.UNRESOLVED_PATH);
   });
 
+  it('returns warning when the collection type cannot be narrowed to an array', () => {
+    // Mirrors `types_field_value` from the generated Elasticsearch schemas: every
+    // ES|QL/ES result cell is typed by this union, with no array branch.
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        run_query: z.object({
+          output: z.object({
+            values: z.array(z.array(z.union([z.number(), z.string(), z.boolean(), z.null()]))),
+          }),
+        }),
+      }),
+    });
+    const itemSchema = getForeachItemSchema(stepContext, 'steps.run_query.output.values[0][0]');
+    expect(itemSchema).toBeInstanceOf(z.ZodUnknown);
+    expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
+    expect(
+      getForeachCollectionDiagnostic(itemSchema, 'steps.run_query.output.values[0][0]')
+    ).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
+      severity: 'warning',
+    });
+  });
+
+  it.each([
+    ['unknown', z.unknown()],
+    ['any', z.any()],
+  ])('returns warning when the collection type is %s', (_name, outputSchema) => {
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        set_exception_list_id: z.object({
+          output: z.object({ exception_list_id: outputSchema }),
+        }),
+      }),
+    });
+    const path = 'steps.set_exception_list_id.output.exception_list_id';
+    const itemSchema = getForeachItemSchema(stepContext, path);
+    expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
+    expect(getForeachCollectionDiagnostic(itemSchema, path)).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
+      severity: 'warning',
+    });
+  });
+
+  it.each([
+    ['number', z.number()],
+    ['boolean', z.boolean()],
+    ['object', z.object({ name: z.string() })],
+  ])('still hard-errors for known non-iterable %s collections', (typeName, outputSchema) => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({ items: outputSchema }),
+    });
+    expect(() => getForeachItemSchema(stepContext, 'consts.items')).toThrow(
+      new RegExp(`Expected array for foreach iteration, but got ${typeName}`)
+    );
+  });
+
   it('returns warning for runtime JSON string collections', () => {
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({

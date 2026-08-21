@@ -7,11 +7,13 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue, HOST_NAME_FIELD } from '@kbn/discover-utils';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
+import { AgentTypeIntegration } from '../../agents/agent_type_integration';
 import { useWithCaseDetailsRefresh } from '../..';
 import { HostIsolationPanel } from './host_isolation_panel';
 import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from '../translations';
@@ -22,6 +24,7 @@ import { PREFIX } from '../../../../../flyout/shared/test_ids';
 const HOST_ISOLATION_TEST_ID = `${PREFIX}HostIsolation` as const;
 export const HOST_ISOLATION_FLYOUT_TEST_ID = `${HOST_ISOLATION_TEST_ID}Flyout` as const;
 export const HOST_ISOLATION_TITLE_TEST_ID = `${HOST_ISOLATION_TEST_ID}Title` as const;
+export const HOST_ISOLATION_INTEGRATION_TEST_ID = `${HOST_ISOLATION_TEST_ID}Integration` as const;
 export const HOST_ISOLATION_PANEL_TEST_ID = `${HOST_ISOLATION_TEST_ID}Panel` as const;
 
 export interface HostIsolationFlyoutProps {
@@ -54,6 +57,9 @@ export const HostIsolationFlyout: FC<HostIsolationFlyoutProps> = memo(
   ({ hit, detailsData, isolateAction, onClose }) => {
     const { addSuccess } = useAppToasts();
     const caseDetailsRefresh = useWithCaseDetailsRefresh();
+    const {
+      details: { agentType },
+    } = useAlertResponseActionsSupport(detailsData);
 
     const title = isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST;
     const hostName = getFieldValue(hit, HOST_NAME_FIELD) as string;
@@ -85,6 +91,12 @@ export const HostIsolationFlyout: FC<HostIsolationFlyoutProps> = memo(
               {title}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <AgentTypeIntegration
+            agentType={agentType}
+            layout="horizontal"
+            data-test-subj={HOST_ISOLATION_INTEGRATION_TEST_ID}
+          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <div data-test-subj={HOST_ISOLATION_PANEL_TEST_ID}>

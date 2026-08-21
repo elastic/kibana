@@ -51,7 +51,9 @@ interface TransactionsTableProps {
   onSearchQueryChange?: (query: string) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
   showSparklines?: boolean;
+  isSparklineLoading?: boolean;
   errorMessage?: string;
+  'data-test-subj': string;
 }
 
 function shouldFetchServer({
@@ -81,7 +83,9 @@ export function TransactionsTable({
   onSearchQueryChange,
   remainingTransactionsCellTooltipContent,
   showSparklines: showSparklinesProp,
+  isSparklineLoading,
   errorMessage,
+  'data-test-subj': dataTestSubj,
 }: TransactionsTableProps) {
   const searchQueryRef = useRef('');
 
@@ -103,6 +107,7 @@ export function TransactionsTable({
       nameInteraction: columnInteractions?.name,
       alertsInteraction: columnInteractions?.alerts,
       showSparklines: resolvedShowSparklines,
+      isSparklineLoading,
       remainingTransactionsCellTooltipContent,
     });
     return (columns ?? DEFAULT_COLUMNS).map((col) =>
@@ -112,6 +117,7 @@ export function TransactionsTable({
     latencyAggregationType,
     columnInteractions,
     resolvedShowSparklines,
+    isSparklineLoading,
     columns,
     remainingTransactionsCellTooltipContent,
   ]);
@@ -130,7 +136,11 @@ export function TransactionsTable({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj={isLoading ? `${dataTestSubj}-loading` : `${dataTestSubj}-loaded`}
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -169,6 +179,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount
+            size="s"
             title={i18n.translate('apmUiShared.transactionsTable.cardinalityWarning.title', {
               defaultMessage:
                 'Number of transaction groups exceed the allowed maximum (1,000) that are displayed.',

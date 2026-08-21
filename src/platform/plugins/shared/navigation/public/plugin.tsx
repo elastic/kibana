@@ -30,6 +30,7 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { NavigationCustomizationService } from './navigation_customization';
+import { registerNavigationCustomizationEvents } from './navigation_customization/telemetry';
 
 export class NavigationPublicPlugin
   implements
@@ -52,6 +53,8 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
+    registerNavigationCustomizationEvents(core.analytics);
+
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -107,8 +110,9 @@ export class NavigationPublicPlugin
       // confirms a project-nav solution. The handler may have already been
       // registered synchronously below; enableUi's per-capability idempotency
       // guards prevent double-registration.
-      if (security && !isServerless && getIsProjectNav(activeSpace?.solution)) {
-        this.customizationService.enableUi({ core, chrome, security });
+      const solutionView = activeSpace?.solution;
+      if (security && !isServerless && isKnownSolutionView(solutionView)) {
+        this.customizationService.enableUi({ core, chrome, security, solution: solutionView });
       }
     };
 
@@ -130,19 +134,6 @@ export class NavigationPublicPlugin
     // (preload: true on the server), keeping startup ordering safe.
     this.customizationService.start({ core, chrome, isUnauthenticated });
 
-    if (isServerless && !isUnauthenticated) {
-      // In serverless, the serverless plugin initializes project navigation directly,
-      // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
-      // to become available, then enable customization support.
-      chrome.project
-        .getNavigation$()
-        .pipe(take(1))
-        .subscribe(({ solutionId }) => {
-          this.activeSolutionId = solutionId;
-          this.customizationService.enableUi({ core, chrome, security });
-        });
-    }
-
     return {
       ui: {
         /**
@@ -161,6 +152,16 @@ export class NavigationPublicPlugin
       addSolutionNavigation: (solutionNavigation) => {
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
+      },
+      initNavigation: (id, navigationTree$) => {
+        // Idempotent: same id is a no-op; a different id is a caller bug,
+        // logged and ignored rather than re-running enableUi mid-session.
+        if (this.activeSolutionId === id) return;
+        if (!this.claimActiveSolution(id)) return;
+        chrome.project.initNavigation(id, navigationTree$);
+        if (!isUnauthenticated) {
+          this.customizationService.enableUi({ core, chrome, security, solution: id });
+        }
       },
       isSolutionNavEnabled$: of(isUnauthenticated).pipe(
         switchMap((unauth) => {
@@ -205,9 +206,27 @@ export class NavigationPublicPlugin
     }
 
     if (isProjectNav && solutionView !== 'classic') {
-      this.activeSolutionId = solutionView as SolutionId;
+      if (!this.claimActiveSolution(solutionView as SolutionId)) return;
       this.tryInitNavigation();
     }
+  }
+
+  /**
+   * First writer wins. Same id is a successful re-claim; a different id is a
+   * caller bug and is logged rather than switching mid-session.
+   */
+  private claimActiveSolution(id: SolutionId): boolean {
+    if (this.activeSolutionId === id) return true;
+    if (this.activeSolutionId !== null) {
+      this.initializerContext.logger
+        .get()
+        .error(
+          `Navigation already initialized with solution "${this.activeSolutionId}"; ignoring attempt to switch to "${id}".`
+        );
+      return false;
+    }
+    this.activeSolutionId = id;
+    return true;
   }
 
   private getIsUnauthenticated(http: HttpStart) {

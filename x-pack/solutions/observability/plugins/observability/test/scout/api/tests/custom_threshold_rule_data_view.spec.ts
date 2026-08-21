@@ -141,194 +141,201 @@ const searchRuleSo = async (esClient: Client, ruleId: string): Promise<RuleSoHit
   return resp.hits.hits as RuleSoHit[];
 };
 
-apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.classic] }, () => {
-  let headers: Record<string, string>;
-  let ruleId: string;
-  // Rules created by the `noDataBehavior` cases; removed after each such test.
-  let transientRuleIds: string[] = [];
+apiTest.describe(
+  'Custom Threshold rule data view',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    let headers: Record<string, string>;
+    let ruleId: string;
+    // Rules created by the `noDataBehavior` cases; removed after each such test.
+    let transientRuleIds: string[] = [];
 
-  apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
-    headers = await getAdminHeaders(requestAuth);
-    await createDataView(apiClient, headers);
+    apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
+      headers = await getAdminHeaders(requestAuth);
+      await createDataView(apiClient, headers);
 
-    // Create the shared rule up front so the tests below don't depend on each
-    // other's execution order for `ruleId`.
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Threshold rule',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: true,
-        alertOnGroupDisappear: true,
-        searchConfiguration: {
-          query: { query: '', language: 'kuery' },
-          index: DATA_VIEW_ID,
+      // Create the shared rule up front so the tests below don't depend on each
+      // other's execution order for `ruleId`.
+      const rule = await createCustomThresholdRule(apiClient, headers, {
+        name: 'Threshold rule',
+        params: {
+          criteria: buildCriteria(),
+          alertOnNoData: true,
+          alertOnGroupDisappear: true,
+          searchConfiguration: {
+            query: { query: '', language: 'kuery' },
+            index: DATA_VIEW_ID,
+          },
         },
-      },
+      });
+      ruleId = rule.id;
     });
-    ruleId = rule.id;
-  });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    for (const id of transientRuleIds) {
-      await apiClient.delete(`api/alerting/rule/${id}`, { headers });
-    }
-    transientRuleIds = [];
-  });
-
-  apiTest.afterAll(async ({ apiClient }) => {
-    if (ruleId) {
-      await apiClient.delete(`api/alerting/rule/${ruleId}`, { headers });
-    }
-    await deleteDataView(apiClient, headers);
-  });
-
-  apiTest('create a threshold rule', async ({ apiClient }) => {
-    // The shared rule is created in `beforeAll`; verify it persisted and is
-    // readable so the dependent tests below can rely on it.
-    const res = await apiClient.get(`api/alerting/rule/${ruleId}`, {
-      headers,
-      responseType: 'json',
+    apiTest.afterEach(async ({ apiClient }) => {
+      for (const id of transientRuleIds) {
+        await apiClient.delete(`api/alerting/rule/${id}`, { headers });
+      }
+      transientRuleIds = [];
     });
-    expect(res).toHaveStatusCode(200);
-    expect((res.body as RuleResponse).id).toBe(ruleId);
-  });
 
-  apiTest('should persist the full custom-threshold form payload', async ({ apiClient }) => {
-    // Mirrors the FTR "saved the rule correctly" assertion: a custom equation
-    // with two metrics, a `notBetween` threshold, a 2-day window and a group-by.
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Custom threshold rule - full form',
-      params: {
-        criteria: buildFullFormCriteria(),
-        groupBy: ['docker.container.name'],
-        alertOnNoData: false,
-        noDataBehavior: 'recover',
-        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
-      },
+    apiTest.afterAll(async ({ apiClient }) => {
+      if (ruleId) {
+        await apiClient.delete(`api/alerting/rule/${ruleId}`, { headers });
+      }
+      await deleteDataView(apiClient, headers);
     });
-    transientRuleIds.push(rule.id);
 
-    const res = await apiClient.get(`api/alerting/rule/${rule.id}`, {
-      headers,
-      responseType: 'json',
-    });
-    expect(res).toHaveStatusCode(200);
-    const { params } = res.body as FullFormRuleResponse;
-    // The custom-threshold params schema persists `criteria` verbatim (the FTR
-    // asserted the same exact shape via `_find`), so a strict deep match is safe.
-    expect(params.criteria).toStrictEqual(buildFullFormCriteria());
-    expect(params.groupBy).toStrictEqual(['docker.container.name']);
-    expect(params.searchConfiguration).toStrictEqual({
-      query: { query: '', language: 'kuery' },
-      index: DATA_VIEW_ID,
-    });
-    expect(params.noDataBehavior).toBe('recover');
-  });
-
-  apiTest(
-    'should have correct data view reference before and after edit',
-    async ({ apiClient, esClient }) => {
-      const alertHitsV1 = await searchRuleSo(esClient, ruleId);
-
-      const bulkEditRes = await apiClient.post('internal/alerting/rules/_bulk_edit', {
+    apiTest('create a threshold rule', async ({ apiClient }) => {
+      // The shared rule is created in `beforeAll`; verify it persisted and is
+      // readable so the dependent tests below can rely on it.
+      const res = await apiClient.get(`api/alerting/rule/${ruleId}`, {
         headers,
         responseType: 'json',
-        body: { ids: [ruleId], operations: [{ operation: 'set', field: 'apiKey' }] },
       });
-      expect(bulkEditRes).toHaveStatusCode(200);
+      expect(res).toHaveStatusCode(200);
+      expect((res.body as RuleResponse).id).toBe(ruleId);
+    });
 
-      const alertHitsV2 = await searchRuleSo(esClient, ruleId);
-
-      expect(alertHitsV1[0]?._source?.references).toStrictEqual([
-        {
-          name: 'param:kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: DATA_VIEW_ID,
+    apiTest('should persist the full custom-threshold form payload', async ({ apiClient }) => {
+      // Mirrors the FTR "saved the rule correctly" assertion: a custom equation
+      // with two metrics, a `notBetween` threshold, a 2-day window and a group-by.
+      const rule = await createCustomThresholdRule(apiClient, headers, {
+        name: 'Custom threshold rule - full form',
+        params: {
+          criteria: buildFullFormCriteria(),
+          groupBy: ['docker.container.name'],
+          alertOnNoData: false,
+          noDataBehavior: 'recover',
+          searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
         },
-      ]);
-      expect(alertHitsV1[0]?._source?.alert?.params?.searchConfiguration).toStrictEqual({
-        query: { query: '', language: 'kuery' },
-        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
       });
-      expect(alertHitsV1[0]?.fields).toStrictEqual(alertHitsV2[0]?.fields);
-      expect(alertHitsV1[0]?._source?.references ?? true).toStrictEqual(
-        alertHitsV2[0]?._source?.references ?? false
-      );
-    }
-  );
+      transientRuleIds.push(rule.id);
 
-  apiTest('should create rule with noDataBehavior: recover', async ({ apiClient }) => {
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Custom threshold rule with noDataBehavior recover',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: false,
-        noDataBehavior: 'recover',
-        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
-      },
+      const res = await apiClient.get(`api/alerting/rule/${rule.id}`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(res).toHaveStatusCode(200);
+      const { params } = res.body as FullFormRuleResponse;
+      // The custom-threshold params schema persists `criteria` verbatim (the FTR
+      // asserted the same exact shape via `_find`), so a strict deep match is safe.
+      expect(params.criteria).toStrictEqual(buildFullFormCriteria());
+      expect(params.groupBy).toStrictEqual(['docker.container.name']);
+      expect(params.searchConfiguration).toStrictEqual({
+        query: { query: '', language: 'kuery' },
+        index: DATA_VIEW_ID,
+      });
+      expect(params.noDataBehavior).toBe('recover');
     });
-    transientRuleIds.push(rule.id);
-    expect(rule.params.noDataBehavior).toBe('recover');
-  });
 
-  apiTest('should create rule with noDataBehavior: alertOnNoData', async ({ apiClient }) => {
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Custom threshold rule with noDataBehavior alertOnNoData',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: true,
-        noDataBehavior: 'alertOnNoData',
-        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
-      },
+    apiTest(
+      'should have correct data view reference before and after edit',
+      async ({ apiClient, esClient }) => {
+        const alertHitsV1 = await searchRuleSo(esClient, ruleId);
+
+        const bulkEditRes = await apiClient.post('internal/alerting/rules/_bulk_edit', {
+          headers,
+          responseType: 'json',
+          body: { ids: [ruleId], operations: [{ operation: 'set', field: 'apiKey' }] },
+        });
+        expect(bulkEditRes).toHaveStatusCode(200);
+
+        const alertHitsV2 = await searchRuleSo(esClient, ruleId);
+
+        expect(alertHitsV1[0]?._source?.references).toStrictEqual([
+          {
+            name: 'param:kibanaSavedObjectMeta.searchSourceJSON.index',
+            type: 'index-pattern',
+            id: DATA_VIEW_ID,
+          },
+        ]);
+        expect(alertHitsV1[0]?._source?.alert?.params?.searchConfiguration).toStrictEqual({
+          query: { query: '', language: 'kuery' },
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        });
+        expect(alertHitsV1[0]?.fields).toStrictEqual(alertHitsV2[0]?.fields);
+        expect(alertHitsV1[0]?._source?.references ?? true).toStrictEqual(
+          alertHitsV2[0]?._source?.references ?? false
+        );
+      }
+    );
+
+    apiTest('should create rule with noDataBehavior: recover', async ({ apiClient }) => {
+      const rule = await createCustomThresholdRule(apiClient, headers, {
+        name: 'Custom threshold rule with noDataBehavior recover',
+        params: {
+          criteria: buildCriteria(),
+          alertOnNoData: false,
+          noDataBehavior: 'recover',
+          searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
+        },
+      });
+      transientRuleIds.push(rule.id);
+      expect(rule.params.noDataBehavior).toBe('recover');
     });
-    transientRuleIds.push(rule.id);
-    expect(rule.params.noDataBehavior).toBe('alertOnNoData');
-  });
 
-  apiTest('should create rule with noDataBehavior: remainActive', async ({ apiClient }) => {
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Custom threshold rule with noDataBehavior remainActive',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: false,
-        noDataBehavior: 'remainActive',
-        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
-      },
+    apiTest('should create rule with noDataBehavior: alertOnNoData', async ({ apiClient }) => {
+      const rule = await createCustomThresholdRule(apiClient, headers, {
+        name: 'Custom threshold rule with noDataBehavior alertOnNoData',
+        params: {
+          criteria: buildCriteria(),
+          alertOnNoData: true,
+          noDataBehavior: 'alertOnNoData',
+          searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
+        },
+      });
+      transientRuleIds.push(rule.id);
+      expect(rule.params.noDataBehavior).toBe('alertOnNoData');
     });
-    transientRuleIds.push(rule.id);
-    expect(rule.params.noDataBehavior).toBe('remainActive');
-  });
 
-  apiTest('should update existing rule to add noDataBehavior parameter', async ({ apiClient }) => {
-    const rule = await createCustomThresholdRule(apiClient, headers, {
-      name: 'Custom threshold rule without noDataBehavior',
-      params: {
-        criteria: buildCriteria(),
-        alertOnNoData: true,
-        alertOnGroupDisappear: true,
-        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
-      },
-    });
-    transientRuleIds.push(rule.id);
-    expect(rule.params.noDataBehavior).toBeUndefined();
-
-    const updateRes = await apiClient.put(`api/alerting/rule/${rule.id}`, {
-      headers,
-      responseType: 'json',
-      body: {
-        name: 'Custom threshold rule with noDataBehavior',
-        schedule: { interval: '1m' },
-        tags: ['observability'],
-        actions: [],
+    apiTest('should create rule with noDataBehavior: remainActive', async ({ apiClient }) => {
+      const rule = await createCustomThresholdRule(apiClient, headers, {
+        name: 'Custom threshold rule with noDataBehavior remainActive',
         params: {
           criteria: buildCriteria(),
           alertOnNoData: false,
           noDataBehavior: 'remainActive',
           searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
         },
-      },
+      });
+      transientRuleIds.push(rule.id);
+      expect(rule.params.noDataBehavior).toBe('remainActive');
     });
-    expect(updateRes).toHaveStatusCode(200);
-    expect((updateRes.body as RuleResponse).params.noDataBehavior).toBe('remainActive');
-  });
-});
+
+    apiTest(
+      'should update existing rule to add noDataBehavior parameter',
+      async ({ apiClient }) => {
+        const rule = await createCustomThresholdRule(apiClient, headers, {
+          name: 'Custom threshold rule without noDataBehavior',
+          params: {
+            criteria: buildCriteria(),
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
+          },
+        });
+        transientRuleIds.push(rule.id);
+        expect(rule.params.noDataBehavior).toBeUndefined();
+
+        const updateRes = await apiClient.put(`api/alerting/rule/${rule.id}`, {
+          headers,
+          responseType: 'json',
+          body: {
+            name: 'Custom threshold rule with noDataBehavior',
+            schedule: { interval: '1m' },
+            tags: ['observability'],
+            actions: [],
+            params: {
+              criteria: buildCriteria(),
+              alertOnNoData: false,
+              noDataBehavior: 'remainActive',
+              searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
+            },
+          },
+        });
+        expect(updateRes).toHaveStatusCode(200);
+        expect((updateRes.body as RuleResponse).params.noDataBehavior).toBe('remainActive');
+      }
+    );
+  }
+);

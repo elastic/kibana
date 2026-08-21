@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { Moment } from 'moment';
@@ -292,7 +292,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         <>
           <EuiCallOut
             color={'warning'}
-            iconType={'alert'}
+            iconType={'warning'}
             size="m"
             data-test-subj="protection-updates-manifest-outdated"
             title={i18n.translate(

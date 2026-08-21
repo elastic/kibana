@@ -20,10 +20,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useQueryClient } from '@kbn/react-query';
+import { useOnAssetCriticalityToolEvent } from '../hooks/use_on_asset_criticality_tool_event';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -49,15 +50,16 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
-import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import { HUNT_WITH_AI_PROMPT } from '../prompts';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
+import { QUERY_KEY_ENTITY_ANALYTICS } from '../components/home/entities_table/constants';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
@@ -65,6 +67,8 @@ import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analy
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -132,6 +136,12 @@ export const EntityAnalyticsHomePage = () => {
 const EntityAnalyticsHomePageContent = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const queryClient = useQueryClient();
+
+  useOnAssetCriticalityToolEvent(() => {
+    queryClient.invalidateQueries([QUERY_KEY_ENTITY_ANALYTICS]);
+  });
+
   const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
   const isEnterprise = useLicense().isEnterprise();
   const leadGenerationEnabled =
@@ -141,8 +151,22 @@ const EntityAnalyticsHomePageContent = () => {
 
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
-  const connectorId = spaceId ? storedConnectorId ?? '' : '';
-  const hasValidConnector = !!availableConnectors?.find((c) => c.id === connectorId);
+  // Mirror the entity details flyout "Generate" behavior: prefer the stored
+  // Options selection when it is still valid, otherwise fall back to the first
+  // connector resolved for the lead_generation feature. The server orders that
+  // list by Feature Settings (a feature-specific override, else the Global
+  // model), so the fallback follows those settings rather than an arbitrary
+  // pick. Only when no connector exists at all does this resolve to ''.
+  const connectorId = useMemo(() => {
+    if (!availableConnectors?.length) {
+      return '';
+    }
+    const storedConnector = spaceId
+      ? availableConnectors.find((connector) => connector.id === storedConnectorId)
+      : undefined;
+    return storedConnector?.id ?? availableConnectors[0]?.id ?? '';
+  }, [availableConnectors, spaceId, storedConnectorId]);
+  const hasValidConnector = connectorId !== '';
   const safeSetConnectorId = useCallback(
     (id: string | undefined) => {
       if (spaceId) {
@@ -163,7 +187,7 @@ const EntityAnalyticsHomePageContent = () => {
     toggleSchedule,
     readPermissionError: leadsReadPermissionError,
     writePermissionError: leadsWritePermissionError,
-  } = useHuntingLeads(connectorId, leadGenerationEnabled);
+  } = useHuntingLeads(connectorId, leadGenerationEnabled, resolvedSpaceId);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -200,17 +224,15 @@ const EntityAnalyticsHomePageContent = () => {
     [history]
   );
 
-  const indicesExist = useMemo(
-    () => !!dataView?.matchedIndices?.length,
-    [dataView?.matchedIndices?.length]
-  );
-
-  const showEmptyPrompt = !indicesExist;
-
   const { data: entityStoreStatusData } = useEntityStoreStatus();
   const entityStoreDisabled =
     entityStoreStatusData?.status === 'not_installed' ||
     entityStoreStatusData?.status === 'stopped';
+  // While an engine is still provisioning its assets the entity-latest index (and its data
+  // view) may not be resolvable yet. Show a loader rather than the entity page or the generic
+  // onboarding screen; the status query polls every 5s while installing and re-renders to the
+  // homepage once it flips to `running`. See elastic/security-team#18599.
+  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
 
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -224,19 +246,25 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const handleHuntInChat = useCallback(() => {
-    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
-  }, [agentBuilder]);
+    telemetry.reportEvent(EntityEventTypes.LeadGenerationHuntWithAiClicked, {});
+    agentBuilder?.openChat({
+      newConversation: true,
+      initialMessage: HUNT_WITH_AI_PROMPT,
+      autoSendInitialMessage: false,
+      sessionTag: 'security',
+    });
+  }, [agentBuilder, telemetry]);
 
   if (dataViewLoading) {
     return <PageLoader />;
   }
 
-  if (showEmptyPrompt) {
-    return <EmptyPrompt />;
-  }
-
   if (entityStoreDisabled) {
     return <EntityStoreDisabledEmptyPrompt />;
+  }
+
+  if (entityStoreInstalling) {
+    return <PageLoader />;
   }
 
   return (
@@ -335,7 +363,11 @@ const EntityAnalyticsHomePageContent = () => {
       </EuiFlexGroup>
 
       {leadGenerationEnabled && isFlyoutOpen && (
-        <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />
+        <ThreatHuntingLeadsFlyout
+          onClose={handleCloseFlyout}
+          onSelectLead={handleOpenLeadInChat}
+          lastRunTimestamp={lastRunTimestamp}
+        />
       )}
     </>
   );
@@ -350,14 +382,20 @@ const EntityAnalyticsEntitiesTable = ({
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
+  // Stable provider value so consumers below (e.g. the memoized
+  // `EntitiesTableSection` subtree) are not forced to re-render by a new
+  // context reference when this component re-renders on an unrelated URL change.
+  const dataViewContextValue = useMemo(
+    () => ({
+      dataView: entityDataView,
+      dataViewIsLoading: entityDataViewLoading,
+    }),
+    [entityDataView, entityDataViewLoading]
+  );
+
   if (entityDataViewLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsEntitiesTableLoader" />;
   }
-
-  const dataViewContextValue = {
-    dataView: entityDataView,
-    dataViewIsLoading: entityDataViewLoading,
-  };
 
   return (
     <DataViewContext.Provider value={dataViewContextValue}>

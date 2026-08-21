@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
-import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -153,25 +154,27 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         </div>
       </EuiFormRow>
       <EuiSpacer />
-      {advancedEditorMessages.map((advancedEditorMessage, i) => (
-        <Fragment key={i}>
-          <EuiCallOut
-            title={
-              advancedEditorMessage.message !== ''
-                ? advancedEditorMessage.message
-                : advancedEditorMessage.error
-            }
-            color={advancedEditorMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={advancedEditorMessage.error !== undefined ? 'error' : 'checkCircleFill'}
-            size="s"
-          >
-            {advancedEditorMessage.message !== '' && advancedEditorMessage.error !== undefined ? (
-              <p>{advancedEditorMessage.error}</p>
-            ) : null}
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      ))}
+      {advancedEditorMessages.map((advancedEditorMessage, i) => {
+        const KbnCalloutComponent =
+          advancedEditorMessage.error !== undefined ? KbnDangerCallout : KbnInfoCallout;
+        return (
+          <Fragment key={i}>
+            <KbnCalloutComponent
+              title={
+                advancedEditorMessage.message !== ''
+                  ? advancedEditorMessage.message
+                  : advancedEditorMessage.error
+              }
+              size="s"
+            >
+              {advancedEditorMessage.message !== '' && advancedEditorMessage.error !== undefined ? (
+                <p>{advancedEditorMessage.error}</p>
+              ) : null}
+            </KbnCalloutComponent>
+            <EuiSpacer />
+          </Fragment>
+        );
+      })}
       <EuiSpacer />
       <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} showCreateDataView={true} />
     </EuiForm>
