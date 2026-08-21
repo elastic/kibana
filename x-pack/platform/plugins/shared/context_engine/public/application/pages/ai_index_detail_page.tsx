@@ -23,10 +23,10 @@ import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
-  KiListPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
+import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useKiList } from '../hooks/use_ki_list';

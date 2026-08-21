@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');
+export { KiListPanel } from './ki_list_panel';
+export { KiRow } from './ki_row';

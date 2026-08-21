@@ -8,14 +8,11 @@
 import { EuiText, EuiTextBlockTruncate, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
-import { getKiTypeLabel } from '../../utils/ki_type_labels';
+import { capitalizeLabel, getKiTypeLabel } from './helpers';
 
 interface KiRowProps {
   ki: KiListItem;
 }
-
-const capitalizeLabel = (label: string): string =>
-  label.length > 0 ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : label;
 
 export const KiRow = ({ ki }: KiRowProps) => {
   const typeLabel = capitalizeLabel(getKiTypeLabel(ki.type));
