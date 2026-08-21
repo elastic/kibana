@@ -18,7 +18,7 @@ import { copyAll } from '../lib';
 
 jest.mock('../lib');
 jest.mock('globby', () => ({ globbySync: jest.fn() }));
-jest.mock('del', () => jest.fn().mockResolvedValue(undefined));
+jest.mock('del', () => ({ deleteAsync: jest.fn().mockResolvedValue(undefined) }));
 
 jest.mock('@kbn/core-i18n-server-internal', () => ({
   getKibanaTranslationFiles: jest.fn().mockResolvedValue([]),
