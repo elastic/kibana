@@ -29,7 +29,7 @@ export const MonitorsMWsCallout = () => {
       (allConfigs ?? []).some(
         (config) =>
           (config.maintenanceWindows?.length ?? 0) > 0 &&
-          config.locations.some((location) => outdatedLocationIds.has(location.id))
+          outdatedLocationIds.has(config.locationId)
       ),
     [allConfigs, outdatedLocationIds]
   );
