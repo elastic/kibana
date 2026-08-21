@@ -362,8 +362,7 @@ export const buildExceptionFilter = async <
       },
     },
   };
-  unprocessedExceptions.push(...unprocessableExceptionItems);
-  return { filter: exceptionFilter, unprocessedExceptions };
+  return { filter: exceptionFilter, unprocessedExceptions: unprocessedExceptions.concat(unprocessableExceptionItems) };
 };
 
 export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilter => {
