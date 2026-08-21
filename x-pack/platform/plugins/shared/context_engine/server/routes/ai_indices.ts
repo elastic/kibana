@@ -22,17 +22,21 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
   aiIndexByIdPath,
-  aiIndexKiSummaryPath,
+  aiIndexKiListPath,
   aiIndexPath,
+  DEFAULT_KI_PAGE_SIZE,
+  MAX_KI_PAGE_SIZE,
+  MAX_KI_RESULT_WINDOW,
+  MAX_KI_TYPE_FILTER_LENGTH,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
-  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
+import type { ListKisResponse } from '../../common/http_api/knowledge_indicators';
 import { apiPrivileges } from '../../common/features';
 import { validateAiIndexId } from '../../common/validation';
 import {
@@ -44,7 +48,7 @@ import {
   InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import { getKiSummary } from '../ai_indices/ki_summary';
+import { getKis } from '../ai_indices/ki_list';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -137,6 +141,29 @@ const aiIndexPropertiesSchema = {
 
 const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
 const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
+
+/** Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`. */
+const maxKiListFrom = MAX_KI_RESULT_WINDOW - MAX_KI_PAGE_SIZE;
+
+const listKisQuerySchema = schema.object({
+  from: schema.number({
+    min: 0,
+    max: maxKiListFrom,
+    defaultValue: 0,
+  }),
+  size: schema.number({
+    min: 1,
+    max: MAX_KI_PAGE_SIZE,
+    defaultValue: DEFAULT_KI_PAGE_SIZE,
+  }),
+  type: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
+      meta: { description: 'When set, return only KIs of this type.' },
+    })
+  ),
+});
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
   if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
@@ -326,15 +353,15 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Get Knowledge Indicator summary for an AI index
+  // List Knowledge Indicators for an AI index
   router.versioned
     .get({
-      path: aiIndexKiSummaryPath,
+      path: aiIndexKiListPath,
       security: READ_SECURITY,
       access: 'internal',
-      summary: 'Get Knowledge Indicator summary',
+      summary: 'List Knowledge Indicators',
       description:
-        'Returns the number of Knowledge Indicators stored in the AI index destination backing store.',
+        'Returns a paginated list of Knowledge Indicators stored in the AI index destination backing store.',
     })
     .addVersion(
       {
@@ -342,21 +369,23 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: listKisQuerySchema,
           },
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const { from, size, type } = request.query;
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-          const kiSummary = await getKiSummary(esClient, aiIndex.dest.value);
-          const body: GetAiIndexKiSummaryResponse = {
-            count: kiSummary.count,
-            dest: aiIndex.dest,
-            counts_by_type: kiSummary.countsByType,
-          };
+          const body: ListKisResponse = await getKis(esClient, {
+            destValue: aiIndex.dest.value,
+            from,
+            size,
+            ...(type !== undefined ? { type } : {}),
+          });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {

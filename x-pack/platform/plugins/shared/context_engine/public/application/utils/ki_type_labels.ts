@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KI_OTHERS_TYPE } from '../../../common/ki_type_counts';
-
-export const getKiTypeLabel = (type: string): string => {
-  if (type === KI_OTHERS_TYPE) {
-    return i18n.translate('xpack.contextEngine.kiType.others', {
-      defaultMessage: 'Other types',
-    });
-  }
-
-  return type.replace(/_/g, ' ');
-};
+export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');

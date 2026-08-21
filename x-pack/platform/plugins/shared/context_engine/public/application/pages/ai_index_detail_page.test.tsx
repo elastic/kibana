@@ -63,17 +63,16 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_ai_index_ki_summary', () => ({
-  useAiIndexKiSummary: () => ({
-    kiSummary: {
-      count: 25,
-      dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-      counts_by_type: [
-        { type: 'index_metadata', count: 10 },
-        { type: 'document', count: 8 },
-        { type: 'detection', count: 7 },
-      ],
-    },
+jest.mock('../hooks/use_ki_list', () => ({
+  useKiList: () => ({
+    kis: [],
+    total: 25,
+    totalAll: 25,
+    countsByType: [
+      { type: 'index_metadata', count: 10 },
+      { type: 'document', count: 8 },
+      { type: 'detection', count: 7 },
+    ],
     isLoading: false,
     error: undefined,
     refetch: jest.fn(),
@@ -174,11 +173,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByText('my-ai-index')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent('10');
-    expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent(
-      'index metadata'
-    );
-    expect(screen.getByTestId('contextAiIndexKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -334,8 +329,9 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
     expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
 
   it('discards the draft when editing is cancelled', async () => {
@@ -377,6 +373,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
     expect(await screen.findAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
 
     fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
@@ -466,6 +463,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
+
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
   });
 
@@ -516,5 +514,24 @@ describe('AiIndexDetailPage', () => {
     });
 
     expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('switches to the Knowledge Indicators tab', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.capabilities = {
+      ...services.application.capabilities,
+      discover_v2: { show: true },
+    };
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+
+    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
   });
 });

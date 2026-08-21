@@ -12,8 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiNotificationBadge,
   EuiSkeletonTitle,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,14 +27,17 @@ import { useParams } from 'react-router-dom';
 import {
   AutomationsPanel,
   DescriptionPanel,
-  KnowledgeIndicatorsPanel,
+  KiListPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
+
+type DetailTabId = 'overview' | 'knowledge_indicators';
 
 const backToListLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToListButton', {
   defaultMessage: 'Back to AI indexes',
@@ -42,6 +48,13 @@ export const AiIndexDetailPage = () => {
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
+
+  const { total: kiTotal } = useKiList({
+    aiIndexId: aiIndex?.id,
+    size: 1,
+    enabled: aiIndex !== undefined,
+  });
 
   const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const isManaged = aiIndex !== undefined && aiIndex.managed;
@@ -120,31 +133,63 @@ export const AiIndexDetailPage = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        <DescriptionPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
+        <EuiTabs data-test-subj="contextAiIndexDetailTabs">
+          <EuiTab
+            isSelected={selectedTab === 'overview'}
+            onClick={() => setSelectedTab('overview')}
+            data-test-subj="contextAiIndexDetailTab-overview"
+          >
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.tabs.overview"
+              defaultMessage="Overview"
+            />
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'knowledge_indicators'}
+            onClick={() => setSelectedTab('knowledge_indicators')}
+            append={
+              kiTotal > 0 ? <EuiNotificationBadge>{kiTotal}</EuiNotificationBadge> : undefined
+            }
+            data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+          >
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
+              defaultMessage="Knowledge Indicators"
+            />
+          </EuiTab>
+        </EuiTabs>
+
         <EuiSpacer size="m" />
-        <SourcesPanel
-          isLoading={isLoading}
-          sources={aiIndex?.sources ?? []}
-          canEdit={aiIndex !== undefined}
-          onEditSources={() => setIsEditingSources(true)}
-          isManaged={hideEditControls}
-        />
-        <EuiSpacer size="m" />
-        <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
-        <EuiSpacer size="m" />
-        <AutomationsPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
-        <EuiSpacer size="m" />
-        <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+
+        {selectedTab === 'overview' && (
+          <>
+            <DescriptionPanel
+              isLoading={isLoading}
+              aiIndex={aiIndex}
+              onSaved={refetch}
+              isManaged={isManaged}
+            />
+            <EuiSpacer size="m" />
+            <SourcesPanel
+              isLoading={isLoading}
+              sources={aiIndex?.sources ?? []}
+              canEdit={aiIndex !== undefined}
+              onEditSources={() => setIsEditingSources(true)}
+              isManaged={hideEditControls}
+            />
+            <EuiSpacer size="m" />
+            <AutomationsPanel
+              isLoading={isLoading}
+              aiIndex={aiIndex}
+              onSaved={refetch}
+              isManaged={isManaged}
+            />
+            <EuiSpacer size="m" />
+            <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+          </>
+        )}
+
+        {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout
