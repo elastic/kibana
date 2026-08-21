@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { WorkflowsManagementFeatureConfig } from './features';
 
@@ -20,7 +20,7 @@ describe('WorkflowsManagementFeatureConfig', () => {
   it('grants ai_index read on workflow via the workflow_read sub-feature privilege', () => {
     const subPrivilege = getSubFeaturePrivilege('workflow_read')!;
 
-    expect(subPrivilege.aiIndex).toEqual({ read: [WORKFLOW_SML_TYPE] });
+    expect(subPrivilege.aiIndex).toEqual({ read: [WORKFLOW_KI_TYPE] });
     expect(subPrivilege.includeIn).toBe('read');
   });
 

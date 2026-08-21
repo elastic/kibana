@@ -24,6 +24,7 @@ import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-s
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -248,11 +249,7 @@ export class StreamsPlugin
       privileges: {
         all: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
-          // Must match SIGNIFICANT_EVENT_SML_TYPE in
-          // x-pack/platform/plugins/shared/significant_events/common/significant_event_attachment.ts.
-          // Declared as a literal rather than imported: `significant_events` already requires
-          // `streams`, so importing it here would create a circular plugin dependency.
-          aiIndex: { read: ['significant_event'] },
+          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
           savedObject: {
             all: [],
             read: [],
@@ -262,11 +259,7 @@ export class StreamsPlugin
         },
         read: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
-          // Must match SIGNIFICANT_EVENT_SML_TYPE in
-          // x-pack/platform/plugins/shared/significant_events/common/significant_event_attachment.ts.
-          // Declared as a literal rather than imported: `significant_events` already requires
-          // `streams`, so importing it here would create a circular plugin dependency.
-          aiIndex: { read: ['significant_event'] },
+          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
           savedObject: {
             all: [],
             read: [],

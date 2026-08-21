@@ -4156,6 +4156,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-elastic-ai-index-ki-types@link:x-pack/platform/packages/shared/agent-builder/agent-builder-elastic-ai-index-ki-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
   version "0.0.0"
   uid ""

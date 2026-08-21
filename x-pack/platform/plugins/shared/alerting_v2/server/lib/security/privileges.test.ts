@@ -7,7 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ACTION_POLICY_SML_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { registerFeaturePrivileges } from './privileges';
 import { ALERTING_V2_FEATURES, getFeatureManagementApps } from '../../../common/feature_privileges';
@@ -75,18 +75,18 @@ describe('registerFeaturePrivileges', () => {
   it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the rules feature', () => {
     const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
 
-    expect(rulesFeature.privileges?.all.aiIndex).toEqual({ read: [RULE_SML_TYPE] });
-    expect(rulesFeature.privileges?.read.aiIndex).toEqual({ read: [RULE_SML_TYPE] });
+    expect(rulesFeature.privileges?.all.aiIndex).toEqual({ read: [RULE_KI_TYPE] });
+    expect(rulesFeature.privileges?.read.aiIndex).toEqual({ read: [RULE_KI_TYPE] });
   });
 
   it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the action policies feature', () => {
     const actionPoliciesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id);
 
     expect(actionPoliciesFeature.privileges?.all.aiIndex).toEqual({
-      read: [ACTION_POLICY_SML_TYPE],
+      read: [ACTION_POLICY_KI_TYPE],
     });
     expect(actionPoliciesFeature.privileges?.read.aiIndex).toEqual({
-      read: [ACTION_POLICY_SML_TYPE],
+      read: [ACTION_POLICY_KI_TYPE],
     });
   });
 
