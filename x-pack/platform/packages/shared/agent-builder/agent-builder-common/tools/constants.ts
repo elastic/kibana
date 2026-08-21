@@ -89,7 +89,7 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
-  sendMessage: 'send_message',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',

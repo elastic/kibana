@@ -11,10 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type {
-  InternalBuiltinToolDefinition,
-  SubAgentExecutor,
-} from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
@@ -62,7 +59,7 @@ export const createSendMessageTool = ({
   subagentTracker?: SubagentTracker;
 }): InternalBuiltinToolDefinition<typeof schema> => {
   return {
-    id: internalTools.sendMessage,
+    id: internalTools.sendMessageToAgent,
     description: toolDescription,
     type: ToolType.builtin,
     schema,
@@ -155,5 +152,3 @@ const extractFinalResponse = async (events$: Observable<ChatEvent>): Promise<Ass
   }
   return roundComplete.data.round.response;
 };
-
-export const SendMessageToolName = internalTools.sendMessage;
