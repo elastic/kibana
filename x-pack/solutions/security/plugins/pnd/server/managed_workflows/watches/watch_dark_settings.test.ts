@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SYSTEM_SECURITY_WATCH_DARK_ID } from '@kbn/pnd-common';
+import { createDarkWatchSettingsRegistration } from './watch_dark_settings';
+
+const darkWatchSettings = createDarkWatchSettingsRegistration();
+
+describe('createDarkWatchSettingsRegistration', () => {
+  it('creates Dark defaults including CommonWatchSettings and Dark dials', () => {
+    expect(darkWatchSettings.createDefaultValues()).toEqual({
+      settingsVersion: 1,
+      autonomyLevel: 'supervised',
+      scheduleId: 'dark-overnight-sweep',
+      allowManualRun: true,
+      scopes: [
+        { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
+        { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
+        { name: 'Customer data', access: 'denied', label: 'No access' },
+      ],
+      connectorId: '',
+      tier2When: 'on_hits',
+      candidateLimit: 10,
+      fanOutMax: 10,
+      scheduleEveryMinutes: 240,
+      targetTechnology: 'aws_iam',
+      leadPollIntervalMinutes: 60,
+      leadMinPriority: 7,
+      intelEventTriggerEnabled: false,
+    });
+  });
+
+  it('migrates slim autonomy-only values onto Dark defaults', () => {
+    expect(darkWatchSettings.migrate({ autonomyLevel: 'assisted' })).toEqual({
+      migrated: true,
+      values: {
+        ...darkWatchSettings.createDefaultValues(),
+        autonomyLevel: 'assisted',
+      },
+    });
+  });
+
+  it('applies autonomy, trigger, and dark dial patches', () => {
+    const defaults = darkWatchSettings.createDefaultValues();
+    const result = darkWatchSettings.applyPatch(defaults, {
+      autonomyLevel: 'manual',
+      triggers: { scheduleId: 'dark-custom-sweep', allowManualRun: false },
+      dark: {
+        connectorId: 'my-inference-connector',
+        tier2When: 'always',
+        candidateLimit: 5,
+      },
+    });
+    if ('rejected' in result) throw new Error(`Unexpected rejection: ${result.rejected}`);
+
+    expect(result.values).toEqual({
+      ...defaults,
+      autonomyLevel: 'manual',
+      scheduleId: 'dark-custom-sweep',
+      allowManualRun: false,
+      connectorId: 'my-inference-connector',
+      tier2When: 'always',
+      candidateLimit: 5,
+    });
+  });
+
+  it('projects Dark settings including the dark extension', () => {
+    expect(darkWatchSettings.toSettings(darkWatchSettings.createDefaultValues())).toEqual({
+      watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
+      autonomy: 'supervised',
+      dark: {
+        connectorId: '',
+        tier2When: 'on_hits',
+        candidateLimit: 10,
+        fanOutMax: 10,
+        scheduleEveryMinutes: 240,
+        targetTechnology: 'aws_iam',
+        leadPollIntervalMinutes: 60,
+        leadMinPriority: 7,
+        intelEventTriggerEnabled: false,
+        scheduleId: 'dark-overnight-sweep',
+        allowManualRun: true,
+        scopes: [
+          { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
+          { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
+          { name: 'Customer data', access: 'denied', label: 'No access' },
+        ],
+      },
+    });
+  });
+
+  it('rejects post-MVP worker patches', () => {
+    expect(
+      darkWatchSettings.applyPatch(darkWatchSettings.createDefaultValues(), {
+        worker: { workerId: 'continuous-threat-hunt', enabled: false },
+      })
+    ).toEqual({ rejected: 'worker "continuous-threat-hunt"' });
+  });
+});

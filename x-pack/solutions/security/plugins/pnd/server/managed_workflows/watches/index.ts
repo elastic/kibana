@@ -13,6 +13,7 @@ import {
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
 } from '@kbn/pnd-common';
 import type { SYSTEM_SECURITY_WATCH_IDS } from '@kbn/pnd-common';
+import { createDarkWatchSettingsRegistration } from './watch_dark_settings';
 import { createWatchSettingsRegistration } from './watch_settings';
 import type { WatchSettingsRegistration } from './types';
 
@@ -23,12 +24,13 @@ export const watchSettingsById: Record<RegisteredWatchId, WatchSettingsRegistrat
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: createWatchSettingsRegistration(
     SYSTEM_SECURITY_WATCH_OFFICER_ID
   ),
-  [SYSTEM_SECURITY_WATCH_DARK_ID]: createWatchSettingsRegistration(SYSTEM_SECURITY_WATCH_DARK_ID),
+  [SYSTEM_SECURITY_WATCH_DARK_ID]: createDarkWatchSettingsRegistration(),
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: createWatchSettingsRegistration(SYSTEM_SECURITY_WATCH_DEEP_ID),
   [SYSTEM_SECURITY_WATCH_DETECTION_ID]: createWatchSettingsRegistration(
     SYSTEM_SECURITY_WATCH_DETECTION_ID
   ),
 };
 
+export { createDarkWatchSettingsRegistration } from './watch_dark_settings';
 export { createWatchSettingsRegistration } from './watch_settings';
 export type { WatchSettingsPatch, WatchSettingsRegistration } from './types';

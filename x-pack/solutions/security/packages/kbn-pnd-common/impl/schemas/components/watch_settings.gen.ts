@@ -232,6 +232,52 @@ export const WatchSettings = lazySchema(() =>
     skills: z.array(WatchSkillAttachment).optional(),
     approvalGates: z.array(WatchApprovalGate).optional(),
     runsLedger: z.array(WatchLedgerEntry).optional(),
+    /**
+     * Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy). Present only for system-security-watch-dark.
+     */
+    dark: DarkWatchSettings.optional(),
   })
 );
 export type WatchSettings = z.infer<typeof WatchSettings>;
+
+export const DarkWatchTier2When = lazySchema(() => z.enum(['on_hits', 'always']));
+export type DarkWatchTier2When = z.infer<typeof DarkWatchTier2When>;
+
+export const DarkWatchTargetTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
+export type DarkWatchTargetTechnology = z.infer<typeof DarkWatchTargetTechnology>;
+
+export const DarkWatchScope = lazySchema(() =>
+  z.object({
+    name: z.string().max(128),
+    access: z.string().max(64),
+    label: z.string().max(128),
+  })
+);
+export type DarkWatchScope = z.infer<typeof DarkWatchScope>;
+
+/**
+ * Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto managedTemplateValues for system-security-watch-dark.
+ */
+export const DarkWatchSettings = lazySchema(() =>
+  z.object({
+    /**
+     * Inference connector id for Tier 2; empty string degrades to Tier 1 only.
+     */
+    connectorId: z.string().max(256),
+    tier2When: DarkWatchTier2When,
+    candidateLimit: z.number().int().min(1).max(100),
+    fanOutMax: z.number().int().min(1).max(100),
+    /**
+     * Hunt cooldown / soft sweep cadence in minutes.
+     */
+    scheduleEveryMinutes: z.number().int().min(1).max(10080),
+    targetTechnology: DarkWatchTargetTechnology,
+    leadPollIntervalMinutes: z.number().int().min(1).max(10080),
+    leadMinPriority: z.number().int().min(0).max(100),
+    intelEventTriggerEnabled: z.boolean(),
+    scheduleId: z.string().min(1).max(128),
+    allowManualRun: z.boolean(),
+    scopes: z.array(DarkWatchScope).max(32),
+  })
+);
+export type DarkWatchSettings = z.infer<typeof DarkWatchSettings>;

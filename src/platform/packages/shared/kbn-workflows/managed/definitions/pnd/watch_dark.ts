@@ -9,20 +9,48 @@
 
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WATCH_MANAGEMENT } from './constants';
 import WATCH_DARK_YAML from './watch_dark.yaml';
-import type { PndWatchTemplateValues } from './watch_template_values';
+import type { DarkWatchTemplateValues } from './watch_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-watch-dark';
+
+const renderPndWatchDarkYaml = ({
+  settingsVersion,
+  autonomyLevel,
+  scheduleId,
+  allowManualRun,
+  scopes,
+  connectorId,
+  tier2When,
+  candidateLimit,
+  fanOutMax,
+  scheduleEveryMinutes,
+  targetTechnology,
+  leadPollIntervalMinutes,
+  leadMinPriority,
+  intelEventTriggerEnabled,
+}: DarkWatchTemplateValues): string =>
+  WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion))
+    .replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel)
+    .replaceAll('__WATCH_SCHEDULE_ID__', scheduleId)
+    .replaceAll('__WATCH_ALLOW_MANUAL_RUN__', String(allowManualRun))
+    .replaceAll('__WATCH_SCOPES_JSON__', JSON.stringify(scopes))
+    .replaceAll('__WATCH_CONNECTOR_ID__', connectorId)
+    .replaceAll('__WATCH_TIER2_WHEN__', tier2When)
+    .replaceAll('__WATCH_CANDIDATE_LIMIT__', String(candidateLimit))
+    .replaceAll('__WATCH_FAN_OUT_MAX__', String(fanOutMax))
+    .replaceAll('__WATCH_SCHEDULE_EVERY_MINUTES__', String(scheduleEveryMinutes))
+    .replaceAll('__WATCH_TARGET_TECHNOLOGY__', targetTechnology)
+    .replaceAll('__WATCH_LEAD_POLL_INTERVAL_MINUTES__', String(leadPollIntervalMinutes))
+    .replaceAll('__WATCH_LEAD_MIN_PRIORITY__', String(leadMinPriority))
+    .replaceAll('__WATCH_INTEL_EVENT_TRIGGER_ENABLED__', String(intelEventTriggerEnabled));
 
 export const PND_WATCH_DARK_WORKFLOW = {
   billable: false,
   id: PND_WATCH_DARK_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: ({ settingsVersion, autonomyLevel }: PndWatchTemplateValues): string =>
-    WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion)).replaceAll(
-      '__WATCH_AUTONOMY_LEVEL__',
-      autonomyLevel
-    ),
-} as const satisfies ManagedWorkflowDefinition<PndWatchTemplateValues>;
+  // Bump when yamlTemplate tokens or DarkWatchTemplateValues shape change.
+  version: 2,
+  yamlTemplate: renderPndWatchDarkYaml,
+} as const satisfies ManagedWorkflowDefinition<DarkWatchTemplateValues>;

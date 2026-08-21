@@ -1,0 +1,66 @@
+version: "1"
+name: Dark Watch - Package Report
+description: >
+  Worker invoked by the Dark Watch Orchestrator once hunt, coverage-gap, and
+  correlation have appended their findings. Decides create vs. dismiss and,
+  when reviewable, creates the report's Proposal(s) concurrently via its own
+  `parallel` step (legal — not nested inside another `parallel` branch,
+  elastic/security-team#18208). Only creates Proposal records; never starts
+  dark_proposal_gate itself (the Orchestrator's start_proposal_gates step
+  does that right after this Worker returns).
+enabled: true
+tags:
+  - watch
+  - watch-dark
+  - dark-watch-worker
+triggers:
+  - type: manual
+inputs:
+  additionalProperties: false
+  properties:
+    report_id:
+      description: Threat report id (dark:report:{report_id}).
+      type: string
+    investigation_id:
+      description: Conversation id of the report's Investigation.
+      type: string
+  required:
+    - report_id
+    - investigation_id
+steps:
+  # Decides server-side: reviewable -> array of Proposals to create; not
+  # reviewable -> dismisses the Investigation, returns []. Always an array,
+  # so create_proposals needs no `if` — empty is just a zero-item fan-out.
+  - name: decide_and_package
+    type: kibana.request
+    with:
+      request:
+        method: POST
+        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/package
+        body:
+          report_id: "{{ inputs.report_id }}"
+
+  # One branch per Proposal draft. `concurrency.max` is small — this isn't
+  # the 10-report fan-out, just a low-single-digit Proposal count.
+  - name: create_proposals
+    type: parallel
+    foreach: "{{ steps.decide_and_package.output.proposals | json }}"
+    concurrency:
+      max: 5
+    steps:
+      # Returns { proposal_id, investigation_id } — echoing investigation_id
+      # so format_result below carries what start_proposal_gates needs.
+      - name: create_proposal
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            path: /internal/pnd/investigations/{{ inputs.investigation_id }}/proposals
+            body: "{{ foreach.item | json }}"
+
+  # Flattens create_proposals' per-branch results into the plain list
+  # start_proposal_gates fans out over.
+  - name: format_result
+    type: data.set
+    with:
+      proposals_to_gate: "{{ steps.create_proposals.output | map: 'create_proposal.output' | json }}"

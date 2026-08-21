@@ -10,7 +10,7 @@ import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
 export type WatchSettingsPatch = Pick<
   UpdateWatchRequestBody,
-  'autonomyLevel' | 'triggers' | 'scopeRouting' | 'approvalGate' | 'worker' | 'skill'
+  'autonomyLevel' | 'triggers' | 'scopeRouting' | 'approvalGate' | 'worker' | 'skill' | 'dark'
 >;
 
 export interface WatchSettingsRegistration {
