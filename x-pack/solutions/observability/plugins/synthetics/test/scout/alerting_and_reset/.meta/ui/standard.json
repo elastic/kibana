@@ -1,5 +1,5 @@
 {
-  "sha1": "c4124bcfdfb08821e7bf0cf6a070d7675c7a8a1c",
+  "sha1": "de4b8804c78924ed41423d741da3970c303f582d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -11,9 +11,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/global.setup.ts",
@@ -27,14 +25,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
-        "line": 26,
-        "column": 25
+        "line": 21,
+        "column": 41
       }
     },
     {
@@ -43,14 +39,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 32,
+        "column": 23
       }
     },
     {
@@ -70,65 +64,57 @@
     {
       "id": "728feac9a49403e-cfa2476ff58cabc",
       "title": "CustomStatusAlert creates a custom status alert rule",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_status_alert.spec.ts",
-        "line": 22,
-        "column": 28
+        "line": 17,
+        "column": 11
       }
     },
     {
       "id": "8e3b6ee237d0715-74afbfcf9ca5efd",
       "title": "Creates a custom TLS alert rule can filter monitors by KQL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 46,
+        "column": 24
       }
     },
     {
       "id": "8e3b6ee237d0715-41c3eabe24bb637",
       "title": "Creates a custom TLS alert rule can filter monitors by type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 64,
-        "column": 10
+        "line": 53,
+        "column": 11
       }
     },
     {
       "id": "8e3b6ee237d0715-761cf21fcc31efc",
       "title": "Creates a custom TLS alert rule can create rule and fire alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
-        "line": 73,
-        "column": 74
+        "line": 66,
+        "column": 8
       }
     },
     {
