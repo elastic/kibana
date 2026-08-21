@@ -146,7 +146,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "workflows": Object {
-            "enabled": false,
+            "enabled": true,
           },
         }
       `);
@@ -202,14 +202,14 @@ describe('config validation', () => {
       expect(config.templates.enabled).toBe(false);
     });
 
-    it('sets workflows.enabled default to false', () => {
+    it('sets workflows.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.workflows.enabled).toBe(false);
+      expect(config.workflows.enabled).toBe(true);
     });
 
-    it('allows workflows.enabled to be set to true explicitly', () => {
-      const config = ConfigSchema.validate({ workflows: { enabled: true } });
-      expect(config.workflows.enabled).toBe(true);
+    it('allows workflows.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ workflows: { enabled: false } });
+      expect(config.workflows.enabled).toBe(false);
     });
   });
 });
