@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin } from '@kbn/agent-builder-common';
@@ -646,20 +647,39 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private async findChildConversationIds(parentId: string): Promise<string[]> {
-    const response = await this.storage.getClient().search({
-      size: 100,
-      track_total_hits: false,
-      _source: false,
-      query: {
-        bool: {
-          filter: [
-            { term: { parent_conversation_id: parentId } },
-            createSpaceDslFilter(this.space),
-          ],
+    // Paginate through all children
+    const PAGE_SIZE = 500;
+    const ids: string[] = [];
+    let searchAfter: SortResults | undefined;
+
+    while (true) {
+      const response = await this.storage.getClient().search({
+        size: PAGE_SIZE,
+        track_total_hits: false,
+        _source: false,
+        // `_doc` sort is the cheapest ES sort — no scoring, no field access and stable for search_after paging.
+        sort: ['_doc'],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { parent_conversation_id: parentId } },
+              createSpaceDslFilter(this.space),
+            ],
+          },
         },
-      },
-    });
-    return response.hits.hits.map((h) => h._id as string).filter((id) => id !== undefined);
+      });
+
+      const hits = response.hits.hits;
+      for (const hit of hits) {
+        if (hit._id) ids.push(hit._id);
+      }
+
+      if (hits.length < PAGE_SIZE) break;
+      searchAfter = hits[hits.length - 1].sort;
+    }
+
+    return ids;
   }
 
   /**
