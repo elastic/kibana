@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
 import type { LensPageObjects } from '../fixtures';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -26,14 +25,13 @@ const ANNOTATION_DIMENSION = 'lnsXY_xAnnotationsPanel > lns-dimensionTrigger';
  * opens the panel's inline editor — the shared starting point of every test here.
  */
 async function openXyPanelInlineEditor(
-  pageObjects: Pick<LensPageObjects, 'dashboard' | 'lens' | 'visualize'>,
-  page: ScoutPage,
+  pageObjects: Pick<LensPageObjects, 'dashboard' | 'lens' | 'visualize' | 'saveModal'>,
   panelTitle: string
 ) {
-  const { dashboard, lens, visualize } = pageObjects;
+  const { dashboard, lens, visualize, saveModal } = pageObjects;
   await visualize.goto();
   await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
-  await saveLensAsNewCopyToNewDashboard({ lens }, page, panelTitle);
+  await saveLensAsNewCopyToNewDashboard({ lens, saveModal }, panelTitle);
   await dashboard.waitForRenderComplete();
   await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 }
@@ -57,7 +55,7 @@ spaceTest.describe(
       const { dashboard, lens } = pageObjects;
 
       await spaceTest.step('open the panel inline editor', async () => {
-        await openXyPanelInlineEditor(pageObjects, page, 'xyVisChart Copy');
+        await openXyPanelInlineEditor(pageObjects, 'xyVisChart Copy');
       });
 
       await spaceTest.step('add an annotation layer', async () => {
@@ -79,7 +77,7 @@ spaceTest.describe(
       const { lens, saveModal } = pageObjects;
 
       await spaceTest.step('open the panel inline editor', async () => {
-        await openXyPanelInlineEditor(pageObjects, page, 'xyVisChart Copy 2');
+        await openXyPanelInlineEditor(pageObjects, 'xyVisChart Copy 2');
       });
 
       await spaceTest.step('add an annotation layer and save it to the library', async () => {
@@ -122,7 +120,7 @@ spaceTest.describe(
       const { dashboard, lens } = pageObjects;
 
       await spaceTest.step('open the panel inline editor', async () => {
-        await openXyPanelInlineEditor(pageObjects, page, 'xyVisChart Copy 3');
+        await openXyPanelInlineEditor(pageObjects, 'xyVisChart Copy 3');
       });
 
       await spaceTest.step('add a reference line layer with a formula and icon', async () => {

@@ -23,6 +23,8 @@ export class SavedObjectSaveModal {
   private readonly descriptionInput;
   private readonly confirmSaveButton;
   private readonly dashboardPicker;
+  private readonly newDashboardRadio;
+  private readonly addToLibraryCheckbox;
   private readonly tagSelector;
   private readonly tagForm;
   private readonly tagColorInput;
@@ -34,6 +36,8 @@ export class SavedObjectSaveModal {
     this.descriptionInput = this.page.testSubj.locator('savedObjectDescription');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
+    this.newDashboardRadio = this.page.locator('input#new-dashboard-option');
+    this.addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
     this.tagSelector = this.page.testSubj.locator('savedObjectTagSelector');
     this.tagForm = this.page.testSubj.locator('tagModalForm');
     this.tagColorInput = this.page.testSubj.locator('~createModalField-color');
@@ -84,7 +88,17 @@ export class SavedObjectSaveModal {
   }
 
   async selectNewDashboard() {
-    await this.page.locator('label[for="new-dashboard-option"]').click();
+    // `check` auto-waits for enabled; the radio can start disabled (e.g. re-saving an
+    // existing saved object until "Save as new" is toggled).
+    await this.newDashboardRadio.check();
+  }
+
+  /**
+   * Sets the "Add to library" checkbox shown with the add-to-dashboard options; unchecking
+   * it saves the object as a by-value panel instead of a library reference.
+   */
+  async setAddToLibrary(checked: boolean) {
+    await this.addToLibraryCheckbox.setChecked(checked);
   }
 
   async selectNoDashboard() {
@@ -111,9 +125,8 @@ export class SavedObjectSaveModal {
   async saveToLibrary(name: string) {
     await this.fillTitle(name);
     await this.selectNoDashboard();
-    const addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
-    await expect(addToLibraryCheckbox).toBeChecked();
-    await expect(addToLibraryCheckbox).toBeDisabled();
+    await expect(this.addToLibraryCheckbox).toBeChecked();
+    await expect(this.addToLibraryCheckbox).toBeDisabled();
     await this.confirm();
   }
 }

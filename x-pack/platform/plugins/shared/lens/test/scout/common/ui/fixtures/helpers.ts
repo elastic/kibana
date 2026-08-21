@@ -273,23 +273,21 @@ export async function buildBytesMetricVisualization({ visualize, lens }: Visuali
  * reason), which the shared `lens_app.save()` does not support.
  */
 export async function saveLensAsNewCopyToNewDashboard(
-  { lens }: Pick<LensPageObjects, 'lens'>,
-  page: ScoutPage,
+  { lens, saveModal }: Pick<LensPageObjects, 'lens' | 'saveModal'>,
   title: string
 ) {
   await lens.saveButton.click();
-  await lens.saveModal.waitFor({ state: 'visible' });
+  await saveModal.modal.waitFor({ state: 'visible' });
 
   await lens.setEuiSwitch('saveAsNewCheckbox', true);
-  await lens.savedObjectTitleInput.fill(title);
-  // Radio is enabled only after save-as-new is on; `check` auto-waits for enabled.
-  await page.locator('#new-dashboard-option').check();
+  await saveModal.fillTitle(title);
+  // Radio is enabled only after save-as-new is on; `selectNewDashboard` auto-waits for enabled.
+  await saveModal.selectNewDashboard();
   // A copy of a library visualization defaults to "Add to library" checked, which would
   // create a by-reference panel; uncheck for a by-value panel (FTR `saveToLibrary: false`).
-  await page.locator('#add-to-library-checkbox').uncheck();
+  await saveModal.setAddToLibrary(false);
 
-  await lens.confirmSaveButton.click();
-  await lens.saveModal.waitFor({ state: 'hidden' });
+  await saveModal.confirm();
 }
 
 /**

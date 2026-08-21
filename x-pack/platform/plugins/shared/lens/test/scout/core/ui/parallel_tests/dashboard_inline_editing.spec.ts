@@ -90,14 +90,14 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
   });
 
   spaceTest('applies inline edits to a by-reference panel', async ({ page, pageObjects }) => {
-    const { dashboard, lens, visualize } = pageObjects;
+    const { dashboard, lens, visualize, saveModal } = pageObjects;
 
     await spaceTest.step(
       'add the saved visualization to a new dashboard and link it to the library',
       async () => {
         await visualize.goto();
         await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
-        await saveLensAsNewCopyToNewDashboard({ lens }, page, 'xyVisChart Copy');
+        await saveLensAsNewCopyToNewDashboard({ lens, saveModal }, 'xyVisChart Copy');
         await dashboard.waitForRenderComplete();
         await dashboard.saveToLibrary('My by reference visualization');
       }
