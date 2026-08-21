@@ -871,6 +871,7 @@
       "groupName": "babel",
       "matchDepNames": ["@emotion/babel-preset-css-prop", "babel-loader"],
       "matchDepPatterns": ["^@babel", "^babel-plugin"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
