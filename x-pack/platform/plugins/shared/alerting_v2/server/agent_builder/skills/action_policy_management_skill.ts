@@ -200,7 +200,7 @@ After rendering all three attachments (rule, workflow, action policy), remind th
 
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
-- They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
+- They can change throttle or grouping — consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md) and the [action-policy-throttle-grouping-compatibility reference](./references/action-policy-throttle-grouping-compatibility.md).
 - They can share this policy with other rules instead of creating one policy per rule — consult the [multi-rule action policies reference](./references/action-policy-multi-rule.md).
 
 ---
@@ -220,7 +220,7 @@ When the user asks how to match episodes, or which KQL fields are available, con
 When the user asks how episodes are grouped (per episode, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
 
 ### Throttle Strategies
-When the user asks how often notifications fire, or to change from \`on_status_change\` vs \`every_time\`, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
+When the user asks how often notifications fire, or to change throttle strategy, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
 
 ### Throttle / Grouping Compatibility
 When setting grouping and throttle together, consult the [action-policy-throttle-grouping-compatibility reference](./references/action-policy-throttle-grouping-compatibility.md).

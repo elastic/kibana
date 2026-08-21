@@ -125,5 +125,17 @@ describe('createActionPolicyManagementSkill', () => {
     expect(byName['action-policy-multi-rule']).toContain('Catch-all');
     expect(byName['action-policy-schema']).toBeUndefined();
     expect(byName['action-policy-operations-schema']).toBeUndefined();
+    expect(byName['concepts']).toBeUndefined();
+  });
+
+  it('defers throttle strategy details to referenced content instead of teaching a two-strategy model', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+
+    expect(skill.content).toContain('action-policy-throttle-strategies.md');
+    expect(skill.content).toContain('action-policy-throttle-grouping-compatibility.md');
+    expect(skill.content).not.toContain(
+      '`on_status_change` (default) only notifies on transitions, `every_time` notifies on every evaluation cycle'
+    );
+    expect(skill.content).not.toContain('change from `on_status_change` vs `every_time`');
   });
 });

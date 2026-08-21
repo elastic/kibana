@@ -522,7 +522,12 @@ const formatStrategySet = (strategies: Set<string>): string =>
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
   const groupingModes = getGroupingModeValues();
-  const perEpisodeMode = groupingModes.find((m) => m === 'per_episode') ?? 'per_episode';
+  const perEpisodeMode = groupingModes.find((m) => m === 'per_episode');
+  if (!perEpisodeMode) {
+    throw new SchemaTranslationError(
+      'Missing grouping mode "per_episode". Add it to groupingModeSchema.'
+    );
+  }
   const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
 
   return [
