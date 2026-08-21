@@ -6,7 +6,6 @@
  */
 
 import type { CloudProvider } from '../types/models/cloud_connector';
-import { AWS_CLOUD_PROVIDER } from '../types/models/cloud_connector';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from './package_policy';
 
@@ -107,80 +106,36 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 ];
 
-// Cloud connector permission allowlist
-// Defines which integrations can share cloud connectors within the same policy group.
-// Connectors created by an integration in one group cannot be reused by integrations in another group.
+// Cloud connector policy groups
+// Connectors can only be shared between integrations in the same policy group. By default,
+// an integration's group is derived from its cloud provider (`<provider>_default`), so any
+// two integrations targeting the same provider can share connectors with no registration
+// required here. The only exceptions are ISOLATED packages: integrations whose connectors
+// are provisioned with bespoke IaC templates and permission scopes (CSPM, Cloud Asset
+// Inventory) and therefore must not be shared with provider-default integrations.
+//
+// INVARIANT: because every requester resolves to exactly one group and group membership is
+// enforced on both create-flow UI filtering and backend reuse, all package policies attached
+// to a given connector always belong to a single group.
 
-export type PolicyGroup = 'security_audit_policy_group' | 'aws_global_policy_group';
+export type DefaultPolicyGroup = `${CloudProvider}_default`;
+export type PolicyGroup = 'security_audit_policy_group' | DefaultPolicyGroup;
 
-export interface CloudConnectorAllowlistEntry {
-  provider: CloudProvider;
-  package: string;
-  policyTemplate: string;
-}
-
-export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
-  PolicyGroup,
-  ReadonlyArray<CloudConnectorAllowlistEntry>
-> = {
-  security_audit_policy_group: [
-    { provider: AWS_CLOUD_PROVIDER, package: 'cloud_security_posture', policyTemplate: 'cspm' },
-    {
-      provider: AWS_CLOUD_PROVIDER,
-      package: 'cloud_asset_inventory',
-      policyTemplate: 'asset_inventory',
-    },
-  ],
-  aws_global_policy_group: [
-    // aws package — all agentless-enabled policy templates
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'awshealth' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'billing' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'cloudwatch' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'config' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'dynamodb' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ebs' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ec2' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'ecs' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'elb' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'guardduty' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'inspector' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'lambda' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'rds' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 's3' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'securityhub' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'sns' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'sqs' },
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'transitgateway' },
-    // aws_bedrock — agentless CloudWatch metrics and logs (ingest-dev#8812)
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws_bedrock', policyTemplate: 'aws_bedrock' },
-    // aws_bedrock_agentcore — agentless CloudWatch metrics and logs (ingest-dev#8812)
-    {
-      provider: AWS_CLOUD_PROVIDER,
-      package: 'aws_bedrock_agentcore',
-      policyTemplate: 'aws_bedrock_agentcore',
-    },
-    // aws_logs — agentless CloudWatch Logs (ingest-dev#8812)
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws_logs', policyTemplate: 'aws_logs' },
-    // aws_mq — agentless CloudWatch metrics and logs (ingest-dev#8812)
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws_mq', policyTemplate: 'amazon_mq' },
-    // aws_securityhub — standalone agentless CEL findings (ingest-dev#8812)
-    { provider: AWS_CLOUD_PROVIDER, package: 'aws_securityhub', policyTemplate: 'aws_securityhub' },
-  ],
+/**
+ * Packages whose cloud connectors are isolated from provider-default sharing.
+ * Keyed by package name: usage listings only expose the package name (not the policy
+ * template), and each of these packages is isolated for all of its policy templates.
+ */
+export const ISOLATED_CLOUD_CONNECTOR_PACKAGES: Readonly<Record<string, PolicyGroup>> = {
+  cloud_security_posture: 'security_audit_policy_group',
+  cloud_asset_inventory: 'security_audit_policy_group',
 };
 
 /**
- * Returns the policy group that a given integration belongs to, or undefined if not in any group.
+ * Returns the policy group for an integration: its isolated group if the package is
+ * registered in {@link ISOLATED_CLOUD_CONNECTOR_PACKAGES}, otherwise the provider-default
+ * group shared by all other integrations targeting the same cloud provider.
  */
-export function getPolicyGroupForIntegration(
-  pkg: string,
-  policyTemplate: string
-): PolicyGroup | undefined {
-  for (const [group, entries] of Object.entries(CLOUD_CONNECTOR_PERMISSION_ALLOWLIST) as Array<
-    [PolicyGroup, ReadonlyArray<CloudConnectorAllowlistEntry>]
-  >) {
-    if (entries.some((entry) => entry.package === pkg && entry.policyTemplate === policyTemplate)) {
-      return group;
-    }
-  }
-  return undefined;
+export function getPolicyGroupForIntegration(pkg: string, provider: CloudProvider): PolicyGroup {
+  return ISOLATED_CLOUD_CONNECTOR_PACKAGES[pkg] ?? `${provider}_default`;
 }
