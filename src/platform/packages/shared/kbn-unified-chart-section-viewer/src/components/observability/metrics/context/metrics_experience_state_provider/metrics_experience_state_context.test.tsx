@@ -77,7 +77,9 @@ const StatefulGridSettingsWrapper = ({ children }: { children: React.ReactNode }
 describe('MetricsExperienceStateProvider', () => {
   describe('onSearchTermChange', () => {
     it('resets currentPage to 0 when search term changes', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Navigate to page 2
       act(() => {
@@ -94,7 +96,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('does not reset currentPage when search term is unchanged', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Set a search term
       act(() => {
@@ -117,7 +121,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('resets currentPage when search term changes from one value to another', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Set initial search and navigate
       act(() => {
@@ -137,7 +143,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('resets currentPage when search term is cleared', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       act(() => {
         result.current.onSearchTermChange('cpu');
@@ -231,6 +239,7 @@ describe('MetricsExperienceStateProvider', () => {
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
         dimensions: [],
+        searchTerm: '',
       });
     });
 
@@ -243,6 +252,7 @@ describe('MetricsExperienceStateProvider', () => {
             gaugeAggregation: 'min',
             histogramPercentile: 'p50',
             dimensions: ['host.name'],
+            searchTerm: 'host',
           }}
         >
           {children}
@@ -255,6 +265,7 @@ describe('MetricsExperienceStateProvider', () => {
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
         dimensions: ['host.name'],
+        searchTerm: 'host',
       });
       expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
     });

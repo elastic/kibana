@@ -26,9 +26,6 @@ export interface MetricsExperienceRestorableState {
   // Pagination page index
   currentPage: number;
 
-  // User search query
-  searchTerm: string;
-
   // Fullscreen mode state
   isFullscreen: boolean;
 

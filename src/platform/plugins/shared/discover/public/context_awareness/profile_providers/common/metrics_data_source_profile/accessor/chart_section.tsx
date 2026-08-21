@@ -48,12 +48,14 @@ const MetricsExperienceGridWrapper = (
       gaugeAggregation: metricsState.gaugeAggregation,
       histogramPercentile: metricsState.histogramPercentile,
       dimensions: metricsState.dimensions,
+      searchTerm: metricsState.searchTerm,
     }),
     [
       metricsState.counterAggregation,
       metricsState.gaugeAggregation,
       metricsState.histogramPercentile,
       metricsState.dimensions,
+      metricsState.searchTerm,
     ]
   );
 

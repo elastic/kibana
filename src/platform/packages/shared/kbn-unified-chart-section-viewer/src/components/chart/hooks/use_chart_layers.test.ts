@@ -166,6 +166,7 @@ describe('useChartLayers', () => {
       gaugeAggregation: 'avg' as const,
       histogramPercentile: 'p95' as const,
       dimensions: [],
+      searchTerm: '',
     };
 
     renderHook(() =>

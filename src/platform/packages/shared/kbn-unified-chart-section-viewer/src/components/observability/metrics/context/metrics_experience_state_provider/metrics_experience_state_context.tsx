@@ -28,6 +28,7 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
+  searchTerm: string;
   metricsSort: MetricsSort;
   /** Derived from the persisted dimension names. */
   selectedDimensions: Dimension[];
@@ -68,9 +69,9 @@ export function MetricsExperienceStateProvider({
   discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
-  const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
+  const { searchTerm } = gridSettings;
 
   const isSortingEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_SORTING_ENABLED,
@@ -109,14 +110,12 @@ export function MetricsExperienceStateProvider({
 
   const onSearchTermChange = useCallback(
     (term: string) => {
-      setSearchTerm((prevTerm) => {
-        if (prevTerm !== term) {
-          setCurrentPage(0);
-        }
-        return term;
-      });
+      if (searchTerm !== term) {
+        setCurrentPage(0);
+      }
+      onGridSettingsChange?.({ searchTerm: term });
     },
-    [setSearchTerm, setCurrentPage]
+    [onGridSettingsChange, searchTerm, setCurrentPage]
   );
 
   const handleMetricsSortChange = useCallback(

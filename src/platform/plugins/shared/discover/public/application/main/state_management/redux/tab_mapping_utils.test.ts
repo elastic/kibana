@@ -817,6 +817,13 @@ describe('tab mapping utils', () => {
   describe('tab type persistence', () => {
     const profileStateRegistry = createProfileStateRegistry();
     const tabTypeServices = { ...services, profileStateRegistry };
+    const createMetricsTabTypeState = (
+      dimensions: string[]
+    ): NonNullable<DiscoverSessionTab['tabTypeState']> => ({
+      type: DiscoverTabType.Metrics,
+      ...METRICS_STATE_DEF.defaultState,
+      dimensions,
+    });
 
     it('hydrates and round-trips an unopened tab type', () => {
       const persistedTab: DiscoverSessionTab = {
@@ -825,10 +832,7 @@ describe('tab mapping utils', () => {
           dataView: dataViewMockWithTimeField,
           services: tabTypeServices,
         }),
-        tabTypeState: {
-          type: DiscoverTabType.Metrics,
-          dimensions: ['host.name'],
-        },
+        tabTypeState: createMetricsTabTypeState(['host.name']),
       };
       const tabState = fromSavedObjectTabToTabState({
         tab: persistedTab,
@@ -837,7 +841,10 @@ describe('tab mapping utils', () => {
 
       expect(tabState.initialInternalState?.tabType).toBe(DiscoverTabType.Metrics);
       expect(tabState.profileState).toEqual({
-        metricsState: { dimensions: ['host.name'] },
+        metricsState: {
+          ...METRICS_STATE_DEF.defaultState,
+          dimensions: ['host.name'],
+        },
       });
 
       const resavedTab = fromTabStateToSavedObjectTab({
@@ -858,10 +865,7 @@ describe('tab mapping utils', () => {
             dataView: dataViewMockWithTimeField,
             services: tabTypeServices,
           }),
-          tabTypeState: {
-            type: DiscoverTabType.Metrics,
-            dimensions: ['saved-dimension'],
-          },
+          tabTypeState: createMetricsTabTypeState(['saved-dimension']),
         },
         existingTab: getTabStateMock({
           id: 'metrics-tab',
@@ -910,8 +914,7 @@ describe('tab mapping utils', () => {
       });
 
       expect(savedObjectTab.tabTypeState).toEqual({
-        type: DiscoverTabType.Metrics,
-        dimensions: [],
+        ...createMetricsTabTypeState([]),
       });
     });
   });

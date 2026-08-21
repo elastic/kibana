@@ -14,6 +14,12 @@ import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_pro
 export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransform({
   tabType: DiscoverTabType.Metrics,
   stateDefinitions: [METRICS_STATE_DEF],
-  toSavedState: ([{ dimensions }]) => ({ dimensions }),
-  fromSavedState: ({ dimensions }) => [{ dimensions }],
+  toSavedState: ([settings]) => ({
+    dimensions: settings.dimensions,
+    searchTerm: settings.searchTerm,
+    counterAggregation: settings.counterAggregation,
+    gaugeAggregation: settings.gaugeAggregation,
+    histogramPercentile: settings.histogramPercentile,
+  }),
+  fromSavedState: (settings) => [settings],
 });

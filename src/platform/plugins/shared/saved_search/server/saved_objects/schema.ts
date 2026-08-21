@@ -9,7 +9,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity, DiscoverTabType } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType, HistogramPercentileValue } from '@kbn/discover-utils';
+import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
@@ -175,12 +176,31 @@ const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
 
 // Tab type payloads, keyed by `type`.
 // Absent `tabTypeState` means DiscoverTabType.Default.
+const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
+  schema.literal(`${FunctionNames.AVG}`),
+  schema.literal(`${FunctionNames.SUM}`),
+  schema.literal(`${FunctionNames.MIN}`),
+  schema.literal(`${FunctionNames.MAX}`),
+]);
+
+const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
+  schema.literal(`${HistogramPercentileValue.P50}`),
+  schema.literal(`${HistogramPercentileValue.P75}`),
+  schema.literal(`${HistogramPercentileValue.P90}`),
+  schema.literal(`${HistogramPercentileValue.P95}`),
+  schema.literal(`${HistogramPercentileValue.P99}`),
+]);
+
 const SCHEMA_TAB_TYPE_STATE_V15 = schema.oneOf([
   schema.object({
     type: schema.literal(DiscoverTabType.Metrics),
     dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
       maxSize: MAX_METRICS_TAB_DIMENSIONS,
     }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
   }),
 ]);
 

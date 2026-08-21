@@ -20,6 +20,7 @@ import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixt
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
+const SEARCH_TERM = 'counter_0';
 
 spaceTest.describe(
   'Metrics in Discover - Save Session',
@@ -60,6 +61,16 @@ spaceTest.describe(
         await discover.waitUntilSearchingHasFinished();
       });
 
+      await spaceTest.step('configure aggregations and filter the grid', async () => {
+        await metricsExperience.gridSettings.open();
+        await metricsExperience.gridSettings.selectCounterAggregation('max');
+        await metricsExperience.gridSettings.selectGaugeAggregation('min');
+        await metricsExperience.gridSettings.selectHistogramPercentile('p50');
+        await metricsExperience.gridSettings.apply();
+        await metricsExperience.searchMetric(SEARCH_TERM);
+        await metricsExperience.waitForFirstCard('counter_0-0');
+      });
+
       const cardCountBefore = await metricsExperience.getVisibleCardCount();
       const queryBefore = await discover.getEsqlQueryValue();
 
@@ -92,6 +103,18 @@ spaceTest.describe(
         ).toBeVisible();
       });
 
+      await spaceTest.step('grid settings and search should be preserved', async () => {
+        await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
+        await metricsExperience.waitForFirstCard('counter_0-0');
+        await metricsExperience.gridSettings.open();
+        await expect(metricsExperience.gridSettings.counterSelect).toContainText('Maximum');
+        await expect(metricsExperience.gridSettings.gaugeSelect).toContainText('Minimum');
+        await expect(metricsExperience.gridSettings.histogramSelect).toContainText(
+          '50th percentile'
+        );
+        await metricsExperience.gridSettings.cancel();
+      });
+
       await spaceTest.step('card count should match the original session', async () => {
         const cardCountAfter = await metricsExperience.getVisibleCardCount();
         expect(cardCountAfter).toStrictEqual(cardCountBefore);
@@ -118,6 +141,7 @@ spaceTest.describe(
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
         ).toBeVisible();
+        await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
         await expect(discover.unsavedChangesIndicator()).toBeHidden();
       });
     });

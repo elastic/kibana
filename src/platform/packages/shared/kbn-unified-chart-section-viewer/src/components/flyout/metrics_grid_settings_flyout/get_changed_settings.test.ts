@@ -15,6 +15,7 @@ const applied: MetricsGridSettings = {
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
   dimensions: ['host.name'],
+  searchTerm: '',
 };
 
 describe('getChangedSettings', () => {
@@ -34,6 +35,7 @@ describe('getChangedSettings', () => {
       gaugeAggregation: 'min',
       histogramPercentile: 'p90',
       dimensions: ['host.name'],
+      searchTerm: '',
     };
 
     expect(getChangedSettings(draft, applied)).toEqual({

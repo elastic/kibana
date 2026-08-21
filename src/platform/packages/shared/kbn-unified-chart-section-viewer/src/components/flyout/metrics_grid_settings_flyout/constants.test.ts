@@ -21,6 +21,7 @@ describe('grid_settings constants', () => {
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
       dimensions: [],
+      searchTerm: '',
     });
   });
 

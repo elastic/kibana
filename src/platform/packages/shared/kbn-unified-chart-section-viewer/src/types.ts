@@ -47,7 +47,7 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    */
   externalServices?: ExternalServices;
   /**
-   * Current per-`metric_type` aggregation overrides (counter/gauge/histogram).
+   * Current aggregation, dimension, and search settings for the metrics grid.
    * Falls back to `METRICS_GRID_SETTINGS_DEFAULTS` when not provided by the host.
    */
   gridSettings?: MetricsGridSettings;

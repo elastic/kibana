@@ -18,6 +18,11 @@ import {
 import { METRICS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
 import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';
 
+const createSavedMetricsSettings = (dimensions: string[]) => ({
+  ...METRICS_STATE_DEF.defaultState,
+  dimensions,
+});
+
 describe('ProfileStateRegistry', () => {
   it('registers and matches definitions', () => {
     const registry = new ProfileStateRegistry();
@@ -97,10 +102,10 @@ describe('ProfileStateRegistry', () => {
 
       expect(savedState).toEqual({
         type: DiscoverTabType.Metrics,
-        dimensions: ['host.name'],
+        ...createSavedMetricsSettings(['host.name']),
       });
       expect(registry.fromSavedState(savedState)).toEqual({
-        metricsState: { dimensions: ['host.name'] },
+        metricsState: createSavedMetricsSettings(['host.name']),
       });
     });
 
@@ -125,7 +130,7 @@ describe('ProfileStateRegistry', () => {
 
       expect(registry.toSavedState(DiscoverTabType.Metrics, {})).toEqual({
         type: DiscoverTabType.Metrics,
-        dimensions: [],
+        ...createSavedMetricsSettings([]),
       });
     });
 
@@ -136,7 +141,7 @@ describe('ProfileStateRegistry', () => {
       expect(
         registry.fromSavedState({
           type: DiscoverTabType.Metrics,
-          dimensions: ['host.name'],
+          ...createSavedMetricsSettings(['host.name']),
         })
       ).toEqual({});
     });
@@ -149,7 +154,7 @@ describe('ProfileStateRegistry', () => {
       const duplicateTransform = createProfileSavedStateTransform({
         tabType: DiscoverTabType.Metrics,
         stateDefinitions: [METRICS_STATE_DEF],
-        toSavedState: ([{ dimensions }]) => ({ dimensions }),
+        toSavedState: ([{ dimensions }]) => createSavedMetricsSettings(dimensions),
         fromSavedState: ({ dimensions }) => [{ dimensions }],
       });
 
@@ -165,7 +170,7 @@ describe('ProfileStateRegistry', () => {
       const transform = createProfileSavedStateTransform({
         tabType: DiscoverTabType.Metrics,
         stateDefinitions: [METRICS_STATE_DEF, METRICS_STATE_DEF],
-        toSavedState: ([{ dimensions }]) => ({ dimensions }),
+        toSavedState: ([{ dimensions }]) => createSavedMetricsSettings(dimensions),
         fromSavedState: ({ dimensions }) => [{ dimensions }, {}],
       });
 
@@ -185,7 +190,7 @@ describe('ProfileStateRegistry', () => {
         tabType: DiscoverTabType.Metrics,
         stateDefinitions: [METRICS_STATE_DEF, secondaryDefinition],
         toSavedState: ([metricsState, secondaryState]) => ({
-          dimensions: [...metricsState.dimensions, secondaryState.suffix],
+          ...createSavedMetricsSettings([...metricsState.dimensions, secondaryState.suffix]),
         }),
         fromSavedState: ({ dimensions }) => [
           { dimensions: dimensions.slice(0, -1) },
@@ -203,7 +208,7 @@ describe('ProfileStateRegistry', () => {
 
       expect(savedState).toEqual({
         type: DiscoverTabType.Metrics,
-        dimensions: ['host.name', 'default-suffix'],
+        ...createSavedMetricsSettings(['host.name', 'default-suffix']),
       });
       expect(registry.fromSavedState(savedState)).toEqual({
         metricsState: { dimensions: ['host.name'] },
