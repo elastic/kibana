@@ -1,5 +1,6 @@
 env:
   CI_FORCE_NODE_POINTER_COMPRESSION: true
+  KBN_ENABLE_JEMALLOC: 'true'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
