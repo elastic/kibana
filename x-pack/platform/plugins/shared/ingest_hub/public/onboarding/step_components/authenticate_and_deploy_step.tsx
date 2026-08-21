@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,6 +21,7 @@ import {
   type DeploymentMethod,
 } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
+import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 
 interface AuthenticateAndDeployStepProps {
   onContinue: () => void;
@@ -33,6 +34,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const [deploymentMethod, setDeploymentMethod] =
     useState<DeploymentMethod>('managed_integrations');
+
+  const { handleDeploy, isDeploying, failedInstances } = useDeploy({ onContinue: () => {} });
+  const [deployAttempted, setDeployAttempted] = useState(false);
+  const isDone = deployAttempted && !isDeploying && failedInstances.length === 0;
+
+  const handleDeployClick = useCallback(() => {
+    setDeployAttempted(true);
+    handleDeploy();
+  }, [handleDeploy]);
 
   const miServiceIds = useMemo(
     () =>
@@ -59,6 +69,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
           showIdentityFederation={showIdentityFederation}
+          onDeploy={handleDeployClick}
+          isDeploying={isDeploying}
+          isDone={isDone}
         />
       )}
 
@@ -79,6 +92,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           <EuiButton
             fill
             onClick={onContinue}
+            isDisabled={miServiceIds.length > 0 && !isDone}
             data-test-subj="authenticateAndDeployStep-nextButton"
           >
             <FormattedMessage

@@ -41,11 +41,17 @@ type PreferredMethod = 'identity_federation' | 'access_keys';
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   showIdentityFederation: boolean;
+  onDeploy: () => void;
+  isDeploying: boolean;
+  isDone: boolean;
 }
 
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
+  onDeploy,
+  isDeploying,
+  isDone,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { euiTheme } = useEuiTheme();
@@ -60,6 +66,11 @@ export function ManagedIntegrationsSection({
       setPreferredMethod('access_keys');
     }
   }, [showIdentityFederation, preferredMethod]);
+
+  useEffect(() => {
+    if (isDone) setIsOpen(false);
+  }, [isDone]);
+
   const [isDeployReady, setIsDeployReady] = useState(false);
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -131,6 +142,16 @@ export function ManagedIntegrationsSection({
               </strong>
             </EuiText>
           </EuiFlexItem>
+          {isDone && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success" iconType="check">
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.doneBadge"
+                  defaultMessage="Done"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
               <FormattedMessage
@@ -207,13 +228,22 @@ export function ManagedIntegrationsSection({
             <EuiSpacer size="m" />
 
             <EuiButton
-              isDisabled={!isDeployReady}
+              isDisabled={!isDeployReady || isDone}
+              isLoading={isDeploying}
+              onClick={onDeploy}
               data-test-subj="managedIntegrationsSection-deployButton"
             >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
-                defaultMessage="Deploy integrations"
-              />
+              {isDeploying ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
+                  defaultMessage="Deploying integrations..."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
+                  defaultMessage="Deploy integrations"
+                />
+              )}
             </EuiButton>
           </EuiPanel>
         </div>
