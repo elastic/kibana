@@ -155,7 +155,9 @@ describe('InferenceFeatureRegistry', () => {
     });
 
     it('replaces endpoints on successive calls (does not append)', () => {
-      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['old'] }));
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['old'] })
+      );
 
       registry.updateRecommendedEndpoints('my_feature', ['new-1', 'new-2']);
       registry.updateRecommendedEndpoints('my_feature', ['final']);
@@ -184,7 +186,9 @@ describe('InferenceFeatureRegistry', () => {
     });
 
     it('returns error and does not update when endpoints array is empty', () => {
-      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
 
       const result = registry.updateRecommendedEndpoints('my_feature', []);
 
@@ -193,7 +197,9 @@ describe('InferenceFeatureRegistry', () => {
     });
 
     it('returns error and does not update when endpoints contain an empty string', () => {
-      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
 
       const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '']);
 
@@ -202,7 +208,9 @@ describe('InferenceFeatureRegistry', () => {
     });
 
     it('returns error and does not update when endpoints contain a whitespace-only string', () => {
-      registry.register(createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] }));
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
 
       const result = registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   ']);
 
@@ -215,9 +223,7 @@ describe('InferenceFeatureRegistry', () => {
 
       registry.updateRecommendedEndpoints('my_feature', ['ep-1']);
 
-      expect(mockLogger.get().debug).toHaveBeenCalledWith(
-        expect.stringContaining('"my_feature"')
-      );
+      expect(mockLogger.get().debug).toHaveBeenCalledWith(expect.stringContaining('"my_feature"'));
     });
   });
 });
