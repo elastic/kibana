@@ -27,9 +27,9 @@ export { InvestigationNotFoundError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
-  'createdAt' | 'finishedAt'
+  'startedAt' | 'finishedAt'
 > = {
-  started_at: 'createdAt',
+  started_at: 'startedAt',
   finished_at: 'finishedAt',
 };
 
@@ -88,6 +88,10 @@ function toInvestigationStatus(status: ExecutionStatus, logger: Logger): Investi
       return 'running';
     }
   }
+}
+
+function isTerminalStatus(status: InvestigationStatus): boolean {
+  return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
 function recoverSubjectFromInput(
@@ -191,7 +195,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const status = toInvestigationStatus(execution.status, this.logger);
-    const isTerminal = status === 'completed' || status === 'failed' || status === 'cancelled';
+    const isTerminal = isTerminalStatus(status);
 
     // runWorkflow stores inputs at context.inputs in the execution document.
     const executionInputs = execution.context?.inputs;
@@ -276,7 +280,7 @@ export class NightshiftInvestigationsClient {
 
     const results: ListInvestigationItem[] = result.results.map((execution) => {
       const status = toInvestigationStatus(execution.status, this.logger);
-      const isTerminal = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isTerminal = isTerminalStatus(status);
       return {
         investigation_id: execution.id,
         status,

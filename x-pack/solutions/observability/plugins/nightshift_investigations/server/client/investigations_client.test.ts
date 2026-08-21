@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { InvestigationStatus } from '../../common';
 import {
   InvestigationNotFoundError,
   NightshiftInvestigationsClient,
@@ -254,6 +255,172 @@ describe('NightshiftInvestigationsClient.get()', () => {
       );
       const result = await makeClient().get('inv-1');
       expect(result.error).toBeUndefined();
+    });
+  });
+});
+
+describe('NightshiftInvestigationsClient.list()', () => {
+  const makeListResult = (overrides: Record<string, unknown> = {}) => ({
+    results: [],
+    page: 1,
+    size: 20,
+    total: 0,
+    ...overrides,
+  });
+
+  it('uses default page=1 and size=20 when called with no arguments', async () => {
+    mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+    await makeClient().list();
+    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, size: 20 }),
+      SPACE_ID
+    );
+  });
+
+  it('passes page and size through when provided', async () => {
+    mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult({ page: 3, size: 50 }));
+    await makeClient().list({ page: 3, size: 50 });
+    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 3, size: 50 }),
+      SPACE_ID
+    );
+  });
+
+  describe('status filter fan-out', () => {
+    const cases: Array<[InvestigationStatus, ExecutionStatus[]]> = [
+      ['pending', [ExecutionStatus.PENDING, ExecutionStatus.QUEUED]],
+      [
+        'running',
+        [
+          ExecutionStatus.RUNNING,
+          ExecutionStatus.WAITING,
+          ExecutionStatus.WAITING_FOR_INPUT,
+          ExecutionStatus.WAITING_FOR_CHILD,
+        ],
+      ],
+      ['completed', [ExecutionStatus.COMPLETED]],
+      ['failed', [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT]],
+      ['cancelled', [ExecutionStatus.CANCELLED, ExecutionStatus.SKIPPED]],
+    ];
+
+    it.each(cases)('%s expands to the correct ExecutionStatus values', async (status, expected) => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+      await makeClient().list({ statuses: [status] });
+      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ statuses: expected }),
+        SPACE_ID
+      );
+    });
+
+    it('omits the statuses filter when no statuses are requested', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+      await makeClient().list({});
+      const call = mockManagement.getWorkflowExecutions.mock.calls[0][0];
+      expect(call).not.toHaveProperty('statuses');
+    });
+  });
+
+  describe('sort field mapping', () => {
+    it('maps started_at to startedAt', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+      await makeClient().list({ sort_field: 'started_at' });
+      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'startedAt' }),
+        SPACE_ID
+      );
+    });
+
+    it('maps finished_at to finishedAt', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+      await makeClient().list({ sort_field: 'finished_at' });
+      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'finishedAt' }),
+        SPACE_ID
+      );
+    });
+
+    it('defaults to createdAt when sort_field is omitted', async () => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+      await makeClient().list({});
+      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'createdAt' }),
+        SPACE_ID
+      );
+    });
+  });
+
+  describe('terminal state gating for completed_at', () => {
+    const makeExecResult = (status: ExecutionStatus, finishedAt?: string) => ({
+      id: 'exec-1',
+      status,
+      startedAt: '2024-01-01T00:00:00Z',
+      finishedAt,
+      concurrencyGroupKey: undefined,
+      executedBy: undefined,
+    });
+
+    it.each([
+      [ExecutionStatus.COMPLETED, 'completed'],
+      [ExecutionStatus.FAILED, 'failed'],
+      [ExecutionStatus.TIMED_OUT, 'failed'],
+      [ExecutionStatus.CANCELLED, 'cancelled'],
+      [ExecutionStatus.SKIPPED, 'cancelled'],
+    ])('sets completed_at for terminal status %s', async (execStatus) => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({ results: [makeExecResult(execStatus, '2024-01-02T00:00:00Z')] })
+      );
+      const result = await makeClient().list({});
+      expect(result.results[0].completed_at).toBe('2024-01-02T00:00:00Z');
+    });
+
+    it.each([
+      [ExecutionStatus.PENDING, 'pending'],
+      [ExecutionStatus.QUEUED, 'pending'],
+      [ExecutionStatus.RUNNING, 'running'],
+      [ExecutionStatus.WAITING, 'running'],
+      [ExecutionStatus.WAITING_FOR_INPUT, 'running'],
+      [ExecutionStatus.WAITING_FOR_CHILD, 'running'],
+    ])('omits completed_at for non-terminal status %s', async (execStatus) => {
+      mockManagement.getWorkflowExecutions.mockResolvedValue(
+        makeListResult({ results: [makeExecResult(execStatus, '2024-01-02T00:00:00Z')] })
+      );
+      const result = await makeClient().list({});
+      expect(result.results[0].completed_at).toBeUndefined();
+    });
+  });
+
+  it('maps getWorkflowExecutions result to ListInvestigationsResponse shape', async () => {
+    const finishedAt = '2024-01-02T00:00:00Z';
+    mockManagement.getWorkflowExecutions.mockResolvedValue({
+      results: [
+        {
+          id: 'exec-42',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2024-01-01T00:00:00Z',
+          finishedAt,
+          concurrencyGroupKey: 'key-1',
+          executedBy: 'user-1',
+        },
+      ],
+      page: 1,
+      size: 20,
+      total: 1,
+    });
+    const result = await makeClient().list({});
+    expect(result).toMatchObject({
+      results: [
+        {
+          investigation_id: 'exec-42',
+          status: 'completed',
+          started_at: '2024-01-01T00:00:00Z',
+          completed_at: finishedAt,
+          concurrency_key: 'key-1',
+          executed_by: 'user-1',
+        },
+      ],
+      page: 1,
+      size: 20,
+      total: 1,
     });
   });
 });

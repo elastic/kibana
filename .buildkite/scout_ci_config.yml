@@ -60,6 +60,7 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - nightshift_investigations
     - notification_center
     - observability
     - observability_onboarding
