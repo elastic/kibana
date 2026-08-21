@@ -14,7 +14,7 @@ export const MAX_EDITOR_HEIGHT = 600;
 export const ESQL_EDITOR_LINE_HEIGHT = 22;
 
 /** Monaco options that match Discover's ES|QL editor text style. */
-export const ESQL_CODE_EDITOR_OPTIONS = {
+export const ESQL_CODE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   theme: ESQL_LANG_ID,
   fontSize: 14,
   lineHeight: ESQL_EDITOR_LINE_HEIGHT,
@@ -24,4 +24,4 @@ export const ESQL_CODE_EDITOR_OPTIONS = {
   minimap: { enabled: false },
   automaticLayout: true,
   scrollBeyondLastLine: false,
-} as const satisfies monaco.editor.IStandaloneEditorConstructionOptions;
+};

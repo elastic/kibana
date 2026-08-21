@@ -57,7 +57,7 @@ const BLOCK_EDITOR_WRAPPER_STYLES: React.CSSProperties = {
   minHeight: MIN_EDITOR_HEIGHT,
 };
 
-const LOCKED_BASE_EDITOR_OPTIONS = {
+const LOCKED_BASE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...ESQL_CODE_EDITOR_OPTIONS,
   readOnly: true,
   domReadOnly: true,
@@ -105,11 +105,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   readOnly = false,
 }) => {
   const options = useMemo(
-    () => ({
+    (): monaco.editor.IStandaloneEditorConstructionOptions => ({
       ...ESQL_CODE_EDITOR_OPTIONS,
       readOnly,
       domReadOnly: readOnly,
-      lineNumbers: lineNumberOffset > 0 ? (n) => String(n + lineNumberOffset) : 'on',
+      lineNumbers: lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : 'on',
     }),
     [lineNumberOffset, readOnly]
   );
