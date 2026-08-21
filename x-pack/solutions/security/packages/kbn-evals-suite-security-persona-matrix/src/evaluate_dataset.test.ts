@@ -170,13 +170,16 @@ describe('createPersonaMatrixTrajectoryEvaluator', () => {
 });
 
 describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
-  it('scores 1 when the primary expected tool was called', async () => {
+  it('scores 1 when every declared expected tool was called', async () => {
     const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
     const result = await evaluator.evaluate({
       input: { question: 'q' },
       expected: toDatasetExample(baseExample).output,
       output: {
-        steps: [{ type: 'tool_call', tool_id: 'security.alerts' }],
+        steps: [
+          { type: 'tool_call', tool_id: 'security.alerts' },
+          { type: 'tool_call', tool_id: 'security.get_related_alerts' },
+        ],
       } as unknown as TaskOutput,
       metadata: baseExample.metadata,
     } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
@@ -197,6 +200,56 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
     } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
+  });
+
+  // Regression: only `expectedTools[0]` used to be checked, so a run that
+  // skipped every later declared tool still scored a full 1.
+  it('scores 0 when a non-primary expected tool was skipped', async () => {
+    const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+    const multiTool: PersonaMatrixExample = {
+      ...baseExample,
+      metadata: {
+        ...baseExample.metadata,
+        expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
+      },
+    };
+    const result = await evaluator.evaluate({
+      input: { question: 'q' },
+      expected: toDatasetExample(multiTool).output,
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }],
+      } as unknown as TaskOutput,
+      metadata: multiTool.metadata,
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    expect(result.score).toBe(0);
+    expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([
+      'platform.core.execute_esql',
+    ]);
+  });
+
+  it('scores 1 only when every declared expected tool was called', async () => {
+    const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+    const multiTool: PersonaMatrixExample = {
+      ...baseExample,
+      metadata: {
+        ...baseExample.metadata,
+        expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
+      },
+    };
+    const result = await evaluator.evaluate({
+      input: { question: 'q' },
+      expected: toDatasetExample(multiTool).output,
+      output: {
+        steps: [
+          { type: 'tool_call', tool_id: 'platform.core.generate_esql' },
+          { type: 'tool_call', tool_id: 'platform.core.list_indices' },
+          { type: 'tool_call', tool_id: 'platform.core.execute_esql' },
+        ],
+      } as unknown as TaskOutput,
+      metadata: multiTool.metadata,
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    expect(result.score).toBe(1);
+    expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([]);
   });
 });
 
