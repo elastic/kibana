@@ -120,6 +120,7 @@ dependsOn:
   - '@kbn/xstate-utils'
   - '@kbn/zod'
   - '@kbn/ui-callout'
+  - '@kbn/data-source'
 tags:
   - plugin
   - prod

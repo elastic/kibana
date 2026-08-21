@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/config-schema'
   - '@kbn/ui-callout'
+  - '@kbn/data-source'
 tags:
   - plugin
   - prod
