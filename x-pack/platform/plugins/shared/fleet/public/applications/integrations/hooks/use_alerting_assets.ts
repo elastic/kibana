@@ -17,7 +17,11 @@ import type { PackageInfo } from '../../../types';
 import { useFleetStatus, useStartServices } from '../../../hooks';
 import { sendGetBulkAssets } from '../../../hooks';
 
-import { ALERTING_ASSET_TYPES, type AlertingAsset } from '../sections/epm/screens/detail/alerting';
+import {
+  ALERTING_ASSET_TYPES,
+  type AlertingAsset,
+  type AlertingSOAssetType,
+} from '../sections/epm/screens/detail/alerting';
 
 type AlertingAssetsByType = Record<string, KibanaAssetReference[]>;
 
@@ -85,7 +89,9 @@ export const useAlertingAssets = (packageInfo: PackageInfo) => {
 
       if (alertingAssets.length > 0) {
         const assetIds: AssetSOObject[] = alertingAssets.map(({ id, type }) => ({ id, type }));
-        const { data: bulkData, error } = await sendGetBulkAssets({ assetIds });
+        const { data: bulkData, error } = await sendGetBulkAssets<AlertingSOAssetType>({
+          assetIds,
+        });
 
         if (error) {
           throw error;

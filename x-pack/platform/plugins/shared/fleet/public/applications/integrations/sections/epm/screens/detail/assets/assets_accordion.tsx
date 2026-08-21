@@ -30,10 +30,11 @@ import { AssetTitleMap } from '../../../constants';
 import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
+import type { AlertingSOAssetType } from '../alerting/types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
-type AccordionAsset = GetBulkAssetsResponse['items'][number];
+type AccordionAsset = GetBulkAssetsResponse<AlertingSOAssetType>['items'][number];
 type AccordionAssetEngine = AccordionAsset['attributes']['engine'];
 
 type AlertingEngineTab = 'v2' | 'v1';

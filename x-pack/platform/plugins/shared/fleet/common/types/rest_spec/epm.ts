@@ -265,15 +265,8 @@ export interface GetBulkAssetsRequest {
   };
 }
 
-export interface GetBulkAssetsResponse {
-  items: Array<
-    Omit<SimpleSOAssetType, 'attributes'> & {
-      appLink?: string;
-      attributes: SimpleSOAssetType['attributes'] & {
-        engine?: 'v1' | 'v2';
-      };
-    }
-  >;
+export interface GetBulkAssetsResponse<TAsset extends SimpleSOAssetType = SimpleSOAssetType> {
+  items: Array<TAsset & { appLink?: string }>;
 }
 
 export interface GetInputsTemplatesRequest {

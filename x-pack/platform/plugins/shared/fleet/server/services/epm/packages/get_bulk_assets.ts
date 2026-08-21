@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type { AssetSOObject, GetBulkAssetsResponse } from '../../../../common';
+import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
 import { KibanaSavedObjectType } from '../../../../common/types';
 
@@ -65,7 +65,11 @@ const getAppLinkForESAssetType = (type: string, id: string): string =>
     ? getKibanaLinkForESAsset(type as ElasticsearchAssetType, id)
     : '';
 
-type BulkAssetItem = GetBulkAssetsResponse['items'][number];
+type BulkAssetWithEngine = SimpleSOAssetType & {
+  attributes: SimpleSOAssetType['attributes'] & Pick<AlertingRuleTemplateAttributes, 'engine'>;
+};
+
+type BulkAssetItem = GetBulkAssetsResponse<BulkAssetWithEngine>['items'][number];
 
 const isType = <TAttributes extends DisplayableSOAssetAttributes>(
   obj: SavedObject<DisplayableSOAssetAttributes>,
@@ -111,7 +115,7 @@ export async function getBulkAssets(
     await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
-  const res: GetBulkAssetsResponse['items'] = resolvedObjects
+  const res: GetBulkAssetsResponse<BulkAssetWithEngine>['items'] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>

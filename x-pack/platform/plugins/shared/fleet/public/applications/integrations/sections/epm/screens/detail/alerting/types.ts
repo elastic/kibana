@@ -9,6 +9,10 @@ import type { SimpleSOAssetType } from '../../../../../../../../common';
 
 export type AlertingEngine = 'v1' | 'v2';
 
+export type AlertingSOAssetType = SimpleSOAssetType & {
+  attributes: SimpleSOAssetType['attributes'] & { engine?: AlertingEngine };
+};
+
 export interface AlertingAsset {
   id: string;
   type: SimpleSOAssetType['type'];
