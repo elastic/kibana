@@ -86,6 +86,7 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
         >
           <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
             <ProjectPickerContent
+              showHeader={false}
               customHeaderText={<React.Fragment />}
               projectRouting={space.projectRouting}
               onProjectRoutingChange={updateProjectRouting}
