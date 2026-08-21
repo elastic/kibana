@@ -272,7 +272,7 @@ export const ReportSchedulesTable = () => {
             }),
           'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',
-          icon: 'dashboardApp',
+          icon: 'productDashboard',
           available: (item) => Boolean((item.payload as BaseParamsV2)?.locatorParams),
           onClick: async (item) => {
             const searchParams = stringify({ scheduledReportId: item.id, ...queryParams });

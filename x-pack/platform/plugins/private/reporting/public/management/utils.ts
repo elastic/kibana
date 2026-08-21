@@ -31,15 +31,15 @@ import type { ScheduledReport } from '../types';
 export const guessAppIconTypeFromObjectType = (type: string): IconType => {
   switch (type) {
     case 'search':
-      return 'discoverApp';
+      return 'productDiscover';
     case 'dashboard':
-      return 'dashboardApp';
+      return 'productDashboard';
     case 'visualization':
-      return 'visualizeApp';
+      return 'visBarVertical';
     case 'canvas workpad':
-      return 'canvasApp';
+      return 'paintBucket';
     case 'lens':
-      return 'lensApp';
+      return 'magnify';
     default:
       return 'apps';
   }
