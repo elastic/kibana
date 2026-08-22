@@ -60,12 +60,13 @@ apiTest.describe(
   () => {
     const taskIdsToCleanup: string[] = [];
 
-    apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    // No `api_key_to_invalidate` cleanup here: this spec never enqueues invalidations (that is
+    // what it asserts), so a type-wide wipe would only remove entries other suites rely on.
+    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       for (const taskId of taskIdsToCleanup) {
         await deleteTaskManagerTaskSilently(apiClient, cookieHeader, taskId);
       }
-      await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
     });
 
     apiTest(
@@ -115,10 +116,6 @@ apiTest.describe(
 
         // Removing the task must not queue the user-created key for invalidation: its lifecycle
         // (rotation, deletion) remains the user's responsibility.
-        const { saved_objects: pendingBefore } = await kbnClient.savedObjects.find({
-          type: 'api_key_to_invalidate',
-        });
-
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const deleteResponse = await apiClient.delete(`internal/task_manager/tasks/${taskId}`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -126,10 +123,21 @@ apiTest.describe(
         expect(deleteResponse).toHaveStatusCode(200);
         taskIdsToCleanup.splice(taskIdsToCleanup.indexOf(taskId), 1);
 
-        const { saved_objects: pendingAfter } = await kbnClient.savedObjects.find({
+        // The delete handler enqueues invalidation entries synchronously, so reading right after
+        // the 200 is deterministic for this task's entries. Assert on entries that could only
+        // belong to this task's user-created key — an empty `apiKeyId` (user-created keys carry
+        // no id) or the raw secret itself — rather than on cluster-wide counts, which other
+        // suites and the invalidation poller change concurrently.
+        const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
           type: 'api_key_to_invalidate',
         });
-        expect(pendingAfter).toHaveLength(pendingBefore.length);
+        const entriesForUserCreatedKey = pendingInvalidations.filter((so) => {
+          const attributes = so.attributes as { apiKeyId?: string; uiamApiKey?: string };
+          return (
+            attributes.apiKeyId === '' || attributes.uiamApiKey === MOCK_IDP_UIAM_ORG_ADMIN_API_KEY
+          );
+        });
+        expect(entriesForUserCreatedKey).toHaveLength(0);
       }
     );
   }

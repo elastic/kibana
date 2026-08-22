@@ -9,6 +9,7 @@ import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, ES_QUERY_RULE_PARAMS } from '../../../scout/api/fixtures/constants';
+import { waitForSuccessfulEventLogEntry } from '../../../scout/api/lib/wait_for_successful_event_log';
 
 const ORG_KEY_HEADERS = {
   ...COMMON_HEADERS,
@@ -55,6 +56,11 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         createdRuleIds.push(response.body.id);
         expect(response.body.api_key_created_by_user).toBe(true);
+
+        // Persistence alone would still pass if execution regressed to the authentication
+        // failure this PR fixes (presenting an external key with the UIAM shared secret), so
+        // verify the rule actually runs successfully with the raw key.
+        await waitForSuccessfulEventLogEntry(apiClient, response.body.id, ORG_KEY_HEADERS);
       }
     );
 
@@ -88,6 +94,9 @@ apiTest.describe(
         expect(getResponse).toHaveStatusCode(200);
         expect(getResponse.body.enabled).toBe(true);
         expect(getResponse.body.api_key_created_by_user).toBe(true);
+
+        // The enable path snapshots the raw key onto the rule; prove it authenticates at run time.
+        await waitForSuccessfulEventLogEntry(apiClient, ruleId, ORG_KEY_HEADERS);
       }
     );
   }
