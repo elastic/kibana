@@ -380,11 +380,16 @@ def check_golden(model: str, ip: str) -> dict:
             {"term": {"example.dataset.id": "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"}},
         ]}},
     })
+    # NOTE: cmd is passed to ssh as a single argv (no local shell), so the
+    # remote shell is the ONLY quoting layer — use plain double quotes.
+    # Backslash-escaped \" lands as a literal quote, splits the header on its
+    # space, and curl then treats "ApiKey" as a URL (2026-08-22 v3 gate
+    # failure: "Could not resolve host: ApiKey").
     out = ssh(
         ip,
         f"source /tmp/golden-cluster-env.sh; printf '%s' '{latest_cmd_q}' > /tmp/q_latest.json; "
-        f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\\\" "
-        f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_search\\\" "
+        f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+        f'"$GOLDEN_ES_URL/.evaluation-scores/_search" '
         f"-H 'Content-Type: application/json' --data @/tmp/q_latest.json",
     )
     try:
@@ -397,8 +402,8 @@ def check_golden(model: str, ip: str) -> dict:
     out = ssh(
         ip,
         f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
-        f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\" "
-        f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_count\\\" "
+        f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+        f'"$GOLDEN_ES_URL/.evaluation-scores/_count" '
         f"-H 'Content-Type: application/json' --data @/tmp/q.json",
     )
     try:
@@ -411,8 +416,8 @@ def check_golden(model: str, ip: str) -> dict:
         out = ssh(
             ip,
             f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
-            f"curl -sS -H \\\"Authorization: ApiKey $GOLDEN_ES_API_KEY\" "
-            f"\\\"$GOLDEN_ES_URL/.evaluation-scores/_count\\\" "
+            f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+            f'"$GOLDEN_ES_URL/.evaluation-scores/_count" '
             f"-H 'Content-Type: application/json' --data @/tmp/q.json",
         )
         try:
