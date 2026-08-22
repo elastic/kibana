@@ -484,12 +484,12 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 0 },
+              total: { relation: 'eq', value: 1 },
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
-                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                  _source: fetchedAlert1,
                 },
               ],
             },
@@ -507,26 +507,9 @@ describe('Alerts Client', () => {
             ...defaultExecutionOpts,
           });
 
+          expect(clusterClient.search).toHaveBeenCalledTimes(1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
-            size: 20,
-            ignore_unavailable: true,
-            index: useDataStreamForAlerts
-              ? '.alerts-test.alerts-default'
-              : '.internal.alerts-test.alerts-default-*',
-            query: {
-              bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-              },
-            },
-            collapse: {
-              field: ALERT_RULE_EXECUTION_UUID,
-            },
-            _source: false,
-            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
-          });
-
-          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
-            size: 2000,
+            size: maxAlerts,
             ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
@@ -534,9 +517,8 @@ describe('Alerts Client', () => {
               : '.internal.alerts-test.alerts-default-*',
             query: {
               bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }, { term: { [ALERT_TRACKED]: true } }],
                 must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
               },
             },
           });
@@ -544,32 +526,32 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
-        test('should query for alerts and filter out null execution uuids', async () => {
-          clusterClient.search.mockResolvedValueOnce({
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-            hits: {
-              total: { relation: 'eq', value: 0 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
-                },
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  fields: { [ALERT_RULE_EXECUTION_UUID]: [null] },
-                },
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  fields: { [ALERT_RULE_EXECUTION_UUID]: null },
-                },
-              ],
-            },
-          });
+        test('should fetch missing alerts by id when task state has extra uuids', async () => {
+          clusterClient.search
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 0 },
+                hits: [],
+              },
+            })
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 1 },
+                hits: [
+                  {
+                    _id: 'missing-uuid',
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    _source: fetchedAlert1,
+                  },
+                ],
+              },
+            });
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -578,31 +560,14 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
-          });
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
-            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              'alert-1': { meta: { uuid: 'missing-uuid' } },
+            },
           });
 
-          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
-            size: 20,
-            ignore_unavailable: true,
-            index: useDataStreamForAlerts
-              ? '.alerts-test.alerts-default'
-              : '.internal.alerts-test.alerts-default-*',
-            query: {
-              bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-              },
-            },
-            collapse: {
-              field: ALERT_RULE_EXECUTION_UUID,
-            },
-            _source: false,
-            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
-          });
-
+          expect(clusterClient.search).toHaveBeenCalledTimes(2);
           expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
-            size: 2000,
+            size: 1,
             ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
@@ -612,7 +577,7 @@ describe('Alerts Client', () => {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
                 must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+                filter: [{ ids: { values: ['missing-uuid'] } }],
               },
             },
           });
