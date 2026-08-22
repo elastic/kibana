@@ -1,5 +1,5 @@
 {
-  "sha1": "ac59d2fa9b8c2c13659bf529e87e5e22ad157b64",
+  "sha1": "072fac33b1efa162dc992789b648002f68f0f7de",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -72,7 +72,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/user_created_uiam_api_key_task.spec.ts",
         "line": 64,
-        "column": 13
+        "column": 5
       }
     }
   ]
