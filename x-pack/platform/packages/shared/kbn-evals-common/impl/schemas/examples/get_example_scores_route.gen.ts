@@ -26,6 +26,17 @@ export const GetExampleScoresRequestParams = lazySchema(() =>
 export type GetExampleScoresRequestParams = z.infer<typeof GetExampleScoresRequestParams>;
 export type GetExampleScoresRequestParamsInput = z.input<typeof GetExampleScoresRequestParams>;
 
+export const GetExampleScoresRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter scores to a specific dataset. When omitted, scores from all datasets matching the example ID are returned.
+     */
+    dataset_id: z.string().max(1024).optional(),
+  })
+);
+export type GetExampleScoresRequestQuery = z.infer<typeof GetExampleScoresRequestQuery>;
+export type GetExampleScoresRequestQueryInput = z.input<typeof GetExampleScoresRequestQuery>;
+
 export const GetExampleScoresResponse = lazySchema(() =>
   z.object({
     scores: z.array(EvaluationScoreDocument),
