@@ -518,14 +518,16 @@ export class DataGrid {
   }
 
   async scrollToRow(rowIndex: number): Promise<void> {
-    const scrollContainer = this.page.testSubj
-      .locator('discoverDocTable')
-      .locator('.euiDataGrid__virtualized');
-    const targetRow = this.page.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const docTable = this.page.testSubj.locator('discoverDocTable');
+    const scrollContainer = docTable.locator('.euiDataGrid__virtualized');
+    const targetRow = docTable.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const targetCell = targetRow.locator('[data-test-subj="dataGridRowCell"]');
 
     for (let attempt = 0; attempt <= rowIndex; attempt++) {
       try {
         await targetRow.waitFor({ state: 'visible', timeout: 100 });
+        await targetRow.evaluate((row) => row.scrollIntoView({ block: 'center' }));
+        await targetCell.waitFor({ state: 'visible' });
         return;
       } catch {
         await scrollContainer.evaluate((element) =>
