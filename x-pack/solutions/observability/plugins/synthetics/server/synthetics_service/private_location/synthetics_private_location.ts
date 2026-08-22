@@ -38,6 +38,8 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import { rebalanceByCost } from './assign_shards';
+import { toConditionUpdates, toMonitorPlacements } from './rebalance_writes';
 import {
   agentIdFromCondition,
   assignAgentById,
@@ -747,6 +749,81 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPolicies() {
     return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  }
+
+  /**
+   * Idempotent, minimal-churn rebalance for a scalable (condition-sharded)
+   * private location. Every monitor is pinned to the location's single agent
+   * policy; distribution is expressed as a per-monitor `${agent.id}` condition.
+   * This reads each monitor's current pin, runs the {@link rebalanceByCost}
+   * placement pass (failover of stale monitors + cost load-balancing onto
+   * stability-gated recovery agents, moving nothing else), and rewrites only the
+   * conditions of monitors whose agent actually changed — reusing the existing
+   * package-policy content and flipping only `condition`, never decrypting or
+   * regenerating monitor configs like {@link editMonitors}. Steady state
+   * performs zero writes.
+   *
+   * The two agent sets serve opposite goals. `recoveryAgentIds` (a
+   * stability-gated subset of `healthyAgentIds`) are the only agents eligible to
+   * *receive* load-balancing moves, so a freshly-recovered ("flapping") agent
+   * can't pull healthy monitors onto itself only to shed them on its next
+   * bounce. Failover is independent of that gate: a dead agent's monitors are
+   * placed on any of the full `healthyAgentIds`, so they evacuate immediately
+   * even when the only currently-live agents aren't stable yet.
+   */
+  async rebalanceShards({
+    location,
+    healthyAgentIds,
+    recoveryAgentIds,
+    capacities,
+    signal,
+  }: {
+    location: { id: string; label?: string; agentPolicyId: string };
+    healthyAgentIds: string[];
+    recoveryAgentIds?: string[];
+    capacities?: ReadonlyMap<string, number>;
+    signal: AbortSignal;
+  }): Promise<{ total: number; moved: number }> {
+    if (healthyAgentIds.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+    signal.throwIfAborted();
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+      signal,
+    });
+    if (pkgPolicies.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+
+    const monitors = toMonitorPlacements(pkgPolicies, location.id);
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+
+    let moved = 0;
+    for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      signal.throwIfAborted();
+      // Update in the policy's own recorded space (grouped in toConditionUpdates),
+      // not via the agent-policy-derived routing — see bulkUpdateInSpace.
+      const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        policiesToUpdate,
+        spaceId,
+      });
+      // Count only successful moves (a failed bulkUpdate leaves the old pin).
+      moved += policiesToUpdate.length - failed.length;
+      if (failed.length > 0) {
+        // Not terminal: the rebalance is idempotent and retried every cycle, so
+        // the next run re-attempts these same moves. warn (not error) — no
+        // operator action is needed unless it persists across cycles.
+        this.server.logger.warn(
+          `[rebalanceShards] Failed to move ${failed.length} monitors for location ${
+            location.label ?? location.id
+          }`
+        );
+      }
+    }
+
+    return { total: pkgPolicies.length, moved };
   }
 }
 

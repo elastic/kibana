@@ -120,7 +120,8 @@ function DiscoverDocumentsComponent({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata, discoverFeatureFlags } =
+    services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -390,6 +391,12 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
+  // This is temporary, sourceDisplayMode should be get from the app state.
+  const sourceDisplayMode = useMemo(
+    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
+    [discoverFeatureFlags]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
     () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
@@ -416,8 +423,7 @@ function DiscoverDocumentsComponent({
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers(cellRendererParams);
+    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
@@ -640,6 +646,7 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
+            sourceDisplayMode={sourceDisplayMode}
           />
         </CellActionsProvider>
       </div>
