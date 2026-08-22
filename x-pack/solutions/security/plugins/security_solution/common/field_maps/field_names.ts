@@ -32,8 +32,8 @@ export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticalit
  * enrichments. Multi-valued: one alert can resolve to a host, a user and a service at once, and
  * each EUID is type-prefixed (`host:`, `user:`, `service:`).
  *
- * Only present for entities that were found in the entity store when the alert was written, so
- * absence means "not in the store at that time" rather than "no EUID could be derived".
+ * Present for every alert with derivable identity fields at rule execution — regardless of whether
+ * the entity was in the store — so absence means "no EUID could be derived", not "not in the store".
  */
 export const ALERT_ENTITY_ID = `${ALERT_NAMESPACE}.entity.id` as const;
 
