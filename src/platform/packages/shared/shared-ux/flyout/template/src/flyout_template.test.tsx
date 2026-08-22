@@ -35,6 +35,36 @@ describe('FlyoutTemplate', () => {
     expect(screen.getByText('summary content')).toBeInTheDocument();
   });
 
+  it('accepts id/hasChildBackground/outsideClickCloses/focusTrapProps/closeButtonProps without altering zone rendering', () => {
+    const focusTrapProps = { shards: [] };
+    const closeButtonProps = { 'data-test-subj': 'myCloseBtn' } as const;
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        id="passthrough-flyout"
+        hasChildBackground
+        outsideClickCloses={false}
+        focusTrapProps={focusTrapProps}
+        closeButtonProps={closeButtonProps}
+        data-test-subj="myFlyout"
+      >
+        <FlyoutTemplate.Header title="Title" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('myFlyoutHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('myFlyoutBody')).toBeInTheDocument();
+    expect(screen.getByText('body content')).toBeInTheDocument();
+    // The EUI Jest mock doesn't forward id or closeButtonProps onto the DOM;
+    // assert the root flyout rendered and the default close button is still present.
+    expect(screen.getByTestId('myFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+  });
+
   it('renders the header title as an H3', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
