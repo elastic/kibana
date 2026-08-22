@@ -98,7 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
             '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
-          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');

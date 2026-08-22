@@ -26,7 +26,7 @@ export async function getFields(
   const cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService);
 
   if (!indexPatternString) {
-    const defaultIndexPattern = await indexPatternsService.getDefault();
+    const defaultIndexPattern = await indexPatternsService.getDefaultDataView();
 
     indexPatternString = defaultIndexPattern?.title ?? '';
   }

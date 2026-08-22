@@ -132,10 +132,6 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save data views
    */
   getCanSave: () => Promise<boolean>;
-  /**
-   * Determines whether the user can save advancedSettings (used for defaultIndex)
-   */
-  getCanSaveAdvancedSettings: () => Promise<boolean>;
 
   scriptedFieldsEnabled: boolean;
 }
@@ -552,14 +548,21 @@ export class DataViewsService {
   };
 
   /**
-   * This appears to be just be used in tsvb
-   * Get default index pattern
+   * Get the configured default index pattern, or null when it's unset
+   * or points to a data view which no longer exists.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   getDefault = async (displayErrors: boolean = true) => {
     const defaultIndexPatternId = await this.getDefaultId();
     if (defaultIndexPatternId) {
-      return await this.get(defaultIndexPatternId, displayErrors);
+      try {
+        return await this.get(defaultIndexPatternId, displayErrors);
+      } catch {
+        // The setting may point to a data view which no longer exists,
+        // which is not repaired automatically anymore, so a stale default
+        // is treated like no default being configured
+        return null;
+      }
     }
     return null;
   };
@@ -1433,9 +1436,14 @@ export class DataViewsService {
       const exists = this.savedObjectsCache.some((obj) => obj.id === configuredDefaultId);
       if (exists) return configuredDefaultId;
     }
+    // On the server the saved objects client returns `created_at`, while in the browser
+    // the content management client renames it to `createdAt`, so support both shapes
+    // to keep the fallback consistent across environments
+    const getCreatedAt = (savedObject: SavedObject<DataViewSavedObjectAttrs>) =>
+      savedObject.created_at ?? (savedObject as { createdAt?: string }).createdAt;
     const sorted = [...this.savedObjectsCache].sort((a, b) => {
       const createdAtDiff =
-        new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+        new Date(getCreatedAt(a) || 0).getTime() - new Date(getCreatedAt(b) || 0).getTime();
       // break ties deterministically (e.g. objects imported in the same bulk request
       // can share an identical created_at timestamp)
       return createdAtDiff !== 0 ? createdAtDiff : a.id.localeCompare(b.id);

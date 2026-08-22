@@ -29,7 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
-        defaultIndex: '795df528-add1-491a-8e25-72a862c4bf8c', // my-example-logs
       });
     });
 

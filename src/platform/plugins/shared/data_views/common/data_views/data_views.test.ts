@@ -116,7 +116,6 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
-      getCanSaveAdvancedSettings: () => Promise.resolve(true),
       scriptedFieldsEnabled: true,
     });
 
@@ -129,7 +128,6 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
-      getCanSaveAdvancedSettings: () => Promise.resolve(false),
       scriptedFieldsEnabled: true,
     });
   });
@@ -890,6 +888,62 @@ describe('IndexPatterns', () => {
       expect(uiSettings.set).toBeCalledTimes(0);
     });
 
+    test('falls back to the oldest data view with the browser-side createdAt shape', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(null);
+      // in the browser the content management client returns `createdAt` instead of `created_at`
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        {
+          id: 'id1',
+          version: 'a',
+          attributes: { title: '1' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+        },
+        {
+          id: 'id2',
+          version: 'a',
+          attributes: { title: '2' },
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+      ]);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: '2' } })
+        );
+
+      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      expect(defaultDataViewResult?.id).toBe('id2');
+      expect(uiSettings.set).toBeCalledTimes(0);
+    });
+
+    test('breaks creation date ties deterministically by id', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(null);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        {
+          id: 'id2',
+          version: 'a',
+          attributes: { title: '2' },
+          created_at: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'id1',
+          version: 'a',
+          attributes: { title: '1' },
+          created_at: '2024-01-01T00:00:00.000Z',
+        },
+      ]);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
+        );
+
+      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      expect(defaultDataViewResult?.id).toBe('id1');
+    });
+
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
       uiSettings.get = jest.fn().mockResolvedValue(null);
       savedObjectsClient.find = jest.fn().mockResolvedValue([
@@ -917,6 +971,27 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
+    });
+  });
+
+  describe('getDefault', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('returns null when the configured default no longer exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('deleted-id');
+      savedObjectsClient.get = jest.fn().mockRejectedValue(new Error('Not Found'));
+
+      expect(await indexPatterns.getDefault()).toBeNull();
+    });
+
+    test('returns null when no default is configured', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(null);
+
+      expect(await indexPatterns.getDefault()).toBeNull();
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
     });
   });
 

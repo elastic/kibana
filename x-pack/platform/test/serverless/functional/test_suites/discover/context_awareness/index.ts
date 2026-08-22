@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
-        defaultIndex: '795df528-add1-491a-8e25-72a862c4bf8c', // my-example-logs
       });
     });
 
@@ -38,7 +37,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     loadTestFile(require.resolve('./_framework'));

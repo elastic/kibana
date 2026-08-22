@@ -22,7 +22,7 @@ describe('CachedIndexPatternFetcher', () => {
     mockedIndices = [];
 
     const indexPatternsService = {
-      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      getDefaultDataView: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
     } as unknown as DataViewsService;

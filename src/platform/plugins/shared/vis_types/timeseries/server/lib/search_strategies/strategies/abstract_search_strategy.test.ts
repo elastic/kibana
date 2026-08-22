@@ -56,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(
       { indexPatternString: '', indexPattern: undefined },
       {
-        getDefault: jest.fn(),
+        getDefaultDataView: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
       } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher

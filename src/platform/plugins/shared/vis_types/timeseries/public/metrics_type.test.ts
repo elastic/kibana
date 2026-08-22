@@ -22,7 +22,7 @@ describe('metricsVisDefinition', () => {
 
     beforeEach(async () => {
       setDataViewsStart({
-        async getDefault() {
+        async getDefaultDataView() {
           return indexPattern1;
         },
         async find(title: string, size: number) {

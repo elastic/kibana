@@ -32,7 +32,7 @@ export class EditorController implements IEditorController {
   ) {}
 
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
-    const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
+    const defaultIndexPattern = (await getDataViewsStart().getDefaultDataView()) || undefined;
 
     render(
       <KibanaRenderContextProvider {...getCoreStart()}>
