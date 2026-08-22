@@ -306,8 +306,8 @@ export const queryMatrixTraces = async (
       serverSupportsFilter =
         scores.length === 0 || scores.every((s) => s.metadata?.execution_id === ref.executionId);
       if (!serverSupportsFilter) {
-        log.debug(
-          'Example-scores route ignores execution filters (older evals plugin) — falling back to shared per-example fetches'
+        log.warning(
+          'Example-scores route ignores execution filters (older evals plugin) — falling back to shared per-example fetches; traces will be complete but slower'
         );
       }
     }
