@@ -173,7 +173,7 @@ export const esqlQuerySegmentSchema = z
 const composedBreachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection. Required when in a breach block.'
+      "A clause appended to the end of the rule's ES|QL query. Required in breach blocks."
     ),
   })
   .strict();

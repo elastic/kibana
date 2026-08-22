@@ -141,7 +141,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('runs base with LIMIT for a conditionless composed rule', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
       query: {
@@ -153,7 +153,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
         query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
       }),

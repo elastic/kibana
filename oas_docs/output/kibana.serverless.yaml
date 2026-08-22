@@ -82737,7 +82737,7 @@ components:
           type: object
           properties:
             segment:
-              description: Appendable ES|QL segment for breach detection. Required when in a breach block.
+              description: A clause appended to the end of the rule's ES|QL query. Required in breach blocks.
               maxLength: 10000
               minLength: 1
               type: string
