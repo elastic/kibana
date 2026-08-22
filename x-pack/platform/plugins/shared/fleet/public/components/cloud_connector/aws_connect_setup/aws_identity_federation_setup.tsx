@@ -9,7 +9,6 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   EuiAccordion,
   EuiButton,
-  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,7 +66,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
 
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
   const [roleArn, setRoleArn] = useState('');
-  const [externalId, setExternalId] = useState('');
   const [connectorName, setConnectorName] = useState('');
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
     initialConnectorId
@@ -103,7 +101,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setSelectedConnectorId(connector.id);
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       setRoleArn('');
-      setExternalId('');
       setConnectorName('');
     }
   );
@@ -115,14 +112,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       accountType,
       vars: {
         role_arn: { value: roleArn, type: 'text' },
-        external_id: { value: externalId, type: 'password' },
       },
     });
-  }, [createConnector, connectorName, accountType, roleArn, externalId]);
+  }, [createConnector, connectorName, accountType, roleArn]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
-  const externalIdInvalid = hasInvalidRequiredVars && !externalId;
-  const isCreateDisabled = !roleArn || !externalId || !!getCloudConnectorNameError(connectorName);
+  const isCreateDisabled = !roleArn || !!getCloudConnectorNameError(connectorName);
 
   if (isLoadingConnectors) {
     return <EuiSkeletonText lines={4} data-test-subj="awsIdentityFederationSetup-loading" />;
@@ -202,29 +197,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               isInvalid={roleArnInvalid}
               onChange={(e) => setRoleArn(e.target.value)}
               data-test-subj="awsIdentityFederationSetup-roleArn"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.externalIdLabel', {
-              defaultMessage: 'External ID',
-            })}
-            isInvalid={externalIdInvalid}
-            error={
-              externalIdInvalid
-                ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.externalIdRequired', {
-                    defaultMessage: 'External ID is required',
-                  })
-                : undefined
-            }
-            fullWidth
-          >
-            <EuiFieldPassword
-              fullWidth
-              value={externalId}
-              isInvalid={externalIdInvalid}
-              onChange={(e) => setExternalId(e.target.value)}
-              data-test-subj="awsIdentityFederationSetup-externalId"
             />
           </EuiFormRow>
           <EuiSpacer size="l" />

@@ -34,7 +34,7 @@ export const useTrainedModelsMenu = ({
         label: i18n.translate('xpack.ml.trainedModels.modelsList.addModelButtonLabel', {
           defaultMessage: 'Add trained model',
         }),
-        iconType: 'plusInCircle' as const,
+        iconType: 'plusCircle' as const,
         run: onOpenAddModelFlyout,
         testId: 'mlModelsAddTrainedModelButton',
       },
