@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, type DiscoverPageObjects } from '../fixtures';
+import { spaceTest, type DiscoverPageObjects } from '../../../common/ui/fixtures';
 
 const ESQL_QUERY = 'FROM logstash-* METADATA _id, _index | SORT @timestamp DESC | LIMIT 100';
 const EXPANDED_DOC_URL_STATE = 'expandedDoc:';
