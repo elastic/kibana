@@ -169,6 +169,29 @@ describe('queryMatrixTraces example fetching', () => {
     expect(getExampleScores).toHaveBeenCalledTimes(12);
   });
 
+  it('warns with model and example names when some scored cells lose their trace', async () => {
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }, { example: { id: 'example-2' } }] as never
+      ),
+      // example-2 comes back with no documents at all: scores were aggregated
+      // for it upstream, but no trace doc exists for this execution.
+      getExampleScores: jest.fn(async (exampleId: string) =>
+        exampleId === 'example-1' ? [completeDoc('exec-a')] : []
+      ),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    const traces = await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never
+    );
+    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('Trace coverage incomplete'));
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('example-2'));
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('model-x'));
+  });
+
   it('retries a transient fetch failure once before dropping the trace', async () => {
     let calls = 0;
     const getExampleScores = jest.fn(async () => {

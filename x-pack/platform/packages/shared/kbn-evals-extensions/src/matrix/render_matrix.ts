@@ -7,6 +7,7 @@
 
 import type { MatrixConfig } from './load_matrix_config';
 import type { Matrix, MatrixCell, MatrixDisplayColumn, MatrixRow } from './build_matrix';
+import type { MatrixTraceData } from './trace_types';
 
 /**
  * Where the numbers came from. Without this, a published matrix is an
@@ -108,7 +109,8 @@ const renderMarkdownTable = (
 export const renderMatrix = (
   matrix: Matrix,
   config: MatrixConfig,
-  provenance: MatrixProvenance = {}
+  provenance: MatrixProvenance = {},
+  traces?: MatrixTraceData
 ): RenderedMatrix => {
   const { notRecommendedLabel } = config;
   const displayColumns = matrix.displayColumns;
@@ -163,6 +165,11 @@ export const renderMatrix = (
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,
       ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),
+      // Traces are embedded at generation time so the artifact is
+      // reproducible: a reader can audit any cell's full conversation without
+      // re-querying the evals cluster. Present only when the caller queried
+      // trace data (the --html path).
+      ...(traces ? { traces } : {}),
     },
     null,
     2

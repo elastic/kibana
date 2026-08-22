@@ -178,13 +178,29 @@ export const matrixCmd: Command<void> = {
     }
 
     const matrix = buildMatrix(aggregated, config);
-    const rendered = renderMatrix(matrix, config, {
-      branch,
-      lookbackDays,
-      suiteIds,
-      commitSha: process.env.BUILDKITE_COMMIT,
-      buildUrl: process.env.BUILDKITE_BUILD_URL,
-    });
+    const generateHtml = flagsReader.boolean('html');
+
+    // Query traces before rendering so they can be embedded in matrix.json —
+    // the artifact then carries everything needed to audit a cell's full
+    // conversation without re-querying the evals cluster.
+    let traces: MatrixTraceData | undefined;
+    if (generateHtml) {
+      log.info('Querying trace data for HTML report...');
+      traces = await queryMatrixTraces(evalsClient, log, aggregated);
+    }
+
+    const rendered = renderMatrix(
+      matrix,
+      config,
+      {
+        branch,
+        lookbackDays,
+        suiteIds,
+        commitSha: process.env.BUILDKITE_COMMIT,
+        buildUrl: process.env.BUILDKITE_BUILD_URL,
+      },
+      traces
+    );
 
     Fs.mkdirSync(outDir, { recursive: true });
     const writes: Array<[string, string]> = [
@@ -200,10 +216,7 @@ export const matrixCmd: Command<void> = {
       Fs.writeFileSync(Path.join(outDir, fileName), contents);
     }
 
-    const generateHtml = flagsReader.boolean('html');
-    if (generateHtml) {
-      log.info('Querying trace data for HTML report...');
-      const traces: MatrixTraceData = await queryMatrixTraces(evalsClient, log, aggregated);
+    if (generateHtml && traces) {
       const htmlContent = renderMatrixHtml(
         matrix,
         config,

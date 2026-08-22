@@ -219,6 +219,25 @@ describe('renderMatrix token axis', () => {
     const { json } = renderMatrix(buildMatrix(withTokens, plain), plain);
     expect(JSON.parse(json)).not.toHaveProperty('tokenCost');
   });
+
+  it('embeds traces into matrix.json when provided', () => {
+    const traces = {
+      'm1:triage': {
+        question: 'What happened?',
+        answer: 'An alert fired.',
+        toolTrail: ['security.alerts'],
+      },
+    };
+    const { json } = renderMatrix(matrix, config, {}, traces as never);
+    const parsed = JSON.parse(json);
+    expect(parsed.traces['m1:triage'].question).toBe('What happened?');
+    expect(parsed.traces['m1:triage'].toolTrail).toEqual(['security.alerts']);
+  });
+
+  it('omits the traces key when trace data was not queried', () => {
+    const { json } = renderMatrix(matrix, config);
+    expect(JSON.parse(json)).not.toHaveProperty('traces');
+  });
 });
 
 describe('renderMatrix provenance', () => {

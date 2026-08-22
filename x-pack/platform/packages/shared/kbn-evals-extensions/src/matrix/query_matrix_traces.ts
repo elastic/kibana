@@ -424,8 +424,9 @@ export const queryMatrixTraces = async (
 
   // 3. For each run, pick the newest complete document per example and merge
   //    into the traces map.
+  const missingByRun: Array<{ ref: RunRef; missing: string[] }> = [];
   for (const ref of runRefs) {
-    let completeCount = 0;
+    const missing: string[] = [];
     for (const exampleId of ref.exampleIds) {
       const scores = exampleScores.get(cacheKey(ref, exampleId)) ?? [];
       const ok = processExampleBatch(
@@ -436,13 +437,33 @@ export const queryMatrixTraces = async (
         traces,
         examplePrefixes
       );
-      if (ok) completeCount++;
+      if (!ok) missing.push(exampleId);
     }
-    if (completeCount === 0) {
+    if (missing.length === ref.exampleIds.size) {
       log.warning(
         `No complete score documents found for suite ${ref.suiteId} (model ${ref.modelId}, execution ${ref.executionId}) — trace will be unavailable`
       );
+    } else if (missing.length > 0) {
+      missingByRun.push({ ref, missing });
     }
+  }
+
+  // Pass-through verification: every (model, example) that produced a score in
+  // the aggregation must also land in the traces map. A gap means the trace
+  // fetch silently lost a scored cell — name each one loudly instead of
+  // letting the HTML render "Trace unavailable" with no log trail.
+  if (missingByRun.length > 0) {
+    const details = missingByRun
+      .map(
+        ({ ref, missing }) =>
+          `${ref.modelId} (execution ${ref.executionId}): ${missing.length}/${
+            ref.exampleIds.size
+          } missing [${missing.join(', ')}]`
+      )
+      .join('; ');
+    log.warning(
+      `Trace coverage incomplete — scores exist but no trace was resolved for: ${details}`
+    );
   }
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);
