@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  createTaskRunError,
+  getUiamApiKeySecret,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
 import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
@@ -14,7 +18,7 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
-import { ErrorWithReason, getUiamApiKeySecret, validateRuleTypeParams } from '../lib';
+import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { RuleTypeParams } from '../../common';
