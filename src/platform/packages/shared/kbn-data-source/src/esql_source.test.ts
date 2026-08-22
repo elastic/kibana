@@ -8,6 +8,8 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
 function makeColumn(
@@ -34,13 +36,24 @@ describe('EsqlSource', () => {
       expect(source.title).toBe('logs-*');
     });
 
-    it('produces an id with the "esql-" prefix and a SHA-256 hex tail', async () => {
+    it('produces an opaque SHA-256 id', async () => {
       const source = await EsqlSource.create({
         query: 'FROM logs-*',
         resultColumns: [],
         timeFieldName: '@timestamp',
       });
-      expect(source.id).toMatch(/^esql-[0-9a-f]{64}$/);
+      expect(source.id).toMatch(/^[0-9a-f]{64}$/);
+    });
+
+    it('uses the same id as an ES|QL ad hoc DataView', async () => {
+      const dataViewsService = {
+        create: jest.fn(async (spec: DataViewSpec) => spec),
+      } as unknown as DataViewsPublicPluginStart;
+      const query = 'FROM logs-*';
+      const source = await EsqlSource.create({ query, resultColumns: [] });
+      const dataView = await getESQLAdHocDataview({ dataViewsService, query });
+
+      expect(source.id).toBe(dataView.id);
     });
 
     it('is deterministic — same title and timeFieldName produce the same id', async () => {

@@ -18,6 +18,7 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
+import { IndexPatternSource } from '@kbn/data-source';
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -82,6 +83,8 @@ describe('initialize fetch', () => {
     );
     expect(stateManager.totalHitCount.getValue()).toEqual(2);
     expect(stateManager.inspectorAdapters.getValue().requests).toBeDefined();
+    expect(stateManager.dataSource.getValue()).toBeInstanceOf(IndexPatternSource);
+    expect(stateManager.dataSource.getValue()?.id).toBe(dataViewMock.id);
   });
 
   it('should catch and emit error', async () => {

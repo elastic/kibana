@@ -14,6 +14,7 @@ import { SolutionType } from '../../../profiles';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 import { createSecurityRootProfileProvider } from './profile';
+import { EsqlSource } from '@kbn/data-source';
 
 const MockComponent: FunctionComponent<DataGridCellValueElementProps> = () => null;
 
@@ -135,6 +136,33 @@ describe('createSecurityRootProfileProvider', () => {
       } as Parameters<typeof getCellRenderers>[0]);
       expect(result['source.ip']).toBe(ExistingRenderer);
       expect(result['destination.ip']).toBeDefined();
+    });
+
+    it('should add cell renderers using an ES|QL data source without a DataView', async () => {
+      const { provider, context } = await resolveSecurityContext(() => MockComponent);
+      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), {
+        context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      const dataSource = await EsqlSource.create({
+        query: `FROM ${ALERTS_INDEX_PATTERN}default`,
+        resultColumns: [
+          {
+            id: 'source.ip',
+            name: 'source.ip',
+            meta: { type: 'ip', esType: 'ip' },
+          },
+        ],
+      });
+
+      const result = getCellRenderers({
+        dataSource,
+        density: undefined,
+        rowHeight: undefined,
+      });
+
+      expect(result['kibana.alert.workflow_status']).toBeDefined();
+      expect(result['source.ip']).toBeDefined();
     });
   });
 });

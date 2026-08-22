@@ -11,6 +11,8 @@ import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 import {
   type AdditionalCellAction,
   type AdditionalCellActionContext,
@@ -30,6 +32,7 @@ export const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
  */
 export const useAdditionalCellActions = ({
   dataSource,
+  runtimeDataSource,
   dataView,
   query,
   filters,
@@ -67,8 +70,8 @@ export const useAdditionalCellActions = ({
   }, [additionalCellActions, uiActions]);
 
   return useMemo<DiscoverCellActionMetadata>(
-    () => ({ instanceId, dataSource, dataView, query, filters, timeRange }),
-    [dataSource, dataView, filters, instanceId, query, timeRange]
+    () => ({ instanceId, dataSource, runtimeDataSource, dataView, query, filters, timeRange }),
+    [dataSource, runtimeDataSource, dataView, filters, instanceId, query, timeRange]
   );
 };
 
@@ -89,7 +92,16 @@ export const createCellAction = (
       }
 
       const fieldSpec = data[0]?.field;
-      const field = fieldSpec?.name ? metadata.dataView?.fields.create(fieldSpec) : undefined;
+      const hasRuntimeField = fieldSpec?.name
+        ? Boolean(metadata.runtimeDataSource?.getColumn(fieldSpec.name))
+        : false;
+      const field = fieldSpec?.name
+        ? metadata.runtimeDataSource instanceof IndexPatternSource
+          ? metadata.runtimeDataSource.getDataView().fields.create(fieldSpec)
+          : hasRuntimeField
+          ? new DataViewField(fieldSpec)
+          : metadata.dataView?.fields.create(fieldSpec)
+        : undefined;
 
       if (!field) {
         return false;

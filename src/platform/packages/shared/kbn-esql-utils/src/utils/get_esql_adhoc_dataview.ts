@@ -84,9 +84,7 @@ export async function getESQLAdHocDataview({
   const prefix = options?.idPrefix ?? 'esql';
   const dataViewId =
     options?.id ??
-    (await sha256(
-      timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
-    ));
+    (await getESQLAdHocDataViewId({ indexPattern, timeFieldName, idPrefix: prefix }));
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
@@ -108,6 +106,19 @@ export async function getESQLAdHocDataview({
   );
   return dataView;
 }
+
+export const getESQLAdHocDataViewId = async ({
+  indexPattern,
+  timeFieldName,
+  idPrefix = 'esql',
+}: {
+  indexPattern: string;
+  timeFieldName?: string;
+  idPrefix?: string;
+}): Promise<string> =>
+  sha256(
+    timeFieldName ? `${idPrefix}-${indexPattern}-${timeFieldName}` : `${idPrefix}-${indexPattern}`
+  );
 
 /**
  * Gets an initial index for a default ES|QL query by querying local indices, remote (CCS)

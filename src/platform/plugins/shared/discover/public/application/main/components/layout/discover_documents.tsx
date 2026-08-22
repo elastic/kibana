@@ -338,6 +338,7 @@ function DiscoverDocumentsComponent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
+    runtimeDataSource: currentDataSource,
     dataView,
     query,
     filters,
@@ -405,11 +406,12 @@ function DiscoverDocumentsComponent({
   );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
+      dataSource: currentDataSource,
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight]
+    [currentDataSource, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');

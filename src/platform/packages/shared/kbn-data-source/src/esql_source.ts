@@ -10,10 +10,9 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataViewId, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Column, DataSource, SerializedDataSource } from './types';
 import { columnFromDatatableColumn } from './to_column';
-import { sha256 } from './sha256';
 
 export interface EsqlSourceArgs {
   query: string;
@@ -33,10 +32,11 @@ interface EsqlSourceConstructorArgs {
  *
  * Built directly from `(query, resultColumns)` — does not require or create a
  * `DataView`. Identity is derived from the FROM clause's target string and the
- * (caller-provided) time field name; columns come from the query response.
+ * (caller-provided) time field name using the same scheme as ES|QL ad hoc data
+ * views; columns come from the query response.
  *
  * Construct via the async {@link EsqlSource.create} factory; the constructor
- * is private because id derivation uses `crypto.subtle.digest` (async).
+ * is private because id derivation is async.
  */
 export class EsqlSource implements DataSource {
   public readonly kind = 'esql' as const;
@@ -74,16 +74,19 @@ export class EsqlSource implements DataSource {
   }
 
   /**
-   * Async factory. Computes the source id by hashing
-   * `{title}-{timeFieldName}`, matching the scheme used by
+   * Async factory. Computes the source id from the title and time field,
+   * matching the scheme used by
    * `getESQLAdHocDataview` so existing filters with `meta.index = oldId`
    * keep resolving.
    */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
     const title = getIndexPatternFromESQLQuery(args.query);
-    const hash = await sha256(`${title}-${args.timeFieldName ?? ''}`);
+    const id = await getESQLAdHocDataViewId({
+      indexPattern: title,
+      timeFieldName: args.timeFieldName,
+    });
     return new EsqlSource({
-      id: `esql-${hash}`,
+      id,
       title,
       timeFieldName: args.timeFieldName,
       resultColumns: args.resultColumns,

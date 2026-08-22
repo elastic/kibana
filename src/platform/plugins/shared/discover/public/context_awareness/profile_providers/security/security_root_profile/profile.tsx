@@ -42,7 +42,8 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-          if (!params.dataView?.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
+          const indexPattern = params.dataSource?.title ?? params.dataView?.getIndexPattern();
+          if (!indexPattern?.includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }
           ALLOWED_CELL_RENDER_FIELDS.forEach((fieldName) => {
@@ -50,11 +51,18 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });
 
-          for (const field of params.dataView.fields.getByType('ip')) {
-            if (!entries[field.name]) {
-              const renderer = context.getSecuritySolutionCellRenderer?.(field.name);
+          const ipFieldNames = params.dataSource
+            ? params.dataSource
+                .getColumns()
+                .filter(({ type }) => type === 'ip')
+                .map(({ name }) => name)
+            : params.dataView?.fields.getByType('ip').map(({ name }) => name) ?? [];
+
+          for (const fieldName of ipFieldNames) {
+            if (!entries[fieldName]) {
+              const renderer = context.getSecuritySolutionCellRenderer?.(fieldName);
               if (renderer) {
-                entries[field.name] = renderer;
+                entries[fieldName] = renderer;
               }
             }
           }

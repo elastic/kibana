@@ -28,6 +28,7 @@ import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { v4 as uuidv4 } from 'uuid';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { triggers } from '@kbn/ui-actions-plugin/public';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 
 let mockScopedProfilesManager: ScopedProfilesManager;
 let mockScopedEbtManager: ScopedDiscoverEBTManager;
@@ -67,6 +68,7 @@ jest
 describe('useAdditionalCellActions', () => {
   const initialProps: React.PropsWithChildren<Parameters<typeof useAdditionalCellActions>[0]> = {
     dataSource: createEsqlDataSource(),
+    runtimeDataSource: new IndexPatternSource(dataViewWithTimefieldMock),
     dataView: dataViewWithTimefieldMock,
     query: { esql: `FROM ${dataViewWithTimefieldMock.getIndexPattern()}` },
     filters: [],
@@ -207,6 +209,27 @@ describe('createCellAction', () => {
       await action.isCompatible({
         ...context,
         metadata: { instanceId: 'test', dataView: dataViewWithTimefieldMock },
+      })
+    ).toBe(true);
+  });
+
+  it('should be compatible with an ES|QL runtime data source without a DataView', async () => {
+    const { action } = getCellAction(() => true);
+    const runtimeDataSource = await EsqlSource.create({
+      query: 'FROM logs-*',
+      resultColumns: [
+        {
+          id: 'message',
+          name: 'message',
+          meta: { type: 'string', esType: 'keyword' },
+        },
+      ],
+    });
+
+    expect(
+      await action.isCompatible({
+        ...context,
+        metadata: { instanceId: 'test', runtimeDataSource },
       })
     ).toBe(true);
   });

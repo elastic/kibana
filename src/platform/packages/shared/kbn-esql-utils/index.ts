@@ -9,6 +9,7 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLAdHocDataViewId,
   getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,

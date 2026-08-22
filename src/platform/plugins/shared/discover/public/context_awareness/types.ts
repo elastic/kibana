@@ -28,6 +28,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 
@@ -275,6 +276,10 @@ export interface ModifiedVisAttributesExtensionParams {
  */
 export interface CellRenderersExtensionParams {
   /**
+   * The runtime data source for the current result set.
+   */
+  dataSource?: DataSource;
+  /**
    * The current data view. Optional because ES|QL mode may not carry a persisted DataView.
    */
   dataView?: DataView;
@@ -314,6 +319,10 @@ export interface DiscoverCellActionMetadata extends Record<string, unknown> {
    * The current data source (ES|QL or data view)
    */
   dataSource?: DiscoverDataSource;
+  /**
+   * The runtime data source for the current result set.
+   */
+  runtimeDataSource?: DataSource;
   /**
    * The current data view
    */

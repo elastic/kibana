@@ -190,6 +190,7 @@ export function ContextAppContent({
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
+      dataSource: currentDataSource,
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
       rowHeight: getRowHeight({
@@ -198,7 +199,7 @@ export function ContextAppContent({
         configRowHeight,
       }),
     });
-  }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+  }, [configRowHeight, currentDataSource, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
@@ -209,6 +210,7 @@ export function ContextAppContent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
+    runtimeDataSource: currentDataSource,
     dataView,
     query: undefined,
     filters,

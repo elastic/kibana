@@ -23,18 +23,15 @@ export interface DataViewLookup {
   get(id: string): Promise<DataView>;
 }
 
-const ESQL_ID_PREFIX = 'esql-';
-
 /**
  * Polymorphic registry over `DataSource` instances.
  *
  * Replaces direct `dataViewsService.get(id)` calls in cross-cutting consumers
  * (filter resolution, etc.) so they handle both source kinds without branching.
  *
- * - For DataView ids → delegates to the underlying `DataViewLookup` and wraps
- *   the result in an {@link IndexPatternSource}.
- * - For `esql-*` ids → returns a registered {@link EsqlSource} instance, or
- *   `undefined` if none is registered.
+ * - Registered ES|QL ids resolve directly from the in-memory registry.
+ * - Other ids delegate to the underlying `DataViewLookup` and wrap the result
+ *   in an {@link IndexPatternSource}.
  *
  * `EsqlSource` registration is consumer-owned: Discover, Lens, etc. call
  * `registerEsqlSource()` when an ES|QL query runs and `unregisterEsqlSource()`
@@ -46,8 +43,9 @@ export class DataSourceService {
   constructor(private readonly dataViews: DataViewLookup) {}
 
   public async get(id: string): Promise<DataSource | undefined> {
-    if (id.startsWith(ESQL_ID_PREFIX)) {
-      return this.esqlSources.get(id);
+    const esqlSource = this.esqlSources.get(id);
+    if (esqlSource) {
+      return esqlSource;
     }
     try {
       const dataView = await this.dataViews.get(id);
@@ -62,16 +60,12 @@ export class DataSourceService {
    * caller has the DataView (e.g. from React state) and would otherwise pay
    * for an async round-trip through {@link get} just to re-fetch what it has.
    *
-   * - For DataView ids with the `esql-` prefix → returns the registered
-   *   {@link EsqlSource}, or `undefined` if none is registered.
+   * - For registered ES|QL ids → returns the registered {@link EsqlSource}.
    * - For everything else → wraps the DataView in an {@link IndexPatternSource}.
    */
   public fromDataView(dataView: DataView): DataSource | undefined {
     if (!dataView.id) return undefined;
-    if (dataView.id.startsWith(ESQL_ID_PREFIX)) {
-      return this.esqlSources.get(dataView.id);
-    }
-    return new IndexPatternSource(dataView);
+    return this.esqlSources.get(dataView.id) ?? new IndexPatternSource(dataView);
   }
 
   public registerEsqlSource(source: EsqlSource): void {
