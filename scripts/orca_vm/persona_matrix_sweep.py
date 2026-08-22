@@ -113,16 +113,20 @@ PATCHED_PW_CONFIG = (
     / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts"
 )
+# Env seeds/tools seed/spec live in the matrix branch itself (merged as
+# f85527ed "Unbreak failing columns", plus the tool-registration assert).
+# Overlay from this worktree — the persona-matrix-env-truth worktree predates
+# the assert and would silently drop it on the VM.
 PATCHED_ENV_SEEDS = (
-    KIBANA_MAIN.parent / "kibana.worktrees/persona-matrix-env-truth"
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/src/fixtures/env_seeds.ts"
 )
 PATCHED_TOOLS_SEED = (
-    KIBANA_MAIN.parent / "kibana.worktrees/persona-matrix-env-truth"
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/src/fixtures/persona_matrix_tools_seed.ts"
 )
 PATCHED_SPEC = (
-    KIBANA_MAIN.parent / "kibana.worktrees/persona-matrix-env-truth"
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/evals/persona_matrix.spec.ts"
 )
 FIXTURES_REMOTE_PREFIX = (
