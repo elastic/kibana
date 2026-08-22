@@ -129,6 +129,13 @@ PATCHED_SPEC = (
     KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/evals/persona_matrix.spec.ts"
 )
+# The spec imports the tool-registration assert added in f85527ed; the VM
+# checkout predates it, so the module must ride along or the spec fails at
+# require time ("Cannot find module '../src/fixtures/tool_registration_check'").
+PATCHED_TOOL_CHECK = (
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/src/fixtures/tool_registration_check.ts"
+)
 FIXTURES_REMOTE_PREFIX = (
     "Projects/kibana/x-pack/solutions/security/packages/"
     "kbn-evals-suite-security-persona-matrix"
@@ -282,7 +289,10 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_ENV_SEEDS), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/env_seeds.ts")
     scp(str(PATCHED_TOOLS_SEED), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/persona_matrix_tools_seed.ts")
     scp(str(PATCHED_SPEC), ip, f"{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts")
-    out = ssh(ip, f"grep -q seedPersonaMatrixEnvironment ~/{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts && echo ENVSEEDS_OK")
+    scp(str(PATCHED_TOOL_CHECK), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts")
+    out = ssh(ip, f"grep -q seedPersonaMatrixEnvironment ~/{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts && "
+                  f"grep -q assertPersonaMatrixToolsRegistered ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts && "
+                  f"echo ENVSEEDS_OK")
     if "ENVSEEDS_OK" not in out:
         raise RuntimeError(f"env-truth overlay verification failed on {ip}: {out}")
     out = ssh(ip, f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE} && "
@@ -479,7 +489,20 @@ def main() -> None:
         # Expected size is derived inside check_golden from the live evaluator
         # count on the VM (21 examples x (evaluators + 1 task doc) x reps).
         expected_docs = result.get("expected", -1)
-        state = "PASS" if result.get("count") == expected_docs else "FAIL"
+        count = result.get("count", -1)
+        # Never green on unresolved numbers: count == expected == -1 would
+        # otherwise PASS a run that produced nothing (observed when the spec
+        # overlay missed tool_registration_check.ts and every run died at
+        # require time).
+        state = (
+            "PASS"
+            if rc == 0
+            and not result.get("error")
+            and isinstance(count, int)
+            and count > 0
+            and count == expected_docs
+            else "FAIL"
+        )
         json.dump({"ip": ip, "model": model, "state": state,
                    "docs": result.get("count", -1), "rc": rc,
                    "execution_id": result.get("execution_id"),
