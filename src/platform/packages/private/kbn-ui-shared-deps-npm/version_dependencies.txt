@@ -159,7 +159,7 @@ console-browserify@1.1.0
 constants-browserify@1.0.0
 convert-source-map@1.8.0
 copy-anything@3.0.2
-core-js@3.46.0
+core-js@3.50.0
 core-util-is@1.0.2
 cosmiconfig@7.1.0
 create-ecdh@4.0.4
@@ -374,7 +374,7 @@ property-information@5.5.0
 public-encrypt@4.0.3
 punycode@1.4.1
 punycode@2.3.1
-qs@6.15.2
+qs@6.15.3
 querystring-es3@0.2.1
 querystringify@2.1.1
 raf-schd@4.0.3
@@ -437,10 +437,10 @@ set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
 shallowequal@1.1.0
-side-channel-list@1.0.0
+side-channel-list@1.0.1
 side-channel-map@1.0.1
 side-channel-weakmap@1.0.2
-side-channel@1.1.0
+side-channel@1.1.1
 source-map-support@0.5.21
 source-map@0.5.7
 source-map@0.6.1
@@ -506,7 +506,7 @@ vfile-location@3.0.1
 vfile-message@2.0.4
 vfile@4.2.1
 vm-browserify@1.1.2
-watchpack@2.4.1
+watchpack@2.4.4
 web-namespaces@1.1.4
 webpack-sources@3.2.3
 webpack@5.96.1
