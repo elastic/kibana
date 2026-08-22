@@ -142,6 +142,28 @@ describe('queryMatrixTraces example fetching', () => {
     });
   });
 
+  it('does not duplicate the direct example key under prefix:<exampleId>', async () => {
+    const client = makeClient({ filtered: true });
+    // Per-example columns set examplePrefixes to the full example id, which
+    // would emit prefix:example-1 as a byte-duplicate of example-1.
+    const aggregated = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-1',
+            experimentId: 'exec-a',
+            datasets: [{ datasetId: 'prefix:example-1' }],
+            evaluators: [],
+          },
+        ],
+      },
+    ];
+    const traces = await queryMatrixTraces(client as never, logStub as never, aggregated as never);
+    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(Object.keys(traces)).not.toContain('model-x:prefix:example-1');
+  });
+
   it('fetches once per example on a legacy server even with many runs', async () => {
     const client = makeClient({ filtered: false });
     const aggregated = Array.from({ length: 6 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();

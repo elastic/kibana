@@ -97,9 +97,13 @@ const renderMarkdownTable = (
   rows: MatrixRow[],
   notRecommendedLabel: string
 ): string => {
-  const header = buildHeader(displayColumns);
+  const coverageOf = (row: MatrixRow): string => `${row.coverage.covered}/${row.coverage.total}`;
+  const header = [...buildHeader(displayColumns), 'Coverage'];
   const separator = header.map(() => ':---');
-  const body = rows.map((row) => rowToValues(displayColumns, row, notRecommendedLabel));
+  const body = rows.map((row) => [
+    ...rowToValues(displayColumns, row, notRecommendedLabel),
+    coverageOf(row),
+  ]);
 
   const toRow = (cells: string[]): string => `| ${cells.join(' | ')} |`;
 

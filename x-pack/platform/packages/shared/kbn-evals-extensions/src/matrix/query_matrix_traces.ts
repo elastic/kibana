@@ -197,7 +197,12 @@ const processExampleBatch = (
   // previously made all cards render the same, last-processed example).
   if (exampleId) {
     for (const prefix of examplePrefixes) {
-      if (exampleId === prefix || exampleId.startsWith(`${prefix}-`)) {
+      // Equality writes `prefix:<exampleId>`, a byte-duplicate of the direct
+      // example key written above (also on the incomplete-fallback path
+      // below). Per-example columns (`examplePrefixes: ['<example-id>']`)
+      // would otherwise double the traces map with unread duplicates.
+      if (prefix === exampleId) continue;
+      if (exampleId.startsWith(`${prefix}-`)) {
         const key = traceKey(modelId, `prefix:${prefix}`);
         // First variant wins: all matching variants are valid examples of the
         // category, so keep the lookup deterministic across Set iteration order.

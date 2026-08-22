@@ -38,6 +38,12 @@ export interface MatrixRow {
   /** Column/composite id -> cell. */
   cells: Record<string, MatrixCell>;
   overall: MatrixCell;
+  /**
+   * Base columns with a non-missing cell out of all base columns. Partial
+   * coverage means `overall` and composites average fewer examples and are
+   * not directly comparable to full-coverage rows.
+   */
+  coverage: { covered: number; total: number };
 }
 
 /** Aggregated token magnitudes for one (model, column) pair, in native units. */
@@ -385,6 +391,10 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
       openSource: modelConfig.openSource,
       cells,
       overall: computeOverall(cells, config),
+      coverage: {
+        covered: config.columns.filter((c) => cells[c.id].kind !== 'missing').length,
+        total: config.columns.length,
+      },
     };
 
     (modelConfig.openSource ? openSource : proprietary).push(row);

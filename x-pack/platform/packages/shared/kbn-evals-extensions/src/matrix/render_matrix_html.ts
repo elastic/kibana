@@ -35,6 +35,8 @@ const REPORT_CSS = `
   td.num { text-align:center; color:var(--muted); }
   td.model { font-weight:600; min-width:160px; }
   .model-id { color:var(--muted); font-weight:400; font-size:12px; font-family:ui-monospace,monospace; }
+  .coverage { color:var(--muted); font-weight:400; font-size:12px; font-family:ui-monospace,monospace; }
+  .coverage.partial { color:var(--warn); font-weight:600; }
   td.cell { font-size:13px; }
   td.cell.ok { color:var(--text); }
   td.cell.err { color:var(--err); font-weight:600; }
@@ -372,14 +374,17 @@ const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
     .map((c) => `<th>${esc(c.label)}</th>`)
     .join('')}</tr>`;
   const rows = [...matrix.proprietary, ...matrix.openSource]
-    .map(
-      (row) =>
-        `<tr><td class="model">${esc(row.modelLabel)}<br><span class="model-id">${esc(
-          row.modelId
-        )}</span></td>${matrix.displayColumns
-          .map((col) => `<td class="cell ok">${cellHtml(row, col)}</td>`)
-          .join('')}</tr>`
-    )
+    .map((row) => {
+      // Partial coverage means overall/composites average fewer examples and
+      // are not directly comparable to full-coverage rows — warn on any gap.
+      const { covered, total } = row.coverage;
+      const coverageClass = covered < total ? 'coverage partial' : 'coverage';
+      return `<tr><td class="model">${esc(row.modelLabel)}<br><span class="model-id">${esc(
+        row.modelId
+      )}</span><br><span class="${coverageClass}" title="base columns with a scored run">${covered}/${total}</span></td>${matrix.displayColumns
+        .map((col) => `<td class="cell ok">${cellHtml(row, col)}</td>`)
+        .join('')}</tr>`;
+    })
     .join('');
   return `<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
 };

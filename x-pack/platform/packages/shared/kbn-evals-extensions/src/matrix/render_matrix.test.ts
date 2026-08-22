@@ -42,6 +42,7 @@ const matrix: Matrix = {
         detect: { kind: 'not-recommended' },
       },
       overall: { kind: 'score', value: 4.6 },
+      coverage: { covered: 2, total: 2 },
     },
   ],
   openSource: [
@@ -54,6 +55,7 @@ const matrix: Matrix = {
         detect: { kind: 'missing' },
       },
       overall: { kind: 'score', value: 3.8 },
+      coverage: { covered: 1, total: 2 },
     },
   ],
 };
@@ -115,6 +117,7 @@ describe('renderMatrix', () => {
             overall_score: { kind: 'score', value: 8 },
           },
           overall: { kind: 'score', value: 8 },
+          coverage: { covered: 2, total: 2 },
         },
       ],
       openSource: [],
@@ -149,6 +152,7 @@ describe('renderMatrix', () => {
           openSource: false,
           cells: { c: { kind: 'score', value: 1 } },
           overall: { kind: 'score', value: 1 },
+          coverage: { covered: 1, total: 1 },
         },
       ],
       openSource: [],

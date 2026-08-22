@@ -64,6 +64,7 @@ const mockMatrix: Matrix = {
         threat: { kind: 'score', value: 7.4 },
       },
       overall: { kind: 'score', value: 7.95 },
+      coverage: { covered: 2, total: 2 },
     },
   ],
   openSource: [],
@@ -172,6 +173,7 @@ describe('renderMatrixHtml', () => {
           // Category aggregate across variants a/b/c — must not leak onto cards.
           cells: { 'alert-analysis': { kind: 'score', value: 8.48 } },
           overall: { kind: 'missing' },
+          coverage: { covered: 1, total: 1 },
         },
       ],
       openSource: [],
@@ -261,6 +263,7 @@ describe('renderMatrixHtml', () => {
           openSource: false,
           cells: { triage: { kind: 'score', value: 7.2 } },
           overall: { kind: 'score', value: 7.2 },
+          coverage: { covered: 1, total: 1 },
         },
       ],
     };
