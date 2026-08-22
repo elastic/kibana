@@ -40,6 +40,10 @@ SSH_USER = "orcaeval"
 IMAGE = json.load(open(Path(__file__).parent / ".azure-state.json"))["imageId"]
 RG = "orca-eval-farm"
 VM_SIZE = "Standard_D8s_v5"
+
+# Per-model env for run_model.sh. Slow chat models blow the default 30-min
+# Playwright cap mid-suite (glm-5-2 died at example 16/21 on 2026-08-22).
+MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=60"}
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
@@ -313,8 +317,10 @@ def launch(ip: str, model: str) -> subprocess.Popen:
     # Forward EVAL_REPETITIONS when set so determinism runs (e.g. =3) can
     # multiply repetitions without editing run_model.sh per-run. run_model.sh
     # defaults it to 1 when absent, preserving the sweep's single-pass behavior.
-    repetitions = os.environ.get("EVAL_REPETITIONS", "")
-    timeout_min = os.environ.get("PERSONA_MATRIX_TIMEOUT_MINUTES", "")
+    # Per-model defaults from MODEL_ENV; the process env overrides them.
+    model_env = dict([kv.split("=", 1) for kv in MODEL_ENV.get(model, "").split()]) if MODEL_ENV.get(model) else {}
+    repetitions = os.environ.get("EVAL_REPETITIONS", model_env.get("EVAL_REPETITIONS", ""))
+    timeout_min = os.environ.get("PERSONA_MATRIX_TIMEOUT_MINUTES", model_env.get("PERSONA_MATRIX_TIMEOUT_MINUTES", ""))
     env_prefix = ""
     if repetitions:
         env_prefix += f"export EVAL_REPETITIONS={shlex.quote(repetitions)} && "

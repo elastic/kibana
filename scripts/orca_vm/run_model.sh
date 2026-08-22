@@ -87,3 +87,7 @@ python3 /tmp/export_scores.py "$MODEL" 2>&1
 EXPORT_EXIT=$?
 
 echo "=== DONE: $MODEL (EVAL_EXIT=$EVAL_EXIT, EXPORT_EXIT=$EXPORT_EXIT) ==="
+
+# Propagate eval failure as the process exit code so the sweep controller's
+# ssh rc reflects it (export still runs above either way; the controller
+# treats r...[truncated]
