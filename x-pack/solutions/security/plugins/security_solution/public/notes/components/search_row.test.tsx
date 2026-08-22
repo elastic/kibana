@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSelector } from 'react-redux';
-import { useSelector } from 'react-redux';
 import { SearchRow } from './search_row';
 import {
   ASSOCIATED_NOT_SELECT_TEST_ID,
