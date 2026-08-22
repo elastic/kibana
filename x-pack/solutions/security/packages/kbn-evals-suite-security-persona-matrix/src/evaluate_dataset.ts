@@ -148,6 +148,54 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
 });
 
 /**
+ * MinExpectedSteps — flags "gave up without trying": the agent produced a
+ * (possibly non-empty) answer but performed fewer tool calls than the example
+ * declares in `expectedTools`. Distinct from FinalAnswerPresent (which only
+ * checks that *some* text exists) — a model can write a confident answer having
+ * called nothing, which is exactly the premature-termination failure mode seen
+ * in the original sweep (~90 runs finished in <3 steps).
+ *
+ * Scores 1 when the run made at least `expectedTools.length` tool calls,
+ * otherwise 0. N/A when the example declares no expectedTools (nothing to
+ * compare against) or the task produced no output.
+ */
+export const createPersonaMatrixMinExpectedStepsEvaluator = (): Evaluator => ({
+  name: 'MinExpectedSteps',
+  kind: 'CODE',
+  evaluate: async ({ output, expected, metadata }) => {
+    const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
+    const meta = metadata as { expectedTools?: string[] } | undefined;
+    const expectedTools = meta?.expectedTools ?? toolSequence ?? [];
+    const minToolCalls = expectedTools.length;
+    if (minToolCalls === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No expectedTools annotation — skipping MinExpectedSteps.',
+      };
+    }
+    const taskOutput = output as TaskOutput | undefined;
+    if (!taskOutput) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No task output — skipping MinExpectedSteps.',
+      };
+    }
+    const actualToolCalls = getToolCallSteps(taskOutput).length;
+    const met = actualToolCalls >= minToolCalls;
+    return {
+      score: met ? 1 : 0,
+      explanation: met
+        ? `Made ${actualToolCalls} tool call(s), meeting the expected minimum of ${minToolCalls}.`
+        : `Made ${actualToolCalls} tool call(s) but expected at least ${minToolCalls} (${expectedTools.join(
+            ', '
+          )}) — agent may have given up without trying.`,
+    };
+  },
+});
+
+/**
  * Trajectory evaluator wrapper. Returns N/A when an example has no
  * `tool_sequence` annotation so partial-coverage datasets don't get
  * penalised. Mirrors `createAlertsRagTrajectoryEvaluator` in
@@ -327,6 +375,7 @@ export function createEvaluatePersonaMatrixDataset({
     const trajectoryEvaluator = createPersonaMatrixTrajectoryEvaluator();
     const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
     const finalAnswerPresentEvaluator = createPersonaMatrixFinalAnswerPresentEvaluator();
+    const minExpectedStepsEvaluator = createPersonaMatrixMinExpectedStepsEvaluator();
 
     const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
@@ -338,6 +387,7 @@ export function createEvaluatePersonaMatrixDataset({
       trajectoryEvaluator,
       expectedToolCalledEvaluator,
       finalAnswerPresentEvaluator,
+      minExpectedStepsEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       evaluators.criteria([

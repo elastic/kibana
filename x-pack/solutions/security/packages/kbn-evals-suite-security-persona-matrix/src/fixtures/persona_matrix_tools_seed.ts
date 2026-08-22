@@ -31,8 +31,6 @@ const AGENT_BUILDER_TOOLS_HEADERS = {
   'elastic-api-version': ELASTIC_API_VERSION,
 } as const;
 
-const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
-
 export const PERSONA_MATRIX_TOOL_IDS = ['virustotal_lookup', 'on_call_lookup'] as const;
 
 interface SeedToolsOptions {
@@ -114,7 +112,12 @@ export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOption
         'on-call responder to own or escalate a security incident.',
       tags: ['persona-matrix', 'incident-response'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.severity | LIMIT 10`,
+        // Queries the eval-seeded on-call schedule index (see env_seeds.ts A5).
+        // Previously this pointed at the alerts index, which has no responder
+        // fields — making workflow-execution-b structurally unanswerable.
+        query:
+          `FROM on-call-schedule | WHERE is_primary == true ` +
+          `| KEEP name, email, slack_handle, shift_start, shift_end | LIMIT 5`,
         // esql tool schema requires `params` present (even empty) — omitting
         // it fails validation with "expected value of type [object] but got
         // [undefined]" (verified live).

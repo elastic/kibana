@@ -79,6 +79,42 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('8.5');
   });
 
+  it('renders a token-cost table when matrix.tokenCost is populated', () => {
+    const matrixWithCost: Matrix = {
+      ...mockMatrix,
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            cells: [
+              {
+                columnId: 'alert',
+                inputTokens: { mean: 1200, min: 1000, max: 1400, count: 3 },
+                outputTokens: { mean: 300, min: 250, max: 350, count: 3 },
+                totalMean: 1500,
+              },
+              { columnId: 'threat', totalMean: 4000 },
+            ],
+          },
+        ],
+      },
+    };
+    const html = renderMatrixHtml(matrixWithCost, mockConfig);
+    expect(html).toContain('Token cost per (model, column)');
+    expect(html).toContain('tokencost');
+    // 1500 -> "2k" (toFixed(0) rounds 1.5 up), 4000 -> "4k", total 5500 -> "5k"/"6k"
+    expect(html).toContain('>2k</td>');
+    expect(html).toContain('>4k</td>');
+    expect(html).toContain('in 1,200 / out 300');
+  });
+
+  it('omits the token-cost table when matrix.tokenCost is absent', () => {
+    const html = renderMatrixHtml(mockMatrix, mockConfig);
+    expect(html).not.toContain('Token cost per (model, column)');
+  });
+
   it('renders trace data when provided', () => {
     const traces: MatrixTraceData = {
       'test-model:alert': {

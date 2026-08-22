@@ -15,6 +15,7 @@ import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
+import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
 
 const DATASET_NAME = 'security: security-persona-matrix';
 const DATASET_DESCRIPTION =
@@ -44,8 +45,12 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
     await cleanupPersonaMatrixTools({ kbnClient, log });
   });
 
-  evaluate('all 21 examples', async ({ evaluateDataset, log }) => {
+  evaluate('all 21 examples', async ({ evaluateDataset, kbnClient, log }) => {
     log.info(`Running persona matrix evaluation with ${personaMatrixDataset.length} examples`);
+
+    // Pre-flight: fail fast if an expected custom tool isn't registered, rather
+    // than silently scoring a tool that doesn't exist.
+    await assertPersonaMatrixToolsRegistered({ kbnClient, log });
 
     await evaluateDataset({
       dataset: {

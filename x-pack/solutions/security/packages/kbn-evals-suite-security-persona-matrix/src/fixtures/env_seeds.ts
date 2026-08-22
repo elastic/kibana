@@ -44,6 +44,7 @@ const LABS_INDEX = 'logs-security_labs.research-default';
 const TI_INDEX = 'ti-mock-default';
 const WATCHLIST_SO_TYPE = 'security-tanker-watchlist';
 const ENTITY_INDEX = '.entities-v1';
+const ONCALL_INDEX = 'on-call-schedule';
 
 const CHRYSALIS_HASH = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
 const HOST = 'srv-win-defend-01';
@@ -204,6 +205,81 @@ export async function seedPersonaMatrixEnvironment({
         'entity.risk_level': 'high',
         'entity.criticality': 'high',
         'entity.tags': ['windows', 'endpoint'],
+      },
+      // A4a: ranked set + the SYSTEM user so entity-analytics-b ("rank the
+      // riskiest entities, profile the top one") and -c ("SYSTEM user's
+      // history/risk") have real data. A single host could not be ranked and no
+      // user entity existed for the watchlist to attach to.
+      {
+        '@timestamp': '2026-07-21T08:00:00.000Z',
+        'entity.type': 'host',
+        'entity.id': 'host-default-srv-linux-web-02',
+        'entity.name': 'srv-linux-web-02',
+        'entity.display_name': 'srv-linux-web-02',
+        'entity.risk_score': 41,
+        'entity.risk_level': 'moderate',
+        'entity.criticality': 'medium',
+        'entity.tags': ['linux', 'web'],
+      },
+      {
+        '@timestamp': '2026-07-21T08:00:00.000Z',
+        'entity.type': 'host',
+        'entity.id': 'host-default-srv-mac-dev-03',
+        'entity.name': 'srv-mac-dev-03',
+        'entity.display_name': 'srv-mac-dev-03',
+        'entity.risk_score': 18,
+        'entity.risk_level': 'low',
+        'entity.criticality': 'low',
+        'entity.tags': ['macos', 'dev'],
+      },
+      {
+        '@timestamp': '2026-07-21T08:05:00.000Z',
+        'entity.type': 'user',
+        'entity.id': `user-default-SYSTEM-${HOST}`,
+        'entity.name': 'SYSTEM',
+        'entity.display_name': `SYSTEM (${HOST})`,
+        'entity.risk_score': 88,
+        'entity.risk_level': 'critical',
+        'entity.criticality': 'high',
+        'entity.tags': ['privileged', 'service-account'],
+        'entity.last_seen': '2026-07-21T08:00:00.000Z',
+        'entity.history':
+          'SYSTEM on srv-win-defend-01 executed BluetoothService.exe from C:\\Users\\Public ' +
+          'and side-loaded the Chrysalis DLL (T1574.002); elevated token use outside normal ' +
+          'service windows over the prior 24h.',
+      },
+    ],
+    log,
+    markerId
+  );
+
+  // A5: on-call schedule so on_call_lookup (re-pointed at this index) can answer
+  // "who is on call". The original run queried a dedicated on-call-schedule
+  // index; without it the tool queried the alerts index, which has no responder
+  // data, making workflow-execution-b structurally unanswerable.
+  await ensureIndexWithDocs(
+    esClient,
+    ONCALL_INDEX,
+    [
+      {
+        '@timestamp': '2026-07-21T00:00:00.000Z',
+        name: 'Dana Whitfield',
+        email: 'dana.whitfield@example.com',
+        slack_handle: '@dana-w',
+        shift_start: '2026-07-20T00:00:00.000Z',
+        shift_end: '2026-07-27T00:00:00.000Z',
+        is_primary: true,
+        escalation_tier: 'primary',
+      },
+      {
+        '@timestamp': '2026-07-21T00:00:00.000Z',
+        name: 'Ravi Osei',
+        email: 'ravi.osei@example.com',
+        slack_handle: '@ravi-o',
+        shift_start: '2026-07-20T00:00:00.000Z',
+        shift_end: '2026-07-27T00:00:00.000Z',
+        is_primary: false,
+        escalation_tier: 'secondary',
       },
     ],
     log,

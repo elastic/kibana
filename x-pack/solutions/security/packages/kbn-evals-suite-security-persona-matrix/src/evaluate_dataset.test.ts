@@ -14,6 +14,7 @@ import {
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
   createPersonaMatrixFinalAnswerPresentEvaluator,
+  createPersonaMatrixMinExpectedStepsEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
@@ -284,6 +285,52 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
 
   it('returns N/A when there is no task output at all', async () => {
     const result = await evaluate(undefined);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+});
+
+describe('createPersonaMatrixMinExpectedStepsEvaluator', () => {
+  const toolStep = (id: string) => ({ type: 'tool_call', tool_id: id });
+  const evaluate = (output: unknown, expectedTools?: string[]) =>
+    createPersonaMatrixMinExpectedStepsEvaluator().evaluate({
+      input: { question: 'q' },
+      expected: expectedTools ? { tool_sequence: expectedTools } : {},
+      output,
+      metadata: expectedTools ? { expectedTools } : {},
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']>[0]);
+
+  it('scores 1 when tool calls meet the expected minimum', async () => {
+    const result = await evaluate(
+      { steps: [toolStep('platform.core.generate_esql'), toolStep('platform.core.execute_esql')] },
+      ['platform.core.generate_esql', 'platform.core.execute_esql']
+    );
+    expect(result.score).toBe(1);
+  });
+
+  // Regression: ~90 original-sweep runs produced an answer in <3 steps having
+  // called nothing — premature termination that FinalAnswerPresent alone misses.
+  it('scores 0 when the agent gave up without trying (fewer calls than expected)', async () => {
+    const result = await evaluate({ steps: [] }, ['on_call_lookup']);
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when only some of the expected tools were called', async () => {
+    const result = await evaluate({ steps: [toolStep('platform.core.generate_esql')] }, [
+      'platform.core.generate_esql',
+      'platform.core.execute_esql',
+    ]);
+    expect(result.score).toBe(0);
+  });
+
+  it('returns N/A when the example declares no expectedTools', async () => {
+    const result = await evaluate({ steps: [toolStep('x')] });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('returns N/A when there is no task output', async () => {
+    const result = await evaluate(undefined, ['on_call_lookup']);
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
   });

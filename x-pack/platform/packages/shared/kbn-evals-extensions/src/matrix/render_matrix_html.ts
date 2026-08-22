@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Matrix, MatrixRow, MatrixDisplayColumn } from './build_matrix';
+import type { Matrix, MatrixRow, MatrixDisplayColumn, TokenCostModel } from './build_matrix';
 import type { MatrixColumnConfig, MatrixConfig } from './load_matrix_config';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
@@ -310,6 +310,38 @@ const stepHtml = (step: TraceStep, index: number): string => {
   )}</span></div>`;
 };
 
+const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
+  if (!matrix.tokenCost || matrix.tokenCost.models.length === 0) return '';
+  const columns = matrix.columns; // base columns only
+  const fmt = (n?: number) =>
+    n === undefined ? '—' : n >= 1000 ? `${(n / 1000).toFixed(0)}k` : `${Math.round(n)}`;
+  const header = `<tr><th>Model</th>${columns
+    .map((c) => `<th>${esc(c.label)}</th>`)
+    .join('')}<th>Total</th></tr>`;
+  const cellFor = (m: TokenCostModel, colId: string) => {
+    const cell = m.cells.find((c) => c.columnId === colId);
+    if (!cell) return '<td class="cell ok">—</td>';
+    const title =
+      cell.inputTokens && cell.outputTokens
+        ? ` title="in ${Math.round(cell.inputTokens.mean).toLocaleString()} / out ${Math.round(
+            cell.outputTokens.mean
+          ).toLocaleString()} (min ${Math.round(cell.totalMean).toLocaleString()})"`
+        : '';
+    return `<td class="cell ok cost"${title}>${fmt(cell.totalMean)}</td>`;
+  };
+  const rows = matrix.tokenCost.models
+    .map((m) => {
+      const total = m.cells.reduce((s, c) => s + c.totalMean, 0);
+      return `<tr><td class="model">${esc(m.modelLabel)}<br><span class="model-id">${esc(
+        m.modelId
+      )}</span></td>${columns.map((c) => cellFor(m, c.id)).join('')}<td class="cell ok cost">${fmt(
+        total
+      )}</td></tr>`;
+    })
+    .join('');
+  return `<details class="methodology tokencost" open><summary>Token cost per (model, column) — input + output means, native units (hover for in/out split)</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
+};
+
 const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
   const groupedColumns = matrix.displayColumns.map((col) => {
     const source = col.kind === 'overall' ? undefined : config.columns.find((c) => c.id === col.id);
@@ -524,6 +556,7 @@ export const renderMatrixHtml = (
     : '';
 
   const summaryTable = renderSummaryTable(matrix, config);
+  const tokenCostTable = renderTokenCost(matrix, config);
   const modelCards =
     (matrix.proprietary.length > 0
       ? renderModelCard(matrix.proprietary, matrix, config, traces)
@@ -546,6 +579,7 @@ export const renderMatrixHtml = (
 <p class="sub">${provenanceLine}</p>
 ${methodologyBlock}
 ${summaryTable}
+${tokenCostTable}
 <p class="legend">Each cell shows the model's score (0–10). Expand a prompt below to read the agent's full answer, tool trail, and reasoning trace.</p>
 ${modelCards}
 </div>
