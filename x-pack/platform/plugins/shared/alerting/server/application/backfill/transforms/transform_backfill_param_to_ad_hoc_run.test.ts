@@ -213,6 +213,30 @@ describe('transformBackfillParamToAdHocRun', () => {
     );
   });
 
+  test('should represent a missing ES api key with empty strings for a rule holding only a raw user-created Cloud key', () => {
+    // Rules created with a raw `essu_` credential have `apiKey: null` — the backfill must not
+    // throw on the missing ES key and must still snapshot the UIAM key and its verdict.
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({
+        apiKey: null,
+        apiKeyCreatedByUser: true,
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).toEqual(
+      expect.objectContaining({
+        apiKeyId: '',
+        apiKeyToUse: '',
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      })
+    );
+  });
+
   test('should not set the externality verdict for a framework-granted UIAM api key', () => {
     const { adHocRunSO } = transformBackfillParamToAdHocRun(
       getMockData(),
