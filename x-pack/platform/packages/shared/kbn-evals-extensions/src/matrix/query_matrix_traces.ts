@@ -251,7 +251,8 @@ const processExampleBatch = (
 export const queryMatrixTraces = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
-  aggregated: AggregatedModelScores[]
+  aggregated: AggregatedModelScores[],
+  traceCache?: Record<string, EvaluationScoreDocument[]>
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -353,6 +354,15 @@ export const queryMatrixTraces = async (
   };
 
   const fetchExample = async (ref: RunRef, exampleId: string): Promise<void> => {
+    // Local trace cache: docs pulled ahead of time (e.g. directly from ES,
+    // bypassing an old evals plugin whose route ignores execution filters and
+    // trips the transport cap on heavy examples). A cache hit means no server
+    // round-trip at all for this cell.
+    const cached = traceCache?.[cacheKey(ref, exampleId)];
+    if (cached) {
+      exampleScores.set(cacheKey(ref, exampleId), cached);
+      return;
+    }
     if (serverSupportsFilter === false) {
       const shared = exampleScores.get(exampleId);
       if (shared) {

@@ -16,6 +16,7 @@ import {
   DEFAULT_EVALUATIONS_KBN_URL,
 } from '@kbn/evals';
 import { KbnClient } from '@kbn/kbn-client';
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { loadMatrixConfig, applyModelOverrides } from '../../matrix/load_matrix_config';
 import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
@@ -55,6 +56,7 @@ export const matrixCmd: Command<void> = {
       'kbn-url',
       'kbn-api-key',
       'model',
+      'trace-cache',
     ],
     boolean: ['html'],
     allowUnexpected: false,
@@ -68,6 +70,8 @@ export const matrixCmd: Command<void> = {
                        e.g. --model gpt-5-preview:GPT-5 --model qwen3:Qwen3:open-source
     --profile          Golden-cluster config profile providing EVAL_KBN_URL/API_KEY
                        (e.g. 'dev-vault' for runtime Vault, or a config.<name>.json file).
+    --trace-cache      Path to a trace-cache JSON (executionId::exampleId -> score docs).
+      ...[truncated]
     --kbn-url          Kibana URL override.
     --kbn-api-key      Kibana API key override.
     --html             Also generate a self-contained HTML report (matrix.html).
@@ -186,7 +190,22 @@ export const matrixCmd: Command<void> = {
     let traces: MatrixTraceData | undefined;
     if (generateHtml) {
       log.info('Querying trace data for HTML report...');
-      traces = await queryMatrixTraces(evalsClient, log, aggregated);
+      // --trace-cache <path>: pre-pulled score documents keyed
+      // `${executionId}::${exampleId}`, e.g. fetched directly from the evals
+      // cluster's ES when the Kibana route can't serve them (older plugin
+      // builds ignore execution filters and trip the response-size cap on
+      // heavy examples). Cached cells skip the server fetch entirely.
+      const traceCachePath = flagsReader.string('trace-cache');
+      let traceCache: Record<string, EvaluationScoreDocument[]> | undefined;
+      if (traceCachePath) {
+        traceCache = JSON.parse(Fs.readFileSync(traceCachePath, 'utf8')) as Record<
+          string,
+          EvaluationScoreDocument[]
+        >;
+        const cellCount = traceCache ? Object.keys(traceCache).length : 0;
+        log.info(`Loaded trace cache: ${cellCount} cells from ${traceCachePath}`);
+      }
+      traces = await queryMatrixTraces(evalsClient, log, aggregated, traceCache);
     }
 
     const rendered = renderMatrix(

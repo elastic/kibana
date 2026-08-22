@@ -124,6 +124,24 @@ describe('queryMatrixTraces example fetching', () => {
     expect(client.getExampleScores).toHaveBeenCalledTimes(1);
   });
 
+  it('serves cells from the trace cache without touching the server', async () => {
+    const client = makeClient({ filtered: true });
+    const traceCache = {
+      'exec-a::example-1': [completeDoc('exec-a')],
+    };
+    const traces = await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      aggregatedFor('exec-a') as never,
+      traceCache as never
+    );
+    expect(client.getExampleScores).not.toHaveBeenCalled();
+    expect(traces['model-x:example-1']).toMatchObject({
+      scores: { Correctness: 1 },
+      repetitions: 1,
+    });
+  });
+
   it('fetches once per example on a legacy server even with many runs', async () => {
     const client = makeClient({ filtered: false });
     const aggregated = Array.from({ length: 6 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();
