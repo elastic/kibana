@@ -9,10 +9,7 @@ import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import {
-  isExternalUiamCredential,
-  markExternalUiamCredential,
-} from '@kbn/core-security-server';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
 import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';

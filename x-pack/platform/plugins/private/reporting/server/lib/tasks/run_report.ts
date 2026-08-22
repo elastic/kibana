@@ -11,10 +11,7 @@ import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
-import {
-  isExternalUiamCredential,
-  markExternalUiamCredential,
-} from '@kbn/core-security-server';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
