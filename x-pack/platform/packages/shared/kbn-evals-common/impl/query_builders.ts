@@ -139,7 +139,7 @@ export const buildExampleScoresQuery = (
   options?: { spaceId?: string; datasetId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
-  if (options?.datasetId) {
+  if (options?.datasetId !== undefined) {
     must.push({ term: { 'example.dataset.id': options.datasetId } });
   }
   if (options?.spaceId) {
