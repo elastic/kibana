@@ -7,7 +7,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux';
 import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
 import { CREATED_BY_SELECT_TEST_ID } from './test_ids';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
