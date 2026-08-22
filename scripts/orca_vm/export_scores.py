@@ -100,4 +100,9 @@ if __name__ == "__main__":
         raise SystemExit("usage: export_scores.py <eis-model-id>")
     model = sys.argv[1]
     count = export_model(model)
-    raise SystemExit(0 if count == 252 else 1)
+    # Transport-level check only: >0 docs landed. Exact-count validation
+    # (21 examples x (evaluators + 1) x reps) happens in the sweep
+    # controller's golden gate, which derives the evaluator count live from
+    # the VM's Scout summary — the hardcoded 252 here went stale when the
+    # suite grew to 14 docs/example (21x14=294).
+    raise SystemExit(0 if count > 0 else 1)
