@@ -55,7 +55,7 @@ export const queryKeys = {
   examples: {
     all: ['evals', 'examples'] as const,
     scores: (exampleId: string, datasetId?: string) =>
-      ['evals', 'examples', 'scores', exampleId, datasetId] as const,
+      ['evals', 'examples', 'scores', exampleId, datasetId ?? null] as const,
   },
   traces: {
     all: ['evals', 'traces'] as const,
