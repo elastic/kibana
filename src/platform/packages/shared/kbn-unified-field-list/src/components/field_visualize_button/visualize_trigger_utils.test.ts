@@ -9,7 +9,7 @@
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getVisualizeInformation } from './visualize_trigger_utils';
+import { getVisualizeInformation, triggerVisualizeActions } from './visualize_trigger_utils';
 
 const field = {
   name: 'fieldName',
@@ -127,6 +127,39 @@ describe('visualize_trigger_utils', () => {
       );
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'multi2');
+    });
+  });
+
+  describe('triggerVisualizeActions', () => {
+    it('should not include openInNewTab in the context by default', () => {
+      const executeTriggerActions = jest.fn();
+      const uiActionsStart = { executeTriggerActions } as unknown as UiActionsStart;
+
+      triggerVisualizeActions(uiActionsStart, field, ['bytes'], 'testApp', dataViewMock);
+
+      expect(executeTriggerActions).toHaveBeenCalledWith('VISUALIZE_FIELD_TRIGGER', {
+        dataViewSpec: {},
+        fieldName: 'fieldName',
+        contextualFields: ['bytes'],
+        originatingApp: 'testApp',
+      });
+    });
+
+    it('should include openInNewTab in the context when requested', () => {
+      const executeTriggerActions = jest.fn();
+      const uiActionsStart = { executeTriggerActions } as unknown as UiActionsStart;
+
+      triggerVisualizeActions(uiActionsStart, field, ['bytes'], 'testApp', dataViewMock, {
+        openInNewTab: true,
+      });
+
+      expect(executeTriggerActions).toHaveBeenCalledWith('VISUALIZE_FIELD_TRIGGER', {
+        dataViewSpec: {},
+        fieldName: 'fieldName',
+        contextualFields: ['bytes'],
+        originatingApp: 'testApp',
+        openInNewTab: true,
+      });
     });
   });
 });
