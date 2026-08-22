@@ -114,7 +114,12 @@ describe('createEntityStoreEnrichment', () => {
         fields: ['entity.id', 'entity.risk.calculated_level'],
       })
     );
-    expect(result).toEqual({ '1': [expect.any(Function), enrichFn] });
+    // Event '2' has a derivable EUID (host:no-match) that is not in the store, so it still
+    // receives the EUID stamp function even though no risk enrichment is appended.
+    expect(result).toEqual({
+      '1': [expect.any(Function), enrichFn],
+      '2': [expect.any(Function)],
+    });
   });
 
   it('enriches all events sharing the same EUID', async () => {
