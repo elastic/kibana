@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiListGroup, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiListGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta } from '@kbn/discover-utils';
@@ -102,19 +102,19 @@ const buildSortActions = ({
 
   const ascLabel =
     currentDirection === 'asc'
-      ? i18n.translate('unifiedDataTable.grid.unsortAscending', {
+      ? i18n.translate('discover.grid.tanStack.unsortAscendingButtonLabel', {
           defaultMessage: 'Unsort ascending',
         })
-      : i18n.translate('unifiedDataTable.grid.sortAscending', {
+      : i18n.translate('discover.grid.tanStack.sortAscendingButtonLabel', {
           defaultMessage: 'Sort ascending',
         });
 
   const descLabel =
     currentDirection === 'desc'
-      ? i18n.translate('unifiedDataTable.grid.unsortDescending', {
+      ? i18n.translate('discover.grid.tanStack.unsortDescendingButtonLabel', {
           defaultMessage: 'Unsort descending',
         })
-      : i18n.translate('unifiedDataTable.grid.sortDescending', {
+      : i18n.translate('discover.grid.tanStack.sortDescendingButtonLabel', {
           defaultMessage: 'Sort descending',
         });
 
@@ -173,7 +173,8 @@ export const buildTanStackColumnHeaderActions = ({
   const columnDisplayName = getColumnDisplayName(
     columnId,
     dataViewField?.displayName,
-    settings?.columns?.[columnId]?.display
+    settings?.columns?.[columnId]?.display,
+    'summary'
   );
   const columnSchema = getSchemaByKbnType(dataViewField?.type);
   const columnIsSortable =
@@ -192,7 +193,7 @@ export const buildTanStackColumnHeaderActions = ({
     actions.push(
       wrapAction(
         {
-          label: i18n.translate('unifiedDataTable.removeColumnLabel', {
+          label: i18n.translate('discover.grid.tanStack.removeColumnButtonLabel', {
             defaultMessage: 'Remove column',
           }),
           iconType: 'cross',
@@ -222,7 +223,7 @@ export const buildTanStackColumnHeaderActions = ({
       actions.push(
         wrapAction(
           {
-            label: i18n.translate('unifiedDataTable.grid.moveColumnLeftButton', {
+            label: i18n.translate('discover.grid.tanStack.moveColumnLeftButtonLabel', {
               defaultMessage: 'Move left',
             }),
             iconType: 'sortLeft',
@@ -246,7 +247,7 @@ export const buildTanStackColumnHeaderActions = ({
       actions.push(
         wrapAction(
           {
-            label: i18n.translate('unifiedDataTable.grid.moveColumnRightButton', {
+            label: i18n.translate('discover.grid.tanStack.moveColumnRightButtonLabel', {
               defaultMessage: 'Move right',
             }),
             iconType: 'sortRight',
@@ -271,8 +272,7 @@ export const buildTanStackColumnHeaderActions = ({
     actions.push(
       wrapAction(
         {
-          key: 'reset-width',
-          label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
+          label: i18n.translate('discover.grid.tanStack.resetColumnWidthButtonLabel', {
             defaultMessage: 'Reset width',
           }),
           iconType: 'refresh',
@@ -353,28 +353,36 @@ export const TanStackColumnHeaderActions = React.memo(
       return null;
     }
 
+    const actionsButtonLabel = i18n.translate(
+      'discover.grid.tanStack.columnActionsButtonAriaLabel',
+      {
+        defaultMessage: '{columnName}. Click to view column header actions.',
+        values: { columnName: columnDisplayName },
+      }
+    );
+
     return (
       <EuiPopover
+        aria-label={actionsButtonLabel}
         display="block"
         panelPaddingSize="s"
         offset={7}
         anchorPosition="downRight"
         button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            iconSize="s"
-            color="text"
-            css={headerActionsCss}
-            aria-label={i18n.translate('unifiedDataTable.grid.columnActionsButtonAriaLabel', {
-              defaultMessage: '{columnName}. Click to view column header actions.',
-              values: { columnName: columnDisplayName },
-            })}
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsOpen((open) => !open);
-            }}
-            data-test-subj={`dataGridHeaderCellActionButton-${columnId}`}
-          />
+          <EuiToolTip content={actionsButtonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              iconSize="s"
+              color="text"
+              css={headerActionsCss}
+              aria-label={actionsButtonLabel}
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                event.stopPropagation();
+                setIsOpen((open) => !open);
+              }}
+              data-test-subj={`dataGridHeaderCellActionButton-${columnId}`}
+            />
+          </EuiToolTip>
         }
         isOpen={isOpen}
         closePopover={closePopover}

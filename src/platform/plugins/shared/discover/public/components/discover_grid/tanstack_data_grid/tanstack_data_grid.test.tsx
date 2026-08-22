@@ -8,10 +8,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { dataViewMock, dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  dataViewMockWithTimeField,
+  esHitsMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { TanStackDataGrid } from './tanstack_data_grid';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
@@ -21,9 +25,7 @@ import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
 const [expandedDoc] = rows;
 
-const renderGrid = (
-  override: Partial<React.ComponentProps<typeof TanStackDataGrid>> = {}
-) => {
+const renderGrid = (override: Partial<React.ComponentProps<typeof TanStackDataGrid>> = {}) => {
   const props: React.ComponentProps<typeof TanStackDataGrid> = {
     rows,
     columns: ['message'],
@@ -172,5 +174,72 @@ describe('TanStackDataGrid summary column row height', () => {
     expect(screen.getByTestId('tanstackGridWrapper')).toHaveStyle({
       '--tsg-body-max-lines': 'none',
     });
+  });
+});
+
+describe('TanStackDataGrid EUI parity', () => {
+  it('keeps selection checked and exposes the selected documents toolbar', () => {
+    renderGrid({ expandedDoc: undefined });
+
+    const selectAllCheckbox = screen.getByRole('checkbox');
+    fireEvent.click(selectAllCheckbox);
+
+    expect(selectAllCheckbox).toBeChecked();
+    expect(screen.getByTestId('unifiedDataTableSelectionBtn')).toHaveTextContent(
+      String(rows.length)
+    );
+  });
+
+  it('renders the EUI-style summary and toolbar header controls', () => {
+    renderGrid({
+      columns: ['_source'],
+      dataView: dataViewMockWithTimeField,
+      showTimeCol: true,
+      expandedDoc: undefined,
+      toolbarLeftSide: <div data-test-subj="toolbarLeftSide">2 documents | View as</div>,
+    });
+
+    expect(screen.getByTestId('toolbarLeftSide')).toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridColumnSortingButton')).toBeInTheDocument();
+  });
+
+  it('groups profile-provided controls in the leading actions column', () => {
+    renderGrid({
+      expandedDoc: undefined,
+      rowAdditionalLeadingControls: [
+        {
+          id: 'customAction',
+          render: (Control) => (
+            <Control iconType="starEmpty" label="Custom action" onClick={jest.fn()} />
+          ),
+        },
+      ],
+    });
+
+    expect(screen.getByRole('grid')).toHaveAttribute('aria-colcount', '3');
+  });
+
+  it('uses the EUI full-screen class and reports full-screen changes', () => {
+    const onFullScreenChange = jest.fn();
+    renderGrid({ expandedDoc: undefined, onFullScreenChange });
+
+    fireEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+    expect(screen.getByTestId('tanstackGridWrapper')).toHaveClass('euiDataGrid--fullScreen');
+    expect(onFullScreenChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('shows the shared sample-size setting', () => {
+    renderGrid({
+      expandedDoc: undefined,
+      sampleSizeState: 500,
+      onUpdateSampleSize: jest.fn(),
+    });
+
+    fireEvent.click(screen.getByTestId('dataGridDensityButton'));
+
+    expect(screen.getAllByTestId('unifiedDataTableSampleSizeInput')).toHaveLength(2);
   });
 });

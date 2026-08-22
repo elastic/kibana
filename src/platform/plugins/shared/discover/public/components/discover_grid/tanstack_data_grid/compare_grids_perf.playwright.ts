@@ -19,13 +19,11 @@
 
 /* eslint-disable no-console, import/no-extraneous-dependencies */
 
-import fs from 'fs';
 import path from 'path';
 import { test, expect, type CDPSession, type Page } from '@playwright/test';
+import { writeFileSync } from '@kbn/fs';
 
 const KIBANA_URL = process.env.KIBANA_URL ?? 'http://localhost:5601';
-const KIBANA_USER = process.env.KIBANA_USER ?? 'elastic';
-const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
 /** Same synthetic dataset for both grids; implementation is selected via the density popover switch. */
 const ROW_BASE = 'ROW a=1,b="hello",c=3.14,d="x",e="y",f=42,g="more",h="data" // 200x';
@@ -184,9 +182,9 @@ const measureGrid = async (
   }
 
   if (grid === 'TanStackDataGrid') {
-    await expect(page.getByText('TanStack Grid')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId('tanstackGridWrapper')).toBeVisible({ timeout: 60_000 });
   } else {
-    await expect(page.getByText('TanStack Grid')).toHaveCount(0, { timeout: 30_000 });
+    await expect(page.getByTestId('tanstackGridWrapper')).toHaveCount(0, { timeout: 30_000 });
     await expect(page.locator('[role="grid"]').first()).toBeVisible({ timeout: 60_000 });
   }
 
@@ -287,7 +285,7 @@ test.describe('Grid A/B performance comparison', () => {
     };
 
     const outPath = path.join(__dirname, 'compare_grids_perf.results.json');
-    fs.writeFileSync(outPath, JSON.stringify(results, null, 2));
+    writeFileSync(outPath, JSON.stringify(results, null, 2));
     console.log(`\nWrote ${outPath}`);
 
     expect(tanstack.domInitial.rowCount).toBeGreaterThan(0);

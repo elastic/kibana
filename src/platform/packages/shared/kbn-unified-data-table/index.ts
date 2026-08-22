@@ -18,9 +18,18 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
+export {
+  UnifiedDataTableAdditionalDisplaySettings,
+  type UnifiedDataTableAdditionalDisplaySettingsProps,
+} from './src/components/data_table_additional_display_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
-export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE, defaultTimeColumnWidth } from './src/constants';
+export {
+  ROWS_HEIGHT_OPTIONS,
+  DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
+  defaultTimeColumnWidth,
+} from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
@@ -43,7 +52,12 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { getDataGridDensity, getDataGridDensityPadding, useDataGridDensity, DATA_GRID_DENSITY_STYLE_MAP } from './src/hooks/use_data_grid_density';
+export {
+  getDataGridDensity,
+  getDataGridDensityPadding,
+  useDataGridDensity,
+  DATA_GRID_DENSITY_STYLE_MAP,
+} from './src/hooks/use_data_grid_density';
 export { getRowHeight, useRowHeight, RowHeightType } from './src/hooks/use_row_height';
 export { RowHeightMode } from './src/components/row_height_settings';
 

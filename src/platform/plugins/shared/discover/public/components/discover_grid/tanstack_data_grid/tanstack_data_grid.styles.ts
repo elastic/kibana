@@ -10,12 +10,11 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const CONTROL_COL_WIDTH = 40;
-export const SELECT_COL_WIDTH = 32;
+export const CONTROL_COL_WIDTH = 24;
+export const SELECT_COL_WIDTH = 24;
 export const DEFAULT_COL_WIDTH = 180;
 export const MIN_COL_WIDTH = 60;
 const RESIZE_HANDLE_WIDTH = 4;
-const ROW_HEIGHT_PX = 34;
 
 export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   wrapper: css({
@@ -23,6 +22,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     flexDirection: 'column',
     height: '100%',
     width: '100%',
+    minHeight: 0,
+    overflow: 'hidden',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
   }),
 
@@ -30,17 +31,26 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     display: 'flex',
     alignItems: 'center',
     gap: euiTheme.size.s,
-    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-    borderBottom: euiTheme.border.thin,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
     flexShrink: 0,
     minHeight: 40,
+    zIndex: 3,
+    '@media (max-width: 575px)': {
+      gap: euiTheme.size.xs,
+      padding: euiTheme.size.xs,
+      '.euiDataGridToolbarControl .euiButtonEmpty__text': {
+        display: 'none',
+      },
+    },
   }),
 
   contentArea: css({
     display: 'flex',
     flex: 1,
     minHeight: 0,
+    minWidth: 0,
+    overflow: 'hidden',
   }),
 
   scrollContainer: css({
@@ -49,6 +59,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     position: 'relative',
     willChange: 'scroll-position',
     minWidth: 0,
+    height: '100%',
+    overscrollBehavior: 'contain',
   }),
 
   // Header
@@ -60,7 +72,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     width: '100%',
     minWidth: 0,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderBottom: `2px solid ${euiTheme.colors.borderBaseFormsControl}`,
+    borderBottom: euiTheme.border.thin,
   }),
 
   headerCell: css({
@@ -86,16 +98,16 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     },
   }),
 
-  headerCellText: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    flex: 1,
-    minWidth: 0,
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical',
-    WebkitLineClamp: 'var(--tsg-header-max-lines, 1)',
-    wordBreak: 'break-word',
-  }),
+  headerCellText: css`
+    display: -webkit-box;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--tsg-header-max-lines, 1);
+  `,
 
   headerCellTextAuto: css({
     overflow: 'hidden',
@@ -137,7 +149,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   resizeHandleActive: css({
     '&::after': {
-      backgroundColor: euiTheme.colors.borderBaseFormsControl,
+      backgroundColor: euiTheme.colors.borderBasePlain,
     },
   }),
 
@@ -190,18 +202,18 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     '&:last-child': { borderRight: 'none' },
   }),
 
-  cellContent: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    minWidth: 0,
-    width: '100%',
-    flex: 1,
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical',
-    WebkitLineClamp: 'var(--tsg-body-max-lines, 1)',
-    wordBreak: 'break-word',
-    whiteSpace: 'normal',
-  }),
+  cellContent: css`
+    display: -webkit-box;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--tsg-body-max-lines, 1);
+  `,
 
   cellContentAuto: css({
     minWidth: 0,
@@ -257,14 +269,14 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     },
   }),
 
-  summaryCellContent: css({
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical',
-    WebkitLineClamp: 'var(--tsg-body-max-lines, 1)',
-    overflow: 'hidden',
-    width: '100%',
-    minWidth: 0,
-  }),
+  summaryCellContent: css`
+    display: -webkit-box;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--tsg-body-max-lines, 1);
+  `,
 
   summaryCellContentAuto: css({
     width: '100%',
@@ -443,24 +455,37 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     alignItems: 'center',
     gap: euiTheme.size.xs,
     marginLeft: 'auto',
+    minWidth: 0,
   }),
 
-  selectionBar: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.s,
-    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-    borderBottom: euiTheme.border.thin,
-    backgroundColor: `${euiTheme.colors.primary}10`,
+  toolbarControlGroup: css({
+    position: 'relative',
+    overflow: 'hidden',
+    border: euiTheme.border.thin,
+    borderRadius: euiTheme.border.radius.small,
+    display: 'inline-flex',
+    alignItems: 'stretch',
     flexShrink: 0,
-    minHeight: 36,
+    '> *': {
+      inlineSize: euiTheme.size.xl,
+      blockSize: euiTheme.size.xl,
+      borderRadius: 0,
+    },
+    '> * + *': {
+      borderInlineStart: euiTheme.border.thin,
+    },
+    '.euiToolTipAnchor': {
+      display: 'inline-flex',
+    },
   }),
 
   // -- Full screen mode --
   fullScreen: css({
     position: 'fixed',
     inset: 0,
-    zIndex: 999,
+    width: '100dvw',
+    height: '100dvh',
+    zIndex: euiTheme.levels.mask,
     backgroundColor: euiTheme.colors.backgroundBasePlain,
   }),
 

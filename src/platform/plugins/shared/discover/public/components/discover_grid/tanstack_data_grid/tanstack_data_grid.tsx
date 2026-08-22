@@ -23,26 +23,28 @@ import {
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiDataGridToolbarControl,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiPopover,
   EuiProgress,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
   keys,
   useEuiTheme,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
+import type { DataTableRecord, DataTableColumnsMeta, RowControlProps } from '@kbn/discover-utils';
 import {
   getShouldShowFieldHandler,
   formatFieldValueText,
@@ -51,11 +53,11 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
 import {
   SourceDocument,
   DataLoadingState,
   getDisplayedColumns,
-  RowHeightSettings,
   ROWS_HEIGHT_OPTIONS,
   DataGridDensity,
   DATA_GRID_DENSITY_STYLE_MAP,
@@ -63,11 +65,19 @@ import {
   useRowHeight,
   RowHeightType,
   SOURCE_COLUMN,
+  UnifiedDataTableSourceColumnHeader,
+  UnifiedDataTableAdditionalDisplaySettings,
+  convertValueToString,
+  getColumnDisplayName,
+  getSchemaByKbnType,
+  isSortable,
   type UnifiedDataTableProps,
   type SortOrder,
   type RenderDocumentViewMeta,
+  type ValueToStringConverter,
 } from '@kbn/unified-data-table';
 import type { AggregateQuery } from '@kbn/es-query';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   getTanStackDataGridStyles,
   CONTROL_COL_WIDTH,
@@ -78,18 +88,11 @@ import {
 import {
   computeTanStackColumnLayout,
   getTimeColumnWidth,
+  type TanStackDataColumnDescriptor,
   type TanStackColumnLayout,
 } from './tanstack_column_layout';
 import { TanStackColumnHeaderActions } from './tanstack_column_header_actions';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import {
-  convertValueToString,
-  getColumnDisplayName,
-  getSchemaByKbnType,
-  isSortable,
-  type ValueToStringConverter,
-} from '@kbn/unified-data-table';
+import type { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -137,12 +140,17 @@ export interface TanStackDataGridProps {
   headerRowHeightState?: UnifiedDataTableProps['headerRowHeightState'];
   onUpdateHeaderRowHeight?: UnifiedDataTableProps['onUpdateHeaderRowHeight'];
   configHeaderRowHeight?: UnifiedDataTableProps['configHeaderRowHeight'];
+  maxAllowedSampleSize?: UnifiedDataTableProps['maxAllowedSampleSize'];
+  sampleSizeState?: UnifiedDataTableProps['sampleSizeState'];
+  onUpdateSampleSize?: UnifiedDataTableProps['onUpdateSampleSize'];
+  onFullScreenChange?: UnifiedDataTableProps['onFullScreenChange'];
   services: UnifiedDataTableProps['services'];
   onFieldEdited?: UnifiedDataTableProps['onFieldEdited'];
   shouldKeepAdHocDataViewImmutable?: UnifiedDataTableProps['shouldKeepAdHocDataViewImmutable'];
   consumer?: UnifiedDataTableProps['consumer'];
   externalAdditionalControls?: React.ReactNode;
   gridImplementationSwitch?: React.ReactNode;
+  toolbarLeftSide?: React.ReactNode;
 }
 
 interface DensityConfig {
@@ -151,7 +159,6 @@ interface DensityConfig {
   fontSize: number;
   cellPaddingV: number;
   cellPaddingH: number;
-  label: string;
   icon: string;
 }
 
@@ -162,7 +169,6 @@ const DENSITY_CONFIG: Record<DataGridDensity, DensityConfig> = {
     fontSize: 12,
     cellPaddingV: 2,
     cellPaddingH: 6,
-    label: 'Compact',
     icon: 'menuLeft',
   },
   [DataGridDensity.NORMAL]: {
@@ -171,7 +177,6 @@ const DENSITY_CONFIG: Record<DataGridDensity, DensityConfig> = {
     fontSize: 14,
     cellPaddingV: 4,
     cellPaddingH: 8,
-    label: 'Normal',
     icon: 'menu',
   },
   [DataGridDensity.EXPANDED]: {
@@ -180,15 +185,32 @@ const DENSITY_CONFIG: Record<DataGridDensity, DensityConfig> = {
     fontSize: 14,
     cellPaddingV: 8,
     cellPaddingH: 12,
-    label: 'Expanded',
     icon: 'menuRight',
   },
 };
 
 const DENSITY_BUTTONS = [
-  { id: DataGridDensity.COMPACT, label: 'Compact', iconType: 'menuLeft' },
-  { id: DataGridDensity.NORMAL, label: 'Normal', iconType: 'menu' },
-  { id: DataGridDensity.EXPANDED, label: 'Expanded', iconType: 'menuRight' },
+  {
+    id: DataGridDensity.COMPACT,
+    label: i18n.translate('discover.grid.tanStack.compactDensityButtonLabel', {
+      defaultMessage: 'Compact',
+    }),
+    iconType: 'menuLeft',
+  },
+  {
+    id: DataGridDensity.NORMAL,
+    label: i18n.translate('discover.grid.tanStack.normalDensityButtonLabel', {
+      defaultMessage: 'Normal',
+    }),
+    iconType: 'menu',
+  },
+  {
+    id: DataGridDensity.EXPANDED,
+    label: i18n.translate('discover.grid.tanStack.expandedDensityButtonLabel', {
+      defaultMessage: 'Expanded',
+    }),
+    iconType: 'menuRight',
+  },
 ];
 
 const OVERSCAN = 20;
@@ -667,7 +689,9 @@ const VirtualRow = React.memo(
       focusedColIndex: number | null;
       rowIndex: number;
       onFilter?: UnifiedDataTableProps['onFilter'];
-      setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
+      setPopoverState?: (
+        state: { fieldName: string; value: unknown; rect: DOMRect } | null
+      ) => void;
       findTerm?: string;
       findActiveMatch?: FindMatch | null;
       getColumnStyle: TanStackColumnLayout['getColumnStyle'];
@@ -727,6 +751,7 @@ const VirtualRow = React.memo(
               findActiveMatch={findActiveMatch}
               rowIndex={virtualRow.index}
               getColumnStyle={getColumnStyle}
+              isRowSelected={isSelected}
             />
           ))}
         </div>
@@ -749,6 +774,7 @@ const VirtualCell = React.memo(
     findActiveMatch,
     rowIndex,
     getColumnStyle,
+    isRowSelected,
   }: {
     cell: Cell<DataTableRecord, unknown>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
@@ -760,6 +786,7 @@ const VirtualCell = React.memo(
     findActiveMatch?: FindMatch | null;
     rowIndex?: number;
     getColumnStyle: TanStackColumnLayout['getColumnStyle'];
+    isRowSelected: boolean;
   }) => {
     const isControl = cell.column.columnDef.meta?.isControl;
     const isSelect = cell.column.columnDef.meta?.isSelect;
@@ -774,8 +801,12 @@ const VirtualCell = React.memo(
       return (
         <div
           css={[isSelect ? styles.selectCell : styles.controlCell, isFocused && styles.focusedCell]}
-          style={{ width: isSelect ? SELECT_COL_WIDTH : CONTROL_COL_WIDTH, flexShrink: 0 }}
+          style={{
+            width: isSelect ? SELECT_COL_WIDTH : cell.column.getSize(),
+            flexShrink: 0,
+          }}
           role="gridcell"
+          aria-selected={isSelect ? isRowSelected : undefined}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </div>
@@ -950,12 +981,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     headerRowHeightState,
     onUpdateHeaderRowHeight,
     configHeaderRowHeight,
+    maxAllowedSampleSize,
+    sampleSizeState = 500,
+    onUpdateSampleSize,
+    onFullScreenChange,
     services,
     onFieldEdited,
     shouldKeepAdHocDataViewImmutable,
     consumer = 'discover',
     externalAdditionalControls,
     gridImplementationSwitch,
+    toolbarLeftSide,
   }) => {
     const { euiTheme } = useEuiTheme();
     const { fieldFormats, storage, toastNotifications, dataViewFieldEditor, data } = services;
@@ -970,7 +1006,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [findTerm, setFindTerm] = useState('');
     const [findActiveIndex, setFindActiveIndex] = useState(0);
 
-    const displayedColumns = useMemo(() => getDisplayedColumns(columns, dataView), [columns, dataView]);
+    const displayedColumns = useMemo(
+      () => getDisplayedColumns(columns, dataView),
+      [columns, dataView]
+    );
 
     const shouldPrependTimeFieldColumn = useMemo(
       () =>
@@ -984,8 +1023,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       [columnsMeta, displayedColumns, isPlainRecord, showTimeCol, timeFieldName]
     );
 
-    const isSummaryMode =
-      displayedColumns.length === 1 && displayedColumns[0] === SOURCE_COLUMN_ID;
+    const isSummaryMode = displayedColumns.length === 1 && displayedColumns[0] === SOURCE_COLUMN_ID;
 
     // STATS ... BY column reordering
     const statsByInfo = useMemo(
@@ -1072,7 +1110,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     // ── Full-screen mode ──
     const [isFullScreen, setIsFullScreen] = useState(false);
-    const toggleFullScreen = useCallback(() => setIsFullScreen((prev) => !prev), []);
+    const toggleFullScreen = useCallback(() => {
+      setIsFullScreen((previousIsFullScreen) => {
+        const nextIsFullScreen = !previousIsFullScreen;
+        onFullScreenChange?.(nextIsFullScreen);
+        return nextIsFullScreen;
+      });
+    }, [onFullScreenChange]);
 
     // ── Grid density (shared with UnifiedDataTable) ──
     const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
@@ -1082,6 +1126,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       onUpdateDataGridDensity,
     });
     const [isDensityPopoverOpen, setIsDensityPopoverOpen] = useState(false);
+    const [isColumnsPopoverOpen, setIsColumnsPopoverOpen] = useState(false);
+    const [isSortPopoverOpen, setIsSortPopoverOpen] = useState(false);
+    const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
     const densityCfg = DENSITY_CONFIG[dataGridDensity];
 
     const {
@@ -1101,22 +1148,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       onUpdateRowHeight: onUpdateHeaderRowHeight,
     });
 
-    const {
-      rowHeight,
-      rowHeightLines,
-      lineCountInput,
-      onChangeRowHeight,
-      onChangeRowHeightLines,
-    } = useRowHeight({
-      type: RowHeightType.row,
-      storage,
-      consumer,
-      key: 'dataGridRowHeight',
-      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
-      configRowHeight,
-      rowHeightState,
-      onUpdateRowHeight,
-    });
+    const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
+      useRowHeight({
+        type: RowHeightType.row,
+        storage,
+        consumer,
+        key: 'dataGridRowHeight',
+        defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+        configRowHeight,
+        rowHeightState,
+        onUpdateRowHeight,
+      });
 
     const isAutoRowHeight = rowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
     const isAutoHeaderRowHeight = headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto;
@@ -1332,6 +1374,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       [dataViewFieldEditor]
     );
 
+    const actionsColumnWidth =
+      CONTROL_COL_WIDTH +
+      (rowAdditionalLeadingControls?.reduce(
+        (width, control) => width + (control.width ?? CONTROL_COL_WIDTH),
+        0
+      ) ?? 0);
+
     // ── Build TanStack column defs ──
     const tanstackColumns: ColumnDef<DataTableRecord>[] = useMemo(() => {
       const defs: ColumnDef<DataTableRecord>[] = [];
@@ -1354,44 +1403,95 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               checked={selectedRowsRef.current.has(record.id)}
               onChange={() => toggleSelectRowRef.current(record.id)}
               aria-label={`Select row ${row.index + 1}`}
-              compressed
             />
           );
         },
       });
 
-      // Expand column
+      // Actions column: details and profile-provided row actions.
       defs.push({
         id: EXPAND_COLUMN_ID,
-        header: '',
-        size: CONTROL_COL_WIDTH,
-        minSize: CONTROL_COL_WIDTH,
-        maxSize: CONTROL_COL_WIDTH,
+        header: () => (
+          <EuiIconTip
+            type="info"
+            content={i18n.translate('discover.grid.tanStack.actionsColumnTooltip', {
+              defaultMessage: 'Actions',
+            })}
+          />
+        ),
+        size: actionsColumnWidth,
+        minSize: actionsColumnWidth,
+        maxSize: actionsColumnWidth,
         enableResizing: false,
         enableSorting: false,
         meta: { isControl: true },
         cell: function ExpandCell({ row }) {
           const record = row.original;
           const isExp = expandedDocRef.current?.id === record.id;
-          return (
-            <EuiToolTip content="Toggle document details" disableScreenReaderOutput>
+          const rowProps = { record, rowIndex: row.index };
+          const availableControls =
+            rowAdditionalLeadingControls?.filter(
+              (control) => control.isAvailable?.(rowProps) ?? true
+            ) ?? [];
+          const Control: React.FC<RowControlProps> = ({
+            color,
+            'data-test-subj': dataTestSubj,
+            disabled,
+            iconType,
+            label,
+            onClick,
+            tooltipContent,
+            ...controlProps
+          }) => {
+            const button = (
               <EuiButtonIcon
-                size="xs"
+                {...controlProps}
+                aria-label={label}
+                color={color ?? 'text'}
+                data-test-subj={dataTestSubj}
+                disabled={disabled}
                 iconSize="s"
-                aria-label="Toggle document details"
-                data-test-subj="docTableExpandToggleColumn"
-                onClick={() => toggleExpandDocRef.current(record)}
-                onKeyDown={(e: React.KeyboardEvent) => {
-                  if (e.key === keys.ENTER || e.key === keys.SPACE) {
-                    e.preventDefault();
-                    toggleExpandDocRef.current(record);
-                  }
-                }}
-                color={isExp ? 'primary' : 'text'}
-                iconType={isExp ? 'minimize' : 'expand'}
-                isSelected={isExp}
+                iconType={iconType}
+                size="xs"
+                onClick={() => onClick?.(rowProps)}
               />
-            </EuiToolTip>
+            );
+
+            return tooltipContent ? (
+              <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
+            ) : (
+              button
+            );
+          };
+
+          return (
+            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center" wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="Toggle document details" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="xs"
+                    iconSize="s"
+                    aria-label="Toggle document details"
+                    data-test-subj="docTableExpandToggleColumn"
+                    onClick={() => toggleExpandDocRef.current(record)}
+                    onKeyDown={(event: React.KeyboardEvent) => {
+                      if (event.key === keys.ENTER || event.key === keys.SPACE) {
+                        event.preventDefault();
+                        toggleExpandDocRef.current(record);
+                      }
+                    }}
+                    color={isExp ? 'primary' : 'text'}
+                    iconType={isExp ? 'minimize' : 'expand'}
+                    isSelected={isExp}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              {availableControls.map((control) => (
+                <EuiFlexItem key={control.id} grow={false}>
+                  {control.render(Control, rowProps)}
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           );
         },
       });
@@ -1414,7 +1514,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
         defs.push({
           id: SOURCE_COLUMN_ID,
-          header: 'Summary',
+          header: () => (
+            <UnifiedDataTableSourceColumnHeader headerRowHeight={headerRowHeightLines} />
+          ),
           size: 1,
           minSize: 0,
           enableResizing: false,
@@ -1498,9 +1600,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       isPlainRecord,
       columnSizing,
       timeFieldName,
+      rowAdditionalLeadingControls,
+      headerRowHeightLines,
+      actionsColumnWidth,
     ]);
 
-    const dataColumns = useMemo(() => {
+    const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {
       if (isSummaryMode) {
         const cols: Array<{ id: string; isSummary?: boolean; isTimestamp?: boolean }> = [];
         if (showTimeCol && timeFieldName) {
@@ -1540,8 +1645,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           timeFieldName: showTimeCol ? timeFieldName : undefined,
           columnSizing,
           settings,
+          leadingControlColumnsWidth: SELECT_COL_WIDTH + actionsColumnWidth,
         }),
-      [containerWidth, dataColumns, columnSizing, settings, showTimeCol, timeFieldName]
+      [
+        actionsColumnWidth,
+        containerWidth,
+        dataColumns,
+        columnSizing,
+        settings,
+        showTimeCol,
+        timeFieldName,
+      ]
     );
 
     // ── React Table instance ──
@@ -1773,6 +1887,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     return (
       <div
         ref={wrapperRef}
+        className={isFullScreen ? 'euiDataGrid--fullScreen' : undefined}
         css={[styles.wrapper, isFullScreen && styles.fullScreen]}
         style={densityVars}
         data-test-subj="tanstackGridWrapper"
@@ -1791,16 +1906,88 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         )}
         {/* Toolbar */}
         <div css={styles.toolbar}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="accent">TanStack Grid</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                {rows.length.toLocaleString()} rows
-                {isSummaryMode ? ' · Summary' : ` · ${effectiveColumns.length} columns`}
-              </EuiText>
-            </EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+            {toolbarLeftSide && <EuiFlexItem grow={false}>{toolbarLeftSide}</EuiFlexItem>}
+            {selectedRows.size > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  aria-label={i18n.translate(
+                    'discover.grid.tanStack.selectedDocumentsPopoverAriaLabel',
+                    { defaultMessage: 'Selected documents actions' }
+                  )}
+                  button={
+                    <EuiDataGridToolbarControl
+                      iconType="chevronSingleDown"
+                      iconSide="right"
+                      badgeContent={selectedRows.size}
+                      onClick={() => setIsSelectionPopoverOpen((isOpen) => !isOpen)}
+                      data-test-subj="unifiedDataTableSelectionBtn"
+                    >
+                      {i18n.translate('discover.grid.tanStack.selectedDocumentsButtonLabel', {
+                        defaultMessage: 'Selected',
+                      })}
+                    </EuiDataGridToolbarControl>
+                  }
+                  isOpen={isSelectionPopoverOpen}
+                  closePopover={() => setIsSelectionPopoverOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem
+                        key="copyAsTsv"
+                        icon="copyClipboard"
+                        onClick={() => {
+                          copySelectedAsText();
+                          setIsSelectionPopoverOpen(false);
+                        }}
+                      >
+                        {i18n.translate('discover.grid.tanStack.copyAsTsvButtonLabel', {
+                          defaultMessage: 'Copy as TSV',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="copyAsJson"
+                        icon="copyClipboard"
+                        onClick={() => {
+                          copySelectedAsJson();
+                          setIsSelectionPopoverOpen(false);
+                        }}
+                      >
+                        {i18n.translate('discover.grid.tanStack.copyAsJsonButtonLabel', {
+                          defaultMessage: 'Copy as JSON',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="copyAsMarkdown"
+                        icon="copyClipboard"
+                        onClick={() => {
+                          copySelectedAsMarkdown();
+                          setIsSelectionPopoverOpen(false);
+                        }}
+                      >
+                        {i18n.translate('discover.grid.tanStack.copyAsMarkdownButtonLabel', {
+                          defaultMessage: 'Copy as Markdown',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="clearSelection"
+                        icon="cross"
+                        onClick={() => {
+                          clearSelection();
+                          setIsSelectionPopoverOpen(false);
+                        }}
+                      >
+                        {i18n.translate('discover.grid.tanStack.clearSelectionButtonLabel', {
+                          defaultMessage: 'Clear selection',
+                        })}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
             {externalAdditionalControls && (
               <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
             )}
@@ -1811,108 +1998,171 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 R{focusedCell.row + 1}:C{focusedCell.col + 1}
               </EuiBadge>
             )}
-            <EuiToolTip content="Find in table" disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="search"
-                aria-label="Find in table"
-                size="xs"
-                onClick={() => setIsFindOpen((v) => !v)}
-                data-test-subj="dataGridFindInTableButton"
-              />
-            </EuiToolTip>
             <EuiPopover
-              aria-label="Grid density"
+              aria-label={i18n.translate('discover.grid.tanStack.columnsPopoverAriaLabel', {
+                defaultMessage: 'Visible columns',
+              })}
               button={
-                <EuiToolTip content="Grid density" disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType={densityCfg.icon}
-                    aria-label="Grid density"
-                    size="xs"
-                    onClick={() => setIsDensityPopoverOpen((v) => !v)}
-                    data-test-subj="dataGridDensityButton"
-                  />
-                </EuiToolTip>
+                <EuiDataGridToolbarControl
+                  iconType="list"
+                  badgeContent={dataColumns.length}
+                  onClick={() => setIsColumnsPopoverOpen((isOpen) => !isOpen)}
+                  data-test-subj="dataGridColumnSelectorButton"
+                >
+                  {i18n.translate('discover.grid.tanStack.columnsButtonLabel', {
+                    defaultMessage: 'Columns',
+                  })}
+                </EuiDataGridToolbarControl>
               }
-              isOpen={isDensityPopoverOpen}
-              closePopover={() => setIsDensityPopoverOpen(false)}
+              isOpen={isColumnsPopoverOpen}
+              closePopover={() => setIsColumnsPopoverOpen(false)}
+              panelPaddingSize="none"
               anchorPosition="downRight"
-              panelPaddingSize="s"
             >
-              <EuiText size="xs" css={{ marginBottom: 6, fontWeight: 600 }}>
-                Density
-              </EuiText>
-              <EuiButtonGroup
-                legend="Grid density"
-                options={DENSITY_BUTTONS}
-                idSelected={dataGridDensity}
-                onChange={(id) => {
-                  onChangeDataGridDensity(
-                    DATA_GRID_DENSITY_STYLE_MAP[id as DataGridDensity]
-                  );
-                }}
-                buttonSize="compressed"
-                isFullWidth
-                data-test-subj="dataGridDensityButtonGroup"
+              <EuiContextMenuPanel
+                items={dataColumns.map(({ id, isSummary, isTimestamp }) => (
+                  <EuiContextMenuItem
+                    key={id}
+                    icon="check"
+                    disabled={isSummary || isTimestamp}
+                    onClick={() => {
+                      persistVisibleColumns(effectiveColumns.filter((columnId) => columnId !== id));
+                      setIsColumnsPopoverOpen(false);
+                    }}
+                  >
+                    {id === SOURCE_COLUMN_ID
+                      ? i18n.translate('discover.grid.tanStack.summaryColumnLabel', {
+                          defaultMessage: 'Summary',
+                        })
+                      : id}
+                  </EuiContextMenuItem>
+                ))}
               />
-              <EuiSpacer size="s" />
-              {onChangeHeaderRowHeight && onChangeHeaderRowHeightLines && (
-                <RowHeightSettings
-                  label="Max header cell lines"
-                  rowHeight={headerRowHeight}
-                  lineCountInput={headerLineCountInput}
-                  onChangeRowHeight={onChangeHeaderRowHeight}
-                  onChangeLineCountInput={onChangeHeaderRowHeightLines}
-                  data-test-subj="unifiedDataTableHeaderRowHeightSettings"
-                  maxRowHeight={5}
-                />
-              )}
-              {onChangeRowHeight && onChangeRowHeightLines && (
-                <RowHeightSettings
-                  label="Body cell lines"
-                  rowHeight={rowHeight}
-                  lineCountInput={lineCountInput}
-                  onChangeRowHeight={onChangeRowHeight}
-                  onChangeLineCountInput={onChangeRowHeightLines}
-                  data-test-subj="unifiedDataTableRowHeightSettings"
-                />
-              )}
-              {gridImplementationSwitch}
             </EuiPopover>
-            <EuiToolTip
-              content={isFullScreen ? 'Exit full screen' : 'Full screen'}
-              disableScreenReaderOutput
+            <EuiPopover
+              aria-label={i18n.translate('discover.grid.tanStack.sortFieldsPopoverAriaLabel', {
+                defaultMessage: 'Sorted fields',
+              })}
+              button={
+                <EuiDataGridToolbarControl
+                  iconType="sortable"
+                  badgeContent={sort.length || undefined}
+                  onClick={() => setIsSortPopoverOpen((isOpen) => !isOpen)}
+                  data-test-subj="dataGridColumnSortingButton"
+                >
+                  {i18n.translate('discover.grid.tanStack.sortFieldsButtonLabel', {
+                    defaultMessage: 'Sort fields',
+                  })}
+                </EuiDataGridToolbarControl>
+              }
+              isOpen={isSortPopoverOpen}
+              closePopover={() => setIsSortPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
             >
-              <EuiButtonIcon
-                iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-                aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
-                size="xs"
-                onClick={toggleFullScreen}
-                data-test-subj="dataGridFullScreenButton"
+              <EuiContextMenuPanel
+                items={
+                  sort.length
+                    ? sort.map(([fieldName, direction]) => (
+                        <EuiContextMenuItem
+                          key={fieldName}
+                          icon={direction === 'asc' ? 'sortUp' : 'sortDown'}
+                          onClick={() => {
+                            onSort?.(
+                              sort.map(([id, currentDirection]) =>
+                                id === fieldName
+                                  ? [id, currentDirection === 'asc' ? 'desc' : 'asc']
+                                  : [id, currentDirection]
+                              )
+                            );
+                          }}
+                        >
+                          {fieldName}
+                        </EuiContextMenuItem>
+                      ))
+                    : [
+                        <EuiContextMenuItem key="noSort" disabled>
+                          {i18n.translate('discover.grid.tanStack.noSortFieldsLabel', {
+                            defaultMessage: 'No fields are sorted',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]
+                }
               />
-            </EuiToolTip>
+            </EuiPopover>
+            <div css={styles.toolbarControlGroup}>
+              <EuiToolTip content="Find in table" disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="search"
+                  aria-label="Find in table"
+                  size="xs"
+                  onClick={() => setIsFindOpen((v) => !v)}
+                  data-test-subj="dataGridFindInTableButton"
+                />
+              </EuiToolTip>
+              <EuiPopover
+                aria-label="Grid density"
+                button={
+                  <EuiToolTip content="Grid density" disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType={densityCfg.icon}
+                      aria-label="Grid density"
+                      size="xs"
+                      onClick={() => setIsDensityPopoverOpen((v) => !v)}
+                      data-test-subj="dataGridDensityButton"
+                    />
+                  </EuiToolTip>
+                }
+                isOpen={isDensityPopoverOpen}
+                closePopover={() => setIsDensityPopoverOpen(false)}
+                anchorPosition="downRight"
+                panelPaddingSize="s"
+              >
+                <UnifiedDataTableAdditionalDisplaySettings
+                  rowHeight={rowHeight}
+                  onChangeRowHeight={onChangeRowHeight}
+                  onChangeRowHeightLines={onChangeRowHeightLines}
+                  headerRowHeight={headerRowHeight}
+                  onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+                  onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+                  maxAllowedSampleSize={maxAllowedSampleSize}
+                  sampleSize={sampleSizeState}
+                  onChangeSampleSize={onUpdateSampleSize}
+                  lineCountInput={lineCountInput}
+                  headerLineCountInput={headerLineCountInput}
+                  densityControl={
+                    <EuiButtonGroup
+                      legend={i18n.translate('discover.grid.tanStack.gridDensityLegend', {
+                        defaultMessage: 'Grid density',
+                      })}
+                      options={DENSITY_BUTTONS}
+                      idSelected={dataGridDensity}
+                      onChange={(id) => {
+                        onChangeDataGridDensity(DATA_GRID_DENSITY_STYLE_MAP[id as DataGridDensity]);
+                      }}
+                      buttonSize="compressed"
+                      isFullWidth
+                      data-test-subj="dataGridDensityButtonGroup"
+                    />
+                  }
+                  additionalContent={gridImplementationSwitch}
+                />
+              </EuiPopover>
+              <EuiToolTip
+                content={isFullScreen ? 'Exit full screen' : 'Full screen'}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+                  aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
+                  size="xs"
+                  onClick={toggleFullScreen}
+                  data-test-subj="dataGridFullScreenButton"
+                />
+              </EuiToolTip>
+            </div>
           </div>
         </div>
-
-        {/* Selection bar */}
-        {selectedRows.size > 0 && (
-          <div css={styles.selectionBar} data-test-subj="selectionBar">
-            <EuiText size="xs">
-              <strong>{selectedRows.size}</strong> row{selectedRows.size !== 1 ? 's' : ''} selected
-            </EuiText>
-            <EuiButtonEmpty size="xs" onClick={copySelectedAsText} iconType="copyClipboard">
-              Copy as TSV
-            </EuiButtonEmpty>
-            <EuiButtonEmpty size="xs" onClick={copySelectedAsJson} iconType="copyClipboard">
-              Copy as JSON
-            </EuiButtonEmpty>
-            <EuiButtonEmpty size="xs" onClick={copySelectedAsMarkdown} iconType="copyClipboard">
-              Copy as Markdown
-            </EuiButtonEmpty>
-            <EuiButtonEmpty size="xs" onClick={clearSelection} iconType="cross" color="text">
-              Clear
-            </EuiButtonEmpty>
-          </div>
-        )}
 
         <div css={styles.contentArea}>
           {isEmpty ? (
@@ -1963,14 +2213,15 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       settings?.columns?.[colId]?.display ??
                         (typeof header.column.columnDef.header === 'string'
                           ? header.column.columnDef.header
-                          : undefined)
+                          : undefined),
+                      'summary'
                     );
                     const columnIndex = effectiveColumns.indexOf(colId);
 
                     const headerColumnStyle =
                       isSelect || isControl
                         ? {
-                            width: isSelect ? SELECT_COL_WIDTH : CONTROL_COL_WIDTH,
+                            width: isSelect ? SELECT_COL_WIDTH : header.column.getSize(),
                             flexShrink: 0,
                           }
                         : getColumnStyle({
@@ -1993,7 +2244,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                             indeterminate={someSelected}
                             onChange={toggleSelectAll}
                             aria-label="Select all rows"
-                            compressed
                           />
                         </div>
                       );
@@ -2011,6 +2261,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         ]}
                         style={headerColumnStyle}
                         role="columnheader"
+                        tabIndex={isDraggable ? 0 : undefined}
                         draggable={isDraggable}
                         onDragStart={isDraggable ? () => handleDragStart(colId) : undefined}
                         onDragOver={
@@ -2024,6 +2275,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         onDrop={isDraggable ? handleDragEnd : undefined}
                         onDragEnd={handleDragEnd}
                       >
+                        {isControl &&
+                          flexRender(header.column.columnDef.header, header.getContext())}
                         {!isControl && (
                           <>
                             {showColumnTokens &&
@@ -2065,6 +2318,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                             >
                               {flexRender(header.column.columnDef.header, header.getContext())}
                             </span>
+                            {header.column.columnDef.meta?.isTimestamp && (
+                              <EuiIconTip
+                                type="clock"
+                                content={i18n.translate(
+                                  'discover.grid.tanStack.timeFieldIconTooltip',
+                                  {
+                                    defaultMessage:
+                                      'This field represents the time that events occurred.',
+                                  }
+                                )}
+                              />
+                            )}
                             {sortDir && (
                               <span css={styles.sortIndicator}>
                                 <EuiIcon
@@ -2135,7 +2400,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
                     const isExpanded = currentExpandedDoc?.id === record.id;
                     const isSelected = selectedRows.has(record.id);
-                    const indicator = getRowIndicator?.(record);
+                    const indicator = getRowIndicator?.(record, euiTheme);
 
                     return (
                       <VirtualRow
@@ -2200,7 +2465,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             styles={styles}
           />
         )}
-
       </div>
     );
   }

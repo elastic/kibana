@@ -29,9 +29,6 @@ const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
 // ES|QL queries for TanStack grid tests (grid is selected via local storage, default TanStack)
 const ESQL_QUERY = 'ROW a=1,b="hello",c=3.14 | EVAL d=a+1';
-const ESQL_MULTI_ROW_QUERY = 'FROM kibana_sample_data_logs | LIMIT 500';
-const ESQL_STATS_QUERY =
-  'FROM kibana_sample_data_logs | STATS count=COUNT(*) BY geo.dest | LIMIT 50';
 
 interface PerfSnapshot {
   timestamp: number;
@@ -220,7 +217,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
 
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     const afterRender = await captureCDPMetrics(cdp);
@@ -336,7 +333,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Click expand button on first row
@@ -363,7 +360,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Find expand button and use keyboard
@@ -389,7 +386,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     // ROW queries show in Summary mode since Discover doesn't auto-select columns
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Verify the Summary column header exists
@@ -414,7 +411,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     const bigQuery = 'ROW a=1,b="test",c=42 // 100x';
     await submitEsqlQuery(page, bigQuery);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 90_000 });
 
     await page.waitForTimeout(3000);
@@ -488,7 +485,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Verify the select-all checkbox exists in the header
@@ -529,7 +526,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     // Submit query that produces individual columns
     await submitEsqlQuery(page, 'ROW a=1,b="test",c=42,d="val",e="extra" // 10x');
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // In Summary mode, add a column via the sidebar to switch to multi-column mode
@@ -568,7 +565,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     // ROW query renders in Summary mode – cell actions are only on individual columns
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Verify the grid is in Summary mode (ROW queries with no explicit column selection)
@@ -597,7 +594,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Click full-screen button
@@ -620,7 +617,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Open density popover
@@ -686,7 +683,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
     await submitEsqlQuery(page, ESQL_QUERY);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Focus the grid
@@ -716,12 +713,9 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     test.setTimeout(120_000);
 
     await setupDiscover(page);
-    await submitEsqlQuery(
-      page,
-      'ROW a=1,b="hello",c=3.14,d="world",e="hello" // 10x'
-    );
+    await submitEsqlQuery(page, 'ROW a=1,b="hello",c=3.14,d="world",e="hello" // 10x');
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Add column "b" (which contains "hello") to exit Summary mode
@@ -790,7 +784,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
       'ROW a=1,b="hello world this is a long value that should be expandable",c=3.14,d="another value",e="more data" // 10x';
     await submitEsqlQuery(page, query);
 
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
 
     // Add column "b" to get multi-column mode
@@ -859,7 +853,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
 
     // If TanStack grid rendered with 0 rows, the empty state should show
     const emptyState = page.locator('[data-test-subj="discoverNoResults"]');
-    const tanstackBadge = page.getByText('TanStack Grid');
+    const tanstackBadge = page.getByTestId('tanstackGridWrapper');
 
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
     const hasBadge = await tanstackBadge.isVisible().catch(() => false);

@@ -33,6 +33,7 @@ export interface ComputeTanStackColumnLayoutParams {
   timeFieldName?: string;
   columnSizing: Record<string, number>;
   settings?: UnifiedDataTableSettings;
+  leadingControlColumnsWidth?: number;
   defaultDataColumnWidth?: number;
   minDataColumnWidth?: number;
 }
@@ -66,11 +67,12 @@ export const computeTanStackColumnLayout = ({
   timeFieldName,
   columnSizing,
   settings,
+  leadingControlColumnsWidth = LEADING_CONTROL_COLUMNS_WIDTH,
   defaultDataColumnWidth = DEFAULT_COL_WIDTH,
   minDataColumnWidth = MIN_COL_WIDTH,
 }: ComputeTanStackColumnLayoutParams): TanStackColumnLayout => {
   const timeColumnWidth = getTimeColumnWidth(timeFieldName, columnSizing, settings);
-  let fixedWidth = LEADING_CONTROL_COLUMNS_WIDTH;
+  let fixedWidth = leadingControlColumnsWidth;
   const flexColumns: TanStackDataColumnDescriptor[] = [];
   const explicitWidths = new Map<string, number>();
 
@@ -101,8 +103,7 @@ export const computeTanStackColumnLayout = ({
     flexColumns.length > 0 ? remainingWidth / flexColumns.length : remainingWidth;
 
   const useFlexibleLayout =
-    flexColumns.length > 0 &&
-    (containerWidth === 0 || flexWidthPerColumn >= minDataColumnWidth);
+    flexColumns.length > 0 && (containerWidth === 0 || flexWidthPerColumn >= minDataColumnWidth);
 
   if (useFlexibleLayout) {
     return {
