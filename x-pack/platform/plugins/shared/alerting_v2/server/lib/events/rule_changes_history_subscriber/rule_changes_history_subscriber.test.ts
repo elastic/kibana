@@ -197,7 +197,7 @@ describe('RuleChangesHistorySubscriber', () => {
           event_type: RULE_CREATED_EVENT_TYPE,
           rule_id: payload.ruleId,
           space_id: payload.spaceId,
-          code: ALERTING_LOG_CODES.RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
         },
         error: expect.objectContaining({ message: 'es unreachable' }),
       });

@@ -102,6 +102,15 @@ export const conversePayloadSchema = schema.object({
       })
     )
   ),
+  project_routing: schema.maybe(
+    schema.string({
+      maxLength: 2048,
+      meta: {
+        description:
+          "Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.",
+      },
+    })
+  ),
   conversation_id: schema.maybe(
     schema.string({
       validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
@@ -220,6 +229,15 @@ export const conversePayloadSchema = schema.object({
         },
       }
     )
+  ),
+  read_only: schema.maybe(
+    schema.boolean({
+      meta: {
+        availability: { stability: 'tech_preview', since: '9.6.0' },
+        description:
+          'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.',
+      },
+    })
   ),
   capabilities: schema.maybe(
     schema.object(
@@ -484,10 +502,12 @@ export function registerChatRoutes({
       prompts,
       attachments,
       access_control: accessControl,
+      read_only: readOnly,
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
+      project_routing: projectRouting,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -506,12 +526,14 @@ export function registerChatRoutes({
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
+        readOnly,
         origin,
         callback,
         capabilities,
         browserApiTools,
         configurationOverrides,
         action,
+        projectRouting,
         nextInput: {
           message: input,
           prompts,

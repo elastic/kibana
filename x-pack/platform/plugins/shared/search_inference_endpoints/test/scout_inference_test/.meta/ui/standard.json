@@ -1,13 +1,41 @@
 {
-  "sha1": "6f7ef540e457fe23a38d69938ce14db037baa569",
+  "sha1": "d27c8af384a80d594d2f59a344125fd7dcf0450d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
     {
-      "id": "42293a2b206815f-21f4f530da45d0c",
-      "title": "EIS Models Page displays page header and documentation link",
+      "id": "7fe1ca7de104f44-2a47ec5f7173cba",
+      "title": "Confirm region selection modal Save opens the confirm region selection modal instead of the legacy confirm modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
+        "line": 40,
+        "column": 11
+      }
+    },
+    {
+      "id": "7fe1ca7de104f44-69d56e662abfdf1",
+      "title": "Confirm region selection modal an in-use 409 keeps the confirmation open with Issues; ignore and save retries with force",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "42293a2b206815f-28592778db61d10",
+      "title": "EIS Models Page displays page header",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -30,7 +58,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
         "line": 21,
-        "column": 38
+        "column": 27
       }
     },
     {
@@ -43,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 31,
+        "line": 30,
         "column": 38
       }
     },
@@ -57,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 65
       }
     },
@@ -71,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 63,
+        "line": 62,
         "column": 7
       }
     },
@@ -85,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 11
       }
     },
@@ -99,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 93,
+        "line": 92,
         "column": 46
       }
     },
@@ -183,13 +211,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_header.spec.ts",
-        "line": 27,
-        "column": 10
+        "line": 25,
+        "column": 7
       }
     },
     {
-      "id": "8dc1b555bb63e06-80dd6e8247f11bc",
-      "title": "External Inference - row actions opens the edit inference flyout from the view endpoint row action",
+      "id": "8dc1b555bb63e06-17923efcbef8144",
+      "title": "External Inference - row actions opens the edit inference flyout from the edit endpoint row action",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

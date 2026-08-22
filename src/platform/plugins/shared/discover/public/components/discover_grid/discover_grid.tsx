@@ -194,6 +194,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         canDragAndDropColumns
         enableComparisonMode
         enableInTableSearch
+        showSummaryColumnToggle
         renderCustomToolbar={renderCustomToolbar}
         getRowIndicator={getRowIndicator}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}

@@ -18,8 +18,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const DeleteEvaluationDatasetExampleRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
-    exampleId: z.string(),
+    datasetId: z.string().max(1024),
+    exampleId: z.string().max(1024),
   })
 );
 export type DeleteEvaluationDatasetExampleRequestParams = z.infer<

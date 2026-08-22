@@ -18,7 +18,7 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
-export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
+export { SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE, defaultTimeColumnWidth } from './src/constants';
 
@@ -48,7 +48,7 @@ export { getRowHeight, useRowHeight, RowHeightType } from './src/hooks/use_row_h
 export { RowHeightMode } from './src/components/row_height_settings';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
-export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
+export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
 export { getColumnDisplayName } from './src/components/data_table_columns';
 export {

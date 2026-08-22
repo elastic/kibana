@@ -62,7 +62,7 @@ export const Footer = memo(({ attack, hit, onAttackUpdated }: FooterProps) => {
         data-test-subj={FOOTER_TAKE_ACTION_BUTTON_TEST_ID}
         fill
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={togglePopover}
       >
         <FormattedMessage

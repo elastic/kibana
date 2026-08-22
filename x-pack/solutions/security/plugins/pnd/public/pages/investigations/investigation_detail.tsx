@@ -24,7 +24,6 @@ import { useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { Proposal } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
-import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
@@ -107,8 +106,7 @@ export const InvestigationDetailPage: React.FC = () => {
   if (isNotFound) {
     return (
       <PndPageSection>
-        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
-        <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.NOT_FOUND}</h2>} />
+        <EuiEmptyPrompt iconType="warning" title={<h2>{i18n.NOT_FOUND}</h2>} />
       </PndPageSection>
     );
   }
@@ -116,7 +114,6 @@ export const InvestigationDetailPage: React.FC = () => {
   if (error || !data?.investigation) {
     return (
       <PndPageSection>
-        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
         <EuiEmptyPrompt
           iconType="error"
           color="danger"
@@ -166,7 +163,7 @@ export const InvestigationDetailPage: React.FC = () => {
             />
           ) : null}
           {!proposalsQuery.isLoading && !proposalsQuery.error && !hasRequestedProposal ? (
-            <EuiEmptyPrompt iconType="alert" title={<h3>{i18n.PROPOSAL_NOT_FOUND}</h3>} />
+            <EuiEmptyPrompt iconType="warning" title={<h3>{i18n.PROPOSAL_NOT_FOUND}</h3>} />
           ) : null}
           {!proposalsQuery.isLoading && !proposalsQuery.error && hasRequestedProposal
             ? proposals.map((proposal) => (
@@ -206,11 +203,6 @@ export const InvestigationDetailPage: React.FC = () => {
 
   return (
     <PndPageSection>
-      <PndPageHeader
-        title={investigation.title}
-        subtitle={investigation.affectedSurface}
-        backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
-      />
       <EuiTabbedContent
         key={`${id}:${proposalId ?? 'overview'}`}
         tabs={tabs}

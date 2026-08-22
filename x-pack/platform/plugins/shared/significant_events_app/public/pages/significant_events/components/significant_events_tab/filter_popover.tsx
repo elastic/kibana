@@ -39,7 +39,7 @@ export const FilterPopover = ({
       aria-label={ariaLabel}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggle}
           isSelected={isOpen}
           numFilters={numFilters}

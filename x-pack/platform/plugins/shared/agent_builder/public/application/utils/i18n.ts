@@ -582,6 +582,12 @@ export const labels = {
           defaultMessage: 'Failed to fetch MCP clients',
         }
       ),
+      loadMcpClientErrorMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.loadMcpClientErrorMessage',
+        {
+          defaultMessage: 'Failed to fetch MCP client',
+        }
+      ),
       noMcpClientsFoundMessage: i18n.translate(
         'xpack.agentBuilder.mcpClients.noMcpClientsFoundMessage',
         {
@@ -635,6 +641,12 @@ export const labels = {
         revoke: i18n.translate('xpack.agentBuilder.mcpClients.actions.revoke', {
           defaultMessage: 'Revoke',
         }),
+        edit: i18n.translate('xpack.agentBuilder.mcpClients.actions.edit', {
+          defaultMessage: 'Edit',
+        }),
+        delete: i18n.translate('xpack.agentBuilder.mcpClients.actions.delete', {
+          defaultMessage: 'Delete',
+        }),
       },
       form: {
         pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
@@ -649,6 +661,15 @@ export const labels = {
         }),
         createButton: i18n.translate('xpack.agentBuilder.mcpClients.form.createButton', {
           defaultMessage: 'Create client',
+        }),
+        editPageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.editPageTitle', {
+          defaultMessage: 'Edit MCP client (OAuth)',
+        }),
+        editBreadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.form.editBreadcrumb', {
+          defaultMessage: 'Edit MCP client',
+        }),
+        updateButton: i18n.translate('xpack.agentBuilder.mcpClients.form.updateButton', {
+          defaultMessage: 'Update',
         }),
         cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.form.cancelButton', {
           defaultMessage: 'Cancel',
@@ -739,7 +760,7 @@ export const labels = {
           defaultMessage: 'For common local agent (Claude Desktop, Cursor etc) you can use:',
         }),
         remoteUrlsLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.remoteUrlsLabel', {
-          defaultMessage: 'Remote URL',
+          defaultMessage: 'Remote URLs',
         }),
         remoteUrlsHelpText: i18n.translate(
           'xpack.agentBuilder.mcpClients.form.remoteUrlsHelpText',
@@ -790,6 +811,14 @@ export const labels = {
         createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
           defaultMessage: 'Failed to create MCP client',
         }),
+        updateSuccessToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.updateSuccessToast', {
+            defaultMessage: 'MCP client "{name}" updated successfully',
+            values: { name },
+          }),
+        updateErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.updateErrorToast', {
+          defaultMessage: 'Failed to update MCP client',
+        }),
       },
       revoke: {
         title: (name: string) =>
@@ -824,6 +853,31 @@ export const labels = {
           }),
         errorToast: i18n.translate('xpack.agentBuilder.mcpClients.revoke.errorToast', {
           defaultMessage: 'Failed to revoke MCP client',
+        }),
+      },
+      delete: {
+        title: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.delete.title', {
+            defaultMessage: 'Delete {name}?',
+            values: { name },
+          }),
+        confirmationText: i18n.translate('xpack.agentBuilder.mcpClients.delete.confirmationText', {
+          defaultMessage:
+            'This action will permanently remove the MCP client. This cannot be undone.',
+        }),
+        deleteButton: i18n.translate('xpack.agentBuilder.mcpClients.delete.deleteButton', {
+          defaultMessage: 'Delete',
+        }),
+        cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.delete.cancelButton', {
+          defaultMessage: 'Cancel',
+        }),
+        successToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.delete.successToast', {
+            defaultMessage: 'MCP client "{name}" deleted successfully',
+            values: { name },
+          }),
+        errorToast: i18n.translate('xpack.agentBuilder.mcpClients.delete.errorToast', {
+          defaultMessage: 'Failed to delete MCP client',
         }),
       },
     },
@@ -2631,11 +2685,15 @@ export const labels = {
     createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
       defaultMessage: 'Elastic',
     }),
-    byAuthor: (author: string) =>
-      i18n.translate('xpack.agentBuilder.overview.byAuthor', {
-        defaultMessage: 'By {author}',
-        values: { author },
-      }),
+    createdBy: i18n.translate('xpack.agentBuilder.overview.createdBy', {
+      defaultMessage: 'Created by',
+    }),
+    updatedBy: i18n.translate('xpack.agentBuilder.overview.updatedBy', {
+      defaultMessage: 'Updated by',
+    }),
+    unknown: i18n.translate('xpack.agentBuilder.overview.unknown', {
+      defaultMessage: 'Unknown',
+    }),
     agentId: (id: string) =>
       i18n.translate('xpack.agentBuilder.overview.agentId', {
         defaultMessage: 'ID {id}',

@@ -149,11 +149,12 @@ const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   </EuiFlexGroup>
 );
 
-type PackQueryStatusItem = Partial<{
+export type PackQueryStatusItem = Partial<{
   action_id: string;
   id: string;
   query: string;
   agents: string[];
+  interval: number;
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
@@ -309,24 +310,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInDiscoverAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInLensAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
@@ -466,7 +467,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={'expand'}
+                iconType={'maximize'}
                 onClick={handleQueryFlyoutOpen(item)}
                 aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
                   defaultMessage: 'View query',
@@ -506,7 +507,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType="expand"
+          iconType="maximize"
           onClick={handleQueryFlyoutOpen(row)}
           aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
             defaultMessage: 'View query',
@@ -529,7 +530,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           <EuiButtonIcon
             data-test-subj={`toggleIcon-${item.id}`}
             onClick={getHandleErrorsToggle(item)}
-            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
             aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
               defaultMessage: 'Toggle results',
             })}
