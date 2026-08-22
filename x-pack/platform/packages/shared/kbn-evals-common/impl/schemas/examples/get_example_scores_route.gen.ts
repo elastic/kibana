@@ -18,14 +18,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
 
-export const GetExampleScoresRequestParams = lazySchema(() =>
-  z.object({
-    exampleId: z.string().max(1024),
-  })
-);
-export type GetExampleScoresRequestParams = z.infer<typeof GetExampleScoresRequestParams>;
-export type GetExampleScoresRequestParamsInput = z.input<typeof GetExampleScoresRequestParams>;
-
 export const GetExampleScoresRequestQuery = lazySchema(() =>
   z.object({
     /**
@@ -36,6 +28,14 @@ export const GetExampleScoresRequestQuery = lazySchema(() =>
 );
 export type GetExampleScoresRequestQuery = z.infer<typeof GetExampleScoresRequestQuery>;
 export type GetExampleScoresRequestQueryInput = z.input<typeof GetExampleScoresRequestQuery>;
+
+export const GetExampleScoresRequestParams = lazySchema(() =>
+  z.object({
+    exampleId: z.string().max(1024),
+  })
+);
+export type GetExampleScoresRequestParams = z.infer<typeof GetExampleScoresRequestParams>;
+export type GetExampleScoresRequestParamsInput = z.input<typeof GetExampleScoresRequestParams>;
 
 export const GetExampleScoresResponse = lazySchema(() =>
   z.object({

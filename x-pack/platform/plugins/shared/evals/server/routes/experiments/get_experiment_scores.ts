@@ -19,16 +19,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
-// example.input, example.metadata, task.output, and evaluator.metadata are
-// unbounded (additionalProperties: true, no ingest-time size limit) and can
-// hold ~100KB+ of raw data per document
-export const UNBOUNDED_SCORE_FIELDS = [
-  'task.output',
-  'example.input',
-  'example.metadata',
-  'evaluator.metadata',
-];
+export { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
 export const registerGetExperimentScoresRoute = ({
   router,

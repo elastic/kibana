@@ -21,7 +21,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
-import { UNBOUNDED_SCORE_FIELDS } from '../experiments/get_experiment_scores';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
   { '@timestamp': { order: 'desc' as const } },
