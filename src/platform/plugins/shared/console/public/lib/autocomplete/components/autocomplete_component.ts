@@ -11,9 +11,15 @@ import type { ResultTerm } from '../types';
 
 export type AutocompleteTermDefinition = string | ResultTerm;
 
+export interface AutocompleteNextGroup {
+  next?: AutocompleteComponent | AutocompleteComponent[];
+  fallback?: boolean;
+}
+
 export interface AutocompleteMatchResult {
   context_values?: Record<string, unknown>;
   next?: AutocompleteComponent | AutocompleteComponent[];
+  nextGroups?: AutocompleteNextGroup[];
   priority?: number;
 }
 

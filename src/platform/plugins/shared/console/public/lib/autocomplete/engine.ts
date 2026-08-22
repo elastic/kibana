@@ -11,6 +11,7 @@ import _ from 'lodash';
 
 import type {
   AutocompleteComponent,
+  AutocompleteMatchResult,
   AutocompleteTermDefinition,
 } from './components/autocomplete_component';
 import { ConstantComponent } from './components/constant_component';
@@ -27,6 +28,8 @@ type AutocompleteContext = AutoCompleteContext;
 
 interface WalkingStateOptions {
   depth?: number;
+  fallbackGroups?: string[];
+  preferredFallbackGroups?: string[];
   priority?: number;
   specificity?: number;
 }
@@ -76,6 +79,8 @@ export class WalkingState {
   components: AutocompleteComponent[];
   contextExtensionList: Array<Record<string, unknown>>;
   depth: number;
+  fallbackGroups: string[];
+  preferredFallbackGroups: string[];
   priority: number | undefined;
   // Number of path segments matched literally (via a ConstantComponent). Used to
   // prefer the most specific endpoint when several patterns match the same path,
@@ -87,15 +92,54 @@ export class WalkingState {
     parentName: string | undefined,
     components: AutocompleteComponent[],
     contextExtensionList: Array<Record<string, unknown>>,
-    { depth = 0, priority, specificity = 0 }: WalkingStateOptions = {}
+    {
+      depth = 0,
+      fallbackGroups = [],
+      preferredFallbackGroups = [],
+      priority,
+      specificity = 0,
+    }: WalkingStateOptions = {}
   ) {
     this.parentName = parentName;
     this.components = components;
     this.contextExtensionList = contextExtensionList;
     this.depth = depth;
+    this.fallbackGroups = fallbackGroups;
+    this.preferredFallbackGroups = preferredFallbackGroups;
     this.priority = priority;
     this.specificity = specificity;
   }
+}
+
+function getNextGroups(result: AutocompleteMatchResult): Array<{
+  next: AutocompleteComponent[];
+  fallbackGroup?: string;
+  preferredFallbackGroup?: string;
+}> {
+  const nextGroups = result.nextGroups ?? [{ next: result.next, fallback: false }];
+  const fallbackGroup =
+    _.some(nextGroups, (nextGroup) => nextGroup.fallback) &&
+    _.some(nextGroups, (nextGroup) => !nextGroup.fallback)
+      ? _.uniqueId('fallback_group_')
+      : undefined;
+
+  return nextGroups.map((nextGroup) => ({
+    next: nextGroup.next ? asArray(nextGroup.next) : [],
+    fallbackGroup: nextGroup.fallback ? fallbackGroup : undefined,
+    preferredFallbackGroup: !nextGroup.fallback ? fallbackGroup : undefined,
+  }));
+}
+
+function resolveFallbackStates(walkStates: WalkingState[]): WalkingState[] {
+  const preferredFallbackGroups = new Set(_.flatMap(walkStates, 'preferredFallbackGroups'));
+  if (!preferredFallbackGroups.size) {
+    return walkStates;
+  }
+  return _.filter(
+    walkStates,
+    (ws) =>
+      !_.some(ws.fallbackGroups, (fallbackGroup) => preferredFallbackGroups.has(fallbackGroup))
+  );
 }
 
 export function walkTokenPath(
@@ -105,7 +149,7 @@ export function walkTokenPath(
   editor: unknown
 ): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
-    return walkingStates;
+    return resolveFallbackStates(walkingStates);
   }
   const token = tokenPath[0];
   const nextWalkingStates: WalkingState[] = [];
@@ -119,10 +163,7 @@ export function walkTokenPath(
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
         tracer('matched [' + token + '] with:', result);
-        let next: AutocompleteComponent[] = [];
-        if (result.next) {
-          next = asArray(result.next);
-        }
+        const nextGroups = getNextGroups(result);
 
         let extensionList: Array<Record<string, unknown>>;
         if (result.context_values) {
@@ -143,22 +184,38 @@ export function walkTokenPath(
 
         const specificity = ws.specificity + (component instanceof ConstantComponent ? 1 : 0);
 
-        nextWalkingStates.push(
-          new WalkingState(component.name, next, extensionList, {
-            depth: ws.depth + 1,
-            priority,
-            specificity,
-          })
-        );
+        _.each(nextGroups, ({ next, fallbackGroup, preferredFallbackGroup }) => {
+          nextWalkingStates.push(
+            new WalkingState(component.name, next, extensionList, {
+              depth: ws.depth + 1,
+              fallbackGroups: fallbackGroup
+                ? ws.fallbackGroups.concat(fallbackGroup)
+                : ws.fallbackGroups,
+              preferredFallbackGroups: preferredFallbackGroup
+                ? ws.preferredFallbackGroups.concat(preferredFallbackGroup)
+                : ws.preferredFallbackGroups,
+              priority,
+              specificity,
+            })
+          );
+        });
       }
     });
   });
 
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
-    return _.map(walkingStates, function (ws) {
-      return new WalkingState(ws.name, [], ws.contextExtensionList);
-    });
+    return resolveFallbackStates(
+      _.map(walkingStates, function (ws) {
+        return new WalkingState(ws.name, [], ws.contextExtensionList, {
+          depth: ws.depth,
+          fallbackGroups: ws.fallbackGroups,
+          preferredFallbackGroups: ws.preferredFallbackGroups,
+          priority: ws.priority,
+          specificity: ws.specificity,
+        });
+      })
+    );
   }
 
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);

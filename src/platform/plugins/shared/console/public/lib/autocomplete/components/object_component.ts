@@ -8,11 +8,12 @@
  */
 
 import _ from 'lodash';
-import { SharedComponent } from '.';
+import { SharedComponent } from './shared_component';
 import type {
   AutocompleteComponent,
   AutocompleteMatch,
   AutocompleteMatchResult,
+  AutocompleteNextGroup,
   AutocompleteTermDefinition,
 } from './autocomplete_component';
 import type { AutoCompleteContext } from '../types';
@@ -29,7 +30,10 @@ type ObjectComponentContext = AutoCompleteContext & {
   ) => AutocompleteComponent[] | undefined | null;
 };
 
-type MatchResultWithNextArray = AutocompleteMatchResult & { next: AutocompleteComponent[] };
+type MatchResultWithNextArray = AutocompleteMatchResult & {
+  next: AutocompleteComponent[];
+  nextGroups?: AutocompleteNextGroup[];
+};
 
 export class ObjectComponent extends SharedComponent {
   constants: AutocompleteComponent[];
@@ -72,21 +76,26 @@ export class ObjectComponent extends SharedComponent {
       }
     });
 
-    // try to link to GLOBAL rules
-    const globalRules = context.globalComponentResolver(token, false);
-    if (globalRules) {
-      result.next.push(...globalRules);
-    }
-
     if (result.next.length) {
       return result;
     }
+    const patternMatches: AutocompleteComponent[] = [];
     _.each(this.patternsAndWildCards, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push(...asArray(componentResult.next));
+        patternMatches.push(...asArray(componentResult.next));
       }
     });
+    result.next.push(...patternMatches);
+
+    // try to link to GLOBAL rules
+    const globalRules = context.globalComponentResolver(token, false);
+    if (globalRules?.length) {
+      result.next.push(...globalRules);
+      if (patternMatches.length) {
+        result.nextGroups = [{ next: patternMatches }, { next: globalRules, fallback: true }];
+      }
+    }
 
     return result;
   }
