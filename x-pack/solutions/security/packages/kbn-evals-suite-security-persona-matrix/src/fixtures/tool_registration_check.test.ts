@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  collectExpectedToolIds,
+  findUnregisteredToolIds,
+} from './tool_registration_check';
+import type { KbnClient } from '@kbn/kbn-client';
+
+describe('collectExpectedToolIds', () => {
+  it('collects, dedupes, and sorts expectedTools across examples', () => {
+    const dataset = [
+      { metadata: { expectedTools: ['virustotal_lookup', 'platform.core.search'] } },
+      { metadata: { expectedTools: ['on_call_lookup', 'virustotal_lookup'] } },
+      { metadata: {} },
+    ];
+    expect(collectExpectedToolIds(dataset)).toEqual([
+      'on_call_lookup',
+      'platform.core.search',
+      'virustotal_lookup',
+    ]);
+  });
+});
+
+describe('findUnregisteredToolIds', () => {
+  const makeKbnClient = (tools: Array<{ id: string }>) =>
+    ({
+      request: jest.fn().mockResolvedValue({ data: { results: tools } }),
+    } as unknown as KbnClient);
+
+  it('returns tool ids not present in the registry', async () => {
+    const kbnClient = makeKbnClient([{ id: 'virustotal_lookup' }]);
+    await expect(
+      findUnregisteredToolIds(kbnClient, ['virustotal_lookup', 'on_call_lookup'])
+    ).resolves.toEqual(['on_call_lookup']);
+  });
+
+  it('lists tools with the date-formatted public API version (not "1")', async () => {
+    const kbnClient = makeKbnClient([]);
+    await findUnregisteredToolIds(kbnClient, ['virustotal_lookup']);
+    const request = (kbnClient as unknown as { request: jest.Mock }).request;
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/api/agent_builder/tools',
+        headers: expect.objectContaining({
+          // 400 "Invalid version" regression: the public tools API expects a
+          // YYYY-MM-DD version string, like the seed client.
+          'elastic-api-version': '2023-10-31',
+        }),
+      })
+    );
+  });
+
+  it('surfaces listing failures instead of silently passing the check', async () => {
+    const kbnClient = {
+      request: jest.fn().mockRejectedValue(new Error('boom')),
+    } as unknown as KbnClient;
+    await expect(findUnregisteredToolIds(kbnClient, ['virustotal_lookup'])).rejects.toThrow(
+      'tool-registration pre-flight'
+    );
+  });
+});

@@ -49,7 +49,9 @@ export async function findUnregisteredToolIds(
       query: { per_page: 1000 },
       headers: {
         'kbn-xsrf': 'persona-matrix-tool-check',
-        'elastic-api-version': '1',
+        // Public versioned API: date format required, like the seed client.
+        // '1' is rejected with 400 "Invalid version".
+        'elastic-api-version': '2023-10-31',
         'x-elastic-internal-origin': 'kbn-evals',
       },
     });
