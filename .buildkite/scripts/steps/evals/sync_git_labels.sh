@@ -4,8 +4,10 @@ set -euo pipefail
 
 # Sync GitHub `models:*` and `models:judge:*` labels from LiteLLM + EIS model discovery.
 #
-# This step discovers models from both sources and runs create_models_labels.sh with --prune
-# to create/update labels for active models and deprecate labels for decommissioned ones.
+# This step discovers models from both sources and runs create_models_labels.sh, creating and
+# updating labels for active models. Labels for decommissioned models are only deprecated
+# (`--prune`) when both sources reported successfully: a source that is missing looks exactly
+# like "every model from that source is gone", which would deprecate labels for live models.
 #
 # Required env vars (set automatically by pre-command hook via setup_job_env.sh):
 #   KBN_EVALS_CONFIG_B64   - base64-encoded vault config (when KBN_EVALS=1)
@@ -15,7 +17,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
-LABEL_ARGS=(--prune)
+LABEL_ARGS=()
 
 # Target repo (configurable via env, defaults to elastic/kibana)
 LABEL_SYNC_REPO="${LABEL_SYNC_REPO:-elastic/kibana}"
@@ -34,9 +36,11 @@ if [[ -n "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then
 
     if node scripts/discover_eis_models.js; then
       echo "EIS discovery complete"
-      if [[ -f "target/eis_models.json" ]]; then
+      if [[ -s "target/eis_models.json" ]] && grep -q '"modelId"' target/eis_models.json; then
         cat target/eis_models.json
         EIS_DISCOVERY_OK="true"
+      else
+        echo "Warning: EIS discovery produced no models" >&2
       fi
       break
     fi
@@ -61,6 +65,7 @@ fi
 # Decode vault config from KBN_EVALS_CONFIG_B64 to a temp file so create_models_labels.sh
 # can read LiteLLM credentials (baseUrl, virtualKey).
 VAULT_CONFIG_TMP=""
+LITELLM_CONFIG_OK="false"
 
 echo "--- LiteLLM model discovery"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
@@ -68,8 +73,20 @@ if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
   printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d > "$VAULT_CONFIG_TMP"
   LABEL_ARGS+=(--from-litellm-vault-config "$VAULT_CONFIG_TMP")
   LABEL_ARGS+=(--judge-from-litellm-vault-config "$VAULT_CONFIG_TMP")
+  LITELLM_CONFIG_OK="true"
 else
   echo "Warning: KBN_EVALS_CONFIG_B64 not set; skipping LiteLLM model labels" >&2
+fi
+
+if [[ "${EIS_DISCOVERY_OK}" != "true" && "${LITELLM_CONFIG_OK}" != "true" ]]; then
+  echo "Error: neither EIS nor LiteLLM models could be discovered; nothing to sync." >&2
+  exit 1
+fi
+
+if [[ "${EIS_DISCOVERY_OK}" == "true" && "${LITELLM_CONFIG_OK}" == "true" ]]; then
+  LABEL_ARGS+=(--prune)
+else
+  echo "Warning: not all model sources are available; syncing labels without --prune" >&2
 fi
 
 # Clean up temp file on exit
