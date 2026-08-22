@@ -36,6 +36,11 @@ export const ALERTING_ERROR_CODES = {
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
+   * A rule's merged shape has a recovery/no-data query block that is
+   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   */
+  INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
+  /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
    * any resource is mutated so the caller sees an all-or-nothing outcome (no
@@ -80,6 +85,10 @@ export const ALERTING_ERROR_CODES = {
    */
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
+  // ────────────────────── Rule templates ─────────────────────
+  /** A rule template with the given identifier does not exist. */
+  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
+
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -108,11 +117,16 @@ export const ALERTING_ERROR_CODES = {
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * The `group_hash` resolved to a latest alert event, but its `episode_id`
-   * did not match the one the item targeted (the episode was superseded).
-   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   * No alert event matched the supplied `episode_id`. On the legacy bulk
+   * route it also covers a targeted `episode_id` superseded by a newer
+   * episode of the group.
    */
   ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  /**
+   * The episode exists but is not the latest episode of its series. Lifecycle
+   * actions (`activate` / `deactivate`) only accept the latest episode.
+   */
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
@@ -142,12 +156,28 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * group and alert on specific degraded code paths without parsing free-form
  * `message` strings.
  *
- * Naming convention: `<DOMAIN>_<WHAT_FAILED>`. Read-path failures that
- * degrade gracefully should encode the degradation (e.g.
- * `*_LOOKUP_FAILED` — the page was still returned, just without that piece
- * of enrichment).
+ * Naming convention: `<DOMAIN>_<WHAT_HAPPENED>`.
+ *
+ * The domain matches the subsystem that owns the failure, so an operator can
+ * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
+ * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
+ * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ *
+ * The suffix encodes the outcome, from a closed vocabulary:
+ * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
+ *   `_NOT_FOUND`, `_LOOKUP_FAILED`, `_DEGRADED`, `_INVALID`, `_UNMAPPED`.
+ * - `error` (operation could not complete): `_FAILED`, `_UNAVAILABLE`,
+ *   `_INVALID`, `_UNRECOVERABLE`.
  */
 export const ALERTING_LOG_CODES = {
+  // ─────────────────────────────── Dispatcher steps ──────────────────────
+  /**
+   * Hydrate episode data step: some episodes had no matching .rule-events row;
+   * data will be absent for those episodes
+   */
+  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -175,7 +205,7 @@ export const ALERTING_LOG_CODES = {
    * to prevent this. Emission of this code signals that the invariant
    * has been violated and the read path silently shrank a page.
    */
-  EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
+  EXECUTION_HISTORY_NORMALIZER_DEGRADED: 'EXECUTION_HISTORY_NORMALIZER_DEGRADED',
   /**
    * Action-policy id resolution failed while building the search filter for
    * the action-policy execution-history search. The search proceeds without
@@ -213,42 +243,50 @@ export const ALERTING_LOG_CODES = {
    * unhandled rejection captured by `captureRejections`). Caught by the bus's
    * permanent defensive listener so it can never crash the process.
    */
-  EVENT_BUS_EMITTER_ERROR: 'EVENT_BUS_EMITTER_ERROR',
+  EVENTS_BUS_EMITTER_FAILED: 'EVENTS_BUS_EMITTER_FAILED',
   /**
    * A subscribed handler threw (sync throw or rejected promise) while
    * processing a published domain event. The failure is isolated: sibling
    * handlers for the same event still run and the publisher is unaffected.
    */
-  EVENT_BUS_HANDLER_FAILURE: 'EVENT_BUS_HANDLER_FAILURE',
+  EVENTS_BUS_HANDLER_FAILED: 'EVENTS_BUS_HANDLER_FAILED',
   /**
    * The rule-lifecycle → workflow subscriber failed to emit a workflow event
    * for a rule domain event. The originating rule operation already
    * succeeded; only the workflow fan-out for this event was lost.
    */
-  RULE_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_WORKFLOW_SUBSCRIBER_FAILURE',
+  EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED: 'EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED',
   /**
    * The alert-action → workflow subscriber failed to emit a workflow event
    * for an alert-action domain event. The originating action already
    * succeeded; only the workflow fan-out for this event was lost.
    */
-  ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE: 'ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE',
+  EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED: 'EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED',
   /**
    * The rule-executor → workflow subscriber failed to emit a workflow event
    * for a rule-execution domain event. The rule run already completed; only
    * the workflow fan-out for this event was lost.
    */
-  RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE',
+  EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED:
+    'EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED',
   /**
    * The rule-changes-history subscriber failed to record a change entry for a
    * rule domain event. The rule operation itself already succeeded; only the
    * audit entry for this change was lost.
    */
-  RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
+  EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED: 'EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED',
   /**
    * A domain event was refused by the bus because its `type` collides with a
    * reserved emitter event name. The publisher continued; no subscriber ran.
    */
-  EVENT_BUS_PUBLISH_REJECTED: 'EVENT_BUS_PUBLISH_REJECTED',
+  EVENTS_BUS_PUBLISH_SKIPPED: 'EVENTS_BUS_PUBLISH_SKIPPED',
+  /**
+   * An alert action carried an `action_type` with no domain-event mapping, so
+   * no event was published for it. The action itself already applied; only
+   * the workflow fan-out for that action type is missing, which happens when
+   * the action-type vocabulary grows ahead of the publisher's mapping.
+   */
+  EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**
@@ -274,6 +312,80 @@ export const ALERTING_LOG_CODES = {
    * (outer catch of the per-group dispatch loop). Sibling groups still run.
    */
   DISPATCH_GROUP_UNHANDLED_ERROR: 'DISPATCH_GROUP_UNHANDLED_ERROR',
+  /**
+   * A dispatch pipeline step threw. The failing step's name is carried in
+   * `labels.step` — this code stays stable across steps so a single filter
+   * returns every step failure.
+   */
+  DISPATCH_STEP_FAILED: 'DISPATCH_STEP_FAILED',
+  /**
+   * An action policy's `throttle.interval` could not be parsed, so the group
+   * was treated as if the interval had elapsed. Throttling is effectively
+   * bypassed for that policy until the interval is corrected.
+   */
+  DISPATCH_THROTTLE_INTERVAL_INVALID: 'DISPATCH_THROTTLE_INTERVAL_INVALID',
+  /**
+   * An action policy could not be read while assembling the policies for a
+   * dispatch tick. The policy is excluded from dispatch consideration; the
+   * remaining policies still dispatch.
+   */
+  DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
+  /**
+   * The dispatcher has no persisted event watermark (cold start or wiped task
+   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
+   * Rule events older than that will not be dispatched.
+   */
+  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
+  /**
+   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark is
+   * safe. This is expected under sustained high load — it is not an error.
+   */
+  DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
+  /**
+   * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
+   * The dispatcher will write terminal `unmatched` records for the blocking
+   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   */
+  DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
+  /**
+   * The persisted eventWatermark is not a valid ISO date string. The dispatcher
+   * will fall back to cold-start behaviour (scan from now − OVERLAP_WINDOW_MINUTES).
+   */
+  DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
+  /**
+   * The escape hatch fired but the pipeline stopped before FetchEpisodesStep so
+   * no episodes are known for the window, and watermark lag is still within one
+   * max scan window. The watermark is held; the stuck counter is reset so
+   * transient infra pressure can recover without dropping the window.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
+  /**
+   * The pre-fetch escape hatch fired and watermark lag already exceeds one max
+   * scan window. The window is force-advanced without knowing its episodes;
+   * unread events in that window are skipped so the dispatcher cannot stall
+   * indefinitely.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
+    'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+  /**
+   * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
+   * call failed. The watermark is held so episodes will be retried next tick.
+   */
+  DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
+
+  // ────────────────────────────── Director ───────────────────────────
+  /**
+   * Releasing the per-run alert-state cache failed after processing. Logged
+   * and swallowed so it can never mask the error that ended the run.
+   */
+  DIRECTOR_CLEANUP_FAILED: 'DIRECTOR_CLEANUP_FAILED',
+  /**
+   * A rule's `pending_timeframe` / `recovering_timeframe` could not be
+   * parsed, so the timeframe threshold was ignored and the transition fell
+   * back to count-only semantics.
+   */
+  DIRECTOR_TIMEFRAME_INVALID: 'DIRECTOR_TIMEFRAME_INVALID',
 
   // ────────────────────────── Action policies ────────────────────────
   /**
@@ -282,6 +394,18 @@ export const ALERTING_LOG_CODES = {
    * the evaluation of the remaining policies.
    */
   POLICY_MATCHER_KQL_INVALID: 'POLICY_MATCHER_KQL_INVALID',
+  /**
+   * A superseded action policy API key could not be queued for invalidation.
+   * The policy update itself already committed, so the old credential stays
+   * valid until an operator revokes it.
+   */
+  POLICY_API_KEY_INVALIDATION_FAILED: 'POLICY_API_KEY_INVALIDATION_FAILED',
+  /**
+   * An action policy's stored auth could not be decrypted, so its API key
+   * could not be identified for invalidation. The superseded credential stays
+   * valid until an operator revokes it.
+   */
+  POLICY_API_KEY_LOOKUP_FAILED: 'POLICY_API_KEY_LOOKUP_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**
@@ -312,6 +436,22 @@ export const ALERTING_LOG_CODES = {
    * failed, leaving the rule's task state diverged from its saved object.
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+  /**
+   * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
+   * for one or more rules — e.g. the per-task-type key grant was rejected. The
+   * affected rules' keys were left unrotated (their old key still works) and
+   * are reported per-rule in the bulk response; no saved object was written,
+   * so rule and task state stay consistent (this is not
+   * `RULE_TASK_MANAGER_DRIFT`).
+   */
+  RULE_API_KEY_ROTATION_FAILED: 'RULE_API_KEY_ROTATION_FAILED',
+
+  /**
+   * Scheduling a new rule's executor task failed and the compensating delete
+   * of the already-persisted saved object failed too. The rule is left
+   * orphaned — enabled, but with no executor task — and needs manual removal.
+   */
+  RULE_CREATE_ROLLBACK_FAILED: 'RULE_CREATE_ROLLBACK_FAILED',
 
   // ────────────────────────── Storage & queries ──────────────────────
   /** A bulk index request into an alerting datastream failed or was rejected. */
@@ -326,6 +466,14 @@ export const ALERTING_LOG_CODES = {
    */
   RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
 
+  // ─────────────────────────── Saved objects ─────────────────────────
+  /**
+   * A saved object (or encrypted saved object) type failed to register at
+   * setup. The plugin cannot read or write that type for the lifetime of the
+   * process; distinct from a runtime document migration failure.
+   */
+  SAVED_OBJECTS_TYPE_REGISTRATION_FAILED: 'SAVED_OBJECTS_TYPE_REGISTRATION_FAILED',
+
   // ──────────────────────── Maintenance windows ──────────────────────
   /** Fetching active maintenance windows failed. */
   MAINTENANCE_WINDOW_FETCH_FAILED: 'MAINTENANCE_WINDOW_FETCH_FAILED',
@@ -339,6 +487,13 @@ export const ALERTING_LOG_CODES = {
    * close. The windows were still read; the PIT expires on its own.
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
+
+  // ──────────────── Rule templates (graceful degradation) ────────────────
+  /**
+   * A stored rule template failed schema validation. Find omits it from the
+   * page; get maps it to not-found. Operator should investigate package drift.
+   */
+  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_episode` failed; tool returns an error result. */
@@ -362,9 +517,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Skill schema docs could not be generated; skill registration aborted (error). */
-  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
-  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────
@@ -373,6 +526,11 @@ export const ALERTING_LOG_CODES = {
    * task retries on its next scheduled run.
    */
   TASKS_TELEMETRY_RUN_FAILED: 'TASKS_TELEMETRY_RUN_FAILED',
+  /**
+   * A background task could not be scheduled at boot, so it will not run
+   * until the next restart. The task type is carried in `labels.task_id`.
+   */
+  TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

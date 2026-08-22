@@ -71,11 +71,15 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
       await lens.layers.activateLayerTab(0);
       expect(await lens.getChartSwitchType()).toBe('Area');
-      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
+      expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+        'Count'
+      );
 
       await lens.layers.activateLayerTab(1);
       expect(await lens.getChartSwitchType()).toBe('Bar');
-      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Max memory');
+      expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+        'Max memory'
+      );
     }
   );
 
@@ -89,8 +93,12 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
       expect(await lens.layers.getLayerCount()).toBe(1);
 
       expect(await lens.getChartSwitchType()).toBe('Bar');
-      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
-      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe('Max memory');
+      expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+        'Count'
+      );
+      expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe(
+        'Max memory'
+      );
     }
   );
 
@@ -101,10 +109,12 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await lens.waitForVisualization('xyVisChart');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
       'Cumulative Sum of Count'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe('@timestamp');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe(
+      '@timestamp'
+    );
   });
 
   spaceTest('should convert sibling pipeline aggregation', async ({ page, pageObjects }) => {
@@ -114,12 +124,14 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await lens.waitForVisualization('xyVisChart');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
       'Overall Max of Count'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe('@timestamp');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe(
+      '@timestamp'
+    );
 
-    await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
+    await lens.dimensions.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
     await expect(page.testSubj.locator('indexPattern-collapse-by')).toHaveValue('max');
   });
 
@@ -131,10 +143,10 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     expect(await lens.layers.getLayerCount()).toBe(2);
 
     await lens.layers.activateLayerTab(0);
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
 
     await lens.layers.activateLayerTab(1);
-    expect(await lens.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel', 0)).toBe(
       'Static value: 10'
     );
   });
@@ -167,7 +179,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Bar');
-    expect(await lens.getSelectedBarOrientationSetting()).toBe('Horizontal');
+    expect(await lens.style.getSelectedBarOrientationSetting()).toBe('Horizontal');
   });
 
   spaceTest('should convert y-axis positions', async ({ pageObjects }) => {
@@ -177,15 +189,17 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await lens.waitForVisualization('xyVisChart');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe('Max memory');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe(
+      'Max memory'
+    );
 
-    await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
-    expect(await lens.getSelectedAxisSide()).toBe('Left');
+    await lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+    expect(await lens.dimensions.getSelectedAxisSide()).toBe('Left');
     await lens.closeDimensionEditor();
 
-    await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger', 0, 1);
-    expect(await lens.getSelectedAxisSide()).toBe('Right');
+    await lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger', 0, 1);
+    expect(await lens.dimensions.getSelectedAxisSide()).toBe('Right');
   });
 
   spaceTest('should convert split series', async ({ pageObjects }) => {
@@ -195,8 +209,8 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await convertToLensByTitle({ dashboard }, 'XY - Split Series');
     await lens.waitForVisualization('xyVisChart');
 
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
-    expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0)).toBe(
       'machine.os.raw: Descending'
     );
 
@@ -204,7 +218,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
       .poll(
         async () =>
           (
-            await lens.getCurrentChartDebugState('xyVisChart')
+            await lens.workspace.getCurrentChartDebugState('xyVisChart')
           ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
@@ -218,8 +232,8 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await convertToLensByTitle({ dashboard }, 'XY - X Axis');
     await lens.waitForVisualization('xyVisChart');
 
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
-    expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).toBe(
       'machine.os.raw: Descending'
     );
 
@@ -227,7 +241,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
       .poll(
         async () =>
           (
-            await lens.getCurrentChartDebugState('xyVisChart')
+            await lens.workspace.getCurrentChartDebugState('xyVisChart')
           ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
@@ -242,25 +256,25 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Line');
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
       '1st percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe(
       '5th percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 2)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 2)).toBe(
       '25th percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 3)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 3)).toBe(
       '50th percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 4)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 4)).toBe(
       '75th percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 5)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 5)).toBe(
       '95th percentile of memory'
     );
-    expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 6)).toBe(
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel', 6)).toBe(
       '99.99th percentile of memory'
     );
   });

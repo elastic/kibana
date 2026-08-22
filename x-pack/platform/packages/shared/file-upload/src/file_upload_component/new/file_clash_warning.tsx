@@ -6,7 +6,7 @@
  */
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CLASH_TYPE } from '../../../file_upload_manager/merge_tools';
@@ -76,19 +76,20 @@ export const FileClashWarning: FC = () => {
         };
 
   return (
-    <EuiCallOut title={title} color="danger">
-      <p>{description}</p>
-      <EuiButton
-        onClick={() => fileUploadManager.removeClashingFiles()}
-        color="danger"
-        size="s"
-        fill
-      >
-        <FormattedMessage
-          id="xpack.fileUpload.fileClashWarning.deleteAllButtonLabel"
-          defaultMessage="Delete all"
-        />
-      </EuiButton>
-    </EuiCallOut>
+    <KbnDangerCallout
+      title={title}
+      text={description}
+      actionProps={{
+        primary: {
+          onClick: () => fileUploadManager.removeClashingFiles(),
+          children: (
+            <FormattedMessage
+              id="xpack.fileUpload.fileClashWarning.deleteAllButtonLabel"
+              defaultMessage="Delete all"
+            />
+          ),
+        },
+      }}
+    />
   );
 };

@@ -11,37 +11,49 @@ import React, { type PropsWithChildren, type RefObject, type ComponentProps } fr
 import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import {
   ProjectPickerFrameHeader,
+  type HeaderContextMenuItemProps,
   ProjectPickerFrameBody,
   ProjectPickerFrameFooter,
 } from './partials';
 import { projectPickerFrameStyles } from './frame.styles';
+import { useProjectPickerState } from '../../state';
 
 interface ProjectPickerFrameProps {
   scrollContainerRef?: RefObject<HTMLDivElement>;
+  customHeaderContextMenuItems?: HeaderContextMenuItemProps[];
+  customHeaderText?: React.ReactNode;
   maxBodyHeight?: ComponentProps<typeof ProjectPickerFrameBody>['maxHeight'];
 }
 
 export function ProjectPickerFrame({
   children,
   maxBodyHeight,
+  customHeaderContextMenuItems,
+  customHeaderText,
   scrollContainerRef,
 }: PropsWithChildren<ProjectPickerFrameProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = projectPickerFrameStyles({ euiTheme });
+  const state = useProjectPickerState();
 
   return (
     <EuiSplitPanel.Outer>
       <EuiSplitPanel.Inner css={styles.headerWrapper}>
-        <ProjectPickerFrameHeader />
+        <ProjectPickerFrameHeader
+          customContextMenuItems={customHeaderContextMenuItems}
+          customHeaderText={customHeaderText}
+        />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="none">
         <ProjectPickerFrameBody maxHeight={maxBodyHeight} scrollContainerRef={scrollContainerRef}>
           {children}
         </ProjectPickerFrameBody>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner color="subdued">
-        <ProjectPickerFrameFooter />
-      </EuiSplitPanel.Inner>
+      {state.controlsState !== 'hidden' && (
+        <EuiSplitPanel.Inner color="subdued">
+          <ProjectPickerFrameFooter />
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 }

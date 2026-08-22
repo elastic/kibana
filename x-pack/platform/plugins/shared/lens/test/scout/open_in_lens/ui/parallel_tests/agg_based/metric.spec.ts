@@ -33,8 +33,8 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await convertToLensByTitle({ dashboard }, 'Metric - Basic');
     await lens.waitForVisualization('mtrVis');
 
-    await lens.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    await lens.dimensions.hoverOverDimensionButton();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -57,12 +57,12 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(1);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(1);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
 
-    await lens.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    await lens.dimensions.hoverOverDimensionButton();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -85,13 +85,13 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Overall Max of Count');
     await expect(dimensions[1]).toHaveText('@timestamp');
 
-    await lens.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    await lens.dimensions.hoverOverDimensionButton();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -124,14 +124,14 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('machine.os.raw: Descending');
 
-    await lens.hoverOverDimensionButton();
+    await lens.dimensions.hoverOverDimensionButton();
     await expect
-      .poll(async () => lens.getMetricVisualizationData(), { timeout: 20_000 })
+      .poll(async () => lens.metric.getMetricVisualizationData(), { timeout: 20_000 })
       .toStrictEqual([
         {
           title: 'osx',
@@ -187,7 +187,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
 
     await dimensions[0].click();
     await lens.openPalettePanelFlyout();
-    const colorStops = await lens.getPaletteColorStops();
+    const colorStops = await lens.style.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { color: 'rgba(0, 104, 55, 1)', stop: '12000000000' },
       { color: 'rgba(183, 224, 117, 1)', stop: '13000000000' },

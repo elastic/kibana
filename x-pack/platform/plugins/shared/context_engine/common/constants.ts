@@ -12,6 +12,20 @@ export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 
+/** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
+export const signalGroupsPath = `${internalApiPath}/signals/groups`;
+export const signalsPath = `${internalApiPath}/signals`;
+
+/** Version of the internal Signals API, shared between route registration and the browser client. */
+export const SIGNALS_INTERNAL_API_VERSION = '1';
+
+/** Max number of tag groups returned by the grouped Signals list. */
+export const MAX_SIGNAL_GROUPS = 100;
+
+/** Default and maximum page size when fetching the individual signals in a group. */
+export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
+export const MAX_SIGNALS_PAGE_SIZE = 100;
+
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
@@ -38,6 +52,7 @@ export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 export const MAX_AI_INDICES = 100;
 
 export const MAX_AI_INDEX_ID_LENGTH = 256;
+export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
@@ -45,3 +60,25 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+
+/** Advanced setting that gates the Context Engine feedback loop. */
+export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
+
+/** Task Manager type, id, and schedule for the global signal-generation task. */
+export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
+export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
+export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
+
+/** Agent id whose tool calls are left untagged. */
+export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+
+/**
+ * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept
+ * in-plugin — mirrors Agent Builder's exported `buildAgentBuilderTracesIndexPattern` contract —
+ * so Context Engine does not take a dependency on `@kbn/agent-builder-plugin`.
+ */
+export const AGENT_BUILDER_TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
+
+/** The Agent Builder OTel traces index name for a given Kibana space. */
+export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
+  `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;

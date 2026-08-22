@@ -284,15 +284,16 @@ describe('splitResultToRuleQuery', () => {
     expect(query.breach.segment).toContain('WHERE count > 100');
   });
 
-  it('returns a standalone query with outcome "no_alert_condition" when there is no WHERE', () => {
+  it('returns composed with an empty segment and outcome "no_alert_condition" when there is no WHERE', () => {
     const fullQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
     const { query, outcome } = splitResultToRuleQuery(fullQuery);
 
     expect(outcome).toBe('no_alert_condition');
-    expect(query.format).toBe('standalone');
-    if (query.format !== 'standalone') throw new Error('expected standalone');
-    // The whole pipeline becomes the breach query — every returned row is a breach.
-    expect(query.breach.query).toBe(fullQuery);
+    expect(query.format).toBe('composed');
+    if (query.format !== 'composed') throw new Error('expected composed');
+    // Whole pipeline stays in base; empty segment is rejected at save for alerts.
+    expect(query.base).toBe(fullQuery);
+    expect(query.breach.segment).toBe('');
   });
 
   it('returns outcome "empty" for an empty query', () => {
@@ -355,23 +356,7 @@ describe('resolveUnifiedAlertApplyQuery', () => {
     });
   });
 
-  it('preserves standalone recovery when split stays standalone', () => {
-    const sandbox = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
-      recovery: recoveryQuery,
-    };
-    const split = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
-    };
-    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual({
-      ...split,
-      recovery: recoveryQuery,
-    });
-  });
-
-  it('drops recovery when format changes from standalone to composed', () => {
+  it('does not carry standalone recovery onto the composed split result', () => {
     const sandbox = {
       format: 'standalone' as const,
       breach: { query: 'FROM logs-*' },
@@ -381,20 +366,6 @@ describe('resolveUnifiedAlertApplyQuery', () => {
       format: 'composed' as const,
       base: 'FROM logs-*',
       breach: { segment: '| WHERE count > 100' },
-    };
-    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual(split);
-  });
-
-  it('drops recovery when format changes from composed to standalone', () => {
-    const sandbox = {
-      format: 'composed' as const,
-      base: 'FROM logs-*',
-      breach: { segment: '' },
-      recovery: recoverySegment,
-    };
-    const split = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
     };
     expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual(split);
   });

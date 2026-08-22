@@ -49,9 +49,7 @@ test.describe(
     test('loads the service overview for a service when clicking on it', async ({ page }) => {
       await page.getByText(testData.SERVICE_OPBEANS_NODE).click();
       expect(page.url()).toContain(`/apm/services/${testData.SERVICE_OPBEANS_NODE}/overview`);
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-        testData.SERVICE_OPBEANS_NODE
-      );
+      await expect(page.getByTestId('appHeaderTitle')).toHaveText(testData.SERVICE_OPBEANS_NODE);
     });
 
     test('shows the correct environment when changing the environment', async ({ page }) => {

@@ -15,6 +15,7 @@ import type {
   MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
+  ALERT_EPISODE_STATUS,
   createActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -251,7 +252,7 @@ export class ActionPolicyClient {
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
@@ -335,11 +336,11 @@ export class ActionPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
@@ -408,7 +409,7 @@ export class ActionPolicyClient {
       last_event_timestamp: '',
       group_hash: '',
       episode_id: '',
-      episode_status: 'active',
+      episode_status: ALERT_EPISODE_STATUS.ACTIVE,
       rule: {
         id: ruleId ?? '',
         name: resolvedName,
@@ -428,15 +429,11 @@ export class ActionPolicyClient {
       let isMatch = false;
       try {
         isMatch = evaluateKql(actionPolicy.matcher, context);
-      } catch (err) {
+      } catch {
         this.logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for action policy "${
-              actionPolicy.id
-            }" during pre-matching: ${
-              err instanceof Error ? err.message : String(err)
-            }. Treating as no-match.`,
+          message: 'Policy matcher failed to evaluate; treating as no-match',
           code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+          labels: { policy_id: actionPolicy.id },
         });
         continue;
       }
@@ -486,11 +483,11 @@ export class ActionPolicyClient {
         },
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
   }
 
   public async bulkEnableActionPolicies({
@@ -675,8 +672,8 @@ export class ActionPolicyClient {
     return sortFieldMap[sortField];
   }
 
-  public async getAllTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.getDistinctTags({
+  public async getTags(params?: { search?: string }): Promise<string[]> {
+    return this.actionPolicySavedObjectService.findTags({
       search: params?.search,
     });
   }
@@ -791,12 +788,23 @@ export class ActionPolicyClient {
     });
   }
 
-  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  private markApiKeysForInvalidation(
+    apiKey?: string,
+    createdByUser?: boolean,
+    policyId?: string
+  ): void {
     if (!apiKey || createdByUser) {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+      this.logger.warn({
+        message: 'Failed to mark superseded API key for invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        labels: policyId != null ? { policy_id: policyId } : undefined,
+        error,
+      });
+    });
   }
 
   private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
@@ -814,12 +822,12 @@ export class ActionPolicyClient {
         apiKey,
         createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch (e) {
-      this.logger.debug({
-        message: () =>
-          `Failed to decrypt auth for action policy "${id}": ${
-            e instanceof Error ? e.message : String(e)
-          }`,
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        labels: { policy_id: id },
+        error,
       });
       return null;
     }
@@ -853,8 +861,12 @@ export class ActionPolicyClient {
           break;
         }
       }
-    } catch {
-      // best-effort — same as getDecryptedAuth returning null on failure
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        error,
+      });
     }
 
     return authMap;
@@ -948,11 +960,11 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
     return {
       policy: transformActionPolicySoAttributesToApiResponse({
