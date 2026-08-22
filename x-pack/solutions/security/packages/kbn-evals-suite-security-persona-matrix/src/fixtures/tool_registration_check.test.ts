@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { collectExpectedToolIds, findUnregisteredToolIds } from './tool_registration_check';
+import {
+  collectExpectedToolIds,
+  findUnregisteredToolIds,
+  findUnattachedToolIds,
+} from './tool_registration_check';
 import type { KbnClient } from '@kbn/kbn-client';
 
 describe('collectExpectedToolIds', () => {
@@ -60,5 +64,39 @@ describe('findUnregisteredToolIds', () => {
     await expect(findUnregisteredToolIds(kbnClient, ['virustotal_lookup'])).rejects.toThrow(
       'tool-registration pre-flight'
     );
+  });
+});
+
+describe('findUnattachedToolIds', () => {
+  const makeAgentClient = (tools: Array<{ tool_ids?: string[] }>) =>
+    ({
+      request: jest.fn().mockResolvedValue({ data: { configuration: { tools } } }),
+    } as unknown as KbnClient);
+
+  it('flags a registered tool that is not attached to the agent', async () => {
+    // The 2026-08-22 defect: both tools existed in the registry, but the
+    // default agent shipped `tools: []`, so the model never saw them and
+    // ExpectedToolCalled scored 0 across every workflow-execution run.
+    const kbnClient = makeAgentClient([]);
+    await expect(
+      findUnattachedToolIds(kbnClient, ['virustotal_lookup', 'on_call_lookup'])
+    ).resolves.toEqual(['virustotal_lookup', 'on_call_lookup']);
+  });
+
+  it('returns nothing when every tool is attached', async () => {
+    const kbnClient = makeAgentClient([{ tool_ids: ['virustotal_lookup', 'on_call_lookup'] }]);
+    await expect(
+      findUnattachedToolIds(kbnClient, ['virustotal_lookup', 'on_call_lookup'])
+    ).resolves.toEqual([]);
+  });
+
+  it('flattens tool_ids across multiple selection entries', async () => {
+    const kbnClient = makeAgentClient([
+      { tool_ids: ['virustotal_lookup'] },
+      { tool_ids: ['on_call_lookup'] },
+    ]);
+    await expect(
+      findUnattachedToolIds(kbnClient, ['virustotal_lookup', 'on_call_lookup'])
+    ).resolves.toEqual([]);
   });
 });

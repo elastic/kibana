@@ -13,6 +13,7 @@ import { seedChrysalisAlerts, cleanupChrysalisAlerts } from '../src/fixtures/chr
 import { seedPersonaMatrixEnvironment, cleanupEnvSeeds } from '../src/fixtures/env_seeds';
 import {
   seedPersonaMatrixTools,
+  attachPersonaMatrixToolsToAgent,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
 import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
@@ -32,6 +33,9 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
     });
     log.info('[persona-matrix] seeded environment-truth data (endpoint, labs, ti-mock, entity)');
     await seedPersonaMatrixTools({ kbnClient, log });
+    // Registry creation alone leaves the tools invisible to the model — the
+    // default agent ships `tools: []` and only sees `defaultAgentToolIds`.
+    await attachPersonaMatrixToolsToAgent({ kbnClient, log });
     log.info('[persona-matrix] seeded virustotal_lookup + on_call_lookup tools');
   });
 

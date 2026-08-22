@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { personaMatrixDataset } from '../datasets';
 
 /**
@@ -101,4 +102,38 @@ export async function assertPersonaMatrixToolsRegistered({
   log.info(
     `[persona-matrix] pre-flight: ${custom.length} custom tools registered (${custom.join(', ')})`
   );
+
+  // Registration is necessary but NOT sufficient: `selectTools` only exposes
+  // tools attached to the agent's configuration plus `defaultAgentToolIds`.
+  // A registered-but-unattached tool is invisible to the model, which zeroes
+  // ExpectedToolCalled while every other signal looks healthy.
+  const unattached = await findUnattachedToolIds(kbnClient, custom);
+  if (unattached.length > 0) {
+    throw new Error(
+      `[persona-matrix] pre-flight tool-attachment check failed: tools registered but not attached ` +
+        `to agent '${agentBuilderDefaultAgentId}': ${unattached.join(', ')}. ` +
+        `Call attachPersonaMatrixToolsToAgent after seeding.`
+    );
+  }
+  log.info(`[persona-matrix] pre-flight: custom tools attached to '${agentBuilderDefaultAgentId}'`);
+}
+
+export async function findUnattachedToolIds(
+  kbnClient: KbnClient,
+  toolIds: readonly string[]
+): Promise<string[]> {
+  const response = await kbnClient.request<{
+    configuration?: { tools?: Array<{ tool_ids?: string[] }> };
+  }>({
+    method: 'GET',
+    path: `/api/agent_builder/agents/${agentBuilderDefaultAgentId}`,
+    headers: {
+      'kbn-xsrf': 'persona-matrix-tool-check',
+      'elastic-api-version': '2023-10-31',
+    },
+  });
+  const attached = new Set(
+    (response.data?.configuration?.tools ?? []).flatMap((entry) => entry.tool_ids ?? [])
+  );
+  return toolIds.filter((id) => !attached.has(id));
 }

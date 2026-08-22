@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 /**
  * Seeds two real, registered Agent Builder tools (`virustotal_lookup` and
@@ -125,6 +126,38 @@ export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOption
       },
     },
   });
+}
+
+/**
+ * Attaches the seeded tools to the default agent's configuration.
+ *
+ * Creating a tool only puts it in the registry. `selectTools` (agent_builder
+ * server) exposes ONLY `agentConfiguration.tools` plus the hardcoded
+ * `defaultAgentToolIds` (all `platform.core.*`) — so a registry tool that is
+ * never attached is invisible to the model, and any example scoring
+ * "did it call virustotal_lookup" is structurally unanswerable. Verified live
+ * 2026-08-22: default agent ships `tools: []`, and every workflow-execution
+ * run scored ExpectedToolCalled=0 until this attach was added.
+ */
+export async function attachPersonaMatrixToolsToAgent({
+  kbnClient,
+  log,
+}: SeedToolsOptions): Promise<void> {
+  await kbnClient.request({
+    method: 'PUT',
+    path: `/api/agent_builder/agents/${agentBuilderDefaultAgentId}`,
+    headers: AGENT_BUILDER_TOOLS_HEADERS,
+    body: {
+      configuration: {
+        tools: [{ tool_ids: [...PERSONA_MATRIX_TOOL_IDS] }],
+      },
+    },
+  });
+  log.info(
+    `[persona-matrix] attached ${PERSONA_MATRIX_TOOL_IDS.join(
+      ', '
+    )} to '${agentBuilderDefaultAgentId}'`
+  );
 }
 
 export async function cleanupPersonaMatrixTools({
