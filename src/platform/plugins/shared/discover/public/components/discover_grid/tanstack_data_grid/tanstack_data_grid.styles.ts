@@ -458,6 +458,52 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     minWidth: 0,
   }),
 
+  toolbarControlButton: css({
+    display: 'inline-flex',
+    alignItems: 'stretch',
+    blockSize: euiTheme.size.xl,
+    overflow: 'hidden',
+    border: euiTheme.border.thin,
+    borderRadius: euiTheme.border.radius.small,
+    flexShrink: 0,
+  }),
+
+  toolbarPopover: css({
+    display: 'inline-flex',
+    alignItems: 'stretch',
+    blockSize: '100%',
+  }),
+
+  toolbarTextControl: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    blockSize: '100%',
+  }),
+
+  toolbarIconControlContainer: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    inlineSize: euiTheme.size.xl,
+    blockSize: euiTheme.size.xl,
+  }),
+
+  toolbarIconControl: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    inlineSize: euiTheme.size.xl,
+    blockSize: euiTheme.size.xl,
+    borderRadius: 0,
+  }),
+
+  toolbarSearchControl: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    blockSize: euiTheme.size.xl,
+    minInlineSize: 210,
+  }),
+
   toolbarControlGroup: css({
     position: 'relative',
     overflow: 'hidden',
@@ -466,16 +512,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     display: 'inline-flex',
     alignItems: 'stretch',
     flexShrink: 0,
-    '> *': {
-      inlineSize: euiTheme.size.xl,
-      blockSize: euiTheme.size.xl,
-      borderRadius: 0,
-    },
     '> * + *': {
       borderInlineStart: euiTheme.border.thin,
-    },
-    '.euiToolTipAnchor': {
-      display: 'inline-flex',
     },
   }),
 
@@ -489,26 +527,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     backgroundColor: euiTheme.colors.backgroundBasePlain,
   }),
 
-  // -- Find in table --
-  findBar: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-    borderBottom: euiTheme.border.thin,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    flexShrink: 0,
-  }),
-
   findInput: css({
-    minWidth: 200,
-  }),
-
-  findCounter: css({
-    fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap',
-    minWidth: 50,
-    textAlign: 'center',
+    minWidth: 210,
   }),
 
   searchHighlight: css({

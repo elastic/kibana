@@ -724,34 +724,31 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await page.waitForTimeout(1_000);
 
     // Click the search button in the toolbar
-    const findBtn = page.locator('[data-test-subj="dataGridFindInTableButton"]');
+    const findBtn = page.locator('[data-test-subj="startInTableSearchButton"]');
     await expect(findBtn).toBeVisible({ timeout: 5_000 });
     await findBtn.click();
     await page.waitForTimeout(300);
 
-    // The find bar should appear
-    const findBar = page.locator('[data-test-subj="findInTableBar"]');
-    await expect(findBar).toBeVisible({ timeout: 3_000 });
-
     // Type a search term that exists in the data
-    const findInput = page.locator('[data-test-subj="findInTableInput"]');
+    const findInput = page.locator('[data-test-subj="inTableSearchInput"]');
+    await expect(findInput).toBeVisible({ timeout: 3_000 });
     await findInput.fill('hello');
     await page.waitForTimeout(500);
 
     // Counter should show matches
-    const counter = page.locator('[data-test-subj="findInTableCounter"]');
+    const counter = page.locator('[data-test-subj="inTableSearchMatchesCounter"]');
     const counterText = await counter.textContent();
     console.log(`Find counter: ${counterText}`);
     expect(counterText).toContain('/');
     expect(counterText).not.toBe('0/0');
 
     // Click next match
-    const nextBtn = page.locator('[data-test-subj="findInTableNext"]');
+    const nextBtn = page.locator('[data-test-subj="inTableSearchButtonNext"]');
     await nextBtn.click();
     await page.waitForTimeout(300);
 
     // Click prev match
-    const prevBtn = page.locator('[data-test-subj="findInTablePrev"]');
+    const prevBtn = page.locator('[data-test-subj="inTableSearchButtonPrev"]');
     await prevBtn.click();
     await page.waitForTimeout(300);
 
@@ -761,13 +758,12 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     console.log(`Highlight marks: ${highlightCount}`);
     expect(highlightCount).toBeGreaterThan(0);
 
-    // Close the find bar
-    const closeBtn = page.locator('[data-test-subj="findInTableClose"]');
-    await closeBtn.click();
+    // Close the search input like EuiDataGrid
+    await findInput.press('Escape');
     await page.waitForTimeout(300);
 
-    // Find bar should be gone
-    await expect(findBar).not.toBeVisible({ timeout: 3_000 });
+    // Search input should be gone
+    await expect(findInput).not.toBeVisible({ timeout: 3_000 });
 
     // Highlights should be gone
     const afterHighlights = await page.locator('mark').count();

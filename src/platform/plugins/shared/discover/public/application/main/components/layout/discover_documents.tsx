@@ -633,6 +633,7 @@ function DiscoverDocumentsComponent({
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
             tanStackToolbarLeftSide={isDataGridFullScreen ? undefined : renderViewModeToggle()}
+            tanStackToolbarTrailingControl={saveToDashboardButton}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}

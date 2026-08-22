@@ -32,6 +32,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
   tanStackToolbarLeftSide?: ReactNode;
+  tanStackToolbarTrailingControl?: ReactNode;
 }
 
 /**
@@ -46,6 +47,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
     tanStackToolbarLeftSide,
+    tanStackToolbarTrailingControl,
     ...props
   }) => {
     const { dataView, services } = props;
@@ -191,6 +193,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           externalAdditionalControls={externalAdditionalControls}
           gridImplementationSwitch={gridImplementationSwitch}
           toolbarLeftSide={tanStackToolbarLeftSide}
+          toolbarTrailingControl={tanStackToolbarTrailingControl}
+          showKeyboardShortcuts={props.showKeyboardShortcuts}
         />
       );
     }

@@ -29,6 +29,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDataGridToolbarControl,
+  EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -37,10 +38,13 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiPopoverTitle,
   EuiProgress,
   EuiText,
   EuiToolTip,
   keys,
+  logicalStyle,
+  mathWithUnits,
   useEuiTheme,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -151,6 +155,8 @@ export interface TanStackDataGridProps {
   externalAdditionalControls?: React.ReactNode;
   gridImplementationSwitch?: React.ReactNode;
   toolbarLeftSide?: React.ReactNode;
+  toolbarTrailingControl?: React.ReactNode;
+  showKeyboardShortcuts?: UnifiedDataTableProps['showKeyboardShortcuts'];
 }
 
 interface DensityConfig {
@@ -366,61 +372,85 @@ const FindInTableBar = React.memo(
       [onClose, onPrev, onNext]
     );
 
+    const handleBlur = useCallback(
+      (event: React.FocusEvent<HTMLInputElement>) => {
+        if (!inputValue && !event.currentTarget.contains(event.relatedTarget)) {
+          onClose();
+        }
+      },
+      [inputValue, onClose]
+    );
+
     const hasResults = matchesCount > 0;
-    const counter = inputValue ? `${hasResults ? activeIndex + 1 : 0}/${matchesCount}` : '';
+    const counter = `${inputValue && hasResults ? activeIndex + 1 : 0}/${matchesCount}`;
 
     return (
-      <div css={styles.findBar} data-test-subj="findInTableBar">
-        <EuiFieldSearch
-          inputRef={(node) => {
-            (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
-          }}
-          compressed
-          css={styles.findInput}
-          placeholder="Find in table"
-          value={inputValue}
-          onChange={handleChange}
-          onKeyUp={handleKeyUp}
-          data-test-subj="findInTableInput"
-          isClearable
-          aria-label="Find in table"
-        />
-        <EuiText size="xs" css={styles.findCounter} data-test-subj="findInTableCounter">
-          {counter}
-        </EuiText>
-        <EuiToolTip content="Previous match" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="arrowUp"
-            size="xs"
-            color="text"
-            disabled={!hasResults}
-            aria-label="Previous match"
-            onClick={onPrev}
-            data-test-subj="findInTablePrev"
-          />
-        </EuiToolTip>
-        <EuiToolTip content="Next match" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="arrowDown"
-            size="xs"
-            color="text"
-            disabled={!hasResults}
-            aria-label="Next match"
-            onClick={onNext}
-            data-test-subj="findInTableNext"
-          />
-        </EuiToolTip>
-        <EuiToolTip content="Close find bar" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="cross"
-            size="xs"
-            color="text"
-            aria-label="Close find bar"
-            onClick={onClose}
-            data-test-subj="findInTableClose"
-          />
-        </EuiToolTip>
-      </div>
+      <EuiFieldSearch
+        inputRef={(node) => {
+          (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+        }}
+        compressed
+        css={styles.findInput}
+        placeholder={i18n.translate('discover.grid.tanStack.findInTablePlaceholder', {
+          defaultMessage: 'Find in table',
+        })}
+        value={inputValue}
+        onChange={handleChange}
+        onKeyUp={handleKeyUp}
+        onBlur={handleBlur}
+        data-test-subj="inTableSearchInput"
+        isClearable
+        aria-label={i18n.translate('discover.grid.tanStack.findInTableInputAriaLabel', {
+          defaultMessage: 'Find in table',
+        })}
+        append={
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued" data-test-subj="inTableSearchMatchesCounter">
+                {counter}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('discover.grid.tanStack.previousMatchButtonLabel', {
+                  defaultMessage: 'Previous',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="chevronSingleUp"
+                  color="text"
+                  disabled={!hasResults}
+                  aria-label={i18n.translate('discover.grid.tanStack.previousMatchButtonLabel', {
+                    defaultMessage: 'Previous',
+                  })}
+                  onClick={onPrev}
+                  data-test-subj="inTableSearchButtonPrev"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('discover.grid.tanStack.nextMatchButtonLabel', {
+                  defaultMessage: 'Next',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="chevronSingleDown"
+                  color="text"
+                  disabled={!hasResults}
+                  aria-label={i18n.translate('discover.grid.tanStack.nextMatchButtonLabel', {
+                    defaultMessage: 'Next',
+                  })}
+                  onClick={onNext}
+                  data-test-subj="inTableSearchButtonNext"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     );
   }
 );
@@ -520,7 +550,7 @@ const CellActions = React.memo(
           <>
             <EuiToolTip content="Filter for value" disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 aria-label="Filter for value"
                 size="xs"
                 iconSize="s"
@@ -531,7 +561,7 @@ const CellActions = React.memo(
             </EuiToolTip>
             <EuiToolTip content="Filter out value" disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="minusInCircle"
+                iconType="minusCircle"
                 aria-label="Filter out value"
                 size="xs"
                 iconSize="s"
@@ -544,7 +574,7 @@ const CellActions = React.memo(
         )}
         <EuiToolTip content="Copy value" disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="copyClipboard"
+            iconType="copy"
             aria-label="Copy value"
             size="xs"
             iconSize="s"
@@ -631,7 +661,7 @@ const CellPopover = React.memo(
                 <>
                   <EuiToolTip content="Filter for value" disableScreenReaderOutput>
                     <EuiButtonIcon
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       aria-label="Filter for value"
                       size="xs"
                       onClick={() => {
@@ -642,7 +672,7 @@ const CellPopover = React.memo(
                   </EuiToolTip>
                   <EuiToolTip content="Filter out value" disableScreenReaderOutput>
                     <EuiButtonIcon
-                      iconType="minusInCircle"
+                      iconType="minusCircle"
                       aria-label="Filter out value"
                       size="xs"
                       onClick={() => {
@@ -655,7 +685,7 @@ const CellPopover = React.memo(
               )}
               <EuiToolTip content="Copy value" disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="copyClipboard"
+                  iconType="copy"
                   aria-label="Copy value"
                   size="xs"
                   onClick={handleCopy}
@@ -992,6 +1022,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     externalAdditionalControls,
     gridImplementationSwitch,
     toolbarLeftSide,
+    toolbarTrailingControl,
+    showKeyboardShortcuts = true,
   }) => {
     const { euiTheme } = useEuiTheme();
     const { fieldFormats, storage, toastNotifications, dataViewFieldEditor, data } = services;
@@ -1129,6 +1161,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [isColumnsPopoverOpen, setIsColumnsPopoverOpen] = useState(false);
     const [isSortPopoverOpen, setIsSortPopoverOpen] = useState(false);
     const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+    const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false);
     const densityCfg = DENSITY_CONFIG[dataGridDensity];
 
     const {
@@ -1883,6 +1916,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     }, [rows, selectedRows, effectiveColumns]);
 
     const isLoadingMore = loadingState === DataLoadingState.loadingMore;
+    const displayPopoverWidth = mathWithUnits(
+      [euiTheme.components.forms.maxWidth, euiTheme.size.s],
+      (formMaxWidth, padding) => formMaxWidth + padding * 2
+    );
 
     return (
       <div
@@ -1892,18 +1929,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         style={densityVars}
         data-test-subj="tanstackGridWrapper"
       >
-        {/* Find in table bar */}
-        {isFindOpen && (
-          <FindInTableBar
-            matchesCount={findMatches.length}
-            activeIndex={findActiveIndex}
-            onSearch={handleFindSearch}
-            onNext={handleFindNext}
-            onPrev={handleFindPrev}
-            onClose={handleFindClose}
-            styles={styles}
-          />
-        )}
         {/* Toolbar */}
         <div css={styles.toolbar}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
@@ -1937,7 +1962,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                     items={[
                       <EuiContextMenuItem
                         key="copyAsTsv"
-                        icon="copyClipboard"
+                        icon="copy"
                         onClick={() => {
                           copySelectedAsText();
                           setIsSelectionPopoverOpen(false);
@@ -1949,7 +1974,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         key="copyAsJson"
-                        icon="copyClipboard"
+                        icon="copy"
                         onClick={() => {
                           copySelectedAsJson();
                           setIsSelectionPopoverOpen(false);
@@ -1961,7 +1986,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         key="copyAsMarkdown"
-                        icon="copyClipboard"
+                        icon="copy"
                         onClick={() => {
                           copySelectedAsMarkdown();
                           setIsSelectionPopoverOpen(false);
@@ -1998,168 +2023,307 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 R{focusedCell.row + 1}:C{focusedCell.col + 1}
               </EuiBadge>
             )}
-            <EuiPopover
-              aria-label={i18n.translate('discover.grid.tanStack.columnsPopoverAriaLabel', {
-                defaultMessage: 'Visible columns',
-              })}
-              button={
-                <EuiDataGridToolbarControl
-                  iconType="list"
-                  badgeContent={dataColumns.length}
-                  onClick={() => setIsColumnsPopoverOpen((isOpen) => !isOpen)}
-                  data-test-subj="dataGridColumnSelectorButton"
-                >
-                  {i18n.translate('discover.grid.tanStack.columnsButtonLabel', {
-                    defaultMessage: 'Columns',
-                  })}
-                </EuiDataGridToolbarControl>
-              }
-              isOpen={isColumnsPopoverOpen}
-              closePopover={() => setIsColumnsPopoverOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel
-                items={dataColumns.map(({ id, isSummary, isTimestamp }) => (
-                  <EuiContextMenuItem
-                    key={id}
-                    icon="check"
-                    disabled={isSummary || isTimestamp}
-                    onClick={() => {
-                      persistVisibleColumns(effectiveColumns.filter((columnId) => columnId !== id));
-                      setIsColumnsPopoverOpen(false);
-                    }}
-                  >
-                    {id === SOURCE_COLUMN_ID
-                      ? i18n.translate('discover.grid.tanStack.summaryColumnLabel', {
-                          defaultMessage: 'Summary',
-                        })
-                      : id}
-                  </EuiContextMenuItem>
-                ))}
-              />
-            </EuiPopover>
-            <EuiPopover
-              aria-label={i18n.translate('discover.grid.tanStack.sortFieldsPopoverAriaLabel', {
-                defaultMessage: 'Sorted fields',
-              })}
-              button={
-                <EuiDataGridToolbarControl
-                  iconType="sortable"
-                  badgeContent={sort.length || undefined}
-                  onClick={() => setIsSortPopoverOpen((isOpen) => !isOpen)}
-                  data-test-subj="dataGridColumnSortingButton"
-                >
-                  {i18n.translate('discover.grid.tanStack.sortFieldsButtonLabel', {
-                    defaultMessage: 'Sort fields',
-                  })}
-                </EuiDataGridToolbarControl>
-              }
-              isOpen={isSortPopoverOpen}
-              closePopover={() => setIsSortPopoverOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel
-                items={
-                  sort.length
-                    ? sort.map(([fieldName, direction]) => (
-                        <EuiContextMenuItem
-                          key={fieldName}
-                          icon={direction === 'asc' ? 'sortUp' : 'sortDown'}
-                          onClick={() => {
-                            onSort?.(
-                              sort.map(([id, currentDirection]) =>
-                                id === fieldName
-                                  ? [id, currentDirection === 'asc' ? 'desc' : 'asc']
-                                  : [id, currentDirection]
-                              )
-                            );
-                          }}
-                        >
-                          {fieldName}
-                        </EuiContextMenuItem>
-                      ))
-                    : [
-                        <EuiContextMenuItem key="noSort" disabled>
-                          {i18n.translate('discover.grid.tanStack.noSortFieldsLabel', {
-                            defaultMessage: 'No fields are sorted',
-                          })}
-                        </EuiContextMenuItem>,
-                      ]
-                }
-              />
-            </EuiPopover>
-            <div css={styles.toolbarControlGroup}>
-              <EuiToolTip content="Find in table" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="search"
-                  aria-label="Find in table"
-                  size="xs"
-                  onClick={() => setIsFindOpen((v) => !v)}
-                  data-test-subj="dataGridFindInTableButton"
-                />
-              </EuiToolTip>
+            <div css={styles.toolbarControlButton}>
               <EuiPopover
-                aria-label="Grid density"
+                css={styles.toolbarPopover}
+                aria-label={i18n.translate('discover.grid.tanStack.columnsPopoverAriaLabel', {
+                  defaultMessage: 'Visible columns',
+                })}
                 button={
-                  <EuiToolTip content="Grid density" disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType={densityCfg.icon}
-                      aria-label="Grid density"
-                      size="xs"
-                      onClick={() => setIsDensityPopoverOpen((v) => !v)}
-                      data-test-subj="dataGridDensityButton"
-                    />
-                  </EuiToolTip>
+                  <EuiDataGridToolbarControl
+                    css={styles.toolbarTextControl}
+                    iconType="table"
+                    badgeContent={dataColumns.length}
+                    onClick={() => setIsColumnsPopoverOpen((isOpen) => !isOpen)}
+                    data-test-subj="dataGridColumnSelectorButton"
+                  >
+                    {i18n.translate('discover.grid.tanStack.columnsButtonLabel', {
+                      defaultMessage: 'Columns',
+                    })}
+                  </EuiDataGridToolbarControl>
                 }
-                isOpen={isDensityPopoverOpen}
-                closePopover={() => setIsDensityPopoverOpen(false)}
+                isOpen={isColumnsPopoverOpen}
+                closePopover={() => setIsColumnsPopoverOpen(false)}
+                panelPaddingSize="none"
                 anchorPosition="downRight"
-                panelPaddingSize="s"
               >
-                <UnifiedDataTableAdditionalDisplaySettings
-                  rowHeight={rowHeight}
-                  onChangeRowHeight={onChangeRowHeight}
-                  onChangeRowHeightLines={onChangeRowHeightLines}
-                  headerRowHeight={headerRowHeight}
-                  onChangeHeaderRowHeight={onChangeHeaderRowHeight}
-                  onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
-                  maxAllowedSampleSize={maxAllowedSampleSize}
-                  sampleSize={sampleSizeState}
-                  onChangeSampleSize={onUpdateSampleSize}
-                  lineCountInput={lineCountInput}
-                  headerLineCountInput={headerLineCountInput}
-                  densityControl={
-                    <EuiButtonGroup
-                      legend={i18n.translate('discover.grid.tanStack.gridDensityLegend', {
-                        defaultMessage: 'Grid density',
-                      })}
-                      options={DENSITY_BUTTONS}
-                      idSelected={dataGridDensity}
-                      onChange={(id) => {
-                        onChangeDataGridDensity(DATA_GRID_DENSITY_STYLE_MAP[id as DataGridDensity]);
+                <EuiContextMenuPanel
+                  items={dataColumns.map(({ id, isSummary, isTimestamp }) => (
+                    <EuiContextMenuItem
+                      key={id}
+                      icon="check"
+                      disabled={isSummary || isTimestamp}
+                      onClick={() => {
+                        persistVisibleColumns(
+                          effectiveColumns.filter((columnId) => columnId !== id)
+                        );
+                        setIsColumnsPopoverOpen(false);
                       }}
-                      buttonSize="compressed"
-                      isFullWidth
-                      data-test-subj="dataGridDensityButtonGroup"
-                    />
-                  }
-                  additionalContent={gridImplementationSwitch}
+                    >
+                      {id === SOURCE_COLUMN_ID
+                        ? i18n.translate('discover.grid.tanStack.summaryColumnLabel', {
+                            defaultMessage: 'Summary',
+                          })
+                        : id}
+                    </EuiContextMenuItem>
+                  ))}
                 />
               </EuiPopover>
-              <EuiToolTip
-                content={isFullScreen ? 'Exit full screen' : 'Full screen'}
-                disableScreenReaderOutput
+            </div>
+            <div css={styles.toolbarControlButton}>
+              <EuiPopover
+                css={styles.toolbarPopover}
+                aria-label={i18n.translate('discover.grid.tanStack.sortFieldsPopoverAriaLabel', {
+                  defaultMessage: 'Sorted fields',
+                })}
+                button={
+                  <EuiDataGridToolbarControl
+                    css={styles.toolbarTextControl}
+                    iconType="sortable"
+                    badgeContent={sort.length || undefined}
+                    onClick={() => setIsSortPopoverOpen((isOpen) => !isOpen)}
+                    data-test-subj="dataGridColumnSortingButton"
+                  >
+                    {i18n.translate('discover.grid.tanStack.sortFieldsButtonLabel', {
+                      defaultMessage: 'Sort fields',
+                    })}
+                  </EuiDataGridToolbarControl>
+                }
+                isOpen={isSortPopoverOpen}
+                closePopover={() => setIsSortPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
               >
-                <EuiButtonIcon
-                  iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-                  aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
-                  size="xs"
-                  onClick={toggleFullScreen}
-                  data-test-subj="dataGridFullScreenButton"
+                <EuiContextMenuPanel
+                  items={
+                    sort.length
+                      ? sort.map(([fieldName, direction]) => (
+                          <EuiContextMenuItem
+                            key={fieldName}
+                            icon={direction === 'asc' ? 'sortUp' : 'sortDown'}
+                            onClick={() => {
+                              onSort?.(
+                                sort.map(([id, currentDirection]) =>
+                                  id === fieldName
+                                    ? [id, currentDirection === 'asc' ? 'desc' : 'asc']
+                                    : [id, currentDirection]
+                                )
+                              );
+                            }}
+                          >
+                            {fieldName}
+                          </EuiContextMenuItem>
+                        ))
+                      : [
+                          <EuiContextMenuItem key="noSort" disabled>
+                            {i18n.translate('discover.grid.tanStack.noSortFieldsLabel', {
+                              defaultMessage: 'No fields are sorted',
+                            })}
+                          </EuiContextMenuItem>,
+                        ]
+                  }
                 />
-              </EuiToolTip>
+              </EuiPopover>
+            </div>
+            <div css={styles.toolbarControlGroup}>
+              <div
+                css={isFindOpen ? styles.toolbarSearchControl : styles.toolbarIconControlContainer}
+              >
+                {isFindOpen ? (
+                  <FindInTableBar
+                    matchesCount={findMatches.length}
+                    activeIndex={findActiveIndex}
+                    onSearch={handleFindSearch}
+                    onNext={handleFindNext}
+                    onPrev={handleFindPrev}
+                    onClose={handleFindClose}
+                    styles={styles}
+                  />
+                ) : (
+                  <EuiToolTip
+                    content={i18n.translate('discover.grid.tanStack.findInTableButtonLabel', {
+                      defaultMessage: 'Find in table',
+                    })}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      css={styles.toolbarIconControl}
+                      iconType="magnify"
+                      aria-label={i18n.translate('discover.grid.tanStack.findInTableButtonLabel', {
+                        defaultMessage: 'Find in table',
+                      })}
+                      size="xs"
+                      color="text"
+                      onClick={() => setIsFindOpen(true)}
+                      data-test-subj="startInTableSearchButton"
+                    />
+                  </EuiToolTip>
+                )}
+              </div>
+              {showKeyboardShortcuts && (
+                <div css={styles.toolbarIconControlContainer}>
+                  <EuiPopover
+                    css={styles.toolbarPopover}
+                    aria-label={i18n.translate(
+                      'discover.grid.tanStack.keyboardShortcutsPopoverAriaLabel',
+                      { defaultMessage: 'Keyboard shortcuts' }
+                    )}
+                    button={
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'discover.grid.tanStack.keyboardShortcutsButtonLabel',
+                          { defaultMessage: 'Keyboard shortcuts' }
+                        )}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          css={styles.toolbarIconControl}
+                          iconType="keyboard"
+                          aria-label={i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsButtonLabel',
+                            { defaultMessage: 'Keyboard shortcuts' }
+                          )}
+                          size="xs"
+                          color="text"
+                          onClick={() => setIsKeyboardShortcutsOpen((isOpen) => !isOpen)}
+                          data-test-subj="dataGridKeyboardShortcutsButton"
+                        />
+                      </EuiToolTip>
+                    }
+                    isOpen={isKeyboardShortcutsOpen}
+                    closePopover={() => setIsKeyboardShortcutsOpen(false)}
+                    anchorPosition="downRight"
+                    panelPaddingSize="s"
+                  >
+                    <EuiPopoverTitle>
+                      {i18n.translate('discover.grid.tanStack.keyboardShortcutsTitle', {
+                        defaultMessage: 'Keyboard shortcuts',
+                      })}
+                    </EuiPopoverTitle>
+                    <EuiDescriptionList
+                      compressed
+                      type="column"
+                      listItems={[
+                        {
+                          title: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsNavigationKeys',
+                            { defaultMessage: 'Arrow keys' }
+                          ),
+                          description: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsNavigationDescription',
+                            { defaultMessage: 'Move between cells' }
+                          ),
+                        },
+                        {
+                          title: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsSearchKeys',
+                            { defaultMessage: 'Ctrl/Command + F' }
+                          ),
+                          description: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsSearchDescription',
+                            { defaultMessage: 'Find in the table' }
+                          ),
+                        },
+                        {
+                          title: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsCloseKey',
+                            { defaultMessage: 'Escape' }
+                          ),
+                          description: i18n.translate(
+                            'discover.grid.tanStack.keyboardShortcutsCloseDescription',
+                            { defaultMessage: 'Close an open cell popover' }
+                          ),
+                        },
+                      ]}
+                    />
+                  </EuiPopover>
+                </div>
+              )}
+              <div css={styles.toolbarIconControlContainer}>
+                <EuiPopover
+                  css={styles.toolbarPopover}
+                  aria-label={i18n.translate('discover.grid.tanStack.gridDensityPopoverAriaLabel', {
+                    defaultMessage: 'Display options',
+                  })}
+                  button={
+                    <EuiToolTip
+                      content={i18n.translate('discover.grid.tanStack.gridDensityButtonLabel', {
+                        defaultMessage: 'Display options',
+                      })}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        css={styles.toolbarIconControl}
+                        iconType="controls"
+                        aria-label={i18n.translate(
+                          'discover.grid.tanStack.gridDensityButtonLabel',
+                          { defaultMessage: 'Display options' }
+                        )}
+                        size="xs"
+                        color="text"
+                        onClick={() => setIsDensityPopoverOpen((v) => !v)}
+                        data-test-subj="dataGridDensityButton"
+                      />
+                    </EuiToolTip>
+                  }
+                  isOpen={isDensityPopoverOpen}
+                  closePopover={() => setIsDensityPopoverOpen(false)}
+                  anchorPosition="downRight"
+                  panelPaddingSize="s"
+                  panelProps={{ css: logicalStyle('width', displayPopoverWidth) }}
+                >
+                  <UnifiedDataTableAdditionalDisplaySettings
+                    rowHeight={rowHeight}
+                    onChangeRowHeight={onChangeRowHeight}
+                    onChangeRowHeightLines={onChangeRowHeightLines}
+                    headerRowHeight={headerRowHeight}
+                    onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+                    onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+                    maxAllowedSampleSize={maxAllowedSampleSize}
+                    sampleSize={sampleSizeState}
+                    onChangeSampleSize={onUpdateSampleSize}
+                    lineCountInput={lineCountInput}
+                    headerLineCountInput={headerLineCountInput}
+                    densityControl={
+                      <EuiButtonGroup
+                        legend={i18n.translate('discover.grid.tanStack.gridDensityLegend', {
+                          defaultMessage: 'Grid density',
+                        })}
+                        options={DENSITY_BUTTONS}
+                        idSelected={dataGridDensity}
+                        onChange={(id) => {
+                          onChangeDataGridDensity(
+                            DATA_GRID_DENSITY_STYLE_MAP[id as DataGridDensity]
+                          );
+                        }}
+                        buttonSize="compressed"
+                        isFullWidth
+                        data-test-subj="dataGridDensityButtonGroup"
+                      />
+                    }
+                    additionalContent={gridImplementationSwitch}
+                  />
+                </EuiPopover>
+              </div>
+              <div css={styles.toolbarIconControlContainer}>
+                <EuiToolTip
+                  content={isFullScreen ? 'Exit full screen' : 'Full screen'}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    css={styles.toolbarIconControl}
+                    iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+                    aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
+                    size="xs"
+                    color="text"
+                    onClick={toggleFullScreen}
+                    data-test-subj="dataGridFullScreenButton"
+                  />
+                </EuiToolTip>
+              </div>
+              {toolbarTrailingControl && (
+                <div css={styles.toolbarIconControlContainer}>{toolbarTrailingControl}</div>
+              )}
             </div>
           </div>
         </div>

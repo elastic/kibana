@@ -197,12 +197,15 @@ describe('TanStackDataGrid EUI parity', () => {
       showTimeCol: true,
       expandedDoc: undefined,
       toolbarLeftSide: <div data-test-subj="toolbarLeftSide">2 documents | View as</div>,
+      toolbarTrailingControl: <button data-test-subj="toolbarTrailingControl">Save</button>,
     });
 
     expect(screen.getByTestId('toolbarLeftSide')).toBeInTheDocument();
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeInTheDocument();
     expect(screen.getByTestId('dataGridColumnSortingButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridKeyboardShortcutsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('toolbarTrailingControl')).toBeInTheDocument();
   });
 
   it('groups profile-provided controls in the leading actions column', () => {
@@ -241,5 +244,14 @@ describe('TanStackDataGrid EUI parity', () => {
     fireEvent.click(screen.getByTestId('dataGridDensityButton'));
 
     expect(screen.getAllByTestId('unifiedDataTableSampleSizeInput')).toHaveLength(2);
+  });
+
+  it('opens search inline in the toolbar like EuiDataGrid', () => {
+    renderGrid({ expandedDoc: undefined });
+
+    fireEvent.click(screen.getByTestId('startInTableSearchButton'));
+
+    expect(screen.getByTestId('inTableSearchInput')).toBeInTheDocument();
+    expect(screen.getByTestId('inTableSearchMatchesCounter')).toHaveTextContent('0/0');
   });
 });
