@@ -32,7 +32,7 @@ import os
 import shlex
 import subprocess
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 SSH_KEY = os.path.expanduser("~/.ssh/azure_eval_farm")
@@ -438,7 +438,15 @@ def prepare(model: str) -> tuple[str, str]:
     ip = provision(model)
     if not wait_ssh(ip):
         raise RuntimeError(f"ssh never ready: {model} @ {ip}")
-    deploy(ip)
+    # A VM whose sshd accepts TCP before it accepts auth, or that hits a
+    # transient scp reset, used to abort the ENTIRE sweep here (2026-08-22:
+    # 17/19 deployed, one scp failure, zero launches). Retry once after a
+    # short wait; a genuinely dead VM raises and is skipped by the caller.
+    try:
+        deploy(ip)
+    except subprocess.CalledProcessError:
+        time.sleep(30)
+        deploy(ip)
     return model, ip
 
 
@@ -465,7 +473,19 @@ def main() -> None:
     # Provision + deploy in parallel (independent per VM); launches stay serial.
     ips: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=5) as pool:
-        for model, ip in pool.map(prepare, models):
+        # as_completed + try/except so one dead VM (eviction, sshd race)
+        # loses its cell instead of killing the whole sweep before launch.
+        futures = {pool.submit(prepare, model): model for model in models}
+        for fut in as_completed(futures):
+            model = futures[fut]
+            try:
+                _, ip = fut.result()
+            except Exception as exc:
+                print(f"[skip] {model}: prepare failed ({exc})", flush=True)
+                (SWEEP_DIR / model).mkdir(parents=True, exist_ok=True)
+                json.dump({"model": model, "state": "FAIL", "error": f"prepare: {exc}"},
+                          open(SWEEP_DIR / model / "status.json", "w"))
+                continue
             ips[model] = ip
             (SWEEP_DIR / model).mkdir(parents=True, exist_ok=True)
             json.dump({"ip": ip, "model": model, "state": "booting"},
