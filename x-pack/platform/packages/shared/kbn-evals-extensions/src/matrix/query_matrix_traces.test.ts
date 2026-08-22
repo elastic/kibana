@@ -169,6 +169,28 @@ describe('queryMatrixTraces example fetching', () => {
     expect(getExampleScores).toHaveBeenCalledTimes(12);
   });
 
+  it('retries a transient fetch failure once before dropping the trace', async () => {
+    let calls = 0;
+    const getExampleScores = jest.fn(async () => {
+      calls += 1;
+      if (calls === 1) throw new Error('503 Service Unavailable');
+      return [completeDoc('exec-a')];
+    });
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores,
+    };
+    const traces = await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      aggregatedFor('exec-a') as never
+    );
+    expect(getExampleScores).toHaveBeenCalledTimes(2);
+    expect(Object.keys(traces)).toContain('model-x:example-1');
+  });
+
   it('enumerates experiments concurrently in phase 1', async () => {
     let inFlight = 0;
     let maxInFlight = 0;

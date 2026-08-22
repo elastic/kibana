@@ -333,12 +333,21 @@ export const queryMatrixTraces = async (
     const key = serverSupportsFilter === false ? exampleId : cacheKey(ref, exampleId);
     const pending = inflight.get(key);
     if (pending) return pending;
-    const request = evalsClient
-      .getExampleScores(exampleId, {
-        executionId: ref.executionId,
-        modelId: ref.modelId,
-      })
-      .finally(() => inflight.delete(key));
+    // Concurrent heavy fetches can trip transient 502/503s on legacy servers;
+    // one bounded retry keeps a flake from silently costing a cell its trace.
+    const attempt = async (retriesLeft: number): Promise<EvaluationScoreDocument[]> => {
+      try {
+        return await evalsClient.getExampleScores(exampleId, {
+          executionId: ref.executionId,
+          modelId: ref.modelId,
+        });
+      } catch (error) {
+        if (retriesLeft === 0) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return attempt(retriesLeft - 1);
+      }
+    };
+    const request = attempt(1).finally(() => inflight.delete(key));
     inflight.set(key, request);
     return request;
   };
