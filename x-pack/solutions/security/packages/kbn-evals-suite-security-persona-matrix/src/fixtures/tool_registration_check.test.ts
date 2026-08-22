@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  collectExpectedToolIds,
-  findUnregisteredToolIds,
-} from './tool_registration_check';
+import { collectExpectedToolIds, findUnregisteredToolIds } from './tool_registration_check';
 import type { KbnClient } from '@kbn/kbn-client';
 
 describe('collectExpectedToolIds', () => {
