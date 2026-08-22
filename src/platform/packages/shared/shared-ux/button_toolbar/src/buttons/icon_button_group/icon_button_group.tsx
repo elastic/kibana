@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import type { EuiButtonGroupOptionProps, IconType, EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
@@ -22,8 +22,8 @@ export interface IconButton {
   label: string;
   /** EUI `IconType` to display. */
   iconType: IconType;
-  /** Handler for button click. */
-  onClick: () => void;
+  /** Handler for button click. Receives the originating mouse event when available. */
+  onClick: (event?: React.MouseEvent) => void;
   /**
    * HTML `title` attribute for the native browser tooltip. Defaults to `label`.
    * Ignored when `toolTipContent` is provided — the native tooltip is suppressed
@@ -62,7 +62,10 @@ export interface Props {
   css?: SerializedStyles;
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label' | 'css'>;
+type Option = EuiButtonGroupOptionProps &
+  Omit<IconButton, 'label' | 'css'> & {
+    onClickCapture?: React.MouseEventHandler<HTMLButtonElement>;
+  };
 
 /**
  * A group of buttons each performing an action, represented by an icon.
@@ -77,6 +80,10 @@ export const IconButtonGroup = ({
   const euiTheme = useEuiTheme();
   const iconButtonStyles = getIconButtonStyles(euiTheme);
   const iconButtonGroupStyles = getIconButtonGroupStyles(euiTheme);
+  // EuiButtonGroup replaces each option's onClick with its own onChange handler which
+  // only reports the option id, so the click event is captured here to hand it to the
+  // option's onClick (e.g. for detecting modifier keys)
+  const lastClickEvent = useRef<React.MouseEvent<HTMLButtonElement>>();
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
     const { label, title, toolTipContent, css: buttonCss, ...rest } = button;
@@ -85,6 +92,9 @@ export const IconButtonGroup = ({
     // `title: ''`) so the EuiToolTip is the only tooltip shown.
     return {
       ...rest,
+      onClickCapture: (event: React.MouseEvent<HTMLButtonElement>) => {
+        lastClickEvent.current = event;
+      },
       'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
@@ -98,7 +108,7 @@ export const IconButtonGroup = ({
   });
 
   const onChangeIconsMulti = (optionId: string) => {
-    buttonGroupOptions.find((x) => x.id === optionId)?.onClick();
+    buttonGroupOptions.find((x) => x.id === optionId)?.onClick(lastClickEvent.current);
   };
 
   return (

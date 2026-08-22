@@ -10,6 +10,8 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
+import type { MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UnifiedHistogramServices } from '../../..';
@@ -56,12 +58,18 @@ export const useEditVisualization = ({
       return undefined;
     }
 
-    return () => {
-      services.lens.navigateToPrefilledEditor({
-        id: '',
-        time_range: relativeTimeRange,
-        attributes: lensAttributes,
-      });
+    return (event?: MouseEvent) => {
+      services.lens.navigateToPrefilledEditor(
+        {
+          id: '',
+          time_range: relativeTimeRange,
+          attributes: lensAttributes,
+        },
+        {
+          // open the editor in a new tab on modified clicks, keeping the current view intact
+          openInNewTab: !!event && hasActiveModifierKey(event),
+        }
+      );
     };
   }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
 

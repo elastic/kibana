@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -24,6 +24,18 @@ describe('<IconButtonGroup />', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Text' })).toBeInTheDocument();
+  });
+
+  it('invokes onClick with the originating click event', () => {
+    const onClick = jest.fn();
+    renderWithI18n(
+      <IconButtonGroup legend="Legend" buttons={[{ label: 'Text', onClick, iconType: 'text' }]} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Text' }), { metaKey: true });
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClick.mock.calls[0][0]).toMatchObject({ metaKey: true, ctrlKey: false });
   });
 
   it('does not expose a native browser title when toolTipContent is provided', () => {

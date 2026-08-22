@@ -310,6 +310,19 @@ describe('Chart', () => {
     expect(mockOnEditVisualization).toHaveBeenCalled();
   });
 
+  test('passes the click event to onEditVisualization for modified clicks', async () => {
+    const user = userEvent.setup();
+    const { mockOnEditVisualization } = await mountComponent();
+
+    await user.keyboard('{Control>}');
+    await user.click(screen.getByText('Edit visualization'));
+    await user.keyboard('{/Control}');
+
+    expect(mockOnEditVisualization).toHaveBeenCalledWith(
+      expect.objectContaining({ ctrlKey: true })
+    );
+  });
+
   it('should not render chart if data view is not time based', async () => {
     await mountComponent({ dataView: dataViewMock });
 
