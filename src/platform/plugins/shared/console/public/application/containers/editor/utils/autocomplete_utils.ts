@@ -546,7 +546,7 @@ export const getInsertText = (
     template = conditionalTemplate;
   }
 
-  if (template && context.addTemplate) {
+  if (template !== undefined && template !== null && template !== '' && context.addTemplate) {
     let templateLines;
     const templateRecord = isRecord(template) ? template : {};
     const raw = templateRecord.__raw;
@@ -575,7 +575,7 @@ export const getInsertText = (
 };
 
 const getConditionalTemplate = (
-  name: string | boolean,
+  name: string | number | boolean,
   bodyContent: string,
   endpoint: AutoCompleteContext['endpoint']
 ) => {

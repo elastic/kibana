@@ -1013,6 +1013,31 @@ ${lineContentBeforePosition}`;
       expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
     });
 
+    it('SHOULD insert boolean and number names as JSON primitives', () => {
+      expect(getInsertText({ name: true }, '', mockContext)).toBe('true');
+      expect(getInsertText({ name: false }, '', mockContext)).toBe('false');
+      expect(getInsertText({ name: 0 }, '', mockContext)).toBe('0');
+      expect(getInsertText({ name: 42 }, '', mockContext)).toBe('42');
+      expect(getInsertText({ name: 'false' }, '', mockContext)).toBe('"false"');
+      expect(getInsertText({ name: '42' }, '', mockContext)).toBe('"42"');
+    });
+
+    it('SHOULD insert false and zero templates when addTemplate is true', () => {
+      const context = { ...mockContext, addTemplate: true };
+
+      expect(getInsertText({ name: 'disabled', template: false }, '', context)).toBe(
+        '"disabled": false'
+      );
+      expect(getInsertText({ name: 'retries', template: 0 }, '', context)).toBe('"retries": 0');
+    });
+
+    it('SHOULD preserve key-only insertion for empty and null templates', () => {
+      const context = { ...mockContext, addTemplate: true };
+
+      expect(getInsertText({ name: '_source', template: '' }, '', context)).toBe('"_source"');
+      expect(getInsertText({ name: 'field', template: null }, '', context)).toBe('"field"');
+    });
+
     it('does not add quotes around braces and brackets', () => {
       expect(
         getInsertText(

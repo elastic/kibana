@@ -15,7 +15,7 @@ export interface ResultTerm {
   meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
-  name?: string | boolean;
+  name?: string | number | boolean;
   value?: string;
   score?: number;
   /**
