@@ -13,6 +13,28 @@ import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types
 import { traceKey } from './trace_types';
 
 /**
+ * Runs `fn` over `items` with at most `limit` in flight, preserving input
+ * order in the returned array. Package intentionally has zero dependencies,
+ * so this is a small local worker pool instead of p-limit.
+ */
+const mapWithConcurrency = async <T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<R>
+): Promise<R[]> => {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await fn(items[index], index);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+};
+
+/**
  * Extracts trace data (initial question, tool trail, agent answer, step trace)
  * from a single evaluation score document.
  *
@@ -243,16 +265,28 @@ export const queryMatrixTraces = async (
   }
   const runRefs: RunRef[] = [];
 
+  const modelSuites: Array<{ modelId: string; suiteId: string; experimentId: string }> = [];
   for (const modelScores of aggregated) {
     for (const suite of modelScores.suites) {
-      const { suiteId, experimentId } = suite;
+      modelSuites.push({
+        modelId: modelScores.modelId,
+        suiteId: suite.suiteId,
+        experimentId: suite.experimentId,
+      });
+    }
+  }
+
+  const enumerated = await mapWithConcurrency(
+    modelSuites,
+    6,
+    async ({ modelId, suiteId, experimentId }) => {
       log.debug(
-        `Enumerating examples for experiment ${experimentId} (model ${modelScores.modelId}, suite ${suiteId})`
+        `Enumerating examples for experiment ${experimentId} (model ${modelId}, suite ${suiteId})`
       );
 
       const stripped = await evalsClient.getExperimentScores(experimentId, {
         suiteId,
-        taskModelId: modelScores.modelId,
+        taskModelId: modelId,
         executionId: experimentId,
       });
 
@@ -263,32 +297,51 @@ export const queryMatrixTraces = async (
 
       if (exampleIds.size === 0) {
         log.warning(
-          `No example IDs found for suite ${suiteId} (model ${modelScores.modelId}) — trace will be unavailable`
+          `No example IDs found for suite ${suiteId} (model ${modelId}) — trace will be unavailable`
         );
-        continue;
+        return null;
       }
 
-      runRefs.push({
-        suiteId,
-        modelId: modelScores.modelId,
-        executionId: experimentId,
-        exampleIds,
-      });
+      return { suiteId, modelId, executionId: experimentId, exampleIds };
     }
+  );
+
+  for (const ref of enumerated) {
+    if (ref) runRefs.push(ref);
   }
 
   // 2. Fetch full score documents per (run, example) with the execution filter
   //    applied server-side. The unfiltered route returns EVERY historical run
   //    of an example (tens of MB), which outgrew the HTTP transport and made
   //    traces silently disappear; the filtered fetch is ~one execution's docs.
-  //    Examples of one run are fetched in parallel; runs stay sequential.
+  //    All (run, example) pairs go through one bounded-concurrency pool.
   //
   //    Backward compatibility: an older evals plugin ignores the unknown query
-  //    params and returns all executions. Detect that from the first response
-  //    and fall back to fetching once per example, shared across runs.
+  //    params and returns all executions. The first pair is fetched alone so
+  //    detection settles before fan-out; on a legacy server each example is
+  //    then fetched exactly once (deduped while in flight) and shared across
+  //    runs, instead of once per run.
   const exampleScores = new Map<string, EvaluationScoreDocument[]>();
   const cacheKey = (ref: RunRef, exampleId: string) => `${ref.executionId}::${exampleId}`;
   let serverSupportsFilter: boolean | undefined;
+  // In-flight dedup: legacy servers get one request per example no matter how
+  // many runs need it; filtered servers dedupe only identical (run, example)
+  // repeats. Keyed differently per mode because the cache identity differs.
+  const inflight = new Map<string, Promise<EvaluationScoreDocument[]>>();
+
+  const fetchScores = (ref: RunRef, exampleId: string): Promise<EvaluationScoreDocument[]> => {
+    const key = serverSupportsFilter === false ? exampleId : cacheKey(ref, exampleId);
+    const pending = inflight.get(key);
+    if (pending) return pending;
+    const request = evalsClient
+      .getExampleScores(exampleId, {
+        executionId: ref.executionId,
+        modelId: ref.modelId,
+      })
+      .finally(() => inflight.delete(key));
+    inflight.set(key, request);
+    return request;
+  };
 
   const fetchExample = async (ref: RunRef, exampleId: string): Promise<void> => {
     if (serverSupportsFilter === false) {
@@ -298,10 +351,7 @@ export const queryMatrixTraces = async (
         return;
       }
     }
-    const scores = await evalsClient.getExampleScores(exampleId, {
-      executionId: ref.executionId,
-      modelId: ref.modelId,
-    });
+    const scores = await fetchScores(ref, exampleId);
     if (serverSupportsFilter === undefined) {
       serverSupportsFilter =
         scores.length === 0 || scores.every((s) => s.metadata?.execution_id === ref.executionId);
@@ -317,23 +367,37 @@ export const queryMatrixTraces = async (
     exampleScores.set(cacheKey(ref, exampleId), scores);
   };
 
+  const pairs: Array<{ ref: RunRef; exampleId: string }> = [];
   for (const ref of runRefs) {
-    await Promise.all(
-      [...ref.exampleIds].map(async (exampleId) => {
-        try {
-          await fetchExample(ref, exampleId);
-        } catch (error) {
-          // A single failed fetch must not abort the whole report: scores are
-          // already aggregated, only this cell's trace detail is lost.
-          log.warning(
-            `Skipping trace details for example ${exampleId} (execution ${ref.executionId}): ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          exampleScores.set(cacheKey(ref, exampleId), []);
-        }
-      })
-    );
+    for (const exampleId of ref.exampleIds) {
+      pairs.push({ ref, exampleId });
+    }
+  }
+
+  const fetchPair = async ({
+    ref,
+    exampleId,
+  }: {
+    ref: RunRef;
+    exampleId: string;
+  }): Promise<void> => {
+    try {
+      await fetchExample(ref, exampleId);
+    } catch (error) {
+      // A single failed fetch must not abort the whole report: scores are
+      // already aggregated, only this cell's trace detail is lost.
+      log.warning(
+        `Skipping trace details for example ${exampleId} (execution ${ref.executionId}): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      exampleScores.set(cacheKey(ref, exampleId), []);
+    }
+  };
+
+  if (pairs.length > 0) {
+    await fetchPair(pairs[0]);
+    await mapWithConcurrency(pairs.slice(1), 8, fetchPair);
   }
 
   // Category prefixes come from the same synthetic `prefix:*` dataset ids the

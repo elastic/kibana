@@ -123,4 +123,70 @@ describe('queryMatrixTraces example fetching', () => {
     // re-downloading the full unfiltered payload.
     expect(client.getExampleScores).toHaveBeenCalledTimes(1);
   });
+
+  it('fetches once per example on a legacy server even with many runs', async () => {
+    const client = makeClient({ filtered: false });
+    const aggregated = Array.from({ length: 6 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();
+    await queryMatrixTraces(client as never, logStub as never, aggregated as never);
+    expect(client.getExampleScores).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetches each (run, example) pair on a filtered server with no cross-run aliasing', async () => {
+    const client = makeClient({ filtered: true });
+    await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      [...aggregatedFor('exec-a'), ...aggregatedFor('exec-b')] as never
+    );
+    expect(client.getExampleScores).toHaveBeenCalledTimes(2);
+    const executions = client.getExampleScores.mock.calls.map(([, f]) => f?.executionId).sort();
+    expect(executions).toEqual(['exec-a', 'exec-b']);
+  });
+
+  it('bounds example-fetch concurrency and overlaps work across runs', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const getExampleScores = jest.fn(
+      async (_exampleId: string, filters?: { executionId?: string }) => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight -= 1;
+        return [completeDoc(filters?.executionId ?? 'exec-a')];
+      }
+    );
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores,
+    };
+    const aggregated = Array.from({ length: 12 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();
+    await queryMatrixTraces(client as never, logStub as never, aggregated as never);
+    // First pair runs alone for filter detection; the remaining 11 pool at ≤8.
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(maxInFlight).toBeLessThanOrEqual(8);
+    expect(getExampleScores).toHaveBeenCalledTimes(12);
+  });
+
+  it('enumerates experiments concurrently in phase 1', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const getExperimentScores = jest.fn(async () => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[];
+    });
+    const client = {
+      getExperimentScores,
+      getExampleScores: jest.fn(async () => [completeDoc('exec-a')]),
+    };
+    const aggregated = Array.from({ length: 8 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();
+    await queryMatrixTraces(client as never, logStub as never, aggregated as never);
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(maxInFlight).toBeLessThanOrEqual(6);
+    expect(getExperimentScores).toHaveBeenCalledTimes(8);
+  });
 });
