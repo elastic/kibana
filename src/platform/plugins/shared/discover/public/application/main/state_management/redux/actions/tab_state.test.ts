@@ -780,12 +780,11 @@ describe('tab_state actions', () => {
 
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
-      const { internalState, runtimeStateManager, tabId, services } = await setup();
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
       const storageSetSpy = jest.spyOn(services.storage, 'set');
-      let state = internalState.getState();
-      let tab = selectTab(state, tabId);
+      let tab = getCurrentTab();
       const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
@@ -807,6 +806,13 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(getCurrentTab().appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+
       // Transition to data view mode
       internalState.dispatch(
         internalStateActions.transitionFromESQLToDataView({
@@ -816,8 +822,7 @@ describe('tab_state actions', () => {
       );
 
       // Get the updated tab state
-      state = internalState.getState();
-      tab = selectTab(state, tabId);
+      tab = getCurrentTab();
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
@@ -830,6 +835,7 @@ describe('tab_state actions', () => {
         type: DataSourceType.DataView,
         dataViewId: dataView.id,
       });
+      expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 
       expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
@@ -853,7 +859,7 @@ describe('tab_state actions', () => {
 
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
-      const { internalState, runtimeStateManager, tabId, services } = await setup();
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
       const storageSetSpy = jest.spyOn(services.storage, 'set');
@@ -883,8 +889,7 @@ describe('tab_state actions', () => {
         })
       );
 
-      let state = internalState.getState();
-      let tab = selectTab(state, tabId);
+      let tab = getCurrentTab();
       const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual(query);
@@ -910,6 +915,13 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(getCurrentTab().appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+
       // Transition to ES|QL mode
       internalState.dispatch(
         internalStateActions.transitionFromDataViewToESQL({
@@ -919,8 +931,7 @@ describe('tab_state actions', () => {
       );
 
       // Get the updated tab state
-      state = internalState.getState();
-      tab = selectTab(state, tabId);
+      tab = getCurrentTab();
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
@@ -932,6 +943,7 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
+      expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 
       expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');

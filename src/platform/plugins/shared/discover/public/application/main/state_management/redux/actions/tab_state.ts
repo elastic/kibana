@@ -461,6 +461,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: {
             language: 'kuery',
             query: '',
@@ -510,6 +511,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: { esql: queryString },
           filters: [],
           dataSource: {

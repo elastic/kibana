@@ -80,6 +80,8 @@ export const useExpandedDocSync = ({
   const expandedDoc = useCurrentTabSelector((tab) => tab.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((tab) => tab.expandedDocOwner);
   const [requestState, setRequestState] = useState(ElasticRequestState.Loading);
+  const isEsqlQuery = isOfAggregateQueryType(query);
+  const isEsqlRoutedRef = Boolean(isEsqlQuery && expandedDocRef?.routing);
 
   // Keep direct result local so one writer below decides whether it or the result row wins.
   const [fetchedDoc, setFetchedDoc] = useState<DataTableRecord>();
@@ -96,11 +98,11 @@ export const useExpandedDocSync = ({
   // Gate unresolved fetches by query because only non-transformational FROM rows can be refetched.
   const isEsqlUnrestorable = useMemo(() => {
     return (
-      isOfAggregateQueryType(query) &&
+      isEsqlQuery &&
       (getAnySourceCommandFromESQLQuery(query.esql) !== 'FROM' ||
         hasTransformationalCommand(query.esql))
     );
-  }, [query]);
+  }, [isEsqlQuery, query]);
 
   const rowFromResults = useMemo(
     () =>
@@ -122,7 +124,8 @@ export const useExpandedDocSync = ({
     !isRefResolved &&
     !resolvedDoc &&
     isRestorable &&
-    !isEsqlUnrestorable;
+    !isEsqlUnrestorable &&
+    !isEsqlRoutedRef;
   const shouldClear =
     Boolean(expandedDoc) && !isRefResolved && isRestorable && !isEsqlUnrestorable && !resolvedDoc;
 
@@ -145,7 +148,7 @@ export const useExpandedDocSync = ({
   const docId = expandedDocRef?.id;
   const docIndex = expandedDocRef?.index;
   const docRouting = expandedDocRef?.routing;
-  const esqlQueryText = isOfAggregateQueryType(query) ? query.esql : undefined;
+  const esqlQueryText = isEsqlQuery ? query.esql : undefined;
 
   useEffect(() => {
     if (!shouldFetch || !docId || !docIndex) {
@@ -210,7 +213,7 @@ export const useExpandedDocSync = ({
 
   return {
     hasExpandedDoc: Boolean(expandedDoc) || Boolean(expandedDocRef && isRestorable),
-    requestState,
+    requestState: isEsqlRoutedRef ? ElasticRequestState.Error : requestState,
     notice: getExpandedDocNotice({ isOutOfResults: isRefResolved && !rowFromResults, fetchStatus }),
     expandedDocRef,
   };

@@ -510,6 +510,18 @@ describe('DiscoverDocumentFlyout', () => {
     });
   });
 
+  it('shows an error without fetching or clearing a routed ES|QL reference', async () => {
+    const routedRef = { ...expandedDocRef, routing: 'route-1' };
+    const { toolkit, services } = await setup({
+      query: { esql: 'FROM logs METADATA _id, _index' },
+      initialFlyout: { type: 'restoreFromRef', ref: routedRef },
+    });
+
+    expect(await screen.findByTestId('docViewerFlyoutError')).toBeVisible();
+    expect(services.data.search.search).not.toHaveBeenCalled();
+    expect(toolkit.getCurrentTab().appState.expandedDoc).toEqual(routedRef);
+  });
+
   it('closes the flyout when the reference is removed from the URL', async () => {
     const { toolkit } = await setup({ searchResult: searchResponseFor(outOfResultsHit) });
 
