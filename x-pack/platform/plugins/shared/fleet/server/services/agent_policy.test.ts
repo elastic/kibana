@@ -56,6 +56,7 @@ import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { getPackageInfo } from './epm/packages';
+import { runWithCache, getPackageInfoCache, setPackageInfoCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 
 jest.mock('./spaces/helpers');
@@ -1088,6 +1089,72 @@ describe('Agent policy', () => {
           has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
+        })
+      );
+    });
+
+    it('should open a cache session so the package-info fallback lookup is shared across package policies', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Three package policies sharing the same package+version (e.g. several monitor package
+      // policies on one shared agent policy), none with a persisted version condition yet.
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { id: 'pp-1', package: { name: 'apache', title: 'Apache', version: '1.3.2' } } as any,
+        { id: 'pp-2', package: { name: 'apache', title: 'Apache', version: '1.3.2' } } as any,
+        { id: 'pp-3', package: { name: 'apache', title: 'Apache', version: '1.3.2' } } as any,
+      ]);
+      // getPackageInfo itself does the caching (via getPackageInfoCache/setPackageInfoCache) when
+      // called inside a runWithCache session; simulate that here since ./epm/packages is mocked.
+      let computeCount = 0;
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        const cached = getPackageInfoCache(pkgName, pkgVersion);
+        if (cached) {
+          return cached;
+        }
+        computeCount++;
+        const info = { conditions: { agent: { version: '>=9.0.0' } } } as any;
+        setPackageInfoCache(pkgName, pkgVersion, info);
+        return info;
+      });
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      // bumpRevision must have opened its own runWithCache session (none was active) for
+      // getPackageInfo's cache to have anywhere to store the first lookup's result.
+      expect(getPackageInfo).toHaveBeenCalledTimes(3);
+      expect(computeCount).toBe(1);
+    });
+
+    it('should reuse an already-active cache session instead of shadowing it with a new one', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { id: 'pp-1', package: { name: 'apache', title: 'Apache', version: '1.3.2' } } as any,
+      ]);
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        return (getPackageInfoCache(pkgName, pkgVersion) ?? {}) as any;
+      });
+
+      await runWithCache(async () => {
+        // Pre-populate the outer session's cache, as a bulk caller (e.g. bumpAgentPoliciesRevision)
+        // would after resolving an earlier package policy that shares this package+version.
+        setPackageInfoCache('apache', '1.3.2', {
+          conditions: { agent: { version: '>=9.0.0' } },
+        } as any);
+
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+      });
+
+      // If bumpRevision had started its own nested session, the pre-populated cache entry above
+      // would be invisible to it and this would fall back to `{}` (no conditions).
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          min_agent_version: '9.0.0',
         })
       );
     });
