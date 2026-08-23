@@ -47,11 +47,16 @@ jest.mock('../../form/hooks/use_data_fields', () => ({
   }),
 }));
 
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+}));
+
 jest.mock('../../form/contexts/rule_form_context', () => ({
   useRuleFormServices: () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
     lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
   }),
 }));

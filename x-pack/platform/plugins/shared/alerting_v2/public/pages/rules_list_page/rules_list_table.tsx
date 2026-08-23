@@ -104,6 +104,8 @@ export interface RulesListTableProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
   onUpdateApiKey: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
+  /** When provided, adds View change history to each row actions menu. */
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
   /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
@@ -148,6 +150,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onToggleEnabled,
   onUpdateApiKey,
   onRun,
+  onViewChangeHistory,
   togglingRuleId,
   isBulkTogglingEnabled,
   onTableChange,
@@ -172,8 +175,10 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    const showActionsColumn = canWrite || onViewChangeHistory;
+
+    return [
       ...(canWrite
         ? ([
             {
@@ -371,7 +376,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(canWrite
+      ...(showActionsColumn
         ? ([
             {
               name: (
@@ -389,32 +394,39 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   responsive={false}
                   justifyContent="flexEnd"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                        defaultMessage: 'Quick edit rule',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => onQuickEdit(rule)}
-                        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                  {canWrite ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
                           defaultMessage: 'Quick edit rule',
                         })}
-                        data-test-subj={`quickEditRule-${rule.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="pencil"
+                          color="text"
+                          onClick={() => onQuickEdit(rule)}
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.rulesList.action.quickEdit',
+                            {
+                              defaultMessage: 'Quick edit rule',
+                            }
+                          )}
+                          data-test-subj={`quickEditRule-${rule.id}`}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <RuleActionsMenu
                       rule={rule}
+                      canWrite={canWrite}
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
                       onUpdateApiKey={onUpdateApiKey}
                       onRun={onRun}
+                      onViewChangeHistory={onViewChangeHistory}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -422,26 +434,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
-    ],
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      onUpdateApiKey,
-      onRun,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
+    ];
+  }, [
+    canWrite,
+    isPageSelected,
+    isRowSelected,
+    onSelectPage,
+    onSelectRow,
+    onNavigateToDetails,
+    onExpand,
+    onQuickEdit,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onUpdateApiKey,
+    onRun,
+    onViewChangeHistory,
+    togglingRuleId,
+    isBulkTogglingEnabled,
+  ]);
 
   const noItemsMessage =
     search || hasActiveFilters

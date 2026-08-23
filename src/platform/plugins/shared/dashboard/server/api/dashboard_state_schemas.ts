@@ -9,7 +9,11 @@
 
 import { z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeEsqlApproximationSchema,
+  asCodeQuerySchema,
+  getAsCodeTagsSchema,
+} from '@kbn/as-code-shared-schemas';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
@@ -216,10 +220,7 @@ export function getDashboardStateSchema(
         description:
           'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
       }),
-      esql_approximation: z.boolean().optional().meta({
-        description:
-          'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
-      }),
+      ...asCodeEsqlApproximationSchema.shape,
       query: asCodeQuerySchema.optional(),
       refresh_interval: refreshIntervalSchema.optional(),
       tags: getAsCodeTagsSchema(
