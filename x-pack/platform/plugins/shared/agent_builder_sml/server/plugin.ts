@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { LockManagerService } from '@kbn/lock-manager';
 import type { Logger } from '@kbn/logging';
 import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import type {
@@ -56,8 +55,6 @@ export class AgentBuilderSmlPlugin
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
-    const lockManager = new LockManagerService(coreSetup, this.logger.get('sml'));
-
     registerSmlCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
       getCrawlerDeps: async () => {
@@ -70,7 +67,6 @@ export class AgentBuilderSmlPlugin
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           uiSettings: coreStart.uiSettings,
-          lockManager,
           logger: this.logger.get('sml'),
         };
       },

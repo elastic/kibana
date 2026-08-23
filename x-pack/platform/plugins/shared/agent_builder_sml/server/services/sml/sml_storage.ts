@@ -12,25 +12,6 @@ import type { SmlDocument } from './types';
 
 export const smlIndexName = 'ai-index-idx-sml-data';
 
-/**
- * Bump this constant whenever the shape of stored SML documents changes in a way
- * that makes existing documents stale (e.g. new required composite-token fields,
- * changed semantics of existing fields).  The crawler reads `_meta.sml_schema_version`
- * from the live index; a mismatch causes a drop-and-recrawl even when the mapping
- * change itself is compatible (additive) and would not trigger the normal rebuild path.
- *
- * History:
- *   1 — original shape (pre-composite-token era)
- *   2 — `permissions.kibana.privileges` becomes `nested`, one element per space carrying
- *       `{ space, name[], count }`. `raw` and the implicit `login:` action are gone.
- *
- * Motivation: `object` -> `nested` is an illegal mapping merge ("can't merge a non-nested mapping
- * with a nested mapping"), so an existing index cannot be updated in place.
- * The version mismatch drops the index and forces a full re-crawl, which is the
- * only way this shape change can land.
- */
-export const SML_SCHEMA_VERSION = 2;
-
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),
 };
@@ -70,11 +51,7 @@ const smlStorageSchemaProperties = {
         properties: {
           /**
            * One element per space, each listing the actions that space requires plus a count of
-           * them. `nested` (not `object`) so ES-side DLS can bind space and action together within
-           * a single element — a flat field cannot express "all these actions, in this one space",
-           * which let a user holding one required action in each of two spaces clear a flat
-           * `terms_set` threshold. `discovery_labels` above is already nested, so this is an
-           * established shape in this index.
+           * them.
            *
            * Caveat: ES|QL cannot read `nested` leaves (its index resolution filters them out), so
            * the read path authorizes via a `nested` Query DSL filter pushed into the `_query`
@@ -100,11 +77,6 @@ export const storageSettings = {
    * Ensure the SML backing index name has a higher priority than built-in AI index templates.
    */
   priority: 600,
-  /**
-   * Stamped into `mappings._meta` at index creation (and re-applied on reconcile) so a
-   * freshly rebuilt index is immediately recognizable as current — see `SML_SCHEMA_VERSION`.
-   */
-  mappingsMeta: { sml_schema_version: SML_SCHEMA_VERSION },
   schema: {
     properties: smlStorageSchemaProperties,
   },

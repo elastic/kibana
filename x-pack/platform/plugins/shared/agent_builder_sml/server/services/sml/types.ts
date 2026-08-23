@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { LockManagerService } from '@kbn/lock-manager';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/http_api/sml';
 
@@ -42,14 +41,11 @@ export interface SmlKibanaPrivilegeGroup {
 }
 
 /**
- * Stored on SML documents as a `nested` field: one element per space.
+ * Permissions required to access an entry, grouped by space.
  *
  * Semantics are OR across spaces, AND across actions within a space. Grouping is what makes that
  * expressible — a caller must satisfy one whole group to see the document, and matches cannot
- * accumulate across groups. The previous flat `space|action` composite-token shape could not
- * express this: `terms_set` counted matching tokens with no awareness of which space each came
- * from, so a user holding one required action in each of two spaces cleared the threshold and saw
- * a document they were authorized for in neither.
+ * accumulate across groups.
  *
  * Mirrors the Elasticsearch-side contract in `AiIndexImplicitPrivilegesProvider`.
  */
@@ -165,8 +161,8 @@ export interface SmlTypeDefinition {
    *
    * Prefer the `kibanaPermissions` helper over hand-writing the action string. Its `kiType` MUST
    * match the KI type the owning feature declares in `aiIndex: { read: [...] }` — which is the
-   * SML type id, not the underlying saved object type. A mismatch produces an action no feature
-   * privilege ever grants, silently hiding every entry of the type from every user.
+   * SML type id (KI type id). A mismatch produces an action no feature privilege ever grants,
+   * silently hiding every entry of the type from every user.
    */
   getPermissions?: (
     originId: string,
@@ -307,7 +303,6 @@ export interface SmlCrawler {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
-    lockManager: LockManagerService;
     abortSignal?: AbortSignal;
   }) => Promise<void>;
 }
@@ -394,10 +389,11 @@ export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
   /**
-   * Space-isolation guard. The delete-by-query requires the doc to carry
-   * a composite permission token for one of the provided space IDs (or the
-   * global wildcard `*|`). NOTE: this is a whole-doc guard, not a partial
-   * delete — a multi-space doc is fully deleted if it matches any provided space.
+   * Space-isolation guard. `deleteEntry` filters by a nested query on
+   * `permissions.kibana.privileges.space` so only an entry whose privileges
+   * contain one of the provided space IDs (or the global wildcard `'*'`) is
+   * removed. NOTE: this is a whole-doc guard — a multi-space doc is fully
+   * deleted if it matches any provided space.
    *
    * Omit (or pass an empty array) for global deletes (e.g. crawler origin-mode
    * rewrites where the caller controls all spaces).

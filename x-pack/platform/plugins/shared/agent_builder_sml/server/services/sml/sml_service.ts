@@ -19,7 +19,6 @@ import type {
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
-  SmlPermissions,
   SmlKibanaPrivilegeGroup,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
@@ -404,8 +403,8 @@ const resolveAuthorizedUniverse = async ({
  * (or to the global wildcard) matches. What "matches" means depends on `authz`:
  * - with `authz` (security plugin present), the element must additionally have ALL of its actions
  *   covered by what the caller holds (the `terms_set` clause);
- * - without `authz` (security plugin absent — dev / test / security off), space scoping alone
- *   applies: privilege enforcement is skipped, matching the open-access semantics of every other
+ * - without `authz` (security plugin absent — dev / test), space scoping alone applies:
+ *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
@@ -716,13 +715,6 @@ const buildSmlEsqlQuery = ({
     lines.push('| EVAL ref_uris = references.uri');
   }
 
-  // `permissions.kibana.privileges` is a `nested` field and ES|QL's index resolution excludes
-  // nested fields outright (field-caps is called with `-nested`), so its leaves cannot be
-  // projected as columns — referencing one fails with "Unknown column". Authorization does not
-  // need it: it is enforced by the `nested` Query DSL filter pushed into the `_query` `filter`
-  // parameter. Callers asking for `fields: ['permissions']` therefore get an empty privilege list
-  // from the search path and must hydrate it via the lookup path if they need the detail.
-
   const keepCols = [
     'id',
     'type',
@@ -853,7 +845,7 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * returns only authorized docs — no overfetch, no JS post-filter. The outer LIMIT is exactly
  * `size`.
  *
- * When the security plugin is absent (dev / test / security off), enumeration is skipped and
+ * When the security plugin is absent (dev / test), enumeration is skipped and
  * privilege enforcement drops out of the pushed filter — but space scoping is still applied, so
  * only docs visible in the requested space are returned (Spaces work without security).
  *
@@ -930,16 +922,8 @@ const searchSml = async ({
     return Array.isArray(v) ? (v as unknown[]).filter((s) => s != null).map(String) : [String(v)];
   };
 
-  // `permissions` is OPTIONAL on this path and deliberately left unset: it is a `nested` field and
-  // ES|QL cannot project nested leaves, so the search path has no value to report. It must stay
-  // absent rather than be stamped empty — an empty `privileges` array is the wire representation of
-  // a PUBLIC document, so filling one in here would tell callers every hit is public. Callers that
-  // need the real value must hydrate it via the lookup path (`getDocumentsByIds`). Authorization
-  // does not depend on it either way; it is enforced in-query by the pushed-down nested filter.
-  type SmlSearchResultInternal = SmlSearchResult & { permissions?: SmlPermissions };
-
-  const allResults: SmlSearchResultInternal[] = response.values.map((row) => {
-    const result: SmlSearchResultInternal = {
+  const allResults: SmlSearchResult[] = response.values.map((row) => {
+    const result: SmlSearchResult = {
       id: String(row[colIndex.get('id')!] ?? ''),
       type: String(row[colIndex.get('type')!] ?? ''),
       title: String(row[colIndex.get('title')!] ?? ''),

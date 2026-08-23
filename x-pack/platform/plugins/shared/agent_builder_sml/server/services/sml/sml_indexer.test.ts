@@ -222,7 +222,7 @@ describe('createSmlIndexer', () => {
       };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
-        kibana: { privileges: { name: ['saved_object:dashboard/get'] } },
+        kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
@@ -261,7 +261,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         permissions: {
           kibana: {
-            privileges: [{ space: 'default', name: ['saved_object:dashboard/get'], count: 1 }],
+            privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
         ingestion_method: 'crawled',
@@ -745,7 +745,7 @@ describe('createSmlIndexer', () => {
             }>((resolve) =>
               setImmediate(() =>
                 resolve({
-                  kibana: { privileges: { name: ['saved_object:lens/get'] } },
+                  kibana: { privileges: { name: ['ai_index:lens/read'] } },
                 })
               )
             )
@@ -770,7 +770,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: [{ space: 'default', name: ['saved_object:lens/get'], count: 1 }],
+            privileges: [{ space: 'default', name: ['ai_index:lens/read'], count: 1 }],
           },
         });
       });
@@ -898,7 +898,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'dashboard', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockReturnValue({
-          kibana: { privileges: { name: ['saved_object:dashboard/get'] } },
+          kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
         });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
@@ -920,7 +920,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: [{ space: '*', name: ['saved_object:dashboard/get'], count: 1 }],
+            privileges: [{ space: '*', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         });
       });

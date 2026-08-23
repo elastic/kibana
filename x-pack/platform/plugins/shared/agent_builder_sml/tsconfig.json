@@ -28,7 +28,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/es-errors",
-    "@kbn/lock-manager",
     "@kbn/context-engine-plugin"
   ]
 }
