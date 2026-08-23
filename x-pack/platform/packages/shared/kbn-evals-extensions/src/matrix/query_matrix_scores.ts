@@ -8,6 +8,73 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@kbn/evals';
+import { isEisBacked, describeJudge } from './judge_provenance';
+import { VERDICT_LADDERS, scoreVerdict } from './jury';
+
+/**
+ * Counts of score documents dropped by the provenance/verdict policy, so the
+ * report can state what was excluded instead of silently shrinking its own
+ * sample.
+ */
+export interface ExcludedScoreCounts {
+  nonEis: number;
+  selfJudged: number;
+  unmappedVerdict: number;
+}
+
+export interface ScoreAggregationOptions {
+  /** Drop scores from judges that are not EIS-backed connectors. */
+  requireEisJudge?: boolean;
+  /** Drop scores where the judge and the graded model are the same id. */
+  excludeSelfJudged?: boolean;
+  /**
+   * Score the judge's categorical verdict via an ordinal ladder instead of its
+   * continuous value. Measured on the persona matrix: judged-score flip across
+   * identical repetitions drops from 83.3% to 33.3%, because the agent's prose
+   * changes every run while its verdict does not.
+   */
+  useVerdictLadder?: boolean;
+  onExcluded?: (counts: ExcludedScoreCounts) => void;
+}
+
+/**
+ * Where each judged evaluator stores its categorical verdict. These paths are
+ * taken from live score documents, not inferred: Groundedness writes
+ * `groundednessAnalysis.summary_verdict`, while Factuality and Relevance both
+ * hang off the shared `correctnessAnalysis.summary` block under different keys.
+ */
+const VERDICT_PATHS: Record<string, [string, string]> = {
+  Groundedness: ['groundednessAnalysis', 'summary_verdict'],
+  Factuality: ['correctnessAnalysis', 'factual_accuracy_summary'],
+  Relevance: ['correctnessAnalysis', 'relevance_summary'],
+};
+
+/**
+ * Ladder score for a judged evaluator, or the stored continuous score for
+ * evaluators with no verdict vocabulary (contract evaluators are already
+ * deterministic and have nothing to gain from the ladder).
+ */
+function resolveVerdictScore(
+  evaluatorName: string,
+  doc: EvaluationScoreDocument
+): number | null | undefined {
+  const ladder = VERDICT_LADDERS[evaluatorName];
+  const path = VERDICT_PATHS[evaluatorName];
+  if (!ladder || !path) {
+    return doc.evaluator?.score;
+  }
+
+  const [blockKey, verdictKey] = path;
+  const metadata = doc.evaluator?.metadata as Record<string, unknown> | undefined;
+  const block = metadata?.[blockKey] as Record<string, unknown> | undefined;
+  // Groundedness puts its verdict at the top of the block; the correctness
+  // evaluators nest theirs one level deeper under `summary`.
+  const summary = (block?.summary as Record<string, unknown> | undefined) ?? block;
+  const verdict = summary?.[verdictKey];
+
+  const mapped = scoreVerdict(typeof verdict === 'string' ? verdict : undefined, ladder);
+  return mapped ?? undefined;
+}
 
 /** Aggregated evaluator score for a single dataset within a suite. */
 export interface AggregatedEvaluatorScore {
@@ -68,9 +135,11 @@ export interface QueryMatrixScoresOptions {
  */
 export const scoresByPrefixToDatasets = (
   scores: EvaluationScoreDocument[],
-  prefixes: string[]
+  prefixes: string[],
+  options: ScoreAggregationOptions = {}
 ): AggregatedDatasetScores[] => {
   const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
+  const excluded: ExcludedScoreCounts = { nonEis: 0, selfJudged: 0, unmappedVerdict: 0 };
 
   for (const doc of scores) {
     const exampleId = doc.example?.id ?? '';
@@ -79,10 +148,37 @@ export const scoresByPrefixToDatasets = (
       continue;
     }
     const evaluatorName = doc.evaluator?.name;
-    const score = doc.evaluator?.score;
-    if (!evaluatorName || typeof score !== 'number') {
+    if (!evaluatorName) {
       continue;
     }
+
+    const judgeId = doc.evaluator?.model?.id;
+    const taskModelId = doc.task?.model?.id;
+    if (options.requireEisJudge && judgeId && !isEisBacked(judgeId)) {
+      excluded.nonEis += 1;
+      continue;
+    }
+    if (
+      options.excludeSelfJudged &&
+      judgeId &&
+      taskModelId &&
+      describeJudge(judgeId, taskModelId).selfJudged
+    ) {
+      excluded.selfJudged += 1;
+      continue;
+    }
+
+    const score = options.useVerdictLadder
+      ? resolveVerdictScore(evaluatorName, doc)
+      : doc.evaluator?.score;
+
+    if (typeof score !== 'number') {
+      if (options.useVerdictLadder && typeof doc.evaluator?.score === 'number') {
+        excluded.unmappedVerdict += 1;
+      }
+      continue;
+    }
+
     let evaluators = byPrefix.get(prefix);
     if (!evaluators) {
       evaluators = new Map();
@@ -93,6 +189,8 @@ export const scoresByPrefixToDatasets = (
     agg.count += 1;
     evaluators.set(evaluatorName, agg);
   }
+
+  options.onExcluded?.(excluded);
 
   return [...byPrefix.entries()].map(([prefix, evaluators]) => ({
     datasetId: `prefix:${prefix}`,

@@ -149,6 +149,17 @@ export const RELEVANCE_LADDER: VerdictLadder = {
 };
 
 /**
+ * Verdict ladders keyed by evaluator name, for callers mapping stored score
+ * documents. Evaluators absent from this map have no verdict vocabulary and
+ * keep their continuous score.
+ */
+export const VERDICT_LADDERS: Record<string, VerdictLadder> = {
+  Groundedness: GROUNDEDNESS_LADDER,
+  Factuality: FACTUALITY_LADDER,
+  Relevance: RELEVANCE_LADDER,
+};
+
+/**
  * Map a categorical verdict onto its ordinal score.
  *
  * Returns null for an unrecognised verdict rather than guessing: an unknown
