@@ -10,9 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -48,7 +48,7 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   updated_at: '2025-01-01T00:00:00.000Z',
   permissions: {
     kibana: {
-      privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_SML_TYPE}/read`], count: 1 }],
+      privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_KI_TYPE}/read`], count: 1 }],
     },
   },
   ingestion_method: 'crawled',
@@ -441,7 +441,7 @@ describe('workflowSmlType', () => {
         logger: createMockLogger(),
       });
       expect(permissions).toEqual({
-        kibana: { privileges: { name: [`ai_index:${WORKFLOW_SML_TYPE}/read`] } },
+        kibana: { privileges: { name: [`ai_index:${WORKFLOW_KI_TYPE}/read`] } },
       });
     });
   });
