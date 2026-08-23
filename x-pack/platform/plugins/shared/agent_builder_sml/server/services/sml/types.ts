@@ -502,6 +502,7 @@ export interface SmlService {
    */
   getDocuments: (params: {
     ids: string[];
+    spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 

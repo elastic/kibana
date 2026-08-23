@@ -87,6 +87,7 @@ describe('resolveSmlAttachItems', () => {
     });
     expect(mockGetDocuments).toHaveBeenCalledWith({
       ids: ['a', 'b'],
+      spaceId: 'default',
       esClient: baseParams.esClient,
     });
   });
@@ -106,6 +107,7 @@ describe('resolveSmlAttachItems', () => {
     });
     expect(mockGetDocuments).toHaveBeenCalledWith({
       ids: ['entry-1'],
+      spaceId: 'default',
       esClient: baseParams.esClient,
     });
   });

@@ -63,6 +63,7 @@ export const resolveSmlAttachItems = async ({
 
   const smlDocs = await sml.getDocuments({
     ids: uniqueEntryIds,
+    spaceId,
     esClient,
   });
 

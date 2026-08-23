@@ -1830,6 +1830,7 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1', 'doc-2'],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1897,6 +1898,7 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-3'],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1926,6 +1928,7 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: [],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1942,6 +1945,7 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1957,6 +1961,7 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1975,6 +1980,7 @@ describe('SmlService', () => {
 
       await smlService.getDocuments({
         ids: ['id-1', 'id-2'],
+        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1986,7 +1992,57 @@ describe('SmlService', () => {
           ignore_unavailable: true,
           query: {
             bool: {
-              filter: [{ terms: { id: ['id-1', 'id-2'] } }],
+              filter: [
+                { terms: { id: ['id-1', 'id-2'] } },
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          must_not: [
+                            {
+                              nested: {
+                                path: 'permissions.kibana.privileges',
+                                query: { match_all: {} },
+                                score_mode: 'none',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        nested: {
+                          path: 'permissions.kibana.privileges',
+                          score_mode: 'none',
+                          query: {
+                            bool: {
+                              filter: [
+                                {
+                                  bool: {
+                                    should: [
+                                      {
+                                        term: {
+                                          'permissions.kibana.privileges.space': 'default',
+                                        },
+                                      },
+                                      {
+                                        term: {
+                                          'permissions.kibana.privileges.space': '*',
+                                        },
+                                      },
+                                    ],
+                                    minimum_should_match: 1,
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         })
