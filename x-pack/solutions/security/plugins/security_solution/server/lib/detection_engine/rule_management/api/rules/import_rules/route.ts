@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { chunk, partition } from 'lodash/fp';
+import { partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
@@ -39,10 +39,8 @@ import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
-import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../constants';
 import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -187,10 +185,10 @@ export const importRulesRoute = (
                 ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
+          const experimentalFeatures = ctx.securitySolution.getConfig().experimentalFeatures;
 
           const importRuleResponse = await importRules({
-            ruleChunks,
+            rules: validatedResponseActionsRules,
             changeTracking: {
               metadata: {
                 bulkCount: validatedResponseActionsRules.length,
@@ -200,6 +198,7 @@ export const importRulesRoute = (
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,
             detectionRulesClient,
+            experimentalFeatures,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>

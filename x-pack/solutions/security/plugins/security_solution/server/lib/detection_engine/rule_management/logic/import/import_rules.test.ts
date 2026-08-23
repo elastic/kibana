@@ -13,6 +13,7 @@ import type { IDetectionRulesClient } from '../detection_rules_client/detection_
 import { detectionRulesClientMock } from '../detection_rules_client/__mocks__/detection_rules_client';
 import { ruleSourceImporterMock } from './rule_source_importer/rule_source_importer.mock';
 import { createRuleImportErrorObject } from './errors';
+import { RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE } from '../../api/constants';
 
 describe('importRules', () => {
   let ruleToImport: ReturnType<typeof getImportRulesSchemaMock>;
@@ -31,7 +32,7 @@ describe('importRules', () => {
 
   it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
-      ruleChunks: [],
+      rules: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -53,7 +54,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -90,7 +91,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -129,7 +130,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -170,7 +171,7 @@ describe('importRules', () => {
     const successfulRuleId = getRulesSchemaMock().rule_id;
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -204,7 +205,7 @@ describe('importRules', () => {
     const successfulRuleId = getRulesSchemaMock().rule_id;
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -214,5 +215,87 @@ describe('importRules', () => {
       { rule_id: successfulRuleId, status_code: 200 },
       { rule_id: successfulRuleId, status_code: 200 },
     ]);
+  });
+
+  describe('bulk path (bulkImportRulesEnabled)', () => {
+    const experimentalFeatures = { bulkImportRulesEnabled: true } as never;
+
+    it('sends all rules within a single batch to one bulkImportRules call', async () => {
+      const r1 = { ...ruleToImport, rule_id: 'r1' };
+      const r2 = { ...ruleToImport, rule_id: 'r2' };
+      const r3 = { ...ruleToImport, rule_id: 'r3' };
+
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [{ rule_id: 'r1' }, { rule_id: 'r2' }, { rule_id: 'r3' }],
+      });
+
+      const result = await importRules({
+        rules: [r1, r2, r3],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkImportRules).toHaveBeenCalledTimes(1);
+      const args = detectionRulesClient.bulkImportRules.mock.calls[0][0];
+      expect(args.rules.map((r) => r.rule_id)).toEqual(['r1', 'r2', 'r3']);
+      expect(result).toEqual([
+        { rule_id: 'r1', status_code: 200 },
+        { rule_id: 'r2', status_code: 200 },
+        { rule_id: 'r3', status_code: 200 },
+      ]);
+    });
+
+    it('chunks the bulk path at RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE', async () => {
+      const total = RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE + 1;
+      const manyRules = Array.from({ length: total }, (_, i) => ({
+        ...ruleToImport,
+        rule_id: `r${i}`,
+      }));
+
+      detectionRulesClient.bulkImportRules.mockResolvedValue({ responses: [] });
+
+      await importRules({
+        rules: manyRules,
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkImportRules).toHaveBeenCalledTimes(2);
+      const [first, second] = detectionRulesClient.bulkImportRules.mock.calls;
+      expect(first[0].rules).toHaveLength(RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE);
+      expect(second[0].rules).toHaveLength(1);
+    });
+
+    it('maps per-rule errors from bulkImportRules to 4xx import responses', async () => {
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [
+          createRuleImportErrorObject({ ruleId: 'rule-a', message: 'boom' }),
+          { rule_id: 'rule-b' },
+          createRuleImportErrorObject({
+            ruleId: 'rule-c',
+            message: 'conflict',
+            type: 'conflict',
+          }),
+        ],
+      });
+
+      const result = await importRules({
+        rules: [ruleToImport],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(result).toEqual([
+        { error: { message: 'boom', status_code: 400 }, rule_id: 'rule-a' },
+        { rule_id: 'rule-b', status_code: 200 },
+        { error: { message: 'conflict', status_code: 409 }, rule_id: 'rule-c' },
+      ]);
+    });
   });
 });

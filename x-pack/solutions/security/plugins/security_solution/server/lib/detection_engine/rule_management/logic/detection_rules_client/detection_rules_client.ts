@@ -20,9 +20,11 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
+import type { BulkImportRulesResult } from './methods/bulk_import_rules';
 import type {
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
+  BulkImportRulesArgs,
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
@@ -41,6 +43,7 @@ import type { RestoreRuleFromHistoryResponse } from '../../../../../../common/ap
 import { createRule } from './methods/create_rule';
 import { bulkCreatePrebuiltRules } from './methods/bulk_create_prebuilt_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
+import { bulkImportRules } from './methods/bulk_import_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
@@ -265,6 +268,18 @@ export const createDetectionRulesClient = ({
           ...args,
           detectionRulesClient: this,
           savedObjectsClient,
+        });
+      });
+    },
+
+    async bulkImportRules(args: BulkImportRulesArgs): Promise<BulkImportRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.bulkImportRules', async () => {
+        return bulkImportRules({
+          actionsClient,
+          rulesClient,
+          savedObjectsClient,
+          mlAuthz,
+          args,
         });
       });
     },

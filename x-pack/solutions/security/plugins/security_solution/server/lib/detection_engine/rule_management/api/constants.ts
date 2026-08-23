@@ -13,3 +13,9 @@ export const RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS = 3600000 as const;
  * 1 hour = 3600000 ms = 60 minutes * 60 seconds * 1000 ms
  */
 export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
+
+/** Batch size for the legacy per-rule import loop; also bounds overwrite-branch concurrency. */
+export const RULE_MANAGEMENT_IMPORT_BATCH_SIZE = 50;
+
+/** Bulk import batch size; optmised for performance and memory usage. */
+export const RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE = 150;
