@@ -43,11 +43,29 @@ const ENDPOINT_INDEX = 'logs-endpoint.events.process-default';
 const LABS_INDEX = 'logs-security_labs.research-default';
 const TI_INDEX = 'ti-mock-default';
 const WATCHLIST_SO_TYPE = 'security-tanker-watchlist';
-const ENTITY_INDEX = '.entities-v1';
 const ONCALL_INDEX = 'on-call-schedule';
 
 const CHRYSALIS_HASH = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
 const HOST = 'srv-win-defend-01';
+
+// Entity docs in `entities-latest-default` are keyed by sha256(euid) — the
+// same digest as @kbn/entity-store's hashEuid — so re-seeding overwrites
+// instead of duplicating. The four euids below are fixed dataset constants,
+// so their digests are precomputed at author time rather than hashing at
+// runtime (which would need the Node crypto builtin, disallowed here):
+//   sha256('host-default-srv-win-defend-01')        = 8956913254bdbf2d6070b7cfc851c691f653b150050013b4bea74c9f9b93457f
+//   sha256('host-default-srv-linux-web-02')         = 1d3a97ba8f44d13e1c6e249923b7994d14c7f36e5223d29832113403c0d24a6c
+//   sha256('host-default-srv-mac-dev-03')           = c7d2277442521af9efbf039522b13067d5444d1dbdb890a1e759ff5527553ed9
+//   sha256('user-default-SYSTEM-srv-win-defend-01') = 4e1e3960d8231ed8b67f2f3788f4a5602b93a44a9ab96cd25e8f0a2c6e2bb9d2
+const SEED_DOC_IDS: Record<string, string> = {
+  'host-default-srv-win-defend-01':
+    '8956913254bdbf2d6070b7cfc851c691f653b150050013b4bea74c9f9b93457f',
+  'host-default-srv-linux-web-02':
+    '1d3a97ba8f44d13e1c6e249923b7994d14c7f36e5223d29832113403c0d24a6c',
+  'host-default-srv-mac-dev-03': 'c7d2277442521af9efbf039522b13067d5444d1dbdb890a1e759ff5527553ed9',
+  'user-default-SYSTEM-srv-win-defend-01':
+    '4e1e3960d8231ed8b67f2f3788f4a5602b93a44a9ab96cd25e8f0a2c6e2bb9d2',
+};
 
 interface SeedOptions {
   esClient: EsClient;
@@ -190,68 +208,104 @@ export async function seedPersonaMatrixEnvironment({
     markerId
   );
 
-  // A4: entity-store record + watchlist so entity lookups return data.
-  await ensureIndexWithDocs(
-    esClient,
-    ENTITY_INDEX,
-    [
+  // A4: Entity Store V2 engines + entities in the latest alias so entity
+  // lookups return data. Entity Analytics Agent Builder tools gate on the
+  // `entities-latest-<space>` alias existing (entity_analytics_availability),
+  // which only the installed V2 engines create — a bare `.entities-v1` index
+  // (previous seed) satisfies no gate and leaves every tool unavailable.
+  // Pattern ported from kbn-evals-suite-entity-analytics setup_helpers.
+  try {
+    log.info(`[env-seed] installing entity store v2`);
+    const installRes = await kbnClient.request({
+      method: 'POST',
+      path: '/api/security/entity_store/install',
+      body: { entityTypes: ['user', 'host'] },
+    });
+    void installRes;
+    const deadline = Date.now() + 120_000;
+    for (;;) {
+      const statusRes = await kbnClient.request({
+        method: 'GET',
+        path: '/api/security/entity_store/status',
+      });
+      const body = (statusRes as unknown as { body?: { status?: string } }).body;
+      if (body?.status === 'running') break;
+      if (body?.status === 'error') {
+        throw new Error(`entity store v2 error state: ${JSON.stringify(body)}`);
+      }
+      if (Date.now() > deadline) {
+        throw new Error('entity store v2 did not reach running within 120s');
+      }
+      await new Promise((r) => setTimeout(r, 2_000));
+    }
+    log.info(`[env-seed] entity store v2 running`);
+
+    const latestAlias = 'entities-latest-default';
+    const now = new Date().toISOString();
+    const seedEntities = [
       {
-        '@timestamp': '2026-07-21T08:00:00.000Z',
-        'entity.type': 'host',
-        'entity.id': `host-default-${HOST}`,
-        'entity.name': HOST,
-        'entity.display_name': HOST,
-        'entity.risk_score': 73,
-        'entity.risk_level': 'high',
-        'entity.criticality': 'high',
-        'entity.tags': ['windows', 'endpoint'],
-      },
-      // A4a: ranked set + the SYSTEM user so entity-analytics-b ("rank the
-      // riskiest entities, profile the top one") and -c ("SYSTEM user's
-      // history/risk") have real data. A single host could not be ranked and no
-      // user entity existed for the watchlist to attach to.
-      {
-        '@timestamp': '2026-07-21T08:00:00.000Z',
-        'entity.type': 'host',
-        'entity.id': 'host-default-srv-linux-web-02',
-        'entity.name': 'srv-linux-web-02',
-        'entity.display_name': 'srv-linux-web-02',
-        'entity.risk_score': 41,
-        'entity.risk_level': 'moderate',
-        'entity.criticality': 'medium',
-        'entity.tags': ['linux', 'web'],
+        euid: `host-default-${HOST}`,
+        type: 'host',
+        name: HOST,
+        riskLevel: 'high' as const,
+        riskScoreNorm: 73,
+        assetCriticality: 'high_impact' as const,
       },
       {
-        '@timestamp': '2026-07-21T08:00:00.000Z',
-        'entity.type': 'host',
-        'entity.id': 'host-default-srv-mac-dev-03',
-        'entity.name': 'srv-mac-dev-03',
-        'entity.display_name': 'srv-mac-dev-03',
-        'entity.risk_score': 18,
-        'entity.risk_level': 'low',
-        'entity.criticality': 'low',
-        'entity.tags': ['macos', 'dev'],
+        euid: 'host-default-srv-linux-web-02',
+        type: 'host',
+        name: 'srv-linux-web-02',
+        riskLevel: 'medium' as const,
+        riskScoreNorm: 41,
+        assetCriticality: 'normal' as const,
       },
       {
-        '@timestamp': '2026-07-21T08:05:00.000Z',
-        'entity.type': 'user',
-        'entity.id': `user-default-SYSTEM-${HOST}`,
-        'entity.name': 'SYSTEM',
-        'entity.display_name': `SYSTEM (${HOST})`,
-        'entity.risk_score': 88,
-        'entity.risk_level': 'critical',
-        'entity.criticality': 'high',
-        'entity.tags': ['privileged', 'service-account'],
-        'entity.last_seen': '2026-07-21T08:00:00.000Z',
-        'entity.history':
-          'SYSTEM on srv-win-defend-01 executed BluetoothService.exe from C:\\Users\\Public ' +
-          'and side-loaded the Chrysalis DLL (T1574.002); elevated token use outside normal ' +
-          'service windows over the prior 24h.',
+        euid: 'host-default-srv-mac-dev-03',
+        type: 'host',
+        name: 'srv-mac-dev-03',
+        riskLevel: 'low' as const,
+        riskScoreNorm: 18,
+        assetCriticality: 'normal' as const,
       },
-    ],
-    log,
-    markerId
-  );
+      {
+        euid: `user-default-SYSTEM-${HOST}`,
+        type: 'user',
+        name: 'SYSTEM',
+        riskLevel: 'critical' as const,
+        riskScoreNorm: 88,
+        assetCriticality: 'high_impact' as const,
+      },
+    ];
+    const operations = seedEntities.flatMap((e) => {
+      const doc: Record<string, unknown> = {
+        '@timestamp': now,
+        entity: {
+          id: e.euid,
+          EngineMetadata: { Type: e.type },
+          risk: {
+            calculated_level: e.riskLevel,
+            calculated_score_norm: e.riskScoreNorm,
+          },
+        },
+        [e.type]: { name: e.name },
+        asset: { criticality: e.assetCriticality },
+      };
+      const seedDocId = SEED_DOC_IDS[e.euid];
+      if (!seedDocId) {
+        throw new Error(
+          `No precomputed doc id for ${e.euid} — add its sha256 to SEED_DOC_IDS in env_seeds.ts`
+        );
+      }
+      return [{ index: { _index: latestAlias, _id: seedDocId } }, doc] as const;
+    });
+    await esClient.bulk({ refresh: true, operations });
+    log.info(`[env-seed] seeded ${seedEntities.length} entities into ${latestAlias}`);
+  } catch (err) {
+    // Non-fatal by design (same contract as the watchlist seed): a missing
+    // entity store degrades entity-analytics coverage but the suite still
+    // measures the other six categories.
+    log.warning(`[env-seed] entity store v2 seed failed (non-fatal): ${err}`);
+  }
 
   // A5: on-call schedule so on_call_lookup (re-pointed at this index) can answer
   // "who is on call". The original run queried a dedicated on-call-schedule
@@ -312,7 +366,10 @@ export async function seedPersonaMatrixEnvironment({
 }
 
 export async function cleanupEnvSeeds({ esClient, log }: SeedOptions): Promise<void> {
-  for (const index of [ENDPOINT_INDEX, LABS_INDEX, TI_INDEX, ENTITY_INDEX]) {
+  // entities-latest-default is owned by the Entity Store V2 engines and
+  // outlives the run on purpose — uninstalling it would take the engine state
+  // with it. Plain seed indices are deleted idempotently.
+  for (const index of [ENDPOINT_INDEX, LABS_INDEX, TI_INDEX]) {
     await esClient.indices.delete({ index }).catch(() => {
       log.info(`[env-seed] cleanup: ${index} already gone`);
     });

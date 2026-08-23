@@ -85,7 +85,7 @@ export async function assertPersonaMatrixToolsRegistered({
   const expected = collectExpectedToolIds(personaMatrixDataset);
   // Only custom (eval-seeded) tools are listed in the Agent Builder registry;
   // platform.* and security.* built-ins are always available and not registered
-  // as custom tools, so they're excluded from this check.
+  // as custom tools, so they're excluded from the registry check below.
   const custom = expected.filter((id) => !id.includes('.'));
   if (custom.length === 0) {
     log.info('[persona-matrix] pre-flight: no custom expectedTools to verify');
@@ -102,6 +102,29 @@ export async function assertPersonaMatrixToolsRegistered({
   log.info(
     `[persona-matrix] pre-flight: ${custom.length} custom tools registered (${custom.join(', ')})`
   );
+
+  // BUILT-IN EXPECTED TOOLS: registration alone is not enough. The public
+  // tools list already excludes built-ins whose availability handler returned
+  // unavailable (skills flags, missing indices, license gates), and the model
+  // sees exactly that filtered list — so an expected built-in that is
+  // availability-gated off in this stack zeroes ExpectedToolCalled for every
+  // example declaring it. This is how security.entity_risk_score scored 0 on
+  // 34/34 runs before its availability contract was understood.
+  const builtins = expected.filter((id) => id.includes('.'));
+  if (builtins.length > 0) {
+    const gatedOff = await findUnregisteredToolIds(kbnClient, builtins);
+    if (gatedOff.length > 0) {
+      throw new Error(
+        `[persona-matrix] pre-flight tool-availability check failed: expected built-in tools ` +
+          `not exposed by the Agent Builder tools list (availability-gated off in this stack): ` +
+          `${gatedOff.join(', ')}. Fix the environment or the expectedTools contract — ` +
+          `running anyway would silently score these examples 0.`
+      );
+    }
+    log.info(
+      `[persona-matrix] pre-flight: ${builtins.length} built-in expectedTools exposed by the tools list`
+    );
+  }
 
   // Registration is necessary but NOT sufficient: `selectTools` only exposes
   // tools attached to the agent's configuration plus `defaultAgentToolIds`.

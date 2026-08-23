@@ -65,6 +65,23 @@ describe('findUnregisteredToolIds', () => {
       'tool-registration pre-flight'
     );
   });
+
+  it('flags availability-gated built-ins the tools list does not expose', async () => {
+    // Regression shape of the security.entity_risk_score bug: the tool is a
+    // registered built-in, but its availability handler (skills flag on)
+    // keeps it out of the public tools list, so the model can never call it.
+    const kbnClient = makeKbnClient([
+      { id: 'security.get_entity' },
+      { id: 'platform.core.generate_esql' },
+    ]);
+    await expect(
+      findUnregisteredToolIds(kbnClient, [
+        'security.get_entity',
+        'platform.core.generate_esql',
+        'security.entity_risk_score',
+      ])
+    ).resolves.toEqual(['security.entity_risk_score']);
+  });
 });
 
 describe('findUnattachedToolIds', () => {

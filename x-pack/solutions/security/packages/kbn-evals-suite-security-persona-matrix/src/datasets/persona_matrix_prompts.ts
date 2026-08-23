@@ -90,10 +90,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'alert-analysis',
+      // security.entity_risk_score is force-disabled under
+      // agentBuilder:experimentalFeatures (skills), which this suite always
+      // enables; the entity-risk context for point-in-time triage comes from
+      // security.get_entity's profile instead.
       expectedTools: [
         'attachments.read',
         'security.alerts',
-        'security.entity_risk_score',
+        'security.get_entity',
         'security.security_labs_search',
       ],
       severity: 'high',
@@ -119,7 +123,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: ['security.alerts', 'security.entity_risk_score'],
+      // entity_risk_score is unavailable under the skills flag (see above);
+      // disposition risk context comes from the get_entity profile.
+      expectedTools: ['security.alerts', 'security.get_entity'],
       severity: 'high',
       tags: ['triage', 'host-queue'],
     },
@@ -142,11 +148,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: [
-        'security.alerts',
-        'security.security_labs_search',
-        'security.entity_risk_score',
-      ],
+      // entity_risk_score is unavailable under the skills flag (see above);
+      // the baseline-vs-pattern risk check comes from the get_entity profile.
+      expectedTools: ['security.alerts', 'security.security_labs_search', 'security.get_entity'],
       severity: 'medium',
       tags: ['triage', 'noise'],
     },
@@ -239,7 +243,12 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      // security.entity_risk_score is force-disabled whenever
+      // agentBuilder:experimentalFeatures (skills) is on — which the persona
+      // matrix always runs with — so it can never be invoked here. Risk data
+      // comes from get_entity plus, for the "unusual behavior tied to it"
+      // phrasing, the risk score history tool.
+      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
     },
@@ -283,7 +292,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     metadata: {
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      // Same skills-precedence constraint as entity-analytics-a: risk history
+      // comes from get_entity_risk_score_history, which stays available under
+      // the experimental-features flag that the suite needs for skills.
+      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'history'],
     },
