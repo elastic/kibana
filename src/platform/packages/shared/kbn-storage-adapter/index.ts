@@ -48,13 +48,6 @@ interface StorageSettingsBase {
 export interface IndexStorageSettings extends StorageSettingsBase {
   name: string;
   priority?: number;
-  /**
-   * Extra keys merged into the index template's `mappings._meta`. Stamped at index
-   * creation and re-applied on every mapping reconcile, so consumers can persist
-   * their own schema markers without racing the adapter's `_meta` rewrites.
-   * The adapter's own `version` key always takes precedence.
-   */
-  mappingsMeta?: Record<string, string | number | boolean>;
 }
 
 export type StorageSettings = IndexStorageSettings;

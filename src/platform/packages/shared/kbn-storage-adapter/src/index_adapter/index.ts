@@ -228,7 +228,7 @@ export class StorageIndexAdapter<
     const version = getSchemaVersion(this.storage);
 
     const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
-      _meta: { ...this.storage.mappingsMeta, version },
+      _meta: { version },
       dynamic: 'strict',
       properties: {
         ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
