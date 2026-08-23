@@ -440,6 +440,63 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
   });
 });
 
+describe('StorageIndexAdapter - custom mappingsMeta', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('merges mappingsMeta into the template mappings._meta, adapter version winning', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      {
+        ...storageSettings,
+        mappingsMeta: { sml_schema_version: 2, version: 'attempted-override' },
+      },
+      { isServerless: false }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          mappings: expect.objectContaining({
+            _meta: expect.objectContaining({
+              sml_schema_version: 2,
+              version: expect.not.stringMatching('attempted-override'),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('writes only the adapter version into _meta when mappingsMeta is unset', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          mappings: expect.objectContaining({
+            _meta: { version: expect.any(String) },
+          }),
+        }),
+      })
+    );
+  });
+});
+
 describe('StorageIndexAdapter - esql method', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let esqlQuery: jest.Mock;
