@@ -1116,7 +1116,7 @@ const autocompleteSml = async ({
       },
       // Order will be arbitrary as every result scores the same.
       sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
-      _source: ['id', 'type', 'title', 'origin', 'permissions'],
+      _source: ['id', 'type', 'title', 'origin'],
     });
 
     const results: SmlAutocompleteResult[] = response.hits.hits
@@ -1128,7 +1128,6 @@ const autocompleteSml = async ({
           type: source.type ?? '',
           title: source.title ?? '',
           origin: { uri: source.origin?.uri ?? '' },
-          permissions: source.permissions ?? emptyPermissions(),
         };
       });
 

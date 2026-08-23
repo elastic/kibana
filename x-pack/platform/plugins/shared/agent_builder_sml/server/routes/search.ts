@@ -77,9 +77,8 @@ export const registerSearchRoute = ({
                 schema.literal('description'),
                 schema.literal('tags'),
                 schema.literal('references'),
-                schema.literal('permissions'),
               ]),
-              { maxSize: 5 }
+              { maxSize: 4 }
             )
           ),
         }),

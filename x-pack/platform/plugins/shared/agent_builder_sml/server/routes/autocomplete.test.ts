@@ -85,7 +85,6 @@ describe('registerAutocompleteRoute', () => {
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
-        permissions: { kibana: { privileges: [] } },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -105,26 +104,29 @@ describe('registerAutocompleteRoute', () => {
     });
   });
 
-  it('does not leak server-only fields (permissions) into the HTTP response', async () => {
-    const mockResults: SmlAutocompleteResult[] = [
+  it('does not leak server-only fields into the HTTP response', async () => {
+    // The route projects an explicit four-field whitelist, so anything the
+    // service carries internally stays server-side. Cast because such fields
+    // are deliberately absent from the published result type.
+    const mockResults = [
       {
         id: 'entry-3',
         type: 'visualization',
         title: 'V',
         origin: { uri: 'v-1' },
-        permissions: {
-          kibana: {
-            privileges: [{ space: 'default', name: ['ai_index:visualization/read'], count: 1 }],
-          },
-        },
+        internal_only_field: 'server-side detail',
       },
-    ];
+    ] as unknown as SmlAutocompleteResult[];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'v' });
-    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
-    const results = (body as any).results;
-    expect(results[0]).not.toHaveProperty('permissions');
+    const body = response.ok.mock.calls[0][0]?.body as { results: Array<Record<string, unknown>> };
+    expect(body.results[0]).toEqual({
+      id: 'entry-3',
+      type: 'visualization',
+      title: 'V',
+      origin: { uri: 'v-1' },
+    });
   });
 
   it('passes spaceId from spaces plugin to sml.autocomplete', async () => {

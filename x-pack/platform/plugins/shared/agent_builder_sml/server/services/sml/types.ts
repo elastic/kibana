@@ -253,7 +253,6 @@ export interface SmlSearchResult {
   description?: string;
   references?: Array<{ uri: string }>;
   tags?: string[];
-  permissions?: SmlPermissions;
 }
 
 /**
@@ -266,8 +265,6 @@ export interface SmlAutocompleteResult {
   type: string;
   title: string;
   origin: { uri: string };
-  /** Used server-side for permission filtering; not exposed in the HTTP response. */
-  permissions: SmlPermissions;
 }
 
 /**
@@ -432,7 +429,7 @@ export interface SmlService {
     /**
      * Optional fields to include beyond the baseline (`id`, `type`, `title`,
      * `description`). Valid opt-in values: `'content'`, `'tags'`,
-     * `'references'`, `'permissions'`.
+     * `'references'`.
      */
     fields?: string[];
     /** Runtime-imposed per-type id-allowlist constraints. See {@link SmlSearchConstraints}. */

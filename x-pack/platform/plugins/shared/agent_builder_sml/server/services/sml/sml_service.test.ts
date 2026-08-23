@@ -909,7 +909,7 @@ describe('SmlService', () => {
           filter: [expectedVisibilityFilter({})],
         },
       });
-      expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
+      expect(call._source).toEqual(['id', 'type', 'title', 'origin']);
     });
 
     it('breaks score ties deterministically instead of falling back to doc order', async () => {
@@ -1269,7 +1269,6 @@ describe('SmlService', () => {
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
-        permissions: makePermissions(),
       });
     });
 

@@ -135,7 +135,6 @@ describe('createSmlSearchTool', () => {
         description: 'A CPU chart',
         tags: ['perf'],
         references: [{ uri: 'dashboard://abc' }],
-        permissions: { kibana: { privileges: [] } },
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });
