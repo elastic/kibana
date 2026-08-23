@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import {
   AppMenuActionId,
   type DiscoverAppMenuItemType,
@@ -26,6 +27,7 @@ import type {
 import type { AppMenuDiscoverParams } from './types';
 import { buildShareOptions } from './get_share';
 import { getDiscoverSessionExportJson } from './get_discover_session_export_json';
+import { ExportDiscoverSessionJsonFlyout } from './export_json_flyout';
 
 interface GetExportAppMenuItemParams {
   discoverParams: AppMenuDiscoverParams;
@@ -40,20 +42,9 @@ interface GetExportAppMenuItemParams {
 }
 
 /**
- * Maps a share integration id to its Export menu presentation
+ * Maps a Share integration id to its Export menu item props.
  */
-const getExportItemMeta = (integrationId: string) => {
-  if (integrationId === 'exportJson') {
-    return {
-      label: i18n.translate('discover.localMenu.export.jsonConfigLabel', {
-        defaultMessage: 'Export JSON config',
-      }),
-      testId: 'exportMenuItem-JSON',
-      iconType: 'code',
-      order: 3,
-    };
-  }
-
+const getShareExportMenuItemProps = (integrationId: string) => {
   if (integrationId === 'csvReports') {
     return {
       label: i18n.translate('discover.localMenu.export.csvLabel', {
@@ -88,8 +79,7 @@ const isShareIntegration = (shareAction: ShareActionIntents): shareAction is Sha
   shareAction.shareType === 'integration';
 
 /**
- * Builds the Export menu item from the share integrations registered for Discover,
- * extending the generic share options with the Discover session JSON producer.
+ * Builds the Export menu item from the local JSON export and registered Share integrations.
  */
 export const getExportAppMenuItem = ({
   discoverParams,
@@ -104,14 +94,17 @@ export const getExportAppMenuItem = ({
 }: GetExportAppMenuItemParams): DiscoverAppMenuItemType | undefined => {
   const { share } = services;
 
+  // Share supplies the reporting actions and Console locator used by the Export menu.
   if (!share) return undefined;
 
+  const getDiscoverSessionTitle = () =>
+    getState().persistedDiscoverSession?.title ||
+    i18n.translate('discover.localMenu.fallbackReportTitle', {
+      defaultMessage: 'Untitled Discover session',
+    });
+
   const getExportJson = (exportAllTabs: boolean = true) => {
-    const title =
-      getState().persistedDiscoverSession?.title ||
-      i18n.translate('discover.localMenu.fallbackReportTitle', {
-        defaultMessage: 'Untitled Discover session',
-      });
+    const title = getDiscoverSessionTitle();
 
     const { sessionState, warnings } = getDiscoverSessionExportJson({
       getState,
@@ -127,58 +120,65 @@ export const getExportAppMenuItem = ({
     };
   };
 
-  const buildExportShareOptions = async () => {
-    const shareOptions = await buildShareOptions({
-      discoverParams,
-      services,
-      currentTab,
-      runtimeStateManager,
-      persistedDiscoverSession,
-      totalHitsState,
-      hasUnsavedChanges,
-    });
-
-    return {
-      ...shareOptions,
-      sharingData: {
-        ...shareOptions.sharingData,
-        getExportJson,
-      },
-    };
+  const shareOptionsParams = {
+    discoverParams,
+    services,
+    currentTab,
+    runtimeStateManager,
+    persistedDiscoverSession,
+    totalHitsState,
+    hasUnsavedChanges,
   };
 
-  const exportIntegrations: ShareActionIntents[] = share.availableIntegrations('search', 'export');
-  const exportItems: DiscoverAppMenuPopoverItem[] = exportIntegrations
+  const exportJsonItem: DiscoverAppMenuPopoverItem = {
+    id: 'exportJson',
+    label: i18n.translate('discover.localMenu.export.jsonConfigLabel', {
+      defaultMessage: 'Export JSON config',
+    }),
+    testId: 'exportMenuItem-JSON',
+    iconType: 'code',
+    order: 3,
+    render: ({ context: { onFinishAction } }) => (
+      <ExportDiscoverSessionJsonFlyout
+        canShowDevTools={Boolean(services.capabilities.dev_tools?.show)}
+        closeFlyout={onFinishAction}
+        getExportJson={getExportJson}
+        title={getDiscoverSessionTitle()}
+        useConsoleUrl={share.url.locators.useUrl}
+      />
+    ),
+  };
+
+  const exportItems: DiscoverAppMenuPopoverItem[] = share
+    .availableIntegrations('search', 'export')
     .filter(isShareIntegration)
-    .map(({ id }) => ({
-      ...getExportItemMeta(id),
-      id,
+    .map(({ id: integrationId }: ShareIntegration) => ({
+      ...getShareExportMenuItemProps(integrationId),
+      id: integrationId,
       run: async () => {
-        const shareOptions = await buildExportShareOptions();
-        const exportHandler = await share.getExportHandler(shareOptions, id, intl);
+        const shareOptions = await buildShareOptions(shareOptionsParams);
+        const exportHandler = await share.getExportHandler(shareOptions, integrationId, intl);
         await exportHandler?.();
       },
     }));
 
-  const exportDerivatives: ShareActionIntents[] = share.availableIntegrations(
-    'search',
-    'exportDerivatives'
-  );
-  const exportDerivativeItems: DiscoverAppMenuPopoverItem[] = exportDerivatives
+  const exportDerivativeItems: DiscoverAppMenuPopoverItem[] = share
+    .availableIntegrations('search', 'exportDerivatives')
     .filter(isShareIntegration)
-    .map(({ id }) => ({
-      ...getExportItemMeta(id),
-      id,
+    .map(({ id: integrationId }: ShareIntegration) => ({
+      ...getShareExportMenuItemProps(integrationId),
+      id: integrationId,
       run: async () => {
-        const shareOptions = await buildExportShareOptions();
-        const exportDerivativeHandler = await share.getExportDerivativeHandler(shareOptions, id);
+        const shareOptions = await buildShareOptions(shareOptionsParams);
+        const exportDerivativeHandler = await share.getExportDerivativeHandler(
+          shareOptions,
+          integrationId
+        );
         await exportDerivativeHandler?.();
       },
     }));
 
-  const items = [...exportItems, ...exportDerivativeItems];
-
-  if (!items.length) return undefined;
+  const items = [...exportItems, ...exportDerivativeItems, exportJsonItem];
 
   return {
     id: AppMenuActionId.export,

@@ -66,7 +66,6 @@ import type { ProfileProviderSharedServices, ProfilesManager } from './context_a
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
-import type { DiscoverExportJsonShare } from './application/main/components/top_nav/app_menu_actions/export_json_config';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -106,26 +105,6 @@ export class DiscoverPlugin
 
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
-      const useConsoleUrl = plugins.share.url.locators.useUrl;
-
-      plugins.share.registerShareIntegration<DiscoverExportJsonShare>('search', {
-        id: 'exportJson',
-        // Use `exportDerivatives` because JSON provides its own flyout instead of Share's managed export flyout.
-        groupId: 'exportDerivatives',
-        getShareIntegrationConfig: async ({ objectType, objectTypeAlias, sharingData }) => {
-          const [{ createExportJsonConfig }, [coreStart]] = await Promise.all([
-            import('./application/main/components/top_nav/app_menu_actions/export_json_config'),
-            core.getStartServices(),
-          ]);
-
-          return createExportJsonConfig({
-            canShowDevTools: Boolean(coreStart.application.capabilities.dev_tools?.show),
-            objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
-            sharingData,
-            useConsoleUrl,
-          });
-        },
-      });
 
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,

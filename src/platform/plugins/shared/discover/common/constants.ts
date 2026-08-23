@@ -73,4 +73,5 @@ export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experienc
  * Discover session HTTP API
  */
 export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
+export const DISCOVER_SESSION_API_ACCESS = 'internal' as const;
 export const DISCOVER_SESSION_API_VERSION = '1';

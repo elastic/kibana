@@ -10,8 +10,13 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
+import {
+  DISCOVER_SESSION_API_ACCESS,
+  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSION_API_VERSION,
+} from '../../../../../../common/constants';
 import type { DiscoverSessionApiData } from '../../../../../../server';
-import { createExportJsonConfig } from './export_json_config';
+import { ExportDiscoverSessionJsonFlyout } from './export_json_flyout';
 
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
 
@@ -28,16 +33,6 @@ const mockGetExportJson = jest.fn(
 const mockDownloadFileAs = jest.fn();
 const mockUseUrl = jest.fn(() => 'console-url');
 const mockExportJsonFlyoutContent = jest.fn((_props: MockExportJsonFlyoutContentProps) => null);
-const exportJsonConfig = createExportJsonConfig({
-  canShowDevTools: true,
-  objectType: 'Discover session',
-  sharingData: {
-    getExportJson: mockGetExportJson,
-    locatorParams: [],
-    title: 'Discover session',
-  },
-  useConsoleUrl: mockUseUrl,
-});
 
 jest.mock('@kbn/as-code-export-flyout-component', () => ({
   ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
@@ -48,15 +43,24 @@ jest.mock('@kbn/share-plugin/public', () => ({
   downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
 }));
 
-describe('Discover export JSON config', () => {
+describe('Discover export JSON flyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('connects the shared flyout to the Discover state and download implementation', async () => {
-    const FlyoutContent = exportJsonConfig.flyoutContent;
+  const renderFlyout = () =>
+    render(
+      <ExportDiscoverSessionJsonFlyout
+        canShowDevTools
+        closeFlyout={jest.fn()}
+        getExportJson={mockGetExportJson}
+        title="Discover session"
+        useConsoleUrl={mockUseUrl}
+      />
+    );
 
-    render(<FlyoutContent closeFlyout={jest.fn()} flyoutRef={{ current: null }} />);
+  it('connects the shared flyout to the Discover state and download implementation', async () => {
+    renderFlyout();
 
     const props = mockExportJsonFlyoutContent.mock.calls[0][0];
 
@@ -88,9 +92,7 @@ describe('Discover export JSON config', () => {
   });
 
   it('configures the Discover Open in Console action', () => {
-    const FlyoutContent = exportJsonConfig.flyoutContent;
-
-    render(<FlyoutContent closeFlyout={jest.fn()} flyoutRef={{ current: null }} />);
+    renderFlyout();
 
     const { openInConsole } = mockExportJsonFlyoutContent.mock.calls[0][0];
 
@@ -100,13 +102,18 @@ describe('Discover export JSON config', () => {
         useUrl: mockUseUrl,
       })
     );
-    expect(openInConsole?.getRequest('{}')).toBe('POST kbn:/api/discover_sessions\n{}');
+    const apiVersionQuery =
+      DISCOVER_SESSION_API_ACCESS === 'internal'
+        ? `?apiVersion=${DISCOVER_SESSION_API_VERSION}`
+        : '';
+
+    expect(openInConsole?.getRequest('{}')).toBe(
+      `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}${apiVersionQuery}\n{}`
+    );
   });
 
   it('exports all tabs by default and can export only the current tab', async () => {
-    const FlyoutContent = exportJsonConfig.flyoutContent;
-
-    render(<FlyoutContent closeFlyout={jest.fn()} flyoutRef={{ current: null }} />);
+    renderFlyout();
 
     const initialProps = mockExportJsonFlyoutContent.mock.calls[0][0];
 
@@ -129,9 +136,7 @@ describe('Discover export JSON config', () => {
   });
 
   it('surfaces export errors through prepareExportJson', async () => {
-    const FlyoutContent = exportJsonConfig.flyoutContent;
-
-    render(<FlyoutContent closeFlyout={jest.fn()} flyoutRef={{ current: null }} />);
+    renderFlyout();
 
     const props = mockExportJsonFlyoutContent.mock.calls[0][0];
 

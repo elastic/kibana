@@ -214,16 +214,6 @@ describe('useTopNavLinks', () => {
               },
             ];
           }
-          if (groupId === 'exportDerivatives') {
-            return [
-              {
-                id: 'exportJson',
-                shareType: 'integration' as const,
-                groupId: 'exportDerivatives',
-                config: () => Promise.resolve({}),
-              },
-            ];
-          }
           return [];
         });
 
@@ -233,9 +223,17 @@ describe('useTopNavLinks', () => {
       expect(exportItem).toBeDefined();
       expect(exportItem?.label).toBe('Export');
 
-      expect(exportItem?.items).toBeDefined();
-      expect(exportItem?.items?.length).toBeGreaterThan(0);
-      expect(exportItem?.items?.find(({ id }) => id === 'exportJson')).toBeDefined();
+      const exportJsonItems = exportItem?.items?.filter(({ id }) => id === 'exportJson');
+      expect(exportJsonItems).toHaveLength(1);
+      expect(exportJsonItems?.[0]).toEqual(
+        expect.objectContaining({
+          label: 'Export JSON config',
+          testId: 'exportMenuItem-JSON',
+          iconType: 'code',
+          order: 3,
+          run: expect.any(Function),
+        })
+      );
 
       const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();
@@ -655,22 +653,6 @@ describe('useTopNavLinks', () => {
     it('should add the separator above the first tab-scoped app menu item', async () => {
       const services = createTestServices();
 
-      jest
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
-          if (groupId === 'exportDerivatives') {
-            return [
-              {
-                id: 'exportJson',
-                shareType: 'integration' as const,
-                groupId: 'exportDerivatives',
-                config: () => Promise.resolve({}),
-              },
-            ];
-          }
-          return [];
-        });
-
       let appMenuConfig = await setup({ services });
 
       let exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
@@ -679,12 +661,13 @@ describe('useTopNavLinks', () => {
       expect(exportItem?.separator).toBe('above');
       expect(inspectItem?.separator).toBeUndefined();
 
-      appMenuConfig = await setup({ services: createTestServices() });
+      const servicesWithoutShare = createTestServices({ share: undefined });
+      appMenuConfig = await setup({ services: servicesWithoutShare });
 
       exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
       inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
 
-      expect(exportItem?.separator).toBeUndefined();
+      expect(exportItem).toBeUndefined();
       expect(inspectItem?.separator).toBe('above');
     });
   });
