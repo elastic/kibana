@@ -166,6 +166,7 @@ export const matrixCmd: Command<void> = {
       examplePrefixes: [
         ...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? [])),
       ],
+      scoring: config.scoring,
     });
 
     if (aggregated.length === 0) {

@@ -145,6 +145,36 @@ export const matrixConfigSchema = schema.object({
   branch: schema.string({ defaultValue: 'main', maxLength: MAX_STRING_LENGTH }),
   /** Only consider experiments newer than `now-<lookbackDays>d`. */
   lookbackDays: schema.number({ defaultValue: 45, min: 1 }),
+  /**
+   * Scoring policy for judged (LLM-graded) evaluators.
+   *
+   * Measured on the persona matrix (8,482 golden score documents): reading the
+   * judge's categorical verdict instead of its continuous score, and dropping
+   * grades from judges that were neither EIS-pinned nor independent of the
+   * graded model, cuts the rerun flip rate from 83.3% to 33.3%.
+   *
+   * Defaults are off so existing matrices keep their published numbers; a
+   * matrix opts in explicitly and its scores change.
+   */
+  scoring: schema.maybe(
+    schema.object({
+      /**
+       * Score judged evaluators by their categorical verdict (SUPPORTED /
+       * PARTIALLY_SUPPORTED / ...) rather than the geometric mean over a
+       * per-run claim list. Contract evaluators are unaffected — they are
+       * already deterministic and expose no verdict.
+       */
+      useVerdictLadder: schema.boolean({ defaultValue: false }),
+      /**
+       * Drop scores produced by judges that are not EIS-pinned (LiteLLM
+       * aliases, HuggingFace repo paths, local quantisations). Those judges
+       * cannot be re-run to reproduce a number.
+       */
+      requireEisJudge: schema.boolean({ defaultValue: false }),
+      /** Drop scores where a model graded its own output. */
+      excludeSelfJudged: schema.boolean({ defaultValue: false }),
+    })
+  ),
   /** Default multiplier applied to evaluator means when a column omits `scale`. */
   defaultScale: schema.number({ defaultValue: 10, min: 0 }),
   /** Decimal places used when rounding cell values. */

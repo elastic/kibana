@@ -124,6 +124,12 @@ export interface QueryMatrixScoresOptions {
    * stats, so columns can slice a single dataset by example category.
    */
   examplePrefixes?: string[];
+  /**
+   * Judged-evaluator scoring policy. Forwarded to `scoresByPrefixToDatasets`
+   * for the per-prefix datasets. Omitted means the historical behaviour:
+   * continuous scores, every judge counted.
+   */
+  scoring?: ScoreAggregationOptions;
 }
 
 /**
@@ -277,7 +283,14 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
 export const queryMatrixScores = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
-  { suiteIds, modelIds, branch, lookbackDays, examplePrefixes = [] }: QueryMatrixScoresOptions
+  {
+    suiteIds,
+    modelIds,
+    branch,
+    lookbackDays,
+    examplePrefixes = [],
+    scoring,
+  }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
 
@@ -336,7 +349,7 @@ export const queryMatrixScores = async (
             taskModelId: modelId,
             executionId: latest.execution_id ?? latest.experiment_id,
           });
-          datasets.push(...scoresByPrefixToDatasets(scores, examplePrefixes));
+          datasets.push(...scoresByPrefixToDatasets(scores, examplePrefixes, scoring));
         } catch (error) {
           log.warning(
             `Per-prefix scores unavailable for experiment ${
