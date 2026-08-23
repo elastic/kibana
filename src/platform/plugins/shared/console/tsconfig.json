@@ -59,6 +59,7 @@
     "@kbn/esql-types",
     "@kbn/core-application-common",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",
