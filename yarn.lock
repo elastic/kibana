@@ -15845,7 +15845,7 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-adm-zip@0.6.0, adm-zip@^0.5.18:
+adm-zip@0.6.0, adm-zip@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
   integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
@@ -16493,7 +16493,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@1.19.0, axios@^1.11.0, axios@^1.18.1, axios@^1.8.2:
+axios@1.19.0, axios@^1.11.0, axios@^1.19.0, axios@^1.8.2:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.19.0.tgz#ddf864d4c8233c0e6873746ab59361537d05ad39"
   integrity sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==
@@ -17634,14 +17634,14 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@151.0.3:
-  version "151.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-151.0.3.tgz#49a430d76e70aeb53bd6949dd0387ad132312b6a"
-  integrity sha512-WoRTSJiYTFTt3bLLwfvFJpa0u8YxNzKYdcm3S+XOoccjVnjn6/0Zb+cW4YpvYCsBtZWWz3L7nYjj5PduAak9tA==
+chromedriver@151.0.5:
+  version "151.0.5"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-151.0.5.tgz#7f37789c5f41c498b24fa07627e364a42d0210a6"
+  integrity sha512-oPI/VtTeLePbkTOI5o4yvEOlcdpmqEdqQNLZbyu5ha6kpDQYfDRuliisDiph29hBK/UzHSmOyZFKX1mE3efYOQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    adm-zip "^0.5.18"
-    axios "^1.18.1"
+    adm-zip "^0.6.0"
+    axios "^1.19.0"
     compare-versions "^6.1.1"
     proxy-agent "^8.0.2"
     proxy-from-env "^2.1.0"
