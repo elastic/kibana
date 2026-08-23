@@ -253,7 +253,7 @@ describe('createRuleSmlType', () => {
     it('returns the registered ai_index read action for rules', () => {
       const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
       expect(permissions).toEqual({
-        kibana: { privileges: { name: [`ai_index:${RULE_SML_TYPE}/read`] } },
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
       });
     });
   });

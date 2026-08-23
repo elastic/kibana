@@ -128,7 +128,7 @@ describe('createSignificantEventSmlType', () => {
       logger: loggingSystemMock.createLogger(),
     });
     expect(permissions).toEqual({
-      kibana: { privileges: { name: [`ai_index:${SIGNIFICANT_EVENT_SML_TYPE}/read`] } },
+      kibana: { privileges: { name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`] } },
     });
   });
 
@@ -153,7 +153,7 @@ describe('createSignificantEventSmlType', () => {
               privileges: [
                 {
                   space: 'default',
-                  name: [`ai_index:${SIGNIFICANT_EVENT_SML_TYPE}/read`],
+                  name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`],
                   count: 1,
                 },
               ],
