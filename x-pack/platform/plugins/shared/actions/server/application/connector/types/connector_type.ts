@@ -27,4 +27,5 @@ export interface ConnectorType {
   isExperimental?: ConnectorTypeSchemaType['isExperimental'];
   isTestable: ConnectorTypeSchemaType['isTestable'];
   specActionNames?: ConnectorTypeSchemaType['specActionNames'];
+  icon?: ConnectorTypeSchemaType['icon'];
 }

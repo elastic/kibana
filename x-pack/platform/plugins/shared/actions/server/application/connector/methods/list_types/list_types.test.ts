@@ -120,6 +120,7 @@ describe('listTypes()', () => {
             id: '.declarative-okta',
             displayName: 'Declarative Okta',
             description: 'Test',
+            icon: 'data:image/svg+xml;base64,dGVzdA==',
             minimumLicense: 'basic',
             supportedFeatureIds: ['workflows'],
           },
@@ -142,6 +143,7 @@ describe('listTypes()', () => {
       expect.objectContaining({
         id: '.declarative-okta',
         specActionNames: ['listUsers', 'getLogs'],
+        icon: 'data:image/svg+xml;base64,dGVzdA==',
       }),
     ]);
   });

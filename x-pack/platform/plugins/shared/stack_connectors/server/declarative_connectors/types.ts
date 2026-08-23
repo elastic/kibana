@@ -7,6 +7,15 @@
 
 import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
 
+export interface DeclarativeConnectorIcon {
+  path: string;
+  contentHash: string;
+}
+
+export type DeclarativeConnectorMetadata = Omit<ConnectorMetadata, 'id' | 'icon'> & {
+  icon?: DeclarativeConnectorIcon;
+};
+
 export interface DeclarativeJsonSchema {
   type: 'object' | 'string' | 'number' | 'integer' | 'boolean' | 'array';
   properties?: Record<string, DeclarativeJsonSchema>;
@@ -74,7 +83,7 @@ export interface DeclarativeConnectorSpec {
   schemaVersion: 1;
   id: string;
   version: string;
-  metadata: Omit<ConnectorMetadata, 'id'>;
+  metadata: DeclarativeConnectorMetadata;
   config: DeclarativeJsonSchema;
   auth: {
     type: 'api_key_header' | 'basic' | 'bearer' | 'none';
@@ -105,6 +114,7 @@ export interface DeclarativeCatalogManifest {
 
 export interface StoredDeclarativeSpec extends DeclarativeCatalogEntry {
   raw: string;
+  iconRaw?: string;
 }
 
 export interface StoredDeclarativeCatalog {

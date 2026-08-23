@@ -56,8 +56,10 @@
     "@kbn/connector-schemas",
     "@kbn/connector-specs",
     "@kbn/actions-utils",
+    "@kbn/es-errors",
     "@kbn/mcp-client",
     "@kbn/std",
+    "@kbn/storage-adapter",
     "@kbn/ui-callout",
   ],
   "exclude": [

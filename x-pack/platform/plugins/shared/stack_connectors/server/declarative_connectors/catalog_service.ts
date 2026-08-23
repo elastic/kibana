@@ -6,17 +6,19 @@
  */
 
 import { createHash } from 'crypto';
+import { Buffer } from 'buffer';
 import fetch from 'node-fetch';
-import type { Logger, ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { setRuntimeConnectorSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { isNotFoundError } from '@kbn/es-errors';
 import { materializeDeclarativeConnectorSpec } from './materialize_spec';
 import { parseDeclarativeCatalogManifest, parseDeclarativeConnectorSpec } from './parse_spec';
 import {
-  DECLARATIVE_CONNECTOR_CATALOG_SO_ID,
-  DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
-} from './saved_objects';
+  DECLARATIVE_CONNECTOR_CATALOG_DOCUMENT_ID,
+  DECLARATIVE_CONNECTOR_CATALOG_INDEX,
+  type DeclarativeConnectorCatalogStorage,
+} from './storage';
 import type {
   DeclarativeCatalogEntry,
   DeclarativeCatalogHealth,
@@ -26,6 +28,7 @@ import type {
 
 const MAX_CATALOG_BYTES = 1024 * 1024;
 const MAX_SPEC_BYTES = 256 * 1024;
+const MAX_ICON_BYTES = 64 * 1024;
 const REQUEST_TIMEOUT_MS = 10_000;
 
 interface DeclarativeConnectorCatalogServiceOptions {
@@ -35,19 +38,28 @@ interface DeclarativeConnectorCatalogServiceOptions {
   logger: Logger;
 }
 
-type StoredCatalogAttributes = StoredDeclarativeCatalog & SavedObjectAttributes;
-
 const buildSpecKey = (id: string, version: string): string => `${id}@${version}`;
 
 const getContentHash = (raw: string): string =>
   `sha256:${createHash('sha256').update(raw, 'utf8').digest('hex')}`;
+
+const validateSvgIcon = (raw: string): void => {
+  if (!/<svg[\s>]/i.test(raw)) {
+    throw new Error('Declarative connector icon is not an SVG document.');
+  }
+  const unsafeMarkup =
+    /<script[\s>]|<foreignObject[\s>]|\son[a-z]+\s*=|(?:href|xlink:href)\s*=\s*["']\s*(?!#)/i;
+  if (unsafeMarkup.test(raw)) {
+    throw new Error('Declarative connector icon contains unsupported active or external content.');
+  }
+};
 
 export class DeclarativeConnectorCatalogService {
   private readonly supportedConnectorIds: Set<string>;
   private activeVersions = new Map<string, string>();
   private materializedSpecs = new Map<string, ConnectorSpec>();
   private storedSpecs = new Map<string, StoredDeclarativeSpec>();
-  private repository?: ISavedObjectsRepository;
+  private storage?: DeclarativeConnectorCatalogStorage;
   private initialization?: Promise<void>;
   private refreshing?: Promise<void>;
   private refreshTimer?: NodeJS.Timeout;
@@ -59,8 +71,8 @@ export class DeclarativeConnectorCatalogService {
     this.supportedConnectorIds = new Set(options.supportedConnectorIds);
   }
 
-  public start(repository: ISavedObjectsRepository): void {
-    this.repository = repository;
+  public start(storage: DeclarativeConnectorCatalogStorage): void {
+    this.storage = storage;
     this.initialization = this.initialize();
     if (this.options.refreshIntervalMs > 0) {
       this.refreshTimer = setInterval(() => {
@@ -156,25 +168,26 @@ export class DeclarativeConnectorCatalogService {
   }
 
   private async loadLastKnownGood(): Promise<boolean> {
-    if (!this.repository) return false;
+    if (!this.storage) return false;
     try {
-      const savedObject = await this.repository.get<StoredCatalogAttributes>(
-        DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
-        DECLARATIVE_CONNECTOR_CATALOG_SO_ID
-      );
-      this.activate(savedObject.attributes);
+      const response = await this.storage.get({
+        id: DECLARATIVE_CONNECTOR_CATALOG_DOCUMENT_ID,
+      });
+      const storedCatalog = response._source?.catalog;
+      if (!storedCatalog) return false;
+      this.activate(storedCatalog);
       this.options.logger.info(
-        `Loaded declarative connector catalog "${savedObject.attributes.catalogVersion}" from the system index.`
+        `Loaded declarative connector catalog "${storedCatalog.catalogVersion}" from "${DECLARATIVE_CONNECTOR_CATALOG_INDEX}".`
       );
       return true;
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) return false;
+      if (isNotFoundError(error)) return false;
       throw error;
     }
   }
 
   private async runRefresh(): Promise<void> {
-    if (!this.repository) {
+    if (!this.storage) {
       throw new Error('Declarative connector catalog service has not started.');
     }
     const manifestUrl = this.resolveRegistryUrl('catalog.json');
@@ -200,7 +213,16 @@ export class DeclarativeConnectorCatalogService {
           `Catalog entry "${entry.id}@${entry.version}" does not match its definition "${parsed.id}@${parsed.version}".`
         );
       }
-      freshSpecs.push({ ...entry, raw });
+      const iconRaw = parsed.metadata.icon
+        ? await this.fetchIcon(entry.definitionUrl, parsed.metadata.icon.path)
+        : undefined;
+      if (iconRaw && getContentHash(iconRaw) !== parsed.metadata.icon?.contentHash) {
+        throw new Error(
+          `Icon integrity check failed for "${entry.id}" version "${entry.version}".`
+        );
+      }
+      if (iconRaw) validateSvgIcon(iconRaw);
+      freshSpecs.push({ ...entry, raw, ...(iconRaw ? { iconRaw } : {}) });
     }
 
     const mergedSpecs = new Map(this.storedSpecs);
@@ -217,14 +239,13 @@ export class DeclarativeConnectorCatalogService {
       fetchedAt: new Date().toISOString(),
     };
 
-    await this.repository.create<StoredCatalogAttributes>(
-      DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
-      storedCatalog as StoredCatalogAttributes,
-      {
-        id: DECLARATIVE_CONNECTOR_CATALOG_SO_ID,
-        overwrite: true,
-      }
-    );
+    await this.storage.index({
+      id: DECLARATIVE_CONNECTOR_CATALOG_DOCUMENT_ID,
+      document: {
+        catalog: storedCatalog,
+        updated_at: storedCatalog.fetchedAt,
+      },
+    });
     this.activate(storedCatalog);
     this.lastRefreshAt = storedCatalog.fetchedAt;
     this.lastError = undefined;
@@ -250,7 +271,20 @@ export class DeclarativeConnectorCatalogService {
       }
       const key = buildSpecKey(stored.id, stored.version);
       nextStoredSpecs.set(key, stored);
-      nextMaterializedSpecs.set(key, materializeDeclarativeConnectorSpec(parsed));
+      const icon = parsed.metadata.icon;
+      let iconDataUrl: string | undefined;
+      if (icon) {
+        if (!stored.iconRaw || getContentHash(stored.iconRaw) !== icon.contentHash) {
+          throw new Error(
+            `Stored declarative connector icon "${stored.id}@${stored.version}" failed its integrity check.`
+          );
+        }
+        validateSvgIcon(stored.iconRaw);
+        iconDataUrl = `data:image/svg+xml;base64,${Buffer.from(stored.iconRaw, 'utf8').toString(
+          'base64'
+        )}`;
+      }
+      nextMaterializedSpecs.set(key, materializeDeclarativeConnectorSpec(parsed, iconDataUrl));
     }
 
     const nextActiveVersions = new Map(Object.entries(storedCatalog.activeVersions));
@@ -291,6 +325,16 @@ export class DeclarativeConnectorCatalogService {
       throw new Error('Declarative connector catalog URLs must remain on the registry origin.');
     }
     return resolved.toString();
+  }
+
+  private async fetchIcon(definitionPath: string, iconPath: string): Promise<string> {
+    const definitionUrl = this.resolveRegistryUrl(definitionPath);
+    const iconUrl = new URL(iconPath, definitionUrl);
+    const registryOrigin = new URL(this.options.registryUrl).origin;
+    if (iconUrl.origin !== registryOrigin) {
+      throw new Error('Declarative connector icon URLs must remain on the registry origin.');
+    }
+    return this.fetchText(iconUrl.toString(), MAX_ICON_BYTES);
   }
 
   private async fetchText(url: string, maxBytes: number): Promise<string> {

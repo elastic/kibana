@@ -27,6 +27,17 @@ const featureIdSchema = z.enum([
   'contextEngine',
 ]);
 
+const contentHashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
+
+const relativeAssetPathSchema = z
+  .string()
+  .min(1)
+  .max(512)
+  .refine(
+    (path) => !path.startsWith('/') && !/^[a-z][a-z0-9+.-]*:/i.test(path),
+    'Asset paths must be relative to the connector definition.'
+  );
+
 const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
   z
     .object({
@@ -127,7 +138,13 @@ const connectorSpecSchema = z
     metadata: z
       .object({
         displayName: z.string().min(1),
-        icon: z.string().optional(),
+        icon: z
+          .object({
+            path: relativeAssetPathSchema,
+            contentHash: contentHashSchema,
+          })
+          .strict()
+          .optional(),
         description: z.string().min(1),
         docsUrl: z.string().optional(),
         minimumLicense: z.enum(['basic', 'gold', 'platinum', 'enterprise']),
@@ -179,7 +196,7 @@ const catalogManifestSchema = z
             id: z.string().regex(/^\.[a-z0-9_-]+$/),
             version: z.string().regex(/^\d+\.\d+\.\d+$/),
             definitionUrl: z.string().min(1),
-            contentHash: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+            contentHash: contentHashSchema,
           })
           .strict()
       )

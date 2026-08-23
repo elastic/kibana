@@ -91,7 +91,10 @@ const filterActionTypes = (
   });
 };
 
-export function getConnectorIcon(id: string): IconType {
+export function getConnectorIcon(id: string, catalogIcon?: string): IconType {
+  if (catalogIcon) {
+    return catalogIcon;
+  }
   const lazyIcon = ConnectorIconsMap.get(id);
   if (lazyIcon) {
     return lazyIcon;
@@ -182,7 +185,7 @@ export const ActionTypeMenu = ({
     .map(([id, actionType]) => {
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         return {
-          iconClass: getConnectorIcon(actionType.id),
+          iconClass: getConnectorIcon(actionType.id, actionType.icon),
           selectMessage: actionType.description ?? '',
           actionType,
           name: actionType.name,

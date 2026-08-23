@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const CONNECTOR_ICON_FIXTURE =
+  '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1H0z"/></svg>';
+
 export const ABUSE_IPDB_SPEC_FIXTURE = `
 schemaVersion: 1
 id: .declarative-abuseipdb
@@ -12,6 +15,9 @@ version: 1.0.0
 metadata:
   displayName: AbuseIPDB
   description: Test AbuseIPDB connector
+  icon:
+    path: 1.0.0.svg
+    contentHash: sha256:65dc4e2bb86a7b2acccb0fac18449c2e49635004bcb5fbd73e39e6735ce8ac70
   minimumLicense: gold
   supportedFeatureIds: [workflows]
 config:

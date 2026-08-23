@@ -34,8 +34,10 @@ const buildAuthTypes = (connector: DeclarativeConnectorSpec): Array<string | Aut
 };
 
 export const materializeDeclarativeConnectorSpec = (
-  declarative: DeclarativeConnectorSpec
+  declarative: DeclarativeConnectorSpec,
+  icon?: string
 ): ConnectorSpec => {
+  const { icon: _iconDefinition, ...metadata } = declarative.metadata;
   const configSchema = declarativeJsonSchemaToZod(declarative.config);
   if (configSchema.type !== 'object') {
     throw new Error(`Declarative connector "${declarative.id}" config must be an object schema.`);
@@ -64,7 +66,8 @@ export const materializeDeclarativeConnectorSpec = (
     version: declarative.version,
     metadata: {
       id: declarative.id,
-      ...declarative.metadata,
+      ...metadata,
+      ...(icon ? { icon } : {}),
       isTechnicalPreview: true,
     },
     auth: {

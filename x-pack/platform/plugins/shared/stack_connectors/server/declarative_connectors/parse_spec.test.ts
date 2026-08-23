@@ -16,6 +16,10 @@ describe('declarative connector parsing', () => {
 
     expect(materialized.metadata.id).toBe('.declarative-abuseipdb');
     expect(materialized.version).toBe('1.0.0');
+    expect(parsed.metadata.icon).toEqual({
+      path: '1.0.0.svg',
+      contentHash: 'sha256:65dc4e2bb86a7b2acccb0fac18449c2e49635004bcb5fbd73e39e6735ce8ac70',
+    });
     expect(Object.keys(materialized.actions)).toEqual(['checkIp', 'reportIp']);
     expect(materialized.schema?.parse({})).toEqual({
       baseUrl: 'http://127.0.0.1:8090',
@@ -59,5 +63,13 @@ version: 1.0.0
 handler: console.log
 `)
     ).toThrow('Declarative connector definition is invalid');
+  });
+
+  it('rejects absolute icon URLs', () => {
+    expect(() =>
+      parseDeclarativeConnectorSpec(
+        ABUSE_IPDB_SPEC_FIXTURE.replace('path: 1.0.0.svg', 'path: https://example.com/icon.svg')
+      )
+    ).toThrow('Asset paths must be relative');
   });
 });

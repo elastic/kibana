@@ -6,12 +6,16 @@
  */
 
 import { createHash } from 'crypto';
+import { errors } from '@elastic/elasticsearch';
 import nock from 'nock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DeclarativeConnectorCatalogService } from './catalog_service';
-import { ABUSE_IPDB_SPEC_FIXTURE, OKTA_SPEC_FIXTURE } from './test_fixtures';
+import type { DeclarativeConnectorCatalogStorage } from './storage';
+import {
+  ABUSE_IPDB_SPEC_FIXTURE,
+  CONNECTOR_ICON_FIXTURE,
+  OKTA_SPEC_FIXTURE,
+} from './test_fixtures';
 import type { StoredDeclarativeCatalog } from './types';
 
 const abuseIpDbRaw = ABUSE_IPDB_SPEC_FIXTURE;
@@ -46,42 +50,59 @@ const createService = () =>
     logger: loggerMock.create(),
   });
 
+const createStorage = (): jest.Mocked<DeclarativeConnectorCatalogStorage> =>
+  ({
+    get: jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    ),
+    index: jest.fn().mockResolvedValue({}),
+  } as unknown as jest.Mocked<DeclarativeConnectorCatalogStorage>);
+
 describe('DeclarativeConnectorCatalogService', () => {
   afterEach(() => {
     nock.cleanAll();
   });
 
   it('validates, persists, and activates a complete catalog atomically', async () => {
-    const repository = savedObjectsRepositoryMock.create();
-    repository.get.mockRejectedValue(
-      SavedObjectsErrorHelpers.createGenericNotFoundError('declarative_connector_catalog', 'active')
-    );
-    repository.create.mockResolvedValue({} as never);
+    const storage = createStorage();
     nock('http://catalog.test')
       .get('/catalog.json')
       .reply(200, manifest)
       .get('/connectors/abuseipdb/1.0.0.yaml')
       .reply(200, abuseIpDbRaw)
+      .get('/connectors/abuseipdb/1.0.0.svg')
+      .reply(200, CONNECTOR_ICON_FIXTURE)
       .get('/connectors/okta/1.0.0.yaml')
       .reply(200, oktaRaw);
 
     const service = createService();
-    service.start(repository);
+    service.start(storage);
     const spec = await service.getSpec('.declarative-okta', '1.0.0');
 
     expect(spec?.metadata.id).toBe('.declarative-okta');
     expect(spec?.version).toBe('1.0.0');
-    expect(repository.create).toHaveBeenCalledWith(
-      'declarative_connector_catalog',
-      expect.objectContaining({
-        catalogVersion: 'test-catalog',
-        activeVersions: {
-          '.declarative-abuseipdb': '1.0.0',
-          '.declarative-okta': '1.0.0',
-        },
-      }),
-      { id: 'active', overwrite: true }
+    expect((await service.getSpec('.declarative-abuseipdb', '1.0.0'))?.metadata.icon).toEqual(
+      expect.stringMatching(/^data:image\/svg\+xml;base64,/)
     );
+    expect(storage.index).toHaveBeenCalledWith({
+      id: 'active',
+      document: {
+        catalog: expect.objectContaining({
+          catalogVersion: 'test-catalog',
+          activeVersions: {
+            '.declarative-abuseipdb': '1.0.0',
+            '.declarative-okta': '1.0.0',
+          },
+        }),
+        updated_at: expect.any(String),
+      },
+    });
     expect(service.getHealth()).toEqual(
       expect.objectContaining({
         ready: true,
@@ -100,23 +121,23 @@ describe('DeclarativeConnectorCatalogService', () => {
         '.declarative-okta': '1.0.0',
       },
       specifications: [
-        { ...manifest.connectors[0], raw: abuseIpDbRaw },
+        { ...manifest.connectors[0], raw: abuseIpDbRaw, iconRaw: CONNECTOR_ICON_FIXTURE },
         { ...manifest.connectors[1], raw: oktaRaw },
       ],
       sourceUrl: 'http://catalog.test',
       fetchedAt: '2026-08-23T00:00:00.000Z',
     };
-    const repository = savedObjectsRepositoryMock.create();
-    repository.get.mockResolvedValue({
-      id: 'active',
-      type: 'declarative_connector_catalog',
-      references: [],
-      attributes: storedCatalog,
+    const storage = createStorage();
+    storage.get.mockResolvedValue({
+      _source: {
+        catalog: storedCatalog,
+        updated_at: storedCatalog.fetchedAt,
+      },
     } as never);
     nock('http://catalog.test').get('/catalog.json').reply(503);
 
     const service = createService();
-    service.start(repository);
+    service.start(storage);
     const spec = await service.getSpec('.declarative-abuseipdb', '1.0.0');
 
     expect(spec?.metadata.id).toBe('.declarative-abuseipdb');
@@ -129,17 +150,15 @@ describe('DeclarativeConnectorCatalogService', () => {
         }),
       })
     );
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(storage.index).not.toHaveBeenCalled();
     service.stop();
   });
 
   it('activates a refreshed version while retaining the pinned version', async () => {
-    const repository = savedObjectsRepositoryMock.create();
-    repository.get.mockRejectedValue(
-      SavedObjectsErrorHelpers.createGenericNotFoundError('declarative_connector_catalog', 'active')
-    );
-    repository.create.mockResolvedValue({} as never);
-    const updatedRaw = abuseIpDbRaw.replace('version: 1.0.0', 'version: 1.1.0');
+    const storage = createStorage();
+    const updatedRaw = abuseIpDbRaw
+      .replace('version: 1.0.0', 'version: 1.1.0')
+      .replace('path: 1.0.0.svg', 'path: 1.1.0.svg');
     const updatedManifest = {
       ...manifest,
       catalogVersion: 'updated-catalog',
@@ -158,43 +177,46 @@ describe('DeclarativeConnectorCatalogService', () => {
       .reply(200, manifest)
       .get('/connectors/abuseipdb/1.0.0.yaml')
       .reply(200, abuseIpDbRaw)
+      .get('/connectors/abuseipdb/1.0.0.svg')
+      .reply(200, CONNECTOR_ICON_FIXTURE)
       .get('/connectors/okta/1.0.0.yaml')
       .reply(200, oktaRaw)
       .get('/catalog.json')
       .reply(200, updatedManifest)
       .get('/connectors/abuseipdb/1.1.0.yaml')
       .reply(200, updatedRaw)
+      .get('/connectors/abuseipdb/1.1.0.svg')
+      .reply(200, CONNECTOR_ICON_FIXTURE)
       .get('/connectors/okta/1.0.0.yaml')
       .reply(200, oktaRaw);
 
     const service = createService();
-    service.start(repository);
+    service.start(storage);
     await service.getSpec('.declarative-abuseipdb');
     await service.refresh();
 
     expect((await service.getSpec('.declarative-abuseipdb'))?.version).toBe('1.1.0');
     expect((await service.getSpec('.declarative-abuseipdb', '1.0.0'))?.version).toBe('1.0.0');
-    expect(repository.create).toHaveBeenLastCalledWith(
-      'declarative_connector_catalog',
-      expect.objectContaining({
-        activeVersions: expect.objectContaining({
-          '.declarative-abuseipdb': '1.1.0',
+    expect(storage.index).toHaveBeenLastCalledWith({
+      id: 'active',
+      document: {
+        catalog: expect.objectContaining({
+          activeVersions: expect.objectContaining({
+            '.declarative-abuseipdb': '1.1.0',
+          }),
+          specifications: expect.arrayContaining([
+            expect.objectContaining({ id: '.declarative-abuseipdb', version: '1.0.0' }),
+            expect.objectContaining({ id: '.declarative-abuseipdb', version: '1.1.0' }),
+          ]),
         }),
-        specifications: expect.arrayContaining([
-          expect.objectContaining({ id: '.declarative-abuseipdb', version: '1.0.0' }),
-          expect.objectContaining({ id: '.declarative-abuseipdb', version: '1.1.0' }),
-        ]),
-      }),
-      { id: 'active', overwrite: true }
-    );
+        updated_at: expect.any(String),
+      },
+    });
     service.stop();
   });
 
   it('rejects a body whose hash does not match the catalog', async () => {
-    const repository = savedObjectsRepositoryMock.create();
-    repository.get.mockRejectedValue(
-      SavedObjectsErrorHelpers.createGenericNotFoundError('declarative_connector_catalog', 'active')
-    );
+    const storage = createStorage();
     nock('http://catalog.test')
       .get('/catalog.json')
       .reply(200, {
@@ -205,11 +227,11 @@ describe('DeclarativeConnectorCatalogService', () => {
       .reply(200, abuseIpDbRaw);
 
     const service = createService();
-    service.start(repository);
+    service.start(storage);
     const spec = await service.getSpec('.declarative-abuseipdb', '1.0.0');
 
     expect(spec).toBeUndefined();
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(storage.index).not.toHaveBeenCalled();
     expect(service.getHealth().lastError?.message).toContain('Integrity check failed');
     service.stop();
   });

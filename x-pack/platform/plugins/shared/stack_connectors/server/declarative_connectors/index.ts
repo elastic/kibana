@@ -11,7 +11,7 @@ export {
   registerDeclarativeConnectorTypes,
 } from './register_connector_types';
 export {
-  DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
-  registerDeclarativeConnectorCatalogSavedObject,
-} from './saved_objects';
+  DECLARATIVE_CONNECTOR_CATALOG_INDEX,
+  createDeclarativeConnectorCatalogStorage,
+} from './storage';
 export { registerDeclarativeConnectorCatalogRoutes } from './routes';

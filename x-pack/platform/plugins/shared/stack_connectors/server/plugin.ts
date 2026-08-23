@@ -9,6 +9,7 @@ import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kb
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/logging';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -27,11 +28,10 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
 import {
-  DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
   DECLARATIVE_CONNECTOR_METADATA,
   DeclarativeConnectorCatalogService,
+  createDeclarativeConnectorCatalogStorage,
   registerDeclarativeConnectorCatalogRoutes,
-  registerDeclarativeConnectorCatalogSavedObject,
   registerDeclarativeConnectorTypes,
 } from './declarative_connectors';
 
@@ -61,10 +61,12 @@ export class StackConnectorsPlugin
   private isServerlessTrial = false;
   private licensing?: LicensingPluginStart;
   private readonly declarativeCatalog?: DeclarativeConnectorCatalogService;
+  private readonly declarativeCatalogStorageLogger: Logger;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.declarativeCatalogStorageLogger = context.logger.get('declarativeCatalogStorage');
     if (this.config.declarativeCatalog.enabled) {
       this.declarativeCatalog = new DeclarativeConnectorCatalogService({
         registryUrl: this.config.declarativeCatalog.registryUrl,
@@ -114,7 +116,6 @@ export class StackConnectorsPlugin
     }
 
     if (this.declarativeCatalog) {
-      registerDeclarativeConnectorCatalogSavedObject(core.savedObjects);
       registerDeclarativeConnectorTypes({ actions, catalog: this.declarativeCatalog });
       registerDeclarativeConnectorCatalogRoutes({
         router,
@@ -130,10 +131,11 @@ export class StackConnectorsPlugin
   public start(core: CoreStart, plugins: ConnectorsPluginsStart) {
     this.licensing = plugins.licensing;
     if (this.declarativeCatalog) {
-      const repository = core.savedObjects.createInternalRepository([
-        DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
-      ]);
-      this.declarativeCatalog.start(repository);
+      const storage = createDeclarativeConnectorCatalogStorage(
+        core.elasticsearch.client.asInternalUser,
+        this.declarativeCatalogStorageLogger
+      );
+      this.declarativeCatalog.start(storage);
     }
   }
 
