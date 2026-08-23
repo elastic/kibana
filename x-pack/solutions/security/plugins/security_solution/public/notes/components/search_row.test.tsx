@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux';
 import { SearchRow } from './search_row';
 import {
   ASSOCIATED_NOT_SELECT_TEST_ID,
@@ -69,6 +69,21 @@ describe('SearchRow', () => {
     await userEvent.keyboard('{enter}');
 
     expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should not dispatch when the search query contains invalid syntax', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
+
+    const searchBox = getByTestId(SEARCH_BAR_TEST_ID);
+
+    await userEvent.type(searchBox, ';');
+    await userEvent.keyboard('{enter}');
+
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   it('should call the correct action when select a value in the associated note dropdown', async () => {
