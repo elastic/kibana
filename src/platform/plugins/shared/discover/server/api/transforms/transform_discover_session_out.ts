@@ -10,10 +10,9 @@
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import { fromStoredTab } from '../../../common/embeddable/transform_utils';
+import { getDiscoverSessionTab } from '../../../common/api/converters';
 import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
-import { transformVisContextOut } from './transform_vis_context';
 
 export const transformDiscoverSessionOut = (
   attributes: DiscoverSessionAttributes,
@@ -26,44 +25,18 @@ export const transformDiscoverSessionOut = (
     description: attributes.description,
     tags,
     tabs: attributes.tabs.map((tab) => {
-      const apiTab = fromStoredTab(tab.attributes, references);
-      const visContext = transformVisContextOut(tab.attributes.visContext);
       const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
         tab.attributes.controlGroupJson,
         tab.id
       );
-      warnings.push(...controlPanelWarnings);
+      const { apiTab, warnings: tabWarnings } = getDiscoverSessionTab({
+        tab,
+        references,
+        controlPanels,
+      });
+      warnings.push(...controlPanelWarnings, ...tabWarnings);
 
-      return {
-        id: tab.id,
-        label: tab.label,
-        ...apiTab,
-        hide_chart: tab.attributes.hideChart ?? false,
-        hide_table: tab.attributes.hideTable ?? false,
-        ...(tab.attributes.hideAggregatedPreview !== undefined && {
-          hide_aggregated_preview: tab.attributes.hideAggregatedPreview,
-        }),
-        ...(tab.attributes.breakdownField !== undefined && {
-          breakdown_field: tab.attributes.breakdownField,
-        }),
-        ...(tab.attributes.chartInterval !== undefined && {
-          chart_interval: tab.attributes.chartInterval as Exclude<
-            DiscoverSessionApiData['tabs'][number]['chart_interval'],
-            undefined
-          >,
-        }),
-        time_restore: tab.attributes.timeRestore ?? false,
-        ...(tab.attributes.timeRange !== undefined && { time_range: tab.attributes.timeRange }),
-        ...(tab.attributes.refreshInterval !== undefined && {
-          refresh_interval: tab.attributes.refreshInterval,
-        }),
-        ...(visContext !== undefined && { vis_context: visContext }),
-        ...(controlPanels !== undefined && { control_panels: controlPanels }),
-        ...(tab.attributes.isTextBasedQuery &&
-          tab.attributes.esqlApproximation !== undefined && {
-            esql_approximation: tab.attributes.esqlApproximation,
-          }),
-      };
+      return apiTab;
     }),
   };
 

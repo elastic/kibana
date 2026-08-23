@@ -10,10 +10,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
-import {
-  ExportJsonFlyoutContent,
-  type ExportJsonSharingData,
-} from '@kbn/as-code-export-flyout-component';
+import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type {
   ExportShareParameters,
@@ -26,10 +23,12 @@ import type { ShareIntegration } from '@kbn/share-plugin/public/types';
 import { DISCOVER_SESSION_API_BASE_PATH } from '../../../../../../common/constants';
 import type { DiscoverSessionApiData } from '../../../../../../server';
 
-export type DiscoverExportJsonSharingData = SharingData &
-  Omit<ExportJsonSharingData<DiscoverSessionApiData>, 'getExportJson'> & {
-    getExportJson: (exportAllTabs?: boolean) => DiscoverSessionApiData;
+export type DiscoverExportJsonSharingData = SharingData & {
+  getExportJson: (exportAllTabs?: boolean) => {
+    data: DiscoverSessionApiData;
+    warnings: readonly string[];
   };
+};
 
 export interface DiscoverExportJsonShare
   extends ShareIntegration<ExportShareParameters, DiscoverExportJsonSharingData> {
@@ -82,10 +81,8 @@ const ExportDiscoverSessionJsonFlyout = ({
   const [exportAllTabs, setExportAllTabs] = useState(true);
   const getExportJsonSelection = useCallback(() => ({ exportAllTabs }), [exportAllTabs]);
   const prepareExportJson = useCallback(
-    async ({ exportAllTabs: shouldExportAllTabs }: ExportJsonSelection) => ({
-      data: getExportJson(shouldExportAllTabs),
-      warnings: [],
-    }),
+    async ({ exportAllTabs: shouldExportAllTabs }: ExportJsonSelection) =>
+      getExportJson(shouldExportAllTabs),
     [getExportJson]
   );
 

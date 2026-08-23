@@ -16,10 +16,13 @@ import { createExportJsonConfig } from './export_json_config';
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
 
 const mockGetExportJson = jest.fn(
-  (_exportAllTabs?: boolean): DiscoverSessionApiData => ({
-    title: 'Discover session',
-    description: '',
-    tabs: [],
+  (_exportAllTabs?: boolean): { data: DiscoverSessionApiData; warnings: readonly string[] } => ({
+    data: {
+      title: 'Discover session',
+      description: '',
+      tabs: [],
+    },
+    warnings: ['An unsupported chart interval was omitted.'],
   })
 );
 const mockDownloadFileAs = jest.fn();
@@ -75,7 +78,7 @@ describe('Discover export JSON config', () => {
         description: '',
         tabs: [],
       },
-      warnings: [],
+      warnings: ['An unsupported chart interval was omitted.'],
     });
 
     expect(mockDownloadFileAs).toHaveBeenCalledWith('discover-session.json', {

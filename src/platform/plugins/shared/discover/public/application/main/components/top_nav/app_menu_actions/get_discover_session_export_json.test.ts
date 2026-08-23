@@ -32,8 +32,14 @@ describe('getDiscoverSessionExportJson', () => {
         dataView: dataViewMock,
       })
     );
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { interval: '10m' },
+      })
+    );
 
-    const result = getDiscoverSessionExportJson({
+    const { sessionState: result, warnings } = getDiscoverSessionExportJson({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
@@ -58,6 +64,14 @@ describe('getDiscoverSessionExportJson', () => {
     );
     expect(result).not.toHaveProperty('id');
     expect(result).not.toHaveProperty('meta');
+    expect(result.tabs[0]).not.toHaveProperty('chart_interval');
+    expect(warnings).toEqual([
+      expect.objectContaining({
+        type: 'dropped_property',
+        tab_id: toolkit.getCurrentTab().id,
+        key: 'chart_interval',
+      }),
+    ]);
   });
 
   it('includes the current control state', async () => {
@@ -77,7 +91,7 @@ describe('getDiscoverSessionExportJson', () => {
       })
     );
 
-    const result = getDiscoverSessionExportJson({
+    const { sessionState: result } = getDiscoverSessionExportJson({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
@@ -116,13 +130,13 @@ describe('getDiscoverSessionExportJson', () => {
     await toolkit.addNewTab({ tab: selectedTab });
     await toolkit.initializeSingleTab({ tabId: selectedTab.id });
 
-    const allTabsResult = getDiscoverSessionExportJson({
+    const { sessionState: allTabsResult } = getDiscoverSessionExportJson({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       title: 'All tabs session',
     });
-    const result = getDiscoverSessionExportJson({
+    const { sessionState: result } = getDiscoverSessionExportJson({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,

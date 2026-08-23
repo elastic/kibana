@@ -13,6 +13,7 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { DISCOVER_SESSION_CHART_INTERVALS } from '../../common/api/constants';
 import {
   discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
@@ -504,7 +505,7 @@ describe('discoverSessionApiDataSchema', () => {
     });
 
     it('accepts supported chart_interval options', () => {
-      for (const chartInterval of ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']) {
+      for (const chartInterval of DISCOVER_SESSION_CHART_INTERVALS) {
         const validated = discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [

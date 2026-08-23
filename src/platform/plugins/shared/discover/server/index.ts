@@ -60,6 +60,7 @@ export type {
   DiscoverSessionApiTab,
   DiscoverSessionApiData,
   DiscoverSessionApiDataInput,
+  DiscoverSessionWarning,
 } from './api/schema';
 
 export const plugin = async (context: PluginInitializerContext) => {

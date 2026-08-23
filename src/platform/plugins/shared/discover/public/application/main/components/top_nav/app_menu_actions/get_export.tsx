@@ -113,13 +113,18 @@ export const getExportAppMenuItem = ({
         defaultMessage: 'Untitled Discover session',
       });
 
-    return getDiscoverSessionExportJson({
+    const { sessionState, warnings } = getDiscoverSessionExportJson({
       getState,
       runtimeStateManager,
       services,
       tabId: exportAllTabs ? undefined : currentTab.id,
       title,
     });
+
+    return {
+      data: sessionState,
+      warnings: warnings.map(({ message }) => message),
+    };
   };
 
   const buildExportShareOptions = async () => {
