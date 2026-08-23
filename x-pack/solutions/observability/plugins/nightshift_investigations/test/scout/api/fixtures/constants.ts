@@ -12,7 +12,10 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 } as const;
 
+// The role API requires at least one of `base` or `feature` to be non-empty.
+// Grant an unrelated privilege so this user can authenticate but still lacks
+// agentBuilder:read (viewer includes it, which is why we cannot use that).
 export const NO_AGENT_BUILDER_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: {}, spaces: ['*'] }],
+  kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
 };
