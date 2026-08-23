@@ -1,21 +1,10 @@
 {
-  "sha1": "",
+  "sha1": "c9f765ba1e780391fafe8a925c9aa98841516dee",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "dd8d3bea8591859-d89fd2ade65d14f",
-      "title": "Teardown Discover tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
-        "line": 13,
-        "column": 19
-      }
-    },
     {
       "id": "d3bfac238753802-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
@@ -784,6 +773,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
         "line": 120,
         "column": 12
+      }
+    },
+    {
+      "id": "dd8d3bea8591859-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
       }
     }
   ]
