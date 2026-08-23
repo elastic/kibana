@@ -47,29 +47,43 @@ async function createToolIfMissing({
   const toolPath = `/api/agent_builder/tools/${encodeURIComponent(String(body.id))}`;
   try {
     await kbnClient.request({
-      method: 'GET',
-      path: toolPath,
+      method: 'POST',
+      path: '/api/agent_builder/tools',
       headers: AGENT_BUILDER_TOOLS_HEADERS,
+      body,
     });
-    // Tool exists from a previous run — delete first so the POST below always
-    // installs the CURRENT definition (verified live: duplicate POST returns
-    // 400 "already exists", and DELETE-then-POST is the upsert path).
-    await kbnClient.request({
-      method: 'DELETE',
-      path: toolPath,
-      headers: AGENT_BUILDER_TOOLS_HEADERS,
-    });
-    log.info(`[persona-matrix] removed stale tool '${body.id}', reinstalling`);
-  } catch {
-    // 404: tool not present, nothing to clean up
+    log.info(`[persona-matrix] created tool '${body.id}'`);
+  } catch (error) {
+    const message = String((error as Error)?.message ?? error);
+    if (!/already exists/i.test(message)) {
+      throw error;
+    }
+    // Multi-model gate runs re-execute beforeAll per model worker against the
+    // same stack, so the tool can pre-date this call. Recover by reinstalling
+    // the CURRENT definition (delete-then-post); if the delete also fails,
+    // keep the stale-but-equivalent definition rather than failing the suite.
+    try {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: toolPath,
+        headers: AGENT_BUILDER_TOOLS_HEADERS,
+      });
+      await kbnClient.request({
+        method: 'POST',
+        path: '/api/agent_builder/tools',
+        headers: AGENT_BUILDER_TOOLS_HEADERS,
+        body,
+      });
+      log.info(`[persona-matrix] removed stale tool '${body.id}', reinstalled`);
+    } catch (recoveryError) {
+      log.warning(
+        `[persona-matrix] tool '${body.id}' already exists and reinstall failed ` +
+          `(${String(
+            (recoveryError as Error)?.message ?? recoveryError
+          )}); keeping existing definition`
+      );
+    }
   }
-  await kbnClient.request({
-    method: 'POST',
-    path: '/api/agent_builder/tools',
-    headers: AGENT_BUILDER_TOOLS_HEADERS,
-    body,
-  });
-  log.info(`[persona-matrix] created tool '${body.id}'`);
 }
 
 export async function seedPersonaMatrixTools({ kbnClient, log }: SeedToolsOptions): Promise<void> {

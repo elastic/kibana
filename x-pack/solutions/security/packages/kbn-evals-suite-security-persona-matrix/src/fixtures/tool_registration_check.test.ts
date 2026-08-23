@@ -9,6 +9,7 @@ import {
   collectExpectedToolIds,
   findUnregisteredToolIds,
   findUnattachedToolIds,
+  selectListAssertableBuiltins,
 } from './tool_registration_check';
 import type { KbnClient } from '@kbn/kbn-client';
 
@@ -81,6 +82,16 @@ describe('findUnregisteredToolIds', () => {
         'security.entity_risk_score',
       ])
     ).resolves.toEqual(['security.entity_risk_score']);
+  });
+
+  it('exempts conversation-scoped built-ins from the list assertion', () => {
+    // attachments.* are injected into an agent run at execution time and never
+    // appear in the registry tools list — flagging them as availability-gated
+    // would fail every run spuriously (caught live on the first two-model
+    // gate run, 2026-08-23).
+    expect(
+      selectListAssertableBuiltins(['attachments.read', 'security.get_entity', 'virustotal_lookup'])
+    ).toEqual(['security.get_entity']);
   });
 });
 

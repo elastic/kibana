@@ -69,6 +69,24 @@ export async function findUnregisteredToolIds(
 }
 
 /**
+ * Built-ins that are injected into an agent run's tool set at execution time
+ * (run_agent/utils/select_tools) and therefore never appear in the registry
+ * tools list. Their absence there is by design, not an availability gate.
+ */
+const CONVERSATION_SCOPED_TOOL_PREFIXES = ['attachments.'];
+
+/**
+ * The subset of expected built-in tool ids whose presence must be asserted via
+ * the public tools list — i.e. excluding conversation-scoped ones.
+ */
+export function selectListAssertableBuiltins(toolIds: string[]): string[] {
+  return toolIds.filter(
+    (id) =>
+      id.includes('.') && !CONVERSATION_SCOPED_TOOL_PREFIXES.some((prefix) => id.startsWith(prefix))
+  );
+}
+
+/**
  * Pre-flight assertion: every expectedTools entry that is an eval-seeded
  * custom tool (i.e. NOT a platform.* / security.* built-in) must be registered
  * before the suite runs. A renamed or unseeded custom tool otherwise silently
@@ -110,7 +128,7 @@ export async function assertPersonaMatrixToolsRegistered({
   // availability-gated off in this stack zeroes ExpectedToolCalled for every
   // example declaring it. This is how security.entity_risk_score scored 0 on
   // 34/34 runs before its availability contract was understood.
-  const builtins = expected.filter((id) => id.includes('.'));
+  const builtins = selectListAssertableBuiltins(expected);
   if (builtins.length > 0) {
     const gatedOff = await findUnregisteredToolIds(kbnClient, builtins);
     if (gatedOff.length > 0) {

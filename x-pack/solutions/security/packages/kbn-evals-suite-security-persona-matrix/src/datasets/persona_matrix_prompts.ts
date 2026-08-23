@@ -332,7 +332,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       expectedTools: [
         'attachments.read',
         'security.security_labs_search',
-        'security.entity_risk_score',
+        // entity_risk_score is unavailable under the skills flag (see
+        // alert-analysis-a); the risk signal comes from the get_entity profile.
+        'security.get_entity',
       ],
       severity: 'critical',
       tags: ['multi-step', 'orchestration'],
@@ -390,7 +392,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'security.alerts',
         'platform.core.generate_esql',
         'platform.core.execute_esql',
-        'security.entity_risk_score',
+        // entity_risk_score is unavailable under the skills flag (see
+        // alert-analysis-a); the risk signal comes from the get_entity profile.
+        'security.get_entity',
       ],
       severity: 'critical',
       tags: ['multi-step', 'conditional-escalation'],
