@@ -224,6 +224,7 @@ describe('AbuseIPDBConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
         params: {
           ipAddress: '8.8.8.8',
+          maxAgeInDays: 90,
           verbose: true,
         },
       });
@@ -248,6 +249,39 @@ describe('AbuseIPDBConnector', () => {
           ipAddress: '2001:4860:4860::8888',
         }).success
       ).toBe(true);
+    });
+
+    it('should pass through an explicit maxAgeInDays', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          data: {
+            ipAddress: '8.8.8.8',
+            isPublic: true,
+            ipVersion: 4,
+            isWhitelisted: false,
+            abuseConfidenceScore: 0,
+            countryCode: 'US',
+            usageType: 'Data Center',
+            isp: 'Google LLC',
+            domain: 'google.com',
+            totalReports: 0,
+            lastReportedAt: null,
+          },
+        },
+      });
+
+      await AbuseIPDBConnector.actions.getIpInfo.handler(mockContext, {
+        ipAddress: '8.8.8.8',
+        maxAgeInDays: 30,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
+        params: {
+          ipAddress: '8.8.8.8',
+          maxAgeInDays: 30,
+          verbose: true,
+        },
+      });
     });
   });
 

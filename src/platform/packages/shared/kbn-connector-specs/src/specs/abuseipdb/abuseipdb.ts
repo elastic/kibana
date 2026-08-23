@@ -122,16 +122,20 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     getIpInfo: {
       isTool: true,
       description:
-        'Verbose IP enrichment via /check?verbose=true. Prefer this over checkIp when workflows need isPublic, isWhitelisted, domain, or fuller geo/ISP context.',
+        'Verbose IP enrichment via /check?verbose=true. Prefer this over checkIp when workflows need isPublic, isWhitelisted, domain, or fuller geo/ISP context. Uses the same maxAgeInDays default (90) as checkIp so totalReports and lastReportedAt stay comparable.',
       input: lazySchema(() =>
         z.object({
           ipAddress: IpAddressSchema.describe('IPv4 or IPv6 address to look up.'),
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
+            .default(90)
+            .describe('Only consider reports from the last N days (1-365). Defaults to 90.'),
         })
       ),
-      handler: async (ctx, input: { ipAddress: string }) => {
+      handler: async (ctx, input: { ipAddress: string; maxAgeInDays?: number }) => {
         const response = await ctx.client.get(`${ABUSEIPDB_API}/check`, {
           params: {
             ipAddress: input.ipAddress,
+            maxAgeInDays: input.maxAgeInDays ?? 90,
             verbose: true,
           },
         });

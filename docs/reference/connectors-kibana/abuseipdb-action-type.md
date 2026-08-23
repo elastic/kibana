@@ -44,6 +44,8 @@ Get IP Info
 :   Get detailed (verbose) information about an IP address including geolocation, allowlist status (`isWhitelisted`), and domain.  
     - **IP Address** (required): IPv4 address to look up.  
     - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` IPv6 addresses are also accepted.  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 90). Same default as Check IP so report counts stay comparable.  
+    - {applies_to}`serverless:` {applies_to}`stack: ga 9.6+` Output includes the last reported date when available.
 
 Bulk Check
 :   Check multiple IPs in a network range using CIDR notation.  
