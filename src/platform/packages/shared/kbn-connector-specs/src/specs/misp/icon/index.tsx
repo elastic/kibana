@@ -8,10 +8,14 @@
  */
 
 import React from 'react';
+
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
+// Cropped mark from https://www.misp-project.org/img/logo.png (wordmark dropped
+// so the cyan knot still reads at connector size). Multi-color PNG — no
+// createBrandIcon theme flip; teal reads on light and dark surfaces.
+import mispIcon from './misp.png';
 
 export default (props: ConnectorIconProps) => {
-  // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} />;
+  return <EuiIcon type={mispIcon} {...props} />;
 };
