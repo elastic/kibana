@@ -40,7 +40,21 @@ describe('rumSessionsTransformBody', () => {
       'attributes.browser.css_selector'
     );
     expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(8);
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 3 }));
+    expect(aggregations.user_seen.filter.bool.should).toEqual(
+      expect.arrayContaining([
+        { exists: { field: 'attributes.user.email' } },
+        { exists: { field: 'resource.attributes.user.email' } },
+        { exists: { field: 'attributes.user.id' } },
+        { exists: { field: 'resource.attributes.user.id' } },
+      ])
+    );
+    expect(aggregations.user_seen.aggs.token.top_metrics.metrics).toEqual(
+      expect.arrayContaining([
+        { field: 'attributes.user.email' },
+        { field: 'resource.attributes.user.email' },
+      ])
+    );
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 4 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -95,7 +109,9 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('boolean replay = false');
     expect(source).toContain('ctx.duration_ms');
     expect(source).toContain('ctx.page_view_count');
-    expect(source).toContain("ctx.user.key = fieldOf(last, 'attributes.user.key')");
+    expect(source).toContain('firstIdentity');
+    expect(source).toContain('ctx.user_seen');
+    expect(source).toContain('ctx.user.key');
     expect(source).toContain('ctx.page_first');
     expect(source).not.toContain('ctx.sequences');
   });
@@ -116,6 +132,8 @@ describe('rumNormalizePipeline', () => {
     const source = rumNormalizePipeline.processors[0].script.source;
     expect(source).toContain("r['session.id'] == null");
     expect(source).toContain("a['user.key'] == null");
+    expect(source).toContain("r['user.email']");
+    expect(source).toContain("r['user.name']");
     expect(source).toContain("a['rum.has_replay'] == null");
     expect(source).toContain("a['screen.name']");
     expect(source).toContain("r['rum.platform'] == null");

@@ -151,6 +151,24 @@ const LAST_SEEN_FIELDS = [
   'attributes.device.memory',
 ] as const;
 
+/** Email first so the table matches session detail when setUser stamped an address. */
+const USER_IDENTITY_FIELDS = [
+  'attributes.user.email',
+  'resource.attributes.user.email',
+  'attributes.user.id',
+  'resource.attributes.user.id',
+  'attributes.user.name',
+  'resource.attributes.user.name',
+  'attributes.user.key',
+] as const;
+
+const USER_IDENTITY_FILTER = {
+  bool: {
+    should: USER_IDENTITY_FIELDS.map((field) => ({ exists: { field } })),
+    minimum_should_match: 1,
+  },
+};
+
 const lastSeenMany = {
   top_metrics: {
     metrics: LAST_SEEN_FIELDS.map((field) => ({ field })),
@@ -265,7 +283,9 @@ export const rumNormalizePipeline = {
             def user = a['user.id'];
             if (user == null) { user = r['user.id']; }
             if (user == null) { user = a['user.email']; }
+            if (user == null) { user = r['user.email']; }
             if (user == null) { user = a['user.name']; }
+            if (user == null) { user = r['user.name']; }
             if (user != null) { a['user.key'] = user.toString(); }
           }
           if (a['browser.name'] == null && r['browser.name'] != null) {
@@ -372,6 +392,26 @@ export const rumSessionsDestPipeline = {
             if ((bag instanceof Map) == false) { return ''; }
             return normalize(bag[field]);
           }
+          def identityOf(def bag, def field) {
+            if ((bag instanceof Map) == false) { return ''; }
+            def raw = bag[field];
+            if (raw == null) { return ''; }
+            def s = raw.toString().trim();
+            if (s == '' || s == 'null') { return ''; }
+            return s;
+          }
+          def firstIdentity(def bag) {
+            def email = identityOf(bag, 'attributes.user.email');
+            if (email == '') { email = identityOf(bag, 'resource.attributes.user.email'); }
+            if (email != '') { return email; }
+            def id = identityOf(bag, 'attributes.user.id');
+            if (id == '') { id = identityOf(bag, 'resource.attributes.user.id'); }
+            if (id != '') { return id; }
+            def name = identityOf(bag, 'attributes.user.name');
+            if (name == '') { name = identityOf(bag, 'resource.attributes.user.name'); }
+            if (name != '') { return name; }
+            return identityOf(bag, 'attributes.user.key');
+          }
           def tokenFrom(def bucket, def field) {
             if ((bucket instanceof Map) == false) { return ''; }
             def token = fieldOf(bucket.token, field);
@@ -466,7 +506,11 @@ export const rumSessionsDestPipeline = {
           ctx.dead_click_count = countOf(ctx.dead_clicks);
           def last = ctx.last_seen;
           if (ctx.user == null) { ctx.user = new HashMap(); }
-          ctx.user.key = fieldOf(last, 'attributes.user.key');
+          def identified = ctx.user_seen;
+          def key = firstIdentity(identified instanceof Map ? identified.token : identified);
+          if (key == '') { key = firstIdentity(last); }
+          if (key == '') { key = fieldOf(last, 'attributes.user.key'); }
+          ctx.user.key = key;
           if (ctx.browser == null) { ctx.browser = new HashMap(); }
           ctx.browser.name = fieldOf(last, 'attributes.browser.name');
           ctx.browser.breakpoint = fieldOf(last, 'attributes.browser.breakpoint');
@@ -498,6 +542,7 @@ export const rumSessionsDestPipeline = {
           ctx.remove('rage_clicks');
           ctx.remove('dead_clicks');
           ctx.remove('last_seen');
+          ctx.remove('user_seen');
           ctx.remove('lcp');
           ctx.remove('inp');
           ctx.remove('cls');
@@ -603,6 +648,18 @@ export const buildRumSessionsTransformBody = (
       rage_clicks: { filter: RAGE_FILTER },
       dead_clicks: { filter: DEAD_FILTER },
       last_seen: lastSeenMany,
+      user_seen: {
+        filter: USER_IDENTITY_FILTER,
+        aggs: {
+          token: {
+            top_metrics: {
+              metrics: USER_IDENTITY_FIELDS.map((field) => ({ field })),
+              sort: { '@timestamp': 'desc' as const },
+              size: RUM_SEQUENCE_TOP_SIZE,
+            },
+          },
+        },
+      },
     },
   },
 });

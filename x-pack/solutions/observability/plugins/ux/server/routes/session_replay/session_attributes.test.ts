@@ -10,7 +10,28 @@ import {
   actionFromHit,
   countDeadAndErrorClicks,
   errorGroupFromHit,
+  userFromHits,
 } from './session_attributes';
+
+describe('userFromHits', () => {
+  it('finds an email on a later event after anonymous page loads', () => {
+    expect(
+      userFromHits([
+        { _source: { name: 'documentLoad', attributes: {} } },
+        {
+          _source: {
+            name: 'click',
+            resource: { attributes: { 'user.email': 'dave.denscombe@elastic.co' } },
+          },
+        },
+      ])
+    ).toEqual({
+      id: null,
+      email: 'dave.denscombe@elastic.co',
+      name: null,
+    });
+  });
+});
 
 describe('activitySearchTokens', () => {
   it('maps shop click labels to xpath tokens', () => {

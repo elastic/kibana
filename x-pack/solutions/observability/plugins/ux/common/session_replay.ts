@@ -22,6 +22,17 @@ export interface SessionUser {
   name: string | null;
 }
 
+/** Map a session-index `user.key` onto the fields the table and detail page share. */
+export const sessionUserFromKey = (key: string | null): SessionUser => {
+  if (!key) {
+    return { id: null, email: null, name: null };
+  }
+  if (key.includes('@')) {
+    return { id: key, email: key, name: null };
+  }
+  return { id: key, email: null, name: key };
+};
+
 export interface SessionClient {
   browser: string | null;
   os: string | null;

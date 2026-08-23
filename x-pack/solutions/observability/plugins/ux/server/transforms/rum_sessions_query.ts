@@ -28,12 +28,13 @@ import {
   type SessionFunnelResponse,
 } from '../../common/session_funnel';
 import type { SessionPatternsResponse } from '../../common/session_patterns';
-import type {
-  RumSessionSummary,
-  SessionListFacets,
-  SessionListResponse,
-  SessionListStats,
-  SessionSortField,
+import {
+  sessionUserFromKey,
+  type RumSessionSummary,
+  type SessionListFacets,
+  type SessionListResponse,
+  type SessionListStats,
+  type SessionSortField,
 } from '../../common/session_replay';
 
 export {
@@ -250,7 +251,7 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     pagePath: pages,
     activityPath: clicks,
     sparkline: [],
-    user: { id: userKey, email: null, name: userKey },
+    user: sessionUserFromKey(userKey),
     client: {
       browser: asString(browser.name),
       os: asString(os.name),

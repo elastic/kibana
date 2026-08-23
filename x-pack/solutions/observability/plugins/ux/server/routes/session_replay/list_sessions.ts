@@ -40,6 +40,7 @@ import { getRumSearchClient } from '../../lib/rum_search_client';
 import { SESSION_ID_SCRIPT } from './session_id_script';
 import {
   extraPathsForFind,
+  FIND_USER_FIELDS,
   intersectSessionIds,
   mergeSessionFind,
   parseSessionFind,
@@ -57,6 +58,7 @@ interface SessionBucket {
   error_count?: { doc_count: number };
   click_count?: { doc_count: number };
   sample?: { hits?: { hits?: OtelHit[] } };
+  identified?: { sample?: { hits?: { hits?: OtelHit[] } } };
 }
 
 const toIso = (agg?: { value_as_string?: string; value?: number | null }): string | null => {
@@ -95,11 +97,17 @@ interface SessionDerived {
   client: RumSessionSummary['client'];
 }
 
-const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): SessionDerived => {
+const deriveFromSample = (
+  hits: OtelHit[],
+  startMs: number,
+  endMs: number,
+  identifiedHits: OtelHit[] = []
+): SessionDerived => {
   const { pages, activities, clicks, timestamps, errorGroups } = collectSessionSignals(hits);
   const pagePath = dedupeConsecutive(pages).slice(0, 12);
   const activityPath = dedupeConsecutive(activities).slice(0, 10);
   const { dead, rage } = countDeadAndErrorClicks(hits, clicks);
+  const userHits = identifiedHits.length > 0 ? [...identifiedHits, ...hits] : hits;
 
   return {
     entryPage: pagePath[0] ?? null,
@@ -112,8 +120,8 @@ const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): Sess
     errorGroups: errorGroups.slice(0, 8),
     activeMs: computeActiveMs(timestamps),
     sparkline: buildSparkline(hits, startMs, endMs),
-    user: userFromHits(hits),
-    client: clientFromHits(hits),
+    user: userFromHits(userHits),
+    client: clientFromHits(userHits),
   };
 };
 
@@ -392,6 +400,23 @@ const queryRawSessions = async (
                   _source: SAMPLE_SOURCE,
                 },
               },
+              identified: {
+                filter: {
+                  bool: {
+                    should: FIND_USER_FIELDS.map((field) => ({ exists: { field } })),
+                    minimum_should_match: 1,
+                  },
+                },
+                aggs: {
+                  sample: {
+                    top_hits: {
+                      size: 5,
+                      sort: [{ '@timestamp': 'desc' as const }],
+                      _source: SAMPLE_SOURCE,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -445,7 +470,12 @@ const queryRawSessions = async (
         const endTime = toIso(bucket.end_time);
         const startMs = startTime ? Date.parse(startTime) : 0;
         const endMs = endTime ? Date.parse(endTime) : startMs + 1;
-        const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
+        const derived = deriveFromSample(
+          bucket.sample?.hits?.hits ?? [],
+          startMs,
+          endMs,
+          bucket.identified?.sample?.hits?.hits ?? []
+        );
         return [
           String(bucket.key),
           { eventCount: bucket.doc_count, startTime, endTime, derived },
@@ -465,7 +495,12 @@ const queryRawSessions = async (
     const endTime = toIso(bucket.end_time);
     const startMs = startTime ? Date.parse(startTime) : 0;
     const endMs = endTime ? Date.parse(endTime) : startMs + 1;
-    const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
+    const derived = deriveFromSample(
+      bucket.sample?.hits?.hits ?? [],
+      startMs,
+      endMs,
+      bucket.identified?.sample?.hits?.hits ?? []
+    );
 
     sessionsById.set(sessionId, {
       sessionId,
