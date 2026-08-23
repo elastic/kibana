@@ -71,6 +71,31 @@ describe('getAvailableConnectors', () => {
     expect(result.totalConnectors).toBe(0);
   });
 
+  it('uses runtime specification action names for declarative connectors', async () => {
+    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([
+        mockActionType({
+          id: '.declarative-okta',
+          name: 'Okta (Declarative PoC)',
+          specActionNames: ['listUsers', 'getLogs'],
+        }),
+      ]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.declarative-okta'].subActions).toEqual([
+      { name: 'listUsers', displayName: 'List Users' },
+      { name: 'getLogs', displayName: 'Get Logs' },
+    ]);
+  });
+
   it('drops connectors whose actionTypeId is not in the allowed action-types list', async () => {
     const actionsClient = {
       getAll: jest

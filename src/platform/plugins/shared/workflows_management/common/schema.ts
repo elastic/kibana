@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getConnectorSpec } from '@kbn/connector-specs';
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
@@ -67,6 +68,11 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     if (inputSchema) {
       return inputSchema as z.ZodSchema;
     }
+  }
+
+  const runtimeInputSchema = getConnectorSpec(actionTypeId)?.actions[subActionName]?.input;
+  if (runtimeInputSchema) {
+    return runtimeInputSchema;
   }
 
   // Generic fallback for unknown sub-actions

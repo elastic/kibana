@@ -386,6 +386,62 @@ describe('create()', () => {
       );
     });
 
+    test('pins the active declarative connector specification', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Declarative Okta',
+          actionTypeId: '.declarative-okta',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.declarative-okta',
+          source: ACTION_TYPE_SOURCES.spec,
+          getConnectorSpec: () => ({
+            version: '1.0.0',
+            metadata: {
+              id: '.declarative-okta',
+              displayName: 'Declarative Okta',
+              description: 'Test',
+              minimumLicense: 'basic',
+              supportedFeatureIds: ['workflows'],
+            },
+            actions: {},
+            test: { enabled: false, handler: async () => ({}) },
+          }),
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'Declarative Okta',
+          actionTypeId: '.declarative-okta',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
     test('creates an action with a custom ID when provided', async () => {
       const savedObjectCreateResult = {
         id: 'custom-id',

@@ -1,0 +1,322 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+import fetch from 'node-fetch';
+import type { Logger, ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { setRuntimeConnectorSpecs } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { materializeDeclarativeConnectorSpec } from './materialize_spec';
+import { parseDeclarativeCatalogManifest, parseDeclarativeConnectorSpec } from './parse_spec';
+import {
+  DECLARATIVE_CONNECTOR_CATALOG_SO_ID,
+  DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
+} from './saved_objects';
+import type {
+  DeclarativeCatalogEntry,
+  DeclarativeCatalogHealth,
+  StoredDeclarativeCatalog,
+  StoredDeclarativeSpec,
+} from './types';
+
+const MAX_CATALOG_BYTES = 1024 * 1024;
+const MAX_SPEC_BYTES = 256 * 1024;
+const REQUEST_TIMEOUT_MS = 10_000;
+
+interface DeclarativeConnectorCatalogServiceOptions {
+  registryUrl: string;
+  refreshIntervalMs: number;
+  supportedConnectorIds: string[];
+  logger: Logger;
+}
+
+type StoredCatalogAttributes = StoredDeclarativeCatalog & SavedObjectAttributes;
+
+const buildSpecKey = (id: string, version: string): string => `${id}@${version}`;
+
+const getContentHash = (raw: string): string =>
+  `sha256:${createHash('sha256').update(raw, 'utf8').digest('hex')}`;
+
+export class DeclarativeConnectorCatalogService {
+  private readonly supportedConnectorIds: Set<string>;
+  private activeVersions = new Map<string, string>();
+  private materializedSpecs = new Map<string, ConnectorSpec>();
+  private storedSpecs = new Map<string, StoredDeclarativeSpec>();
+  private repository?: ISavedObjectsRepository;
+  private initialization?: Promise<void>;
+  private refreshing?: Promise<void>;
+  private refreshTimer?: NodeJS.Timeout;
+  private activeCatalogVersion?: string;
+  private lastRefreshAt?: string;
+  private lastError?: { message: string; at: string };
+
+  constructor(private readonly options: DeclarativeConnectorCatalogServiceOptions) {
+    this.supportedConnectorIds = new Set(options.supportedConnectorIds);
+  }
+
+  public start(repository: ISavedObjectsRepository): void {
+    this.repository = repository;
+    this.initialization = this.initialize();
+    if (this.options.refreshIntervalMs > 0) {
+      this.refreshTimer = setInterval(() => {
+        void this.refresh().catch((error) => {
+          this.options.logger.warn(
+            `Declarative connector catalog refresh failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+      }, this.options.refreshIntervalMs);
+      this.refreshTimer.unref();
+    }
+  }
+
+  public stop(): void {
+    if (this.refreshTimer) clearInterval(this.refreshTimer);
+    setRuntimeConnectorSpecs([]);
+  }
+
+  public getCurrentSpec = (id: string): ConnectorSpec | undefined => {
+    const version = this.activeVersions.get(id);
+    return version ? this.materializedSpecs.get(buildSpecKey(id, version)) : undefined;
+  };
+
+  public getValidationSpecs = (id: string): ConnectorSpec[] => {
+    const current = this.getCurrentSpec(id);
+    const otherVersions = [...this.materializedSpecs.entries()]
+      .filter(([key]) => key.startsWith(`${id}@`) && this.materializedSpecs.get(key) !== current)
+      .map(([, spec]) => spec);
+    return current ? [current, ...otherVersions] : otherVersions;
+  };
+
+  public getSpec = async (id: string, version?: string): Promise<ConnectorSpec | undefined> => {
+    await this.initialization;
+    const resolvedVersion = version ?? this.activeVersions.get(id);
+    return resolvedVersion
+      ? this.materializedSpecs.get(buildSpecKey(id, resolvedVersion))
+      : undefined;
+  };
+
+  public getHealth = (): DeclarativeCatalogHealth => ({
+    enabled: true,
+    ready: this.activeVersions.size > 0,
+    sourceUrl: this.options.registryUrl,
+    activeCatalogVersion: this.activeCatalogVersion,
+    connectorVersions: Object.fromEntries(this.activeVersions),
+    cachedSpecificationCount: this.storedSpecs.size,
+    lastRefreshAt: this.lastRefreshAt,
+    lastError: this.lastError,
+  });
+
+  public refresh = async (): Promise<void> => {
+    if (this.refreshing) return this.refreshing;
+    this.refreshing = this.runRefresh()
+      .catch((error) => {
+        this.recordError(error);
+        throw error;
+      })
+      .finally(() => {
+        this.refreshing = undefined;
+      });
+    return this.refreshing;
+  };
+
+  private async initialize(): Promise<void> {
+    let loadedLastKnownGood = false;
+    try {
+      loadedLastKnownGood = await this.loadLastKnownGood();
+    } catch (error) {
+      this.recordError(error);
+      this.options.logger.warn(
+        `Failed to load the last-known-good declarative connector catalog: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    try {
+      await this.refresh();
+    } catch (error) {
+      this.recordError(error);
+      this.options.logger.warn(
+        `Declarative connector catalog refresh failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      if (!loadedLastKnownGood) {
+        this.options.logger.warn(
+          'Declarative connectors are unavailable because no last-known-good catalog exists.'
+        );
+      }
+    }
+  }
+
+  private async loadLastKnownGood(): Promise<boolean> {
+    if (!this.repository) return false;
+    try {
+      const savedObject = await this.repository.get<StoredCatalogAttributes>(
+        DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
+        DECLARATIVE_CONNECTOR_CATALOG_SO_ID
+      );
+      this.activate(savedObject.attributes);
+      this.options.logger.info(
+        `Loaded declarative connector catalog "${savedObject.attributes.catalogVersion}" from the system index.`
+      );
+      return true;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) return false;
+      throw error;
+    }
+  }
+
+  private async runRefresh(): Promise<void> {
+    if (!this.repository) {
+      throw new Error('Declarative connector catalog service has not started.');
+    }
+    const manifestUrl = this.resolveRegistryUrl('catalog.json');
+    const manifest = parseDeclarativeCatalogManifest(
+      JSON.parse(await this.fetchText(manifestUrl, MAX_CATALOG_BYTES))
+    );
+    const seenIds = new Set<string>();
+    const freshSpecs: StoredDeclarativeSpec[] = [];
+
+    for (const entry of manifest.connectors) {
+      this.validateCatalogEntry(entry, seenIds);
+      const definitionUrl = this.resolveRegistryUrl(entry.definitionUrl);
+      const raw = await this.fetchText(definitionUrl, MAX_SPEC_BYTES);
+      const actualHash = getContentHash(raw);
+      if (actualHash !== entry.contentHash) {
+        throw new Error(
+          `Integrity check failed for "${entry.id}" version "${entry.version}". Expected ${entry.contentHash}, received ${actualHash}.`
+        );
+      }
+      const parsed = parseDeclarativeConnectorSpec(raw);
+      if (parsed.id !== entry.id || parsed.version !== entry.version) {
+        throw new Error(
+          `Catalog entry "${entry.id}@${entry.version}" does not match its definition "${parsed.id}@${parsed.version}".`
+        );
+      }
+      freshSpecs.push({ ...entry, raw });
+    }
+
+    const mergedSpecs = new Map(this.storedSpecs);
+    for (const spec of freshSpecs) {
+      mergedSpecs.set(buildSpecKey(spec.id, spec.version), spec);
+    }
+    const storedCatalog: StoredDeclarativeCatalog = {
+      catalogVersion: manifest.catalogVersion,
+      activeVersions: Object.fromEntries(
+        manifest.connectors.map(({ id, version }) => [id, version])
+      ),
+      specifications: [...mergedSpecs.values()],
+      sourceUrl: this.options.registryUrl,
+      fetchedAt: new Date().toISOString(),
+    };
+
+    await this.repository.create<StoredCatalogAttributes>(
+      DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
+      storedCatalog as StoredCatalogAttributes,
+      {
+        id: DECLARATIVE_CONNECTOR_CATALOG_SO_ID,
+        overwrite: true,
+      }
+    );
+    this.activate(storedCatalog);
+    this.lastRefreshAt = storedCatalog.fetchedAt;
+    this.lastError = undefined;
+    this.options.logger.info(
+      `Activated declarative connector catalog "${manifest.catalogVersion}" with ${manifest.connectors.length} connectors.`
+    );
+  }
+
+  private activate(storedCatalog: StoredDeclarativeCatalog): void {
+    const nextStoredSpecs = new Map<string, StoredDeclarativeSpec>();
+    const nextMaterializedSpecs = new Map<string, ConnectorSpec>();
+    for (const stored of storedCatalog.specifications) {
+      if (getContentHash(stored.raw) !== stored.contentHash) {
+        throw new Error(
+          `Stored declarative connector "${stored.id}@${stored.version}" failed its integrity check.`
+        );
+      }
+      const parsed = parseDeclarativeConnectorSpec(stored.raw);
+      if (parsed.id !== stored.id || parsed.version !== stored.version) {
+        throw new Error(
+          `Stored declarative connector "${stored.id}@${stored.version}" is invalid.`
+        );
+      }
+      const key = buildSpecKey(stored.id, stored.version);
+      nextStoredSpecs.set(key, stored);
+      nextMaterializedSpecs.set(key, materializeDeclarativeConnectorSpec(parsed));
+    }
+
+    const nextActiveVersions = new Map(Object.entries(storedCatalog.activeVersions));
+    const nextActiveSpecs: ConnectorSpec[] = [];
+    for (const [id, version] of nextActiveVersions) {
+      const activeSpec = nextMaterializedSpecs.get(buildSpecKey(id, version));
+      if (!activeSpec) {
+        throw new Error(`Active declarative connector "${id}@${version}" is not cached.`);
+      }
+      nextActiveSpecs.push(activeSpec);
+    }
+
+    setRuntimeConnectorSpecs(nextActiveSpecs);
+    this.storedSpecs = nextStoredSpecs;
+    this.materializedSpecs = nextMaterializedSpecs;
+    this.activeVersions = nextActiveVersions;
+    this.activeCatalogVersion = storedCatalog.catalogVersion;
+  }
+
+  private validateCatalogEntry(entry: DeclarativeCatalogEntry, seenIds: Set<string>): void {
+    if (!this.supportedConnectorIds.has(entry.id)) {
+      throw new Error(`Catalog contains unsupported development connector "${entry.id}".`);
+    }
+    if (seenIds.has(entry.id)) {
+      throw new Error(`Catalog contains duplicate connector ID "${entry.id}".`);
+    }
+    seenIds.add(entry.id);
+  }
+
+  private resolveRegistryUrl(path: string): string {
+    const registryUrl = new URL(
+      this.options.registryUrl.endsWith('/')
+        ? this.options.registryUrl
+        : `${this.options.registryUrl}/`
+    );
+    const resolved = new URL(path.replace(/^\/+/, ''), registryUrl);
+    if (resolved.origin !== registryUrl.origin) {
+      throw new Error('Declarative connector catalog URLs must remain on the registry origin.');
+    }
+    return resolved.toString();
+  }
+
+  private async fetchText(url: string, maxBytes: number): Promise<string> {
+    const response = await fetch(url, {
+      timeout: REQUEST_TIMEOUT_MS,
+      size: maxBytes,
+      headers: {
+        'User-Agent': 'Kibana declarative-connectors-poc',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Catalog request failed with HTTP ${response.status} at ${url}.`);
+    }
+    const expectedOrigin = new URL(this.options.registryUrl).origin;
+    if (new URL(response.url).origin !== expectedOrigin) {
+      throw new Error(
+        'Declarative connector catalog redirects must remain on the registry origin.'
+      );
+    }
+    return response.text();
+  }
+
+  private recordError(error: unknown): void {
+    this.lastError = {
+      message: error instanceof Error ? error.message : String(error),
+      at: new Date().toISOString(),
+    };
+  }
+}

@@ -315,6 +315,11 @@ describe('Action Executor', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
+      attributes: {
+        ...connectorSavedObject.attributes,
+        specId: '.declarative-okta',
+        specVersion: '1.0.0',
+      },
     });
     connectorTypeRegistry.get.mockReturnValueOnce({
       ...connectorType,
@@ -326,6 +331,8 @@ describe('Action Executor', () => {
     expect(connectorType.executor).toHaveBeenCalledWith(
       expect.objectContaining({
         connectorVersion: 'WzEsMV0=',
+        specId: '.declarative-okta',
+        specVersion: '1.0.0',
       })
     );
     expect(connectorType.executor).not.toHaveBeenCalledWith(

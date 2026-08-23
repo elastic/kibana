@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { materializeDeclarativeConnectorSpec } from './materialize_spec';
+import { parseDeclarativeCatalogManifest, parseDeclarativeConnectorSpec } from './parse_spec';
+import { ABUSE_IPDB_SPEC_FIXTURE } from './test_fixtures';
+
+describe('declarative connector parsing', () => {
+  it('parses and materializes the AbuseIPDB catalog definition', () => {
+    const parsed = parseDeclarativeConnectorSpec(ABUSE_IPDB_SPEC_FIXTURE);
+    const materialized = materializeDeclarativeConnectorSpec(parsed);
+
+    expect(materialized.metadata.id).toBe('.declarative-abuseipdb');
+    expect(materialized.version).toBe('1.0.0');
+    expect(Object.keys(materialized.actions)).toEqual(['checkIp', 'reportIp']);
+    expect(materialized.schema?.parse({})).toEqual({
+      baseUrl: 'http://127.0.0.1:8090',
+    });
+    expect(() => materialized.actions.checkIp.input.parse({ ipAddress: 'not-an-ip' })).toThrow();
+  });
+
+  it('parses the local catalog manifest', () => {
+    const manifest = parseDeclarativeCatalogManifest({
+      schemaVersion: 1,
+      catalogVersion: '2026-08-23.1',
+      connectors: [
+        {
+          id: '.declarative-abuseipdb',
+          version: '1.0.0',
+          definitionUrl: 'connectors/abuseipdb/1.0.0.yaml',
+          contentHash: `sha256:${'0'.repeat(64)}`,
+        },
+        {
+          id: '.declarative-okta',
+          version: '1.0.0',
+          definitionUrl: 'connectors/okta/1.0.0.yaml',
+          contentHash: `sha256:${'1'.repeat(64)}`,
+        },
+      ],
+    });
+
+    expect(manifest.catalogVersion).toBe('2026-08-23.1');
+    expect(manifest.connectors.map(({ id }) => id)).toEqual([
+      '.declarative-abuseipdb',
+      '.declarative-okta',
+    ]);
+  });
+
+  it('rejects executable or unknown fields', () => {
+    expect(() =>
+      parseDeclarativeConnectorSpec(`
+schemaVersion: 1
+id: .declarative-test
+version: 1.0.0
+handler: console.log
+`)
+    ).toThrow('Declarative connector definition is invalid');
+  });
+});

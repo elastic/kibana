@@ -120,4 +120,31 @@ describe('Connector Model Versions', () => {
       });
     });
   });
+
+  describe('version 3', () => {
+    it('adds optional declarative specification pin fields', () => {
+      const version3 = connectorModelVersions['3'] as SavedObjectsFullModelVersion;
+      const schema = version3.schemas?.create;
+
+      expect(version3.changes).toEqual([]);
+      expect(schema?.validate).toBeDefined();
+      expect(
+        schema?.validate({
+          actionTypeId: '.declarative-okta',
+          name: 'Okta',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          authMode: 'shared',
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        })
+      ).toEqual(
+        expect.objectContaining({
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        })
+      );
+    });
+  });
 });

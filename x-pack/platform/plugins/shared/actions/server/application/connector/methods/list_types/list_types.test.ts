@@ -110,6 +110,42 @@ describe('listTypes()', () => {
     ]);
   });
 
+  it('exposes action names from runtime connector specifications', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: '.declarative-okta',
+        getConnectorSpec: () => ({
+          metadata: {
+            id: '.declarative-okta',
+            displayName: 'Declarative Okta',
+            description: 'Test',
+            minimumLicense: 'basic',
+            supportedFeatureIds: ['workflows'],
+          },
+          actions: {
+            listUsers: {
+              input: { parse: (value: unknown) => value } as never,
+              handler: async () => ({}),
+            },
+            getLogs: {
+              input: { parse: (value: unknown) => value } as never,
+              handler: async () => ({}),
+            },
+          },
+          test: { enabled: false, handler: async () => ({}) },
+        }),
+      })
+    );
+
+    await expect(actionsClient.listTypes({ featureId: 'alerting' })).resolves.toEqual([
+      expect.objectContaining({
+        id: '.declarative-okta',
+        specActionNames: ['listUsers', 'getLogs'],
+      }),
+    ]);
+  });
+
   it('filters out system action types when not defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 

@@ -137,6 +137,11 @@ export async function create({
           validatedActionTypeSecrets as Record<string, unknown>
         )
       : validatedActionTypeConfig;
+  const connectorSpec = actionType.getConnectorSpec?.();
+  const specPin =
+    connectorSpec?.version !== undefined
+      ? { specId: connectorSpec.metadata.id, specVersion: connectorSpec.version }
+      : {};
 
   const result = await tryCatch(
     async () =>
@@ -149,6 +154,7 @@ export async function create({
           config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...specPin,
         },
         { id }
       )

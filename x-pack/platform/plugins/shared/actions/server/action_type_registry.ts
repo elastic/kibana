@@ -37,6 +37,7 @@ export interface ActionTypeRegistryOpts {
 interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
+  exposeSpecActions?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -270,7 +271,10 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, exposeSpecActions }: ListOpts = {
+      exposeValidation: false,
+      exposeSpecActions: false,
+    }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
@@ -299,6 +303,12 @@ export class ActionTypeRegistry {
         description: actionType.description,
         isExperimental: actionType.isExperimental,
         isTestable: Boolean(actionType.isTestable),
+        ...((exposeValidation === true || exposeSpecActions === true) &&
+        actionType.getConnectorSpec?.()
+          ? {
+              specActionNames: Object.keys(actionType.getConnectorSpec()?.actions ?? {}),
+            }
+          : {}),
       }));
   }
 

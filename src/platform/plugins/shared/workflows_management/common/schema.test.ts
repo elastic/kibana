@@ -11,10 +11,16 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
+import { setRuntimeConnectorSpecs } from '@kbn/connector-specs';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
+import { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema } from './schema';
 
 describe('schema', () => {
+  afterEach(() => {
+    setRuntimeConnectorSpecs([]);
+  });
+
   describe('getWorkflowZodSchema: elasticsearch steps', () => {
     const examples = [
       {
@@ -52,6 +58,63 @@ describe('schema', () => {
 
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
+    });
+    it('uses runtime connector action input schemas', () => {
+      setRuntimeConnectorSpecs([
+        {
+          version: '1.0.0',
+          metadata: {
+            id: '.declarative-test',
+            displayName: 'Declarative Test',
+            description: 'Test',
+            minimumLicense: 'basic',
+            supportedFeatureIds: ['workflows'],
+          },
+          actions: {
+            checkIp: {
+              input: z.object({ ipAddress: z.ipv4() }).strict(),
+              handler: async () => ({}),
+            },
+          },
+          test: { enabled: false, handler: async () => ({}) },
+        },
+      ]);
+      const connectorTypes = {
+        '.declarative-test': {
+          actionTypeId: '.declarative-test',
+          displayName: 'Declarative Test',
+          instances: [
+            {
+              id: 'connector-1',
+              name: 'Connector',
+              isPreconfigured: false,
+              isDeprecated: false,
+            },
+          ],
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          subActions: [{ name: 'checkIp', displayName: 'Check IP' }],
+        },
+      };
+      const workflow = (ipAddress: string) =>
+        [
+          'name: Runtime connector schema',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'steps:',
+          '  - name: check_ip',
+          '    type: declarative-test.checkIp',
+          '    connector-id: connector-1',
+          '    with:',
+          `      ipAddress: ${ipAddress}`,
+        ].join('\n');
+      const workflowSchema = getWorkflowZodSchema(connectorTypes);
+
+      expect(parseWorkflowYamlToJSON(workflow('192.0.2.1'), workflowSchema).success).toBe(true);
+      expect(parseWorkflowYamlToJSON(workflow('not-an-ip'), workflowSchema).success).toBe(false);
     });
     examples.forEach((example) => {
       it(`should parse ${example.name} with zod schema`, () => {

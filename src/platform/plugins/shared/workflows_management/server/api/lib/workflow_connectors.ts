@@ -18,7 +18,10 @@ import type {
   GetAvailableConnectorsResponse,
 } from '@kbn/workflows/types/v1';
 
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
+import {
+  CONNECTOR_SUB_ACTIONS_MAP,
+  formatSubActionName,
+} from '../../../common/connector_sub_actions_map';
 
 const getConnectorInstanceConfig = (
   connector: FindActionResult
@@ -53,7 +56,12 @@ export const getAvailableConnectors = async (params: {
   const connectorTypes: Record<string, ConnectorTypeInfo> = {};
 
   actionTypes.forEach((actionType) => {
-    const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+    const subActions = actionType.specActionNames
+      ? actionType.specActionNames.map((name) => ({
+          name,
+          displayName: formatSubActionName(name),
+        }))
+      : CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 
     connectorTypes[actionType.id] = {
       actionTypeId: actionType.id,

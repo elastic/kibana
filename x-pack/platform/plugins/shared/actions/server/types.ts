@@ -19,7 +19,7 @@ import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
-import type { AuthMode } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -101,6 +101,8 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
+  specId?: string;
+  specVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -256,6 +258,12 @@ export interface ActionTypeCoreFields<
    */
   isExperimental?: boolean;
   /**
+   * Returns the active specification used for generated forms and connector
+   * version pinning. Dynamic providers may return undefined while their
+   * catalog is still loading.
+   */
+  getConnectorSpec?: () => ConnectorSpec | undefined;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
@@ -316,6 +324,8 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  specId?: string;
+  specVersion?: string;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

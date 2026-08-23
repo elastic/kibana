@@ -605,6 +605,8 @@ export class ActionExecutor {
             ...(actionType.source === ACTION_TYPE_SOURCES.spec
               ? {
                   connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
+                  ...(rawAction.specId ? { specId: rawAction.specId } : {}),
+                  ...(rawAction.specVersion ? { specVersion: rawAction.specVersion } : {}),
                 }
               : {}),
           });

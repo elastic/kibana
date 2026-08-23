@@ -26,6 +26,14 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+import {
+  DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
+  DECLARATIVE_CONNECTOR_METADATA,
+  DeclarativeConnectorCatalogService,
+  registerDeclarativeConnectorCatalogRoutes,
+  registerDeclarativeConnectorCatalogSavedObject,
+  registerDeclarativeConnectorTypes,
+} from './declarative_connectors';
 
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
@@ -52,10 +60,19 @@ export class StackConnectorsPlugin
   private isServerless = false;
   private isServerlessTrial = false;
   private licensing?: LicensingPluginStart;
+  private readonly declarativeCatalog?: DeclarativeConnectorCatalogService;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    if (this.config.declarativeCatalog.enabled) {
+      this.declarativeCatalog = new DeclarativeConnectorCatalogService({
+        registryUrl: this.config.declarativeCatalog.registryUrl,
+        refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
+        supportedConnectorIds: DECLARATIVE_CONNECTOR_METADATA.map(({ id }) => id),
+        logger: context.logger.get('declarativeCatalog'),
+      });
+    }
   }
 
   // Trial detection for the Elastic-managed email SMTP relay (the `elastic_cloud` service).
@@ -96,6 +113,15 @@ export class StackConnectorsPlugin
       registerConnectorTypesFromSpecs({ actions });
     }
 
+    if (this.declarativeCatalog) {
+      registerDeclarativeConnectorCatalogSavedObject(core.savedObjects);
+      registerDeclarativeConnectorTypes({ actions, catalog: this.declarativeCatalog });
+      registerDeclarativeConnectorCatalogRoutes({
+        router,
+        catalog: this.declarativeCatalog,
+      });
+    }
+
     if (plugins.usageCollection) {
       registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
     }
@@ -103,7 +129,15 @@ export class StackConnectorsPlugin
 
   public start(core: CoreStart, plugins: ConnectorsPluginsStart) {
     this.licensing = plugins.licensing;
+    if (this.declarativeCatalog) {
+      const repository = core.savedObjects.createInternalRepository([
+        DECLARATIVE_CONNECTOR_CATALOG_SO_TYPE,
+      ]);
+      this.declarativeCatalog.start(repository);
+    }
   }
 
-  public stop() {}
+  public stop() {
+    this.declarativeCatalog?.stop();
+  }
 }
