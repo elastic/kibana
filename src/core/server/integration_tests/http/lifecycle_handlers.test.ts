@@ -331,6 +331,8 @@ describe('core lifecycle handlers', () => {
         'origin:absent',
         'user_agent:non_browser',
         'provenance_decision:would_allow',
+        'method:post',
+        'route_access:internal',
       ]);
       expect(incrementCounter).toHaveBeenCalledWith(
         expect.objectContaining({ counterType: PROVENANCE_TELEMETRY_COUNTER_TYPE })

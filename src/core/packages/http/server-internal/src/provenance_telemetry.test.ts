@@ -17,12 +17,21 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   classifyProvenance,
   createProvenanceTelemetryPostAuthHandler,
+  isLikelyModernBrowser,
   PROVENANCE_TELEMETRY_COUNTER_TYPE,
 } from './provenance_telemetry';
 
 const BROWSER_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
+const FIREFOX_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0';
 const CLI_UA = 'curl/8.1.2';
+const IE_UA = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)';
+const HEADLESS_UA =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/120.0 Safari/537.36';
+const OVERSIZE_UA = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36 ${'A'.repeat(
+  500
+)}`;
 
 const forgeRequest = ({
   headers = {},
@@ -68,13 +77,25 @@ describe('classifyProvenance', () => {
     ).toBe('none');
   });
 
-  it('records presence of Sec-Fetch-Mode and Origin without capturing values', () => {
+  it('buckets known Sec-Fetch-Mode values and records presence of Origin without capturing values', () => {
     const classification = classifyProvenance(
       forgeRequest({ headers: { 'sec-fetch-mode': 'cors', origin: 'https://evil.example' } })
     );
-    expect(classification.secFetchModePresent).toBe(true);
+    expect(classification.secFetchModeBucket).toBe('cors');
     expect(classification.originPresent).toBe(true);
     expect(Object.values(classification)).not.toContain('https://evil.example');
+  });
+
+  it('reports "absent" when Sec-Fetch-Mode is missing and folds unknown values into "other"', () => {
+    expect(classifyProvenance(forgeRequest({ headers: {} })).secFetchModeBucket).toBe('absent');
+    expect(
+      classifyProvenance(forgeRequest({ headers: { 'sec-fetch-mode': 'navigate' } }))
+        .secFetchModeBucket
+    ).toBe('navigate');
+    expect(
+      classifyProvenance(forgeRequest({ headers: { 'sec-fetch-mode': 'bogus' } }))
+        .secFetchModeBucket
+    ).toBe('other');
   });
 
   it('distinguishes browser vs non-browser user agents', () => {
@@ -122,6 +143,22 @@ describe('classifyProvenance', () => {
   });
 });
 
+describe('isLikelyModernBrowser', () => {
+  it('accepts modern Chrome and Firefox user agents', () => {
+    expect(isLikelyModernBrowser(BROWSER_UA)).toBe(true);
+    expect(isLikelyModernBrowser(FIREFOX_UA)).toBe(true);
+  });
+
+  it('rejects non-browser, old-style bot/IE, headless, and oversize user agents', () => {
+    expect(isLikelyModernBrowser(CLI_UA)).toBe(false);
+    expect(isLikelyModernBrowser(IE_UA)).toBe(false);
+    expect(isLikelyModernBrowser(HEADLESS_UA)).toBe(false);
+    expect(isLikelyModernBrowser(OVERSIZE_UA)).toBe(false);
+    expect(isLikelyModernBrowser(undefined)).toBe(false);
+    expect(isLikelyModernBrowser('')).toBe(false);
+  });
+});
+
 describe('createProvenanceTelemetryPostAuthHandler', () => {
   const responseFactory = mockRouter.createResponseFactory();
 
@@ -160,10 +197,12 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
     const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
     expect(counterNames).toEqual([
       'sec_fetch_site:cross-site',
-      'sec_fetch_mode:present',
+      'sec_fetch_mode:cors',
       'origin:present',
       'user_agent:browser',
       'provenance_decision:would_block',
+      'method:post',
+      'route_access:internal',
     ]);
     expect(incrementCounter).toHaveBeenCalledWith(
       expect.objectContaining({ counterType: PROVENANCE_TELEMETRY_COUNTER_TYPE })
@@ -191,8 +230,29 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
       'origin:absent',
       'user_agent:browser',
       'provenance_decision:would_allow',
+      'method:post',
+      'route_access:internal',
       'gap:browser_missing_provenance',
     ]);
+  });
+
+  it('slices counts by HTTP method and public vs internal route access', () => {
+    const incrementCounter = jest.fn();
+    const toolkit = createToolkit();
+    const handler = createProvenanceTelemetryPostAuthHandler(createConfig, incrementCounter);
+
+    handler(
+      forgeRequest({
+        method: 'delete',
+        kibanaRouteOptions: { xsrfRequired: true, access: 'public' } as KibanaRouteOptions,
+      }),
+      responseFactory,
+      toolkit
+    );
+
+    const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+    expect(counterNames).toContain('method:delete');
+    expect(counterNames).toContain('route_access:public');
   });
 
   it('mirrors enforcement scope: does not count when protection is disabled', () => {

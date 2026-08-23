@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OnPostAuthHandler, KibanaRequest } from '@kbn/core-http-server';
+import type {
+  OnPostAuthHandler,
+  KibanaRequest,
+  RouteMethod,
+  RouteAccess,
+} from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 
 const ORIGIN_HEADER = 'origin';
@@ -23,11 +28,36 @@ const SEC_FETCH_SITE_BUCKETS = ['same-origin', 'same-site', 'cross-site', 'none'
 type KnownSecFetchSiteBucket = (typeof SEC_FETCH_SITE_BUCKETS)[number];
 export type SecFetchSiteBucket = KnownSecFetchSiteBucket | 'absent';
 
+const SEC_FETCH_MODE_BUCKETS = ['cors', 'navigate', 'no-cors', 'same-origin', 'websocket'] as const;
+
+type KnownSecFetchModeBucket = (typeof SEC_FETCH_MODE_BUCKETS)[number];
+export type SecFetchModeBucket = KnownSecFetchModeBucket | 'other' | 'absent';
+
+// Approved by Security (Larry): flags UAs that look like a modern browser
+// engine without capturing the raw header value.
+const LIKELY_MODERN_BROWSER =
+  /^Mozilla\/5\.0 \([^)]{10,200}\) (?:AppleWebKit\/[\d.]+ \(KHTML, like Gecko\).*(?:Chrome|CriOS|Edg|EdgiOS|OPR|Version)\/\d|Gecko\/\S+ (?:Firefox|FxiOS)\/\d)/;
+
+export const isLikelyModernBrowser = (userAgent: string | undefined): boolean => {
+  if (!userAgent || userAgent.length > 512) {
+    return false;
+  }
+  if (userAgent.includes('(compatible;')) {
+    return false;
+  }
+  if (userAgent.includes('HeadlessChrome')) {
+    return false;
+  }
+  return LIKELY_MODERN_BROWSER.test(userAgent);
+};
+
 export interface ProvenanceClassification {
   secFetchSiteBucket: SecFetchSiteBucket;
-  secFetchModePresent: boolean;
+  secFetchModeBucket: SecFetchModeBucket;
   originPresent: boolean;
   isBrowserUa: boolean;
+  method: RouteMethod;
+  routeAccess: RouteAccess;
   gapBrowserMissingProvenance: boolean;
   wouldBlock: boolean;
 }
@@ -58,9 +88,17 @@ const toSecFetchSiteBucket = (value: string | undefined): SecFetchSiteBucket => 
     : 'none';
 };
 
+const toSecFetchModeBucket = (value: string | undefined): SecFetchModeBucket => {
+  if (value == null) {
+    return 'absent';
+  }
+  return (SEC_FETCH_MODE_BUCKETS as readonly string[]).includes(value)
+    ? (value as KnownSecFetchModeBucket)
+    : 'other';
+};
+
 /**
- * Derives provenance signals from a request without capturing any raw header
- * values. Only enums/booleans leave this function, so no PII is recorded.
+ * Only enums/booleans leave this function, no raw header values, so no PII is recorded.
  */
 export const classifyProvenance = (request: KibanaRequest): ProvenanceClassification => {
   const secFetchSite = firstHeaderValue(request.headers[SEC_FETCH_SITE_HEADER]);
@@ -69,27 +107,27 @@ export const classifyProvenance = (request: KibanaRequest): ProvenanceClassifica
   const userAgent = firstHeaderValue(request.headers[USER_AGENT_HEADER]);
 
   const secFetchSiteBucket = toSecFetchSiteBucket(secFetchSite);
-  const secFetchModePresent = secFetchMode != null;
+  const secFetchModeBucket = toSecFetchModeBucket(secFetchMode);
   const originPresent = origin != null;
-  const isBrowserUa = userAgent != null && /mozilla\//i.test(userAgent);
+  const isBrowserUa = isLikelyModernBrowser(userAgent);
 
   return {
     secFetchSiteBucket,
-    secFetchModePresent,
+    secFetchModeBucket,
     originPresent,
     isBrowserUa,
+    method: request.route.method,
+    routeAccess: request.route.options.access,
     gapBrowserMissingProvenance: isBrowserUa && secFetchSiteBucket === 'absent' && !originPresent,
-    // Proposed provenance model (dry-run only, pending Security sign-off): a
-    // cross-site fetch would be rejected. Kept as a single predicate so the
-    // rule can be adjusted in one place.
+    // Dry-run only, pending Security sign-off on enforcement: a cross-site
+    // fetch would be rejected under the proposed model.
     wouldBlock: secFetchSiteBucket === 'cross-site',
   };
 };
 
 /**
- * Measurement-only post-auth handler. It records provenance signals for
- * state-changing requests that XSRF currently guards and always calls
- * `toolkit.next()` — no request is ever allowed or rejected here.
+ * Measurement-only: always calls `toolkit.next()`, no request is ever
+ * allowed or rejected here.
  */
 export const createProvenanceTelemetryPostAuthHandler = (
   getConfig: () => ProvenanceTelemetryConfig | undefined,
@@ -115,10 +153,12 @@ export const createProvenanceTelemetryPostAuthHandler = (
       incrementCounter({ counterType: PROVENANCE_TELEMETRY_COUNTER_TYPE, counterName });
 
     increment(`sec_fetch_site:${classification.secFetchSiteBucket}`);
-    increment(`sec_fetch_mode:${classification.secFetchModePresent ? 'present' : 'absent'}`);
+    increment(`sec_fetch_mode:${classification.secFetchModeBucket}`);
     increment(`origin:${classification.originPresent ? 'present' : 'absent'}`);
     increment(`user_agent:${classification.isBrowserUa ? 'browser' : 'non_browser'}`);
     increment(`provenance_decision:${classification.wouldBlock ? 'would_block' : 'would_allow'}`);
+    increment(`method:${classification.method}`);
+    increment(`route_access:${classification.routeAccess}`);
     if (classification.gapBrowserMissingProvenance) {
       increment('gap:browser_missing_provenance');
     }
