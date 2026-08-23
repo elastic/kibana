@@ -54,7 +54,8 @@ export const SearchRow = React.memo(() => {
   const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
 
   const onQueryChange = useCallback(
-    ({ queryText }: { queryText: string }) => {
+    ({ queryText, error }: { queryText: string; error: Error | null }) => {
+      if (error) return;
       dispatch(userSearchedNotes(queryText.trim()));
     },
     [dispatch]
