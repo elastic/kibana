@@ -33,7 +33,7 @@ const SEC_FETCH_MODE_BUCKETS = ['cors', 'navigate', 'no-cors', 'same-origin', 'w
 type KnownSecFetchModeBucket = (typeof SEC_FETCH_MODE_BUCKETS)[number];
 export type SecFetchModeBucket = KnownSecFetchModeBucket | 'other' | 'absent';
 
-// Approved by Security (Larry): flags UAs that look like a modern browser
+// Security-approved heuristic: flags UAs that look like a modern browser
 // engine without capturing the raw header value.
 const LIKELY_MODERN_BROWSER =
   /^Mozilla\/5\.0 \([^)]{10,200}\) (?:AppleWebKit\/[\d.]+ \(KHTML, like Gecko\).*(?:Chrome|CriOS|Edg|EdgiOS|OPR|Version)\/\d|Gecko\/\S+ (?:Firefox|FxiOS)\/\d)/;
