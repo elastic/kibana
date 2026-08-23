@@ -1,21 +1,10 @@
 {
-  "sha1": "",
+  "sha1": "baf49dac6b51b18641159e368bf28d286f517f90",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "52c78078719bb17-d89fd2ade65d14f",
-      "title": "Teardown Discover tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 13,
-        "column": 19
-      }
-    },
     {
       "id": "0f64951867b1265-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
@@ -287,7 +276,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen_privileged.spec.ts",
-        "line": 57,
+        "line": 51,
         "column": 14
       }
     },
@@ -311,7 +300,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 42,
+        "line": 37,
         "column": 14
       }
     },
@@ -335,7 +324,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 78,
+        "line": 73,
         "column": 14
       }
     },
@@ -359,7 +348,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 94,
+        "line": 89,
         "column": 14
       }
     },
@@ -383,7 +372,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
-        "line": 119,
+        "line": 114,
         "column": 14
       }
     },
@@ -407,7 +396,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 62,
+        "line": 56,
         "column": 14
       }
     },
@@ -431,7 +420,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 98,
+        "line": 92,
         "column": 14
       }
     },
@@ -455,7 +444,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 140,
+        "line": 134,
         "column": 14
       }
     },
@@ -479,7 +468,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 152,
+        "line": 146,
         "column": 14
       }
     },
@@ -695,7 +684,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
-        "line": 47,
+        "line": 42,
         "column": 14
       }
     },
@@ -719,7 +708,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
-        "line": 93,
+        "line": 88,
         "column": 14
       }
     },
@@ -831,7 +820,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 49,
+        "line": 44,
         "column": 14
       }
     },
@@ -855,7 +844,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
-        "line": 48,
+        "line": 43,
         "column": 14
       }
     },
@@ -879,7 +868,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 63,
+        "line": 57,
         "column": 14
       }
     },
@@ -903,7 +892,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 99,
+        "line": 93,
         "column": 14
       }
     },
@@ -927,7 +916,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 119,
+        "line": 113,
         "column": 14
       }
     },
@@ -951,8 +940,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
-        "line": 143,
+        "line": 137,
         "column": 14
+      }
+    },
+    {
+      "id": "52c78078719bb17-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
       }
     }
   ]
