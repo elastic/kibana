@@ -59,7 +59,7 @@ describe('WatchlistConfigClient', () => {
 
   describe('create', () => {
     const SO_ID = 'new-watchlist-id';
-    const attrs = { name: 'Test Watchlist' };
+    const attrs = { name: 'Test Watchlist', riskModifier: 0 };
     const savedObjectResult = {
       id: SO_ID,
       type: 'watchlist-config',
