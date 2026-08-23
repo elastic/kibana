@@ -998,6 +998,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
     },
   },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
+    },
+  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
