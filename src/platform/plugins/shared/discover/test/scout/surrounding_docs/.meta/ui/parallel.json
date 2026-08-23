@@ -1,21 +1,10 @@
 {
-  "sha1": "",
+  "sha1": "206a7c7da280401f9952ccff0ab6bd0eb68287ab",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "d7169ee3bc6bd51-d89fd2ade65d14f",
-      "title": "Teardown Discover tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
-        "line": 13,
-        "column": 19
-      }
-    },
     {
       "id": "75066322895708e-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
@@ -36,7 +25,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_accessibility.spec.ts",
-        "line": 34,
+        "line": 29,
         "column": 12
       }
     },
@@ -231,7 +220,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 12
       }
     },
@@ -257,7 +246,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 80,
+        "line": 77,
         "column": 12
       }
     },
@@ -283,7 +272,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 104,
+        "line": 101,
         "column": 12
       }
     },
@@ -309,7 +298,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 120,
+        "line": 117,
         "column": 12
       }
     },
@@ -335,7 +324,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 160,
+        "line": 157,
         "column": 12
       }
     },
@@ -493,6 +482,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
         "line": 49,
         "column": 12
+      }
+    },
+    {
+      "id": "d7169ee3bc6bd51-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
       }
     }
   ]
