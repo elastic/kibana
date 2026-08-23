@@ -223,12 +223,17 @@ export async function seedPersonaMatrixEnvironment({
     })) as unknown as { body?: { status?: string } };
     if (initial.body?.status !== 'running') {
       log.info(`[env-seed] installing entity store v2`);
-      const installRes = await kbnClient.request({
-        method: 'POST',
-        path: '/api/security/entity_store/install',
-        body: { entityTypes: ['user', 'host'] },
-      });
-      void installRes;
+      // Fire-and-poll: on a cold cluster the install endpoint can hold the
+      // connection open for the entire transform-init duration (observed
+      // >9 min, wedging beforeAll past any await deadline). The status poll
+      // below is the real completion signal.
+      kbnClient
+        .request({
+          method: 'POST',
+          path: '/api/security/entity_store/install',
+          body: { entityTypes: ['user', 'host'] },
+        })
+        .catch((err) => log.warning(`[env-seed] entity store install call errored: ${err}`));
       // First-install on a cold stack initializes ES transforms and can take
       // several minutes (observed >120s locally); the entity-analytics suite
       // helper defaults to the same poll but is equally tunable.
