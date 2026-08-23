@@ -568,7 +568,7 @@ const CellActions = React.memo(
         <EuiToolTip content="Expand cell" disableScreenReaderOutput>
           <EuiButtonIcon
             css={styles.cellActionButton}
-            iconType="expand"
+            iconType="maximize"
             aria-label="Expand cell"
             size="xs"
             iconSize="s"
@@ -1569,6 +1569,25 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         },
       });
 
+      const summaryColumn: ColumnDef<DataTableRecord> = {
+        id: SOURCE_COLUMN_ID,
+        header: () => <UnifiedDataTableSourceColumnHeader headerRowHeight={headerRowHeightLines} />,
+        size: 1,
+        minSize: 0,
+        enableResizing: false,
+        enableSorting: false,
+        meta: { isSummary: true },
+        cell: ({ row }) => (
+          <SummaryCellContent
+            row={row.original}
+            dataView={dataView}
+            shouldShowFieldHandler={shouldShowFieldHandler}
+            fieldFormats={fieldFormats}
+            columnsMeta={columnsMeta}
+          />
+        ),
+      };
+
       if (isSummaryMode) {
         if (showTimeCol && timeFieldName) {
           const timeField = dataView.getFieldByName(timeFieldName);
@@ -1592,29 +1611,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           });
         }
 
-        defs.push({
-          id: SOURCE_COLUMN_ID,
-          header: () => (
-            <UnifiedDataTableSourceColumnHeader headerRowHeight={headerRowHeightLines} />
-          ),
-          size: 1,
-          minSize: 0,
-          enableResizing: false,
-          enableSorting: false,
-          meta: { isSummary: true },
-          cell: ({ row }) => (
-            <SummaryCellContent
-              row={row.original}
-              dataView={dataView}
-              shouldShowFieldHandler={shouldShowFieldHandler}
-              fieldFormats={fieldFormats}
-              columnsMeta={columnsMeta}
-            />
-          ),
-        });
+        defs.push(summaryColumn);
       } else {
         for (const colId of effectiveColumns) {
-          if (colId === SOURCE_COLUMN_ID) continue;
+          if (colId === SOURCE_COLUMN_ID) {
+            defs.push(summaryColumn);
+            continue;
+          }
           const isTimeField = colId === timeFieldName;
           const dataViewField = dataView.getFieldByName(colId);
           const formatValue = (value: unknown) => {

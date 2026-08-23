@@ -132,6 +132,13 @@ describe('TanStackDataGrid columns', () => {
     expect(screen.getByTestId('tanstackGridWrapper')).toHaveTextContent('timestamp');
     expect(screen.getByTestId('tanstackGridWrapper')).toHaveTextContent('extension');
   });
+
+  it('renders a pinned summary beside regular table columns', () => {
+    renderGrid({ columns: ['message', '_source'], expandedDoc: undefined });
+
+    expect(screen.getByRole('grid')).toHaveAttribute('aria-colcount', '4');
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+  });
 });
 
 describe('TanStackDataGrid summary column row height', () => {
