@@ -392,4 +392,31 @@ describe('installPrebuiltWatchlists', function () {
     const names = getPrebuiltWatchlists('default').map((w) => w.name);
     expect(new Set(names).size).toBe(names.length);
   });
+
+  describe('watchlist index template', () => {
+    beforeEach(() => {
+      mockSoClient.find.mockResolvedValue(buildEmptySpacesResponse());
+      mockWatchlistGet.mockRejectedValue(new Error('not found'));
+    });
+
+    it('registers an index template for .entity_analytics.watchlists.*', async () => {
+      await callInstall();
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'entity_analytics_watchlists',
+          index_patterns: ['.entity_analytics.watchlists.*'],
+        })
+      );
+    });
+
+    it('continues even if index template registration fails', async () => {
+      mockEsClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('ES error'));
+
+      await expect(callInstall()).resolves.not.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to install watchlist index template')
+      );
+    });
+  });
 });
