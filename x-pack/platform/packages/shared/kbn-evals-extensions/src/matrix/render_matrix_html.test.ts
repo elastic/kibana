@@ -141,6 +141,60 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('🔍 Step trace');
   });
 
+  describe('untrusted model output in answers', () => {
+    const renderAnswer = (answer: string) =>
+      renderMatrixHtml(
+        mockMatrix,
+        mockConfig,
+        {},
+        {
+          'test-model:alert': {
+            question: 'q',
+            toolTrail: [],
+            answer,
+            steps: [],
+            stepCount: 0,
+            toolCount: 0,
+          },
+        }
+      );
+
+    // The answer is output from the evaluated model, and this package also
+    // ships redTeamCmd, whose entire purpose is coaxing adversarial output.
+    // Assembled at runtime so the linter's `no-script-url` pattern match does
+    // not fire on a literal — these are payloads under test, not real links.
+    const scheme = (s: string) => `${s}:alert(1)`;
+
+    it.each([
+      ['script scheme', `[click](${scheme('javascript')})`],
+      ['mixed-case script scheme', `[click](${scheme('JaVaScRiPt')})`],
+      ['data: html', '[x](data:text/html;base64,PHNjcmlwdD4=)'],
+      ['leading-space bypass', `[x](  ${scheme('javascript')})`],
+    ])('strips the href for a %s URL', (_label, answer) => {
+      const html = renderAnswer(answer);
+      expect(html).not.toMatch(/href="javascript:/i);
+      expect(html).not.toMatch(/href="data:/i);
+      expect(html).not.toMatch(/href="\s/);
+    });
+
+    it('keeps plain http(s) links', () => {
+      expect(renderAnswer('[ok](https://example.com/a?b=1)')).toContain(
+        '<a href="https://example.com/a?b=1">ok</a>'
+      );
+    });
+
+    it('does not emit a raw event-handler attribute inside the href', () => {
+      const html = renderAnswer('[x](https://e.com onmouseover=alert(1))');
+      expect(html).not.toMatch(/href="[^"]*\son[a-z]+=/i);
+    });
+
+    it('escapes raw HTML in the answer body', () => {
+      const html = renderAnswer('<img src=x onerror=alert(1)>');
+      expect(html).not.toContain('<img src=x');
+      expect(html).toContain('&lt;img');
+    });
+  });
+
   it('shows trace unavailable when no traces provided', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
     expect(html).toContain('Trace unavailable');

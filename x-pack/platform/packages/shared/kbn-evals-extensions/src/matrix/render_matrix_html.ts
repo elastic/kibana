@@ -123,7 +123,10 @@ const inlineMd = (s: string): string =>
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, text: string, url: string) =>
       // Only allow http(s) links — the markdown source is untrusted model
       // output, and escaped schemes like `javascript:` still execute.
-      /^https?:\/\//i.test(url) ? `<a href="${url}">${text}</a>` : text
+      // Whitespace must also be rejected: the URL is interpolated into the
+      // href unquoted-adjacent, so `https://e.com onmouseover=...` would
+      // otherwise smuggle an event handler into the tag.
+      /^https?:\/\/\S*$/i.test(url) ? `<a href="${url}">${text}</a>` : text
     );
 
 const splitTableRow = (line: string): string[] =>
