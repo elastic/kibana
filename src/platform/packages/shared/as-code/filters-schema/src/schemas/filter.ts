@@ -243,29 +243,28 @@ export const asCodeConditionFilterSchema = lazySchema(() =>
 );
 
 // Inner group shape (recursing shape)
-const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = lazySchema(() =>
-  z
-    .object({
-      operator: z
-        .union([
-          z.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
-          z.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
-        ])
-        .meta({
-          description:
-            'Logical operator applied across all entries in `conditions`. Use `and` to require all conditions, or `or` to require at least one.',
-        }),
-      conditions: z.array(z.union([conditionSchema, z.lazy(() => groupConditionSchema)])).meta({
+// Unable to use lazySchema here due to recursive reference.
+// See https://github.com/elastic/kibana/issues/286732
+const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = z
+  .object({
+    operator: z
+      .union([
+        z.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
+        z.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
+      ])
+      .meta({
         description:
-          'Ordered list of conditions or nested groups combined by the group `operator`.',
+          'Logical operator applied across all entries in `conditions`. Use `and` to require all conditions, or `or` to require at least one.',
       }),
-    })
-    .strict()
-    .meta({
-      description: 'Logical group that combines one or more conditions or nested groups.',
-      id: 'kbn-as-code-filters-schema_groupConditionSchema',
-    })
-);
+    conditions: z.array(z.union([conditionSchema, z.lazy(() => groupConditionSchema)])).meta({
+      description: 'Ordered list of conditions or nested groups combined by the group `operator`.',
+    }),
+  })
+  .strict()
+  .meta({
+    description: 'Logical group that combines one or more conditions or nested groups.',
+    id: 'kbn-as-code-filters-schema_groupConditionSchema',
+  });
 
 export const asCodeGroupFilterSchema = lazySchema(() =>
   commonBasePropertiesSchema
