@@ -215,28 +215,39 @@ export async function seedPersonaMatrixEnvironment({
   // (previous seed) satisfies no gate and leaves every tool unavailable.
   // Pattern ported from kbn-evals-suite-entity-analytics setup_helpers.
   try {
-    log.info(`[env-seed] installing entity store v2`);
-    const installRes = await kbnClient.request({
-      method: 'POST',
-      path: '/api/security/entity_store/install',
-      body: { entityTypes: ['user', 'host'] },
-    });
-    void installRes;
-    const deadline = Date.now() + 120_000;
-    for (;;) {
-      const statusRes = await kbnClient.request({
-        method: 'GET',
-        path: '/api/security/entity_store/status',
+    // Warm-stack fast path: engines already installed and running from a
+    // previous run — skip straight to re-seeding docs.
+    const initial = (await kbnClient.request({
+      method: 'GET',
+      path: '/api/security/entity_store/status',
+    })) as unknown as { body?: { status?: string } };
+    if (initial.body?.status !== 'running') {
+      log.info(`[env-seed] installing entity store v2`);
+      const installRes = await kbnClient.request({
+        method: 'POST',
+        path: '/api/security/entity_store/install',
+        body: { entityTypes: ['user', 'host'] },
       });
-      const body = (statusRes as unknown as { body?: { status?: string } }).body;
-      if (body?.status === 'running') break;
-      if (body?.status === 'error') {
-        throw new Error(`entity store v2 error state: ${JSON.stringify(body)}`);
+      void installRes;
+      // First-install on a cold stack initializes ES transforms and can take
+      // several minutes (observed >120s locally); the entity-analytics suite
+      // helper defaults to the same poll but is equally tunable.
+      const deadline = Date.now() + 600_000;
+      for (;;) {
+        const statusRes = (await kbnClient.request({
+          method: 'GET',
+          path: '/api/security/entity_store/status',
+        })) as unknown as { body?: { status?: string } };
+        const body = statusRes.body;
+        if (body?.status === 'running') break;
+        if (body?.status === 'error') {
+          throw new Error(`entity store v2 error state: ${JSON.stringify(body)}`);
+        }
+        if (Date.now() > deadline) {
+          throw new Error('entity store v2 did not reach running within 600s');
+        }
+        await new Promise((r) => setTimeout(r, 2_000));
       }
-      if (Date.now() > deadline) {
-        throw new Error('entity store v2 did not reach running within 120s');
-      }
-      await new Promise((r) => setTimeout(r, 2_000));
     }
     log.info(`[env-seed] entity store v2 running`);
 
