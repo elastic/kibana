@@ -9,6 +9,7 @@
 
 import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
+import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
   buildGauge,
@@ -285,9 +286,10 @@ export class LensConfigBuilder {
     }
 
     const converter = this.apiConvertersByChart[chartType];
-    const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
+    const { state: configWithoutTags, references: tagReferences } = toStoredTags(config as any); // handle type mismatches
+    const attributes = converter.fromAPItoLensState(configWithoutTags as any); // handle type mismatches
     const { filters, query, references } = filtersAndQueryToLensState(
-      config,
+      configWithoutTags as any,
       attributes.references ?? []
     );
 
@@ -295,7 +297,7 @@ export class LensConfigBuilder {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
-      references: [...(attributes.references ?? []), ...references],
+      references: [...(attributes.references ?? []), ...references, ...tagReferences],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
@@ -315,19 +317,22 @@ export class LensConfigBuilder {
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     const chartConfig = converter.fromLensStateToAPI(config);
     const panelFiltersAndQuery = filtersAndQueryToApiFormat(config);
+    const { tags } = toAsCodeTags(config.references);
 
     // Omit panel-level query on ES|QL charts, query is on data_source
     if ('data_source' in chartConfig && isEsqlTableTypeDataSource(chartConfig.data_source)) {
       const { query: _, ...panelFiltersWithoutQuery } = panelFiltersAndQuery;
       return {
         ...chartConfig,
-        ...panelFiltersWithoutQuery,
+        ...panelFiltersWithoutQuery.filters,
+        ...(tags.length > 0 ? { tags } : {}),
       };
     }
 
     return {
       ...chartConfig,
       ...panelFiltersAndQuery,
+      ...(tags.length > 0 ? { tags } : {}),
     };
   }
 }

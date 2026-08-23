@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import {
   LENS_SAMPLING_MIN_VALUE,
   LENS_SAMPLING_MAX_VALUE,
@@ -56,6 +57,7 @@ export const sharedPanelInfoSchema = z
       id: 'lensPanelFilters',
       description: 'Filters applied to the panel',
     }),
+    tags: getAsCodeTagsSchema('Tag IDs associated with this visualization.').optional(),
   })
   .strict();
 
