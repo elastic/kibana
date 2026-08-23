@@ -103,3 +103,41 @@ export const CheckWarninglistInputSchema = lazySchema(() =>
   })
 );
 export type CheckWarninglistInput = z.infer<typeof CheckWarninglistInputSchema>;
+
+export const CreateEventInputSchema = lazySchema(() =>
+  z.object({
+    info: z.string().min(1).max(1024).describe('Event title / info (required).'),
+    distribution: z.coerce.number().int().min(0).max(3).optional(),
+    threatLevelId: z.coerce.number().int().min(1).max(4).optional(),
+    analysis: z.coerce.number().int().min(0).max(2).optional(),
+    published: z.boolean().optional().default(false),
+  })
+);
+export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
+
+export const AddAttributeInputSchema = lazySchema(() =>
+  z.object({
+    eventId: z.string().min(1).describe('Event id or UUID to attach the attribute to.'),
+    type: z.string().min(1).describe('MISP attribute type (ip-dst, domain, md5, …).'),
+    value: z.string().min(1).describe('Attribute value.'),
+    category: z.string().min(1).optional(),
+    toIds: z.boolean().optional().default(true),
+    comment: z.string().max(1024).optional(),
+  })
+);
+export type AddAttributeInput = z.infer<typeof AddAttributeInputSchema>;
+
+export const PublishEventInputSchema = lazySchema(() =>
+  z.object({
+    eventId: z.string().min(1).describe('Event id or UUID to publish.'),
+  })
+);
+export type PublishEventInput = z.infer<typeof PublishEventInputSchema>;
+
+export const AddTagToEventInputSchema = lazySchema(() =>
+  z.object({
+    eventId: z.string().min(1).describe('Event id or UUID.'),
+    tag: z.string().min(1).describe('Tag name or id to apply.'),
+  })
+);
+export type AddTagToEventInput = z.infer<typeof AddTagToEventInputSchema>;

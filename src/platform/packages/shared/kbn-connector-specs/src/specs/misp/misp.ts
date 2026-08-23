@@ -9,7 +9,7 @@
 
 /**
  * MISP connector — attribute/event search, indicator checks, warninglists, and
- * sightings for workflows.
+ * write-back (sightings / events / attributes / tags / publish) for workflows.
  *
  * Auth: automation API key in `Authorization` (raw key, not Bearer) plus optional
  * TLS verification controls for self-signed MISP instances.
@@ -23,16 +23,24 @@ import type { AxiosError } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec';
 import {
+  AddAttributeInputSchema,
   AddSightingInputSchema,
+  AddTagToEventInputSchema,
   CheckIndicatorInputSchema,
   CheckWarninglistInputSchema,
+  CreateEventInputSchema,
   GetEventInputSchema,
+  PublishEventInputSchema,
   SearchAttributesInputSchema,
   SearchEventsInputSchema,
+  type AddAttributeInput,
   type AddSightingInput,
+  type AddTagToEventInput,
   type CheckIndicatorInput,
   type CheckWarninglistInput,
+  type CreateEventInput,
   type GetEventInput,
+  type PublishEventInput,
   type SearchAttributesInput,
   type SearchEventsInput,
 } from './types';
@@ -129,7 +137,7 @@ export const Misp: ConnectorSpec = {
     displayName: 'MISP',
     description: i18n.translate('core.kibanaConnectorSpecs.misp.metadata.description', {
       defaultMessage:
-        'Search MISP attributes and events, check indicators and warninglists, and write sightings back to a self-hosted MISP instance',
+        'Search MISP attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to a self-hosted MISP instance',
     }),
     minimumLicense: 'gold',
     isTechnicalPreview: true,
@@ -357,6 +365,103 @@ export const Misp: ConnectorSpec = {
           };
         } catch (error) {
           throw formatMispError('checkWarninglist', error);
+        }
+      },
+    },
+
+    createEvent: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Create a MISP event from a detection or case (info/title required). Returns the new event including id/UUID for follow-on attribute and publish steps.',
+      input: CreateEventInputSchema,
+      handler: async (ctx, input: CreateEventInput) => {
+        const baseUrl = getBaseUrl(ctx);
+        const event: Record<string, unknown> = {
+          info: input.info,
+          published: input.published ?? false,
+        };
+        if (input.distribution !== undefined) event.distribution = input.distribution;
+        if (input.threatLevelId !== undefined) event.threat_level_id = input.threatLevelId;
+        if (input.analysis !== undefined) event.analysis = input.analysis;
+        try {
+          const response = await ctx.client.post(
+            `${baseUrl}/events/add`,
+            { Event: event },
+            { headers: jsonHeaders }
+          );
+          return response.data;
+        } catch (error) {
+          throw formatMispError('createEvent', error);
+        }
+      },
+    },
+
+    addAttribute: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Add an IOC attribute to an existing MISP event (type, value, optional category / to_ids).',
+      input: AddAttributeInputSchema,
+      handler: async (ctx, input: AddAttributeInput) => {
+        const baseUrl = getBaseUrl(ctx);
+        const body: Record<string, unknown> = {
+          type: input.type,
+          value: input.value,
+          to_ids: input.toIds ?? true,
+        };
+        if (input.category) body.category = input.category;
+        if (input.comment) body.comment = input.comment;
+        try {
+          const response = await ctx.client.post(
+            `${baseUrl}/attributes/add/${encodeURIComponent(input.eventId)}`,
+            body,
+            { headers: jsonHeaders }
+          );
+          return response.data;
+        } catch (error) {
+          throw formatMispError('addAttribute', error);
+        }
+      },
+    },
+
+    publishEvent: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Publish a MISP event so it propagates to feeds and sync subscribers — final step of create → enrich → publish.',
+      input: PublishEventInputSchema,
+      handler: async (ctx, input: PublishEventInput) => {
+        const baseUrl = getBaseUrl(ctx);
+        try {
+          const response = await ctx.client.post(
+            `${baseUrl}/events/publish/${encodeURIComponent(input.eventId)}`,
+            {},
+            { headers: jsonHeaders }
+          );
+          return response.data;
+        } catch (error) {
+          throw formatMispError('publishEvent', error);
+        }
+      },
+    },
+
+    addTagToEvent: {
+      isTool: true,
+      scope: 'write',
+      description: 'Apply a tag (TLP, workflow state, galaxy cluster) to a MISP event.',
+      input: AddTagToEventInputSchema,
+      handler: async (ctx, input: AddTagToEventInput) => {
+        const baseUrl = getBaseUrl(ctx);
+        try {
+          const response = await ctx.client.post(
+            `${baseUrl}/events/addTag`,
+            { event: input.eventId, tag: input.tag },
+            { headers: jsonHeaders }
+          );
+          return response.data;
+        } catch (error) {
+          throw formatMispError('addTagToEvent', error);
         }
       },
     },
