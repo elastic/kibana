@@ -959,12 +959,7 @@ const searchSml = async ({
 
   // Authorization is enforced via the terms_set filter; LIMIT bounds to `size`.
   logger.debug(`SML search: returned=${response.values.length}, size=${size}`);
-  const includePermissions = fields !== undefined && fields.includes('permissions');
-  return {
-    results: allResults.map(({ permissions, ...rest }) =>
-      includePermissions && permissions !== undefined ? { ...rest, permissions } : rest
-    ),
-  };
+  return { results: allResults };
 };
 
 // Every typed token must match, with the last one matched as a prefix.
