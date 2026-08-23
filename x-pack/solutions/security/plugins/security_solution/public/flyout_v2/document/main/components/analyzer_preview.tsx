@@ -16,10 +16,15 @@ import {
   ALERT_ANCESTORS_ID,
   ALERT_RULE_INDICES,
 } from '../../../../../common/field_maps/field_names';
+import { ANCESTOR_INDEX } from '../constants/field_names';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import type { StatsNode } from '../hooks/use_alert_prevalence_from_process_tree';
 import { useAlertPrevalenceFromProcessTree } from '../hooks/use_alert_prevalence_from_process_tree';
+import {
+  getNonLocalQualifiedIndex,
+  withDocumentIndex,
+} from '../../../shared/utils/non_local_index';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -56,7 +61,18 @@ export const AnalyzerPreview = memo(
     const [cache, setCache] = useState<Partial<Cache>>({});
 
     const alertIndices = useMemo(() => {
-      const ruleIndices = getFieldValue(hit, ALERT_RULE_INDICES) as string[];
+      // `getFieldValue` unwraps a single-element field to a scalar string, so both branches below
+      // must coerce to an array. A scalar here would later be spread into single-character index
+      // names by `withDocumentIndex`, producing a malformed entity search request.
+      const rawRuleIndices = getFieldValue(hit, ALERT_RULE_INDICES) as
+        | string
+        | string[]
+        | undefined;
+      const ruleIndices = rawRuleIndices
+        ? Array.isArray(rawRuleIndices)
+          ? rawRuleIndices
+          : [rawRuleIndices]
+        : [];
       const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as {
         index: string | string[];
       };
@@ -66,12 +82,30 @@ export const AnalyzerPreview = memo(
             ? ruleParameters.index
             : [ruleParameters.index]
           : [];
-      return ruleIndices?.length > 0 ? ruleIndices : ruleParametersIndices;
+      return ruleIndices.length > 0 ? ruleIndices : ruleParametersIndices;
     }, [hit]);
-    const indices = alertIndices.length > 0 ? alertIndices : dataViewIndices;
-
     const ancestorId = useMemo(() => getFieldValue(hit, ALERT_ANCESTORS_ID) as string, [hit]);
     const documentId = shouldUseAncestor ? ancestorId : hit.raw._id ?? ''; // use ancestor as fallback for alert preview
+
+    // For rule-preview documents the resolver anchor is the ancestor (see `documentId`), which can
+    // live in a linked project even though the preview alert itself is stored locally. Thread the
+    // ancestor's project-qualified `_index` so entity lookup can disambiguate the same `_id` across
+    // projects; otherwise use the document's own `_index` (the fanned-in linked-alert case).
+    const documentIndex = useMemo(() => {
+      if (!shouldUseAncestor) {
+        return hit.raw._index;
+      }
+      const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
+      return getNonLocalQualifiedIndex(
+        (getFieldValue(hit, ANCESTOR_INDEX) as string) ?? hit.raw._index ?? '',
+        documentIndexName
+      );
+    }, [hit, shouldUseAncestor]);
+
+    const indices = withDocumentIndex(
+      alertIndices.length > 0 ? alertIndices : dataViewIndices,
+      documentIndex
+    );
     const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
       documentId,
       indices,

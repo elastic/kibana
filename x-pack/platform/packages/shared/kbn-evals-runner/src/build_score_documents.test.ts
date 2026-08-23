@@ -80,6 +80,59 @@ describe('buildScoreDocuments', () => {
     expect(score.evaluator.score).toBe(0.5);
   });
 
+  it('stamps every score of an evaluator with that evaluator kind and judge model', () => {
+    const judgeModel = { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' };
+    const evaluatorResults: EvaluatorResult[] = [
+      {
+        evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm', model: judgeModel },
+        scores: [
+          { name: 'factuality', score: 0.9 },
+          { name: 'relevance', score: 0.7 },
+        ],
+      },
+      {
+        evaluator: { name: 'input_tokens', version: '1.0.0', kind: 'code' },
+        scores: [{ name: 'input_tokens', score: 42 }],
+      },
+    ];
+
+    const body = buildScoreDocuments({ ...baseParams, evaluatorResults });
+
+    expect(
+      body.scores.map(({ evaluator }) => [evaluator.name, evaluator.kind, evaluator.model])
+    ).toEqual([
+      ['correctness.factuality', 'llm', judgeModel],
+      ['correctness.relevance', 'llm', judgeModel],
+      ['input_tokens', 'code', undefined],
+    ]);
+    // The top-level default stays, so ingest can still back evaluators that report none.
+    expect(body.evaluator_model).toEqual({ id: 'judge-model' });
+  });
+
+  it('records the evaluator version on every score it produced', () => {
+    const evaluatorResults: EvaluatorResult[] = [
+      {
+        evaluator: { name: 'tone', version: '1.3.0', kind: 'llm' },
+        scores: [
+          { name: 'politeness', score: 0.9 },
+          { name: 'clarity', score: 0.4 },
+        ],
+      },
+      {
+        evaluator: { name: 'latency' },
+        scores: [{ name: 'latency', score: 12 }],
+      },
+    ];
+
+    const body = buildScoreDocuments({ ...baseParams, evaluatorResults });
+
+    expect(body.scores.map(({ evaluator }) => [evaluator.name, evaluator.version])).toEqual([
+      ['tone.politeness', '1.3.0'],
+      ['tone.clarity', '1.3.0'],
+      ['latency', undefined],
+    ]);
+  });
+
   it('omits optional fields that are not provided', () => {
     const evaluatorResults: EvaluatorResult[] = [
       { evaluator: { name: 'latency' }, scores: [{ name: 'latency', score: 12 }] },
