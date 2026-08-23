@@ -220,8 +220,8 @@ export async function seedPersonaMatrixEnvironment({
     const initial = (await kbnClient.request({
       method: 'GET',
       path: '/api/security/entity_store/status',
-    })) as unknown as { body?: { status?: string } };
-    if (initial.body?.status !== 'running') {
+    })) as unknown as { data?: { status?: string } };
+    if (initial.data?.status !== 'running') {
       log.info(`[env-seed] installing entity store v2`);
       // Fire-and-poll: on a cold cluster the install endpoint can hold the
       // connection open for the entire transform-init duration (observed
@@ -242,8 +242,11 @@ export async function seedPersonaMatrixEnvironment({
         const statusRes = (await kbnClient.request({
           method: 'GET',
           path: '/api/security/entity_store/status',
-        })) as unknown as { body?: { status?: string } };
-        const body = statusRes.body;
+        })) as unknown as { data?: { status?: string } };
+        const body = statusRes.data;
+        // Visible poll progress: a silent loop here previously masked a
+        // response-shape bug for entire runs.
+        log.info(`[env-seed] entity store status: ${body?.status ?? 'unknown'}`);
         if (body?.status === 'running') break;
         if (body?.status === 'error') {
           throw new Error(`entity store v2 error state: ${JSON.stringify(body)}`);
