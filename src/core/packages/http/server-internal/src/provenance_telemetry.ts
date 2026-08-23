@@ -26,7 +26,7 @@ export const PROVENANCE_TELEMETRY_COUNTER_TYPE = 'xsrf_provenance';
 const SEC_FETCH_SITE_BUCKETS = ['same-origin', 'same-site', 'cross-site', 'none'] as const;
 
 type KnownSecFetchSiteBucket = (typeof SEC_FETCH_SITE_BUCKETS)[number];
-export type SecFetchSiteBucket = KnownSecFetchSiteBucket | 'absent';
+export type SecFetchSiteBucket = KnownSecFetchSiteBucket | 'absent' | 'other';
 
 const SEC_FETCH_MODE_BUCKETS = ['cors', 'navigate', 'no-cors', 'same-origin', 'websocket'] as const;
 
@@ -85,7 +85,7 @@ const toSecFetchSiteBucket = (value: string | undefined): SecFetchSiteBucket => 
   }
   return (SEC_FETCH_SITE_BUCKETS as readonly string[]).includes(value)
     ? (value as KnownSecFetchSiteBucket)
-    : 'none';
+    : 'other';
 };
 
 const toSecFetchModeBucket = (value: string | undefined): SecFetchModeBucket => {

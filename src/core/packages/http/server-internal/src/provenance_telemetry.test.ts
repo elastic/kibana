@@ -69,12 +69,12 @@ describe('classifyProvenance', () => {
     ).toBe('same-origin');
   });
 
-  it('reports "absent" when Sec-Fetch-Site is missing and folds unknown values into "none"', () => {
+  it('reports "absent" when Sec-Fetch-Site is missing and folds unknown values into "other"', () => {
     expect(classifyProvenance(forgeRequest({ headers: {} })).secFetchSiteBucket).toBe('absent');
     expect(
       classifyProvenance(forgeRequest({ headers: { 'sec-fetch-site': 'bogus' } }))
         .secFetchSiteBucket
-    ).toBe('none');
+    ).toBe('other');
   });
 
   it('buckets known Sec-Fetch-Mode values and records presence of Origin without capturing values', () => {
