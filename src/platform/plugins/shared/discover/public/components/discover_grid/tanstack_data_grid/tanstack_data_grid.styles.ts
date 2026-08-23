@@ -72,7 +72,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     width: '100%',
     minWidth: 0,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderBottom: euiTheme.border.thin,
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridBorderColor}`,
   }),
 
   headerCell: css({
@@ -83,9 +83,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     fontWeight: euiTheme.font.weight.semiBold,
     fontSize: 'var(--tsg-font-size, 14px)',
-    lineHeight: 1.5,
+    lineHeight: 'var(--tsg-line-height, 21px)',
     overflow: 'hidden',
-    borderRight: euiTheme.border.thin,
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
+    boxSizing: 'border-box',
     flexShrink: 0,
     userSelect: 'none',
     '&:last-child': { borderRight: 'none' },
@@ -171,10 +172,11 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     height: '100%',
     width: '100%',
     minWidth: 0,
-    borderBottom: euiTheme.border.thin,
+    backgroundColor: euiTheme.components.dataGridRowBackground,
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridBorderColor}`,
     boxSizing: 'border-box',
     '&:hover': {
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+      backgroundColor: euiTheme.components.dataGridRowBackgroundHover,
     },
   }),
 
@@ -185,9 +187,9 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   rowExpanded: css({
-    backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+    backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
     '&:hover': {
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+      backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
     },
   }),
 
@@ -196,9 +198,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     alignItems: 'flex-start',
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     flexShrink: 0,
-    borderRight: euiTheme.border.thin,
-    lineHeight: 1.5,
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
+    lineHeight: 'var(--tsg-line-height, 21px)',
     fontSize: 'var(--tsg-font-size, 14px)',
+    boxSizing: 'border-box',
     '&:last-child': { borderRight: 'none' },
   }),
 
@@ -228,9 +231,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingTop: euiTheme.size.xs,
+    paddingTop: 'var(--tsg-cell-padding-v, 4px)',
     flexShrink: 0,
-    borderRight: euiTheme.border.thin,
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
+    boxSizing: 'border-box',
   }),
 
   controlHeaderCell: css({
@@ -238,7 +242,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    borderRight: euiTheme.border.thin,
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
+    boxSizing: 'border-box',
   }),
 
   summaryCell: css({
@@ -248,7 +253,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     minWidth: 0,
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     overflow: 'hidden',
-    lineHeight: 1.5,
+    lineHeight: 'var(--tsg-line-height, 21px)',
     fontSize: 'var(--tsg-font-size, 14px)',
     boxSizing: 'border-box',
     // Match EuiDataGrid lineCount cells: wrap at the cell width, then clamp to body lines.
@@ -309,7 +314,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   // -- Cell actions (hover overlay) --
   cellWithActions: css({
     position: 'relative',
-    '&:hover .tsg-cellActions': {
+    '&:hover .tsg-cellActions, &:focus-within .tsg-cellActions': {
       opacity: 1,
       pointerEvents: 'auto',
     },
@@ -317,22 +322,25 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   cellActions: css({
     position: 'absolute',
-    right: 2,
-    top: '50%',
-    transform: 'translateY(-50%)',
+    left: 0,
+    bottom: '100%',
     display: 'flex',
-    gap: 2,
+    gap: euiTheme.size.xxs,
     opacity: 0,
     pointerEvents: 'none',
     transition: 'opacity 100ms ease',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    color: euiTheme.colors.emptyShade,
+    backgroundColor: euiTheme.colors.primary,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`,
     borderRadius: euiTheme.border.radius.small,
-    boxShadow:
-      euiTheme.levels.menu !== undefined
-        ? `0 1px 4px ${euiTheme.colors.shadow}`
-        : `0 1px 3px rgba(0,0,0,.15)`,
-    padding: '1px 2px',
-    zIndex: 1,
+    borderBottomLeftRadius: 0,
+    paddingInline: euiTheme.size.xxs,
+    zIndex: 3,
+  }),
+
+  cellActionButton: css({
+    color: 'inherit',
+    borderRadius: 0,
   }),
 
   // -- Cell popover --
@@ -346,35 +354,37 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     position: 'fixed',
     zIndex: 1000,
     minWidth: 200,
-    maxWidth: 500,
-    maxHeight: 400,
+    maxWidth: '75vw',
+    maxHeight: '50vh',
     overflow: 'auto',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     border: euiTheme.border.thin,
-    borderRadius: euiTheme.border.radius.medium,
+    borderRadius: euiTheme.border.radius.small,
     boxShadow: `0 4px 16px ${euiTheme.colors.shadow ?? 'rgba(0,0,0,.15)'}`,
-    padding: euiTheme.size.m,
-    fontSize: euiTheme.size.m,
-    lineHeight: 1.6,
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
+    padding: euiTheme.size.s,
   }),
 
   cellPopoverHeader: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: euiTheme.size.s,
-    paddingBottom: euiTheme.size.xs,
-    borderBottom: euiTheme.border.thin,
-    fontWeight: euiTheme.font.weight.semiBold,
-    fontSize: euiTheme.size.m,
     gap: euiTheme.size.xs,
   }),
 
-  cellPopoverBody: css({
-    maxHeight: 320,
-    overflow: 'auto',
+  cellPopoverValue: css({
+    flex: 1,
+    minWidth: 0,
+    fontFamily: euiTheme.font.familyCode,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+  }),
+
+  cellPopoverActions: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.s,
+    flexWrap: 'wrap',
+    paddingTop: euiTheme.size.xs,
   }),
 
   // -- Keyboard focus ring --
@@ -387,11 +397,13 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   // -- Row selection --
   selectCell: css({
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     flexShrink: 0,
-    borderRight: euiTheme.border.thin,
+    paddingTop: 'var(--tsg-cell-padding-v, 4px)',
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     width: SELECT_COL_WIDTH,
+    boxSizing: 'border-box',
   }),
 
   selectHeaderCell: css({
@@ -399,8 +411,9 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    borderRight: euiTheme.border.thin,
+    borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     width: SELECT_COL_WIDTH,
+    boxSizing: 'border-box',
   }),
 
   selectedRow: css({
@@ -429,7 +442,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   headerActionsButton: css({
     flexShrink: 0,
-    opacity: 0.5,
+    opacity: 0,
     transition: 'opacity 100ms ease',
     '&:hover, &:focus': {
       opacity: 1,
@@ -456,6 +469,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     gap: euiTheme.size.xs,
     marginLeft: 'auto',
     minWidth: 0,
+  }),
+
+  columnSelectorSummaryToggle: css({
+    padding: euiTheme.size.s,
   }),
 
   toolbarControlButton: css({

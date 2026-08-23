@@ -195,6 +195,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           toolbarLeftSide={tanStackToolbarLeftSide}
           toolbarTrailingControl={tanStackToolbarTrailingControl}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
+          showSummaryColumnToggle
         />
       );
     }

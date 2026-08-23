@@ -135,6 +135,16 @@ describe('TanStackDataGrid columns', () => {
 });
 
 describe('TanStackDataGrid summary column row height', () => {
+  it('converts EUI rem typography values to pixel row heights', () => {
+    renderGrid({ expandedDoc: undefined });
+
+    const rowMinHeight = parseFloat(
+      screen.getByTestId('tanstackGridWrapper').style.getPropertyValue('--tsg-row-min-height')
+    );
+
+    expect(rowMinHeight).toBeGreaterThan(20);
+  });
+
   it('applies body cell lines to the summary column clamp', () => {
     const { rerender } = renderGrid({
       columns: ['_source'],
@@ -253,5 +263,15 @@ describe('TanStackDataGrid EUI parity', () => {
 
     expect(screen.getByTestId('inTableSearchInput')).toBeInTheDocument();
     expect(screen.getByTestId('inTableSearchMatchesCounter')).toHaveTextContent('0/0');
+  });
+
+  it('pins the summary column from the columns popover', () => {
+    const onSetColumns = jest.fn();
+    renderGrid({ expandedDoc: undefined, onSetColumns, showSummaryColumnToggle: true });
+
+    fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+    fireEvent.click(screen.getByTestId('columnSelectorShowSummaryColumn'));
+
+    expect(onSetColumns).toHaveBeenCalledWith(['message', '_source'], true);
   });
 });

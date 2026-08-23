@@ -23,6 +23,7 @@ import {
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckbox,
@@ -36,12 +37,15 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiIconTip,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
+  euiFontSize,
   keys,
   logicalStyle,
   mathWithUnits,
@@ -65,6 +69,7 @@ import {
   ROWS_HEIGHT_OPTIONS,
   DataGridDensity,
   DATA_GRID_DENSITY_STYLE_MAP,
+  getDataGridDensityPadding,
   useDataGridDensity,
   useRowHeight,
   RowHeightType,
@@ -105,6 +110,7 @@ declare module '@tanstack/react-table' {
     isSummary?: boolean;
     isTimestamp?: boolean;
     fieldName?: string;
+    formatValue?: (value: unknown) => string;
   }
 }
 
@@ -157,42 +163,13 @@ export interface TanStackDataGridProps {
   toolbarLeftSide?: React.ReactNode;
   toolbarTrailingControl?: React.ReactNode;
   showKeyboardShortcuts?: UnifiedDataTableProps['showKeyboardShortcuts'];
+  showSummaryColumnToggle?: UnifiedDataTableProps['showSummaryColumnToggle'];
 }
 
-interface DensityConfig {
-  rowHeight: number;
-  summaryRowHeight: number;
-  fontSize: number;
-  cellPaddingV: number;
-  cellPaddingH: number;
-  icon: string;
-}
-
-const DENSITY_CONFIG: Record<DataGridDensity, DensityConfig> = {
-  [DataGridDensity.COMPACT]: {
-    rowHeight: 28,
-    summaryRowHeight: 70,
-    fontSize: 12,
-    cellPaddingV: 2,
-    cellPaddingH: 6,
-    icon: 'menuLeft',
-  },
-  [DataGridDensity.NORMAL]: {
-    rowHeight: 34,
-    summaryRowHeight: 90,
-    fontSize: 14,
-    cellPaddingV: 4,
-    cellPaddingH: 8,
-    icon: 'menu',
-  },
-  [DataGridDensity.EXPANDED]: {
-    rowHeight: 44,
-    summaryRowHeight: 120,
-    fontSize: 14,
-    cellPaddingV: 8,
-    cellPaddingH: 12,
-    icon: 'menuRight',
-  },
+const DENSITY_ICONS: Record<DataGridDensity, string> = {
+  [DataGridDensity.COMPACT]: 'menuLeft',
+  [DataGridDensity.NORMAL]: 'menu',
+  [DataGridDensity.EXPANDED]: 'menuRight',
 };
 
 const DENSITY_BUTTONS = [
@@ -505,12 +482,14 @@ const CellActions = React.memo(
   ({
     fieldName,
     value,
+    formattedValue,
     onFilter,
     onExpand,
     styles,
   }: {
     fieldName: string;
     value: unknown;
+    formattedValue: string;
     onFilter?: UnifiedDataTableProps['onFilter'];
     onExpand: () => void;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
@@ -532,9 +511,9 @@ const CellActions = React.memo(
     const handleCopy = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigator.clipboard.writeText(formatCellValue(value));
+        navigator.clipboard.writeText(formattedValue);
       },
-      [value]
+      [formattedValue]
     );
     const handleExpand = useCallback(
       (e: React.MouseEvent) => {
@@ -550,6 +529,7 @@ const CellActions = React.memo(
           <>
             <EuiToolTip content="Filter for value" disableScreenReaderOutput>
               <EuiButtonIcon
+                css={styles.cellActionButton}
                 iconType="plusCircle"
                 aria-label="Filter for value"
                 size="xs"
@@ -561,6 +541,7 @@ const CellActions = React.memo(
             </EuiToolTip>
             <EuiToolTip content="Filter out value" disableScreenReaderOutput>
               <EuiButtonIcon
+                css={styles.cellActionButton}
                 iconType="minusCircle"
                 aria-label="Filter out value"
                 size="xs"
@@ -574,6 +555,7 @@ const CellActions = React.memo(
         )}
         <EuiToolTip content="Copy value" disableScreenReaderOutput>
           <EuiButtonIcon
+            css={styles.cellActionButton}
             iconType="copy"
             aria-label="Copy value"
             size="xs"
@@ -585,6 +567,7 @@ const CellActions = React.memo(
         </EuiToolTip>
         <EuiToolTip content="Expand cell" disableScreenReaderOutput>
           <EuiButtonIcon
+            css={styles.cellActionButton}
             iconType="expand"
             aria-label="Expand cell"
             size="xs"
@@ -604,6 +587,7 @@ const CellPopover = React.memo(
   ({
     fieldName,
     value,
+    formattedValue,
     anchorRect,
     onClose,
     onFilter,
@@ -611,14 +595,15 @@ const CellPopover = React.memo(
   }: {
     fieldName: string;
     value: unknown;
+    formattedValue: string;
     anchorRect: DOMRect;
     onClose: () => void;
     onFilter?: UnifiedDataTableProps['onFilter'];
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
-    const formatted = formatCellValue(value);
-    const top = Math.min(anchorRect.bottom + 4, window.innerHeight - 420);
-    const left = Math.min(anchorRect.left, window.innerWidth - 520);
+    const top = Math.max(8, Math.min(anchorRect.top, window.innerHeight - 240));
+    const panelWidth = Math.min(window.innerWidth * 0.75, Math.max(anchorRect.width, 400));
+    const left = Math.max(8, Math.min(anchorRect.left, window.innerWidth - panelWidth - 8));
 
     useEffect(() => {
       const handleEsc = (e: KeyboardEvent) => {
@@ -629,8 +614,8 @@ const CellPopover = React.memo(
     }, [onClose]);
 
     const handleCopy = useCallback(() => {
-      navigator.clipboard.writeText(formatted);
-    }, [formatted]);
+      navigator.clipboard.writeText(formattedValue);
+    }, [formattedValue]);
 
     return (
       <>
@@ -649,54 +634,55 @@ const CellPopover = React.memo(
         />
         <div
           css={styles.cellPopover}
-          style={{ top, left }}
-          data-test-subj="cellPopover"
+          style={{ top, left, width: panelWidth }}
+          data-test-subj="euiDataGridExpansionPopover"
           role="dialog"
           aria-label={`${fieldName} value`}
         >
           <div css={styles.cellPopoverHeader}>
-            <span>{fieldName}</span>
-            <div css={{ display: 'flex', gap: 2 }}>
-              {onFilter && (
-                <>
-                  <EuiToolTip content="Filter for value" disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="plusCircle"
-                      aria-label="Filter for value"
-                      size="xs"
-                      onClick={() => {
-                        onFilter(fieldName, value, '+');
-                        onClose();
-                      }}
-                    />
-                  </EuiToolTip>
-                  <EuiToolTip content="Filter out value" disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="minusCircle"
-                      aria-label="Filter out value"
-                      size="xs"
-                      onClick={() => {
-                        onFilter(fieldName, value, '-');
-                        onClose();
-                      }}
-                    />
-                  </EuiToolTip>
-                </>
-              )}
-              <EuiToolTip content="Copy value" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="copy"
-                  aria-label="Copy value"
-                  size="xs"
-                  onClick={handleCopy}
-                />
-              </EuiToolTip>
-              <EuiToolTip content="Close" disableScreenReaderOutput>
-                <EuiButtonIcon iconType="cross" aria-label="Close" size="xs" onClick={onClose} />
-              </EuiToolTip>
-            </div>
+            <EuiText size="s" css={styles.cellPopoverValue}>
+              {formattedValue}
+            </EuiText>
+            <EuiToolTip content="Close" disableScreenReaderOutput>
+              <EuiButtonIcon iconType="cross" aria-label="Close" size="xs" onClick={onClose} />
+            </EuiToolTip>
           </div>
-          <div css={styles.cellPopoverBody}>{formatted}</div>
+          <EuiHorizontalRule margin="none" />
+          <div css={styles.cellPopoverActions}>
+            {onFilter && (
+              <>
+                <EuiButtonEmpty
+                  iconType="plusCircle"
+                  size="s"
+                  onClick={() => {
+                    onFilter(fieldName, value, '+');
+                    onClose();
+                  }}
+                >
+                  {i18n.translate('discover.grid.tanStack.filterForValueButtonLabel', {
+                    defaultMessage: 'Filter for',
+                  })}
+                </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  iconType="minusCircle"
+                  size="s"
+                  onClick={() => {
+                    onFilter(fieldName, value, '-');
+                    onClose();
+                  }}
+                >
+                  {i18n.translate('discover.grid.tanStack.filterOutValueButtonLabel', {
+                    defaultMessage: 'Filter out',
+                  })}
+                </EuiButtonEmpty>
+              </>
+            )}
+            <EuiButtonEmpty iconType="copy" size="s" onClick={handleCopy}>
+              {i18n.translate('discover.grid.tanStack.copyValueButtonLabel', {
+                defaultMessage: 'Copy value',
+              })}
+            </EuiButtonEmpty>
+          </div>
         </div>
       </>
     );
@@ -720,7 +706,7 @@ const VirtualRow = React.memo(
       rowIndex: number;
       onFilter?: UnifiedDataTableProps['onFilter'];
       setPopoverState?: (
-        state: { fieldName: string; value: unknown; rect: DOMRect } | null
+        state: { fieldName: string; value: unknown; formattedValue: string; rect: DOMRect } | null
       ) => void;
       findTerm?: string;
       findActiveMatch?: FindMatch | null;
@@ -811,7 +797,9 @@ const VirtualCell = React.memo(
     isFocused: boolean;
     isAutoHeight?: boolean;
     onFilter?: UnifiedDataTableProps['onFilter'];
-    setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
+    setPopoverState?: (
+      state: { fieldName: string; value: unknown; formattedValue: string; rect: DOMRect } | null
+    ) => void;
     findTerm?: string;
     findActiveMatch?: FindMatch | null;
     rowIndex?: number;
@@ -851,6 +839,9 @@ const VirtualCell = React.memo(
             value: Object.entries(cell.row.original.flattened)
               .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
               .join('\n'),
+            formattedValue: Object.entries(cell.row.original.flattened)
+              .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
+              .join('\n'),
             rect: el.getBoundingClientRect(),
           });
         }
@@ -881,7 +872,7 @@ const VirtualCell = React.memo(
     const value = cell.getValue();
     const colId = cell.column.id;
     const rowId = cell.row.original.id;
-    const formatted = formatCellValue(value);
+    const formatted = cell.column.columnDef.meta?.formatValue?.(value) ?? formatCellValue(value);
     const isActiveHighlight =
       findTerm &&
       findActiveMatch &&
@@ -893,6 +884,7 @@ const VirtualCell = React.memo(
         setPopoverState({
           fieldName,
           value,
+          formattedValue: formatted,
           rect: el.getBoundingClientRect(),
         });
       }
@@ -935,6 +927,7 @@ const VirtualCell = React.memo(
           <CellActions
             fieldName={fieldName}
             value={value}
+            formattedValue={formatted}
             onFilter={onFilter}
             onExpand={() => {
               const el = document.querySelector(`[data-row-id="${rowId}"][data-col-id="${colId}"]`);
@@ -1024,8 +1017,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     toolbarLeftSide,
     toolbarTrailingControl,
     showKeyboardShortcuts = true,
+    showSummaryColumnToggle = false,
   }) => {
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
     const { fieldFormats, storage, toastNotifications, dataViewFieldEditor, data } = services;
     const parentRef = useRef<HTMLDivElement | null>(null);
     const styles = useMemo(() => getTanStackDataGridStyles(euiTheme), [euiTheme]);
@@ -1056,6 +1051,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     );
 
     const isSummaryMode = displayedColumns.length === 1 && displayedColumns[0] === SOURCE_COLUMN_ID;
+    const showSummaryColumn = displayedColumns.includes(SOURCE_COLUMN_ID);
 
     // STATS ... BY column reordering
     const statsByInfo = useMemo(
@@ -1074,6 +1070,23 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         onSetColumns?.(nextVisibleColumns, false);
       },
       [onSetColumns]
+    );
+
+    const onChangeShowSummaryColumn = useCallback(
+      (show: boolean) => {
+        const withoutSource = effectiveColumns.filter((column) => column !== SOURCE_COLUMN_ID);
+        const nextColumns = show ? [...withoutSource, SOURCE_COLUMN_ID] : withoutSource;
+        const shouldPrependTime = canPrependTimeFieldColumn(
+          nextColumns,
+          timeFieldName,
+          columnsMeta,
+          showTimeCol,
+          Boolean(isPlainRecord)
+        );
+
+        onSetColumns?.(nextColumns, !shouldPrependTime);
+      },
+      [columnsMeta, effectiveColumns, isPlainRecord, onSetColumns, showTimeCol, timeFieldName]
     );
 
     // Find matches
@@ -1162,7 +1175,33 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [isSortPopoverOpen, setIsSortPopoverOpen] = useState(false);
     const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
     const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false);
-    const densityCfg = DENSITY_CONFIG[dataGridDensity];
+    const densityCfg = useMemo(() => {
+      const isCompact = dataGridDensity === DataGridDensity.COMPACT;
+      const padding = getDataGridDensityPadding(euiTheme, dataGridDensity);
+      const { fontSize } = euiFontSize(euiThemeContext, isCompact ? 'xs' : 's');
+      const { lineHeight } = euiFontSize(euiThemeContext, isCompact ? 'xs' : 'm');
+      const cellPadding = parseFloat(padding);
+      const fontSizeValue = String(fontSize ?? (isCompact ? '12px' : '14px'));
+      const baseFontSize = Number(euiTheme.base);
+      const numericFontSize =
+        parseFloat(fontSizeValue) * (fontSizeValue.endsWith('rem') ? baseFontSize : 1);
+      const lineHeightValue = String(lineHeight ?? 1.5);
+      const parsedLineHeight = parseFloat(lineHeightValue);
+      const numericLineHeight = lineHeightValue.endsWith('rem')
+        ? parsedLineHeight * baseFontSize
+        : parsedLineHeight <= 4
+        ? parsedLineHeight * numericFontSize
+        : parsedLineHeight;
+
+      return {
+        rowHeight: numericLineHeight + cellPadding * 2,
+        summaryRowHeight: (numericLineHeight + cellPadding * 2) * 3,
+        fontSize: numericFontSize,
+        lineHeight: numericLineHeight,
+        cellPadding,
+        icon: DENSITY_ICONS[dataGridDensity],
+      };
+    }, [dataGridDensity, euiTheme, euiThemeContext]);
 
     const {
       rowHeight: headerRowHeight,
@@ -1200,6 +1239,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [popoverState, setPopoverState] = useState<{
       fieldName: string;
       value: unknown;
+      formattedValue: string;
       rect: DOMRect;
     } | null>(null);
     const closePopover = useCallback(() => setPopoverState(null), []);
@@ -1531,6 +1571,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
       if (isSummaryMode) {
         if (showTimeCol && timeFieldName) {
+          const timeField = dataView.getFieldByName(timeFieldName);
+          const formatTimeValue = (value: unknown) => {
+            const timeValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
+            return timeField && fieldFormats
+              ? formatFieldValueText({ value: timeValue, fieldFormats, dataView, field: timeField })
+              : formatTimestamp(timeValue);
+          };
           defs.push({
             id: timeFieldName,
             accessorFn: (r) => r.flattened[timeFieldName],
@@ -1538,9 +1585,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             size: getTimeColumnWidth(timeFieldName, columnSizing, settings),
             minSize: MIN_COL_WIDTH,
             enableSorting: false,
-            meta: { isTimestamp: true, fieldName: timeFieldName },
+            meta: { isTimestamp: true, fieldName: timeFieldName, formatValue: formatTimeValue },
             cell: ({ getValue }) => (
-              <span css={styles.timestampCell}>{formatTimestamp(getValue())}</span>
+              <span css={styles.timestampCell}>{formatTimeValue(getValue())}</span>
             ),
           });
         }
@@ -1570,6 +1617,19 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           if (colId === SOURCE_COLUMN_ID) continue;
           const isTimeField = colId === timeFieldName;
           const dataViewField = dataView.getFieldByName(colId);
+          const formatValue = (value: unknown) => {
+            const fieldValue =
+              isTimeField && Array.isArray(value) && value.length === 1 ? value[0] : value;
+            if (dataViewField && fieldFormats) {
+              return formatFieldValueText({
+                value: fieldValue,
+                fieldFormats,
+                dataView,
+                field: dataViewField,
+              });
+            }
+            return isTimeField ? formatTimestamp(fieldValue) : formatCellValue(fieldValue);
+          };
           const columnSchema = getSchemaByKbnType(dataViewField?.type);
           const columnIsSortable =
             isSortEnabled &&
@@ -1589,25 +1649,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               : settings?.columns?.[colId]?.width ?? DEFAULT_COL_WIDTH,
             minSize: MIN_COL_WIDTH,
             enableSorting: columnIsSortable,
-            meta: { isTimestamp: isTimeField, fieldName: colId },
+            meta: { isTimestamp: isTimeField, fieldName: colId, formatValue },
             cell: function DataCell({ getValue }) {
               const val = getValue();
-              let formatted: string;
-              if (isTimeField) {
-                formatted = formatTimestamp(val);
-              } else {
-                const dvField = dataView.getFieldByName(colId);
-                if (dvField && fieldFormats) {
-                  formatted = formatFieldValueText({
-                    value: val,
-                    fieldFormats,
-                    dataView,
-                    field: dvField,
-                  });
-                } else {
-                  formatted = formatCellValue(val);
-                }
-              }
+              const formatted = formatValue(val);
               return (
                 <div css={isTimeField ? styles.timestampCell : undefined} title={formatted}>
                   {formatted}
@@ -1734,8 +1779,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       if (rowHeightLines <= 1) {
         return densityCfg.rowHeight;
       }
-      const lineH = densityCfg.fontSize * 1.5;
-      return Math.round(densityCfg.cellPaddingV * 2 + lineH * rowHeightLines);
+      return Math.round(densityCfg.cellPadding * 2 + densityCfg.lineHeight * rowHeightLines);
     }, [rowHeightLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
@@ -1872,8 +1916,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       () =>
         ({
           '--tsg-font-size': `${densityCfg.fontSize}px`,
-          '--tsg-cell-padding-v': `${densityCfg.cellPaddingV}px`,
-          '--tsg-cell-padding-h': `${densityCfg.cellPaddingH}px`,
+          '--tsg-line-height': `${densityCfg.lineHeight}px`,
+          '--tsg-cell-padding-v': `${densityCfg.cellPadding}px`,
+          '--tsg-cell-padding-h': `${densityCfg.cellPadding}px`,
           '--tsg-header-max-lines': isAutoHeaderRowHeight
             ? 'none'
             : String(Math.max(headerRowHeightLines, 1)),
@@ -2047,6 +2092,27 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 panelPaddingSize="none"
                 anchorPosition="downRight"
               >
+                {showSummaryColumnToggle && (
+                  <>
+                    <div css={styles.columnSelectorSummaryToggle}>
+                      <EuiSwitch
+                        compressed
+                        label={
+                          <EuiText size="xs">
+                            {i18n.translate('discover.grid.tanStack.pinSummaryColumnSwitchLabel', {
+                              defaultMessage: 'Pin summary',
+                            })}
+                          </EuiText>
+                        }
+                        checked={showSummaryColumn}
+                        disabled={isSummaryMode}
+                        onChange={(event) => onChangeShowSummaryColumn(event.target.checked)}
+                        data-test-subj="columnSelectorShowSummaryColumn"
+                      />
+                    </div>
+                    <EuiHorizontalRule margin="none" />
+                  </>
+                )}
                 <EuiContextMenuPanel
                   items={dataColumns.map(({ id, isSummary, isTimestamp }) => (
                     <EuiContextMenuItem
@@ -2445,6 +2511,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                           <>
                             {showColumnTokens &&
                               !isSummary &&
+                              !header.column.columnDef.meta?.isTimestamp &&
                               (() => {
                                 const fieldName = header.column.columnDef.meta?.fieldName;
                                 if (!fieldName) return null;
@@ -2623,6 +2690,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           <CellPopover
             fieldName={popoverState.fieldName}
             value={popoverState.value}
+            formattedValue={popoverState.formattedValue}
             anchorRect={popoverState.rect}
             onClose={closePopover}
             onFilter={onFilterRef.current}
