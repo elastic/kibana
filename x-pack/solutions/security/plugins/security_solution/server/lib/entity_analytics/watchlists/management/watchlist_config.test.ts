@@ -92,15 +92,6 @@ describe('WatchlistConfigClient', () => {
       });
     });
 
-    it('rethrows the original error when the SO rollback delete fails', async () => {
-      mockCreateOrUpdateIndex.mockRejectedValueOnce(new Error('Index creation failed'));
-      soClientMock.delete.mockRejectedValueOnce(new Error('Delete also failed'));
-
-      await expect(client.create(attrs)).rejects.toThrow('Index creation failed');
-      expect(loggerMock.error).toHaveBeenCalledWith(
-        expect.stringContaining(`Failed to roll back watchlist SO '${SO_ID}'`)
-      );
-    });
   });
 
   describe('getEntityCounts', () => {
