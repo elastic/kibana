@@ -324,7 +324,7 @@ export class LensConfigBuilder {
       const { query: _, ...panelFiltersWithoutQuery } = panelFiltersAndQuery;
       return {
         ...chartConfig,
-        ...panelFiltersWithoutQuery.filters,
+        ...panelFiltersWithoutQuery,
         ...(tags.length > 0 ? { tags } : {}),
       };
     }
