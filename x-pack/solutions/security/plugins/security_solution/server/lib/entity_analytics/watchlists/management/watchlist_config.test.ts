@@ -80,7 +80,7 @@ describe('WatchlistConfigClient', () => {
       expect(result).toMatchObject({ id: SO_ID, name: 'Test Watchlist' });
     });
 
-    it('rolls back the saved object when index creation fails', async () => {
+    it('deletes the saved object when index creation fails', async () => {
       const indexError = new Error('Index creation failed');
       mockCreateOrUpdateIndex.mockRejectedValueOnce(indexError);
       soClientMock.delete.mockResolvedValue({});
@@ -92,7 +92,7 @@ describe('WatchlistConfigClient', () => {
       });
     });
 
-    it('rethrows the original error even if the SO rollback delete also fails', async () => {
+    it('rethrows the original error when the SO rollback delete fails', async () => {
       mockCreateOrUpdateIndex.mockRejectedValueOnce(new Error('Index creation failed'));
       soClientMock.delete.mockRejectedValueOnce(new Error('Delete also failed'));
 
