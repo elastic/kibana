@@ -9,6 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod';
 import {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
@@ -173,6 +174,7 @@ const discoverSessionEsqlTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...asCodeEsqlApproximationSchema.shape,
   })
   .strict();
 
@@ -328,3 +330,6 @@ export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassi
 export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
+
+// Input types (shape accepted by the API, before defaults applied)
+export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;

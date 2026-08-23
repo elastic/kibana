@@ -109,6 +109,51 @@ export class LensLayers {
   }
 
   /**
+   * Duplicates the layer at `index` via the layer-actions clone control (FTR `duplicateLayer`).
+   * Returns once a new layer tab is present.
+   */
+  async duplicateLayer(index = 0) {
+    const tabsBefore = await this.getLayerCount();
+    await this.hoverLayerTab(index);
+
+    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${index}`);
+    const cloneButton = this.page.testSubj.locator(`lnsLayerClone--${index}`);
+    await splitButton.or(cloneButton).waitFor({ state: 'visible' });
+    if (await splitButton.isVisible()) {
+      await splitButton.click();
+    }
+    await cloneButton.click();
+
+    await this.page.waitForFunction(
+      (before) => {
+        const tabs = document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length;
+        const count = tabs === 0 ? 1 : tabs;
+        return count > before;
+      },
+      tabsBefore,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Switches the XY stacking subtype for the layer at `layerIndex`
+   * Caller must have a chart that exposes lnsStackingOptionsButton` (e.g. bar/area).
+   * Returns once the overlay is gone and the stacking trigger label matches `subType`.
+   */
+  async switchToVisualizationSubtype(subType: string, layerIndex = 0) {
+    const stackingButton = this.page.testSubj.locator(
+      `lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`
+    );
+    await stackingButton.waitFor({ state: 'visible' });
+    await stackingButton.click();
+    const option = this.page.testSubj.locator(`lnsStackingOptionsButton${subType}`);
+    await option.click();
+    await option.waitFor({ state: 'hidden' });
+    // exact: true — "Stacked" is a substring of "Unstacked"
+    await stackingButton.getByText(subType, { exact: true }).waitFor({ state: 'visible' });
+  }
+
+  /**
    * Hovers the layer tab at `index` when the tabs row is rendered (hidden for a single layer).
    * Throws if tabs exist but `index` is out of range — a wrong index must not silently no-op.
    */

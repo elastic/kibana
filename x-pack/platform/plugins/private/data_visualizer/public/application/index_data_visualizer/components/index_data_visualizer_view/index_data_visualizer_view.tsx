@@ -541,6 +541,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
                     setFrozenDataPreference={setFrozenDataPreference}
                     dataView={currentDataView}
                     query={undefined}
+                    projectRouting={cps?.cpsManager?.getProjectRouting()}
                     disabled={false}
                     timefilter={timefilter}
                   />
