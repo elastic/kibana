@@ -36,7 +36,11 @@ jest.mock('@kbn/storage-adapter', () => ({
 
 jest.mock('./sml_storage', () => ({
   smlIndexName: '.test-sml-data',
-  storageSettings: { name: '.test-sml-data', schema: { properties: {} } },
+  storageSettings: {
+    name: '.test-sml-data',
+    mappingsMeta: { sml_schema_version: 2 },
+    schema: { properties: {} },
+  },
   SML_SCHEMA_VERSION: 2,
   createSmlStorage: jest.fn(),
 }));
@@ -814,232 +818,7 @@ describe('SmlCrawlerImpl', () => {
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
 
-    it('stamps sml_schema_version at the end of a crawl', async () => {
-      // Drop-check read sees a current marker; the reconcile then rewrites `_meta` (adapter
-      // schema hash changed), so subsequent stamp reads see the marker missing and re-write it.
-      (esClient.indices.getMapping as jest.Mock)
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: {
-              _meta: { version: 'old-schema-hash', sml_schema_version: SML_SCHEMA_VERSION },
-            },
-          },
-        })
-        .mockResolvedValue({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.test-sml-data',
-          _meta: expect.objectContaining({ sml_schema_version: SML_SCHEMA_VERSION }),
-        })
-      );
-    });
-
-    it('preserves the storage adapter `_meta.version` when stamping', async () => {
-      // `putMapping` replaces the whole `_meta` object, so the stamp must merge the adapter's
-      // own `version` key back in — otherwise the two writers clobber each other and the adapter
-      // re-runs template + mapping updates on every crawl.
-      (esClient.indices.getMapping as jest.Mock)
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: {
-              _meta: { version: 'old-schema-hash', sml_schema_version: SML_SCHEMA_VERSION },
-            },
-          },
-        })
-        .mockResolvedValue({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
-        index: '.test-sml-data',
-        _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: SML_SCHEMA_VERSION },
-      });
-    });
-
-    it('skips the stamp write when the marker is already current', async () => {
-      // Default getMapping mock returns `_meta` with a current marker on every read, so neither
-      // stamp call should issue a putMapping.
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(esClient.indices.putMapping).not.toHaveBeenCalled();
-    });
-
-    it('stamps on the way out of an aborted crawl so the marker cannot be lost', async () => {
-      // `reconcileMappings` rewrote `_meta` (marker gone from stamp reads); the crawl then
-      // aborts before any document work. The `finally` stamp must restore the marker anyway,
-      // otherwise the next crawl would treat the index as stale and drop it — a single transient
-      // abort would trigger a spurious full-index rebuild.
-      (esClient.indices.getMapping as jest.Mock)
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: {
-              _meta: { version: 'old-schema-hash', sml_schema_version: SML_SCHEMA_VERSION },
-            },
-          },
-        })
-        .mockResolvedValue({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
-      const abortController = new AbortController();
-      abortController.abort();
-
-      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
-      });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({
-        definition,
-        esClient,
-        savedObjectsClient,
-        abortSignal: abortController.signal,
-      });
-
-      expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
-      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
-        index: '.test-sml-data',
-        _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: SML_SCHEMA_VERSION },
-      });
-    });
-
-    it('stamps on the way out of a failed list() so the marker cannot be lost', async () => {
-      // Same hazard as the abort case: `crawl()` returns early when list() throws, after the
-      // reconcile may have rewritten `_meta`. The `finally` stamp keeps the marker intact.
-      (esClient.indices.getMapping as jest.Mock)
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: {
-              _meta: { version: 'old-schema-hash', sml_schema_version: SML_SCHEMA_VERSION },
-            },
-          },
-        })
-        .mockResolvedValue({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
-      async function* failingList(): AsyncIterable<SmlListItem[]> {
-        throw new Error('list failed');
-      }
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(failingList()),
-      });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to list items'));
-      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
-        index: '.test-sml-data',
-        _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: SML_SCHEMA_VERSION },
-      });
-    });
-
-    it('stamps sml_schema_version only after documents have been written', async () => {
-      // The stamp must come after the crawl writes documents, because that write is what
-      // creates the index. `reconcileMappings` does not create it — the storage adapter bails
-      // when there is no write index — so a stamp attempted before the first write 404s on a
-      // fresh install (or right after a stale-schema drop) and is silently lost. The `finally`
-      // placement lands the stamp after `processQueue`, once the index exists.
-      (esClient.indices.getMapping as jest.Mock)
-        // drop check: no index yet
-        .mockRejectedValueOnce({ statusCode: 404 })
-        // finally stamp: index created by processQueue, adapter stamped its version
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
-      const definition = createMockDefinition({
-        list: jest
-          .fn()
-          .mockReturnValue(yieldPages([{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }])),
-      });
-      mockStateClient.search
-        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } })
-        .mockResolvedValueOnce({ hits: { hits: [] } })
-        .mockResolvedValueOnce({ hits: { hits: [] } })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'test-type:a',
-                sort: ['a'],
-                _source: {
-                  origin_id: 'a',
-                  type_id: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'create',
-                  last_crawled_at: '2024-01-01',
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      const [stampOrder] = (esClient.indices.putMapping as jest.Mock).mock.invocationCallOrder;
-      const writeOrders = mockIndexer.indexAttachment.mock.invocationCallOrder;
-
-      expect(writeOrders.length).toBeGreaterThan(0);
-      expect(stampOrder).toBeGreaterThan(Math.max(...writeOrders));
-    });
-
-    it('stamps sml_schema_version even when the index was dropped for a stale schema', async () => {
-      (esClient.indices.getMapping as jest.Mock)
-        // drop check: stale marker → index is dropped
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 } },
-          },
-        })
-        // finally stamp: index recreated by processQueue, adapter stamped its version
-        .mockResolvedValueOnce({
-          '.test-sml-data-000001': {
-            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
-          },
-        });
-
+    it('never writes _meta via putMapping — version stamping is owned by the index template', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
         list: jest.fn().mockReturnValue(yieldPages(items)),
@@ -1049,31 +828,7 @@ describe('SmlCrawlerImpl', () => {
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
-      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
-        expect.objectContaining({
-          _meta: expect.objectContaining({ sml_schema_version: SML_SCHEMA_VERSION }),
-        })
-      );
-    });
-
-    it('does not warn when the stamp 404s because the crawl wrote nothing', async () => {
-      // A crawl that indexes no documents leaves no index to stamp. Benign — there is no data to
-      // protect, and the marker lands on the first crawl that writes something.
-      (esClient.indices.getMapping as jest.Mock).mockRejectedValue({ statusCode: 404 });
-
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
       expect(esClient.indices.putMapping).not.toHaveBeenCalled();
-      expect(logger.warn).not.toHaveBeenCalledWith(
-        expect.stringContaining('failed to stamp schema version')
-      );
     });
   });
 

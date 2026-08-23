@@ -100,6 +100,11 @@ export const storageSettings = {
    * Ensure the SML backing index name has a higher priority than built-in AI index templates.
    */
   priority: 600,
+  /**
+   * Stamped into `mappings._meta` at index creation (and re-applied on reconcile) so a
+   * freshly rebuilt index is immediately recognizable as current — see `SML_SCHEMA_VERSION`.
+   */
+  mappingsMeta: { sml_schema_version: SML_SCHEMA_VERSION },
   schema: {
     properties: smlStorageSchemaProperties,
   },

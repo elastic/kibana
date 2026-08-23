@@ -69,89 +69,81 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
     const indexDropped = await this.dropIndexIfSchemaStale({ esClient, storage });
 
-    try {
-      const mappingsRebuilt = await this.applyMappingsOrRebuild({ storage });
+    const mappingsRebuilt = await this.applyMappingsOrRebuild({ storage });
 
-      const integrityResetNeeded =
-        indexDropped ||
-        mappingsRebuilt ||
-        (await this.checkDataIntegrity({
-          esClient,
+    const integrityResetNeeded =
+      indexDropped ||
+      mappingsRebuilt ||
+      (await this.checkDataIntegrity({
+        esClient,
+        stateClient,
+        attachmentType: definition.id,
+      }));
+
+    // Stream source items page by page. For each page, batch-lookup state
+    // docs by ID, diff, and write state updates stamped with crawlStartTime.
+    let totalItems = 0;
+    let newCount = 0;
+    let updatedCount = 0;
+    let unchangedCount = 0;
+
+    try {
+      for await (const page of definition.list(context)) {
+        if (abortSignal?.aborted) {
+          this.logger.info(
+            `SML crawler: crawl aborted for type '${definition.id}' after ${totalItems} item(s)`
+          );
+          return;
+        }
+
+        totalItems += page.length;
+
+        const result = await this.processPage({
+          page,
           stateClient,
           attachmentType: definition.id,
-        }));
+          crawlStartTime,
+          integrityResetNeeded,
+        });
 
-      // Stream source items page by page. For each page, batch-lookup state
-      // docs by ID, diff, and write state updates stamped with crawlStartTime.
-      let totalItems = 0;
-      let newCount = 0;
-      let updatedCount = 0;
-      let unchangedCount = 0;
-
-      try {
-        for await (const page of definition.list(context)) {
-          if (abortSignal?.aborted) {
-            this.logger.info(
-              `SML crawler: crawl aborted for type '${definition.id}' after ${totalItems} item(s)`
-            );
-            return;
-          }
-
-          totalItems += page.length;
-
-          const result = await this.processPage({
-            page,
-            stateClient,
-            attachmentType: definition.id,
-            crawlStartTime,
-            integrityResetNeeded,
-          });
-
-          newCount += result.newItems;
-          updatedCount += result.updatedItems;
-          unchangedCount += result.unchangedItems;
-        }
-      } catch (error) {
-        this.logger.error(
-          `SML crawler: failed to list items for type '${definition.id}': ${
-            (error as Error).message
-          }`
-        );
-        return;
+        newCount += result.newItems;
+        updatedCount += result.updatedItems;
+        unchangedCount += result.unchangedItems;
       }
-
-      this.logger.debug(
-        `SML crawler: enumerated ${totalItems} item(s) for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${unchangedCount} unchanged`
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: failed to list items for type '${definition.id}': ${(error as Error).message}`
       );
-
-      // Mark-and-sweep: delete state docs not seen in this crawl run.
-      const deletedCount = await this.sweepStaleState({
-        stateClient,
-        attachmentType: definition.id,
-        crawlStartTime,
-      });
-      if (deletedCount > 0) {
-        this.logger.info(
-          `SML crawler: marked ${deletedCount} item(s) as deleted for type '${definition.id}'`
-        );
-      }
-
-      if (newCount === 0 && updatedCount === 0 && deletedCount === 0) {
-        this.logger.debug(`SML crawler: no state changes needed for type '${definition.id}'`);
-      }
-
-      // Process queued actions (create/update/delete)
-      await this.processQueue({
-        attachmentType: definition.id,
-        esClient,
-        savedObjectsClient,
-        stateClient,
-      });
-    } finally {
-      // This way the version marker can never be lost to an early return
-      // after `reconcileMappings` rewrote `_meta`. Idempotent and 404-safe.
-      await this.stampSchemaVersion({ esClient });
+      return;
     }
+
+    this.logger.debug(
+      `SML crawler: enumerated ${totalItems} item(s) for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${unchangedCount} unchanged`
+    );
+
+    // Mark-and-sweep: delete state docs not seen in this crawl run.
+    const deletedCount = await this.sweepStaleState({
+      stateClient,
+      attachmentType: definition.id,
+      crawlStartTime,
+    });
+    if (deletedCount > 0) {
+      this.logger.info(
+        `SML crawler: marked ${deletedCount} item(s) as deleted for type '${definition.id}'`
+      );
+    }
+
+    if (newCount === 0 && updatedCount === 0 && deletedCount === 0) {
+      this.logger.debug(`SML crawler: no state changes needed for type '${definition.id}'`);
+    }
+
+    // Process queued actions (create/update/delete)
+    await this.processQueue({
+      attachmentType: definition.id,
+      esClient,
+      savedObjectsClient,
+      stateClient,
+    });
   }
 
   /**
@@ -203,39 +195,6 @@ export class SmlCrawlerImpl implements SmlCrawler {
     }
 
     return true;
-  }
-
-  /**
-   * Stamp `SML_SCHEMA_VERSION` into the index `_meta` so future crawls can detect drift.
-   * When the marker is already current, the write is skipped entirely — the stamp is idempotent
-   * and never errors on repeated calls.
-   *
-   * A 404 here means the index does not exist (yet) — on a fresh install (or right after a
-   * stale-schema drop) it is only created once `processQueue` writes documents. That is benign:
-   * there is no data to protect, and the stamp lands on the first crawl that writes something.
-   */
-  private async stampSchemaVersion({ esClient }: { esClient: ElasticsearchClient }): Promise<void> {
-    try {
-      const response = await esClient.indices.getMapping({ index: smlIndexName });
-      const currentMeta = Object.values(response)[0]?.mappings?._meta as
-        | { sml_schema_version?: number }
-        | undefined;
-      if (currentMeta?.sml_schema_version === SML_SCHEMA_VERSION) {
-        return;
-      }
-      await esClient.indices.putMapping({
-        index: smlIndexName,
-        _meta: { ...currentMeta, sml_schema_version: SML_SCHEMA_VERSION },
-      });
-    } catch (error) {
-      if (!isResponseError(error) || error.statusCode !== 404) {
-        this.logger.warn(
-          `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${
-            (error as Error).message
-          }`
-        );
-      }
-    }
   }
 
   /** Returns true when the index was dropped due to a mapping update failure. */
