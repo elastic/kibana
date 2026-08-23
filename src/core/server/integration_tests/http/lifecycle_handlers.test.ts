@@ -275,6 +275,9 @@ describe('core lifecycle handlers', () => {
 
   describe('provenance telemetry post-auth handler (dry-run)', () => {
     const testPath = '/provenance/test/route';
+    const publicTestPath = '/provenance/test/route_public';
+    const browserUserAgent =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
     const incrementCounter = jest.fn();
 
     beforeEach(async () => {
@@ -311,6 +314,15 @@ describe('core lifecycle handlers', () => {
       );
       router.get(
         { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+      router.post(
+        {
+          path: publicTestPath,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'public' },
+        },
         (context, req, res) => res.ok({ body: 'ok' })
       );
 
@@ -358,6 +370,44 @@ describe('core lifecycle handlers', () => {
     it('does not count safe methods', async () => {
       await supertest(innerServer.listener).get(testPath).expect(200, 'ok');
       expect(incrementCounter).not.toHaveBeenCalled();
+    });
+
+    it('flags the gap for a browser user agent missing provenance headers', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('user-agent', browserUserAgent)
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toEqual(
+        expect.arrayContaining([
+          'sec_fetch_mode:absent',
+          'user_agent:browser',
+          'gap:browser_missing_provenance',
+        ])
+      );
+    });
+
+    it('buckets a present Sec-Fetch-Mode value', async () => {
+      await supertest(innerServer.listener)
+        .post(testPath)
+        .set(xsrfHeader, 'anything')
+        .set('sec-fetch-mode', 'cors')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toContain('sec_fetch_mode:cors');
+    });
+
+    it('records public route access', async () => {
+      await supertest(innerServer.listener)
+        .post(publicTestPath)
+        .set(xsrfHeader, 'anything')
+        .expect(200, 'ok');
+
+      const counterNames = incrementCounter.mock.calls.map(([params]) => params.counterName);
+      expect(counterNames).toContain('route_access:public');
     });
   });
 
