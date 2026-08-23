@@ -40,6 +40,14 @@ export interface MatrixTraceEntry {
   scores?: Record<string, number>;
   /** Number of repetitions aggregated into this entry's scores. */
   repetitions?: number;
+  /**
+   * Per-evaluator spread across repetitions (evaluator name → max - min).
+   * `scores` alone cannot distinguish a stable cell from a volatile one: a
+   * cell scoring 10/10/10 and one scoring 0/10/20 both report a mean of 10.
+   * Only populated when `repetitions > 1`; an absent entry means the cell was
+   * measured once and its stability is unknown, not that it is stable.
+   */
+  spread?: Record<string, number>;
 }
 
 /**

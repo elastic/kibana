@@ -140,6 +140,42 @@ export const exampleScoresByEvaluator = (
 };
 
 /**
+ * Per-evaluator spread (max - min) across the repetitions of one example.
+ *
+ * The mean returned by `exampleScoresByEvaluator` hides volatility: 10/10/10
+ * and 0/10/20 both average to 10. Reporting the spread alongside the mean is
+ * what makes a repeated run more informative than a single one. Returns only
+ * evaluators seen more than once — a single observation has no measurable
+ * spread, and emitting 0 for it would claim a stability that was never tested.
+ * Pure for unit testing.
+ */
+export const exampleSpreadByEvaluator = (
+  docs: EvaluationScoreDocument[]
+): Record<string, number> => {
+  const seen = new Map<string, { min: number; max: number; count: number }>();
+  for (const doc of docs) {
+    const name = doc.evaluator?.name;
+    const score = doc.evaluator?.score;
+    if (!name || typeof score !== 'number') {
+      continue;
+    }
+    const agg = seen.get(name);
+    if (!agg) {
+      seen.set(name, { min: score, max: score, count: 1 });
+      continue;
+    }
+    agg.min = Math.min(agg.min, score);
+    agg.max = Math.max(agg.max, score);
+    agg.count += 1;
+  }
+  return Object.fromEntries(
+    [...seen.entries()]
+      .filter(([, agg]) => agg.count > 1)
+      .map(([name, agg]) => [name, agg.max - agg.min])
+  );
+};
+
+/**
  * Number of distinct repetitions present in a batch of score documents.
  * Pure for unit testing.
  */
@@ -177,6 +213,12 @@ const processExampleBatch = (
   // per-prompt score on trace cards, so cards no longer repeat the column
   // aggregate for every variant in a category.
   entry.scores = exampleScoresByEvaluator(relevant);
+  // Spread across those same repetitions, so a volatile cell is visually
+  // distinct from a stable one instead of hiding behind an identical mean.
+  const spread = exampleSpreadByEvaluator(relevant);
+  if (Object.keys(spread).length > 0) {
+    entry.spread = spread;
+  }
   // How many repetitions of this example fed the scores above — the report
   // badges it so 1-rep cells are visually distinguishable from 3-rep cells.
   entry.repetitions = countRepetitions(relevant);

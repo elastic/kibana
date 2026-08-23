@@ -390,6 +390,26 @@ const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
 };
 
 /**
+ * Worst-case spread across repetitions, rendered as a `±` badge.
+ *
+ * A mean hides volatility — 10/10/10 and 0/10/20 both read as 10 — so the
+ * report shows the widest observed swing next to it. Absent for single-rep
+ * cells: their stability was never measured, and showing `±0` there would
+ * assert a stability nobody tested.
+ */
+const spreadLabel = (trace?: { spread?: Record<string, number> }): string => {
+  const values = Object.values(trace?.spread ?? {});
+  if (values.length === 0) {
+    return '';
+  }
+  const worst = Math.max(...values);
+  if (worst === 0) {
+    return 'stable';
+  }
+  return `±${worst % 1 === 0 ? worst : worst.toFixed(2)}`;
+};
+
+/**
  * Per-prompt score for a trace card, computed from the example's own
  * per-evaluator scores using the column's evaluator semantics (allowlist or
  * global exclusions) and scale. Returns an empty string when the trace
@@ -485,6 +505,7 @@ const renderModelCard = (
                 trace?.repetitions
                   ? `${trace.repetitions} rep${trace.repetitions === 1 ? '' : 's'}`
                   : '',
+                spreadLabel(trace),
                 trace?.stepCount ? `${trace.stepCount} steps` : '',
                 trace?.toolCount ? `${trace.toolCount} tools` : '',
               ].filter(Boolean);

@@ -9,6 +9,7 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import {
   countRepetitions,
   exampleScoresByEvaluator,
+  exampleSpreadByEvaluator,
   queryMatrixTraces,
 } from './query_matrix_traces';
 
@@ -39,6 +40,52 @@ describe('exampleScoresByEvaluator', () => {
   it('returns an empty map when nothing is scorable', () => {
     expect(exampleScoresByEvaluator([doc('ExpectedToolCalled', null)])).toEqual({});
     expect(exampleScoresByEvaluator([])).toEqual({});
+  });
+});
+
+describe('exampleSpreadByEvaluator', () => {
+  const repDoc = (name: string, score: number, repetition: number) =>
+    ({
+      evaluator: { name, score },
+      task: { repetition_index: repetition },
+    } as unknown as EvaluationScoreDocument);
+
+  it('reports max - min per evaluator across repetitions', () => {
+    expect(
+      exampleSpreadByEvaluator([repDoc('Groundedness', 0, 0), repDoc('Groundedness', 20, 1)])
+    ).toEqual({ Groundedness: 20 });
+  });
+
+  it('distinguishes a volatile cell from a stable one with the same mean', () => {
+    // Both average to 10 — the mean alone cannot tell these apart, which is
+    // the entire reason this function exists.
+    const stable = [
+      repDoc('Relevance', 10, 0),
+      repDoc('Relevance', 10, 1),
+      repDoc('Relevance', 10, 2),
+    ];
+    const volatile = [
+      repDoc('Relevance', 0, 0),
+      repDoc('Relevance', 10, 1),
+      repDoc('Relevance', 20, 2),
+    ];
+
+    expect(exampleScoresByEvaluator(stable)).toEqual(exampleScoresByEvaluator(volatile));
+    expect(exampleSpreadByEvaluator(stable)).toEqual({ Relevance: 0 });
+    expect(exampleSpreadByEvaluator(volatile)).toEqual({ Relevance: 20 });
+  });
+
+  it('omits evaluators observed only once rather than claiming zero spread', () => {
+    // A single observation has no measured stability; emitting 0 would assert
+    // one that was never tested.
+    expect(exampleSpreadByEvaluator([repDoc('Factuality', 7, 0)])).toEqual({});
+  });
+
+  it('ignores documents with no numeric score', () => {
+    const missing = { evaluator: { name: 'criteria' } } as unknown as EvaluationScoreDocument;
+    expect(
+      exampleSpreadByEvaluator([repDoc('criteria', 1, 0), missing, repDoc('criteria', 0, 1)])
+    ).toEqual({ criteria: 1 });
   });
 });
 
