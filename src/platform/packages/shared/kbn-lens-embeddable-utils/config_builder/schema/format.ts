@@ -96,18 +96,11 @@ const customFormatSchema = lazySchema(() =>
  * Format configuration for dimension values.
  */
 export const formatTypeSchema = lazySchema(() =>
-  z
-    .union([
-      numericFormatSchema,
-      byteFormatSchema,
-      durationFormatSchema,
-      customFormatSchema,
-    ])
-    .meta({
-      id: 'formatType',
-      title: 'Format Type',
-      description: 'Number display format for the dimension value.',
-    })
+  z.union([numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema]).meta({
+    id: 'formatType',
+    title: 'Format Type',
+    description: 'Number display format for the dimension value.',
+  })
 );
 
 export const formatSchema = lazySchema(() =>

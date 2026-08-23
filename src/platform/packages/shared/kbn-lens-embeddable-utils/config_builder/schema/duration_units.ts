@@ -43,25 +43,26 @@ const durationFormatCompactSchema = z.boolean().optional().meta({
     'When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.',
 });
 
-export const durationFormatSchema = lazySchema(() => z
-  .object({
-    type: z.literal('duration'),
-    from: durationInputUnitSchema.meta({
-      description:
-        'Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.',
-    }),
-    to: durationOutputUnitSchema.meta({
-      description:
-        'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
-    }),
-    decimals: durationFormatDecimalsSchema,
-    compact: durationFormatCompactSchema,
-    suffix: durationFormatSuffixSchema,
-  })
-  .strict()
-  .meta({
-    id: 'durationFormat',
-    title: 'Duration Format',
-    description: 'Duration format between time units.',
-  })
+export const durationFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('duration'),
+      from: durationInputUnitSchema.meta({
+        description:
+          'Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.',
+      }),
+      to: durationOutputUnitSchema.meta({
+        description:
+          'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
+      }),
+      decimals: durationFormatDecimalsSchema,
+      compact: durationFormatCompactSchema,
+      suffix: durationFormatSuffixSchema,
+    })
+    .strict()
+    .meta({
+      id: 'durationFormat',
+      title: 'Duration Format',
+      description: 'Duration format between time units.',
+    })
 );

@@ -17,37 +17,38 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
 
-export const searchResponseBodySchema = lazySchema(() => z
-  .object({
-    data: z
-      .array(
-        z
-          .object({
-            id: z.string().meta({ description: 'The dashboard ID.' }),
-            data: z
-              .object({
-                description: z
-                  .string()
-                  .optional()
-                  .meta({ description: 'A short description of the dashboard.' }),
-                tags: getAsCodeTagsSchema(
-                  'Tag IDs associated with this dashboard.',
-                  100
-                ).optional(),
-                time_range: timeRangeSchema.optional(),
-                title: z.string().meta({ description: 'The dashboard title.' }),
-                access_control: accessControlSchema,
-              })
-              .strict(),
-            meta: asCodeMetaSchema,
-          })
-          .strict()
-      )
-      .max(PAGINATION_MAX_SIZE)
-      .meta({
-        description:
-          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
-      }),
+export const searchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      data: z
+        .array(
+          z
+            .object({
+              id: z.string().meta({ description: 'The dashboard ID.' }),
+              data: z
+                .object({
+                  description: z
+                    .string()
+                    .optional()
+                    .meta({ description: 'A short description of the dashboard.' }),
+                  tags: getAsCodeTagsSchema(
+                    'Tag IDs associated with this dashboard.',
+                    100
+                  ).optional(),
+                  time_range: timeRangeSchema.optional(),
+                  title: z.string().meta({ description: 'The dashboard title.' }),
+                  access_control: accessControlSchema,
+                })
+                .strict(),
+              meta: asCodeMetaSchema,
+            })
+            .strict()
+        )
+        .max(PAGINATION_MAX_SIZE)
+        .meta({
+          description:
+            'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+        }),
       meta: asCodePaginationResponseMetaSchema,
     })
     .strict()
