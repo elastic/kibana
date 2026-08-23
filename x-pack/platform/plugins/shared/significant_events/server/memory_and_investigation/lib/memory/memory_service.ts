@@ -235,6 +235,65 @@ export class MemoryServiceImpl implements MemoryService {
     return hits.filter((hit) => hit._source.is_deleted !== true);
   }
 
+  /**
+   * Normalize page references to page ids before persisting.
+   *
+   * Callers (interactive tools vs. background curation skills) supply references as either page
+   * ids (UUIDs) or human-readable page names. The stored contract is id-based (see
+   * {@link getBacklinks} and {@link search}), so resolve each reference to a page id here:
+   * an input matching a live page `id` is kept; one matching a live page `name` is replaced with
+   * that page's `id`; anything else is preserved verbatim (legitimate forward references and
+   * pre-existing ids survive). A single collapsed lookup covers every reference.
+   *
+   * On lookup failure the references are returned unchanged. `_searchLatest` already
+   * swallows `index_not_found_exception` by returning zero hits, so a missing index yields
+   * verbatim passthrough naturally (no match) without reaching the catch.
+   */
+  private async _normalizeReferences(references: string[]): Promise<string[]> {
+    if (references.length === 0) return [];
+
+    let liveById: Set<string>;
+    let idByName: Map<string, string>;
+    try {
+      const hits = await this._searchLatest({
+        query: {
+          bool: {
+            should: [{ terms: { id: references } }, { terms: { name: references } }],
+            minimum_should_match: 1,
+          },
+        },
+        collapseField: 'id',
+        size: references.length,
+      });
+
+      liveById = new Set<string>();
+      idByName = new Map<string, string>();
+      for (const { _source } of hits) {
+        if (_source.is_deleted === true) continue;
+        liveById.add(_source.id);
+        idByName.set(_source.name, _source.id);
+      }
+    } catch (err) {
+      this.logger.debug(
+        `Memory reference normalization lookup failed, storing references verbatim: ${
+          (err as Error).message
+        }`
+      );
+      return references;
+    }
+
+    const seen = new Set<string>();
+    const normalized: string[] = [];
+    for (const reference of references) {
+      const resolved = liveById.has(reference) ? reference : idByName.get(reference) ?? reference;
+      if (!seen.has(resolved)) {
+        seen.add(resolved);
+        normalized.push(resolved);
+      }
+    }
+    return normalized;
+  }
+
   // ── Public API ──
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
@@ -245,6 +304,8 @@ export class MemoryServiceImpl implements MemoryService {
       throw badRequest(`Memory entry with name '${name}' already exists`);
     }
 
+    const normalizedReferences = await this._normalizeReferences(references);
+
     const now = new Date().toISOString();
     const tombstone = await this._getCollapsedByName(name);
     if (tombstone?.is_deleted === true) {
@@ -254,7 +315,7 @@ export class MemoryServiceImpl implements MemoryService {
         title,
         content,
         categories,
-        references,
+        references: normalizedReferences,
         tags,
         version: tombstone.version + 1,
         created_at: tombstone.created_at,
@@ -273,7 +334,7 @@ export class MemoryServiceImpl implements MemoryService {
       title,
       content,
       categories,
-      references,
+      references: normalizedReferences,
       version: 1,
       tags,
       created_at: now,
@@ -326,7 +387,9 @@ export class MemoryServiceImpl implements MemoryService {
       ...(params.title !== undefined && { title: params.title }),
       ...(params.name !== undefined && { name: params.name }),
       ...(params.categories !== undefined && { categories: params.categories }),
-      ...(params.references !== undefined && { references: params.references }),
+      ...(params.references !== undefined && {
+        references: await this._normalizeReferences(params.references),
+      }),
       ...(params.tags !== undefined && { tags: params.tags }),
       version: nextVersion,
       updated_at: now,

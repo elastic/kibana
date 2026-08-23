@@ -36,6 +36,24 @@ const matchesFilter = (doc: MemoryDocument, filter: Record<string, unknown>): bo
     return Array.isArray(docValue) ? docValue.some((item) => item === value) : docValue === value;
   });
 
+const matchesClause = (doc: MemoryDocument, clause: Record<string, unknown>): boolean => {
+  if ('term' in clause) {
+    const term = clause.term as Record<string, unknown>;
+    return matchesFilter(doc, term);
+  }
+  if ('terms' in clause) {
+    const terms = clause.terms as Record<string, unknown>;
+    const [[field, values]] = Object.entries(terms);
+    const fieldValues = values as unknown[];
+    return fieldValues.includes(doc[field as keyof MemoryDocument]);
+  }
+  if ('ids' in clause) {
+    const ids = clause.ids as { values?: unknown[] };
+    return (ids.values ?? []).includes(doc._id);
+  }
+  return true;
+};
+
 const filterByQuery = (
   docs: MemoryDocument[],
   query: Record<string, unknown>
@@ -44,30 +62,31 @@ const filterByQuery = (
     return docs;
   }
 
-  const bool = query.bool as { filter?: Array<Record<string, unknown>> } | undefined;
-  if (!bool?.filter) {
+  const bool = query.bool as
+    | {
+        filter?: Array<Record<string, unknown>>;
+        should?: Array<Record<string, unknown>>;
+        minimum_should_match?: number;
+      }
+    | undefined;
+  if (!bool) {
     return docs;
   }
 
-  return docs.filter((doc) =>
-    bool.filter!.every((clause) => {
-      if ('term' in clause) {
-        const term = clause.term as Record<string, unknown>;
-        return matchesFilter(doc, term);
-      }
-      if ('terms' in clause) {
-        const terms = clause.terms as Record<string, unknown>;
-        const [[field, values]] = Object.entries(terms);
-        const fieldValues = values as unknown[];
-        return fieldValues.includes(doc[field as keyof MemoryDocument]);
-      }
-      if ('ids' in clause) {
-        const ids = clause.ids as { values?: unknown[] };
-        return (ids.values ?? []).includes(doc._id);
-      }
-      return true;
-    })
-  );
+  // `should` clauses (used by reference normalization) match when at least
+  // `minimum_should_match` of them are satisfied.
+  if (bool.should) {
+    const minShouldMatch = bool.minimum_should_match ?? 1;
+    return docs.filter(
+      (doc) => bool.should!.filter((clause) => matchesClause(doc, clause)).length >= minShouldMatch
+    );
+  }
+
+  if (!bool.filter) {
+    return docs;
+  }
+
+  return docs.filter((doc) => bool.filter!.every((clause) => matchesClause(doc, clause)));
 };
 
 const collapseDocuments = (
@@ -515,5 +534,265 @@ describe('MemoryServiceImpl', () => {
     await service.update({ id: source.id, references: [], user });
 
     await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([]);
+  });
+
+  describe('reference normalization', () => {
+    // Give every uuid call a unique value so ids never collide across pages/history records.
+    const useIncrementingUuids = () => {
+      let counter = 0;
+      mockedUuidV4.mockImplementation(() => `uuid-${counter++}`);
+    };
+
+    it('stores references that are already ids unchanged', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const target = await service.create({
+        name: 'target-page',
+        title: 'Target',
+        content: 'target',
+        user,
+      });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'links to target',
+        references: [target.id],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [target.id],
+      });
+    });
+
+    it('resolves a reference given as an existing page name to that page id', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const target = await service.create({
+        name: 'target-page',
+        title: 'Target',
+        content: 'target',
+        user,
+      });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'links to target by name',
+        references: ['target-page'],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [target.id],
+      });
+    });
+
+    it('preserves a reference matching neither an id nor a name verbatim', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'forward reference',
+        references: ['does-not-exist'],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: ['does-not-exist'],
+      });
+    });
+
+    it('applies the same normalization on update', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const target = await service.create({
+        name: 'target-page',
+        title: 'Target',
+        content: 'target',
+        user,
+      });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'no links yet',
+        user,
+      });
+
+      const updated = await service.update({
+        id: source.id,
+        references: ['target-page'],
+        user,
+      });
+
+      expect(updated.references).toEqual([target.id]);
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [target.id],
+      });
+    });
+
+    it('does not resolve a tombstoned page name (unresolved string preserved)', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const ghost = await service.create({
+        name: 'ghost-page',
+        title: 'Ghost',
+        content: 'about to be deleted',
+        user,
+      });
+      await service.delete({ id: ghost.id, user });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'references a deleted page by name',
+        references: ['ghost-page'],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: ['ghost-page'],
+      });
+    });
+
+    it('stores references verbatim and logs at debug when the lookup throws a non-index error', async () => {
+      useIncrementingUuids();
+      const { service, esClient } = createService();
+
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        const query = (params as { query?: { bool?: { should?: unknown } } }).query;
+        if (query?.bool?.should) {
+          throw Object.assign(new Error('cluster_block_exception'), { statusCode: 500 });
+        }
+        return base(params as never);
+      });
+
+      const created = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'lookup will fail',
+        references: ['x'],
+        user,
+      });
+
+      expect(created.references).toEqual(['x']);
+      await expect(service.get({ id: created.id })).resolves.toMatchObject({ references: ['x'] });
+      expect(logger.debug).toHaveBeenCalled();
+    });
+
+    it('stores references verbatim without logging when the index is missing', async () => {
+      useIncrementingUuids();
+      const { service, esClient } = createService();
+
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        const query = (params as { query?: { bool?: { should?: unknown } } }).query;
+        if (query?.bool?.should) {
+          throw Object.assign(new Error('index_not_found_exception'), { statusCode: 404 });
+        }
+        return base(params as never);
+      });
+
+      const created = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'index missing during normalization',
+        references: ['x'],
+        user,
+      });
+
+      expect(created.references).toEqual(['x']);
+      // `_searchLatest` swallows index-not-found by returning zero hits, so the catch never runs.
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    it('resolves a mixed batch (id, name, unresolved) and preserves input order', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const alpha = await service.create({
+        name: 'alpha-page',
+        title: 'Alpha',
+        content: 'a',
+        user,
+      });
+      const beta = await service.create({
+        name: 'beta-page',
+        title: 'Beta',
+        content: 'b',
+        user,
+      });
+
+      // Order: name (beta), unresolved, id (alpha) — expect beta.id, unresolved, alpha.id.
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'mixed references',
+        references: ['beta-page', 'not-a-page', alpha.id],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [beta.id, 'not-a-page', alpha.id],
+      });
+    });
+
+    it('de-duplicates a page referenced by both its id and its name', async () => {
+      useIncrementingUuids();
+      const { service } = createService();
+
+      const target = await service.create({
+        name: 'target-page',
+        title: 'Target',
+        content: 'target',
+        user,
+      });
+
+      const source = await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'references the same page twice',
+        references: [target.id, 'target-page'],
+        user,
+      });
+
+      await expect(service.get({ id: source.id })).resolves.toMatchObject({
+        references: [target.id],
+      });
+    });
+
+    it('issues exactly one normalization lookup regardless of reference count', async () => {
+      useIncrementingUuids();
+      const { service, esClient } = createService();
+
+      let normalizationSearches = 0;
+      const base = esClient.search.getMockImplementation()!;
+      esClient.search.mockImplementation(async (params) => {
+        const query = (params as { query?: { bool?: { should?: unknown } } }).query;
+        if (query?.bool?.should) {
+          normalizationSearches++;
+        }
+        return base(params as never);
+      });
+
+      await service.create({
+        name: 'source-page',
+        title: 'Source',
+        content: 'many references',
+        references: ['r1', 'r2', 'r3'],
+        user,
+      });
+
+      expect(normalizationSearches).toBe(1);
+    });
   });
 });

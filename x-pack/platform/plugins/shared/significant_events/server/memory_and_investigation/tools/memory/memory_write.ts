@@ -33,7 +33,9 @@ const memoryWriteSchema = z.object({
   references: z
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
-    .describe('IDs of other memory pages referenced from this content.'),
+    .describe(
+      'IDs of other memory pages referenced from this content (or their unique page names, which are resolved to IDs on write).'
+    ),
   tags: z.array(z.string().max(MAX_ID_LENGTH)).optional().describe('Optional classification tags.'),
   change_summary: z
     .string()

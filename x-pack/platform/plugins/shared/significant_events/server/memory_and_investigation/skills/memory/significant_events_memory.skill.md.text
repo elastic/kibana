@@ -23,5 +23,5 @@ Memory is not a mirror of data that lives elsewhere. Store only what is hard to 
 - Learned something durable during analysis → offer to save it (per <the_model>).
 - Told something is wrong → fix it with memory_patch.
 - Organize primarily around **services**, **infrastructure**, and **architecture**; use **operations** for runbooks/failure patterns and **streams/<name>** as an additional lens. Assign multiple categories when unsure.
-- One focused topic per page; descriptive unique names (e.g. "nginx-prod-overview"). Search before writing to avoid duplicates; read before updating. Cross-reference related pages via the references field, and link rather than duplicate.
+- One focused topic per page; descriptive unique names (e.g. "nginx-prod-overview"). Search before writing to avoid duplicates; read before updating. Cross-reference related pages by page id via the references field, and link rather than duplicate.
 </usage>
