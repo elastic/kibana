@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiToolTip } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
