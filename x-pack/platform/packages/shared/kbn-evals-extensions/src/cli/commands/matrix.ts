@@ -20,6 +20,7 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { loadMatrixConfig, applyModelOverrides } from '../../matrix/load_matrix_config';
 import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
+import type { QueryMatrixScoresOptions } from '../../matrix/query_matrix_scores';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { renderMatrixHtml } from '../../matrix/render_matrix_html';
@@ -27,6 +28,31 @@ import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
 import type { MatrixTraceData } from '../../matrix/trace_types';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
+
+/**
+ * Build the aggregation query for a matrix run.
+ *
+ * Extracted from the command body so the config-to-aggregation link is
+ * reachable from a unit test: the scoring policy is only worth anything if a
+ * config value actually survives the trip, and a test that cannot see this
+ * object cannot notice when it stops being passed.
+ */
+export const matrixScoreQuery = (
+  config: MatrixConfig,
+  {
+    suiteIds,
+    modelIds,
+    branch,
+    lookbackDays,
+  }: Omit<QueryMatrixScoresOptions, 'examplePrefixes' | 'scoring'>
+): QueryMatrixScoresOptions => ({
+  suiteIds,
+  modelIds,
+  branch,
+  lookbackDays,
+  examplePrefixes: [...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? []))],
+  scoring: config.scoring,
+});
 
 export const matrixCmd: Command<void> = {
   name: 'matrix',
@@ -158,16 +184,11 @@ export const matrixCmd: Command<void> = {
       })`
     );
 
-    const aggregated = await queryMatrixScores(evalsClient, log, {
-      suiteIds,
-      modelIds,
-      branch,
-      lookbackDays,
-      examplePrefixes: [
-        ...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? [])),
-      ],
-      scoring: config.scoring,
-    });
+    const aggregated = await queryMatrixScores(
+      evalsClient,
+      log,
+      matrixScoreQuery(config, { suiteIds, modelIds, branch, lookbackDays })
+    );
 
     if (aggregated.length === 0) {
       // Empty CSVs would publish as a blank matrix in customer-facing docs.

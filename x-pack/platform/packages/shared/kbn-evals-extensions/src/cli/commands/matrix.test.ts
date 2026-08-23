@@ -9,6 +9,42 @@ import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
 import type { AggregatedModelScores } from '../../matrix/query_matrix_scores';
+import { matrixScoreQuery } from './matrix';
+
+describe('matrixScoreQuery', () => {
+  const query = (overrides = {}) =>
+    matrixScoreQuery(
+      parseMatrixConfig({
+        columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], examplePrefixes: ['a'] }],
+        models: [{ id: 'model-a', label: 'Model A' }],
+        ...overrides,
+      }),
+      { suiteIds: ['suite-a'], modelIds: ['model-a'] }
+    );
+
+  it('forwards the opted-in scoring policy to the aggregator', () => {
+    expect(query({ scoring: { useVerdictLadder: true, requireEisJudge: true } }).scoring).toEqual({
+      useVerdictLadder: true,
+      requireEisJudge: true,
+      excludeSelfJudged: false,
+    });
+  });
+
+  it('forwards no policy when the config does not opt in', () => {
+    expect(query().scoring).toBeUndefined();
+  });
+
+  it('de-duplicates example prefixes across columns', () => {
+    const options = query({
+      columns: [
+        { id: 'a', label: 'A', suites: ['s'], examplePrefixes: ['dup'] },
+        { id: 'b', label: 'B', suites: ['s'], examplePrefixes: ['dup', 'other'] },
+      ],
+    });
+
+    expect(options.examplePrefixes).toEqual(['dup', 'other']);
+  });
+});
 
 describe('matrix command empty-result guard', () => {
   const config = parseMatrixConfig({
