@@ -19,6 +19,8 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../components/spark_plot';
+import { DurabilityBadge } from '../durability_badge/durability_badge';
+import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
@@ -30,6 +32,7 @@ import {
   MATCH_QUERY_TYPE_LABEL,
   STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
+  DURABILITY_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
   MINIMIZE_DETAILS_ARIA_LABEL,
@@ -134,6 +137,13 @@ export const useKnowledgeIndicatorsColumns = ({
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
+      },
+      {
+        name: DURABILITY_COLUMN_LABEL,
+        width: '128px',
+        render: (ki: KnowledgeIndicator) => (
+          <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(ki)} compact />
+        ),
       },
       {
         name: ACTIONS_COLUMN_LABEL,

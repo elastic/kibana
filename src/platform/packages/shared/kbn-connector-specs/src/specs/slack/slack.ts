@@ -1065,6 +1065,7 @@ export const Slack: ConnectorSpec = {
     createConversation: {
       isTool: false,
       supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
+      scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
@@ -1118,6 +1119,7 @@ export const Slack: ConnectorSpec = {
     inviteToConversation: {
       isTool: false,
       supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
+      scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
@@ -1171,7 +1173,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       supportedAuthTypes: SLACK_MESSAGE_AUTH_TYPES,
       description:
-        'Send a text or Block Kit message. OAuth and bot token authentication require a channel ID; incoming webhooks send to their configured channel.',
+        'Send a text or Block Kit message. OAuth and bot token authentication require a channel ID; use listChannels to discover channels or resolveChannelId when you know the channel name. These authentication methods return a message timestamp that can be used as threadTs to post a reply. Incoming webhooks send to their configured channel. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
