@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
+import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type {
   SmlTypeDefinition,
   SmlContext,
@@ -25,6 +26,9 @@ import {
 import { createSmlStorage, smlIndexName, SML_SCHEMA_VERSION, type SmlStorage } from './sml_storage';
 
 export type { SmlCrawler };
+
+/** Single-owner guard for the destructive drop of the shared SML data index. */
+const SML_INDEX_DROP_LOCK_ID = 'agent_builder_sml_index_drop';
 
 interface SmlCrawlerDeps {
   indexer: SmlIndexer;
@@ -44,11 +48,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
     definition,
     esClient,
     savedObjectsClient,
+    lockManager,
     abortSignal,
   }: {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
+    lockManager: LockManagerService;
     abortSignal?: AbortSignal;
   }): Promise<void> {
     const crawlerStateStorage = createSmlCrawlerStateStorage({
@@ -67,13 +73,25 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    const indexDropped = await this.dropIndexIfSchemaStale({ esClient, storage });
+    const dropResult = await this.dropIndexIfSchemaStale({ esClient, storage, lockManager });
+    if (dropResult === 'busy') {
+      this.logger.info(
+        `SML crawler: skipping crawl for type '${definition.id}' — another task is rebuilding index '${smlIndexName}'`
+      );
+      return;
+    }
 
-    const mappingsRebuilt = await this.applyMappingsOrRebuild({ storage });
+    const rebuildResult = await this.applyMappingsOrRebuild({ storage, lockManager });
+    if (rebuildResult === 'busy') {
+      this.logger.info(
+        `SML crawler: skipping crawl for type '${definition.id}' — another task is rebuilding index '${smlIndexName}'`
+      );
+      return;
+    }
 
     const integrityResetNeeded =
-      indexDropped ||
-      mappingsRebuilt ||
+      dropResult === 'dropped' ||
+      rebuildResult === 'rebuilt' ||
       (await this.checkDataIntegrity({
         esClient,
         stateClient,
@@ -148,36 +166,25 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
   /**
    * Check if the live index's `_meta.sml_schema_version` matches `SML_SCHEMA_VERSION`.
-   * If the version is missing or stale, drops the index so it will be recreated with the
-   * correct shape on the next write. Returns true when the index was dropped.
-   *
-   * A 404 from `getMapping` means the index doesn't exist yet — no action needed.
-   * All other errors are re-thrown.
+   * If the version is missing or stale, drops the index (under the drop lock) so it will
+   * be recreated with the correct shape — and a template-stamped current marker — on the
+   * next write. Returns 'busy' when another task holds the drop lock; callers must skip
+   * the crawl run entirely so their writes cannot land in an index about to be deleted.
    */
   private async dropIndexIfSchemaStale({
     esClient,
     storage,
+    lockManager,
   }: {
     esClient: ElasticsearchClient;
     storage: SmlStorage;
-  }): Promise<boolean> {
-    let storedVersion: number | undefined;
+    lockManager: LockManagerService;
+  }): Promise<'current' | 'dropped' | 'busy'> {
+    const storedVersion = await this.readStoredSchemaVersion({ esClient });
 
-    try {
-      const response = await esClient.indices.getMapping({ index: smlIndexName });
-      const indexData = Object.values(response)[0];
-      storedVersion = (indexData?.mappings?._meta as { sml_schema_version?: number } | undefined)
-        ?.sml_schema_version;
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 404) {
-        // Index does not exist yet — will be created fresh with the correct shape.
-        return false;
-      }
-      throw error;
-    }
-
-    if (storedVersion === SML_SCHEMA_VERSION) {
-      return false;
+    // Missing index will be created fresh (and stamped) on the first write.
+    if (storedVersion === 'missing-index' || storedVersion === SML_SCHEMA_VERSION) {
+      return 'current';
     }
 
     this.logger.warn(
@@ -186,38 +193,114 @@ export class SmlCrawlerImpl implements SmlCrawler {
       }, expected: ${SML_SCHEMA_VERSION}) — dropping index '${smlIndexName}' and forcing full re-crawl`
     );
 
-    try {
-      await storage.getClient().clean();
-    } catch (cleanError) {
-      if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
-        throw cleanError;
-      }
-    }
-
-    return true;
+    const result = await this.cleanIndexExclusively({
+      lockManager,
+      storage,
+      stillNeeded: async () => {
+        // Re-read under the lock: another task may have already dropped and
+        // recreated the index (stamped at creation by the template).
+        const current = await this.readStoredSchemaVersion({ esClient });
+        return current !== 'missing-index' && current !== SML_SCHEMA_VERSION;
+      },
+    });
+    return result === 'cleaned' ? 'dropped' : result === 'not_needed' ? 'current' : 'busy';
   }
 
-  /** Returns true when the index was dropped due to a mapping update failure. */
-  private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
+  /**
+   * Read `_meta.sml_schema_version` from the live index. Returns 'missing-index' when the
+   * index does not exist yet; all non-404 errors are re-thrown.
+   */
+  private async readStoredSchemaVersion({
+    esClient,
+  }: {
+    esClient: ElasticsearchClient;
+  }): Promise<number | undefined | 'missing-index'> {
+    try {
+      const response = await esClient.indices.getMapping({ index: smlIndexName });
+      const indexData = Object.values(response)[0];
+      return (indexData?.mappings?._meta as { sml_schema_version?: number } | undefined)
+        ?.sml_schema_version;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return 'missing-index';
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Run `storage.getClient().clean()` as the single owner of the drop lock. The index is
+   * shared by every SML type's crawler task, so an uncoordinated drop can wipe documents
+   * a concurrent task just wrote. `stillNeeded` re-evaluates the drop condition inside the
+   * lock, because another task may have completed the rebuild between our check and our
+   * acquisition. Returns 'busy' when another task currently holds the lock.
+   */
+  private async cleanIndexExclusively({
+    lockManager,
+    storage,
+    stillNeeded,
+  }: {
+    lockManager: LockManagerService;
+    storage: SmlStorage;
+    stillNeeded: () => Promise<boolean>;
+  }): Promise<'cleaned' | 'not_needed' | 'busy'> {
+    try {
+      return await lockManager.withLock(SML_INDEX_DROP_LOCK_ID, async () => {
+        if (!(await stillNeeded())) {
+          return 'not_needed' as const;
+        }
+        try {
+          await storage.getClient().clean();
+        } catch (cleanError) {
+          if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
+            throw cleanError;
+          }
+        }
+        return 'cleaned' as const;
+      });
+    } catch (error) {
+      if (isLockAcquisitionError(error)) {
+        return 'busy';
+      }
+      throw error;
+    }
+  }
+
+  /** Returns 'rebuilt' when the index was dropped due to a mapping update failure. */
+  private async applyMappingsOrRebuild({
+    storage,
+    lockManager,
+  }: {
+    storage: SmlStorage;
+    lockManager: LockManagerService;
+  }): Promise<'applied' | 'rebuilt' | 'busy'> {
     try {
       await storage.getClient().reconcileMappings();
-      return false;
+      return 'applied';
     } catch (error) {
       if (!isResponseError(error)) throw error;
-      if (error.statusCode === 404) return false;
+      if (error.statusCode === 404) return 'applied';
 
       const errorType = (error.body as { error?: { type?: string } })?.error?.type ?? error.message;
       this.logger.warn(
         `SML crawler: mapping update failed (${error.statusCode} ${errorType}) — dropping index '${smlIndexName}' and re-crawling immediately`
       );
-      try {
-        await storage.getClient().clean();
-      } catch (cleanError) {
-        if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
-          throw cleanError;
-        }
-      }
-      return true;
+      const result = await this.cleanIndexExclusively({
+        lockManager,
+        storage,
+        stillNeeded: async () => {
+          // Retry the in-place update under the lock; another task may already have rebuilt.
+          try {
+            await storage.getClient().reconcileMappings();
+            return false;
+          } catch (retryError) {
+            if (!isResponseError(retryError)) throw retryError;
+            if (retryError.statusCode === 404) return false;
+            return true;
+          }
+        },
+      });
+      return result === 'cleaned' ? 'rebuilt' : result === 'not_needed' ? 'applied' : 'busy';
     }
   }
 

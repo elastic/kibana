@@ -6,6 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { LockAcquisitionError } from '@kbn/lock-manager';
+import type { LockManagerService } from '@kbn/lock-manager';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlCrawlerStateStorage } from './sml_crawler_state_storage';
@@ -50,6 +52,17 @@ jest.mock('@kbn/es-errors', () => ({
     (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
   ),
 }));
+
+jest.mock('@kbn/lock-manager', () => {
+  class MockLockAcquisitionError extends Error {}
+  return {
+    LockAcquisitionError: MockLockAcquisitionError,
+    isLockAcquisitionError: (e: unknown) => e instanceof MockLockAcquisitionError,
+  };
+});
+
+const mockWithLock = jest.fn(async <T>(_lockId: string, cb: () => Promise<T>): Promise<T> => cb());
+const lockManager = { withLock: mockWithLock } as unknown as LockManagerService;
 
 const mockUpdateMappingsIfNeeded = jest.fn();
 
@@ -135,6 +148,9 @@ describe('SmlCrawlerImpl', () => {
     mockSmlClient.existsIndex.mockResolvedValue(false);
     mockSmlClient.clean.mockResolvedValue({ acknowledged: true });
     mockUpdateMappingsIfNeeded.mockResolvedValue(undefined);
+    mockWithLock.mockImplementation(
+      async <T>(_lockId: string, cb: () => Promise<T>): Promise<T> => cb()
+    );
     (createSmlStorage as jest.Mock).mockReturnValue({
       getClient: jest.fn().mockReturnValue(getMockSmlClient()),
     });
@@ -152,7 +168,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockStateClient.bulk).toHaveBeenCalled();
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
@@ -213,7 +229,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
         (
@@ -259,7 +275,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
         (
@@ -317,7 +333,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       // Should still write bulk (to update last_crawled_at), but with no update_action
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
@@ -364,7 +380,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
         (
@@ -415,7 +431,7 @@ describe('SmlCrawlerImpl', () => {
         .mockResolvedValue({ hits: { hits: [] } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -467,7 +483,7 @@ describe('SmlCrawlerImpl', () => {
         .mockResolvedValue({ hits: { hits: [] } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(logger.warn).toHaveBeenCalledWith('SML crawler: skipping hit without _id');
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
@@ -532,7 +548,7 @@ describe('SmlCrawlerImpl', () => {
       });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       // Indexer must only be called for non-manual origin
       expect(mockIndexer.indexAttachment).toHaveBeenCalledTimes(1);
@@ -608,7 +624,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       // findManualOriginIds is not queried for delete-only batches
       expect(esClient.search).not.toHaveBeenCalled();
@@ -633,7 +649,7 @@ describe('SmlCrawlerImpl', () => {
       (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('data integrity mismatch'));
       const createOp = mockStateClient.bulk.mock.calls
@@ -661,9 +677,10 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
-      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
+      // once outside the lock, retried once inside before dropping
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(2);
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('mapping update failed'));
       const createOp = mockStateClient.bulk.mock.calls
@@ -683,9 +700,9 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await expect(crawler.crawl({ definition, esClient, savedObjectsClient })).rejects.toThrow(
-        'connection refused'
-      );
+      await expect(
+        crawler.crawl({ definition, esClient, savedObjectsClient, lockManager })
+      ).rejects.toThrow('connection refused');
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
@@ -699,7 +716,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
@@ -713,7 +730,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
@@ -729,14 +746,15 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
 
     it('sml_schema_version mismatch: drops index and forces full re-crawl', async () => {
-      // Simulate index with an older sml_schema_version (1 = pre-composite-token shape)
-      (esClient.indices.getMapping as jest.Mock).mockResolvedValueOnce({
+      // Simulate index with an older sml_schema_version (1 = pre-composite-token shape).
+      // Persistent (not Once): the drop path re-reads the version inside the lock.
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
         '.test-sml-data-000001': {
           mappings: {
             _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 },
@@ -751,7 +769,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -768,8 +786,9 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('missing sml_schema_version in _meta: treats index as stale and drops it', async () => {
-      // _meta exists but has no sml_schema_version field (pre-version-stamp era)
-      (esClient.indices.getMapping as jest.Mock).mockResolvedValueOnce({
+      // _meta exists but has no sml_schema_version field (pre-version-stamp era).
+      // Persistent (not Once): the drop path re-reads the version inside the lock.
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
         '.test-sml-data-000001': {
           mappings: {
             _meta: { version: EXPECTED_SCHEMA_VERSION },
@@ -783,7 +802,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -799,7 +818,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
@@ -813,9 +832,110 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('performs the stale-schema drop inside the distributed lock', async () => {
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+        '.test-sml-data-000001': {
+          mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 } },
+        },
+      });
+      const definition = createMockDefinition();
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
+
+      expect(mockWithLock).toHaveBeenCalledWith(
+        'agent_builder_sml_index_drop',
+        expect.any(Function)
+      );
+      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the entire crawl run when the drop lock is held by another task', async () => {
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+        '.test-sml-data-000001': {
+          mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 } },
+        },
+      });
+      mockWithLock.mockRejectedValueOnce(new LockAcquisitionError('held'));
+      const list = jest.fn().mockReturnValue(yieldPages([]));
+      const definition = createMockDefinition({ list });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
+
+      expect(mockSmlClient.clean).not.toHaveBeenCalled();
+      expect(list).not.toHaveBeenCalled();
+      expect(mockStateClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('re-checks the version inside the lock and does not drop when already migrated', async () => {
+      (esClient.indices.getMapping as jest.Mock)
+        // outside the lock: stale
+        .mockResolvedValueOnce({
+          '.test-sml-data-000001': {
+            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 } },
+          },
+        })
+        // inside the lock: another task already dropped + template recreated it as current
+        .mockResolvedValueOnce({
+          '.test-sml-data-000002': {
+            mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 2 } },
+          },
+        });
+      const definition = createMockDefinition();
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
+
+      expect(mockWithLock).toHaveBeenCalledTimes(1);
+      expect(mockSmlClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('mapping rebuild path also runs under the lock and retries in-place first', async () => {
+      mockUpdateMappingsIfNeeded
+        .mockRejectedValueOnce({
+          statusCode: 400,
+          body: { error: { type: 'illegal_argument_exception' } },
+        })
+        // retry inside the lock succeeds → no drop needed
+        .mockResolvedValueOnce(undefined);
+      const definition = createMockDefinition();
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
+
+      expect(mockWithLock).toHaveBeenCalledWith(
+        'agent_builder_sml_index_drop',
+        expect.any(Function)
+      );
+      expect(mockSmlClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('mapping rebuild path drops when the in-place retry still fails inside the lock', async () => {
+      mockUpdateMappingsIfNeeded
+        .mockRejectedValueOnce({
+          statusCode: 400,
+          body: { error: { type: 'illegal_argument_exception' } },
+        })
+        .mockRejectedValueOnce({
+          statusCode: 400,
+          body: { error: { type: 'illegal_argument_exception' } },
+        });
+      const definition = createMockDefinition();
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
+
+      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
     });
 
     it('never writes _meta via putMapping — version stamping is owned by the index template', async () => {
@@ -826,7 +946,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(esClient.indices.putMapping).not.toHaveBeenCalled();
     });
@@ -844,7 +964,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to list items'));
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
@@ -864,7 +984,7 @@ describe('SmlCrawlerImpl', () => {
         .mockResolvedValue({ errors: false, items: [] });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to update state'));
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
@@ -884,7 +1004,7 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
+      await crawler.crawl({ definition, esClient, savedObjectsClient, lockManager });
 
       // Should have written two separate bulk calls (one per page)
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>

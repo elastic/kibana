@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { LockManagerService } from '@kbn/lock-manager';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/http_api/sml';
 
@@ -306,6 +307,7 @@ export interface SmlCrawler {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
+    lockManager: LockManagerService;
     abortSignal?: AbortSignal;
   }) => Promise<void>;
 }

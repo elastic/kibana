@@ -37,11 +37,15 @@ const mockSmlService = {
 };
 const mockLogger = loggerMock.create();
 (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+const mockLockManager = {
+  withLock: jest.fn(async (_id: string, cb: () => Promise<unknown>) => cb()),
+};
 const mockGetCrawlerDeps = jest.fn().mockResolvedValue({
   smlService: mockSmlService,
   elasticsearch: { client: { asInternalUser: mockEsClient } },
   savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
   uiSettings: mockUiSettings,
+  lockManager: mockLockManager,
   logger: mockLogger,
 });
 
@@ -84,6 +88,7 @@ describe('sml_task_definitions', () => {
       elasticsearch: { client: { asInternalUser: mockEsClient } },
       savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
       uiSettings: mockUiSettings,
+      lockManager: mockLockManager,
       logger: mockLogger,
     });
     mockSmlService.listTypeDefinitions.mockReturnValue([]);
@@ -147,6 +152,7 @@ describe('sml_task_definitions', () => {
         definition,
         esClient: mockEsClient,
         savedObjectsClient: mockSoRepository,
+        lockManager: mockLockManager,
         abortSignal: mockAbortController.signal,
       });
     });

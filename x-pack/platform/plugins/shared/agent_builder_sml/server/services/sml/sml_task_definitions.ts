@@ -13,6 +13,7 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { LockManagerService } from '@kbn/lock-manager';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlService } from './types';
@@ -62,6 +63,7 @@ interface SmlCrawlerDepsProvider {
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  lockManager: LockManagerService;
   logger: Logger;
 }
 
@@ -92,7 +94,7 @@ export const registerSmlCrawlerTaskDefinition = ({
               return { state: {} };
             }
 
-            const { smlService, elasticsearch, savedObjects, uiSettings, logger } =
+            const { smlService, elasticsearch, savedObjects, uiSettings, lockManager, logger } =
               await getCrawlerDeps();
 
             const soClient = savedObjects.createInternalRepository();
@@ -131,6 +133,7 @@ export const registerSmlCrawlerTaskDefinition = ({
                 definition,
                 esClient,
                 savedObjectsClient: soRepository,
+                lockManager,
                 abortSignal: signal,
               });
               logger.debug(`SML crawler task completed for type '${attachmentType}'`);
