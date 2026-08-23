@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiSkeletonText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +37,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
+        <KbnDangerCallout announceOnMount title={error} />
       </>
     );
   }
