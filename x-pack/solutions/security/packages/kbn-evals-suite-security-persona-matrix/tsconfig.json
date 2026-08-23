@@ -11,7 +11,6 @@
     "@kbn/core",
     "@kbn/evals",
     "@kbn/evals-suite-attack-discovery",
-    "@kbn/entity-store",
     "@kbn/scout",
     "@kbn/security-evals-alerts-snapshot",
     "@kbn/tooling-log",
