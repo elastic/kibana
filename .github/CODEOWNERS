@@ -1854,6 +1854,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/ @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm_2.index.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm_2.serverless.config.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-signals-metrics-team
