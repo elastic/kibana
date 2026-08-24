@@ -105,31 +105,6 @@ function reconcileInstances(
   return [...kept, ...added];
 }
 
-/**
- * Migrate a persisted ServiceVars value that may be in the old flat shape
- * ({enabledInputs, varsByInput}) to the new per-DS shape.
- * Old sessions stored a flat structure before ingest-dev#9304 restructured to PT granularity.
- */
-function migrateServiceVars(raw: unknown, service: AwsServiceMatrixEntry | undefined): ServiceVars {
-  if (!raw || typeof raw !== 'object') {
-    return { enabledDataStreams: service?.dataStreams ?? [], varsByDataStream: {} };
-  }
-  const r = raw as Record<string, unknown>;
-  // Detect old flat shape: has enabledInputs but not enabledDataStreams
-  if ('enabledInputs' in r && !('enabledDataStreams' in r)) {
-    const oldInputs = (r.enabledInputs as string[]) ?? [];
-    const oldVarsByInput = (r.varsByInput as Record<string, Record<string, string>>) ?? {};
-    const dsIds = service?.dataStreams ?? [];
-    const varsByDataStream: Record<string, ServiceDataStreamVars> = {};
-    // Assign the flat vars to the first (primary) DS.
-    if (dsIds.length > 0) {
-      varsByDataStream[dsIds[0]] = { enabledInputs: oldInputs, varsByInput: oldVarsByInput };
-    }
-    return { enabledDataStreams: dsIds, varsByDataStream };
-  }
-  return raw as ServiceVars;
-}
-
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -163,11 +138,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {
       const raw = persisted?.serviceVars?.[instanceId];
+      if (raw) {
+        return raw as ServiceVars;
+      }
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
-      if (raw) {
-        return migrateServiceVars(raw, service);
-      }
       return {
         enabledDataStreams: service?.dataStreams ?? [],
         varsByDataStream: {},
