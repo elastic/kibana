@@ -97,15 +97,24 @@ export class ScoutFailedTestReporter implements Reporter {
   onBegin(config: FullConfig, suite: Suite) {
     this.suite = suite;
 
-    // Get plugin or package metadata from kibana.jsonc
+    // Get plugin or package metadata from kibana.jsonc. Playwright 1.62+ fails the
+    // whole run if a reporter throws, so a missing/unresolvable manifest must not
+    // abort onBegin — leave kibanaModule unset and keep reporting failures.
     if (config.configFile) {
-      const metadata = getKibanaModuleData(config.configFile);
-      this.kibanaModule = {
-        id: metadata.id,
-        type: metadata.type,
-        visibility: metadata.visibility,
-        group: metadata.group,
-      };
+      try {
+        const metadata = getKibanaModuleData(config.configFile);
+        this.kibanaModule = {
+          id: metadata.id,
+          type: metadata.type,
+          visibility: metadata.visibility,
+          group: metadata.group,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.log.warning(
+          `Unable to resolve kibana.jsonc for Scout config ${config.configFile}: ${message}. Failure reports will omit kibanaModule metadata.`
+        );
+      }
     }
 
     // Initialize failure tracker for GitHub issue integration
