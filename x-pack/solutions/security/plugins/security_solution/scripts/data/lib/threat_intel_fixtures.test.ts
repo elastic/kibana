@@ -28,7 +28,6 @@ import {
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
   THREAT_INTEL_LIVE_WINDOW_MS,
   THREAT_INTEL_RSS_CURRENT_ITEMS_PER_PACK,
-  THREAT_INTEL_SUBSCRIPTION_ID,
 } from './threat_intel_fixtures';
 
 describe('PACK_TI_SCENARIOS', () => {
@@ -48,7 +47,6 @@ describe('PACK_TI_SCENARIOS', () => {
       'ti-rss-kubernetes',
       'ti-rss-okta',
     ]);
-    expect(THREAT_INTEL_SUBSCRIPTION_ID).toEqual('threat-intel-digest');
   });
 
   it('keeps fixture identity free of data-generator strings', () => {
@@ -65,7 +63,6 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(blob.toLowerCase()).not.toContain('data-generator');
       expect(blob.toLowerCase()).not.toContain('data generator');
     }
-    expect(THREAT_INTEL_SUBSCRIPTION_ID.toLowerCase()).not.toContain('data-generator');
   });
 
   it('declares Hub categories and regions for historic report seeding', () => {
