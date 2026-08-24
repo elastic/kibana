@@ -169,6 +169,15 @@ export const signalEvidenceSchema = z.object({
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
     ),
+  time_range: z
+    .object({
+      from: z.iso.datetime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+      to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+    })
+    .optional()
+    .describe(
+      'Absolute time window the query was executed against. Required to interpret an esql_query that uses ?_tstart/?_tend placeholders.'
+    ),
 });
 
 export const SIGNAL_VERDICTS = [
@@ -201,7 +210,7 @@ const signalBaseSchema = z.object({
   verdict: z
     .enum(SIGNAL_VERDICTS)
     .describe(
-      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation at a newly elevated rate; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion (empty or errored evidence, or matching rows whose pre/post rate shows no new elevation); not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -255,11 +264,12 @@ const detectionSignalSchema = signalBaseSchema
         message: 'A refuting verdict requires found or empty query evidence.',
       });
     }
-    if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {
+    if (signal.verdict === 'inconclusive' && result === undefined) {
       context.addIssue({
         code: 'custom',
         path: ['verdict'],
-        message: 'An inconclusive verdict requires empty or error query evidence.',
+        message:
+          'An inconclusive verdict requires query evidence (found rate-flat rows, empty, or error).',
       });
     }
     if (

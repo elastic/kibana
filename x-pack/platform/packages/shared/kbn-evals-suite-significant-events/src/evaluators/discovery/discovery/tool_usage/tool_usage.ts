@@ -159,6 +159,8 @@ export const scoreToolUsage = ({
       score === 1
         ? persistenceCalls.retriedPartialFailure
           ? 'Correctly called all tools and retried only failed event items'
+          : persistenceCalls.retriedSchemaFailure
+          ? 'Correctly called all tools and retried after a schema or tool error'
           : 'Correctly called all tools'
         : `Missing tools: ${missing.join(', ')}`,
   };

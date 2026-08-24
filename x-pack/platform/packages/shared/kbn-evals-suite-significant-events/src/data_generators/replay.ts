@@ -24,6 +24,7 @@ export type { ReplayStats } from './replay_into_managed_stream';
 export {
   deleteTemporaryReplayIndices,
   replayIntoManagedStream,
+  shiftSnapshotTimestamp,
 } from './replay_into_managed_stream';
 
 export { replayKnowledgeIndicatorsSnapshot } from './replay_knowledge_indicators_snapshot';

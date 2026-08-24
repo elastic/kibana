@@ -95,11 +95,28 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface ChronicSeedInput {
+  /** Failure phrase written to `body.text`; the seeded KI query greps for it. */
+  phrase: string;
+  service: string;
+  rate_per_minute: number;
+  duration_minutes: number;
+  detection_offset_minutes: number;
+  ki_title: string;
+  ki_description: string;
+}
+
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
+    /**
+     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
+     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     */
+    chronic_seed?: ChronicSeedInput;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
