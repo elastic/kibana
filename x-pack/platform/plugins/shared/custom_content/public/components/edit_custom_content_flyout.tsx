@@ -307,7 +307,7 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  disabled={!hasChanges || hasPreviewedCurrentDraft || !draftTemplate.trim()}
                   onClick={handleRender}
                   data-test-subj="customContentRunPreviewButton"
                 >

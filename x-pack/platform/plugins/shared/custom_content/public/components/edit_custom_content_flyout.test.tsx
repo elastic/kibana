@@ -142,7 +142,11 @@ describe('EditCustomContentFlyout', () => {
     });
 
     it('is enabled when the query differs from the saved value', () => {
-      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM other',
+        draftTemplate: '<p>hi</p>',
+      });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
       expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
     });
@@ -171,6 +175,7 @@ describe('EditCustomContentFlyout', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
         handleRender,
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
