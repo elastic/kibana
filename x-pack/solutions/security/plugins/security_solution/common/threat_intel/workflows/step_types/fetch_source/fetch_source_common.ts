@@ -145,8 +145,10 @@ export const fetchSourceStepCommonDefinition: BaseStepDefinition<
     details: i18n.translate(
       'xpack.securitySolution.workflows.steps.threatIntelFetchSource.documentation.details',
       {
+        // Braces are wrapped in single quotes so ICU MessageFormat treats them
+        // as literal text instead of parsing `{{ foreach.item }}` as an argument.
         defaultMessage:
-          'Runs the adapter for `source._source.adapter_type` (rss, stix, taxii, vendor_api, kev, text list). Pass `source` as `${{ foreach.item }}` so the hit stays an object. `{{ foreach.item }}` stringifies it.',
+          "Runs the adapter for `source._source.adapter_type` (rss, stix, taxii, vendor_api, kev, text list). Pass `source` as `$'{{ foreach.item }}'` so the hit stays an object. `'{{ foreach.item }}'` stringifies it.",
       }
     ),
     examples: [
