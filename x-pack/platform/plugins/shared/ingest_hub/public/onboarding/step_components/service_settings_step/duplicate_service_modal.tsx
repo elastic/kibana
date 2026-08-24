@@ -62,17 +62,21 @@ export function DuplicateServiceModal({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
   }));
-  const [draftEnabledDataStreams, setDraftEnabledDataStreams] = useState<string[]>(
-    sourceConfig.enabledDataStreams
-  );
 
   const trimmedName = name.trim();
   const nameEmpty = trimmedName === '';
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
   const nameInvalid = nameEmpty || nameTaken;
 
+  const singleDs = service.dataStreams.length === 1;
+  const enabledDsFromInputs = service.dataStreams.filter((dsId) => {
+    const dsVars = draftByDs[dsId];
+    if (dsVars) return dsVars.enabledInputs.length > 0;
+    if (singleDs) return true;
+    return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+  });
   const activeDataStreams =
-    draftEnabledDataStreams.length > 0 ? draftEnabledDataStreams : service.dataStreams;
+    enabledDsFromInputs.length > 0 ? enabledDsFromInputs : service.dataStreams;
 
   const anyRequiredEmpty = activeDataStreams.some((dsId) => {
     const dsInfo = service.varDefsByDataStream?.[dsId];
@@ -111,7 +115,13 @@ export function DuplicateServiceModal({
       setNameTouched(true);
       return;
     }
-    onAdd(trimmedName, draftByDs, draftEnabledDataStreams);
+    const enabledDataStreams = service.dataStreams.filter((dsId) => {
+      const dsVars = draftByDs[dsId];
+      if (dsVars) return dsVars.enabledInputs.length > 0;
+      if (singleDs) return true;
+      return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+    });
+    onAdd(trimmedName, draftByDs, enabledDataStreams);
   };
 
   return (
@@ -167,11 +177,13 @@ export function DuplicateServiceModal({
         <ServiceFieldsForm
           service={service}
           varsByDataStream={draftByDs}
-          enabledDataStreams={draftEnabledDataStreams}
           globalRegion={globalRegion}
           onFieldChange={(dsId, input, fieldName, value) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {
@@ -184,14 +196,12 @@ export function DuplicateServiceModal({
               };
             })
           }
-          onDataStreamToggle={(dsId, enabled) =>
-            setDraftEnabledDataStreams((prev) =>
-              enabled ? [...prev, dsId] : prev.filter((id) => id !== dsId)
-            )
-          }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {

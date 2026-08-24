@@ -48,12 +48,16 @@ export function ServiceSettingsFlyout({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...config.varsByDataStream,
   }));
-  const [draftEnabledDataStreams, setDraftEnabledDataStreams] = useState<string[]>(
-    config.enabledDataStreams
-  );
 
   const handleApply = () => {
-    onApply(draftByDs, draftEnabledDataStreams);
+    const singleDs = service.dataStreams.length === 1;
+    const enabledDataStreams = service.dataStreams.filter((dsId) => {
+      const dsVars = draftByDs[dsId];
+      if (dsVars) return dsVars.enabledInputs.length > 0;
+      if (singleDs) return true;
+      return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+    });
+    onApply(draftByDs, enabledDataStreams);
   };
 
   return (
@@ -80,11 +84,13 @@ export function ServiceSettingsFlyout({
         <ServiceFieldsForm
           service={service}
           varsByDataStream={draftByDs}
-          enabledDataStreams={draftEnabledDataStreams}
           globalRegion={globalRegion}
           onFieldChange={(dsId, input, fieldName, value) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {
@@ -97,14 +103,12 @@ export function ServiceSettingsFlyout({
               };
             })
           }
-          onDataStreamToggle={(dsId, enabled) =>
-            setDraftEnabledDataStreams((prev) =>
-              enabled ? [...prev, dsId] : prev.filter((id) => id !== dsId)
-            )
-          }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {

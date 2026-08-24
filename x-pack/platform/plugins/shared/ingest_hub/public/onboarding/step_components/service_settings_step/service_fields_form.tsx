@@ -37,9 +37,11 @@ import {
 } from './field_config';
 import type { ServiceDataStreamVars } from './use_service_settings';
 
-function getInputDisplayLabel(input: string): string {
+function getInputDisplayLabel(input: string, inputTitles?: Record<string, string>): string {
+  if (inputTitles?.[input]) return inputTitles[input];
   switch (input) {
     case 'httpjson':
+    case 'cel':
       return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.httpjson', {
         defaultMessage: 'Collect logs via API',
       });
@@ -59,10 +61,8 @@ function getInputDisplayLabel(input: string): string {
 export interface ServiceFieldsFormProps {
   service: AwsServiceMatrixEntry;
   varsByDataStream: Record<string, ServiceDataStreamVars>;
-  enabledDataStreams: string[];
   globalRegion: string;
   onFieldChange: (dsId: string, input: string, fieldName: string, value: string) => void;
-  onDataStreamToggle: (dsId: string, enabled: boolean) => void;
   onInputToggle: (dsId: string, input: string, enabled: boolean) => void;
 }
 
@@ -312,10 +312,8 @@ function InputVarFields({
 export function ServiceFieldsForm({
   service,
   varsByDataStream,
-  enabledDataStreams,
   globalRegion,
   onFieldChange,
-  onDataStreamToggle,
   onInputToggle,
 }: ServiceFieldsFormProps) {
   const dataStreams = service.dataStreams ?? [];
@@ -324,35 +322,21 @@ export function ServiceFieldsForm({
   if (dataStreams.length === 0) return null;
 
   if (!multiDs) {
-    // Single data-stream service — render inputs directly, no DS-level toggle.
+    // Single data-stream service — render input toggles for all inputs.
     const dsId = dataStreams[0];
     const dsView = makeDsView(service, dsId);
     const dsInputs = dsView.inputs ?? [];
-    const dsVars = varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-    const multiInput = dsInputs.length > 1;
-
-    if (!multiInput) {
-      const singleInput = dsInputs[0] ?? null;
-      return singleInput ? (
-        <InputVarFields
-          service={dsView}
-          activeInput={singleInput}
-          varsByInput={dsVars.varsByInput}
-          globalRegion={globalRegion}
-          onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
-        />
-      ) : null;
-    }
+    const dsVars = varsByDataStream[dsId];
 
     return (
       <>
         {dsInputs.map((input, idx) => {
-          const isEnabled = dsVars.enabledInputs.includes(input);
+          const isEnabled = dsVars ? dsVars.enabledInputs.includes(input) : true;
           return (
             <React.Fragment key={input}>
               {idx > 0 && <EuiHorizontalRule margin="m" />}
               <EuiSwitch
-                label={getInputDisplayLabel(input)}
+                label={getInputDisplayLabel(input, service.inputTitles)}
                 checked={isEnabled}
                 onChange={(e) => onInputToggle(dsId, input, e.target.checked)}
                 data-test-subj={`serviceSettingsFlyout-inputToggle-${input}`}
@@ -360,13 +344,15 @@ export function ServiceFieldsForm({
               {isEnabled && (
                 <>
                   <EuiSpacer size="m" />
-                  <InputVarFields
-                    service={dsView}
-                    activeInput={input}
-                    varsByInput={dsVars.varsByInput}
-                    globalRegion={globalRegion}
-                    onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
-                  />
+                  <div style={{ paddingLeft: 24 }}>
+                    <InputVarFields
+                      service={dsView}
+                      activeInput={input}
+                      varsByInput={dsVars?.varsByInput ?? {}}
+                      globalRegion={globalRegion}
+                      onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
+                    />
+                  </div>
                 </>
               )}
             </React.Fragment>
@@ -376,67 +362,46 @@ export function ServiceFieldsForm({
     );
   }
 
-  // Multi-data-stream service — render per-DS sections with DS-level toggles.
+  // Multi-data-stream service — flat input toggles; DS enabled state is derived from inputs.
+  const inputItems = dataStreams.flatMap((dsId) => {
+    const dsView = makeDsView(service, dsId);
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = varsByDataStream[dsId];
+    const dsInputs = dsView.inputs ?? [];
+    return dsInputs.map((input) => ({ dsId, input, dsView, dsInfo, dsVars, dsInputs }));
+  });
+
   return (
     <>
-      {dataStreams.map((dsId, dsIdx) => {
-        const dsView = makeDsView(service, dsId);
-        const dsInfo = service.varDefsByDataStream?.[dsId];
-        const dsVars = varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-        const isDsEnabled = enabledDataStreams.includes(dsId);
-        const dsInputs = dsView.inputs ?? [];
-        const multiInput = dsInputs.length > 1;
-
+      {inputItems.map(({ dsId, input, dsView, dsInfo, dsVars, dsInputs }, idx) => {
+        const isInputEnabled = dsVars
+          ? dsVars.enabledInputs.includes(input)
+          : (dsInfo?.defaultEnabledInputs ?? []).includes(input);
+        const label =
+          dsInputs.length === 1
+            ? dsInfo?.title ?? getInputDisplayLabel(input, service.inputTitles)
+            : `${dsInfo?.title ?? dsId} — ${getInputDisplayLabel(input, service.inputTitles)}`;
         return (
-          <React.Fragment key={dsId}>
-            {dsIdx > 0 && <EuiHorizontalRule margin="m" />}
+          <React.Fragment key={`${dsId}-${input}`}>
+            {idx > 0 && <EuiHorizontalRule margin="m" />}
             <EuiSwitch
-              label={dsInfo?.title ?? dsId}
-              checked={isDsEnabled}
-              onChange={(e) => onDataStreamToggle(dsId, e.target.checked)}
-              data-test-subj={`serviceSettingsFlyout-dsToggle-${dsId}`}
+              label={label}
+              checked={isInputEnabled}
+              onChange={(e) => onInputToggle(dsId, input, e.target.checked)}
+              data-test-subj={`serviceSettingsFlyout-inputToggle-${dsId}-${input}`}
             />
-            {isDsEnabled && (
+            {isInputEnabled && (
               <>
                 <EuiSpacer size="m" />
-                {multiInput ? (
-                  dsInputs.map((input, inputIdx) => {
-                    const isInputEnabled = dsVars.enabledInputs.includes(input);
-                    return (
-                      <React.Fragment key={input}>
-                        {inputIdx > 0 && <EuiHorizontalRule margin="s" />}
-                        <EuiSwitch
-                          label={getInputDisplayLabel(input)}
-                          checked={isInputEnabled}
-                          onChange={(e) => onInputToggle(dsId, input, e.target.checked)}
-                          data-test-subj={`serviceSettingsFlyout-inputToggle-${dsId}-${input}`}
-                        />
-                        {isInputEnabled && (
-                          <>
-                            <EuiSpacer size="m" />
-                            <InputVarFields
-                              service={dsView}
-                              activeInput={input}
-                              varsByInput={dsVars.varsByInput}
-                              globalRegion={globalRegion}
-                              onFieldChange={(inp, field, val) =>
-                                onFieldChange(dsId, inp, field, val)
-                              }
-                            />
-                          </>
-                        )}
-                      </React.Fragment>
-                    );
-                  })
-                ) : dsInputs[0] ? (
+                <div style={{ paddingLeft: 24 }}>
                   <InputVarFields
                     service={dsView}
-                    activeInput={dsInputs[0]}
-                    varsByInput={dsVars.varsByInput}
+                    activeInput={input}
+                    varsByInput={dsVars?.varsByInput ?? {}}
                     globalRegion={globalRegion}
                     onFieldChange={(inp, field, val) => onFieldChange(dsId, inp, field, val)}
                   />
-                ) : null}
+                </div>
               </>
             )}
           </React.Fragment>

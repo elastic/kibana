@@ -101,6 +101,8 @@ export interface AwsServiceMatrixEntry {
    */
   varDefsByDataStream?: Record<string, DataStreamInfo>;
   packageName: string;
+  /** Display titles for each input type, sourced from policy_templates[].inputs[].title. */
+  inputTitles?: Record<string, string>;
   /** Whether the service is enabled by default when the integration is installed. */
   defaultEnabled: boolean;
   /**
@@ -435,6 +437,7 @@ export function buildAwsServiceMatrix(
     let defaultEnabled = true;
     const defaultEnabledInputs: string[] = [];
     let identityFederationSupported: boolean | undefined;
+    const inputTitles: Record<string, string> = {};
     let managedIntegrations = false;
     let pt: any;
     const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
@@ -588,9 +591,16 @@ export function buildAwsServiceMatrix(
           defaultEnabled = defaultEnabledInputs.length > 0;
         }
 
+        // Collect per-input display titles from the policy template manifest.
+        const ptInputs: any[] = (pt as any)?.inputs ?? [];
+        for (const ptInput of ptInputs) {
+          if (ptInput.type && ptInput.title) {
+            inputTitles[ptInput.type as string] = ptInput.title as string;
+          }
+        }
+
         // Derive identityFederationSupported: true when at least one of the PT's inputs does NOT
         // hide 'identity_federation' in the 'credential_type' var_group.
-        const ptInputs: any[] = (pt as any)?.inputs ?? [];
         const allDsInputTypes = new Set(Object.keys(varDefsByInput));
         if (ptInputs.length > 0 && allDsInputTypes.size > 0) {
           const relevantInputs = ptInputs.filter((i: any) => allDsInputTypes.has(i.type));
@@ -669,6 +679,7 @@ export function buildAwsServiceMatrix(
         Object.keys(varDefsByDataStream).length > 0 ? varDefsByDataStream : undefined,
       defaultEnabled,
       defaultEnabledInputs,
+      inputTitles: Object.keys(inputTitles).length > 0 ? inputTitles : undefined,
       showInUI,
       badge,
       identityFederationSupported,
