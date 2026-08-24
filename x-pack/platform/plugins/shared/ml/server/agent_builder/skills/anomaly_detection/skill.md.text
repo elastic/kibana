@@ -548,20 +548,22 @@ Heatmap — each row is one `view_by` field value, each column is a time bucket,
   "type": "ml_anomaly_swimlane",
   "grid": { "x": 0, "y": 0, "w": 24, "h": 10 },
   "config": {
-    "title": "Anomalies of my-job by host.name",
+    "title": "Anomalies of my-job by host.name with severity >= 50",
     "job_ids": ["my-job"],
     "swimlane_type": "viewBy",
-    "view_by": "host.name"
+    "view_by": "host.name",
+    "severity_threshold": 50
   }
 }
 ```
 
 | Field | Notes |
 | --- | --- |
-| `title` | Optional. Descriptive panel title. Use the pattern `"Anomalies of <job-id> by <view_by>"` for viewBy, or `"Overall anomalies of <job-id>"` for overall. |
+| `title` | Optional. Descriptive panel title. Use the pattern `"Anomalies of <job-id> by <view_by>"` for viewBy, or `"Overall anomalies of <job-id>"` for overall. Append `" with severity >= <N>"` when a threshold is set. |
 | `job_ids` | Required. One or more existing job or group IDs. |
 | `swimlane_type` | Required. `"overall"` or `"viewBy"`. |
 | `view_by` | Required when `swimlane_type` is `"viewBy"`. Use the exact field name from the job config (e.g. `"host.name"`). |
+| `severity_threshold` | Optional. Minimum anomaly score (0–100). Only anomalies with a score at or above this value are shown. Omit to show all anomalies. Typical values: `25` (minor and above), `50` (major and above), `75` (critical only). |
 | `time_range` | Set to the analysis window (`{"from": "...", "to": "..."}`) for historical/batch jobs — omitting it defaults the panel to "last 15 minutes" which shows no data. Omit only for realtime jobs that should track the current time range. |
 
 ### `ml_anomaly_charts`
