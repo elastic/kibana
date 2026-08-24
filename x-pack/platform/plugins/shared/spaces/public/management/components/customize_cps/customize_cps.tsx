@@ -113,21 +113,23 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
             defaultMessage: 'Cross-project search default scope',
           })}
           labelAppend={
-            <EuiToolTip disableScreenReaderOutput>
-              <EuiButtonIcon
-                buttonRef={contextMenuTriggerButtonRef}
-                iconType="ellipsis"
-                aria-label={i18n.translate(
-                  'xpack.spaces.management.manageSpacePage.cpsDefaultScopeMenuActions',
-                  {
-                    defaultMessage: 'Cross-project search default scope menu actions',
-                  }
-                )}
-                color="text"
-                onClick={openContextMenu}
-                data-test-subj="cpsDefaultScopeMenuActionsButton"
-              />
-            </EuiToolTip>
+            Boolean(configurationLinks.length) ? (
+              <EuiToolTip disableScreenReaderOutput>
+                <EuiButtonIcon
+                  buttonRef={contextMenuTriggerButtonRef}
+                  iconType="ellipsis"
+                  aria-label={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.cpsDefaultScopeMenuActions',
+                    {
+                      defaultMessage: 'Cross-project search default scope menu actions',
+                    }
+                  )}
+                  color="text"
+                  onClick={openContextMenu}
+                  data-test-subj="cpsDefaultScopeMenuActionsButton"
+                />
+              </EuiToolTip>
+            ) : null
           }
         >
           <>
