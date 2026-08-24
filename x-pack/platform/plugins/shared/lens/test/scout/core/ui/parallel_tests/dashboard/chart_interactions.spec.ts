@@ -73,7 +73,9 @@ spaceTest.describe('Lens dashboard chart interactions', { tag: '@local-stateful-
       const time = await datePicker.getTimeConfig();
       expect(time.start).toBe(XY_TIME_START);
       expect(time.end).toBe(XY_TIME_END);
-      await expect(page.testSubj.locator('~filter-key-ip & ~filter-value-97.220.3.248')).toBeVisible();
+      await expect(
+        page.testSubj.locator('~filter-key-ip & ~filter-value-97.220.3.248')
+      ).toBeVisible();
     }
   );
 
@@ -94,7 +96,9 @@ spaceTest.describe('Lens dashboard chart interactions', { tag: '@local-stateful-
       const tooltipActions = page.locator('.echTooltipActions');
       await clickElasticChartCanvas(page, { x: 30, y: 5 }, { button: 'right' });
       await tooltipActions.getByText(/Filter \d+ selected series/).click();
-      await expect(page.testSubj.locator('~filter-key-ip & ~filter-value-97.220.3.248')).toBeVisible();
+      await expect(
+        page.testSubj.locator('~filter-key-ip & ~filter-value-97.220.3.248')
+      ).toBeVisible();
 
       await clickElasticChartCanvas(page, { x: 35, y: 5 }, { button: 'right' });
       await tooltipActions.getByText('Filter by time').click();
