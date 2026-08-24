@@ -16,7 +16,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({}).describe('No parameters. Lists stats for every rule migration.');
@@ -63,6 +64,11 @@ Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (_input, { request }) => {
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view rule migration stats');
+      }
+
       const response = await callSelfClient<GetAllStatsRuleMigrationResponse>(
         request,
         SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,

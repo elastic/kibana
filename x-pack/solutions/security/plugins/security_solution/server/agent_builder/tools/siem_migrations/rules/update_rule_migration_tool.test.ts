@@ -7,8 +7,11 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { createToolTestMocks, createToolHandlerContext } from '../../../__mocks__/test_helpers';
-import { coreMock } from '@kbn/core/server/mocks';
+import {
+  createToolTestMocks,
+  createToolHandlerContext,
+  setupMockCoreStartServices,
+} from '../../../__mocks__/test_helpers';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { updateRuleMigrationTool } from './update_rule_migration_tool';
 
@@ -17,34 +20,25 @@ const mockProductFeaturesService = {
 } as unknown as ProductFeaturesService;
 
 describe('updateRuleMigrationTool', () => {
-  const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  let mockCore: ReturnType<typeof coreMock.createSetup>;
+  const {
+    mockCore,
+    mockLogger,
+    mockEsClient,
+    mockSecurityStart,
+    mockCheckPrivileges,
+    mockRequest,
+  } = createToolTestMocks();
   let mockFetch: jest.Mock;
-  let checkPrivileges: jest.Mock;
 
-  const tool = () => updateRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
+  const tool = updateRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCore = coreMock.createSetup();
     mockFetch = jest.fn();
-    checkPrivileges = jest.fn();
-    const mockCoreStart = coreMock.createStart();
+    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
       fetch: mockFetch,
     });
-    checkPrivileges.mockResolvedValue({ hasAllRequested: true });
-    mockCore.getStartServices.mockResolvedValue([
-      mockCoreStart,
-      {
-        security: {
-          authz: {
-            checkPrivilegesDynamicallyWithRequest: () => checkPrivileges,
-          },
-        },
-      } as never,
-      {},
-    ]);
   });
 
   it('should update a migration name and return { ok: true }', async () => {
@@ -55,7 +49,7 @@ describe('updateRuleMigrationTool', () => {
       body: null,
     });
 
-    const result = (await tool().handler(
+    const result = (await tool.handler(
       { migration_id: 'abc', name: 'Renamed Migration' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
@@ -79,7 +73,7 @@ describe('updateRuleMigrationTool', () => {
       body: null,
     });
 
-    await tool().handler(
+    await tool.handler(
       { migration_id: 'abc', index_pattern: 'logs-*,winlogbeat-*' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
@@ -96,7 +90,7 @@ describe('updateRuleMigrationTool', () => {
       body: null,
     });
 
-    await tool().handler(
+    await tool.handler(
       { migration_id: 'abc', name: 'New Name', index_pattern: 'logs-archive-*' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
@@ -107,15 +101,15 @@ describe('updateRuleMigrationTool', () => {
 
   it('should reject a no-op PATCH where neither name nor index_pattern is provided', () => {
     // Schema .refine rejects this before the handler runs.
-    const schema = tool().schema;
+    const schema = tool.schema;
     const result = schema.safeParse({ migration_id: 'abc' });
     expect(result.success).toBe(false);
   });
 
   it('should return an error result without calling the endpoint when privileges are missing', async () => {
-    checkPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
+    mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
-    const result = (await tool().handler(
+    const result = (await tool.handler(
       { migration_id: 'abc', name: 'New Name' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
@@ -134,7 +128,7 @@ describe('updateRuleMigrationTool', () => {
     error.body = { message: 'Invalid index pattern' };
     mockFetch.mockRejectedValueOnce(error);
 
-    const result = (await tool().handler(
+    const result = (await tool.handler(
       { migration_id: 'abc', name: 'New Name' },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;

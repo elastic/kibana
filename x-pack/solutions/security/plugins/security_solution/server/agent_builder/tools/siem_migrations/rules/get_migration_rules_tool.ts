@@ -20,7 +20,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
 // Extend the OpenAPI-generated query schema, bounding the unbounded inputs (repo rule: prevent
@@ -101,6 +102,11 @@ Read-only.`,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {
       const { migration_id: migrationId, ...query } = input;
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view migration rules');
+      }
+
       // Default sort: translated title asc (deterministic pagination of translated rules).
       const response = await callSelfClient<GetRuleMigrationRulesResponse>(
         request,
