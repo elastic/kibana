@@ -31,7 +31,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     display: 'flex',
     alignItems: 'center',
     gap: euiTheme.size.s,
-    padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+    padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xxs}`,
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     flexShrink: 0,
     minHeight: 40,
@@ -83,7 +83,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     fontWeight: euiTheme.font.weight.semiBold,
     fontSize: 'var(--tsg-font-size, 14px)',
-    lineHeight: 'var(--tsg-line-height, 21px)',
+    lineHeight: 'var(--tsg-header-line-height, 21px)',
     overflow: 'hidden',
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     boxSizing: 'border-box',
@@ -441,6 +441,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   headerActionsButton: css({
+    position: 'absolute',
+    insetInlineEnd: euiTheme.size.xs,
+    top: '50%',
+    transform: 'translateY(-50%)',
     flexShrink: 0,
     opacity: 0,
     transition: 'opacity 100ms ease',
@@ -463,12 +467,26 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   // -- Toolbar enhancements --
+  toolbarLeadingControls: css({
+    display: 'contents',
+  }),
+
+  toolbarSpacer: css({
+    flex: '1 1 auto',
+    minWidth: 0,
+  }),
+
   toolbarRight: css({
     display: 'flex',
     alignItems: 'center',
     gap: euiTheme.size.xs,
-    marginLeft: 'auto',
     minWidth: 0,
+  }),
+
+  selectionToolbarControlLabel: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
   }),
 
   columnSelectorSummaryToggle: css({

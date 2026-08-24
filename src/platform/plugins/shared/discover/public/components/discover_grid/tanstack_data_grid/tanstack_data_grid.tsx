@@ -39,6 +39,7 @@ import {
   EuiIconTip,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
@@ -50,11 +51,13 @@ import {
   logicalStyle,
   mathWithUnits,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta, RowControlProps } from '@kbn/discover-utils';
 import {
   getShouldShowFieldHandler,
+  calcFieldCounts,
   formatFieldValueText,
   canPrependTimeFieldColumn,
   getVisibleColumns,
@@ -80,11 +83,18 @@ import {
   getColumnDisplayName,
   getSchemaByKbnType,
   isSortable,
+  CompareDocuments,
+  CopyAsTextFormat,
+  copyRowsAsJsonToClipboard,
+  copyRowsAsTextToClipboard,
+  getSchemaDetectors,
   type UnifiedDataTableProps,
   type SortOrder,
   type RenderDocumentViewMeta,
   type ValueToStringConverter,
+  type DocMap,
 } from '@kbn/unified-data-table';
+import { uniq } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
@@ -164,6 +174,9 @@ export interface TanStackDataGridProps {
   toolbarTrailingControl?: React.ReactNode;
   showKeyboardShortcuts?: UnifiedDataTableProps['showKeyboardShortcuts'];
   showSummaryColumnToggle?: UnifiedDataTableProps['showSummaryColumnToggle'];
+  enableComparisonMode?: UnifiedDataTableProps['enableComparisonMode'];
+  ariaLabelledBy?: UnifiedDataTableProps['ariaLabelledBy'];
+  showFullScreenButton?: UnifiedDataTableProps['showFullScreenButton'];
 }
 
 const DENSITY_ICONS: Record<DataGridDensity, string> = {
@@ -198,6 +211,7 @@ const DENSITY_BUTTONS = [
 
 const OVERSCAN = 20;
 const MAX_SUMMARY_FIELDS = 80;
+const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
 
 const scrollPositionCache = new Map<string, number>();
 
@@ -1018,11 +1032,15 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     toolbarTrailingControl,
     showKeyboardShortcuts = true,
     showSummaryColumnToggle = false,
+    enableComparisonMode = false,
+    ariaLabelledBy = 'documentsAriaLabel',
+    showFullScreenButton = true,
   }) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
     const { fieldFormats, storage, toastNotifications, dataViewFieldEditor, data } = services;
     const parentRef = useRef<HTMLDivElement | null>(null);
+    const dataGridId = useGeneratedHtmlId({ prefix: `${consumer}TanStackGrid` });
     const styles = useMemo(() => getTanStackDataGridStyles(euiTheme), [euiTheme]);
 
     const scrollKey = dataView.id ?? dataView.title;
@@ -1089,10 +1107,93 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       [columnsMeta, effectiveColumns, isPlainRecord, onSetColumns, showTimeCol, timeFieldName]
     );
 
+    // ── Row selection ──
+    const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+    const [isFilterActive, setIsFilterActive] = useState(false);
+    const [isCompareActive, setIsCompareActive] = useState(false);
+    const lastSelectedRowIndexRef = useRef<number | null>(null);
+    const availableRowIds = useMemo(() => new Set(rows.map((row) => row.id)), [rows]);
+    const displayedRows = useMemo(
+      () => (isFilterActive ? rows.filter((row) => selectedRows.has(row.id)) : rows),
+      [isFilterActive, rows, selectedRows]
+    );
+    const allSelected =
+      displayedRows.length > 0 && displayedRows.every((row) => selectedRows.has(row.id));
+    const someSelected = selectedRows.size > 0 && !allSelected;
+
+    const toggleSelectRow = useCallback(
+      (rowId: string, rowIndex: number, selectRange: boolean) => {
+        setSelectedRows((previousSelectedRows) => {
+          const nextSelectedRows = new Set(previousSelectedRows);
+          const shouldSelect = !nextSelectedRows.has(rowId);
+          const previousRowIndex = lastSelectedRowIndexRef.current;
+
+          if (selectRange && previousRowIndex !== null) {
+            const startIndex = Math.min(previousRowIndex, rowIndex);
+            const endIndex = Math.max(previousRowIndex, rowIndex);
+            displayedRows.slice(startIndex, endIndex + 1).forEach((row) => {
+              if (shouldSelect) nextSelectedRows.add(row.id);
+              else nextSelectedRows.delete(row.id);
+            });
+          } else if (shouldSelect) {
+            nextSelectedRows.add(rowId);
+          } else {
+            nextSelectedRows.delete(rowId);
+          }
+
+          return nextSelectedRows;
+        });
+        lastSelectedRowIndexRef.current = rowIndex;
+      },
+      [displayedRows]
+    );
+
+    const toggleSelectAll = useCallback(() => {
+      setSelectedRows((previousSelectedRows) => {
+        const nextSelectedRows = new Set(previousSelectedRows);
+        if (displayedRows.every((row) => nextSelectedRows.has(row.id))) {
+          displayedRows.forEach((row) => nextSelectedRows.delete(row.id));
+        } else {
+          displayedRows.forEach((row) => nextSelectedRows.add(row.id));
+        }
+        return nextSelectedRows;
+      });
+    }, [displayedRows]);
+
+    const clearSelection = useCallback(() => {
+      setSelectedRows(new Set());
+      setIsFilterActive(false);
+      lastSelectedRowIndexRef.current = null;
+    }, []);
+
+    useEffect(() => {
+      setSelectedRows((previousSelectedRows) => {
+        const nextSelectedRows = new Set(
+          Array.from(previousSelectedRows).filter((rowId) => availableRowIds.has(rowId))
+        );
+        return nextSelectedRows.size === previousSelectedRows.size
+          ? previousSelectedRows
+          : nextSelectedRows;
+      });
+    }, [availableRowIds]);
+
+    useEffect(() => {
+      if (selectedRows.size === 0) {
+        setIsFilterActive(false);
+        setIsCompareActive(false);
+      }
+    }, [selectedRows.size]);
+
+    const selectedRowsRef = useRef(selectedRows);
+    selectedRowsRef.current = selectedRows;
+
+    const toggleSelectRowRef = useRef(toggleSelectRow);
+    toggleSelectRowRef.current = toggleSelectRow;
+
     // Find matches
     const findMatches = useMemo(
-      () => scanMatches(rows, effectiveColumns, findTerm, isSummaryMode),
-      [rows, effectiveColumns, findTerm, isSummaryMode]
+      () => scanMatches(displayedRows, effectiveColumns, findTerm, isSummaryMode),
+      [displayedRows, effectiveColumns, findTerm, isSummaryMode]
     );
     const findActiveMatch = findMatches[findActiveIndex] ?? null;
 
@@ -1121,38 +1222,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       return getShouldShowFieldHandler(dataViewFields, dataView, true);
     }, [dataView]);
 
-    // ── Row selection ──
-    const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-    const allSelected = rows.length > 0 && selectedRows.size === rows.length;
-    const someSelected = selectedRows.size > 0 && !allSelected;
-
-    const toggleSelectRow = useCallback((rowId: string) => {
-      setSelectedRows((prev) => {
-        const next = new Set(prev);
-        if (next.has(rowId)) {
-          next.delete(rowId);
-        } else {
-          next.add(rowId);
-        }
-        return next;
-      });
-    }, []);
-
-    const toggleSelectAll = useCallback(() => {
-      setSelectedRows((prev) => {
-        if (prev.size === rows.length) return new Set();
-        return new Set(rows.map((r) => r.id));
-      });
-    }, [rows]);
-
-    const clearSelection = useCallback(() => setSelectedRows(new Set()), []);
-
-    const selectedRowsRef = useRef(selectedRows);
-    selectedRowsRef.current = selectedRows;
-
-    const toggleSelectRowRef = useRef(toggleSelectRow);
-    toggleSelectRowRef.current = toggleSelectRow;
-
     // ── Full-screen mode ──
     const [isFullScreen, setIsFullScreen] = useState(false);
     const toggleFullScreen = useCallback(() => {
@@ -1178,26 +1247,26 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const densityCfg = useMemo(() => {
       const isCompact = dataGridDensity === DataGridDensity.COMPACT;
       const padding = getDataGridDensityPadding(euiTheme, dataGridDensity);
-      const { fontSize } = euiFontSize(euiThemeContext, isCompact ? 'xs' : 's');
-      const { lineHeight } = euiFontSize(euiThemeContext, isCompact ? 'xs' : 'm');
+      const typographyScale = isCompact ? 'xs' : 's';
+      const { fontSize, lineHeight: headerLineHeight } = euiFontSize(
+        euiThemeContext,
+        typographyScale,
+        { unit: 'px' }
+      );
       const cellPadding = parseFloat(padding);
       const fontSizeValue = String(fontSize ?? (isCompact ? '12px' : '14px'));
-      const baseFontSize = Number(euiTheme.base);
-      const numericFontSize =
-        parseFloat(fontSizeValue) * (fontSizeValue.endsWith('rem') ? baseFontSize : 1);
-      const lineHeightValue = String(lineHeight ?? 1.5);
-      const parsedLineHeight = parseFloat(lineHeightValue);
-      const numericLineHeight = lineHeightValue.endsWith('rem')
-        ? parsedLineHeight * baseFontSize
-        : parsedLineHeight <= 4
-        ? parsedLineHeight * numericFontSize
-        : parsedLineHeight;
+      const numericFontSize = parseFloat(fontSizeValue);
+      const numericHeaderLineHeight = parseFloat(String(headerLineHeight));
+      // Unified data table values use the code typography line height rather than
+      // the tighter header typography line height.
+      const numericLineHeight = numericFontSize * 1.6;
 
       return {
-        rowHeight: numericLineHeight + cellPadding * 2,
-        summaryRowHeight: (numericLineHeight + cellPadding * 2) * 3,
+        rowHeight: Math.floor(numericLineHeight + cellPadding * 2),
+        summaryRowHeight: Math.floor(numericLineHeight * 3 + cellPadding * 2),
         fontSize: numericFontSize,
         lineHeight: numericLineHeight,
+        headerLineHeight: numericHeaderLineHeight,
         cellPadding,
         icon: DENSITY_ICONS[dataGridDensity],
       };
@@ -1372,17 +1441,24 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
       const prevMeta = prevRenderDocumentViewMeta.current;
       const metaChanged =
-        prevMeta?.displayedColumns !== displayedColumns || prevMeta?.displayedRows !== rows;
+        prevMeta?.displayedColumns !== displayedColumns ||
+        prevMeta?.displayedRows !== displayedRows;
 
       if (metaChanged) {
         const nextMeta: RenderDocumentViewMeta = {
           displayedColumns,
-          displayedRows: rows,
+          displayedRows,
         };
         setRenderDocumentViewMeta(nextMeta);
         prevRenderDocumentViewMeta.current = nextMeta;
       }
-    }, [displayedColumns, rows, expandedDoc, renderDocumentView, setRenderDocumentViewMeta]);
+    }, [
+      displayedColumns,
+      displayedRows,
+      expandedDoc,
+      renderDocumentView,
+      setRenderDocumentViewMeta,
+    ]);
 
     const onFilterRef = useRef(onFilter);
     onFilterRef.current = onFilter;
@@ -1474,7 +1550,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             <EuiCheckbox
               id={`select-${record.id}`}
               checked={selectedRowsRef.current.has(record.id)}
-              onChange={() => toggleSelectRowRef.current(record.id)}
+              onChange={(event) =>
+                toggleSelectRowRef.current(
+                  record.id,
+                  row.index,
+                  (event.nativeEvent as MouseEvent).shiftKey
+                )
+              }
               aria-label={`Select row ${row.index + 1}`}
             />
           );
@@ -1554,7 +1636,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       }
                     }}
                     color={isExp ? 'primary' : 'text'}
-                    iconType={isExp ? 'minimize' : 'expand'}
+                    iconType={isExp ? 'minimize' : 'maximize'}
                     isSelected={isExp}
                   />
                 </EuiToolTip>
@@ -1696,12 +1778,11 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         return cols;
       }
 
-      return effectiveColumns
-        .filter((colId) => colId !== SOURCE_COLUMN_ID)
-        .map((colId) => ({
-          id: colId,
-          isTimestamp: colId === timeFieldName,
-        }));
+      return effectiveColumns.map((colId) => ({
+        id: colId,
+        isSummary: colId === SOURCE_COLUMN_ID,
+        isTimestamp: colId === timeFieldName,
+      }));
     }, [effectiveColumns, isSummaryMode, showTimeCol, timeFieldName]);
 
     const [containerWidth, setContainerWidth] = useState(0);
@@ -1716,7 +1797,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       const observer = new ResizeObserver(updateWidth);
       observer.observe(scrollEl);
       return () => observer.disconnect();
-    }, [rows.length]);
+    }, [displayedRows.length]);
 
     const columnLayout = useMemo(
       () =>
@@ -1741,7 +1822,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     // ── React Table instance ──
     const table = useReactTable({
-      data: rows,
+      data: displayedRows,
       columns: tanstackColumns,
       getCoreRowModel: getCoreRowModel(),
       getSortedRowModel: isSortEnabled && !isSummaryMode ? getSortedRowModel() : undefined,
@@ -1782,7 +1863,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       if (rowHeightLines <= 1) {
         return densityCfg.rowHeight;
       }
-      return Math.round(densityCfg.cellPadding * 2 + densityCfg.lineHeight * rowHeightLines);
+      return Math.floor(densityCfg.cellPadding * 2 + densityCfg.lineHeight * rowHeightLines);
     }, [rowHeightLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
@@ -1797,7 +1878,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       estimateSize: getRowHeight,
       overscan: OVERSCAN,
       initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
-      getItemKey: (index) => rows[index]?.id ?? index,
+      getItemKey: (index) => displayedRows[index]?.id ?? index,
     });
 
     useEffect(() => {
@@ -1910,7 +1991,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const virtualItems = rowVirtualizer.getVirtualItems();
     const canRenderDocumentView = Boolean(setExpandedDoc && renderDocumentView);
     const isLoading = loadingState === DataLoadingState.loading;
-    const isEmpty = !isLoading && rows.length === 0;
+    const isEmpty = !isLoading && displayedRows.length === 0;
     const totalWidth = columnLayout.gridWidth;
     const getColumnStyle = columnLayout.getColumnStyle;
     const headerSortEnabled = isSortEnabled && !(isPlainRecord && isSummaryMode);
@@ -1920,6 +2001,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         ({
           '--tsg-font-size': `${densityCfg.fontSize}px`,
           '--tsg-line-height': `${densityCfg.lineHeight}px`,
+          '--tsg-header-line-height': `${densityCfg.headerLineHeight}px`,
           '--tsg-cell-padding-v': `${densityCfg.cellPadding}px`,
           '--tsg-cell-padding-h': `${densityCfg.cellPadding}px`,
           '--tsg-header-max-lines': isAutoHeaderRowHeight
@@ -1931,43 +2013,115 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       [densityCfg, headerRowHeightLines, rowHeightLines, isAutoHeaderRowHeight, isAutoRowHeight]
     );
 
-    // ── Copy selected rows ──
-    const copySelectedAsText = useCallback(() => {
-      const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
-      const cols = effectiveColumns.filter((c) => c !== SOURCE_COLUMN_ID);
-      const header = cols.join('\t');
-      const body = selectedRecords
-        .map((r) => cols.map((c) => formatCellValue(r.flattened[c])).join('\t'))
-        .join('\n');
-      navigator.clipboard.writeText(`${header}\n${body}`);
-    }, [rows, selectedRows, effectiveColumns]);
+    // ── Selected rows actions ──
+    const selectedRowIndices = useMemo(
+      () =>
+        rows.reduce<number[]>((indices, row, index) => {
+          if (selectedRows.has(row.id)) indices.push(index);
+          return indices;
+        }, []),
+      [rows, selectedRows]
+    );
+    const selectedRecords = useMemo(
+      () => rows.filter((row) => selectedRows.has(row.id)),
+      [rows, selectedRows]
+    );
+    const copyColumns = useMemo(
+      () =>
+        uniq(
+          effectiveColumns.flatMap((column) =>
+            column === SOURCE_COLUMN_ID
+              ? Object.keys(calcFieldCounts(displayedRows)).sort()
+              : [column]
+          )
+        ),
+      [displayedRows, effectiveColumns]
+    );
+    const copySelectedAsText = useCallback(
+      async (format: CopyAsTextFormat) => {
+        await copyRowsAsTextToClipboard({
+          format,
+          columns: copyColumns,
+          dataView,
+          selectedRowIndices,
+          toastNotifications,
+          valueToStringConverter,
+        });
+      },
+      [copyColumns, dataView, selectedRowIndices, toastNotifications, valueToStringConverter]
+    );
+    const copySelectedAsJson = useCallback(async () => {
+      await copyRowsAsJsonToClipboard({ selectedRows: selectedRecords, toastNotifications });
+    }, [selectedRecords, toastNotifications]);
 
-    const copySelectedAsJson = useCallback(() => {
-      const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
-      const json = JSON.stringify(
-        selectedRecords.map((r) => r.flattened),
-        null,
-        2
-      );
-      navigator.clipboard.writeText(json);
-    }, [rows, selectedRows]);
-
-    const copySelectedAsMarkdown = useCallback(() => {
-      const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
-      const cols = effectiveColumns.filter((c) => c !== SOURCE_COLUMN_ID);
-      const header = `| ${cols.join(' | ')} |`;
-      const sep = `| ${cols.map(() => '---').join(' | ')} |`;
-      const body = selectedRecords
-        .map((r) => `| ${cols.map((c) => formatCellValue(r.flattened[c])).join(' | ')} |`)
-        .join('\n');
-      navigator.clipboard.writeText(`${header}\n${sep}\n${body}`);
-    }, [rows, selectedRows, effectiveColumns]);
+    const selectedDocIds = useMemo(() => Array.from(selectedRows), [selectedRows]);
+    const docMap = useMemo<DocMap>(
+      () => new Map(rows.map((doc, docIndex) => [doc.id, { doc, docIndex }])),
+      [rows]
+    );
+    const replaceSelectedDocs = useCallback((docIds: string[]) => {
+      setSelectedRows(new Set(docIds));
+    }, []);
+    const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
 
     const isLoadingMore = loadingState === DataLoadingState.loadingMore;
     const displayPopoverWidth = mathWithUnits(
       [euiTheme.components.forms.maxWidth, euiTheme.size.s],
       (formMaxWidth, padding) => formMaxWidth + padding * 2
     );
+    const copyJsonLabel = isPlainRecord
+      ? i18n.translate('discover.grid.tanStack.copyResultsAsJsonButtonLabel', {
+          defaultMessage: 'Copy results as JSON',
+        })
+      : i18n.translate('discover.grid.tanStack.copyDocumentsAsJsonButtonLabel', {
+          defaultMessage: 'Copy documents as JSON',
+        });
+    const showSelectedDocumentsLabel = isPlainRecord
+      ? i18n.translate('discover.grid.tanStack.showSelectedResultsButtonLabel', {
+          defaultMessage: 'Show selected results only',
+        })
+      : i18n.translate('discover.grid.tanStack.showSelectedDocumentsButtonLabel', {
+          defaultMessage: 'Show selected documents only',
+        });
+    const showAllDocumentsLabel = isPlainRecord
+      ? i18n.translate('discover.grid.tanStack.showAllResultsButtonLabel', {
+          defaultMessage: 'Show all results',
+        })
+      : i18n.translate('discover.grid.tanStack.showAllDocumentsButtonLabel', {
+          defaultMessage: 'Show all documents',
+        });
+
+    if (isCompareActive) {
+      return (
+        <div
+          ref={wrapperRef}
+          className={isFullScreen ? 'euiDataGrid--fullScreen' : undefined}
+          css={[styles.wrapper, isFullScreen && styles.fullScreen]}
+          style={densityVars}
+          data-test-subj="tanstackGridWrapper"
+        >
+          <CompareDocuments
+            id={dataGridId}
+            wrapper={wrapperRef.current}
+            consumer={consumer}
+            ariaDescribedBy={ariaLabelledBy}
+            ariaLabelledBy={ariaLabelledBy}
+            dataView={dataView}
+            columnsMeta={columnsMeta}
+            isPlainRecord={Boolean(isPlainRecord)}
+            selectedFieldNames={effectiveColumns}
+            selectedDocIds={selectedDocIds}
+            schemaDetectors={schemaDetectors}
+            forceShowAllFields={isSummaryMode}
+            showFullScreenButton={showFullScreenButton}
+            fieldFormats={fieldFormats}
+            docMap={docMap}
+            replaceSelectedDocs={replaceSelectedDocs}
+            setIsCompareActive={setIsCompareActive}
+          />
+        </div>
+      );
+    }
 
     return (
       <div
@@ -1979,26 +2133,54 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       >
         {/* Toolbar */}
         <div css={styles.toolbar}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <EuiFlexGroup
+            css={styles.toolbarLeadingControls}
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            wrap={false}
+          >
             {toolbarLeftSide && <EuiFlexItem grow={false}>{toolbarLeftSide}</EuiFlexItem>}
+            {externalAdditionalControls && (
+              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+            )}
+            <EuiFlexItem css={styles.toolbarSpacer} />
             {selectedRows.size > 0 && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={styles.toolbarControlButton}>
                 <EuiPopover
+                  css={styles.toolbarPopover}
                   aria-label={i18n.translate(
                     'discover.grid.tanStack.selectedDocumentsPopoverAriaLabel',
                     { defaultMessage: 'Selected documents actions' }
                   )}
                   button={
                     <EuiDataGridToolbarControl
+                      css={styles.toolbarTextControl}
                       iconType="chevronSingleDown"
                       iconSide="right"
-                      badgeContent={selectedRows.size}
+                      isSelected={isFilterActive}
+                      data-selected-documents={selectedRows.size}
                       onClick={() => setIsSelectionPopoverOpen((isOpen) => !isOpen)}
                       data-test-subj="unifiedDataTableSelectionBtn"
                     >
-                      {i18n.translate('discover.grid.tanStack.selectedDocumentsButtonLabel', {
-                        defaultMessage: 'Selected',
-                      })}
+                      <span css={styles.selectionToolbarControlLabel}>
+                        <EuiNotificationBadge
+                          size="m"
+                          color="subdued"
+                          aria-label={i18n.translate(
+                            'discover.grid.tanStack.selectedDocumentsCountLabel',
+                            {
+                              defaultMessage: '{count} selected documents',
+                              values: { count: selectedRows.size },
+                            }
+                          )}
+                        >
+                          {selectedRows.size}
+                        </EuiNotificationBadge>
+                        {i18n.translate('discover.grid.tanStack.selectedDocumentsButtonLabel', {
+                          defaultMessage: 'Selected',
+                        })}
+                      </span>
                     </EuiDataGridToolbarControl>
                   }
                   isOpen={isSelectionPopoverOpen}
@@ -2007,46 +2189,103 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   anchorPosition="downLeft"
                 >
                   <EuiContextMenuPanel
+                    data-test-subj="unifiedDataTableSelectionMenu"
                     items={[
+                      ...(enableComparisonMode && selectedRows.size > 1
+                        ? [
+                            <EuiContextMenuItem
+                              key="compareSelected"
+                              icon="compare"
+                              disabled={selectedRows.size > MAX_SELECTED_DOCS_FOR_COMPARE}
+                              data-test-subj="unifiedDataTableCompareSelectedDocuments"
+                              onClick={() => {
+                                setIsSelectionPopoverOpen(false);
+                                setIsCompareActive(true);
+                              }}
+                            >
+                              {selectedRows.size > MAX_SELECTED_DOCS_FOR_COMPARE ? (
+                                <EuiToolTip
+                                  content={i18n.translate(
+                                    'discover.grid.tanStack.compareSelectedDisabledTooltip',
+                                    {
+                                      defaultMessage: 'Comparison is limited to {limit} rows',
+                                      values: { limit: MAX_SELECTED_DOCS_FOR_COMPARE },
+                                    }
+                                  )}
+                                >
+                                  <span tabIndex={0}>
+                                    {i18n.translate(
+                                      'discover.grid.tanStack.compareSelectedButtonLabel',
+                                      { defaultMessage: 'Compare selected' }
+                                    )}
+                                  </span>
+                                </EuiToolTip>
+                              ) : (
+                                i18n.translate(
+                                  'discover.grid.tanStack.compareSelectedButtonLabel',
+                                  { defaultMessage: 'Compare selected' }
+                                )
+                              )}
+                            </EuiContextMenuItem>,
+                          ]
+                        : []),
                       <EuiContextMenuItem
-                        key="copyAsTsv"
+                        key="copyAsText"
                         icon="copy"
-                        onClick={() => {
-                          copySelectedAsText();
+                        data-test-subj="unifiedDataTableCopyRowsAsText"
+                        onClick={async () => {
+                          await copySelectedAsText(CopyAsTextFormat.tabular);
                           setIsSelectionPopoverOpen(false);
                         }}
                       >
-                        {i18n.translate('discover.grid.tanStack.copyAsTsvButtonLabel', {
-                          defaultMessage: 'Copy as TSV',
-                        })}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="copyAsJson"
-                        icon="copy"
-                        onClick={() => {
-                          copySelectedAsJson();
-                          setIsSelectionPopoverOpen(false);
-                        }}
-                      >
-                        {i18n.translate('discover.grid.tanStack.copyAsJsonButtonLabel', {
-                          defaultMessage: 'Copy as JSON',
+                        {i18n.translate('discover.grid.tanStack.copySelectionAsTextButtonLabel', {
+                          defaultMessage: 'Copy selection as text',
                         })}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         key="copyAsMarkdown"
                         icon="copy"
-                        onClick={() => {
-                          copySelectedAsMarkdown();
+                        data-test-subj="unifiedDataTableCopyRowsAsMarkdown"
+                        onClick={async () => {
+                          await copySelectedAsText(CopyAsTextFormat.markdown);
                           setIsSelectionPopoverOpen(false);
                         }}
                       >
-                        {i18n.translate('discover.grid.tanStack.copyAsMarkdownButtonLabel', {
-                          defaultMessage: 'Copy as Markdown',
-                        })}
+                        {i18n.translate(
+                          'discover.grid.tanStack.copySelectionAsMarkdownButtonLabel',
+                          { defaultMessage: 'Copy selection as Markdown' }
+                        )}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="copyAsJson"
+                        icon="copy"
+                        data-test-subj="dscGridCopySelectedDocumentsJSON"
+                        onClick={async () => {
+                          await copySelectedAsJson();
+                          setIsSelectionPopoverOpen(false);
+                        }}
+                      >
+                        {copyJsonLabel}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key={isFilterActive ? 'showAllDocuments' : 'showSelectedDocuments'}
+                        icon="eye"
+                        data-test-subj={
+                          isFilterActive
+                            ? 'dscGridShowAllDocuments'
+                            : 'dscGridShowSelectedDocuments'
+                        }
+                        onClick={() => {
+                          setIsSelectionPopoverOpen(false);
+                          setIsFilterActive((isActive) => !isActive);
+                        }}
+                      >
+                        {isFilterActive ? showAllDocumentsLabel : showSelectedDocumentsLabel}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         key="clearSelection"
                         icon="cross"
+                        data-test-subj="dscGridClearSelectedDocuments"
                         onClick={() => {
                           clearSelection();
                           setIsSelectionPopoverOpen(false);
@@ -2060,9 +2299,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   />
                 </EuiPopover>
               </EuiFlexItem>
-            )}
-            {externalAdditionalControls && (
-              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
             )}
           </EuiFlexGroup>
           <div css={styles.toolbarRight}>
@@ -2593,7 +2829,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                 timeFieldName={timeFieldName}
                                 toastNotifications={toastNotifications}
                                 valueToStringConverter={valueToStringConverter}
-                                rowsCount={rows.length}
+                                rowsCount={displayedRows.length}
                                 editField={editField}
                                 hasEditDataViewPermission={hasEditDataViewPermission}
                                 headerActionsCss={styles.headerActionsButton}
@@ -2683,7 +2919,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             currentExpandedDoc &&
             typeof renderDocumentView === 'function' && (
               <span className="dscTable__flyout">
-                {renderDocumentView(currentExpandedDoc, rows, displayedColumns, columnsMeta)}
+                {renderDocumentView(
+                  currentExpandedDoc,
+                  displayedRows,
+                  displayedColumns,
+                  columnsMeta
+                )}
               </span>
             )}
         </div>

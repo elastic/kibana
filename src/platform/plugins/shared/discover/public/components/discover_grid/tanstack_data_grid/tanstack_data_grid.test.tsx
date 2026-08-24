@@ -142,7 +142,7 @@ describe('TanStackDataGrid columns', () => {
 });
 
 describe('TanStackDataGrid summary column row height', () => {
-  it('converts EUI rem typography values to pixel row heights', () => {
+  it('uses EUI typography values for pixel row heights', () => {
     renderGrid({ expandedDoc: undefined });
 
     const rowMinHeight = parseFloat(
@@ -280,5 +280,34 @@ describe('TanStackDataGrid EUI parity', () => {
     fireEvent.click(screen.getByTestId('columnSelectorShowSummaryColumn'));
 
     expect(onSetColumns).toHaveBeenCalledWith(['message', '_source'], true);
+  });
+
+  it('matches the EUI selected documents menu and selected-only mode', () => {
+    renderGrid({ expandedDoc: undefined, enableComparisonMode: true });
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+
+    expect(screen.getByText('Compare selected')).toBeInTheDocument();
+    expect(screen.getByText('Copy selection as text')).toBeInTheDocument();
+    expect(screen.getByText('Copy selection as Markdown')).toBeInTheDocument();
+    expect(screen.getByText('Copy documents as JSON')).toBeInTheDocument();
+    expect(screen.getByText('Show selected documents only')).toBeInTheDocument();
+    expect(screen.getByText('Clear selection')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Show selected documents only'));
+    fireEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+
+    expect(screen.getByText('Show all documents')).toBeInTheDocument();
+  });
+
+  it('opens document comparison for multiple selected rows', async () => {
+    renderGrid({ expandedDoc: undefined, enableComparisonMode: true });
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+    fireEvent.click(screen.getByText('Compare selected'));
+
+    expect(await screen.findByTestId('unifiedDataTableCompareDocuments')).toBeInTheDocument();
   });
 });

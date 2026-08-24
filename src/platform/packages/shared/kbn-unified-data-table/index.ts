@@ -71,7 +71,13 @@ export {
 } from './src/components/build_copy_column_button';
 export { buildEditFieldButton } from './src/components/build_edit_field_button';
 export { isSortable } from './src/hooks/use_sorting';
-export { getSchemaByKbnType } from './src/components/data_table_schema';
+export { getSchemaByKbnType, getSchemaDetectors } from './src/components/data_table_schema';
 export { convertValueToString } from './src/utils/convert_value_to_string';
+export { CompareDocuments } from './src/components/compare_documents';
+export {
+  CopyAsTextFormat,
+  copyRowsAsJsonToClipboard,
+  copyRowsAsTextToClipboard,
+} from './src/utils/copy_value_to_clipboard';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
