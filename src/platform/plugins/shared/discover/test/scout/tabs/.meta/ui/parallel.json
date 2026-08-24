@@ -1,0 +1,200 @@
+{
+  "sha1": "ccc487c06aef695d5faa66fc2930f9b735cf3551",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "11b6599941153f8-70753e6cedbcd4d",
+      "title": "Setup Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "8369655b631bef5-77796a3f919c5c0",
+      "title": "Discover tabs - deprecated saved objects API compatibility should support Discover sessions without tabs created through the deprecated saved objects API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/deprecated_saved_objects_api.spec.ts",
+        "line": 28,
+        "column": 14
+      }
+    },
+    {
+      "id": "31fe0df53119c51-accb5de6e8f51ae",
+      "title": "Discover tabs - opening a new tab should create a new tab in classic mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "31fe0df53119c51-4eba405f9b363af",
+      "title": "Discover tabs - opening a new tab should create a new tab in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "31fe0df53119c51-5e52b578914cfc3",
+      "title": "Discover tabs - opening a new tab should be able to complete all quickly opened tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "3281695d372dede-3d9829fe04e0e78",
+      "title": "Discover tabs - on tab change should maintain separate DocViewer state for different tabs and retain it while switching tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "3281695d372dede-88c7f59ade27537",
+      "title": "Discover tabs - on tab change should close the Lens edit flyout on tab change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
+        "line": 143,
+        "column": 12
+      }
+    },
+    {
+      "id": "3281695d372dede-5b298893abd5fcc",
+      "title": "Discover tabs - on tab change should detect time field change in ES|QL query correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
+        "line": 172,
+        "column": 12
+      }
+    },
+    {
+      "id": "24420d39ed77a9e-16c7641de80acbd",
+      "title": "Discover tabs - tab duplication should restore the previous app and global states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_duplication.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "c6e586f1175a67c-89b5312b92472d7",
+      "title": "Discover tabs - tab preview should show the correct content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "c6e586f1175a67c-c5a0bec486ab375",
+      "title": "Discover tabs - tab preview should preserve content after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "c6e586f1175a67c-84228ac8c77263d",
+      "title": "Discover tabs - tab preview should preserve content after saving and loading",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "c378ccf225132a0-a203b99039e8561",
+      "title": "Discover tabs - time range should not save different time ranges when the switch is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "c378ccf225132a0-5ce08f2bac612d1",
+      "title": "Discover tabs - time range should save different time ranges when the switch is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
+        "line": 132,
+        "column": 12
+      }
+    },
+    {
+      "id": "6c80b774cf64439-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
+      }
+    }
+  ]
+}

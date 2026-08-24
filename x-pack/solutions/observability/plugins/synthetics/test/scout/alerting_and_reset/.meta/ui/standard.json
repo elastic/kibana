@@ -1,5 +1,5 @@
 {
-  "sha1": "8b85f275c8f8015c29f62837beb1e106f8473ed0",
+  "sha1": "5f93a76ecbd148570b610ae078cee896dc83bf63",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -22,28 +22,28 @@
     {
       "id": "c8dad933cd9e3b5-be21be8c0f093a7",
       "title": "AlertingDefaults configures alerting defaults: add Slack connector",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },
     {
       "id": "c8dad933cd9e3b5-a4c1e1e301cd7d5",
       "title": "AlertingDefaults configures alerting defaults: add Email connector",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 7
       }
     },
@@ -106,15 +106,15 @@
     {
       "id": "947eec4700d1a16-036cb48539f2f34",
       "title": "DefaultStatusAlert creates default alert, triggers on down status, and recovers",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 31,
+        "column": 8
       }
     }
   ]
