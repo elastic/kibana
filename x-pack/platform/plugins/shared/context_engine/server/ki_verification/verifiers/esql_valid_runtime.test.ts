@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { createEsqlExecutesVerifier, ESQL_EXECUTES_VERIFIER_ID } from './esql_executes';
+import { createEsqlValidRuntimeVerifier, ESQL_VALID_RUNTIME_VERIFIER_ID } from './esql_valid_runtime';
 import type { KiVerifierContext, KnowledgeIndicator } from '../types';
 
 const VALID_QUERY = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
@@ -26,7 +26,7 @@ const esResponseError = (type: string, reason: string, statusCode = 400) =>
   );
 
 describe('esql-executes verifier', () => {
-  const verifier = createEsqlExecutesVerifier();
+  const verifier = createEsqlValidRuntimeVerifier();
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let context: KiVerifierContext;
 
@@ -39,7 +39,7 @@ describe('esql-executes verifier', () => {
   });
 
   it('has the expected id', () => {
-    expect(verifier.id).toBe(ESQL_EXECUTES_VERIFIER_ID);
+    expect(verifier.id).toBe(ESQL_VALID_RUNTIME_VERIFIER_ID);
   });
 
   describe('applies', () => {
@@ -370,6 +370,16 @@ describe('esql-executes verifier', () => {
           expect(outcome.reason).toContain('attributes.broken_shape');
           expect(outcome.reason).toContain('Unknown index [nope]');
         }
+      });
+
+      it('executes each query only once when the same attribute is listed twice', async () => {
+        const outcome = await verifier.verify(makeKi(VALID_QUERY), {
+          ...context,
+          esqlAttributes: ['esql', 'esql'],
+        });
+
+        expect(outcome).toEqual({ passed: true });
+        expect(esClient.esql.query).toHaveBeenCalledTimes(1);
       });
 
       it('bounds the query count across all attributes, not per attribute', async () => {

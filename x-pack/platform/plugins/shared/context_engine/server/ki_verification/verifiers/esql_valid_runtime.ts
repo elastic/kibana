@@ -17,7 +17,7 @@ import {
 } from './esql_attribute';
 import type { KiVerifier } from '../types';
 
-export const ESQL_EXECUTES_VERIFIER_ID = 'esql-valid-runtime';
+export const ESQL_VALID_RUNTIME_VERIFIER_ID = 'esql-valid-runtime';
 
 /**
  * Row cap injected right after the source command, so a query is bounded before
@@ -53,8 +53,8 @@ const formatEsError = (error: errors.ResponseError): string => {
  * cannot: unknown indices and fields, type errors, and any other rejection that
  * only surfaces once Elasticsearch plans and runs the query.
  */
-export const createEsqlExecutesVerifier = (): KiVerifier => ({
-  id: ESQL_EXECUTES_VERIFIER_ID,
+export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
+  id: ESQL_VALID_RUNTIME_VERIFIER_ID,
   applies: hasEsqlAttribute,
   async verify(ki, context) {
     const { esClient, abortSignal } = context;

@@ -7,7 +7,7 @@
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
-import { ESQL_EXECUTES_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
+import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
@@ -78,7 +78,7 @@ describe('verify_ki workflow step', () => {
     expect(output.passed).toBe(true);
     expect(output.results).toEqual([
       { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
-      { verifier: ESQL_EXECUTES_VERIFIER_ID, passed: true },
+      { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('verify_ki workflow step', () => {
         passed: false,
         reason: expect.stringContaining('NOT_A_FUNCTION'),
       },
-      { verifier: ESQL_EXECUTES_VERIFIER_ID, passed: true },
+      { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
     ]);
   });
 

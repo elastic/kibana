@@ -22,7 +22,7 @@ const REASON_QUERY_PREVIEW_LENGTH = 200;
 
 /** The attribute names a run inspects, defaulting to `esql`. */
 export const resolveEsqlAttributeKeys = ({ esqlAttributes }: KiVerifierContext): string[] =>
-  esqlAttributes && esqlAttributes.length > 0 ? esqlAttributes : [ESQL_ATTRIBUTE_KEY];
+  esqlAttributes && esqlAttributes.length > 0 ? [...new Set(esqlAttributes)] : [ESQL_ATTRIBUTE_KEY];
 
 /** How an attribute is named in failure reasons. */
 const describeAttribute = (key: string): string => `attributes.${key}`;
@@ -50,8 +50,7 @@ export interface EsqlQueryRef {
 /**
  * The failure message for a query that exceeds {@link MAX_ESQL_QUERY_LENGTH},
  * or `undefined` when it is within bounds. The KI still fails, but only this
- * query goes unchecked; the rest are still verified. A malformed attribute, by
- * contrast, stops the run outright.
+ * query goes unchecked; the rest are still verified.
  */
 export const getOversizedQueryFailure = ({ source, query }: EsqlQueryRef): string | undefined =>
   query.length > MAX_ESQL_QUERY_LENGTH
