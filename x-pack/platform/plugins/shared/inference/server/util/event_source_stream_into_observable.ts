@@ -25,18 +25,27 @@ export function eventSourceStreamIntoObservable(
     });
 
     let tornDown = false;
-    const maxDurationTimer = setTimeout(() => {
-      readable.destroy(
-        createInferenceRequestError(
-          `Inference stream exceeded the maximum allowed duration of ${maxDurationMs}ms`,
-          408
-        )
+    const deadline = Date.now() + maxDurationMs;
+    const createTimeoutError = () =>
+      createInferenceRequestError(
+        `Inference stream exceeded the maximum allowed duration of ${maxDurationMs}ms`,
+        408
       );
+
+    // idle-stream guard only: a busy stream drains on the microtask queue,
+    // starving timers — the in-band deadline check below covers that case
+    const maxDurationTimer = setTimeout(() => {
+      readable.destroy(createTimeoutError());
     }, maxDurationMs);
 
     async function processStream() {
       for await (const chunk of readable) {
+        if (Date.now() > deadline) {
+          throw createTimeoutError();
+        }
         parser.feed(chunk.toString());
+        // yield a macrotask per chunk so timers and cancellation stay serviced
+        await new Promise<void>((resolve) => setImmediate(resolve));
       }
     }
 
