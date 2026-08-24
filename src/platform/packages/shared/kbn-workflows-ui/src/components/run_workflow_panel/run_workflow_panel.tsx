@@ -1,67 +1,84 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import {
-  useRunWorkflow,
-  useWorkflows,
-  useWorkflowsCapabilities,
-  WorkflowSelector,
-} from '@kbn/workflows-ui';
-import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
-import {
-  getManagedWorkflowSelectorVisibilityContext,
-  getManagedWorkflowSolutionVisibilityContext,
-} from '@kbn/workflows';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import type { RenderingService } from '@kbn/core-rendering-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ToMountPointParams } from '@kbn/react-kibana-mount';
+import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import * as i18n from '../translations';
-import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
+import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
+import * as i18n from './translations';
+import type { RunWorkflowOptions } from '../../api/types';
+import { useRunWorkflow } from '../../hooks/use_run_workflow';
+import { useWorkflows } from '../../hooks/use_workflows';
+import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
+import { WorkflowSelector } from '../workflow_selector/workflow_selector';
+import {
+  getWorkflowsListQueryParams,
+  type WorkflowSelectorVisibility,
+} from '../workflow_selector/workflow_utils';
+
+/**
+ * The inputs payload forwarded verbatim to the workflow execution API.
+ * Aliased from RunWorkflowOptions['inputs'] so this type tracks any API changes automatically.
+ */
+export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
-  inputs: Record<string, unknown>;
-  /** The trigger type to sort to the top of the workflow list. */
-  sortTriggerType: string;
-  /** data-test-subj prefix for the execute button. */
-  executeButtonTestSubj: string;
+  inputs: WorkflowRunInputs;
   /**
-   * Managed workflows are excluded from the list unless the caller opts in with a matching
-   * visibility. Pass the selector(s)/solution(s) the surfacing context maps to (e.g.
-   * `{ selectors: ['rule_action'] }`) to include managed workflows tagged with that context.
+   * Server-side managed workflow visibility filter. Only managed workflows tagged with a
+   * matching managedVisibilityContexts value (selector or solution) are returned by the server.
+   * When omitted, no managed workflows are fetched — only user-created workflows are shown.
    */
   visibility?: WorkflowSelectorVisibility;
+  /**
+   * Comparator passed directly to Array.sort — return negative to rank `a` before `b`.
+   * When omitted the list order is unchanged.
+   */
+  sortWorkflow?: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
+  /**
+   * Client-side predicate applied after the server returns its visibility-filtered results.
+   * Return false to hide a workflow from the list.
+   * When omitted all fetched workflows that are enabled are shown.
+   */
+  filterWorkflow?: (workflow: WorkflowListItemDto) => boolean;
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
 }
 
+interface RunWorkflowPanelServices {
+  application: ApplicationStart;
+  notifications: NotificationsStart;
+  rendering?: ToMountPointParams;
+}
+
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
-  sortTriggerType,
-  executeButtonTestSubj,
   visibility,
+  sortWorkflow,
+  filterWorkflow,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
   const {
-    services: { application, rendering },
-  } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
-  const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
+    services: { application, notifications, rendering },
+  } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
   const runWorkflow = useRunWorkflow();
@@ -70,26 +87,11 @@ export const RunWorkflowPanel = ({
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
-  // Mirror the visibility-context derivation WorkflowSelector runs internally so both queries share
-  // a react-query cache key (one fetch) and the selected managed workflow resolves below.
-  const visibilityContext = useMemo(() => {
-    if (!visibility) return undefined;
-    const contexts = [
-      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
-      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
-    ];
-    return contexts.length > 0 ? contexts : undefined;
-  }, [visibility]);
 
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
-  const { data: workflowsData } = useWorkflows({
-    size: 1000,
-    page: 1,
-    query: '',
-    ...(visibilityContext && canReadManagedWorkflow
-      ? { managed: 'all' as const, visibilityContext }
-      : {}),
-  });
+  const { data: workflowsData } = useWorkflows(
+    getWorkflowsListQueryParams({ visibility, canReadManagedWorkflow })
+  );
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
     [workflowsData, selectedId]
@@ -116,7 +118,7 @@ export const RunWorkflowPanel = ({
         },
         {
           onSuccess: (data: RunWorkflowResponseDto) => {
-            workflowTriggerSuccess({
+            notifications.toasts.addSuccess({
               title: i18n.WORKFLOW_START_SUCCESS_TOAST,
               ...(rendering && {
                 text: toMountPoint(
@@ -139,7 +141,7 @@ export const RunWorkflowPanel = ({
             });
           },
           onError: (err) => {
-            workflowTriggerFailed(err, {
+            notifications.toasts.addError(new Error(err.body?.message ?? err.message), {
               title: i18n.WORKFLOW_START_FAILED_TOAST,
             });
           },
@@ -150,17 +152,7 @@ export const RunWorkflowPanel = ({
         }
       );
     },
-    [
-      application,
-      selectedId,
-      runWorkflow,
-      inputs,
-      workflowTriggerSuccess,
-      workflowTriggerFailed,
-      rendering,
-      onClose,
-      onExecute,
-    ]
+    [application, selectedId, runWorkflow, inputs, notifications, rendering, onClose, onExecute]
   );
 
   const handleExecuteClick = useCallback(() => {
@@ -177,15 +169,12 @@ export const RunWorkflowPanel = ({
       <WorkflowSelector
         config={{
           visibility,
-          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
+          filterFunction: (workflows) => {
+            const enabled = workflows.filter((w) => w.enabled);
+            return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
+          },
           sortFunction: (workflows) =>
-            workflows.sort((a, b) => {
-              const aHasType = a.definition?.triggers?.some((t) => t.type === sortTriggerType);
-              const bHasType = b.definition?.triggers?.some((t) => t.type === sortTriggerType);
-              if (aHasType && !bHasType) return -1;
-              if (!aHasType && bHasType) return 1;
-              return 0;
-            }),
+            sortWorkflow ? [...workflows].sort(sortWorkflow) : workflows,
           listView: true,
           hideTopRowHeader: true,
           hideViewWorkflowLink: true,
@@ -196,7 +185,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, sortTriggerType, visibility]
+    [selectedId, visibility, sortWorkflow, filterWorkflow]
   );
 
   return (
@@ -221,7 +210,8 @@ export const RunWorkflowPanel = ({
         )}
       </div>
       <EuiButton
-        data-test-subj={executeButtonTestSubj}
+        css={{ marginTop: euiTheme.size.xs }}
+        data-test-subj="run-workflow-execute-button"
         fullWidth
         size="s"
         onClick={handleExecuteClick}

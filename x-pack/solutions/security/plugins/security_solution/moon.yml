@@ -286,8 +286,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows'
-  - '@kbn/deeplinks-workflows'
-  - '@kbn/core-rendering-browser'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'

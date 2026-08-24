@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import type { JSONSchema7 } from 'json-schema';
+import React, { useMemo } from 'react';
 import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { ResumeExecutionModal, generateSampleFromJsonSchema } from '@kbn/workflows-ui';
-import { i18n } from '@kbn/i18n';
+import { getProvideInputsResumeMessage } from './translations';
+import { generateSampleFromJsonSchema } from '../../lib/generate_sample_from_json_schema';
+import { ResumeExecutionModal } from '../resume_execution_modal/resume_execution_modal';
 
 export interface RunWorkflowInputsModalProps {
   /** Display name of the workflow shown in the modal header. */
@@ -45,13 +48,7 @@ export const RunWorkflowInputsModal = ({
 
   return (
     <ResumeExecutionModal
-      resumeMessage={i18n.translate(
-        'xpack.securitySolution.detectionEngine.alerts.workflow.inputs.resumeMessage',
-        {
-          defaultMessage: 'Provide inputs to run {workflowName}',
-          values: { workflowName },
-        }
-      )}
+      resumeMessage={getProvideInputsResumeMessage(workflowName)}
       initialcontextOverride={contextOverride}
       onSubmit={({ stepInputs }) => onSubmit(stepInputs)}
       onClose={onCancel}
