@@ -193,6 +193,8 @@ export function createEventsWriteTool({
       frozen to the stored values and narrative_preserved: true is returned.
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it
+      without writing (written: false, reason: existing_active_event). Otherwise creates a new
+      event with a generated event_id.
     `,
     annotations: {
       title: 'Write Significant Events',
