@@ -7,7 +7,13 @@
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { apiPublishesUnifiedSearch, hasBlockingError } from '@kbn/presentation-publishing';
+import {
+  apiHasParentApi,
+  apiIsOfType,
+  apiPublishesUnifiedSearch,
+  hasBlockingError,
+} from '@kbn/presentation-publishing';
+import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -27,6 +33,17 @@ import {
 import { createDataProviders } from '../data_provider';
 
 export const ACTION_ID = 'embeddable_addToTimeline';
+
+/**
+ * Determines whether a Lens embeddable is rendered inside a Dashboard container.
+ * Security Dashboards render Lens panels through the platform Dashboard, so their
+ * `parentApi` is the Dashboard API. This lets us opt the "Add to Timeline" cell
+ * action out of the Security Dashboards surface without affecting other Security
+ * Lens surfaces (Overview, Explore, Entity Analytics, etc.).
+ */
+function isInsideDashboard(embeddable: CellValueContext['embeddable']): boolean {
+  return apiHasParentApi(embeddable) && apiIsOfType(embeddable.parentApi, DASHBOARD_API_TYPE);
+}
 
 function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   return (
@@ -91,7 +108,10 @@ export const createAddToTimelineLensAction = ({
       isLensApi(embeddable) &&
       apiPublishesUnifiedSearch(embeddable) &&
       isDataColumnsFilterable(data) &&
-      isInSecurityApp(currentAppId),
+      isInSecurityApp(currentAppId) &&
+      // Security Dashboards use the platform Dashboard experience; the "Add to
+      // Timeline" cell action is intentionally excluded from that surface.
+      !isInsideDashboard(embeddable),
     execute: async ({ data }) => {
       const dataProviders = data.reduce<DataProvider[]>((acc, { columnMeta, value, eventId }) => {
         const dataProvider = createDataProviders({
