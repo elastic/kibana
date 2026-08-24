@@ -54,6 +54,13 @@ export async function loadServersConfig(
     configureHTTP2(rawConfig);
   }
 
+  if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
+    log.info(
+      'scout: Overriding Kibana hostname to ::1 (got KIBANA_TEST_IPV6_ONLY=true in the environment)'
+    );
+    rawConfig.servers.kibana.hostname = '::1';
+  }
+
   const clusterConfig = new Config(rawConfig);
   // construct config for Playwright Test
   const scoutServerConfig = clusterConfig.getScoutTestConfig();
