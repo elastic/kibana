@@ -81,7 +81,14 @@ const getStyles = (
 ) => {
   return {
     donutTextWrapper: css`
-      top: ${isChartEmbeddablesEnabled && !dataExists ? '66%' : '34%'};
+      ${isChartEmbeddablesEnabled
+        ? `top: ${dataExists ? '34%' : '66%'};`
+        : `
+          // Center the whole label block on the donut, not just its top edge, so that
+          // multi-line labels (count + unit) stay vertically centered.
+          top: 50%;
+          transform: translateY(-50%);
+        `}
       width: 100%;
       max-width: 75%;
       position: absolute; // Make this position absolute in order to overlap the text onto the donut
@@ -133,6 +140,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           css={styles.donutTextWrapper}
           alignItems="center"
           className={donutTextWrapperClassName}
+          data-test-subj="donut-chart-label"
           direction="column"
           gutterSize="none"
           justifyContent="center"
