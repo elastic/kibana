@@ -26,11 +26,7 @@ import type {
   BeatsOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
-import {
-  isBeatsOutput,
-  isOtlpOutput,
-  isOtelExporterOutput,
-} from '../../../common/services/output_helpers';
+import { isBeatsOutput, isOtelExporterOutput } from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -317,31 +313,6 @@ async function hashSecrets(output: PreconfiguredOutput) {
     };
   }
 
-  if (isOtlpOutput(output)) {
-    const otlpOutput = output as NewOtlpOutput;
-    const tls = otlpOutput.secrets?.otlp_exporter?.tls;
-    const tlsHashes: Record<string, unknown> = {};
-
-    if (typeof tls?.key_pem === 'string') {
-      tlsHashes.key_pem = await hashSecret(tls.key_pem);
-    }
-
-    const tpmHashes: Record<string, unknown> = {};
-    if (typeof tls?.tpm?.owner_auth === 'string') {
-      tpmHashes.owner_auth = await hashSecret(tls.tpm.owner_auth);
-    }
-    if (typeof tls?.tpm?.auth === 'string') {
-      tpmHashes.auth = await hashSecret(tls.tpm.auth);
-    }
-    if (Object.keys(tpmHashes).length) {
-      tlsHashes.tpm = tpmHashes;
-    }
-
-    if (Object.keys(tlsHashes).length) {
-      secrets = { ...secrets, otlp_exporter: { tls: tlsHashes } };
-    }
-  }
-
   return secrets;
 }
 
@@ -456,19 +427,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
 
   if (existingOutput.type === 'otlp') {
     const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
-    const existingTls = existingOutput.secrets?.otlp_exporter?.tls;
-    const preconfiguredTls = preconfiguredOtlp.secrets?.otlp_exporter?.tls;
-    const [tlsKeyIsDifferent, ownerAuthIsDifferent, tpmAuthIsDifferent] = await Promise.all([
-      isSecretDifferent(preconfiguredTls?.key_pem, existingTls?.key_pem),
-      isSecretDifferent(preconfiguredTls?.tpm?.owner_auth, existingTls?.tpm?.owner_auth),
-      isSecretDifferent(preconfiguredTls?.tpm?.auth, existingTls?.tpm?.auth),
-    ]);
-    return (
-      isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter) ||
-      tlsKeyIsDifferent ||
-      ownerAuthIsDifferent ||
-      tpmAuthIsDifferent
-    );
+    return isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter);
   }
 
   const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;
