@@ -227,7 +227,7 @@ export class AgentStatusChangeTask {
 
       await this.bulkCreateAgentStatusChangeDocs(esClient, agentsWithStatus, agentlessPolicies);
 
-      const updateErrors: Record<string, unknown> = {};
+      const updateErrors: Record<string, Error> = {};
       await bulkUpdateAgents(
         esClient,
         agentsWithStatus.map((agent: Agent) => ({
