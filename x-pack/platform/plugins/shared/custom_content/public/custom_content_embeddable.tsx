@@ -53,7 +53,6 @@ import {
 } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../common/constants';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
 
@@ -171,7 +170,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     titleManager.api.title$.getValue() ?? undefined
                   ),
                 ],
-                sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
               });
             };
 
@@ -340,27 +338,32 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             .subscribe((event) => {
               if (!isRoundCompleteEvent(event)) return;
 
-              const updatedRef = event.data.round.input.attachment_refs?.find(
+              // A round can touch several attachments — the dashboard's, and one per custom content
+              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
+              // attachment leading the list would make this panel skip its own update.
+              const agentRefs = event.data.round.input.attachment_refs?.filter(
                 (ref) =>
                   ref.actor === ATTACHMENT_REF_ACTOR.agent &&
                   (ref.operation === 'updated' || ref.operation === 'created')
               );
-              if (!updatedRef) return;
+              if (!agentRefs?.length) return;
 
-              const updatedAttachment = event.data.attachments?.find(
-                (a) =>
-                  a.id === updatedRef.attachment_id &&
-                  a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
-              );
-              if (!updatedAttachment) return;
+              for (const ref of agentRefs) {
+                const updatedAttachment = event.data.attachments?.find(
+                  (a) =>
+                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
+                );
+                if (!updatedAttachment) continue;
 
-              const data = getLatestVersion(updatedAttachment)?.data as
-                | CustomContentContextAttachmentData
-                | undefined;
-              if (!data || data.embeddable_id !== uuid) return;
+                const data = getLatestVersion(updatedAttachment)?.data as
+                  | CustomContentContextAttachmentData
+                  | undefined;
+                if (!data || data.embeddable_id !== uuid) continue;
 
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
+                template$.next(data.panel_template);
+                esqlQuery$.next(data.esql_query);
+                break;
+              }
             });
 
           return () => sub.unsubscribe();
@@ -375,7 +378,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             attachments: [
               buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
             ],
-            sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
           });
         }, [panelTitle]);
 

@@ -442,6 +442,87 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
     });
 
+    it('applies its own update when other attachments were updated in the same round', async () => {
+      const chatEvents$ = new Subject<unknown>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      // The dashboard attachment leads the ref list, and another custom content panel follows.
+      // Neither may stop this panel from picking up its own update.
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'dashboard-att',
+                  version: 3,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+                {
+                  attachment_id: 'other-panel-att',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'dashboard-att',
+              type: 'dashboard',
+              current_version: 3,
+              versions: [{ version: 3, data: { title: 'A dashboard' } }],
+            },
+            {
+              id: 'other-panel-att',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: { panel_template: '<p>not mine</p>', embeddable_id: 'other-uuid' },
+                },
+              ],
+            },
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: { panel_template: '<p>mine</p>', embeddable_id: 'test-uuid' },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+
+      expect(embeddable.api.serializeState().template).toBe('<p>mine</p>');
+    });
+
     it('ignores events for a different embeddable_id', async () => {
       const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
@@ -553,7 +634,6 @@ describe('customContentEmbeddableFactory', () => {
               data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
             }),
           ]),
-          sessionTag: expect.stringContaining('test-uuid'),
         })
       );
     });

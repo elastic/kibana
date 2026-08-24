@@ -28,7 +28,9 @@ const makeAttachment = (data: Record<string, unknown>) => ({
 
 const makeContext = (attachmentData?: Record<string, unknown>) => {
   const attachment = attachmentData ? makeAttachment(attachmentData) : undefined;
-  const update = jest.fn().mockResolvedValue(undefined);
+  // `attachments.update` resolves the new versioned attachment; the tool reads `current_version`
+  // off it so the agent can address that exact version in its render tag.
+  const update = jest.fn().mockResolvedValue({ ...attachment, current_version: 2 });
   return {
     attachments: {
       getAll: jest.fn().mockReturnValue(attachment ? [attachment] : []),
@@ -178,6 +180,42 @@ describe('createUpdateCustomContentTool handler', () => {
     it('returns success on valid update', async () => {
       const { results } = await callHandler({ prompt: 'Show KPIs' }, existing);
       expect(results[0].type).toBe(ToolResultType.other);
+    });
+  });
+
+  describe('render coordinates', () => {
+    const existing = {
+      panel_template: '<p>old</p>',
+      esql_query: 'FROM logs',
+      panel_title: 'My Panel',
+      embeddable_id: 'p1',
+    };
+
+    // Without these the agent cannot emit `<render_attachment id version />`, and no preview card
+    // is rendered for the round.
+    it('returns the attachment id and the newly created version', async () => {
+      const { results } = await callHandler({ prompt: 'Show KPIs' }, existing);
+      expect(results[0].data).toEqual(
+        expect.objectContaining({ attachment_id: 'att-1', version: 2 })
+      );
+    });
+
+    it('omits the version when the update produced no new one', async () => {
+      const tool = createUpdateCustomContentTool();
+      const ctx = makeContext(existing);
+      ctx.attachments.update = jest.fn().mockResolvedValue(undefined);
+
+      type HandlerParams = Parameters<typeof tool.handler>[0];
+      type HandlerCtx = Parameters<typeof tool.handler>[1];
+      const ret = await tool.handler(
+        { prompt: 'Show KPIs' } as HandlerParams,
+        ctx as unknown as HandlerCtx
+      );
+      if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
+
+      expect(ret.results[0].data).toEqual(
+        expect.objectContaining({ attachment_id: 'att-1', version: undefined })
+      );
     });
   });
 });
