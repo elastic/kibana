@@ -14,12 +14,16 @@ import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { ChatOpener } from '../../../types';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
+import { useFeedbackSchedule } from '../../hooks/use_feedback_schedule';
+import { useRunFeedbackLoop } from '../../hooks/use_run_feedback_loop';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { useSignals } from '../../hooks/use_signals';
 import { SignalsPanel } from './signals_panel';
 import { buildSignal } from './signal_test_fixtures';
 
 jest.mock('../../hooks/use_feedback_loop_enabled', () => ({ useFeedbackLoopEnabled: jest.fn() }));
+jest.mock('../../hooks/use_feedback_schedule', () => ({ useFeedbackSchedule: jest.fn() }));
+jest.mock('../../hooks/use_run_feedback_loop', () => ({ useRunFeedbackLoop: jest.fn() }));
 jest.mock('../../hooks/use_signal_groups', () => ({ useSignalGroups: jest.fn() }));
 jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
@@ -35,8 +39,24 @@ jest.mock('@kbn/llm-trace-waterfall', () => ({
 }));
 
 const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
+const mockUseFeedbackSchedule = jest.mocked(useFeedbackSchedule);
+const mockUseRunFeedbackLoop = jest.mocked(useRunFeedbackLoop);
 const mockUseSignalGroups = jest.mocked(useSignalGroups);
 const mockUseSignals = jest.mocked(useSignals);
+
+const scheduleResult = (overrides: Partial<ReturnType<typeof useFeedbackSchedule>> = {}) => ({
+  isEnabled: false,
+  isLoading: false,
+  error: undefined,
+  setEnabled: jest.fn(),
+  isSaving: false,
+  ...overrides,
+});
+
+const runResult = (overrides: { mutate?: jest.Mock; isLoading?: boolean } = {}) =>
+  ({ mutate: jest.fn(), isLoading: false, ...overrides } as unknown as ReturnType<
+    typeof useRunFeedbackLoop
+  >);
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -65,11 +85,12 @@ const signalsResult = (overrides = {}) => ({
   ...overrides,
 });
 
-const renderPanel = ({
-  isLoading = false,
-  chatOpener,
-  index = aiIndex,
-}: { isLoading?: boolean; chatOpener?: ChatOpener; index?: GetAiIndexResponse } = {}) => {
+const renderPanel = (
+  args: { isLoading?: boolean; chatOpener?: ChatOpener; index?: GetAiIndexResponse } = {}
+) => {
+  const { isLoading = false, chatOpener } = args;
+  // `in` rather than a default, so a test can render the panel before the index has loaded.
+  const index = 'index' in args ? args.index : aiIndex;
   const services = {
     ...coreMock.createStart(),
     data: { search: { search: jest.fn() } },
@@ -91,6 +112,8 @@ const aiIndexWithAgent: GetAiIndexResponse = { ...aiIndex, feedback_agent_id: 'm
 describe('SignalsPanel', () => {
   beforeEach(() => {
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockUseFeedbackSchedule.mockReturnValue(scheduleResult());
+    mockUseRunFeedbackLoop.mockReturnValue(runResult());
     mockUseSignalGroups.mockReturnValue(groupsResult());
     mockUseSignals.mockReturnValue(signalsResult());
   });
@@ -165,35 +188,56 @@ describe('SignalsPanel', () => {
     expect(opener.mock.calls[0][0]).not.toHaveProperty('signals');
   });
 
-  it('renders the agent selector and disables Analyze with a prompt when no agent is configured', () => {
+  it('analyzes without a configured agent, since the run falls back to the built-in one', () => {
     const opener = jest.fn();
     renderPanel({ chatOpener: opener });
 
     expect(screen.getByTestId('contextSignalsFeedbackAgentSelect')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeDisabled();
-    expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeEnabled();
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
-    expect(opener).not.toHaveBeenCalled();
+    expect(opener).toHaveBeenCalledWith({ aiIndex, tag: undefined });
   });
 
-  it('enables Analyze and hides the prompt once an agent is configured', () => {
-    renderPanel({ chatOpener: jest.fn(), index: aiIndexWithAgent });
-
-    expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeEnabled();
-    expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
-  });
-
-  it('does not render the agent selector when no chat opener is registered', () => {
-    renderPanel();
-    expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
-  });
-
-  it('does not render the agent selector or prompt for a managed index', () => {
+  it('does not render the agent selector for a managed index', () => {
     renderPanel({ chatOpener: jest.fn(), index: { ...aiIndex, managed: true } });
 
     expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
+  });
+
+  it('starts a run without opening chat, and offers it even without Agent Builder', () => {
+    const mutate = jest.fn();
+    mockUseRunFeedbackLoop.mockReturnValue(runResult({ mutate }));
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('contextSignalsRunNowButton'));
+
+    expect(mutate).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('contextSignalsAnalyzeButton')).not.toBeInTheDocument();
+  });
+
+  it('waits for the AI index before allowing a run', () => {
+    renderPanel({ index: undefined });
+    expect(screen.getByTestId('contextSignalsRunNowButton')).toBeDisabled();
+  });
+
+  it('reflects the schedule state and toggles it', () => {
+    const setEnabled = jest.fn();
+    mockUseFeedbackSchedule.mockReturnValue(scheduleResult({ isEnabled: true, setEnabled }));
+    renderPanel();
+
+    const toggle = screen.getByTestId('contextSignalsScheduleSwitch');
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+    expect(setEnabled).toHaveBeenCalledWith(false);
+  });
+
+  it('locks the schedule toggle while the change is in flight', () => {
+    mockUseFeedbackSchedule.mockReturnValue(scheduleResult({ isSaving: true }));
+    renderPanel();
+
+    expect(screen.getByTestId('contextSignalsScheduleSwitch')).toBeDisabled();
   });
 
   it('renders a distinct error state when the groups query fails', () => {

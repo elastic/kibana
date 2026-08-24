@@ -23,3 +23,19 @@ export const withContextEngineFeatureFlag =
     }
     return handler(ctx, request, response);
   };
+
+/**
+ * Gates a route on both the Context Engine setting and the feedback-loop setting, used by every
+ * signals, improvements, and feedback-loop route. `getFeedbackLoopEnabled` is read per request, so
+ * toggling the setting takes effect without a restart.
+ */
+export const withFeedbackLoopFeatureFlag = <P, Q, B>(
+  getFeedbackLoopEnabled: () => Promise<boolean>,
+  handler: RequestHandler<P, Q, B>
+): RequestHandler<P, Q, B> =>
+  withContextEngineFeatureFlag(async (ctx, request, response) => {
+    if (!(await getFeedbackLoopEnabled())) {
+      return response.notFound();
+    }
+    return handler(ctx, request, response);
+  });

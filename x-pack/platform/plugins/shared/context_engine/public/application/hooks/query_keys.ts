@@ -21,4 +21,15 @@ export const contextEngineQueryKeys = {
     byTag: (tag: string, from: number, size: number) =>
       ['context_engine', 'signals', 'by_tag', tag, from, size] as const,
   },
+  improvements: {
+    // The unparameterized prefix is what a mutation invalidates, so approving a suggestion
+    // refreshes every page and status filter of the list, not just the one on screen.
+    all: (aiIndexId: string) => ['context_engine', 'improvements', aiIndexId] as const,
+    list: (aiIndexId: string, status: readonly string[] | undefined, from: number, size: number) =>
+      ['context_engine', 'improvements', aiIndexId, status ?? 'open', from, size] as const,
+  },
+  feedbackLoop: {
+    schedule: (aiIndexId: string) =>
+      ['context_engine', 'feedback_loop', aiIndexId, 'schedule'] as const,
+  },
 };

@@ -20,6 +20,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/react-query",
+    "@kbn/react-hooks",
     "@kbn/scout",
     "@kbn/logging",
     "@kbn/config-schema",
@@ -60,6 +61,8 @@
     "@kbn/security-plugin",
     "@kbn/zod",
     "@kbn/es-types",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions"
   ]
 }

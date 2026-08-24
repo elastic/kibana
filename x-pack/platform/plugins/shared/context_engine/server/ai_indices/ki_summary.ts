@@ -11,15 +11,28 @@ import {
   groupKiTypeCountsForSummary,
   MAX_KI_TYPE_SUMMARY_COUNT,
 } from '../../common/ki_type_counts';
+import { KI_NOT_EXCLUDED_ESQL_PREDICATE } from '../../common/ki_lifecycle';
 import type { KiTypeCount } from '../../common/http_api/ai_indices';
+import { isEsqlUnknownColumnError } from '../esql_errors';
 
 export interface KiSummary {
   count: number;
   countsByType: KiTypeCount[];
 }
 
-export const getKiCountByTypeQuery = (destValue: string): string =>
-  `FROM ${destValue} | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT ${MAX_KI_TYPE_SUMMARY_COUNT}`;
+/**
+ * @param excludeRemoved when true, skips KIs flagged as excluded. Only valid against a destination
+ * whose mapping includes `attributes`; see `getKiSummary` for the fallback.
+ */
+export const getKiCountByTypeQuery = (destValue: string, excludeRemoved = true): string =>
+  [
+    `FROM ${destValue}`,
+    ...(excludeRemoved ? [`WHERE ${KI_NOT_EXCLUDED_ESQL_PREDICATE}`] : []),
+    'STATS count = COUNT(*) BY type',
+    'INLINE STATS total = SUM(count)',
+    'SORT count DESC',
+    `LIMIT ${MAX_KI_TYPE_SUMMARY_COUNT}`,
+  ].join(' | ');
 
 const parseKiCountByTypeResponse = (response: {
   columns: Array<{ name: string }>;
@@ -56,15 +69,34 @@ const parseKiCountByTypeResponse = (response: {
   return { count: total, countsByType: groupKiTypeCountsForSummary(countsByType, total) };
 };
 
+/**
+ * Counts the Knowledge Indicators an agent would actually retrieve, skipping any flagged as
+ * excluded. A destination that does not map `attributes` (a strict-mapped AI index) makes ES|QL
+ * reject the filter outright; such an index can never hold an excluded KI, so the unfiltered count
+ * is the right answer there.
+ */
 export const getKiSummary = async (
   esClient: ElasticsearchClient,
   destValue: string
 ): Promise<KiSummary> => {
+  const run = async (excludeRemoved: boolean) =>
+    parseKiCountByTypeResponse(
+      await esClient.esql.query({ query: getKiCountByTypeQuery(destValue, excludeRemoved) })
+    );
+
   try {
-    const response = await esClient.esql.query({
-      query: getKiCountByTypeQuery(destValue),
-    });
-    return parseKiCountByTypeResponse(response);
+    return await run(true);
+  } catch (error) {
+    if (isEsqlUnknownIndexError(error)) {
+      return { count: 0, countsByType: [] };
+    }
+    if (!isEsqlUnknownColumnError(error)) {
+      throw error;
+    }
+  }
+
+  try {
+    return await run(false);
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
       return { count: 0, countsByType: [] };

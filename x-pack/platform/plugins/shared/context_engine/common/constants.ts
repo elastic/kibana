@@ -26,6 +26,43 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/** Improvements routes (internal): list per AI index, record a run's output, approve, reject. */
+export const improvementsPath = `${internalApiPath}/improvements`;
+export const improvementApprovePath = `${improvementsPath}/{improvementId}/_approve`;
+export const improvementRejectPath = `${improvementsPath}/{improvementId}/_reject`;
+export const aiIndexImprovementsPath = `${internalApiPath}/ai_index/{aiIndexId}/improvements`;
+
+/** Feedback-loop routes (internal): the agent context payload, a manual run, and the schedule. */
+export const aiIndexFeedbackContextPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_context`;
+export const aiIndexFeedbackRunPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_loop/_run`;
+export const aiIndexFeedbackSchedulePath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_loop/schedule`;
+
+/**
+ * Version of the internal Improvements and feedback-loop APIs, shared between route registration
+ * and the browser client.
+ */
+export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
+
+/** Default and maximum page size when listing improvements. */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Max number of improvements handed to the agent as prior history. Bounds the prompt while still
+ * covering enough past decisions for the agent to avoid re-proposing.
+ */
+export const MAX_IMPROVEMENT_HISTORY = 200;
+
+/** Max number of suggestions accepted from a single feedback-loop run. */
+export const MAX_IMPROVEMENTS_PER_RUN = 20;
+
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
+export const MAX_IMPROVEMENT_ID_LENGTH = 256;
+export const MAX_IMPROVEMENT_WORKFLOW_YAML_LENGTH = 65536;
+export const MAX_IMPROVEMENT_KI_CONTENT_LENGTH = 32768;
+export const MAX_IMPROVEMENT_TAGS = 32;
+
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
@@ -71,6 +108,23 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
 /** Agent id whose tool calls are left untagged. */
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+
+/**
+ * Built-in Agent Builder agent that analyzes signals and proposes improvements. Used whenever an
+ * AI index has no `feedback_agent_id` of its own. Registered by `context_engine_agent_builder`,
+ * which owns the Agent Builder dependency; declared here so both plugins agree on the id.
+ */
+export const CONTEXT_ENGINE_FEEDBACK_AGENT_ID = 'platform.context_engine.feedback_loop';
+
+/**
+ * How often a scheduled feedback loop runs, in minutes. Daily: signals accumulate slowly, and a
+ * run costs an LLM analysis and produces suggestions a human has to review, so a shorter cadence
+ * would mostly re-read the same evidence and re-propose what is still awaiting review.
+ */
+export const FEEDBACK_LOOP_SCHEDULE_INTERVAL_MINUTES = 1440;
+
+/** The plugin id the improvement-loop managed workflow is owned by. */
+export const CONTEXT_ENGINE_PLUGIN_ID = 'contextEngine';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

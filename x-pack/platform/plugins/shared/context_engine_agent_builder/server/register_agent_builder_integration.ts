@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { registerFeedbackLoopAgent } from './agent_builder/agents/feedback_loop/agent';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
 import type {
@@ -30,6 +31,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   workflowsManagement: WorkflowsManagementApi;
 }): void => {
   registerAttachmentTypes(agentBuilder);
+  registerFeedbackLoopAgent(agentBuilder);
 
   registerAgentBuilderTools({
     agentBuilder,

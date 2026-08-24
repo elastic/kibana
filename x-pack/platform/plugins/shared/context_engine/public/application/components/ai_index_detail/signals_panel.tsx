@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -22,7 +23,9 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
+import { useFeedbackSchedule } from '../../hooks/use_feedback_schedule';
 import { useKibana } from '../../hooks/use_kibana';
+import { useRunFeedbackLoop } from '../../hooks/use_run_feedback_loop';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { FeedbackAgentSelector } from './feedback_agent_selector';
 import { SignalGroupFlyout } from './signal_group_flyout';
@@ -36,8 +39,11 @@ interface SignalsPanelProps {
 
 /**
  * Read-only Signals panel. Shows a preaggregated grouped-by-tag list of "issue" cards; clicking a
- * group opens a flyout with its member signals (each drilling into a trace waterfall). A panel-level
- * "Analyze & improve" button opens Agent Builder over all signals once Agent Builder is available.
+ * group opens a flyout with its member signals (each drilling into a trace waterfall).
+ *
+ * It also carries the analysis controls: "Run now" starts one autonomous run whose suggestions land
+ * in the improvements panel, the schedule switch makes that recurring, and "Analyze & improve" hands
+ * the same briefing to Agent Builder chat for a conversation instead.
  */
 export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
@@ -58,9 +64,11 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   });
   const [selectedGroup, setSelectedGroup] = useState<SignalGroup | undefined>();
 
-  const loading = isLoading || isLoadingGroups;
+  const aiIndexId = aiIndex?.id;
+  const runFeedbackLoop = useRunFeedbackLoop(aiIndexId ?? '');
+  const schedule = useFeedbackSchedule({ aiIndexId, enabled: feedbackLoopEnabled });
 
-  const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
+  const loading = isLoading || isLoadingGroups;
 
   const handleAnalyze = () => {
     if (aiIndex) {
@@ -85,13 +93,27 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
             </h2>
           </EuiTitle>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={() => runFeedbackLoop.mutate()}
+            isDisabled={aiIndex === undefined}
+            isLoading={runFeedbackLoop.isLoading}
+            data-test-subj="contextSignalsRunNowButton"
+          >
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.runNowButton', {
+              defaultMessage: 'Run now',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
         {chatOpener && (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
               iconType="sparkles"
               onClick={handleAnalyze}
-              isDisabled={aiIndex === undefined || !hasFeedbackAgent}
+              isDisabled={aiIndex === undefined}
               data-test-subj="contextSignalsAnalyzeButton"
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analyzeButton', {
@@ -102,41 +124,36 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
         )}
       </EuiFlexGroup>
 
-      {chatOpener && aiIndex && !aiIndex.managed && (
-        <>
-          <EuiSpacer size="m" />
-          <FeedbackAgentSelector aiIndex={aiIndex} />
-          {!hasFeedbackAgent && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued" data-test-subj="contextSignalsFeedbackAgentPrompt">
-                <p>
-                  {i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt',
-                    {
-                      defaultMessage: 'Select an analysis agent to enable "Analyze & improve".',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            </>
-          )}
-        </>
-      )}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false} wrap>
+        {aiIndex && !aiIndex.managed && (
+          <EuiFlexItem grow={false}>
+            <FeedbackAgentSelector aiIndex={aiIndex} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.contextEngine.aiIndexDetail.signals.scheduleSwitch', {
+              defaultMessage: 'Analyze automatically every day',
+            })}
+            checked={schedule.isEnabled}
+            disabled={aiIndex === undefined || schedule.isLoading || schedule.isSaving}
+            onChange={(event) => schedule.setEnabled(event.target.checked)}
+            data-test-subj="contextSignalsScheduleSwitch"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      {chatOpener && aiIndex && aiIndex.managed && !hasFeedbackAgent && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued" data-test-subj="contextSignalsManagedNoAgentPrompt">
-            <p>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt', {
-                defaultMessage:
-                  'A feedback agent must be configured for this managed index to enable "Analyze & improve".',
-              })}
-            </p>
-          </EuiText>
-        </>
-      )}
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="subdued" data-test-subj="contextSignalsAnalysisHint">
+        <p>
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analysisHint', {
+            defaultMessage:
+              'Runs analyze the signals below and propose changes for you to review. Scheduled runs use your privileges. Without an analysis agent, the built-in Context Engine Feedback Loop agent is used.',
+          })}
+        </p>
+      </EuiText>
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">

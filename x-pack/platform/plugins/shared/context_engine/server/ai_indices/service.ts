@@ -250,6 +250,51 @@ export class AiIndexService {
     );
   }
 
+  /**
+   * Detaches a workflow automation from an AI index, retrying on concurrent writes. Detaching an
+   * automation that is not attached is a no-op, so an improvement whose removal was already applied
+   * can be re-approved without failing.
+   */
+  async removeAutomation(
+    aiIndexId: string,
+    automation: { type: 'workflow'; value: string }
+  ): Promise<'detached' | 'not_attached'> {
+    return pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+        if (existing.document.managed) {
+          throw new AiIndexManagedError(aiIndexId);
+        }
+
+        const remaining = existing.document.automations.filter(
+          (entry) => !(entry.type === automation.type && entry.value === automation.value)
+        );
+        if (remaining.length === existing.document.automations.length) {
+          return 'not_attached';
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          { ...existing.document, automations: remaining },
+          existing
+        );
+
+        return 'detached';
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
+  }
+
   async list(): Promise<AiIndexHttpItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,

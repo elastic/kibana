@@ -11,8 +11,14 @@ import { KI_OTHERS_TYPE } from '../../common/ki_type_counts';
 import { getKiCountByTypeQuery, getKiSummary } from './ki_summary';
 
 describe('ki_summary', () => {
-  it('builds a count-by-type query for the destination', () => {
+  it('builds a count-by-type query that skips removed Knowledge Indicators', () => {
     expect(getKiCountByTypeQuery('ai-index-idx-sample-ki')).toBe(
+      'FROM ai-index-idx-sample-ki | WHERE FIELD_EXTRACT(attributes, "excluded") IS NULL | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5'
+    );
+  });
+
+  it('builds a query without the exclusion filter when the destination has no attributes field', () => {
+    expect(getKiCountByTypeQuery('ai-index-idx-sample-ki', false)).toBe(
       'FROM ai-index-idx-sample-ki | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5'
     );
   });

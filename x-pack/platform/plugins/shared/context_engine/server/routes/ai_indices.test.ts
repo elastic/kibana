@@ -28,6 +28,7 @@ import {
   AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { FeedbackScheduleService } from '../feedback/schedule';
 
 interface RegisteredRoute {
   config: {
@@ -87,6 +88,7 @@ describe('ai indices routes', () => {
   let aiIndexService: jest.Mocked<
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete'>
   >;
+  let feedbackScheduleService: jest.Mocked<Pick<FeedbackScheduleService, 'uninstall'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -134,6 +136,7 @@ describe('ai indices routes', () => {
       list: jest.fn(),
       delete: jest.fn(),
     };
+    feedbackScheduleService = { uninstall: jest.fn() };
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -160,7 +163,10 @@ describe('ai indices routes', () => {
     registerAiIndexRoutes({
       router,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getFeedbackScheduleService: () =>
+        feedbackScheduleService as unknown as FeedbackScheduleService,
       getActions: async () => actions,
+      getSpaces: async () => undefined,
     });
   });
 
@@ -442,7 +448,7 @@ describe('ai indices routes', () => {
 
       expect(esqlQuery).toHaveBeenCalledWith({
         query:
-          'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
+          'FROM ai-index-ds-customer_support* | WHERE FIELD_EXTRACT(attributes, "excluded") IS NULL | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -522,6 +528,19 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
     });
 
+    it('uninstalls the improvement-loop schedule for the deleted index', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(feedbackScheduleService.uninstall).toHaveBeenCalledWith({
+        spaceId: 'default',
+        aiIndexId: 'customer_support',
+      });
+    });
+
     it('returns 404 when the AI index does not exist', async () => {
       aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
@@ -530,6 +549,7 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
       });
+      expect(feedbackScheduleService.uninstall).not.toHaveBeenCalled();
     });
   });
 

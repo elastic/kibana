@@ -23,7 +23,8 @@ export const createAnalyzeChatOpener = ({
   coreStart: CoreStart;
   agentBuilder: AgentBuilderPluginStart | undefined;
   buildAnalyzeChat?: (
-    context: AnalyzeAndImproveContext
+    context: AnalyzeAndImproveContext,
+    deps: { http: CoreStart['http'] }
   ) => AnalyzeChatOptions | Promise<AnalyzeChatOptions>;
 }): ChatOpener | undefined => {
   if (!agentBuilder || coreStart.application.capabilities.agentBuilder?.show !== true) {
@@ -44,7 +45,17 @@ export const createAnalyzeChatOpener = ({
       });
       return;
     }
-    const options = await buildAnalyzeChat(ctx);
+    let options: AnalyzeChatOptions;
+    try {
+      options = await buildAnalyzeChat(ctx, { http: coreStart.http });
+    } catch (error) {
+      coreStart.notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.contextEngine.chatOpener.briefingErrorTitle', {
+          defaultMessage: 'Unable to prepare the analysis',
+        }),
+      });
+      return;
+    }
     if (!options.agentId) {
       return;
     }

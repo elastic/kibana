@@ -13,6 +13,7 @@ import type {
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { createWorkflowProvider } from './workflow_provider';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -32,11 +33,15 @@ export class ContextEngineAgentBuilderPlugin
     >,
     setupDeps: ContextEngineAgentBuilderSetupDependencies
   ): ContextEngineAgentBuilderPluginSetup {
+    const workflowsManagement = setupDeps.workflowsManagement.management;
+
     registerContextEngineAgentBuilderIntegration({
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
-      workflowsManagement: setupDeps.workflowsManagement.management,
+      workflowsManagement,
     });
+
+    setupDeps.contextEngine.registerWorkflowProvider(createWorkflowProvider(workflowsManagement));
 
     return {};
   }

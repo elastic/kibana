@@ -36,6 +36,10 @@ export interface AnalyzeChatOptions {
   newConversation: boolean;
   /** Session tag for this AI index's conversation. */
   sessionTag: string;
+  /** First message of the conversation, stating what the agent is being asked to do. */
+  initialMessage: string;
+  /** When true, the initial message is sent without waiting for the user. */
+  autoSendInitialMessage: boolean;
   /** Attachments passed to Agent Builder. */
   attachments: AttachmentInput[];
 }

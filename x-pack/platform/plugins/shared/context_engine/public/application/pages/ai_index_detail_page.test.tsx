@@ -94,6 +94,30 @@ jest.mock('../hooks/use_signals', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_improvements', () => ({
+  useImprovements: () => ({
+    improvements: [],
+    total: 0,
+    isLoading: false,
+    error: undefined,
+    refetch: jest.fn(),
+  }),
+}));
+
+jest.mock('../hooks/use_feedback_schedule', () => ({
+  useFeedbackSchedule: () => ({
+    isEnabled: false,
+    isLoading: false,
+    error: undefined,
+    setEnabled: jest.fn(),
+    isSaving: false,
+  }),
+}));
+
+jest.mock('../hooks/use_run_feedback_loop', () => ({
+  useRunFeedbackLoop: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
+
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,

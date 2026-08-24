@@ -6,42 +6,49 @@
  */
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { getFeedbackContext } from './application/api/feedback_loop';
 import type { AnalyzeAndImproveContext, AnalyzeChatOptions } from './types';
 
-const workflowIdsOf = (aiIndex: AiIndexHttpItem): string[] =>
-  aiIndex.automations
-    .filter((automation) => automation.type === 'workflow')
-    .map((automation) => automation.value);
+/**
+ * Builds Agent Builder `openChat` options for an Analyze & improve hand-off.
+ *
+ * The briefing is fetched from the same server route a scheduled run calls, so the interactive and
+ * automatic paths hand the agent identical information: the index configuration, its knowledge
+ * indicators, the signals, and every prior suggestion with its outcome. It travels as an attachment
+ * rather than as the message so the reviewer can read (and the agent can quote) it, leaving the
+ * message itself to state the ask.
+ */
+export const buildAnalyzeChat = async (
+  { aiIndex, tag }: AnalyzeAndImproveContext,
+  { http }: { http: HttpStart }
+): Promise<AnalyzeChatOptions> => {
+  const context = await getFeedbackContext(http, { aiIndexId: aiIndex.id });
 
-const buildIndexSummary = (aiIndex: AiIndexHttpItem): string => {
-  const workflowIds = workflowIdsOf(aiIndex);
-  const lines: Array<string | undefined> = [
-    `AI index: ${aiIndex.id}${aiIndex.managed ? ' (managed)' : ''}`,
-    aiIndex.description ? `Description: ${aiIndex.description}` : undefined,
-    `Dest: ${aiIndex.dest.type} ${aiIndex.dest.value}`,
-    aiIndex.sources.length
-      ? `Sources:\n${aiIndex.sources
-          .map((source) => `- ${source.type}: ${source.value}`)
-          .join('\n')}`
-      : 'Sources: none',
-    workflowIds.length
-      ? `Linked workflow IDs:\n${workflowIds.map((id) => `- ${id}`).join('\n')}`
-      : 'Linked workflow IDs: none',
-  ];
-  return lines.filter((line): line is string => Boolean(line)).join('\n');
+  return {
+    // Resolved server-side: the index's configured agent, or the built-in feedback-loop agent.
+    agentId: context.agent_id,
+    newConversation: true,
+    sessionTag: `context-engine-feedback:${aiIndex.id}`,
+    initialMessage: tag
+      ? i18n.translate('xpack.contextEngine.analyzeChat.initialMessageForTag', {
+          defaultMessage:
+            'Review the attached briefing for the "{aiIndexId}" AI index and propose improvements. Focus on the signals tagged "{tag}".',
+          values: { aiIndexId: aiIndex.id, tag },
+        })
+      : i18n.translate('xpack.contextEngine.analyzeChat.initialMessage', {
+          defaultMessage:
+            'Review the attached briefing for the "{aiIndexId}" AI index and propose improvements.',
+          values: { aiIndexId: aiIndex.id },
+        }),
+    autoSendInitialMessage: true,
+    attachments: [
+      {
+        id: `context-engine-ai-index:${aiIndex.id}`,
+        type: AttachmentType.text,
+        data: { content: context.prompt },
+      },
+    ],
+  };
 };
-
-/** Builds Agent Builder `openChat` options for an Analyze & improve hand-off. */
-export const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
-  agentId: aiIndex.feedback_agent_id,
-  newConversation: true,
-  sessionTag: `context-engine-feedback:${aiIndex.id}`,
-  attachments: [
-    {
-      id: `context-engine-ai-index:${aiIndex.id}`,
-      type: AttachmentType.text,
-      data: { content: buildIndexSummary(aiIndex) },
-    },
-  ],
-});

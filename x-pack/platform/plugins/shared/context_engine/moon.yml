@@ -65,6 +65,8 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/es-types'
   - '@kbn/task-manager-plugin'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod

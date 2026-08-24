@@ -80,3 +80,69 @@ user against the current space's signals index):
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
 
+## Improvement loop
+
+Signals are only an observation. The improvement loop hands them to an agent,
+records what it proposes, and applies the suggestions a user approves:
+
+```
+signals ──► feedback agent ──► improvements (proposed)
+                                    │
+                     user approves ─┼─► applied to KIs / automations
+                     user rejects  ─┘   (recorded, hidden, still fed back)
+```
+
+The analysis runs as the `Context Engine Improvement Loop` managed workflow —
+one instance per AI index per space, off by default. Enabling it from the
+**Signals** panel stores the caller's API key on the scheduled task, so runs
+execute with that user's privileges; `Run now` starts a single run without
+enabling anything. Both go through the same steps: fetch the briefing, run the
+agent, record what it proposed. `Analyze & improve` sends that same briefing to
+Agent Builder chat instead, for a conversation rather than a recorded run.
+
+The agent is the AI index's `feedback_agent_id`, or the built-in
+`platform.context_engine.feedback_loop` agent when the index names none. It is
+resolved per run, so changing it takes effect immediately without reinstalling
+the workflow.
+
+Suggestions are stored in the per-space `.contextengine-improvements-<space>`
+index and reviewed in the **Suggested improvements** panel. Applying is never
+destructive: a removed Knowledge Indicator is flagged as excluded (and filtered
+out of retrieval) and a removed automation is disabled, so an applied removal
+can be undone. Every suggestion keeps its full history — when it was proposed,
+who resolved it and when — and the agent is given all of it on the next run so
+it does not re-propose what was refused.
+
+| Method | Path                                                                | Description                                          |
+| ------ | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                | Suggestions for an AI index (open ones by default)   |
+| `POST` | `/internal/context_engine/improvements`                             | Record a run's suggestions (called by the workflow)  |
+| `POST` | `/internal/context_engine/improvements/{id}/_approve`               | Apply a suggestion                                   |
+| `POST` | `/internal/context_engine/improvements/{id}/_reject`                | Refuse a suggestion                                  |
+| `GET`  | `/internal/context_engine/ai_index/{id}/feedback_context`           | The briefing handed to the agent                     |
+| `POST` | `/internal/context_engine/ai_index/{id}/feedback_loop/_run`         | Start one run now                                    |
+| `GET`  | `/internal/context_engine/ai_index/{id}/feedback_loop/schedule`     | Whether the recurring analysis is on                 |
+| `PUT`  | `/internal/context_engine/ai_index/{id}/feedback_loop/schedule`     | Turn the recurring analysis on or off                |
+
+Notes:
+
+- These routes are gated by both `contextEngine:enabled` and
+  `contextEngine:feedbackLoopEnabled` (404 while either is off).
+- Scheduling depends on the optional `workflowsExtensions` plugin. Without it
+  the run and schedule routes answer 503; reviewing suggestions already
+  recorded keeps working.
+- Deleting an AI index uninstalls its schedule in the space the delete came
+  from. AI indices are global while schedules are per space, so a schedule
+  enabled from another space has to be turned off there.
+- The improvements index is read and written by Kibana's internal user, unlike
+  signals, which are read as the requesting user. Elasticsearch's built-in
+  `kibana_system` role grants `.contextengine-*` (with `allow_restricted_indices`)
+  and nothing matching `context-engine-improvements-*`, so the store has to live
+  under the dot prefix — a restricted namespace no end user, not even
+  `superuser`, can read directly. The route's Context Engine privileges and the
+  per-space index are the authorization boundary; applying an approved suggestion
+  still runs as the caller. Adding `context-engine-improvements-*` to the role in
+  the Elasticsearch repo (next to the `context-engine-signals-*` grant it already
+  has) is what it would take to make this a user-readable index read as the
+  caller, like signals.
+

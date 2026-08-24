@@ -13,10 +13,14 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
+import {
+  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_PLUGIN_ID,
+} from '../common/constants';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -25,12 +29,19 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerFeedbackLoopRoutes } from './routes/feedback_loop';
+import { registerImprovementRoutes } from './routes/improvements';
 import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
+import { createFeedbackScheduleService } from './feedback/schedule';
+import type { FeedbackScheduleService } from './feedback/schedule';
+import { ImprovementsService } from './improvements/service';
+import type { ImprovementsServiceApi } from './improvements/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import type { WorkflowProvider } from './workflows/provider';
 
 export class ContextEnginePlugin
   implements
@@ -44,8 +55,17 @@ export class ContextEnginePlugin
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;
+  private improvementsService?: ImprovementsService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
+  private workflowProvider?: WorkflowProvider;
+  private feedbackScheduleService?: FeedbackScheduleService;
+  /**
+   * Resolves the plugin-scoped managed workflows client once per boot and reuses it: binding the
+   * plugin id is a per-boot operation, not a per-request one. Assigned in `setup`.
+   */
+  private getManagedWorkflows: () => Promise<PluginScopedManagedWorkflowsApi | undefined> =
+    async () => undefined;
   private readonly aiIndexRegistry = new AiIndexRegistry();
 
   constructor(context: PluginInitializerContext) {
@@ -93,34 +113,92 @@ export class ContextEnginePlugin
       logger: this.logger.get('signal_generator'),
     });
 
+    const getSpaces = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.spaces;
+    };
+
+    // Claiming ownership has to happen in setup, before any install can reference the definition.
+    setupDeps.workflowsExtensions?.registerManagedWorkflowOwner(CONTEXT_ENGINE_PLUGIN_ID);
+
+    let managedWorkflows: Promise<PluginScopedManagedWorkflowsApi | undefined> | undefined;
+    this.getManagedWorkflows = () => {
+      managedWorkflows ??= coreSetup
+        .getStartServices()
+        .then(([, startDeps]) =>
+          startDeps.workflowsExtensions?.initManagedWorkflowsClient(CONTEXT_ENGINE_PLUGIN_ID)
+        );
+      return managedWorkflows;
+    };
+
+    this.feedbackScheduleService = createFeedbackScheduleService({
+      getManagedWorkflows: () => this.getManagedWorkflows(),
+      getWorkflowProvider: () => this.workflowProvider,
+      logger: this.logger.get('feedback_schedule'),
+    });
+    const feedbackScheduleService = this.feedbackScheduleService;
+
+    const getAiIndexService = () => {
+      if (!this.aiIndexService) {
+        throw new Error('AI index service not available — plugin has not started');
+      }
+      return this.aiIndexService;
+    };
+
+    const getImprovementsService = (): ImprovementsServiceApi => {
+      if (!this.improvementsService) {
+        throw new Error('Improvements service not available — plugin has not started');
+      }
+      return this.improvementsService;
+    };
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
-      getAiIndexService: () => {
-        if (!this.aiIndexService) {
-          throw new Error('AI index service not available — plugin has not started');
-        }
-        return this.aiIndexService;
-      },
+      getAiIndexService,
+      getFeedbackScheduleService: () => feedbackScheduleService,
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getSpaces,
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({
       router,
-      getSpaces: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.spaces;
-      },
+      getSpaces,
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerFeedbackLoopRoutes({
+      router,
+      getAiIndexService,
+      getImprovementsService,
+      getFeedbackScheduleService: () => feedbackScheduleService,
+      getSpaces,
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    registerImprovementRoutes({
+      router,
+      getAiIndexService,
+      getImprovementsService,
+      getWorkflowProvider: () => this.workflowProvider,
+      getSpaces,
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+      logger: this.logger.get('improvements'),
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      registerWorkflowProvider: (provider) => {
+        if (this.workflowProvider) {
+          throw new Error('A Context Engine workflow provider is already registered');
+        }
+        this.workflowProvider = provider;
+      },
     };
   }
 
@@ -139,6 +217,12 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    this.improvementsService = new ImprovementsService({
+      esClient: this.esClient,
+      logger: this.logger.get('improvements'),
+    });
+    const improvementsService = this.improvementsService;
 
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
@@ -168,6 +252,19 @@ export class ContextEnginePlugin
         );
       });
 
+    // The improvement loop has no static workflows to install: instances are created per AI index,
+    // on demand. Signalling readiness right away is what lets the platform auto-upgrade those
+    // instances when the definition version changes.
+    this.getManagedWorkflows()
+      .then((managedWorkflows) => managedWorkflows?.ready())
+      .catch((err) => {
+        this.logger.warn(
+          `Failed to signal managed workflow readiness: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      });
+
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(
         `Failed to schedule signal generator: ${err instanceof Error ? err.message : String(err)}`
@@ -182,6 +279,13 @@ export class ContextEnginePlugin
         return this.aiIndexService;
       },
       getSignalsService: () => signalsService,
+      getImprovementsService: () => improvementsService,
+      getFeedbackScheduleService: () => {
+        if (!this.feedbackScheduleService) {
+          throw new Error('Feedback schedule service not available — plugin has not set up');
+        }
+        return this.feedbackScheduleService;
+      },
     };
   }
 

@@ -19,14 +19,18 @@ export const useFeedbackLoopEnabled = (): boolean => {
     services: { settings },
   } = useKibana();
 
+  // Coerced rather than passed through: an unset setting reads back as undefined, and callers feed
+  // this to React Query's `enabled`, where undefined means "on" instead of "off".
   const [enabled, setEnabled] = useState<boolean>(() =>
-    settings.globalClient.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID, false)
+    Boolean(
+      settings.globalClient.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID, false)
+    )
   );
 
   useEffect(() => {
     const subscription = settings.globalClient
       .get$<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID, false)
-      .subscribe(setEnabled);
+      .subscribe((value) => setEnabled(Boolean(value)));
     return () => subscription.unsubscribe();
   }, [settings]);
 

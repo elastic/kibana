@@ -7,8 +7,9 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
@@ -35,18 +36,13 @@ import type {
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
 import { validateAiIndexId } from '../../common/validation';
-import {
-  InvalidAiIndexDestError,
-  AiIndexConflictError,
-  AiIndexManagedError,
-  AiIndexNotFoundError,
-  AiIndexAlreadyExistsError,
-  InvalidConnectorSourceError,
-} from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { getKiSummary } from '../ai_indices/ki_summary';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import type { FeedbackScheduleService } from '../feedback/schedule';
+import { handleAiIndexError } from './ai_index_errors';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
+import { resolveSpaceId } from './space';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -138,31 +134,18 @@ const aiIndexPropertiesSchema = {
 const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
 const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
-const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
-    return response.badRequest({ body: { message: error.message } });
-  }
-  if (error instanceof AiIndexNotFoundError) {
-    return response.notFound({ body: { message: error.message } });
-  }
-  if (
-    error instanceof AiIndexManagedError ||
-    error instanceof AiIndexConflictError ||
-    error instanceof AiIndexAlreadyExistsError
-  ) {
-    return response.conflict({ body: { message: error.message } });
-  }
-  throw error;
-};
-
 export const registerAiIndexRoutes = ({
   router,
   getAiIndexService,
+  getFeedbackScheduleService,
   getActions,
+  getSpaces,
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
+  getFeedbackScheduleService: () => FeedbackScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
   // Create an AI index
   router.versioned
@@ -396,6 +379,13 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         try {
           await getAiIndexService().delete(aiIndexId);
+          // Best-effort, and only for the space the delete came from: AI indices are global while
+          // schedule instances are per space, so a schedule enabled from another space survives and
+          // has to be turned off there.
+          await getFeedbackScheduleService().uninstall({
+            spaceId: resolveSpaceId(await getSpaces(), request),
+            aiIndexId,
+          });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });

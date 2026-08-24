@@ -14,6 +14,8 @@ const analyzeOptions = async (ctx: AnalyzeAndImproveContext): Promise<AnalyzeCha
   agentId: ctx.aiIndex.feedback_agent_id,
   newConversation: true,
   sessionTag: `context-engine-feedback:${ctx.aiIndex.id}`,
+  initialMessage: `Review ${ctx.aiIndex.id}`,
+  autoSendInitialMessage: true,
   attachments: [
     {
       id: `context-engine-ai-index:${ctx.aiIndex.id}`,
@@ -84,6 +86,8 @@ describe('createAnalyzeChatOpener', () => {
       agentId: 'agent-x',
       newConversation: true,
       sessionTag: 'context-engine-feedback:idx-1',
+      initialMessage: 'Review idx-1',
+      autoSendInitialMessage: true,
       attachments: [
         {
           id: 'context-engine-ai-index:idx-1',
@@ -114,7 +118,7 @@ describe('createAnalyzeChatOpener', () => {
     expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
   });
 
-  it('does not open a chat when the index has no configured feedback agent', async () => {
+  it('does not open a chat when no agent could be resolved', async () => {
     const agentBuilder = mockAgentBuilder();
     const opener = createAnalyzeChatOpener({
       coreStart: coreWithCapability(true),
@@ -125,5 +129,22 @@ describe('createAnalyzeChatOpener', () => {
     await opener!(context(undefined));
 
     expect(agentBuilder.openChat).not.toHaveBeenCalled();
+  });
+
+  it('reports a failure to prepare the briefing instead of opening an empty chat', async () => {
+    const coreStart = coreWithCapability(true);
+    const agentBuilder = mockAgentBuilder();
+    const opener = createAnalyzeChatOpener({
+      coreStart,
+      agentBuilder,
+      buildAnalyzeChat: async () => {
+        throw new Error('context unavailable');
+      },
+    });
+
+    await opener!(context('agent-x'));
+
+    expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });
 });

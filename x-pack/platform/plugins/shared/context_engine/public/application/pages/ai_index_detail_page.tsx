@@ -24,6 +24,7 @@ import { useParams } from 'react-router-dom';
 import {
   AutomationsPanel,
   DescriptionPanel,
+  ImprovementsPanel,
   KnowledgeIndicatorsPanel,
   SignalsPanel,
   SourcesPanel,
@@ -145,6 +146,8 @@ export const AiIndexDetailPage = () => {
         />
         <EuiSpacer size="m" />
         <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+        <EuiSpacer size="m" />
+        <ImprovementsPanel isLoading={isLoading} aiIndex={aiIndex} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

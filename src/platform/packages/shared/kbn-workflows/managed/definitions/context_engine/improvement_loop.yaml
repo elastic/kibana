@@ -1,0 +1,174 @@
+# Context Engine Improvement Loop
+#
+# One instance per AI index. Fetches everything known about the index (configuration,
+# knowledge indicator summary, signal counts, and every prior suggestion with its
+# outcome), hands it to the index's feedback agent, and records the suggestions the
+# agent returns for a human to approve or reject.
+#
+# Flow:
+#   fetch_context -> analyze -> if(any suggestions) record -> output
+#
+# The agent is not named here: `fetch_context` resolves it from the AI index
+# (`feedback_agent_id`, falling back to the built-in feedback-loop agent), so changing
+# the agent on the index takes effect on the next run without reinstalling.
+
+version: "1"
+name: "Context Engine Improvement Loop - __AI_INDEX_ID__"
+description: "Analyzes signals for the __AI_INDEX_ID__ AI index and proposes improvements to its knowledge indicators and automations."
+enabled: false
+tags:
+  - context-engine
+  - ai-index
+  - improvement-loop
+  - scheduled
+settings:
+  timeout: "45m"
+  # A scheduled run and a manual "Run now" must not analyze the same index at the same
+  # time: both would read the same signals and propose the same changes, and only the
+  # first would deduplicate against the other's suggestions.
+  concurrency:
+    key: "context-engine-improvement-loop-__AI_INDEX_ID__"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "__INTERVAL_MINUTES__m"
+  - type: manual
+consts:
+  # Liquid has no array literal, so `| default: []` falls back to nothing at all rather than to
+  # an empty array. A const is the only way to spell that fallback for a run that proposed nothing.
+  no_improvements: []
+steps:
+  # -----------------------------------------------------------------------
+  # Step 1: Everything the agent is given about the index, rendered server-side
+  #         so this workflow and the interactive hand-off say the same thing.
+  # -----------------------------------------------------------------------
+  - name: fetch_context
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/__AI_INDEX_ID__/feedback_context"
+      headers:
+        elastic-api-version: "__API_VERSION__"
+        x-elastic-internal-origin: "kibana"
+
+  # -----------------------------------------------------------------------
+  # Step 2: The analysis itself. Nobody is watching this run, so the agent is
+  #         told to work autonomously and answer with suggestions only.
+  # -----------------------------------------------------------------------
+  - name: analyze
+    type: ai.agent
+    agent-id: "{{ steps.fetch_context.output.agent_id }}"
+    # Attributes this run's LLM spend to the feedback loop, rolled up under Context Engine.
+    plugin-id: "context_engine_improvement_loop"
+    aggregate-by: "context_engine"
+    # Persist the analysis as a conversation so a reviewer can see which signals the
+    # agent read and which tools it called before judging a suggestion.
+    create-conversation: true
+    public-conversation: true
+    timeout: "30m"
+    with:
+      message: "{{ steps.fetch_context.output.prompt }}"
+      metadata:
+        workflow_execution_id: "{{ execution.id }}"
+      schema:
+        type: object
+        properties:
+          improvements:
+            type: array
+            description: The suggested changes. Empty when the signals do not justify one.
+            items:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - add_ki
+                    - edit_ki
+                    - remove_ki
+                    - add_workflow
+                    - edit_workflow
+                    - remove_workflow
+                  description: The change to make.
+                title:
+                  type: string
+                  description: A short summary of the change, shown to the reviewer.
+                rationale:
+                  type: string
+                  description: The evidence behind the suggestion, naming the signals, knowledge indicator, or workflow it came from.
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: How strongly the evidence supports this change.
+                signal_tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Classification tags of the signals this came from.
+                signal_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Ids of individual signals read as evidence.
+                target_ki_id:
+                  type: string
+                  description: Required for edit_ki and remove_ki - the _id of the knowledge indicator to change.
+                target_workflow_id:
+                  type: string
+                  description: Required for edit_workflow and remove_workflow - the id of the workflow to change.
+                ki:
+                  type: object
+                  description: Required for add_ki and edit_ki. For an edit, only the fields that change.
+                  properties:
+                    type:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    content:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                workflow_yaml:
+                  type: string
+                  description: Required for add_workflow and edit_workflow - the complete workflow definition.
+              required:
+                - action
+                - title
+                - rationale
+        required:
+          - improvements
+
+  # -----------------------------------------------------------------------
+  # Step 3: Record the suggestions for review. An empty list is a valid outcome
+  #         rather than a failure, and the route accepts it as a no-op, so this
+  #         step runs unconditionally and the run always reports what it found.
+  # -----------------------------------------------------------------------
+  - name: record
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/context_engine/improvements"
+      headers:
+        elastic-api-version: "__API_VERSION__"
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "kibana"
+        Content-Type: application/json
+      body:
+        ai_index_id: "__AI_INDEX_ID__"
+        run_id: "{{ execution.id }}"
+        improvements: "${{ steps.analyze.output.structured_output.improvements | default: consts.no_improvements }}"
+
+  - name: output_result
+    type: workflow.output
+    with:
+      ai_index_id: "__AI_INDEX_ID__"
+      proposed: "${{ steps.analyze.output.structured_output.improvements | size | default: 0 }}"
+      recorded: "${{ steps.record.output.recorded | size | default: 0 }}"
+      skipped: "${{ steps.record.output.skipped | default: 0 }}"
+      conversation_id: "${{ steps.analyze.output.conversation_id }}"

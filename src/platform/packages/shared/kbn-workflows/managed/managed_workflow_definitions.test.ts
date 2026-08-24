@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  CONTEXT_ENGINE_IMPROVEMENT_LOOP_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -37,6 +38,11 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+  [CONTEXT_ENGINE_IMPROVEMENT_LOOP_WORKFLOW_ID]: {
+    aiIndexId: 'support_kb',
+    intervalMinutes: 1440,
+    apiVersion: '1',
+  },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },

@@ -44,6 +44,59 @@ export interface AiIndexAuditEventParams {
   error?: Error;
 }
 
+/**
+ * Improvement decisions are audited separately from AI index changes: approving one writes to a
+ * user's Knowledge Indicators or workflows, so who decided what needs its own trail.
+ */
+export enum ImprovementAuditAction {
+  APPROVE = 'context_engine_improvement_approve',
+  REJECT = 'context_engine_improvement_reject',
+}
+
+const improvementEventVerbs: Record<ImprovementAuditAction, VerbsTuple> = {
+  context_engine_improvement_approve: ['approve', 'approving', 'approved'],
+  context_engine_improvement_reject: ['reject', 'rejecting', 'rejected'],
+};
+
+export interface ImprovementAuditEventParams {
+  action: ImprovementAuditAction;
+  id: string;
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+export const improvementAuditEvent = ({
+  action,
+  id,
+  outcome,
+  error,
+}: ImprovementAuditEventParams): AuditEvent => {
+  const doc = `Context Engine improvement [id=${id}]`;
+  const [present, progressive, past] = improvementEventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: ['change'],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: { type: 'context_engine_improvement', id },
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
 export const aiIndexAuditEvent = ({
   action,
   id,
