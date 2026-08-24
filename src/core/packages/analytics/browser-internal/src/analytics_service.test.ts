@@ -311,6 +311,34 @@ describe('AnalyticsService', () => {
     `);
   });
 
+  test('setup should register the display language context provider (en, no preference, no override)', async () => {
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    analyticsService.setup({ injectedMetadata });
+    expect(
+      await firstValueFrom(findRegisteredContextProviderByName('display language')[0].context$)
+    ).toEqual({
+      display_language: 'en',
+      display_language_config_override: false,
+    });
+  });
+
+  test('setup should register the display language context provider (with browser preference and override)', async () => {
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    injectedMetadata.getI18nInfo.mockReturnValue({
+      locale: 'de-DE',
+      browserPreferredLocale: 'fr-FR',
+      configOverride: true,
+    });
+    analyticsService.setup({ injectedMetadata });
+    expect(
+      await firstValueFrom(findRegisteredContextProviderByName('display language')[0].context$)
+    ).toEqual({
+      display_language: 'de-DE',
+      display_language_browser_preference: 'fr-FR',
+      display_language_config_override: true,
+    });
+  });
+
   test('setup should expose only the APIs report and opt-in', () => {
     expect(analyticsService.start()).toStrictEqual({
       reportEvent: expect.any(Function),

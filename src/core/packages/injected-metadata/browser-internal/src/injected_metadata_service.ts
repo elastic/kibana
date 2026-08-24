@@ -96,6 +96,11 @@ export class InjectedMetadataService {
         return this.state.clusterInfo;
       },
 
+      getI18nInfo: () => {
+        const { locale, browserPreferredLocale, configOverride } = this.state.i18n;
+        return { locale, browserPreferredLocale, configOverride };
+      },
+
       getCustomBranding: () => {
         return this.state.customBranding;
       },

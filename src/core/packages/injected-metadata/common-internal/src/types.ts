@@ -77,6 +77,15 @@ export interface InjectedMetadata {
     /** `null` when the effective locale is English — no fetch is needed. */
     translationsUrl: string | null;
     availableLocales: Array<{ id: string; label: string }>;
+    /** The locale Kibana rendered this page in. */
+    locale: string;
+    /**
+     * What the Accept-Language header resolves to against the configured locale
+     * list. Absent when nothing the browser asked for can be served.
+     */
+    browserPreferredLocale?: string;
+    /** True when `i18n.defaultLocale` is set to anything other than `en`. */
+    configOverride: boolean;
   };
   theme: InjectedMetadataTheme;
   csp: {

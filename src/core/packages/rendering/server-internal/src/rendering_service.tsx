@@ -291,7 +291,12 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+    const {
+      locale: effectiveLocale,
+      setCookieHeader,
+      browserPreferredLocale,
+      configOverride,
+    } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
@@ -376,6 +381,9 @@ export class RenderingService {
         i18n: {
           translationsUrl,
           availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
+          locale: effectiveLocale,
+          browserPreferredLocale,
+          configOverride,
         },
         theme: {
           darkMode,

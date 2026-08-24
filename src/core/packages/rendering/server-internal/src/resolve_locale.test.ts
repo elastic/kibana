@@ -270,6 +270,64 @@ describe('resolveLocale', () => {
     });
   });
 
+  describe('browserPreferredLocale', () => {
+    it('reflects the Accept-Language match even when the user profile wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          userSettingLocale: 'ja-JP',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.browserPreferredLocale).toBe('fr-FR');
+    });
+
+    it('reflects the Accept-Language match even when the KBN_LOCALE cookie wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP`,
+            acceptLanguage: 'fr-FR,en;q=0.5',
+          }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.browserPreferredLocale).toBe('fr-FR');
+    });
+
+    it('reflects the Accept-Language match even when a config override wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.browserPreferredLocale).toBe('ja-JP');
+    });
+
+    it('is undefined when no configured locale can be served from Accept-Language', () => {
+      const result = resolveLocale(
+        baseArgs({
+          request: buildRequest({ acceptLanguage: 'es-ES,pt-BR;q=0.5' }),
+        })
+      );
+      expect(result.browserPreferredLocale).toBeUndefined();
+    });
+  });
+
+  describe('configOverride', () => {
+    it('is false when configLocale is the default en', () => {
+      const result = resolveLocale(baseArgs({ configLocale: 'en' }));
+      expect(result.configOverride).toBe(false);
+    });
+
+    it('is true when configLocale is a non-default value', () => {
+      const result = resolveLocale(baseArgs({ configLocale: 'fr-FR' }));
+      expect(result.configOverride).toBe(true);
+    });
+  });
+
   describe('Set-Cookie header', () => {
     it('always emits a Set-Cookie value matching the resolved locale', () => {
       const result = resolveLocale(baseArgs());

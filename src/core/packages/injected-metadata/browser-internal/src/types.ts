@@ -43,6 +43,11 @@ export interface InternalInjectedMetadataSetup {
   };
   getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
+  getI18nInfo: () => {
+    locale: string;
+    browserPreferredLocale: string | undefined;
+    configOverride: boolean;
+  };
   /**
    * An array of frontend plugins in topological order.
    */

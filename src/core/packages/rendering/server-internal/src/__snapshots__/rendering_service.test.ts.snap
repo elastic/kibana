@@ -53,6 +53,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -154,6 +156,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -251,6 +255,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -352,6 +358,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -449,6 +457,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -546,6 +556,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -647,6 +659,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -744,6 +758,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -841,6 +857,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -938,6 +956,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1040,6 +1060,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1143,6 +1165,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1245,6 +1269,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1351,6 +1377,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1448,6 +1476,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1550,6 +1580,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1656,6 +1688,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1758,6 +1792,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1862,6 +1898,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1966,6 +2004,8 @@ Object {
         "label": "English",
       },
     ],
+    "configOverride": false,
+    "locale": "en",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {

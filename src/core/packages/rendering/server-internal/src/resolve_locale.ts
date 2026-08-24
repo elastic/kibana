@@ -47,6 +47,14 @@ export interface ResolveLocaleResult {
    * Always present — the cookie is rewritten on every render.
    */
   setCookieHeader: string;
+  /**
+   * What the Accept-Language header resolves to against the configured locale list,
+   * regardless of which priority step actually won. Undefined when nothing the
+   * browser asked for can be served.
+   */
+  browserPreferredLocale: string | undefined;
+  /** True when `i18n.defaultLocale` is set to anything other than `en`. */
+  configOverride: boolean;
 }
 
 /**
@@ -68,33 +76,41 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     allowLocaleCookie,
   } = args;
 
+  // Compute unconditionally so the value is available regardless of which
+  // priority step wins. This is the authoritative browser-side preference for
+  // telemetry — derived from the real Accept-Language header the server sees
+  // rather than navigator.languages, which Chrome reduces before sending.
+  const browserPreferredLocale = pickFromAcceptLanguage(
+    getHeader(request, 'accept-language'),
+    configuredLocales,
+    translationHashes
+  );
+  const configOverride = configLocale !== EN_LOCALE;
+
+  const win = (locale: string): ResolveLocaleResult => ({
+    ...finalize(locale, request, serverBasePath),
+    browserPreferredLocale,
+    configOverride,
+  });
+
   if (userSettingLocale && translationHashes[userSettingLocale]) {
-    return finalize(userSettingLocale, request, serverBasePath);
+    return win(userSettingLocale);
   }
 
   if (allowLocaleCookie) {
     const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
     if (cookieLocale && translationHashes[cookieLocale]) {
-      return finalize(cookieLocale, request, serverBasePath);
+      return win(cookieLocale);
     }
   }
 
   // An explicitly-configured default locale (any value other than the built-in
   // EN_LOCALE) outranks Accept-Language detection.
-  if (configLocale !== EN_LOCALE) {
-    return finalize(configLocale, request, serverBasePath);
+  if (configOverride) {
+    return win(configLocale);
   }
 
-  const headerLocale = pickFromAcceptLanguage(
-    getHeader(request, 'accept-language'),
-    configuredLocales,
-    translationHashes
-  );
-  if (headerLocale) {
-    return finalize(headerLocale, request, serverBasePath);
-  }
-
-  return finalize(configLocale, request, serverBasePath);
+  return win(browserPreferredLocale ?? configLocale);
 };
 
 const getHeader = (request: KibanaRequest, name: string): string => {
@@ -191,7 +207,7 @@ const finalize = (
   locale: string,
   request: KibanaRequest,
   serverBasePath: string
-): ResolveLocaleResult => {
+): Pick<ResolveLocaleResult, 'locale' | 'setCookieHeader'> => {
   const isHttps = request.url.protocol === 'https:';
   const path = serverBasePath || '/';
   const parts = [
