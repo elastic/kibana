@@ -29,7 +29,7 @@ export const customContentPanelConfigSchema = z.object({
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
     .optional()
     .describe(
-      'ES|QL query whose results are passed to the generated template as row objects. Omit for static content.'
+      'ES|QL query whose results are passed to the generated template as row objects. Omit for static content. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and fails the panel if Elasticsearch refuses it.'
     ),
 });
 

@@ -42,7 +42,9 @@ export const customContentUpdateSchema = z
       .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
       .nullable()
       .optional()
-      .describe('ES|QL query. Omit to keep the existing query. Pass null to remove it entirely.'),
+      .describe(
+        'ES|QL query. Omit to keep the existing query. Pass null to remove it entirely. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+      ),
   })
   .refine(({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined, {
     message: 'At least one of prompt or esqlQuery must be provided.',

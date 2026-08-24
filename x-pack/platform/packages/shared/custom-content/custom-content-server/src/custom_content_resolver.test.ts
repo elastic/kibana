@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -26,7 +27,7 @@ const esClient = {
   },
 } as unknown as IScopedClusterClient;
 
-const logger = { debug: jest.fn() } as unknown as Logger;
+const logger = { debug: jest.fn(), warn: jest.fn() } as unknown as Logger;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -120,5 +121,57 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     expect(result).toBe('<div>hello</div>');
     expect(result).not.toContain('```');
+  });
+});
+
+describe('createCustomContentTemplateResolver — ES|QL sampling failures', () => {
+  const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
+
+  const responseError = (type: string, statusCode: number, reason: string) =>
+    new errors.ResponseError({
+      statusCode,
+      body: { error: { type, reason } },
+      warnings: null,
+      meta: {} as never,
+    } as never);
+
+  beforeEach(() => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+  });
+
+  // Without a sampled schema any generated template references invented columns, so every cause
+  // fails rather than persisting a panel that only breaks at render time.
+  it.each([
+    [
+      'a rejected query',
+      responseError('verification_exception', 400, 'Unknown column [nope]'),
+      /ES\|QL query is invalid: Unknown column \[nope\].*generate_esql/,
+    ],
+    [
+      'unparseable syntax',
+      responseError('parsing_exception', 400, 'line 1:6: mismatched input'),
+      /ES\|QL query is invalid: line 1:6: mismatched input/,
+    ],
+    [
+      'a permission error',
+      responseError('security_exception', 403, 'action [indices:data/read/esql] is unauthorized'),
+      /No access to the index targeted by this ES\|QL query/,
+    ],
+    ['a transient cluster error', new Error('socket hang up'), /Could not sample.*socket hang up/],
+  ])('fails with a cause-specific message on %s', async (_label, error, expected) => {
+    mockEsqlQuery.mockRejectedValue(error);
+
+    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).rejects.toThrow(
+      expected
+    );
+    expect(mockChatComplete).not.toHaveBeenCalled();
+  });
+
+  it('still generates a template when a valid query matches no rows', async () => {
+    mockEsqlQuery.mockResolvedValue({ columns: [{ name: 'count', type: 'long' }], values: [] });
+
+    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).resolves.toBe(
+      '<div>ok</div>'
+    );
   });
 });
