@@ -50,9 +50,13 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    await deleteMonitorAPI.deleteMonitorBulk({
-      monitors,
+    const { res } = await deleteMonitorAPI.execute({
+      monitorIds: monitors.map(({ id }) => id),
     });
+
+    if (res) {
+      return res;
+    }
 
     return {
       deleted_monitors: monitorsToDelete,

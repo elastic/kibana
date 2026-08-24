@@ -8,17 +8,43 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { CoreSetup, CapabilitiesProvider } from '@kbn/core-di-server';
+import { cacheInScope } from '@kbn/core-di-internal';
+import {
+  CapabilitiesProvider,
+  CapabilitiesResolver,
+  CapabilitiesSwitcher,
+  CoreSetup,
+  CoreStart,
+  type ICapabilitiesResolver,
+  Request,
+} from '@kbn/core-di-server';
 import { OnSetup } from '@kbn/core-di';
 
-export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptions): void {
+export function loadCapabilities({ bind, onActivation }: ContainerModuleLoadOptions): void {
   onActivation(CapabilitiesProvider, ({ get }, provider) => {
     get(CoreSetup('capabilities')).registerProvider(provider);
 
     return provider;
   });
 
+  onActivation(CapabilitiesSwitcher, ({ get }, switcher) => {
+    get(CoreSetup('capabilities')).registerSwitcher(switcher.switch, switcher);
+
+    return switcher;
+  });
+
   bind(OnSetup).toConstantValue((container) => {
     container.getAll(CapabilitiesProvider);
+    container.getAll(CapabilitiesSwitcher);
   });
+
+  bind(CapabilitiesResolver)
+    .toResolvedValue(
+      (capabilities, request): ICapabilitiesResolver =>
+        (options) =>
+          capabilities.resolveCapabilities(request, options),
+      [CoreStart('capabilities'), Request]
+    )
+    .inRequestScope()
+    .onActivation(cacheInScope(CapabilitiesResolver));
 }
