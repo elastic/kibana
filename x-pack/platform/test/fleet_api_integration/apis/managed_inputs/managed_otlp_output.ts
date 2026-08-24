@@ -33,29 +33,6 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
 
-    const deleteAllSecrets = async () => {
-      try {
-        await es.deleteByQuery({
-          index: '.fleet-secrets',
-          query: { match_all: {} },
-        });
-      } catch (_err) {
-        // index doesn't exist yet — safe to ignore
-      }
-    };
-
-    const enableOutputSecrets = async () => {
-      await kibanaServer.savedObjects.create({
-        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-        id: 'fleet-default-settings',
-        attributes: {
-          output_secret_storage_requirements_met: true,
-          use_space_awareness_migration_status: 'success',
-        },
-        overwrite: true,
-      });
-    };
-
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
