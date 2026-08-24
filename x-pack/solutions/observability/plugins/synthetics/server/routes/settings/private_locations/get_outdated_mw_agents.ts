@@ -23,8 +23,8 @@ const PER_PAGE = 1000;
 const MAX_PAGES = 10;
 
 /**
- * True when the policy has at least one enrolled agent whose version predates
- * Maintenance Window support. Stops paging as soon as one is found.
+ * True when the policy has at least one active enrolled agent whose version
+ * predates Maintenance Window support. Stops paging as soon as one is found.
  */
 const locationHasOutdatedMwAgent = async (
   server: SyntheticsServerSetup,
@@ -37,7 +37,7 @@ const locationHasOutdatedMwAgent = async (
   while (fetched < total && page <= MAX_PAGES) {
     const { agents, total: totalAgents } =
       await server.fleet.agentService.asInternalUser.listAgents({
-        showInactive: true,
+        showInactive: false,
         perPage: PER_PAGE,
         page,
         kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
@@ -63,8 +63,8 @@ const locationHasOutdatedMwAgent = async (
 };
 
 /**
- * Private location ids with at least one enrolled agent older than the MW
- * support threshold. Fleet versions only — no host metrics.
+ * Private location ids with at least one active enrolled agent older than the
+ * MW support threshold. Fleet versions only — no host metrics.
  */
 export const getOutdatedMwAgentLocations: SyntheticsRestApiRouteFactory<
   OutdatedMwAgentLocationsResponse
