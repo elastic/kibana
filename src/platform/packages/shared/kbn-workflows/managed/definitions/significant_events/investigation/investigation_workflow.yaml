@@ -91,6 +91,13 @@ steps:
         {% if inputs.context %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
+
+        As you work, use the set_conversation_metadata tool to record structured findings:
+        - At the start: set status = "in_progress" and an initial severity ("critical", "high", "medium", or "low") based on the signal.
+        - As you identify affected services: set affected_services as an array of service names.
+        - When you reach a conclusion: set summary (one concise paragraph), root_cause (the specific technical cause), and update severity if your analysis changes your initial assessment.
+        - At the end: set status = "resolved" if the issue has a clear fix or is self-correcting, or "false_positive" if the signal is not a real problem.
+        Only set severity = "critical" or "high" if there is active user impact or confirmed data exposure.
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
       # (x-pack/platform/packages/shared/kbn-significant-events-schema/src/significant_events/investigation_state.ts)
       # — this is the same schema the investigation_progress_report tool streams live, so the
