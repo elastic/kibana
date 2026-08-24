@@ -17,7 +17,13 @@ import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
-import type { CloudProjectContext, ServiceAccountsBackend } from './types';
+import type {
+  CloudProjectContext,
+  ListedServiceAccount,
+  ListServiceAccountsParams,
+  ListServiceAccountsResult,
+  ServiceAccountsBackend,
+} from './types';
 import type { SecurityLicense } from '../../common';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
@@ -53,6 +59,29 @@ const serviceAccountSchema = z.object({
       }),
     ])
   ),
+});
+
+const serviceAccountCreatorSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('user'),
+    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+    first_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+    last_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  }),
+  z.object({
+    type: z.literal('api-key'),
+    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+    description: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  }),
+]);
+
+const listedServiceAccountSchema = serviceAccountSchema.extend({
+  creator: serviceAccountCreatorSchema,
+});
+
+const listServiceAccountsResponseSchema = z.object({
+  service_accounts: z.array(listedServiceAccountSchema),
+  after: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 
 /**
@@ -166,6 +195,74 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     } catch (e) {
       this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
       throw e;
+    }
+  }
+
+  async list(
+    request: KibanaRequest,
+    params: ListServiceAccountsParams = {}
+  ): Promise<ListServiceAccountsResult> {
+    this.assertLicenseEnabled('list service accounts');
+    await this.assertManageSecurityPrivilege(request, 'list service accounts');
+
+    this.logger.debug('Attempting to list service accounts');
+
+    try {
+      const result = await this.uiam.listServiceAccounts(params);
+      const parsed = listServiceAccountsResponseSchema.safeParse(result);
+      if (!parsed.success) {
+        this.logger.error(
+          `Service account list payload from UIAM failed validation: ${parsed.error.message}`
+        );
+        throw new Error(`Error occured during service account listing.`);
+      }
+
+      return parsed.data;
+    } catch (e) {
+      this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async get(request: KibanaRequest, id: string): Promise<ListedServiceAccount> {
+    this.assertLicenseEnabled('get a service account');
+    await this.assertManageSecurityPrivilege(request, 'get a service account');
+
+    this.logger.debug(`Attempting to get service account ${id}`);
+
+    try {
+      const result = await this.uiam.getServiceAccount(id);
+      const parsed = listedServiceAccountSchema.safeParse(result);
+      if (!parsed.success) {
+        this.logger.error(
+          `Service account payload from UIAM failed validation: ${parsed.error.message}`
+        );
+        throw new Error(`Error occured during service account retrieval.`);
+      }
+
+      return parsed.data;
+    } catch (e) {
+      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  private assertLicenseEnabled(action: string): void {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(`Cannot ${action}: security features are disabled in Elasticsearch`);
+    }
+  }
+
+  private async assertManageSecurityPrivilege(
+    request: KibanaRequest,
+    action: string
+  ): Promise<void> {
+    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
+      elasticsearch: { cluster: ['manage_security'], index: {} },
+    });
+
+    if (!hasAllRequested) {
+      throw Boom.forbidden(`Cannot ${action}: missing \`manage_security\` cluster privilege`);
     }
   }
 

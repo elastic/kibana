@@ -71,6 +71,8 @@ describe('ServiceAccountWorkloadBindings', () => {
 
     backend = {
       create: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),
