@@ -10,7 +10,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountsServiceStart } from './types';
 
 export const serviceAccountsServiceMock = {
-  createStart: (): jest.Mocked<ServiceAccountsServiceStart> => ({
+  createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     create: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
       type: 'project' as const,
@@ -25,5 +25,30 @@ export const serviceAccountsServiceMock = {
       })
     ),
     reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+    releaseFakeRequest: jest.fn(),
+    workloads: {
+      attach: jest.fn().mockResolvedValue({
+        operationType: 'mock-operation-type',
+        workloadType: 'mock-workload-type',
+        workloadId: 'mock-workload-id',
+        serviceAccountId: 'mock-service-account-id',
+        spaceId: 'default',
+        attachedBy: {
+          type: 'user' as const,
+          userProfileId: 'mock-user-profile-id',
+          username: 'mock-user',
+        },
+        attachedAt: '2026-08-21T00:00:00.000Z',
+      }),
+      detach: jest.fn().mockResolvedValue(undefined),
+      getBinding: jest.fn().mockResolvedValue(null),
+      withScopedRequest: jest.fn().mockImplementation(async (_operationType, _params, fn) =>
+        fn(
+          httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer essu_mock-service-account-token' },
+          })
+        )
+      ),
+    },
   }),
 };

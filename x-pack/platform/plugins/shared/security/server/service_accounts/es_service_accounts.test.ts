@@ -31,4 +31,10 @@ describe('EsServiceAccounts', () => {
       await expect(new EsServiceAccounts().reauthenticateFakeRequest()).resolves.toBeNull();
     });
   });
+
+  describe('#releaseFakeRequest', () => {
+    it('is a no-op since this backend never mints requests', () => {
+      expect(() => new EsServiceAccounts().releaseFakeRequest()).not.toThrow();
+    });
+  });
 });

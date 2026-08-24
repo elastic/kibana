@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 
+import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 
 /**
@@ -38,10 +39,25 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Drops a fake request from the refresh registry: transparent credential replacement is
+   * permanently disabled and the request rides out the remainder of its current short-lived
+   * token. Idempotent, and a no-op for requests this backend did not mint.
+   */
+  releaseFakeRequest(request: KibanaRequest): void;
 }
 
 /**
  * Start contract of the service accounts service. `null` when the feature is
  * disabled, mirroring how OAuth management is exposed.
  */
-export type ServiceAccountsServiceStart = ServiceAccountsBackend;
+export interface ServiceAccountsServiceStart extends ServiceAccountsBackend {
+  /**
+   * Workload binding management and execution. Consumed exclusively by the Core security
+   * delegate, which reaches it through operation capability handles — it is deliberately absent
+   * from the security plugin's own public contract, so no plugin can address a workload binding
+   * without having claimed the operation type it belongs to.
+   */
+  workloads: ServiceAccountWorkloadBindingsApi;
+}

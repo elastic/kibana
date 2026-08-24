@@ -68,6 +68,19 @@ describe('getDefaultSecurityImplementation', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
+
+    // Handles are handed out at setup regardless of whether a delegate ever registers, so every
+    // workload method has to fail closed rather than run unauthenticated.
+    it.each([
+      'attachWorkload',
+      'detachWorkload',
+      'getWorkloadBinding',
+      'withScopedRequestForWorkload',
+    ] as const)('%s rejects', async (method) => {
+      await expect(
+        (implementation.serviceAccounts[method] as () => Promise<unknown>)()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
   });
 
   describe('fakeRequestEnricher', () => {

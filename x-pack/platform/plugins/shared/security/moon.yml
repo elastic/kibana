@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
   - '@kbn/cloud-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/es-query'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'

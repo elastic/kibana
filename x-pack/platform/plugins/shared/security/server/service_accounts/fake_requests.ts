@@ -37,6 +37,13 @@ export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
  */
 export const SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS = 60 * 60 * 1000;
 
+/**
+ * Wraps a credential mint for a service account bound fake request. The interceptor decides
+ * whether minting may proceed (throw to refuse — e.g. when a workload binding no longer exists)
+ * and observes the outcome; it must call `mint` at most once and return its result.
+ */
+export type ServiceAccountMintInterceptor = (mint: () => Promise<string>) => Promise<string>;
+
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
   serviceAccountId: string;
@@ -47,6 +54,12 @@ export interface CreateServiceAccountFakeRequestParams {
    * {@link SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS}; size it to the expected workload duration.
    */
   maxLifetimeMs?: number;
+  /**
+   * Wraps every credential mint for this request — the initial one included. Interceptor
+   * failures are treated exactly like mint failures: propagated to the caller and, on refresh,
+   * subject to the mint-failure backoff.
+   */
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
 
 interface ServiceAccountFakeRequestEntry {
@@ -58,6 +71,7 @@ interface ServiceAccountFakeRequestEntry {
   /** Single-flight mint: concurrent refreshes await the same exchange instead of stampeding UIAM. */
   inflight?: Promise<string>;
   lastFailedMintAt?: number;
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
 
 /**
@@ -94,8 +108,9 @@ export class ServiceAccountFakeRequests {
     serviceAccountId,
     spaceId,
     maxLifetimeMs = SERVICE_ACCOUNT_REQUEST_MAX_LIFETIME_MS,
+    mintInterceptor,
   }: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
-    const token = await this.mintToken(serviceAccountId);
+    const token = await this.mintWithInterceptor(serviceAccountId, mintInterceptor);
 
     // The lowercase `authorization` key is load-bearing: the ES client derives a fake request's
     // credential by picking exact lowercased keys off its headers, so any other casing would
@@ -117,6 +132,7 @@ export class ServiceAccountFakeRequests {
       createdAt: now,
       maxLifetimeMs,
       mintedAt: now,
+      mintInterceptor,
     });
 
     this.logger.debug('Created a service account bound fake request');
@@ -165,13 +181,18 @@ export class ServiceAccountFakeRequests {
       );
     }
 
-    entry.inflight = this.mintToken(entry.serviceAccountId)
+    entry.inflight = this.mintWithInterceptor(entry.serviceAccountId, entry.mintInterceptor)
       .then((token) => {
-        (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
-        entry.token = token;
-        entry.mintedAt = Date.now();
-        entry.lastFailedMintAt = undefined;
-        this.logger.debug('Replaced the token of a service account bound fake request');
+        // A release() while the mint was in flight wins: the request is no longer ours to
+        // refresh, so its header stays untouched. Callers already awaiting this mint still
+        // receive the token they asked for.
+        if (this.registry.get(request) === entry) {
+          (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
+          entry.token = token;
+          entry.mintedAt = Date.now();
+          entry.lastFailedMintAt = undefined;
+          this.logger.debug('Replaced the token of a service account bound fake request');
+        }
         return token;
       })
       .catch((err) => {
@@ -183,5 +204,26 @@ export class ServiceAccountFakeRequests {
       });
 
     return await entry.inflight;
+  }
+
+  /**
+   * Drops the request from the registry: transparent credential replacement is permanently
+   * disabled and the request rides out the remainder of its current token. Idempotent; returns
+   * whether the request was registered.
+   */
+  release(request: KibanaRequest): boolean {
+    const released = this.registry.delete(request);
+    if (released) {
+      this.logger.debug('Released a service account bound fake request');
+    }
+    return released;
+  }
+
+  private mintWithInterceptor(
+    serviceAccountId: string,
+    mintInterceptor?: ServiceAccountMintInterceptor
+  ): Promise<string> {
+    const mint = () => this.mintToken(serviceAccountId);
+    return mintInterceptor ? mintInterceptor(mint) : mint();
   }
 }

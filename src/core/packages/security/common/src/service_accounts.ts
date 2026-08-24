@@ -44,6 +44,68 @@ export interface CreateServiceAccountParams {
 }
 
 /**
+ * The principal that attached a service account to a workload. Always the most specific stable
+ * identifier available for whatever actually acted: a machine identity, else the credential, else
+ * the user.
+ *
+ * @public
+ */
+export type ServiceAccountWorkloadAttacher =
+  | {
+      type: 'user';
+      username: string;
+      userProfileId?: string;
+    }
+  | {
+      type: 'api_key';
+      apiKeyId: string;
+      variant: 'stack' | 'uiam';
+      userProfileId?: string;
+    }
+  | { type: 'service_account'; serviceAccountId: string };
+
+/**
+ * A persisted attachment of a service account to a workload of a registered operation type.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadBinding {
+  operationType: string;
+  workloadType: string;
+  workloadId: string;
+  serviceAccountId: string;
+  spaceId: string;
+  attachedBy: ServiceAccountWorkloadAttacher;
+  /** ISO-8601 timestamp of the attach. */
+  attachedAt: string;
+}
+
+/**
+ * Parameters for attaching a service account to a workload.
+ *
+ * @public
+ */
+export interface AttachServiceAccountWorkloadParams {
+  serviceAccountId: string;
+  /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
+  workloadType: string;
+  workloadId: string;
+}
+
+/**
+ * Identifies a workload whose binding is being read or executed. Workload IDs are not guaranteed
+ * unique across spaces, so the space is part of a binding's identity.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadCoordinates {
+  workloadType: string;
+  workloadId: string;
+  /** Defaults to the default space. */
+  spaceId?: string;
+}
+
+/**
  * A service account.
  *
  * @public

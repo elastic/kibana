@@ -227,4 +227,135 @@ describe('ServiceAccountFakeRequests', () => {
       expect(mintToken).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('mint interceptor', () => {
+    it('wraps the initial mint, receiving the mint function and returning its result', async () => {
+      const order: string[] = [];
+      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+        order.push('verify');
+        const token = await mint();
+        order.push('minted');
+        return token;
+      });
+
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+
+      expect(mintInterceptor).toHaveBeenCalledTimes(1);
+      expect(order).toEqual(['verify', 'minted']);
+      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+    });
+
+    it('propagates an interceptor refusal from create without minting', async () => {
+      const mintInterceptor = jest.fn(async () => {
+        throw new Error('binding no longer exists');
+      });
+
+      await expect(
+        fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor })
+      ).rejects.toThrowError('binding no longer exists');
+      expect(mintToken).not.toHaveBeenCalled();
+    });
+
+    it('wraps every refresh mint; interceptor refusals are backed off like mint failures', async () => {
+      let refuse = false;
+      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+        if (refuse) {
+          throw new Error('binding no longer exists');
+        }
+        return await mint();
+      });
+
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+      mintToken.mockClear();
+      refuse = true;
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+        'binding no longer exists'
+      );
+      expect(mintToken).not.toHaveBeenCalled();
+
+      // Within the backoff window the interceptor is not even consulted again.
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+        'A recent attempt to mint a service account token failed; refusing to retry yet.'
+      );
+      expect(mintInterceptor).toHaveBeenCalledTimes(2);
+
+      // Once the backoff elapses and the interceptor permits again, minting resumes.
+      refuse = false;
+      jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
+        'essu_token_2'
+      );
+      expect(request.headers.authorization).toBe('Bearer essu_token_2');
+    });
+
+    it('deduplicates concurrent refreshes into a single interceptor invocation', async () => {
+      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+      mintToken.mockClear();
+      mintInterceptor.mockClear();
+
+      let resolveMint!: (token: string) => void;
+      mintToken.mockImplementationOnce(
+        () => new Promise<string>((resolve) => (resolveMint = resolve))
+      );
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      const first = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+      const second = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+
+      resolveMint('essu_token_shared');
+
+      await expect(first).resolves.toBe('essu_token_shared');
+      await expect(second).resolves.toBe('essu_token_shared');
+      expect(mintInterceptor).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('#release', () => {
+    it('reports whether the request was registered and is idempotent', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+
+      expect(fakeRequests.release(request)).toBe(true);
+      expect(fakeRequests.release(request)).toBe(false);
+      expect(fakeRequests.release(httpServerMock.createFakeKibanaRequest({}))).toBe(false);
+    });
+
+    it('permanently disables credential replacement', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockClear();
+
+      fakeRequests.release(request);
+
+      expect(fakeRequests.isServiceAccountRequest(request)).toBe(false);
+      await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrowError(
+        'The provided request is not bound to a service account.'
+      );
+      expect(mintToken).not.toHaveBeenCalled();
+      // The request rides out its current token; nothing is replaced.
+      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+    });
+
+    it('a release during an in-flight mint leaves the request header untouched', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockClear();
+
+      let resolveMint!: (token: string) => void;
+      mintToken.mockImplementationOnce(
+        () => new Promise<string>((resolve) => (resolveMint = resolve))
+      );
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      const inflight = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+
+      expect(fakeRequests.release(request)).toBe(true);
+      resolveMint('essu_token_late');
+
+      // The caller that was already awaiting the mint still receives its token, but the
+      // released request's credential is never extended.
+      await expect(inflight).resolves.toBe('essu_token_late');
+      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+    });
+  });
 });
