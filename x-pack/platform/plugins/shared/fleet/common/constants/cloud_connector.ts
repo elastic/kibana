@@ -114,12 +114,9 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
 // are provisioned with bespoke IaC templates and permission scopes (CSPM, Cloud Asset
 // Inventory) and therefore must not be shared with provider-default integrations.
 //
-// NOTE: group membership is enforced on every NEW attachment (create-flow UI filtering and
-// backend reuse), but data created before this enforcement was effective may contain
-// cross-group attachments — the pre-inversion allowlist lookup never matched var_groups
-// integrations, so their attachments were unfiltered. Enforcement therefore checks every
-// usage of a connector rather than assuming all usages share one group, and updates that
-// re-save a policy with its already-attached connector are exempt (grandfathered).
+// Group membership is enforced on every NEW attachment. Attachments that predate
+// enforcement may be cross-group, so every usage of a connector is checked, and re-saving
+// a policy with its already-attached connector is exempt (grandfathered).
 
 export type DefaultPolicyGroup = `${CloudProvider}_default`;
 export type PolicyGroup = 'security_audit_policy_group' | DefaultPolicyGroup;
