@@ -26,7 +26,7 @@ const CLUSTER_UUID_RETRY_DELAY_MS = 1000;
 /**
  * Server-side analytics wrapper for Context Engine telemetry.
  *
- * Owns EBT event type registration and reporting for KI and AI index writes.
+ * Owns EBT event type registration and reporting for KI writes.
  * Payloads never contain KI free text; user-owned AI index ids are hashed with
  * the cluster id as salt before reporting. A reporting failure never
  * propagates to the caller.
