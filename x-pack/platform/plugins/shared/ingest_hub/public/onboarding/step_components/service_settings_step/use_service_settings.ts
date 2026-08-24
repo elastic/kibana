@@ -105,6 +105,22 @@ function reconcileInstances(
   return [...kept, ...added];
 }
 
+function mergeVarsByDataStream(
+  base: Record<string, ServiceDataStreamVars>,
+  incoming: Record<string, ServiceDataStreamVars>
+): Record<string, ServiceDataStreamVars> {
+  const result: Record<string, ServiceDataStreamVars> = { ...base };
+  for (const [dsId, dsVars] of Object.entries(incoming)) {
+    const existing = result[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
+    for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
+      mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+    }
+    result[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
+  }
+  return result;
+}
+
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -160,15 +176,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       enabledDataStreams: string[]
     ) => {
       const current = getServiceVars(instanceId);
-      const merged: Record<string, ServiceDataStreamVars> = { ...current.varsByDataStream };
-      for (const [dsId, dsVars] of Object.entries(newVarsByDataStream)) {
-        const existing = merged[dsId] ?? { enabledInputs: [], varsByInput: {} };
-        const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
-        for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
-          mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
-        }
-        merged[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
-      }
+      const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         instances,
@@ -199,17 +207,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       }
 
       const sourceVars = getServiceVars(sourceInstanceId);
-      const mergedByDs: Record<string, ServiceDataStreamVars> = {
-        ...sourceVars.varsByDataStream,
-      };
-      for (const [dsId, dsVars] of Object.entries(newVarsByDataStream)) {
-        const existing = mergedByDs[dsId] ?? { enabledInputs: [], varsByInput: {} };
-        const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
-        for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
-          mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
-        }
-        mergedByDs[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
-      }
+      const mergedByDs = mergeVarsByDataStream(sourceVars.varsByDataStream, newVarsByDataStream);
 
       const newInstance: ServiceInstance = {
         instanceId: newInstanceId,

@@ -641,15 +641,15 @@ describe('useDeploy', () => {
     // but deployAttempted and local failedInstances are both reset to their initial values.
     // The hook must seed from the persisted store so the error callout remains visible.
     setupMocks({
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['ec2'],
       deployAndDetectStep: {
-        serviceStatuses: { ec2_metrics: 'error' },
-        failedInstances: ['ec2_metrics'],
+        serviceStatuses: { ec2: 'error' },
+        failedInstances: ['ec2'],
       },
     });
     const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
 
-    expect(result.current.failedInstances).toEqual(['ec2_metrics']);
+    expect(result.current.failedInstances).toEqual(['ec2']);
   });
 
   it('navigates immediately and completes API call on success', async () => {
@@ -963,7 +963,7 @@ describe('useDeploy', () => {
   describe('isAlreadyDeployed', () => {
     it('is false when serviceStatuses is empty', () => {
       setupMocks({
-        selectedServiceIds: ['ec2_metrics'],
+        selectedServiceIds: ['ec2'],
         deployAndDetectStep: { serviceStatuses: {} },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
@@ -972,8 +972,8 @@ describe('useDeploy', () => {
 
     it('is false when status is instantiating (deploy in flight)', () => {
       setupMocks({
-        selectedServiceIds: ['ec2_metrics'],
-        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+        selectedServiceIds: ['ec2'],
+        deployAndDetectStep: { serviceStatuses: { ec2: 'instantiating' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
@@ -981,8 +981,8 @@ describe('useDeploy', () => {
 
     it('is false when status is error', () => {
       setupMocks({
-        selectedServiceIds: ['ec2_metrics'],
-        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'error' } },
+        selectedServiceIds: ['ec2'],
+        deployAndDetectStep: { serviceStatuses: { ec2: 'error' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
@@ -990,8 +990,8 @@ describe('useDeploy', () => {
 
     it('is true when all members have status receiving', () => {
       setupMocks({
-        selectedServiceIds: ['ec2_metrics'],
-        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'receiving' } },
+        selectedServiceIds: ['ec2'],
+        deployAndDetectStep: { serviceStatuses: { ec2: 'receiving' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
@@ -999,8 +999,8 @@ describe('useDeploy', () => {
 
     it('is true when all members have status detecting', () => {
       setupMocks({
-        selectedServiceIds: ['ec2_metrics'],
-        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'detecting' } },
+        selectedServiceIds: ['ec2'],
+        deployAndDetectStep: { serviceStatuses: { ec2: 'detecting' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
