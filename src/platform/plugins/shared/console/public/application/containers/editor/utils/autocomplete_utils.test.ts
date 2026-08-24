@@ -710,6 +710,40 @@ describe('autocomplete_utils', () => {
         expect(acc).toBe('  "value": 0.5');
       });
 
+      it('SHOULD NOT suggest primitive terms inside a triple-quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": """-1"""'];
+        // Cursor after `-1`, before the closing triple quote.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 16, word: '1' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
+      it('SHOULD NOT suggest primitive terms inside a multiline triple-quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": """', '-1', '"""'];
+        // Cursor after `-1` in the multiline triple-quoted value.
+        const position = { lineNumber: 4, column: 3 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 2, word: '1' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
       it('SHOULD cover both quotes when accepted straight from the trigger quote', async () => {
         const editorLines = ['GET _search', '{', '  "refresh": ""'];
         // Cursor between the auto-closed quotes, before typing anything.

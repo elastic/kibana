@@ -12,6 +12,7 @@ import {
   getLineRemainderWithoutConsoleComments,
   isEscaped,
   isInsideConsoleString,
+  isInsideTripleQuotedJsonValue,
 } from '@kbn/monaco/src/languages/console/utils';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
@@ -413,10 +414,12 @@ const getCompletionLineState = (
     getLineRemainderWithoutConsoleComments(bodyContentBeforePosition, lineContentAfterPosition)
   );
   const isInsideQuotedString = isInsideConsoleString(bodyContentBeforePosition);
+  const isInsideTripleQuotedString = isInsideTripleQuotedJsonValue(bodyContentBeforePosition);
 
   return {
     canInsertTemplate,
     isInsideQuotedString,
+    isInsideTripleQuotedString,
     lineContentBeforePosition,
     endColumn: getCompletionEndColumn(
       position.column,
@@ -437,8 +440,13 @@ const getSuggestions = (
 ) => {
   // get the word before suggestions to replace when selecting a suggestion from the list
   const wordUntilPosition = model.getWordUntilPosition(position);
-  const { canInsertTemplate, endColumn, isInsideQuotedString, lineContentBeforePosition } =
-    getCompletionLineState(model, position, bodyContentBeforePosition);
+  const {
+    canInsertTemplate,
+    endColumn,
+    isInsideQuotedString,
+    isInsideTripleQuotedString,
+    lineContentBeforePosition,
+  } = getCompletionLineState(model, position, bodyContentBeforePosition);
   context.addTemplate = canInsertTemplate;
   // Check if we're typing a field name with a trailing dot
   // Check if we're typing a nested field name (contains a dot)
@@ -498,6 +506,10 @@ const getSuggestions = (
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
         if ((isInsideQuotedString || !context.addTemplate) && usesStructuralSnippet(item)) {
+          return false;
+        }
+
+        if (isInsideTripleQuotedString && typeof item.name !== 'string') {
           return false;
         }
 
