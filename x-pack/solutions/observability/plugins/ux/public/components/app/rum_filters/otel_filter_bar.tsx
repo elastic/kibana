@@ -37,6 +37,7 @@ import { fetchRumFilters } from '../../../services/rest/rum_api';
 import { mergeRumSearch, type RumFilterPatch } from '../../../utils/rum_search';
 import { FacetOptionRow } from './facet_option_row';
 import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
+import { useSyncOpenWithTourStep } from '../rum_tour/use_sync_open_with_tour_step';
 import {
   bucketsToOptions,
   customPlaceholderFor,
@@ -363,6 +364,7 @@ export function OtelFilterBar() {
   const [facets, setFacets] = useState<RumFiltersResponse>(EMPTY);
   const [addOpen, setAddOpen] = useState(false);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
+  useSyncOpenWithTourStep('filters', setFlyoutOpen);
 
   useEffect(() => {
     let cancelled = false;
