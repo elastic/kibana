@@ -11,20 +11,7 @@ export default function apmApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('APM', function () {
-    loadTestFile(require.resolve('./agent_explorer'));
-    loadTestFile(require.resolve('./alerts'));
-    loadTestFile(require.resolve('./cold_start'));
-    loadTestFile(require.resolve('./correlations'));
-    loadTestFile(require.resolve('./custom_dashboards'));
-    loadTestFile(require.resolve('./data_view'));
-    loadTestFile(require.resolve('./dependencies'));
-    loadTestFile(require.resolve('./diagnostics'));
-    loadTestFile(require.resolve('./environment'));
-    loadTestFile(require.resolve('./error_rate'));
-    loadTestFile(require.resolve('./errors'));
-    loadTestFile(require.resolve('./historical_data'));
-    loadTestFile(require.resolve('./infrastructure'));
-    loadTestFile(require.resolve('./inspect'));
-    loadTestFile(require.resolve('./latency'));
+    loadTestFile(require.resolve('./part_1'));
+    loadTestFile(require.resolve('./part_2'));
   });
 }
