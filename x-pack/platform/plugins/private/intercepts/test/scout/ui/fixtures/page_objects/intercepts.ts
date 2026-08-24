@@ -54,10 +54,7 @@ export class InterceptsPageObject {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       await this.clickRandomNpsButton();
       try {
-        await this.page.testSubj.waitForSelector('interceptStep-completion', {
-          state: 'visible',
-          timeout: 1000,
-        });
+        await this.waitForCompletionStep(1000);
         return;
       } catch {
         // Another NPS step is still showing; keep going.
@@ -72,9 +69,10 @@ export class InterceptsPageObject {
     return (await locator.getAttribute('href')) || '';
   }
 
-  async waitForCompletionStep() {
+  async waitForCompletionStep(timeout?: number) {
     await this.page.testSubj.waitForSelector('interceptStep-completion', {
       state: 'visible',
+      timeout,
     });
   }
 
