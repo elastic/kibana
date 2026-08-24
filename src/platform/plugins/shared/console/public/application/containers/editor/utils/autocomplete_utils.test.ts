@@ -822,6 +822,24 @@ describe('autocomplete_utils', () => {
         expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
       });
 
+      it('SHOULD NOT suggest primitive terms inside a multiline quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": "abc', 'def -'];
+        // Cursor after `-` on the continuation line of a quoted value whose
+        // opening quote lives on the previous line.
+        const position = { lineNumber: 4, column: 6 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 6, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
       it('SHOULD cover both quotes when accepted straight from the trigger quote', async () => {
         const editorLines = ['GET _search', '{', '  "refresh": ""'];
         // Cursor between the auto-closed quotes, before typing anything.

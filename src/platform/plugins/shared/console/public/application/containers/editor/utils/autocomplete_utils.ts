@@ -466,8 +466,12 @@ const getSuggestions = (
   } = getCompletionLineState(model, position, bodyContentBeforePosition);
   context.addTemplate = canInsertTemplate;
   const completingObjectKey = isCompletingObjectKey(bodyTokens);
-  const openingQuoteStartColumn =
-    isInsideQuotedString && findOpeningQuoteStartColumn(lineContentBeforePosition);
+  // `false`: not inside a quoted string. A number: the column right after the string's opening
+  // quote on this line. `undefined`: inside a quoted string whose opening quote sits on an
+  // earlier line (multi-line continuation).
+  const openingQuoteStartColumn = isInsideQuotedString
+    ? findOpeningQuoteStartColumn(lineContentBeforePosition)
+    : false;
   // Check if we're typing a field name with a trailing dot
   // Check if we're typing a nested field name (contains a dot)
   // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
@@ -512,24 +516,21 @@ const getSuggestions = (
 
   // Primitive terms insert bare JSON literals (`true`, `0`), so their replacement range must
   // cover any quote or numeric punctuation that Monaco leaves outside the current word.
+  const hasOpeningQuoteOnLine = typeof openingQuoteStartColumn === 'number';
   const unquotedPrimitiveValueStartColumn =
-    openingQuoteStartColumn === false || openingQuoteStartColumn === undefined
+    openingQuoteStartColumn === false
       ? findUnquotedPrimitiveValueStartColumn(lineContentBeforePosition)
       : undefined;
-  const primitiveTermRange =
-    openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
-      ? { ...range, startColumn: openingQuoteStartColumn }
-      : unquotedPrimitiveValueStartColumn !== undefined
-      ? { ...range, startColumn: unquotedPrimitiveValueStartColumn }
-      : range;
-  const primitiveTermFilterText =
-    openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
-      ? (name: ResultTerm['name']) => `"${String(name)}`
-      : undefined;
+  const primitiveTermRange = hasOpeningQuoteOnLine
+    ? { ...range, startColumn: openingQuoteStartColumn }
+    : unquotedPrimitiveValueStartColumn !== undefined
+    ? { ...range, startColumn: unquotedPrimitiveValueStartColumn }
+    : range;
+  const primitiveTermFilterText = hasOpeningQuoteOnLine
+    ? (name: ResultTerm['name']) => `"${String(name)}`
+    : undefined;
   const quotedValueRange =
-    openingQuoteStartColumn !== false &&
-    openingQuoteStartColumn !== undefined &&
-    !completingObjectKey
+    hasOpeningQuoteOnLine && !completingObjectKey
       ? { ...range, startColumn: openingQuoteStartColumn + 1 }
       : range;
 
@@ -541,7 +542,12 @@ const getSuggestions = (
           return false;
         }
 
-        if (isInsideTripleQuotedString && typeof item.name !== 'string') {
+        // Bare JSON literals are meaningless inside a triple-quoted ESQL query or a multi-line
+        // string continuation whose opening quote is not on this line.
+        if (
+          (isInsideTripleQuotedString || openingQuoteStartColumn === undefined) &&
+          typeof item.name !== 'string'
+        ) {
           return false;
         }
 
