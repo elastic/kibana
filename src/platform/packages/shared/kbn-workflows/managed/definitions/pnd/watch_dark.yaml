@@ -88,13 +88,31 @@ steps:
           filter:
             - term:
                 reportable: true
-            - range:
-                last_hunted_at:
-                  lte: "now-__WATCH_SCHEDULE_EVERY_MINUTES__m"
+            # Never-hunted reports lack last_hunted_at; a bare range excludes them.
+            - bool:
+                should:
+                  - range:
+                      last_hunted_at:
+                        lte: "now-__WATCH_SCHEDULE_EVERY_MINUTES__m"
+                  - bool:
+                      must_not:
+                        exists:
+                          field: last_hunted_at
+                minimum_should_match: 1
+      # Ranked reports first (corroborated), then by base rank. Never-hunted
+      # docs lack corroborated_rank_score so they sort after ranked ones, still
+      # ordered by rank_score as the secondary key.
+      sort:
+        - corroborated_rank_score:
+            order: desc
+            missing: _last
+        - rank_score:
+            order: desc
+            missing: 0
 
   # --- Stage 1-5: one straight-line branch per selected report --------
   # Branch body must be straight-line, atomic steps only (no nested
-  # if/foreach/parallel — #18208), so coverage-gap and correlation run
+  # if/foreach/parallel — #18208), so hunt and correlation run
   # serially below instead of concurrently.
   - name: report_fan_out
     type: parallel
@@ -122,14 +140,6 @@ steps:
             connector_id: "{{ consts.watch_settings.connectorId }}"
             tier2_when: "{{ consts.watch_settings.tier2When }}"
             target_technology: "{{ consts.watch_settings.targetTechnology }}"
-
-      - name: coverage_gap
-        type: workflow.execute
-        with:
-          workflow-id: system-security-dark-coverage-gap
-          inputs:
-            report_id: "{{ foreach.item._source.report_id }}"
-            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
 
       - name: correlation
         type: workflow.execute
