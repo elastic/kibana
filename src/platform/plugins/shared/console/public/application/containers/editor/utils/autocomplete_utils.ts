@@ -542,7 +542,7 @@ export const getInsertText = (
 
   // check if there is template to add
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
-  if (conditionalTemplate) {
+  if (conditionalTemplate !== undefined) {
     template = conditionalTemplate;
   }
 
@@ -599,7 +599,7 @@ const getConditionalTemplate = (
     return false;
   });
   // use the template from the matched rule
-  if (matchedRule && matchedRule.__template) {
+  if (matchedRule && matchedRule.__template !== undefined) {
     return matchedRule.__template;
   }
 };

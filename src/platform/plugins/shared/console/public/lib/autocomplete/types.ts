@@ -47,7 +47,7 @@ export interface DataAutoCompleteRulesOneOf {
   __condition?: {
     lines_regex: string;
   };
-  __template: Record<string, unknown>;
+  __template?: unknown;
   [key: string]: unknown;
 }
 

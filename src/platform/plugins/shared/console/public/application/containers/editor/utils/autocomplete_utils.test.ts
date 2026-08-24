@@ -1038,6 +1038,37 @@ ${lineContentBeforePosition}`;
       expect(getInsertText({ name: 'field', template: null }, '', context)).toBe('"field"');
     });
 
+    it.each([
+      { conditionalTemplate: false, expected: '"enabled": false' },
+      { conditionalTemplate: 0, expected: '"enabled": 0' },
+      { conditionalTemplate: '', expected: '"enabled"' },
+      { conditionalTemplate: null, expected: '"enabled"' },
+    ])(
+      'SHOULD use matching conditional template $conditionalTemplate instead of the default',
+      ({ conditionalTemplate, expected }) => {
+        const context: AutoCompleteContext = {
+          ...mockContext,
+          addTemplate: true,
+          endpoint: {
+            paramsAutocomplete: {
+              getTopLevelComponents: () => [],
+            },
+            bodyAutocompleteRootComponents: [],
+            data_autocomplete_rules: {
+              enabled: {
+                __one_of: [
+                  { __template: true },
+                  { __condition: { lines_regex: 'mode' }, __template: conditionalTemplate },
+                ],
+              },
+            },
+          },
+        };
+
+        expect(getInsertText({ name: 'enabled', template: true }, 'mode', context)).toBe(expected);
+      }
+    );
+
     it('does not add quotes around braces and brackets', () => {
       expect(
         getInsertText(
