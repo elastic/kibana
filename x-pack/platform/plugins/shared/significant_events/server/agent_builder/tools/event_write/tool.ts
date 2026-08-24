@@ -95,36 +95,32 @@ export const eventsWriteItemSchema = significantEventSchema
       message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
     }
   )
-  .refine(
-    (item) => {
-      const grounded = (item.signals ?? []).filter((s) => s.evidence != null);
-      if (
-        item.status !== 'open' ||
-        (item.severity !== '60-high' && item.severity !== '80-critical') ||
-        grounded.length === 0
-      ) {
-        return true;
-      }
-      return grounded.some((s) => s.verdict === 'confirms');
-    },
-    {
-      message:
-        'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms signal; without a confirmed, newly elevated failure use a lower severity or a non-open status.',
+  .superRefine((item, ctx) => {
+    const signals = item.signals ?? [];
+    const grounded = signals.filter((s) => s.evidence != null);
+    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+    const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
+
+    if (hasConfirms && hasNotChecked) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+      });
     }
-  )
-  .refine(
-    (item) => {
-      const verdicts = (item.signals ?? []).map((s) => s.verdict);
-      if (!verdicts.includes('confirms')) {
-        return true;
-      }
-      return !verdicts.includes('not_checked');
-    },
-    {
-      message:
-        'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+    if (
+      item.status === 'open' &&
+      (item.severity === '60-high' || item.severity === '80-critical') &&
+      grounded.length > 0 &&
+      !hasConfirms
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms signal; without a confirmed, newly elevated failure use a lower severity or a non-open status.',
+      });
     }
-  );
+  });
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 

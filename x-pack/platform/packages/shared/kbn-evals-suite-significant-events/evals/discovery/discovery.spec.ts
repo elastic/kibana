@@ -20,6 +20,7 @@ import {
   deleteTemporaryReplayIndices,
   canonicalDetectionsFromGroundTruth,
   shiftSnapshotTimestamp,
+  type ReplayShift,
 } from '../../src/data_generators/replay';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
 import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
@@ -189,7 +190,7 @@ evaluate.describe(
             // Concurrency must remain 1 — this variable is not safe under concurrent tasks.
             // Raising concurrency requires replacing it with a per-invocation approach or a proper lock.
             let lastReplayedSnapshotKey: string | undefined;
-            let lastReplayShift: { maxTimestamp: string; replayNow: string } | undefined;
+            let lastReplayShift: ReplayShift | undefined;
 
             const detectionsByScenario = new Map(
               collectedExamples.map(({ scenario, detections, snapshotKey }) => [
@@ -424,7 +425,7 @@ evaluate.describe(
 
               const runById = new Map(runs.map((run) => [run.id, run]));
               let lastReplayedSnapshotKey: string | undefined;
-              let lastReplayShift: { maxTimestamp: string; replayNow: string } | undefined;
+              let lastReplayShift: ReplayShift | undefined;
 
               await executorClient.runExperiment(
                 {

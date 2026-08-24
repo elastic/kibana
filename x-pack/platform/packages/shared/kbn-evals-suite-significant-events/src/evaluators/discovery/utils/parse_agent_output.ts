@@ -78,10 +78,10 @@ const parseEventsWriteStep = (
   };
 };
 
-const isProducedDiscovery = (result: EventsWriteItemResult): boolean =>
-  result.written ||
-  result.reason === 'existing_active_event' ||
-  result.reason === 'unchanged_outcome';
+const isProducedDiscovery = (result: EventsWriteItemResult): boolean => {
+  if (result.written) return true;
+  return result.reason === 'existing_active_event' || result.reason === 'unchanged_outcome';
+};
 
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.

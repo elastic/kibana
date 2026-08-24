@@ -10,6 +10,7 @@ import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
+import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
 export interface SamplingCriterion extends EvaluationCriterionStructured {
@@ -95,16 +96,7 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface ChronicSeedInput {
-  /** Failure phrase written to `body.text`; the seeded KI query greps for it. */
-  phrase: string;
-  service: string;
-  rate_per_minute: number;
-  duration_minutes: number;
-  detection_offset_minutes: number;
-  ki_title: string;
-  ki_description: string;
-}
+export type { ChronicSeedInput };
 
 export interface DiscoveryScenario {
   input: {
