@@ -16,7 +16,7 @@ import { CASES_READ_ROLE } from '../../fixtures/roles';
 // them, and sees the read-only chrome badge.
 test.describe(
   'Observability cases - read-only privileges',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let caseId: string;
 

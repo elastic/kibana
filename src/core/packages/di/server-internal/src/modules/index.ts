@@ -8,12 +8,20 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { loadCapabilites } from './capabilities';
+import { loadCapabilities } from './capabilities';
+import { loadElasticsearch } from './elasticsearch';
 import { loadHttp } from './http';
 import { loadSavedObjects } from './saved_objects';
+import { loadSecurity } from './security';
+import { loadUiSettings } from './ui_settings';
+import { loadUserProfile } from './user_profile';
 
 export const core = new ContainerModule((options) => {
-  loadCapabilites(options);
+  loadCapabilities(options);
+  loadElasticsearch(options);
   loadHttp(options);
   loadSavedObjects(options);
+  loadSecurity(options);
+  loadUiSettings(options);
+  loadUserProfile(options);
 });

@@ -36,7 +36,7 @@ import {
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../../infra/elasticsearch/resolve_closed_indices';
-import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
+import { resolveUpdatesDataStreamName } from '../../asset_manager/resolve_entity_store_indices';
 import {
   applyMaxLagCutoff,
   capExtractionWindowEnd,
@@ -645,7 +645,7 @@ export class RemoteLogsExtractionClient {
         await ingestEntities({
           esClient: this.strategy.client,
           esqlResponse,
-          targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
+          targetIndex: await resolveUpdatesDataStreamName(this.strategy.client, this.namespace),
           logger: this.logger,
           signal,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
