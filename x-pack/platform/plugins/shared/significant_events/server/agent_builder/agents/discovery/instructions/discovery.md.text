@@ -239,7 +239,7 @@ Accept when any criterion below holds. Use each side's **Current evidence** verd
      - both sides share at least one entity node in `blast_radius` (`feature_id` or normalized `name`).
 
   - Topology forms the edge: accept a pair of confirmed connected failures when propagation is plausible. Different signatures or impacts do not reject unless they show an independent path or failure class. Use **Impact** to qualify, not require identical operations.
-  - Reject the pair when current evidence identifies a distinct resource or dependency path. Different local signatures on a connected path (SQLState 08001 vs HTTP connection-refused, JDBC vs connection pool) are not an independent failure class. Timing and **Alert symptom** qualify the narrative only; they never create or override a topology match.
+  - Reject the pair when current evidence identifies a distinct resource or dependency path. Different local signatures on a connected path (backend error vs caller timeout, protocol vs pool) are not an independent failure class. Timing and **Alert symptom** qualify the narrative only; they never create or override a topology match.
 2. **Evidence convergence**
   - Read each side's **Current evidence** description as two facts: **Found** is the observed error/signature and target; **Impact** is the observed operation that is blocked, degraded, or unaffected. Use both facts when assessing the pair; do not treat the description as decorative narrative.
   - Accept the pair when the **Found** facts and **Impact** facts support the same incident correlation or root cause. For a confirmed topology dependency, accept different local error signatures when one side's observed impact is a compatible downstream consequence of the other's failure along that path. Impact alone never creates a match, and an independent or contradictory impact rejects it.
@@ -295,8 +295,10 @@ For events returned by `platform_sig_events_event_search`, derive:
 
 **Routing invariants**
 - Maintain `continued_rule_uuids`, initially empty. It contains only rules accepted onto an open event; rule-search candidates and zero-result rules are never added. Add a detection's `rule_uuid` immediately on acceptance. Never assign the same `rule_uuid` twice.
-- Before accepting any continuation, identify the specific confirmed open-event signal that passes `<incident_matching>`, or apply the Recovery reconciliation exception to close that same episode. A rule in `unresolved_rule_uuids` prevents closure but is not acceptance evidence by itself; a stored signal for a rule absent from that list has a non-confirming verdict and may be used only for the Recovery reconciliation exception. A returned event, shared topology, or a previously unconfirmed copy of the current rule is not acceptance evidence for an active continuation.
-- If neither a confirmed pairwise match nor the Recovery reconciliation exception applies, the detection starts a new event and omits `event_id`. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
+- **Rule Match** and **Topology Match** are independent accepts. A zero-result Rule Match does not block Topology Match. Topology Match does not require the new rule in `signal_rule_uuids` or a stored signal that passes `<incident_matching>` for that rule — compact search has no per-signal prose.
+- **Rule Match accept:** a stored signal for this `rule_uuid` passes `<incident_matching>`, or the Recovery reconciliation exception closes that same episode. A rule in `unresolved_rule_uuids` prevents closure but is not acceptance evidence by itself; a stored signal for a rule absent from that list has a non-confirming verdict and may be used only for Recovery reconciliation.
+- **Topology Match accept:** grounded topology overlaps the open event's stored topology, and the compact `title`, `summary`, and `symptom_hypothesis` describe the same incident this batch is confirming. That narrative-plus-topology test is enough to copy `event_id`.
+- Omit `event_id` only when neither phase accepts. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
 
 Before either routing search, derive each remaining detection's topology ID set from grounded `causal_features[].feature_id`, `blast_radius[].feature_id`, and matched query KI `features[].id`. Build `topology_feature_ids` as their distinct union.
 Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-call group**. Topology Match runs on grounded topology inputs; a zero-result Rule Match never skips it.
@@ -316,17 +318,20 @@ Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-c
 
 **Topology Match**
 
-This search runs on grounded topology inputs; a zero-result Rule Match never skips it.
+This search runs on grounded topology inputs. It does not depend on Rule Match: a zero-result Rule Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
 
 1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `stream_names`.
-2. For each rule not in `continued_rule_uuids`, accept an event continuation when the current confirmed detection's grounded `causal_features[].feature_id` or exact `blast_radius[].feature_id` occurs in the returned open event's stored topology. That overlap is sufficient acceptance evidence: reuse the open event's `event_id`. Different local error signatures, protocol layers, or upstream/downstream wording cannot split it. `signal_rule_uuids` and `unresolved_rule_uuids` alone are not acceptance evidence.
-   - Reject that continuation only when **Current evidence** identifies a distinct resource or dependency path absent from the stored topology.
+2. For each rule not in `continued_rule_uuids`, accept an event continuation when both hold:
+   - the current confirmed detection's grounded `causal_features[].feature_id` or exact `blast_radius[].feature_id` occurs in the returned open event's stored topology, and
+   - the open event's compact `title`, `summary`, and `symptom_hypothesis` support that this batch continues the same incident (same failure class and path; wording and local signatures may differ).
+   Reuse that `event_id`. Compact `signal_rule_uuids` need not contain the new rule. Different local error signatures, protocol layers, or upstream/downstream wording cannot split it.
+   - Reject only when **Current evidence** identifies a distinct resource or dependency path, or the stored narrative is a different incident.
      On accept, bind this detection's grounded `causal_features` and `blast_radius` for emit — both are required on the write payload even when stored topology from `event_search` is empty. `causal_features` without the grounded `blast_radius` dependency edges is incomplete.
    Add accepted rules to `continued_rule_uuids`.
 3. When `has_more` is true and some rules remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
 For each accepted continuation, record `rule_uuid → accepted_event_id` immediately.
-At emit time, every item containing a bound rule must include that exact `event_id` on the write item. Missing `event_id` is a new event and is invalid for a continuation even if the handler later reports `existing_active_event`. Rule Match with an empty Topology Match still binds `event_id`.
+At emit time, every item containing a bound rule must include that exact `event_id` on the write item. Missing `event_id` is a new event and is invalid for a continuation even if the handler later reports `existing_active_event`. Bind from Rule Match **or** Topology Match — an empty Rule Match does not cancel a Topology accept.
 If multiple events match, prefer greatest rule coverage, then summary and topology overlap.
 
 ### Step 4: Group remaining detections into new events
@@ -433,7 +438,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 1. **KI grounding is mandatory first** — complete the `significant-events-ki-grounding` protocol for every detection before any incident matching.
 2. **`verdict` comes from grounding row content, not `evidence.result`.** Copy the `significant-events-ki-grounding` verdict, then apply `<verification_lens>` — a successful empty exact query under the recovery lens is `refutes`. Do not run additional queries after grouping to change `verdict`.
 3. **Alert symptom is an authored prior, not derived from confirmation.** Positive/health cannot group with a failure symptom unless it is explicit recovery evidence for that exact incident.
-4. **Route every detection exactly once.** Reuse an accepted open event by putting its `event_id` on the write item; otherwise form a new event. A handler `existing_active_event` skip without a submitted `event_id` is not routing. Never drop or duplicate a detection.
+4. **Route every detection exactly once.** Reuse an accepted open event by putting its `event_id` on the write item (Rule Match **or** Topology Match). Topology accept does not need a matching `signal_rule_uuid`. A handler `existing_active_event` skip without a submitted `event_id` is not routing. Never drop or duplicate a detection.
 5. **Topology is grounded, then copied** — finalize it during routing (continuation) or grouping (new event), then write it unchanged. Omitting a confirmed path from the payload is an error, not simplification. Copy every confirmed service into `causal_features` and every grounded dependency edge into `blast_radius`.
 6. **Status decision** — apply the `status` field description on `platform_sig_events_events_write`, plus:
    - `open`: at least one event-aligned active failure is confirmed, or a concrete off-topic observed-error row contains a non-benign error.
