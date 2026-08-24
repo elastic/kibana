@@ -8,7 +8,9 @@
  */
 
 import { esql } from '@elastic/esql';
+import moment from 'moment';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
 import {
@@ -18,7 +20,33 @@ import {
   hasDateRange,
   mapToEsqlInterval,
 } from './date_histogram_helpers';
-import type { ToEsqlFn } from './types';
+import type { GetSerializedFormatFn, ToEsqlFn } from './types';
+
+export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
+  DateHistogramIndexPatternColumn
+> = (column, _targetColumn, indexPattern, uiSettings, dateRange) => {
+  if (!indexPattern || !dateRange || !uiSettings)
+    return {
+      id: 'date',
+    };
+  const { interval } = getTimeZoneAndInterval(column, indexPattern);
+  const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+  const usedInterval =
+    calcAutoInterval(
+      { from: dateRange.fromDate, to: dateRange.toDate },
+      interval,
+      false
+    )?.asMilliseconds() || 3600000;
+  const rules = uiSettings?.get<Array<[string, string]>>('dateFormat:scaled');
+  for (let i = rules.length - 1; i >= 0; i--) {
+    const rule = rules[i];
+    if (!Array.isArray(rule) || rule.length !== 2) continue;
+    if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
+      return { id: 'date', params: { pattern: rule[1] } };
+    }
+  }
+  return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
+};
 
 export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (
   column,

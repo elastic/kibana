@@ -13,6 +13,7 @@ import type {
   StaticValueIndexPatternColumn,
   IndexPattern,
 } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
@@ -21,8 +22,6 @@ import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
 });
-
-export const defaultValue = 100;
 
 function isEmptyValue(value: number | string | undefined) {
   return value == null || value === '';
@@ -97,7 +96,7 @@ export const staticValueOperation: OperationDefinition<
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [String(isValid ? params.value! : defaultValue)],
+          expression: [String(isValid ? params.value! : DEFAULT_STATIC_VALUE)],
         },
       },
     ];
@@ -119,7 +118,7 @@ export const staticValueOperation: OperationDefinition<
       dataType: 'number',
       operationType: 'static_value',
       isBucketed: false,
-      params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
+      params: { ...previousParams, value: String(previousParams.value ?? DEFAULT_STATIC_VALUE) },
       references: [],
     };
   },
@@ -192,7 +191,7 @@ export const staticValueOperation: OperationDefinition<
     const fallbackValue =
       currentColumn?.operationType !== 'static_value' && activeDataValue != null
         ? activeDataValue
-        : String(defaultValue);
+        : String(DEFAULT_STATIC_VALUE);
 
     const { inputValue, handleInputChange } = useDebouncedValue<string | undefined>(
       {

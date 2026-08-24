@@ -34,7 +34,7 @@ import type {
   LensAppServices,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isColumnFormatted } from '../operations/definitions/helpers';
+import { isColumnFormatted } from '@kbn/lens-common';
 import { DurationRowInputs } from './formatting/duration_input';
 import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 

@@ -44,3 +44,18 @@ export type ToEsqlFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> 
     dateRange: DateRange
   ): ESQLExpressionWithParams | undefined;
 }['fn'];
+
+/**
+ * Signature of a per-operation serialized-format resolver.
+ * Mirrors `OperationDefinition['getSerializedFormat']` with node-safe types.
+ * Declared via a method signature so the column parameter is bivariant.
+ */
+export type GetSerializedFormatFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = {
+  fn(
+    column: C,
+    targetColumn: C,
+    indexPattern?: IndexPattern,
+    uiSettings?: UiSettingsReader,
+    dateRange?: DateRange
+  ): Record<string, unknown>;
+}['fn'];

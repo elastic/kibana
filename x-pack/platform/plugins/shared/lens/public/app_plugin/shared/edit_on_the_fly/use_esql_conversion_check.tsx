@@ -24,12 +24,10 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
-  type ColumnRoles,
-} from '../../../datasources/form_based/generate_esql_query';
-import {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
-} from '../../../datasources/form_based/to_esql_failure_reasons';
+  type ColumnRoles,
+} from '@kbn/lens-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -156,7 +154,15 @@ export const useEsqlConversionCheck = (
         coreStart.uiSettings,
         framePublicAPI.dateRange,
         startDependencies.data.nowProvider.get(),
-        columnRoles
+        columnRoles,
+        (col, cols, colIndexPattern) =>
+          operationDefinitionMap[col.operationType].getDefaultLabel(
+            col,
+            cols,
+            colIndexPattern,
+            coreStart.uiSettings,
+            framePublicAPI.dateRange
+          )
       );
     } catch (e) {
       // Layer remains non-convertible
@@ -323,7 +329,15 @@ function tryConvertTrendlineLayer(
       coreStart.uiSettings,
       framePublicAPI.dateRange,
       startDependencies.data.nowProvider.get(),
-      columnRoles
+      columnRoles,
+      (col, cols, colIndexPattern) =>
+        operationDefinitionMap[col.operationType].getDefaultLabel(
+          col,
+          cols,
+          colIndexPattern,
+          coreStart.uiSettings,
+          framePublicAPI.dateRange
+        )
     );
     if (!isEsqlQuerySuccess(esqlLayer)) {
       return { success: false, reason: esqlLayer?.reason };

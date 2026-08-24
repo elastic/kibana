@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ESQLExpressionWithParams, ToEsqlFn, UiSettingsReader } from './types';
-export { countToESQL } from './count_to_esql';
-export { cardinalityToESQL } from './cardinality_to_esql';
+export type {
+  ESQLExpressionWithParams,
+  GetSerializedFormatFn,
+  ToEsqlFn,
+  UiSettingsReader,
+} from './types';
+export { countToESQL, getCountSerializedFormat } from './count_to_esql';
+export { cardinalityToESQL, getCardinalitySerializedFormat } from './cardinality_to_esql';
 export { percentileToESQL } from './percentile_to_esql';
 export { buildMetricToESQL } from './metric_to_esql';
-export { dateHistogramToESQL } from './date_histogram_to_esql';
+export { dateHistogramToESQL, getDateHistogramSerializedFormat } from './date_histogram_to_esql';
 export { rangesToESQL } from './ranges_to_esql';
 export { toEsqlRegistry, DATE_HISTOGRAM_ID, RANGE_ID } from './registry';
 export {

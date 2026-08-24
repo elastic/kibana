@@ -1,30 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type {
-  DateHistogramIndexPatternColumn,
-  DateRange,
-  FormBasedLayer,
-  IndexPattern,
-  ValueFormatConfig,
-  GenericIndexPatternColumn,
-} from '@kbn/lens-common';
-import { getTimeZoneAndInterval } from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../common/types';
-import { isColumnOfType } from './operations/definitions/helpers';
-import { operationDefinitionMap } from './operations';
+import type { DateRange, IndexPattern, OriginalColumn, ValueFormatConfig } from '../types';
+import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
+import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
+import { isColumnOfType } from '../datasources/form_based/helpers';
+import { getTimeZoneAndInterval } from './operations/date_histogram_helpers';
+import type { UiSettingsReader } from './operations/types';
+
+/**
+ * Resolves the default (non custom) label for a column.
+ * Browser consumers back this with `operationDefinitionMap[...].getDefaultLabel`.
+ */
+export type GetDefaultLabelFn = (
+  column: GenericIndexPatternColumn,
+  columns: Record<string, GenericIndexPatternColumn>,
+  indexPattern: IndexPattern,
+  uiSettings: UiSettingsReader,
+  dateRange: DateRange
+) => string;
 
 export interface CreateEsAggsIdMapEntryParams {
   col: GenericIndexPatternColumn;
   colId: string;
   layer: FormBasedLayer;
   indexPattern: IndexPattern;
-  uiSettings: IUiSettingsClient;
+  uiSettings: UiSettingsReader;
   dateRange: DateRange;
   /** Format configuration for the column (accepts ValueFormatConfig or serialized format) */
   format?: ValueFormatConfig | Record<string, unknown>;
@@ -32,6 +39,8 @@ export interface CreateEsAggsIdMapEntryParams {
   interval?: number;
   /** Whether to include sourceField in the output (for bucket columns) */
   includeSourceField?: boolean;
+  /** Resolves default labels; falls back to `col.label` when not provided */
+  getDefaultLabel?: GetDefaultLabelFn;
 }
 
 /**
@@ -48,16 +57,12 @@ export function createEsAggsIdMapEntry({
   uiSettings,
   dateRange,
   includeSourceField = false,
+  getDefaultLabel,
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
-  const label = col.customLabel
-    ? col.label
-    : operationDefinitionMap[col.operationType].getDefaultLabel(
-        col,
-        layer.columns,
-        indexPattern,
-        uiSettings,
-        dateRange
-      );
+  const label =
+    col.customLabel || !getDefaultLabel
+      ? col.label
+      : getDefaultLabel(col, layer.columns, indexPattern, uiSettings, dateRange);
 
   // Build the entry with proper typing for the discriminated union
   if (

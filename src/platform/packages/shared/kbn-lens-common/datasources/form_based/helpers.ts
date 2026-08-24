@@ -8,13 +8,29 @@
  */
 
 import type { FormulaIndexPatternColumn } from '../operations';
-import type { FormBasedLayer, FormBasedPersistedState, GenericIndexPatternColumn } from '../types';
+import type {
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  TextBasedLayerColumn,
+} from '../types';
 
-function isColumnOfType<C extends GenericIndexPatternColumn>(
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
   type: C['operationType'],
   column: GenericIndexPatternColumn
 ): column is C {
   return column.operationType === type;
+}
+
+export function isColumnFormatted(
+  column: GenericIndexPatternColumn | TextBasedLayerColumn
+): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
+  return Boolean(
+    'params' in column &&
+      (column as FormattedIndexPatternColumn).params &&
+      'format' in (column as FormattedIndexPatternColumn).params!
+  );
 }
 
 export function hasStateFormulaColumn(state: FormBasedPersistedState): boolean {

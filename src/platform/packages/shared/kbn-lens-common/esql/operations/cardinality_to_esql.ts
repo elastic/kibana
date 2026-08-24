@@ -9,7 +9,15 @@
 
 import { esql } from '@elastic/esql';
 import type { CardinalityIndexPatternColumn } from '../../datasources/operations';
-import type { ToEsqlFn } from './types';
+import type { GetSerializedFormatFn, ToEsqlFn } from './types';
+
+export const getCardinalitySerializedFormat: GetSerializedFormatFn<
+  CardinalityIndexPatternColumn
+> = () => {
+  return {
+    id: 'number',
+  };
+};
 
 export const cardinalityToESQL: ToEsqlFn<CardinalityIndexPatternColumn> = (column) => {
   if (column.params?.emptyAsNull || column.timeShift) return;

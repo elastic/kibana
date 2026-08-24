@@ -11,6 +11,7 @@ export type {
   IndexPatternField,
   DateRange,
   PersistableFilter,
+  OriginalColumn,
   SortingHint,
   ValueLabelConfig,
   IndexPattern,
@@ -424,20 +425,53 @@ export {
   getFormulaColumnsFromLayer,
   getReferencedColumnIds,
   cleanupFormulaReferenceColumns,
+  isColumnOfType,
+  isColumnFormatted,
 } from './datasources/form_based/helpers';
 
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
 export { LENS_DATASOURCE_ID } from './embeddable/types';
 export type { LensDatasourceId } from './embeddable/types';
 export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';
-export { AUTO_TARGET_NUMBER_OF_BUCKETS } from './esql/constants';
+export { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './esql/constants';
 export {
   buildTrendlineBucketExpression,
   appendTimeBucketToEsqlQuery,
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
 } from './esql/trendline_query';
-export type { ESQLExpressionWithParams, ToEsqlFn, UiSettingsReader } from './esql/operations';
+export type {
+  ESQLExpressionWithParams,
+  GetSerializedFormatFn,
+  ToEsqlFn,
+  UiSettingsReader,
+} from './esql/operations';
+export type { EsqlOperationMeta } from './esql/operations/registry';
+export { esqlOperationMetaRegistry } from './esql/operations/registry';
+export {
+  getCountSerializedFormat,
+  getCardinalitySerializedFormat,
+  getDateHistogramSerializedFormat,
+} from './esql/operations';
+export { parseTimeShiftWrapper, resolveTimeShift } from './esql/time_shift';
+export { convertToAbsoluteDateRange } from './esql/date_range';
+export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
+export {
+  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
+} from './esql/to_esql_failure_reasons';
+export type {
+  CreateEsAggsIdMapEntryParams,
+  GetDefaultLabelFn,
+} from './esql/create_es_aggs_id_map_entry';
+export { createEsAggsIdMapEntry } from './esql/create_es_aggs_id_map_entry';
+export type { ColumnRoles, EsqlQueryResult } from './esql/generate_esql_query';
+export {
+  extractAggId,
+  generateEsqlQuery,
+  isEsqlQueryFailure,
+  isEsqlQuerySuccess,
+} from './esql/generate_esql_query';
 export {
   countToESQL,
   cardinalityToESQL,

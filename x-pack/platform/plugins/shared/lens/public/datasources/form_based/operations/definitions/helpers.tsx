@@ -13,9 +13,7 @@ import type { Query } from '@kbn/es-query';
 import type {
   ColumnBuildHints,
   FieldBasedIndexPatternColumn,
-  FormattedIndexPatternColumn,
   GenericIndexPatternColumn,
-  TextBasedLayerColumn,
   FormBasedLayer,
   FormBasedPersistedState,
   IndexPattern,
@@ -163,18 +161,6 @@ export function isValidNumber(
 }
 
 /**
- * Type guard for narrowing a full column to a specific column type.
- * Use this when you have a complete `GenericIndexPatternColumn` and need to
- * access type-specific properties with full type safety.
- */
-export function isColumnOfType<C extends GenericIndexPatternColumn>(
-  type: C['operationType'],
-  column: GenericIndexPatternColumn
-): column is C {
-  return column.operationType === type;
-}
-
-/**
  * Checks if partial column hints match a specific operation type.
  * Use this in `buildColumn` implementations when working with `previousColumn`
  * which is typed as `ColumnBuildHints` (partial metadata, not a full column).
@@ -218,16 +204,6 @@ export const isColumn = (
 ): setter is GenericIndexPatternColumn => {
   return 'operationType' in setter;
 };
-
-export function isColumnFormatted(
-  column: GenericIndexPatternColumn | TextBasedLayerColumn
-): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
-  return Boolean(
-    'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
-  );
-}
 
 export function getFormatFromPreviousColumn(previousColumn: ColumnBuildHints | undefined) {
   return previousColumn?.dataType === 'number' && previousColumn.params?.format

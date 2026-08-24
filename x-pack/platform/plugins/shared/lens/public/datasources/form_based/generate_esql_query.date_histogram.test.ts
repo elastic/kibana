@@ -10,7 +10,7 @@ import type {
   FormBasedLayer,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import { generateEsqlQuery } from './generate_esql_query';
+import { generateEsqlQuery } from '@kbn/lens-common';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import { mockLayer, mockIndexPattern, mockDateRange } from './__mocks__/esql_query_mocks';

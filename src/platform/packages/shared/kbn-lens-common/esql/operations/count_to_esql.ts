@@ -9,7 +9,16 @@
 
 import { esql } from '@elastic/esql';
 import type { CountIndexPatternColumn } from '../../datasources/operations';
-import type { ToEsqlFn } from './types';
+import type { GetSerializedFormatFn, ToEsqlFn } from './types';
+
+export const getCountSerializedFormat: GetSerializedFormatFn<CountIndexPatternColumn> = (
+  column,
+  _targetColumn,
+  indexPattern
+) => {
+  const field = indexPattern?.getFieldByName(column.sourceField);
+  return field?.format ?? { id: 'number' };
+};
 
 export const countToESQL: ToEsqlFn<CountIndexPatternColumn> = (column, _columnId, indexPattern) => {
   if (column.params?.emptyAsNull === false || column.timeShift) return;

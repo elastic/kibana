@@ -33,13 +33,17 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
-import { convertToAbsoluteDateRange } from '../../utils';
+import {
+  isEsqlQuerySuccess,
+  generateEsqlQuery,
+  convertToAbsoluteDateRange,
+  isColumnFormatted,
+  isColumnOfType,
+  resolveTimeShift,
+} from '@kbn/lens-common';
 import { getLensFeatureFlags } from '../../get_feature_flags';
 import { operationDefinitionMap } from './operations';
-import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import { dedupeAggs } from './dedupe_aggs';
-import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
@@ -181,7 +185,23 @@ function getExpressionForLayer(
 
     // Only generate ES|QL query when ES|QL mode is enabled
     const esqlLayer = canUseESQL
-      ? generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant)
+      ? generateEsqlQuery(
+          esAggEntries,
+          layer,
+          indexPattern,
+          uiSettings,
+          dateRange,
+          nowInstant,
+          undefined,
+          (col, colColumns, colIndexPattern) =>
+            operationDefinitionMap[col.operationType].getDefaultLabel(
+              col,
+              colColumns,
+              colIndexPattern,
+              uiSettings,
+              dateRange
+            )
+        )
       : undefined;
     const isFormBasedEsqlMode = canUseESQL && !!esqlLayer && isEsqlQuerySuccess(esqlLayer);
 

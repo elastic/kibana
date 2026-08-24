@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { resolveTimeShift } from './time_shift_utils';
+import { resolveTimeShift } from '@kbn/lens-common';
 
 describe('time_shift_utils', () => {
   describe('resolveTimeShift', () => {
