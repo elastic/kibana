@@ -48,7 +48,6 @@ import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
   AWS_SCHEMA_META,
-  MANAGED_INTEGRATION_EXAMPLES,
   type AwsSchema,
   type AwsServiceEntry,
 } from './aws_services_data';
@@ -342,16 +341,18 @@ const ConfirmableFieldText: React.FunctionComponent<{
   );
 };
 
-// Elastic Cloud Forwarder widget — owns the FULL CloudFormation lifecycle:
-// launch → per-service detection animation → stack name/version capture.
-// Deploy state is lifted to the parent flow so Detect & Review can read it.
-// Open/closed state is controlled by the parent's sequential accordion.
+// Elastic Cloud Forwarder widget — owns the CloudFormation launch and stack
+// name capture. Per-service data-arrival detection is intentionally NOT
+// shown here anymore — it starts in the background as soon as the stack is
+// launched, but is only surfaced on Detect & Review (step 4), so this step
+// doesn't block the user on waiting for data to arrive. Deploy state is
+// lifted to the parent flow so Detect & Review can read it. Open/closed
+// state is controlled by the parent's sequential accordion.
 const CloudFormationWidget: React.FunctionComponent<{
   services: AwsServiceEntry[];
   schema: AwsSchema;
   isLaunched: boolean;
   onLaunch: () => void;
-  receivedCount: number;
   stackName: string;
   onStackNameChange: (value: string) => void;
   isOpen: boolean;
@@ -362,25 +363,22 @@ const CloudFormationWidget: React.FunctionComponent<{
   schema,
   isLaunched,
   onLaunch,
-  receivedCount,
   stackName,
   onStackNameChange,
   isOpen,
   onToggle,
   onCompleteChange,
 }) => {
-  const allReceived = services.length > 0 && receivedCount >= services.length;
-  const isComplete = allReceived && stackName.trim().length > 0;
+  const isComplete = isLaunched && stackName.trim().length > 0;
 
   useEffect(() => {
     onCompleteChange(isComplete);
   }, [isComplete, onCompleteChange]);
 
-  // Design-preview-only toggles: the prototype has no real AWS backend to
-  // actually fail, so these let reviewers see the failure states on demand
-  // without them ever appearing during a normal click-through.
+  // Design-preview-only toggle: the prototype has no real AWS backend to
+  // actually fail, so this lets reviewers see the failure state on demand
+  // without it ever appearing during a normal click-through.
   const [previewLaunchError, setPreviewLaunchError] = useState(false);
-  const [previewStuck, setPreviewStuck] = useState(false);
 
   return (
     <AccordionCard
@@ -469,82 +467,16 @@ const CloudFormationWidget: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         )
-      ) : !allReceived ? (
-        <EuiButton isLoading disabled data-test-subj="awsOnboardingStep3CloudFormationDeploying">
-          Cloudformation stack deploying...
-        </EuiButton>
       ) : (
         <EuiText size="s">
           <p>
-            The Elastic Cloud Forwarder has been created in your AWS account. Log collection is
-            now active.
+            The Elastic Cloud Forwarder has been created in your AWS account. Data detection is
+            running in the background — check Detect &amp; Review for arrival status.
           </p>
         </EuiText>
       )}
 
       {isLaunched && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {`${receivedCount} of ${services.length} - data received`}
-              </EuiText>
-            </EuiFlexItem>
-            {!allReceived && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="Design preview only — shows how a stalled detection would look. Not part of the real flow.">
-                  <EuiButtonEmpty
-                    size="xs"
-                    color="text"
-                    iconType="beaker"
-                    onClick={() => setPreviewStuck((v) => !v)}
-                    data-test-subj="awsOnboardingCloudFormationPreviewStuck"
-                  >
-                    {previewStuck ? 'Hide preview' : 'Preview: data not arriving'}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGrid columns={4} gutterSize="m">
-            {services.map((service, i) => (
-              <EuiFlexItem key={service.id} style={{ minWidth: 0 }}>
-                <ServiceDetectionCard service={service} receiving={i < receivedCount} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          {previewStuck && !allReceived && (
-            <>
-              <EuiSpacer size="m" />
-              <KbnWarningCallout
-                announceOnMount
-                title="Still waiting on data from some services"
-                data-test-subj="awsOnboardingCloudFormationStuckWarning"
-              >
-                <p>
-                  This can happen if the trigger source (S3 bucket or CloudWatch log group)
-                  doesn&apos;t match what&apos;s configured in Service settings, if the stack was
-                  deployed to a different AWS region than the log source, or if there&apos;s
-                  simply no new log activity yet to forward.
-                </p>
-                <EuiButtonEmpty
-                  iconType="popout"
-                  iconSide="right"
-                  href="https://console.aws.amazon.com/lambda"
-                  target="_blank"
-                  flush="left"
-                >
-                  Open AWS Lambda console
-                </EuiButtonEmpty>
-              </KbnWarningCallout>
-            </>
-          )}
-        </>
-      )}
-
-      {allReceived && (
         <>
           <EuiSpacer size="l" />
           <EuiText size="s">
@@ -583,10 +515,12 @@ type ManagedAccessMethod = 'access_keys' | 'identity_federation';
 // Managed Integrations widget — the single credentials card for the managed
 // path (the separate "Setup access" card was removed as a duplicate).
 // Defaults to Federated Identity; the Federated Identity Name is lifted to
-// the parent flow so Detect & Review's summary can read it. Like the Cloud
-// Forwarder card, it owns its own deploy CTA + arrival animation so the
-// Detect & Review summary arrives already settled. Open/closed state is
-// controlled by the parent's sequential accordion.
+// the parent flow so Detect & Review's summary can read it. Unlike earlier
+// versions of this widget, it no longer waits for (or shows) per-service
+// data arrival — that starts in the background on deploy but is only
+// surfaced on Detect & Review (step 4), so deploying doesn't block progress
+// here. Open/closed state is controlled by the parent's sequential
+// accordion.
 const ManagedIntegrationsWidget: React.FunctionComponent<{
   servicesCount: number;
   onValidityChange: (isValid: boolean) => void;
@@ -594,7 +528,6 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   onIdentityNameChange: (value: string) => void;
   isDeployed: boolean;
   onDeploy: () => void;
-  receivedCount: number;
   isOpen: boolean;
   onToggle: () => void;
   onCompleteChange: (isComplete: boolean) => void;
@@ -605,7 +538,6 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   onIdentityNameChange,
   isDeployed,
   onDeploy,
-  receivedCount,
   isOpen,
   onToggle,
   onCompleteChange,
@@ -631,8 +563,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
     onValidityChange(isValid);
   }, [isValid, onValidityChange]);
 
-  const allReceived = receivedCount >= MANAGED_INTEGRATION_EXAMPLES.length;
-  const isComplete = isDeployed && allReceived;
+  const isComplete = isDeployed;
 
   useEffect(() => {
     onCompleteChange(isComplete);
@@ -808,31 +739,13 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         )
-      ) : !allReceived ? (
-        <EuiButton isLoading disabled data-test-subj="awsOnboardingManagedIntegrationsDeploying">
-          Deploying integrations...
-        </EuiButton>
       ) : (
         <EuiText size="s">
-          <p>Managed integration data streams are connected. Data collection is now active.</p>
+          <p>
+            Managed integrations deployed. Data detection is running in the background — check
+            Detect &amp; Review for arrival status.
+          </p>
         </EuiText>
-      )}
-
-      {isDeployed && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            {`${receivedCount} of ${MANAGED_INTEGRATION_EXAMPLES.length} - data received`}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiFlexGrid columns={4} gutterSize="m">
-            {MANAGED_INTEGRATION_EXAMPLES.map((name, i) => (
-              <EuiFlexItem key={name} style={{ minWidth: 0 }}>
-                <ServiceDetectionCard service={{ name }} receiving={i < receivedCount} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        </>
       )}
     </AccordionCard>
   );
@@ -1242,14 +1155,12 @@ export const StepAuthentication: React.FunctionComponent<{
   onDeployIdentityNameChange: (value: string) => void;
   isDeployed: boolean;
   onLaunchCloudFormation: () => void;
-  receivedCount: number;
   stackName: string;
   onStackNameChange: (value: string) => void;
   isAgentEnrolled: boolean;
   onAgentEnrolled: () => void;
   isManagedDeployed: boolean;
   onDeployManagedIntegrations: () => void;
-  managedReceivedCount: number;
   agentReceivedCount: number;
 }> = ({
   services,
@@ -1261,14 +1172,12 @@ export const StepAuthentication: React.FunctionComponent<{
   onDeployIdentityNameChange,
   isDeployed,
   onLaunchCloudFormation,
-  receivedCount,
   stackName,
   onStackNameChange,
   isAgentEnrolled,
   onAgentEnrolled,
   isManagedDeployed,
   onDeployManagedIntegrations,
-  managedReceivedCount,
   agentReceivedCount,
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -1450,7 +1359,6 @@ export const StepAuthentication: React.FunctionComponent<{
             onIdentityNameChange={onDeployIdentityNameChange}
             isDeployed={isManagedDeployed}
             onDeploy={onDeployManagedIntegrations}
-            receivedCount={managedReceivedCount}
             isOpen={managedAccordion.isOpen('managedIntegrations')}
             onToggle={() => managedAccordion.toggle('managedIntegrations')}
             onCompleteChange={setIsManagedIntegrationsComplete}
@@ -1461,7 +1369,6 @@ export const StepAuthentication: React.FunctionComponent<{
             schema={schema}
             isLaunched={isDeployed}
             onLaunch={onLaunchCloudFormation}
-            receivedCount={receivedCount}
             stackName={stackName}
             onStackNameChange={onStackNameChange}
             isOpen={managedAccordion.isOpen('cloudFormation')}
