@@ -7,17 +7,21 @@
 
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './app';
+import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../hooks/use_kibana';
 
+jest.mock('../hooks/use_fetch_event_by_id');
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_fetch_investigation_statuses');
 jest.mock('../hooks/use_fetch_stream_features');
 jest.mock('../hooks/use_close_significant_event');
 jest.mock('../hooks/use_kibana');
@@ -35,7 +39,9 @@ jest.mock('../event/event_flyout', () => ({
   ),
 }));
 
+const mockUseFetchEventById = useFetchEventById as jest.Mock;
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseFetchInvestigationStatuses = useFetchInvestigationStatuses as jest.Mock;
 const mockUseFetchStreamFeatures = useFetchStreamFeatures as jest.Mock;
 const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -43,6 +49,7 @@ const mockUsePageReady = usePageReady as jest.Mock;
 
 const impactedService = (name: string, streamName = 'logs.app') => ({
   type: 'entity' as const,
+  subtype: 'service',
   feature_id: `feat-${name}`,
   name,
   stream_name: streamName,
@@ -109,6 +116,7 @@ function setEvents({
     isLoading,
     refetch: jest.fn(),
   });
+  mockUseFetchInvestigationStatuses.mockReturnValue({ data: undefined });
   mockUseFetchStreamFeatures.mockReturnValue({
     features: featuresForEvents(events),
     isInitialLoading: false,
@@ -116,6 +124,18 @@ function setEvents({
     isError: false,
     refetch: jest.fn(),
   });
+}
+
+function setEventById({
+  event,
+  isFetched = true,
+}: { event?: SignificantEvent; isFetched?: boolean } = {}) {
+  mockUseFetchEventById.mockReturnValue({ data: event, isFetched, isError: false });
+}
+
+function LocationProbe() {
+  const { search } = useLocation();
+  return <span data-test-subj="locationProbe">{search}</span>;
 }
 
 function renderWithIntl(
@@ -178,6 +198,7 @@ describe('NightshiftApp', () => {
       },
     });
     setEvents();
+    setEventById();
   });
 
   it('renders hero message when events need action', () => {
@@ -580,31 +601,61 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
-  it('restores the open flyout from the eventUuid URL parameter', () => {
+  it('restores the open flyout from the eventId URL parameter without fetching by id', () => {
     setEvents({
-      events: [mockEvent({ event_uuid: 'evt-uuid-1', title: 'Deep linked event' })],
+      events: [mockEvent({ event_id: 'evt-1', title: 'Deep linked event' })],
     });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-1'] });
 
     expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
+    expect(mockUseFetchEventById).toHaveBeenCalledWith('evt-1', { enabled: false });
   });
 
-  it('restores the open flyout from a superseded eventUuid using eventId', () => {
-    setEvents({
-      events: [
-        mockEvent({
-          event_id: 'evt-1',
-          event_uuid: 'evt-uuid-current',
-          title: 'Lineage linked event',
-        }),
-      ],
-    });
-    renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-stale&eventId=evt-1'],
+  it('opens the flyout for a deep-linked event that is not on the landing list', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed', title: 'Listed event' })] });
+    setEventById({
+      event: mockEvent({ event_id: 'evt-low', severity: '20-low', title: 'Low severity event' }),
     });
 
-    expect(screen.getByText('Flyout: Lineage linked event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-low'] });
+
+    expect(screen.getByText('Flyout: Low severity event')).toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+  });
+
+  it('does not show the not-found callout while the by-id lookup is in flight', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed' })] });
+    setEventById({ isFetched: false });
+
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-pending'] });
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+  });
+
+  it('names the unresolved event in the callout and clears the id from the URL', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed' })] });
+
+    renderWithIntl(
+      <>
+        <NightshiftApp />
+        <LocationProbe />
+      </>,
+      { initialEntries: ['/?eventId=evt-unknown'] }
+    );
+
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
+    expect(screen.getByTestId('locationProbe')).not.toHaveTextContent('eventId=evt-unknown');
+  });
+
+  it('ignores a legacy eventUuid parameter', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-1', event_uuid: 'evt-uuid-1' })] });
+
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+    expect(mockUseFetchEventById).toHaveBeenCalledWith(undefined, { enabled: false });
   });
 
   it('keeps the flyout open when a refetch returns a newer event version', () => {
@@ -621,7 +672,7 @@ describe('NightshiftApp', () => {
     });
     setEvents({ events: [initialEvent] });
     const { rerender } = renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-1&eventId=evt-1'],
+      initialEntries: ['/?eventId=evt-1'],
     });
 
     expect(screen.getByText('Flyout: Investigating event')).toBeInTheDocument();
@@ -644,26 +695,26 @@ describe('NightshiftApp', () => {
     });
     rerender(
       <I18nProvider>
-        <MemoryRouter initialEntries={['/?eventUuid=evt-uuid-1&eventId=evt-1']}>
+        <MemoryRouter initialEntries={['/?eventId=evt-1']}>
           <NightshiftApp />
         </MemoryRouter>
       </I18nProvider>
     );
 
     expect(screen.getByText('Flyout: Investigated event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
   });
 
   it('keeps the not-found warning visible until a valid event is selected', () => {
-    setEvents({ events: [mockEvent({ event_uuid: 'evt-uuid-1' })] });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-unknown'] });
+    setEvents({ events: [mockEvent({ event_id: 'evt-1' })] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-unknown'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
-    expect(screen.getByText('Significant Event not found')).toBeInTheDocument();
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
 
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
     expect(screen.getByTestId('stubEventFlyout')).toBeInTheDocument();
   });
 

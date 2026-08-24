@@ -59,9 +59,29 @@ describe('event_search tool', () => {
     expect(tool.schema.safeParse({ per_page: 50, rule_uuids: ['rule-1'] }).success).toBe(true);
     expect(tool.schema.safeParse({ per_page: 51, rule_uuids: ['rule-1'] }).success).toBe(false);
     expect(tool.schema.parse({ query: '', rule_uuids: ['rule-1'] }).query).toBeUndefined();
+    expect(
+      tool.schema.parse({ event_ids: ['event-1'], rule_uuids: [] }).rule_uuids
+    ).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
     expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
-    expect(tool.schema.safeParse({}).success).toBe(false);
+    expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1'] }).success).toBe(true);
+    expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1', 'event-2'] }).success).toBe(
+      false
+    );
+    expect(
+      tool.schema.safeParse({ view: 'full', event_ids: ['event-1'], signals_per_page: 11 }).success
+    ).toBe(false);
+    expect(tool.schema.safeParse({}).success).toBe(true);
+    expect(tool.schema.parse({})).toEqual(
+      expect.objectContaining({
+        status: 'open',
+        view: 'compact',
+        page: 1,
+        per_page: 20,
+        from: 'now-7d',
+        to: 'now',
+      })
+    );
   });
 
   it('returns events on success and tracks telemetry', async () => {
@@ -93,7 +113,6 @@ describe('event_search tool', () => {
         query: '   ',
         stream_names: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
-        exclude_unconfirmed_signals: true,
         status: 'open',
       },
       createMockToolContext()
@@ -116,7 +135,6 @@ describe('event_search tool', () => {
         params: expect.objectContaining({
           query: undefined,
           rule_uuids: ['rule-uuid-1'],
-          exclude_unconfirmed_signals: true,
         }),
       })
     );

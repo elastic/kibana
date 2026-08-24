@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
+import type { SignalEntry } from '@kbn/significant-events-schema';
 import {
   checkoutDetection,
   checkoutDetectionSignal,
@@ -30,16 +31,15 @@ import { InvestigationFlyout } from './investigation_flyout';
 
 type FlyoutScenario =
   | 'investigationCompleted'
-  | 'investigationRunning'
-  | 'investigationLoading'
-  | 'investigationFailed'
-  | 'investigationUnavailable'
   | 'investigationEmpty'
   | 'investigationWithoutChat'
   | 'eventInvestigationCompleted'
   | 'eventInvestigationRunning'
   | 'detection'
-  | 'detectionUnconfirmed'
+  | 'detectionRefutes'
+  | 'detectionOffTopic'
+  | 'detectionInconclusive'
+  | 'detectionNotChecked'
   | 'detectionEntitiesLoading'
   | 'detectionEntitiesError'
   | 'entityWithoutEvidence'
@@ -50,52 +50,13 @@ interface NightshiftFlyoutStoryProps {
 }
 
 const noop = () => undefined;
-const unconfirmedDetectionSignal = {
+const signalWithVerdict = (verdict: SignalEntry['verdict']): SignalEntry => ({
   ...checkoutDetectionSignal,
-  confirmed: false,
-};
+  verdict,
+});
 
 const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {
   switch (scenario) {
-    case 'investigationRunning':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={runningInvestigation}
-          status="running"
-          state={runningInvestigationState}
-          onClose={noop}
-        />
-      );
-    case 'investigationLoading':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={runningInvestigation}
-          status="loading"
-          onClose={noop}
-        />
-      );
-    case 'investigationFailed':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={completedInvestigation}
-          status="failed"
-          error="The investigation failed because no inference connector was available."
-          onClose={noop}
-        />
-      );
-    case 'investigationUnavailable':
-      return (
-        <InvestigationFlyout
-          eventTitle={checkoutEvent.title}
-          investigation={completedInvestigation}
-          status="unavailable"
-          error="You do not have permission to view this investigation."
-          onClose={noop}
-        />
-      );
     case 'investigationEmpty':
       return (
         <InvestigationFlyout
@@ -150,15 +111,25 @@ const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {
           onClose={noop}
         />
       );
-    case 'detectionUnconfirmed':
+    case 'detectionRefutes':
+    case 'detectionOffTopic':
+    case 'detectionInconclusive':
+    case 'detectionNotChecked': {
+      const verdictByScenario = {
+        detectionRefutes: 'refutes',
+        detectionOffTopic: 'off_topic',
+        detectionInconclusive: 'inconclusive',
+        detectionNotChecked: 'not_checked',
+      } as const;
       return (
         <DetectionFlyout
           detection={checkoutDetection}
           event={checkoutEvent}
-          signal={unconfirmedDetectionSignal}
+          signal={signalWithVerdict(verdictByScenario[scenario])}
           onClose={noop}
         />
       );
+    }
     case 'entityWithoutEvidence':
       return <EntityFlyout feature={entityWithoutEvidence} onClose={noop} />;
     case 'streamEntityWithoutChat':
@@ -217,22 +188,6 @@ export const InvestigationCompleted: Story = {
   args: { scenario: 'investigationCompleted' },
 };
 
-export const InvestigationRunning: Story = {
-  args: { scenario: 'investigationRunning' },
-};
-
-export const InvestigationLoading: Story = {
-  args: { scenario: 'investigationLoading' },
-};
-
-export const InvestigationFailed: Story = {
-  args: { scenario: 'investigationFailed' },
-};
-
-export const InvestigationUnavailable: Story = {
-  args: { scenario: 'investigationUnavailable' },
-};
-
 export const InvestigationEmptyResults: Story = {
   args: { scenario: 'investigationEmpty' },
 };
@@ -253,8 +208,20 @@ export const Detection: Story = {
   args: { scenario: 'detection' },
 };
 
-export const DetectionUnconfirmed: Story = {
-  args: { scenario: 'detectionUnconfirmed' },
+export const DetectionRefutes: Story = {
+  args: { scenario: 'detectionRefutes' },
+};
+
+export const DetectionOffTopic: Story = {
+  args: { scenario: 'detectionOffTopic' },
+};
+
+export const DetectionInconclusive: Story = {
+  args: { scenario: 'detectionInconclusive' },
+};
+
+export const DetectionNotChecked: Story = {
+  args: { scenario: 'detectionNotChecked' },
 };
 
 export const DetectionEntitiesLoading: Story = {

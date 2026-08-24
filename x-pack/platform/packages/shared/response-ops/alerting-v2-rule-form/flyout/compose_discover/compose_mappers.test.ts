@@ -33,10 +33,10 @@ const baseRuleResponse: RuleResponse = {
     base: BASE,
     breach: { segment: ALERT_SEGMENT },
   },
-  createdBy: 'test',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedBy: 'test',
-  updatedAt: '2026-01-01T00:00:00Z',
+  created_by: 'test',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_by: 'test',
+  updated_at: '2026-01-01T00:00:00Z',
 };
 
 const baseFormValues: FormValues = {
@@ -386,6 +386,25 @@ describe('mapRuleToComposeFormValues', () => {
       expect(result.query.base).toBe(BASE);
       expect(result.query.breach.segment).toBe(ALERT_SEGMENT);
     }
+  });
+
+  it('round-trips an omitted composed breach through the form as an empty segment', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      query: { format: 'composed', base: BASE },
+    };
+
+    const formValues = mapRuleToComposeFormValues(rule);
+
+    expect(formValues.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: '' },
+    });
+    expect(composeFormToCreateRequest(formValues).query).toEqual({
+      format: 'composed',
+      base: BASE,
+    });
   });
 
   it('maps recovery segment from composed query when recovery_strategy: query', () => {
