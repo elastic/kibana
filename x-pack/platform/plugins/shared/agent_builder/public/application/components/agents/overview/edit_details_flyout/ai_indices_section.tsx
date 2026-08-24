@@ -19,8 +19,7 @@ interface AiIndicesSectionProps {
 }
 
 /**
- * Picks the AI indices an agent retrieves from, as a panel of the edit-settings flyout. Shares its
- * controls with the agent form's settings tab; only the chrome around them differs.
+ * Picks the AI indices an agent retrieves from.
  */
 export const AiIndicesSection: React.FC<AiIndicesSectionProps> = ({ agentId, isDisabled }) => {
   const isContextEngineEnabled = useIsContextEngineEnabled();

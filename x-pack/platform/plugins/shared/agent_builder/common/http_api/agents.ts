@@ -37,13 +37,11 @@ export interface DeleteAgentResponse {
 }
 
 /**
- * One AI index an agent retrieves from, for the internal agent AI indices endpoints.
- * The public agent APIs only return an agent's own configuration, so these internal endpoints
- * are how the UI tells type-contributed indices from user-assigned ones.
+ * The public agent APIs only return an agent's own configuration, so this is the only way
+ * a client can tell inherited AI indices from assigned ones.
  */
 export interface AgentAiIndexEntry {
   id: string;
-  /** True when the index is contributed by the agent's type and not editable on the agent. */
   is_default: boolean;
 }
 

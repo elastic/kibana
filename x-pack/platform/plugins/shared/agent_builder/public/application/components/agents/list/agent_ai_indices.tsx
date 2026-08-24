@@ -10,8 +10,7 @@ import { BadgeList } from '../../common/badge_list';
 import { labels } from '../../../utils/i18n';
 
 /**
- * The AI indices an agent retrieves from, as read-only badges for the agents table. Assigned and
- * inherited ones are not told apart here — editing happens in the agent's AI indices section.
+ * The AI indices as read-only badges for the agents table.
  */
 export const AgentAiIndices: React.FC<{ aiIndices: string[] }> = ({ aiIndices }) => (
   <BadgeList

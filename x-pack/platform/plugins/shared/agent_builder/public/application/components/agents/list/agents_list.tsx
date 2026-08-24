@@ -106,7 +106,6 @@ const columnNames = {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
-  // The same label the cell component uses for its aria-label, so the two cannot diverge.
   aiIndices: i18nLabels.aiIndices.columnTitle,
   createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
     defaultMessage: 'Created by',
@@ -294,14 +293,10 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
-    // Read-only: what an agent retrieves from, assigned and inherited together. Editing lives on
-    // the agent's AI indices tab, where the two can be told apart.
     const agentAiIndices: EuiTableComputedColumnType<ListAgentResponseItem> = {
       width: '14%',
       valign: 'top',
       name: columnNames.aiIndices,
-      // While the effective indices load, a missing entry does not mean "inherits nothing", so the
-      // cell shows a placeholder rather than claiming the agent has no AI indices.
       render: (agent) =>
         isLoadingAgentAiIndices ? (
           <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />

@@ -25,8 +25,6 @@ interface UseAgentAiIndicesByIdResult {
 
 /**
  * Loads the effective AI indices for one agent, with type-contributed ones flagged.
- *
- * Pass `enabled: false` where the Context Engine is off, so the request is never made.
  */
 export const useAgentAiIndicesById = (
   agentId: string | undefined,

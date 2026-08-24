@@ -29,8 +29,7 @@ interface AiIndicesSectionProps {
 }
 
 /**
- * Picks the AI indices an agent retrieves from, as a section of the agent form's settings tab.
- * Only rendered when the Context Engine is on, since nothing retrieves without it.
+ * Picks the AI indices, as a section of the agent form's settings tab.
  */
 export const AiIndicesSection: React.FC<AiIndicesSectionProps> = ({
   control,

@@ -16,18 +16,13 @@ import { useToasts } from '../use_toasts';
 
 interface UseAgentAiIndicesResult {
   /** Effective AI indices per agent, with type-contributed ones flagged as defaults. */
-  aiIndicesByAgentId: Record<string, AgentAiIndexEntry>;
+  aiIndicesByAgentId: Record<string, AgentAiIndexEntry[]>;
   isLoading: boolean;
   error: Error | undefined;
 }
 
 /**
  * Loads the effective AI indices for each agent, with type-contributed ones flagged.
- *
- * Callers must not treat a missing entry as "inherits nothing" while `isLoading` is true — every
- * agent would look like it has no context at all until this resolves.
- *
- * Pass `enabled: false` where the Context Engine is off, so the request is never made.
  */
 export const useAgentAiIndices = ({
   enabled = true,
@@ -58,7 +53,6 @@ export const useAgentAiIndices = ({
     [data]
   );
 
-  // A disabled query never leaves the "loading" status, so report it as settled instead.
   return {
     aiIndicesByAgentId,
     isLoading: enabled && isLoading,

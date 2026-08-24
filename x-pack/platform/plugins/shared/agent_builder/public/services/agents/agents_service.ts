@@ -56,9 +56,6 @@ export class AgentService {
 
   /**
    * Lists the effective AI indices for each listed agent, with type-contributed ones flagged.
-   *
-   * `list()` only reports an agent's own configuration, so this is the only way to tell which
-   * values are contributed by the type and therefore not editable on the agent.
    */
   async listAgentAiIndices(): Promise<AgentAiIndicesItem[]> {
     const res = await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);

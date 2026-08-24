@@ -73,10 +73,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
       isDefault ? labels.aiIndices.defaultIndexBadge(id) : id
     )
     .join(', ');
-  // While the effective indices load, a missing entry does not mean "inherits nothing", so the row
-  // shows a placeholder rather than a premature "Not set" that flips once the query settles.
   const hasAiIndices = isLoadingAgentAiIndices || Boolean(aiIndicesSummary);
-
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};
   `;

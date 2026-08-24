@@ -22,11 +22,6 @@ import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_in
 import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices';
 import { labels } from '../../../utils/i18n';
 
-/**
- * Loads what an agent retrieves from: the AI indices it can be assigned, and the ones its type
- * contributes. `agentId` is undefined while creating an agent, which inherits nothing until
- * saved, so the inherited lookup is skipped entirely.
- */
 export const useAiIndices = (agentId?: string) => {
   const {
     aiIndices: availableAiIndices,
@@ -59,7 +54,6 @@ export interface AiIndicesFieldsProps {
   /** AI indices contributed by the agent's type. They always apply and cannot be removed here. */
   inheritedIds: string[];
   isLoading: boolean;
-  /** Set when either AI indices query failed, so the fields are not just silently empty. */
   error?: Error;
   isFormDisabled: boolean;
   onChange: (assignedIds: string[]) => void;
@@ -76,17 +70,13 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
 }) => {
   const inheritedIdSet = useMemo(() => new Set(inheritedIds), [inheritedIds]);
 
-  // Inherited ids are listed above as defaults, so they are not shown again here. Ones the agent
-  // is nevertheless assigned (possible via the API) must survive edits, so every change writes
-  // them back along with the visible selection.
+  // Inherited ids are listed above as defaults, so they are not shown again here.
   const hiddenAssignedIds = useMemo(
     () => assignedIds.filter((id) => inheritedIdSet.has(id)),
     [assignedIds, inheritedIdSet]
   );
 
-  // The API does not validate stored ids, so an agent can reference an index that was deleted or
-  // that falls outside the list endpoint's cap. Those stay selected here — a pill can exist
-  // without an option — so they are not dropped on the next save.
+  // The API does not validate stored ids, so an agent can reference an index that was deleted.
   const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       assignedIds

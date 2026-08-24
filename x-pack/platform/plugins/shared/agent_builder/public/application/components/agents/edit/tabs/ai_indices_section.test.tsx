@@ -221,8 +221,8 @@ describe('AiIndicesSection', () => {
       expect(within(comboBox()).getByTestId('comboBoxSearchInput')).toBeDisabled();
     });
 
-    // The API does not validate stored ids, so an agent can reference an index that was deleted or
-    // that falls outside the list endpoint's cap. Dropping those on save would lose configuration.
+    // The API does not validate stored ids, so an agent can reference an index that was deleted.
+    // Dropping those on save would lose configuration.
     it('keeps assigned ids the Context Engine does not know about', async () => {
       renderSection({ assignedIds: ['deleted-index'] });
 
