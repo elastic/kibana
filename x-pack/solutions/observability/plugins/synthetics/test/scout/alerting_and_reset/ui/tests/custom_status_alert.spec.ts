@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-// Disabling for Cloud runs due to flakiness. See https://github.com/elastic/kibana/issues/268088
+// Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/268088
 test.describe(
   'CustomStatusAlert',
   { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
