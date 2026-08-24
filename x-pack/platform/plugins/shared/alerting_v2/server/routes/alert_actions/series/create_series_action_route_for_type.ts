@@ -69,7 +69,7 @@ export const createSeriesActionRouteForType = <
     };
     static routeOptions = {
       summary,
-      description: 'Create an action for a specific alert series.',
+      description: 'Create an action for a specific alert episode series.',
       oasOperationObject,
     } as const;
     static schemas = {
@@ -87,7 +87,7 @@ export const createSeriesActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description: 'Indicates the alert series was not found.',
+          description: 'Indicates the alert episode series was not found.',
         },
       },
     };

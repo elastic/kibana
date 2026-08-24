@@ -21,7 +21,7 @@ export const createTagSeriesActionOasExamples = (): AlertingOasOperationObject =
   buildOasOperation({
     requestBody: {
       name: 'createTagSeriesActionRequest',
-      summary: 'Tag the alert series with production and investigating',
+      summary: 'Tag the alert episode series with production and investigating',
       value: CREATE_TAG_SERIES_ACTION_REQUEST,
     },
     responses: {

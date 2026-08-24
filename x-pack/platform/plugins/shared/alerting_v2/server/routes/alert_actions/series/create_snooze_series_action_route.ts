@@ -15,7 +15,7 @@ import { createSeriesActionRouteForType } from './create_series_action_route_for
 export const CreateSnoozeSeriesActionRoute = createSeriesActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
   pathSuffix: '_snooze',
-  summary: 'Snooze an alert series',
+  summary: 'Snooze an alert episode series',
   bodySchema: createSnoozeSeriesActionBodySchema,
   oasOperationObject: createSnoozeSeriesActionOasExamples,
 });

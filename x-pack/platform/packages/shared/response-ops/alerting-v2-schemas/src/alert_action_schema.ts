@@ -157,7 +157,7 @@ export const seriesAlertActionParamsSchema = z
       .string()
       .min(1)
       .max(256)
-      .describe('Hash identifying the alert series to apply the action to.'),
+      .describe('Hash identifying the alert episode series to apply the action to.'),
   })
   .describe('Path parameters for series-level alert action endpoints.');
 export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSchema>;
@@ -168,7 +168,7 @@ export const episodeAlertActionParamsSchema = z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
-      .describe('Identifier of the episode to apply the action to.'),
+      .describe('Identifier of the alert episode to apply the action to.'),
   })
   .describe('Path parameters for episode-level alert action endpoints.');
 export type EpisodeAlertActionParams = z.infer<typeof episodeAlertActionParamsSchema>;
@@ -234,7 +234,7 @@ export const bulkCreateSeriesAlertActionItemBodySchema = createSeriesAlertAction
           .string()
           .min(1)
           .max(256)
-          .describe('Hash identifying the alert series to apply the action to.'),
+          .describe('Hash identifying the alert episode series to apply the action to.'),
       })
       .strict()
       .describe('Series-level alert action payload with series identifier for bulk requests.')
@@ -262,7 +262,7 @@ export const bulkCreateEpisodeAlertActionItemBodySchema = createEpisodeAlertActi
           .string()
           .min(1)
           .max(ID_MAX_LENGTH)
-          .describe('Identifier of the episode to apply the action to.'),
+          .describe('Identifier of the alert episode to apply the action to.'),
       })
       .strict()
       .describe('Episode-level alert action payload with episode identifier for bulk requests.')

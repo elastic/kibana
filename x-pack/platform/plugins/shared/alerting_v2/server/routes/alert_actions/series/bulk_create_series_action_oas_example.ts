@@ -36,7 +36,7 @@ export const BULK_CREATE_SERIES_ACTION_RESPONSE: BulkResponse = {
       id: 'group-hash-3',
       error: {
         code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
-        message: 'No alert event found for group [group-hash-3]',
+        message: 'Alert series with group_hash [group-hash-3] not found',
       },
     },
   ],
@@ -52,7 +52,7 @@ export const bulkCreateSeriesActionOasExamples = (): AlertingOasOperationObject 
   buildOasOperation({
     requestBody: {
       name: 'bulkCreateSeriesActionRequest',
-      summary: 'Tag, snooze, and unsnooze three alert series',
+      summary: 'Tag, snooze, and unsnooze three alert episode series',
       value: BULK_CREATE_SERIES_ACTION_REQUEST,
     },
     responses: {

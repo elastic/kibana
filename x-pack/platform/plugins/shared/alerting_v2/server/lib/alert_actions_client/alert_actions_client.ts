@@ -24,6 +24,7 @@ import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerti
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
+  getAlertSeriesNotFoundMessage,
   getEpisodeNotLatestMessage,
 } from '../errors/alert_error_messages';
 import type { AlertAction } from '../../resources/datastreams/alert_actions';
@@ -285,7 +286,7 @@ export class AlertActionsClient {
         errors.push(
           toBulkActionError(item.group_hash, {
             code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
-            message: `No alert event found for group [${item.group_hash}]`,
+            message: getAlertSeriesNotFoundMessage(item.group_hash),
           })
         );
         continue;

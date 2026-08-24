@@ -34,7 +34,7 @@ export const INVALID_EPISODE_ACTION_PARAMS_RESPONSE = invalidResponseExample({
 /** Shared 404 body for series-level alert-action routes. */
 export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'alertSeriesNotFound',
-  summary: 'No alert series exists for the given group_hash',
+  summary: 'No alert episode series exists for the given group_hash',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
     error: 'Not Found',

@@ -32,8 +32,8 @@ export class BulkCreateSeriesActionRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Bulk create alert series actions',
-    description: 'Create actions for multiple alert series in a single request.',
+    summary: 'Bulk create alert episode series actions',
+    description: 'Create actions for multiple alert episode series in a single request.',
     oasOperationObject: bulkCreateSeriesActionOasExamples,
   } as const;
   static schemas = {

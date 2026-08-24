@@ -15,7 +15,7 @@ import { createSeriesActionRouteForType } from './create_series_action_route_for
 export const CreateTagSeriesActionRoute = createSeriesActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
-  summary: 'Tag an alert series',
+  summary: 'Tag an alert episode series',
   bodySchema: createTagSeriesActionBodySchema,
   oasOperationObject: createTagSeriesActionOasExamples,
 });
