@@ -24,7 +24,8 @@ test.describe.skip(
       await syntheticsServices.cleanUp();
     });
 
-    test('creates a custom status alert rule', async ({
+    // Failing: See https://github.com/elastic/kibana/issues/268088
+    test.skip('creates a custom status alert rule', async ({
       pageObjects,
       page,
       browserAuth,
