@@ -325,8 +325,13 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['waf', 'cloudtrail'],
       serviceVars: {
         cloudtrail: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { aws_region: 'eu-west-1' } },
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { aws_region: 'eu-west-1' } },
+            },
+          },
         },
       },
     });
@@ -377,7 +382,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],
-      serviceVars: { elb: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
@@ -428,7 +438,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],
-      serviceVars: { elb: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
     await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
@@ -472,7 +487,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],
-      serviceVars: { elb: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
@@ -561,8 +581,13 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['elb'],
       serviceVars: {
         elb: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
         },
       },
     });
@@ -586,8 +611,13 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['elb'],
       serviceVars: {
         elb: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
         },
       },
     });
@@ -615,10 +645,18 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['elb'],
       serviceVars: {
         elb: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
         },
-        [dupInstanceId]: { enabledInputs: ['aws-s3'], varsByInput: {} }, // bucket_arn missing
+        [dupInstanceId]: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        }, // bucket_arn missing
       },
       instances: [
         {
@@ -659,12 +697,22 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['cloudtrail'],
       serviceVars: {
         cloudtrail: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
         },
         [dupInstanceId]: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::second-bucket' } },
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::second-bucket' } },
+            },
+          },
         },
       },
       instances: [
@@ -702,7 +750,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],
-      serviceVars: { elb: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: { elb_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+        },
+      },
     });
 
     await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
@@ -725,8 +778,13 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       selectedServiceIds: ['cloudtrail'],
       serviceVars: {
         cloudtrail: {
-          enabledInputs: ['aws-s3'],
-          varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {
+            cloudtrail: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
         },
       },
     });

@@ -246,13 +246,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
           // Find the first enabled input across all data streams for region display.
-          let activeInput: string | null = null;
           let override: string | undefined;
           for (const dsId of service.dataStreams) {
             const dsVars = config.varsByDataStream[dsId];
             const inp = dsVars?.enabledInputs?.[0];
             if (inp) {
-              activeInput = inp;
               const regionField = getRegionFieldName(service, inp);
               override = dsVars.varsByInput?.[inp]?.[regionField]?.trim() || undefined;
               break;

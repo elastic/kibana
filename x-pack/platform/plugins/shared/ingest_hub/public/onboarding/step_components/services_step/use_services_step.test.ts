@@ -201,6 +201,7 @@ describe('useServicesStep — categories hidden when signal has no matching serv
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       showInUI: true,
       defaultEnabled: true,
+      defaultEnabledInputs: [],
       packageName: 'aws',
     },
     {
@@ -212,6 +213,7 @@ describe('useServicesStep — categories hidden when signal has no matching serv
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       showInUI: true,
       defaultEnabled: true,
+      defaultEnabledInputs: [],
       packageName: 'aws',
     },
   ] as AwsServiceMatrixEntry[];
