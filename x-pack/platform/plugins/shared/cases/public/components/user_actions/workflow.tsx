@@ -125,7 +125,7 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
       userAction,
       handleOutlineComment,
       label,
-      icon: 'dot',
+      icon: 'workflow',
       extraActions,
     }).build();
   },
