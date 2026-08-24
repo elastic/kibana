@@ -25,6 +25,7 @@ interface ScoutCiConfig {
     disabled?: string[];
   };
   excluded_configs?: string[];
+  pr_only_configs?: string[];
 }
 
 const readScoutCiConfig = (): ScoutCiConfig => {
@@ -33,9 +34,24 @@ const readScoutCiConfig = (): ScoutCiConfig => {
   return parse(fs.readFileSync(scoutCiConfigPath, 'utf8')) as ScoutCiConfig;
 };
 
+export const isScoutPrPipeline = (): boolean => {
+  const pullRequest = process.env.BUILDKITE_PULL_REQUEST;
+  return Boolean(pullRequest) && pullRequest !== 'false';
+};
+
+export const getEffectiveScoutCiExcludedConfigs = (
+  ciConfig: Pick<ScoutCiConfig, 'excluded_configs' | 'pr_only_configs'>,
+  isPrPipeline: boolean = isScoutPrPipeline()
+): string[] => {
+  const excluded = ciConfig.excluded_configs ?? [];
+  if (isPrPipeline) {
+    return excluded;
+  }
+  return [...excluded, ...(ciConfig.pr_only_configs ?? [])];
+};
+
 export const getScoutCiExcludedConfigs = (): string[] => {
-  const ciConfig = readScoutCiConfig();
-  return ciConfig.excluded_configs ?? [];
+  return getEffectiveScoutCiExcludedConfigs(readScoutCiConfig());
 };
 
 /**

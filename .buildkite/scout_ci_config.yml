@@ -123,7 +123,6 @@ packages:
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
-  - x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/playwright.config.ts
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
@@ -133,3 +132,8 @@ excluded_configs:
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts
+
+# Run on PR pipelines only (skipped on on-merge / scheduled Scout). PR selective
+# testing still limits these to affected modules — e.g. synthetics source or this suite.
+pr_only_configs:
+  - x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/playwright.config.ts

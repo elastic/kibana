@@ -169,6 +169,70 @@ describe('identifyTestLoads', () => {
     expect(loads).toHaveLength(0);
   });
 
+  it('keeps pr_only_configs on pull-request pipelines', () => {
+    const previous = process.env.BUILDKITE_PULL_REQUEST;
+    process.env.BUILDKITE_PULL_REQUEST = '286968';
+
+    try {
+      const config = createMockConfig({ path: 'pr-only/config.ts' });
+      mockTestConfigs = [config];
+
+      const ciConfig: ScoutCIConfig = {
+        plugins: { enabled: [], disabled: [] },
+        packages: { enabled: [], disabled: [] },
+        excluded_configs: [],
+        pr_only_configs: ['pr-only/config.ts'],
+      };
+
+      const stats = new ScoutTestConfigStats({
+        lastUpdated: new Date(),
+        lookbackDays: 3,
+        buildkite: {},
+        configs: [],
+      });
+
+      expect(identifyTestLoads(ciConfig, stats, testTarget, [], log)).toHaveLength(1);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.BUILDKITE_PULL_REQUEST;
+      } else {
+        process.env.BUILDKITE_PULL_REQUEST = previous;
+      }
+    }
+  });
+
+  it('drops pr_only_configs on on-merge pipelines', () => {
+    const previous = process.env.BUILDKITE_PULL_REQUEST;
+    process.env.BUILDKITE_PULL_REQUEST = 'false';
+
+    try {
+      const config = createMockConfig({ path: 'pr-only/config.ts' });
+      mockTestConfigs = [config];
+
+      const ciConfig: ScoutCIConfig = {
+        plugins: { enabled: [], disabled: [] },
+        packages: { enabled: [], disabled: [] },
+        excluded_configs: [],
+        pr_only_configs: ['pr-only/config.ts'],
+      };
+
+      const stats = new ScoutTestConfigStats({
+        lastUpdated: new Date(),
+        lookbackDays: 3,
+        buildkite: {},
+        configs: [],
+      });
+
+      expect(identifyTestLoads(ciConfig, stats, testTarget, [], log)).toHaveLength(0);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.BUILDKITE_PULL_REQUEST;
+      } else {
+        process.env.BUILDKITE_PULL_REQUEST = previous;
+      }
+    }
+  });
+
   it('filters configs by test target Playwright tag', () => {
     const matchingConfig = createMockConfig({
       path: 'matching/config.ts',

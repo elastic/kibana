@@ -28,6 +28,7 @@ import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/sc
 import { parse } from 'yaml';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
+import { getEffectiveScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
 import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
@@ -55,6 +56,7 @@ export interface ScoutCIConfig {
     disabled: string[];
   };
   excluded_configs: string[];
+  pr_only_configs?: string[];
 }
 
 function loadScoutCIConfig(): ScoutCIConfig {
@@ -88,8 +90,9 @@ export function identifyTestLoads(
   testLoadFilters: TestLoadFilter[],
   log: ToolingLog
 ): ScoutCITestLoad[] {
+  const excludedConfigs = getEffectiveScoutCiExcludedConfigs(scoutCIConfig);
   const testLoads = testConfigs.all
-    .filter((config) => !scoutCIConfig.excluded_configs.includes(config.path))
+    .filter((config) => !excludedConfigs.includes(config.path))
     .filter((config) =>
       config.manifest.tests.find((test) => {
         return test.tags.includes(testTarget.playwrightTag);
