@@ -11,7 +11,8 @@ import { test } from '../../../common/ui/fixtures';
 // Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/268088
 test.describe(
   'CustomStatusAlert',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+import { tags } from '`@kbn/scout-oblt`';
+import { expect } from '`@kbn/scout-oblt`/ui';
   () => {
     let configId: string;
 
