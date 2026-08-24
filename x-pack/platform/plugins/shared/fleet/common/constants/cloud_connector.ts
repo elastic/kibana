@@ -106,18 +106,6 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 ];
 
-// Cloud connector policy groups
-// Connectors can only be shared between integrations in the same policy group. By default,
-// an integration's group is derived from its cloud provider (`<provider>_default`), so any
-// two integrations targeting the same provider can share connectors with no registration
-// required here. The only exceptions are ISOLATED packages: integrations whose connectors
-// are provisioned with bespoke IaC templates and permission scopes (CSPM, Cloud Asset
-// Inventory) and therefore must not be shared with provider-default integrations.
-//
-// Group membership is enforced on every NEW attachment. Attachments that predate
-// enforcement may be cross-group, so every usage of a connector is checked, and re-saving
-// a policy with its already-attached connector is exempt (grandfathered).
-
 export type DefaultPolicyGroup = `${CloudProvider}_default`;
 export type PolicyGroup = 'security_audit_policy_group' | DefaultPolicyGroup;
 
