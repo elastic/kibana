@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { getFlyoutManagerStore, useGeneratedHtmlId } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { createPaginationStore } from './store';
 import { PaginationStoreProvider } from './context';
@@ -42,6 +43,14 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
  * - Registers `openDocumentFlyoutImpl` in the store.
  * - Exposes `openDocumentFlyout` so consumers can dispatch opens without
  *   touching the store directly.
+ *
+ * Two entry points open a document, and they differ in how they treat an overlay that is
+ * already open:
+ * - `openDocumentFlyout` is the *source* entry point (a table row). It starts a fresh
+ *   session, replacing anything the user has stacked on top of the flyout.
+ * - `openPaginatedFlyout` is the *in-flyout* entry point (the header `EuiPagination`, and
+ *   the source's cross-page resolution effect). It swaps the displayed document into the
+ *   open overlay.
  */
 export const usePaginatedFlyout = ({
   resolveDocument,
@@ -66,6 +75,28 @@ export const usePaginatedFlyout = ({
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const v2OverlayRef = useRef<OverlayRef | null>(null);
+
+  // Stable EUI id for the overlay this hook opens, so `ownsTheScreen` can look the flyout up
+  // in the flyout manager. Unique per hook instance, which keeps concurrently mounted sources
+  // (alerts table and Timeline) from resolving to each other's flyout.
+  const flyoutId = useGeneratedHtmlId({ prefix: 'paginatedDocumentFlyout' });
+
+  // `true` when the paginated flyout still owns the screen: it is the current session's main
+  // flyout, nothing is nested inside it, and no earlier session shares its history group.
+  // Only then does swapping a new document into the open overlay show that document to the
+  // user. In every other case the overlay is backgrounded — a tool flyout stacked a new
+  // session on top of it (EUI appends a session for a main flyout, it never closes the
+  // previous one), or a document was opened as its child — and reusing it would silently
+  // repoint a flyout the user cannot see.
+  const ownsTheScreen = useCallback((): boolean => {
+    const { sessions } = getFlyoutManagerStore().getState();
+    const currentSession = sessions[sessions.length - 1];
+    return (
+      currentSession?.mainFlyoutId === flyoutId &&
+      currentSession.childFlyoutId == null &&
+      sessions.every((session) => session === currentSession || session.historyKey !== historyKey)
+    );
+  }, [flyoutId, historyKey]);
 
   // `resolveDocument` closes over mutable React state and will change identity
   // on every render. Reading through a ref lets the stable `openPaginatedFlyout`
@@ -115,6 +146,7 @@ export const usePaginatedFlyout = ({
         React.createElement(PaginationStoreProvider, { value: store }, infraRenderBody()),
         {
           ...infraDefaultProps,
+          id: flyoutId,
           historyKey,
           session: FLYOUT_SESSION_KIND.START,
           onClose: (flyout: OverlayRef) => {
@@ -132,9 +164,10 @@ export const usePaginatedFlyout = ({
         }
       );
     },
-    // historyKey is stable. Mutable values are read through refs. storeRef.current is stable.
+    // historyKey and flyoutId are stable. Mutable values are read through refs.
+    // storeRef.current is stable.
 
-    [historyKey]
+    [historyKey, flyoutId]
   );
 
   // Register `openDocumentFlyoutImpl` so the in-flyout `EuiPagination` can
@@ -162,8 +195,19 @@ export const usePaginatedFlyout = ({
   }, []);
 
   const openDocumentFlyout = useCallback(
-    (documentIndex: number): void => openPaginatedFlyout(documentIndex),
-    [openPaginatedFlyout]
+    (documentIndex: number): void => {
+      // Opening from the source (a table row) starts a fresh session. When the overlay no
+      // longer owns the screen, closing it makes EUI drop every flyout in this history group,
+      // so the new document replaces that stack instead of leaving the tool/child flyout on
+      // top of it. When it does own the screen the document is swapped in place, which avoids
+      // remounting the flyout and keeps the history group free of a Back button.
+      if (v2OverlayRef.current && !ownsTheScreen()) {
+        v2OverlayRef.current.close();
+        v2OverlayRef.current = null;
+      }
+      openPaginatedFlyout(documentIndex);
+    },
+    [openPaginatedFlyout, ownsTheScreen]
   );
 
   const slice = useMemo(
