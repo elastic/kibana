@@ -161,6 +161,7 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/core-rendering-browser'
   - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

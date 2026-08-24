@@ -34,6 +34,8 @@ const commandOptionNameToLocation: Record<string, Location> = {
   'join:on': Location.JOIN,
   'mmr:on': Location.MMR,
   'rerank:on': Location.RERANK,
+  // HIGHLIGHT command: the query expression slot allows full-text functions
+  highlight: Location.HIGHLIGHT_QUERY,
 };
 
 /**

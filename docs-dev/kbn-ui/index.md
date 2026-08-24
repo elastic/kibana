@@ -74,6 +74,16 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
+## Package visibility [kbn-ui-package-visibility]
+
+`@kbn/ui-*` packages come in two kinds. The kind decides whether app code may import the package.
+
+**Shared** — reusable UI for plugins. Import directly (for example `@kbn/ui-callout`).
+
+**Platform implementation** — chrome layout, side navigation, feedback UI. These back core or plugin contracts; app code must not import them. Use the corresponding platform APIs or packages instead. The lint error names the alternative for each package. See [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js).
+
+To restrict a package, add it under `packages` with a non-empty `alternative`.
+
 ## Development [kbn-ui-development]
 
 All `@kbn/ui-*` packages share a single Storybook and docset.
@@ -105,10 +115,11 @@ docs-builder serve --path docs-dev
 ## Contributing
 
 1. Create a new package directory under `src/platform/kbn-ui/`.
-2. Add a `kibana.jsonc` with `"group": "platform"`, `"visibility": "shared"`, and the `@kbn/ui-<name>` id.
-3. Export a single public API from `index.ts` — no subpath imports.
-4. Include unit tests alongside source files.
-5. Respect the dependency and portability rules above.
+2. Add a `kibana.jsonc` with `"group": "platform"` and the `@kbn/ui-<name>` id.
+3. If it is a platform implementation package, restrict it: add it under `packages` in [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js) with an `alternative` naming the contract apps should use, plus `overrides` for owners that must import it. See [Package visibility](#kbn-ui-package-visibility).
+4. Export a single public API from `index.ts` — no subpath imports.
+5. Include unit tests alongside source files.
+6. Respect the dependency and portability rules above.
 
 ### Guidelines
 
