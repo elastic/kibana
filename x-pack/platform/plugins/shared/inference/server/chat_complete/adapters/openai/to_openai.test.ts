@@ -321,9 +321,32 @@ describe('messagesToOpenAI', () => {
           role: 'user',
           content: [
             { type: 'text', text: 'text message' },
-            { type: 'image_url', image_url: { url: 'base64data' } },
+            { type: 'image_url', image_url: { url: 'data:image/png;base64,base64data' } },
             { type: 'text', text: 'with image' },
           ],
+        },
+      ]);
+    });
+
+    it('passes the image data through unchanged when no mimeType is provided', () => {
+      const result = messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: { data: 'https://example.com/image.png', mimeType: '' },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toEqual([
+        {
+          role: 'user',
+          content: [{ type: 'image_url', image_url: { url: 'https://example.com/image.png' } }],
         },
       ]);
     });

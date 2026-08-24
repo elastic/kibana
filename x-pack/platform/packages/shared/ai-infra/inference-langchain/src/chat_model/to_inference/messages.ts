@@ -137,11 +137,13 @@ const convertMessageContent = (message: BaseMessage): InferenceMessageContent =>
       });
     } else if (isMessageContentImageUrl(part)) {
       const imageUrl = typeof part.image_url === 'string' ? part.image_url : part.image_url.url;
+      // Parse "data:<mimeType>;base64,<data>" — adapters need mimeType and raw base64 separately.
+      const dataUrlMatch = imageUrl.match(/^data:([^;]+);base64,(.+)$/s);
       messages.push({
         type: 'image',
         source: {
-          data: imageUrl,
-          mimeType: '',
+          data: dataUrlMatch ? dataUrlMatch[2] : imageUrl,
+          mimeType: dataUrlMatch ? dataUrlMatch[1] : '',
         },
       });
     }

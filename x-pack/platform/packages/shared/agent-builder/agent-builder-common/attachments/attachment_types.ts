@@ -28,13 +28,6 @@ interface AttachmentDataMap {
   [AttachmentType.image]: ImageAttachmentData;
 }
 
-/** Max base64 character length accepted for image attachment payloads (~1.5MB). */
-export const IMAGE_ATTACHMENT_MAX_BASE64_LENGTH = 1_500_000;
-
-export const IMAGE_ATTACHMENT_MEDIA_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
-
-export type ImageAttachmentMediaType = (typeof IMAGE_ATTACHMENT_MEDIA_TYPES)[number];
-
 export const esqlAttachmentDataSchema = z.object({
   query: z.string(),
   description: z.string().optional(),
@@ -60,21 +53,6 @@ export const textAttachmentDataSchema = z.object({
 export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
-}
-
-export const imageAttachmentDataSchema = z.object({
-  media_type: z.enum(IMAGE_ATTACHMENT_MEDIA_TYPES),
-  data: z.string().min(1).max(IMAGE_ATTACHMENT_MAX_BASE64_LENGTH),
-});
-
-/**
- * Data for an image attachment (raw base64, no data-URL prefix).
- */
-export interface ImageAttachmentData {
-  /** MIME type of the image */
-  media_type: ImageAttachmentMediaType;
-  /** Raw base64-encoded image bytes (no `data:` prefix) */
-  data: string;
 }
 
 export const screenContextTimeRangeSchema = z.object({
@@ -148,3 +126,28 @@ export interface ConnectorAttachmentData {
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
+export const SUPPORTED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
+export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number];
+
+export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
+
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+export const imageAttachmentDataSchema = z.object({
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+  mime_type: z.enum(SUPPORTED_IMAGE_MIME_TYPES),
+});
+
+/**
+ * Data for an image attachment.
+ */
+export interface ImageAttachmentData {
+  /** files plugin file id */
+  file_id: string;
+  /** original filename */
+  name: string;
+  /** mime type of the image */
+  mime_type: SupportedImageMimeType;
+}

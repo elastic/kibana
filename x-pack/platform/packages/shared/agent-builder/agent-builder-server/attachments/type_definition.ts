@@ -122,14 +122,12 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Image representation of an attachment when exposed to the LLM as multimodal content.
+ * Image representation of an attachment when exposed to the LLM.
  */
 export interface ImageAttachmentRepresentation {
   type: 'image';
-  /** MIME type of the image (e.g. image/png) */
-  mediaType: string;
-  /** Raw base64-encoded image bytes (no `data:` prefix) */
-  data: string;
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
 }
 
 /**

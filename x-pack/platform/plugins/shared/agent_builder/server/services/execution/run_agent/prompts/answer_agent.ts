@@ -30,6 +30,7 @@ export const getStructuredAnswerPrompt = async (
     cycleLimit,
     resultTransformer,
     toolManager,
+    imageResolver,
   } = params;
   const visEnabled = capabilities.visualizations;
 
@@ -97,6 +98,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
         cycleLimit,
         resultTransformer,
         toolManager,
+        imageResolver,
       })),
       ...formatAnswerActionHistory({ actions: answerActions }),
     ]),

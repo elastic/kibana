@@ -119,19 +119,34 @@ export const generateFakeToolCallId = () => {
 
 export const createUserMessage = (
   content: string | UserMessageContentPart[],
-  { clean = false }: { clean?: boolean } = {}
+  {
+    clean = false,
+    images,
+  }: { clean?: boolean; images?: Array<{ base64: string; mimeType: string }> } = {}
 ): HumanMessage => {
-  if (typeof content === 'string') {
-    return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
+  if (typeof content !== 'string') {
+    const parts: UserMessageContentPart[] = clean
+      ? content.map((part) =>
+          part.type === 'text' ? { ...part, text: cleanPrompt(part.text) } : part
+        )
+      : content;
+    // LangChain's typed ContentBlock union no longer includes legacy image_url parts,
+    // but InferenceChatModel still converts them via isMessageContentImageUrl.
+    return new HumanMessage({ content: parts as HumanMessage['content'] });
   }
-  const parts: UserMessageContentPart[] = clean
-    ? content.map((part) =>
-        part.type === 'text' ? { ...part, text: cleanPrompt(part.text) } : part
-      )
-    : content;
-  // LangChain's typed ContentBlock union no longer includes legacy image_url parts,
-  // but InferenceChatModel still converts them via isMessageContentImageUrl.
-  return new HumanMessage({ content: parts as HumanMessage['content'] });
+  const text = clean ? cleanPrompt(content) : content;
+  if (images && images.length > 0) {
+    return new HumanMessage({
+      content: [
+        { type: 'text', text },
+        ...images.map((i) => ({
+          type: 'image_url' as const,
+          image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
+        })),
+      ],
+    });
+  }
+  return new HumanMessage({ content: text });
 };
 
 export const createAIMessage = (

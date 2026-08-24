@@ -38,6 +38,7 @@ export const getResearchAgentPrompt = async (
     conversationTimestamp,
     relevantSkillsEnabled,
     relevantSkills,
+    imageResolver,
   } = params;
 
   // Generate messages from the conversation's rounds, optionally
@@ -65,6 +66,7 @@ export const getResearchAgentPrompt = async (
       cycleLimit,
       resultTransformer,
       toolManager,
+      imageResolver,
     })),
   ]);
 };

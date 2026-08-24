@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  isImageResult,
+  isOtherResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -54,37 +58,39 @@ export const createAttachmentReadTool = ({
 
     const { data: versionData, type } = attachment;
 
-    let formattedData: unknown = versionData.data;
-    if (attachmentsService && formatContext) {
-      const definition = attachmentsService.getTypeDefinition(attachment.type);
-      const typeReadonly = definition?.isReadonly ?? false;
-      if (definition && typeReadonly) {
-        try {
-          const formatted = await definition.format(
-            {
+    const representation =
+      attachmentsService && formatContext
+        ? await tryGetRepresentation({
+            attachment: {
               id: attachment.id,
               type: attachment.type,
               data: versionData.data,
             },
-            formatContext
-          );
-          if (formatted.getRepresentation) {
-            const representation = await formatted.getRepresentation();
-            if (representation.type === 'text') {
-              formattedData = representation.value;
-            } else {
-              // Avoid dumping base64 into tool results; vision is inlined on the user message.
-              formattedData = {
-                media_type: representation.mediaType,
-                byte_length: Math.floor((representation.data.length * 3) / 4),
-                note: 'Image content is already available in the user message as multimodal content.',
-              };
-            }
-          }
-        } catch {
-          formattedData = versionData.data;
-        }
-      }
+            attachmentsService,
+            formatContext,
+          })
+        : undefined;
+
+    if (representation?.type === 'image') {
+      // Image bytes are NOT inlined in the tool result — they would bloat
+      // context and be persisted to ES. `getBase64` is called later by the
+      // prompt builder when the image is delivered to the LLM.
+      const imageData = versionData.data as { mime_type?: string; name?: string };
+      const name = imageData.name ?? attachmentId;
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.image,
+            data: {
+              attachment_id: attachmentId,
+              mime_type: representation.mimeType,
+              name: imageData.name,
+              description: `Image attachment "${name}" (${representation.mimeType}). The image was provided as visual input for this turn. Call attachment_read again to view it in the current turn.`,
+            },
+          },
+        ],
+      };
     }
 
     return {
@@ -96,7 +102,7 @@ export const createAttachmentReadTool = ({
             attachment_id: attachmentId,
             type,
             version: attachment.version,
-            data: formattedData,
+            data: representation?.type === 'text' ? representation.value : versionData.data,
           },
         },
       ],
@@ -105,6 +111,10 @@ export const createAttachmentReadTool = ({
   summarizeToolReturn: (toolReturn) => {
     if (toolReturn.results.length === 0) return undefined;
     const result = toolReturn.results[0];
+
+    // Image markers are already minimal (~200 bytes) — pass through unchanged.
+    if (isImageResult(result)) return [result];
+
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 
@@ -122,3 +132,24 @@ export const createAttachmentReadTool = ({
     ];
   },
 });
+
+const tryGetRepresentation = async ({
+  attachment,
+  attachmentsService,
+  formatContext,
+}: {
+  attachment: { id: string; type: string; data: unknown };
+  attachmentsService: NonNullable<AttachmentToolsOptions['attachmentsService']>;
+  formatContext: NonNullable<AttachmentToolsOptions['formatContext']>;
+}) => {
+  const definition = attachmentsService.getTypeDefinition(attachment.type);
+  if (!definition?.isReadonly) return undefined;
+
+  try {
+    const formatted = await definition.format(attachment, formatContext);
+    if (!formatted.getRepresentation) return undefined;
+    return await formatted.getRepresentation();
+  } catch {
+    return undefined;
+  }
+};

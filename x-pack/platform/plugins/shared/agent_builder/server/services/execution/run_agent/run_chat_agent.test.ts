@@ -23,6 +23,8 @@ import {
   getPendingRound,
 } from './utils';
 import { createAgentGraph } from './graph';
+import { createPromptFactory } from './prompts';
+import { createImageResolver } from './utils/image_resolver';
 
 jest.mock('./utils', () => ({
   prepareConversation: jest.fn(),
@@ -43,6 +45,10 @@ jest.mock('./utils/create_result_transformer', () => ({
   createResultTransformer: jest.fn(() => ({})),
 }));
 
+jest.mock('./utils/image_resolver', () => ({
+  createImageResolver: jest.fn(() => jest.fn()),
+}));
+
 jest.mock('./prompts', () => ({
   createPromptFactory: jest.fn(() => ({})),
 }));
@@ -61,6 +67,8 @@ const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
 const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
+const createPromptFactoryMock = createPromptFactory as jest.MockedFn<typeof createPromptFactory>;
+const createImageResolverMock = createImageResolver as jest.MockedFn<typeof createImageResolver>;
 
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
@@ -278,5 +286,41 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({ additionalSkillIds: [] })
       );
     });
+  });
+
+  it('passes an image resolver built from the attachment state manager to the prompt factory', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {} as any,
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingRoundMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      previousRounds: [],
+      nextInput: { message: 'hello', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+      },
+      context
+    );
+
+    expect(createImageResolverMock).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentStateManager: context.attachmentStateManager })
+    );
+    expect(createPromptFactoryMock.mock.calls[0][0].imageResolver).toBe(
+      createImageResolverMock.mock.results[0].value
+    );
   });
 });

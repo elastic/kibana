@@ -5,17 +5,31 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { FilesStart } from '@kbn/files-plugin/server';
+
+const streamToBuffer = (stream: Readable): Promise<Buffer> =>
+  new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', reject);
+  });
 
 /**
- * Creates the definition for the `image` attachment type.
+ * Definition for the `image` attachment type. Image bytes live in the Files
+ * plugin — `getBase64` is a lazy accessor invoked at LLM-delivery time, never
+ * during `attachment_read`, so the base64 payload is only ever materialised
+ * once per LLM turn.
  */
-export const createImageAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.image,
-  ImageAttachmentData
-> => {
+export const createImageAttachmentType = ({
+  getFilesPlugin,
+}: {
+  getFilesPlugin: () => Promise<FilesStart>;
+}): AttachmentTypeDefinition<AttachmentType.image, ImageAttachmentData> => {
   return {
     id: AttachmentType.image,
     isReadonly: true,
@@ -28,19 +42,19 @@ export const createImageAttachmentType = (): AttachmentTypeDefinition<
     },
     format: (attachment) => {
       return {
-        getRepresentation: () => {
-          return {
-            type: 'image',
-            mediaType: attachment.data.media_type,
-            data: attachment.data.data,
-          };
-        },
+        getRepresentation: () => ({
+          type: 'image' as const,
+          mimeType: attachment.data.mime_type,
+          getBase64: async () => {
+            const filesPlugin = await getFilesPlugin();
+            const fileService = filesPlugin.fileServiceFactory.asInternal();
+            const file = await fileService.getById({ id: attachment.data.file_id });
+            const readable = await file.downloadContent();
+            const buffer = await streamToBuffer(readable);
+            return buffer.toString('base64');
+          },
+        }),
       };
-    },
-    getAgentDescription: () => {
-      return `An image attachment contains a screenshot or other image.
-The image content is already inlined in the user message as multimodal content —
-you can see it directly. Do not call attachment_read to retrieve the binary data.`;
     },
     getTools: () => [],
   };

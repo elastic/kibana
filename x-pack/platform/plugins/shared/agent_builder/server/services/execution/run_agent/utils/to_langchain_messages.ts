@@ -318,19 +318,14 @@ const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined =>
 };
 
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
-  const representation = attachment.representation;
-  const child =
-    representation.type === 'image'
-      ? `[image media_type=${representation.mediaType}]`
-      : representation.value;
-
+  const { representation } = attachment;
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [child],
+    children: [representation.type === 'text' ? representation.value : ''],
   };
 };
 
