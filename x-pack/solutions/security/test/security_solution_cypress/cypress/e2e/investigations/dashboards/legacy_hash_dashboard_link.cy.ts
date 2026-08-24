@@ -79,13 +79,13 @@ describe('Legacy hash-based dashboard links', { tags: ['@ess', '@serverless'] },
 
 describe('Legacy hash-based dashboard links in a non-default space', { tags: ['@ess'] }, () => {
   const SPACE_ID = 'legacy-hash-dashboard-link-space';
-  let importedSavedObjects: Array<{ type: string; id: string }> = [];
+  const importedSavedObjects: Array<{ type: string; id: string }> = [];
 
   before(() => {
     activateSpace(SPACE_ID);
     importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID).then((objects) => {
-    login();
-    activateSpace(SPACE_ID);
+      login();
+      activateSpace(SPACE_ID);
     });
   });
 
