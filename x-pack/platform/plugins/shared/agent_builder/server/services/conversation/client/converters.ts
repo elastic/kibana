@@ -103,7 +103,10 @@ const reconcileEvents = (merged: Conversation) => {
   return events;
 };
 
-const convertBaseFromEs = (document: Document, user: CurrentUser) => {
+export const fromEsWithoutRounds = (
+  document: Document,
+  user: CurrentUser
+): ConversationWithoutRounds => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -289,13 +292,6 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
       : roundsToEvents(conversation);
 
   return { ...conversation, events };
-};
-
-export const fromEsWithoutRounds = (
-  document: Document,
-  user: CurrentUser
-): ConversationWithoutRounds => {
-  return convertBaseFromEs(document, user);
 };
 
 const withPermissions = <T extends ConversationWithoutRounds>({
