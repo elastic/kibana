@@ -9,7 +9,10 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { registerFeaturePrivileges } from './privileges';
-import { ALERTING_V2_FEATURES } from '../../../common/feature_privileges';
+import {
+  ALERTING_V2_DEPRECATED_FEATURE_IDS,
+  ALERTING_V2_FEATURES,
+} from '../../../common/feature_privileges';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
@@ -39,9 +42,39 @@ describe('registerFeaturePrivileges', () => {
     registerFeaturePrivileges(features);
 
     expect(features.registerKibanaFeature).toHaveBeenCalledTimes(
-      Object.keys(ALERTING_V2_FEATURES).length
+      Object.keys(ALERTING_V2_FEATURES).length * 2
     );
   });
+
+  it.each(
+    (Object.keys(ALERTING_V2_FEATURES) as Array<keyof typeof ALERTING_V2_FEATURES>).map((key) => [
+      ALERTING_V2_DEPRECATED_FEATURE_IDS[key],
+      ALERTING_V2_FEATURES[key].id,
+    ])
+  )(
+    'registers deprecated feature "%s" with replacedBy pointing at "%s"',
+    (deprecatedId, currentId) => {
+      const registered = getRegisteredFeature(deprecatedId);
+
+      expect(registered.deprecated).toEqual(
+        expect.objectContaining({
+          notice: expect.stringContaining(deprecatedId),
+        })
+      );
+      expect(registered.privileges?.all.replacedBy).toEqual([
+        { feature: currentId, privileges: ['all'] },
+      ]);
+      expect(registered.privileges?.read.replacedBy).toEqual([
+        { feature: currentId, privileges: ['read'] },
+      ]);
+      expect(registered.privileges?.all.api).toEqual(
+        getRegisteredFeature(currentId).privileges?.all.api
+      );
+      expect(registered.privileges?.read.api).toEqual(
+        getRegisteredFeature(currentId).privileges?.read.api
+      );
+    }
+  );
 
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);

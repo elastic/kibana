@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
@@ -12,7 +13,9 @@ import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
+  ALERTING_V2_DEPRECATED_FEATURE_IDS,
   ALERTING_V2_FEATURES,
+  type AlertingV2Feature,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
 
@@ -71,8 +74,55 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
   };
 };
 
+const DEPRECATION_NOTICE_URL = 'https://github.com/elastic/kibana/pull/285000';
+
+const buildDeprecatedKibanaFeature = (
+  feature: AlertingV2FeatureDefinition,
+  deprecatedId: string
+): KibanaFeatureConfig => {
+  const current = buildKibanaFeature(feature);
+  const { privileges } = current;
+  if (!privileges) {
+    throw new Error(`Feature "${feature.id}" is missing privileges`);
+  }
+
+  return {
+    ...current,
+    id: deprecatedId,
+    name: i18n.translate('xpack.alertingVTwo.features.deprecatedFeatureName', {
+      defaultMessage: '{name} (Deprecated)',
+      values: { name: feature.name },
+    }),
+    deprecated: {
+      notice: i18n.translate('xpack.alertingVTwo.features.deprecationNotice', {
+        defaultMessage:
+          'The {deprecatedId} privileges are deprecated. Use {currentId} instead. See {link}.',
+        values: {
+          deprecatedId,
+          currentId: feature.id,
+          link: DEPRECATION_NOTICE_URL,
+        },
+      }),
+    },
+    privileges: {
+      all: {
+        ...privileges.all,
+        replacedBy: [{ feature: feature.id, privileges: ['all'] }],
+      },
+      read: {
+        ...privileges.read,
+        replacedBy: [{ feature: feature.id, privileges: ['read'] }],
+      },
+    },
+  };
+};
+
 export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
-  Object.values(ALERTING_V2_FEATURES).forEach((feature) => {
+  (Object.keys(ALERTING_V2_FEATURES) as AlertingV2Feature[]).forEach((key) => {
+    const feature = ALERTING_V2_FEATURES[key];
     features.registerKibanaFeature(buildKibanaFeature(feature));
+    features.registerKibanaFeature(
+      buildDeprecatedKibanaFeature(feature, ALERTING_V2_DEPRECATED_FEATURE_IDS[key])
+    );
   });
 };

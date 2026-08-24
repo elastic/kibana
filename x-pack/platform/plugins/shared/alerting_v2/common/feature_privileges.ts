@@ -242,6 +242,18 @@ export const ALERTING_V2_FEATURES = {
 
 export type AlertingV2Feature = keyof typeof ALERTING_V2_FEATURES;
 
+/**
+ * Feature IDs granted in 9.5.0/9.5.1 before the `v2` qualifier was dropped.
+ * Keep these registered as deprecated so existing roles and space settings
+ * continue to grant/hide the renamed features.
+ */
+export const ALERTING_V2_DEPRECATED_FEATURE_IDS = {
+  rules: 'alerting_v2_rules',
+  alerts: 'alerting_v2_alerts',
+  actionPolicies: 'alerting_v2_action_policies',
+  executionHistory: 'alerting_v2_execution_history',
+} as const satisfies Record<AlertingV2Feature, string>;
+
 export type WritableAlertingV2Feature = {
   [K in AlertingV2Feature]: 'write' extends keyof (typeof ALERTING_V2_API_PRIVILEGES)[K]
     ? K

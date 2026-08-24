@@ -493,6 +493,10 @@ export default function ({ getService }: FtrProviderContext) {
       alerting_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
