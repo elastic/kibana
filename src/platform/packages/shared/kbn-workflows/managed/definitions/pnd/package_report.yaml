@@ -1,7 +1,7 @@
 version: "1"
 name: Dark Watch - Package Report
 description: >
-  Worker invoked by the Dark Watch Orchestrator once hunt, coverage-gap, and
+  Worker invoked by the Dark Watch Orchestrator once hunt and
   correlation have appended their findings. Decides create vs. dismiss and,
   when reviewable, creates the report's Proposal(s) concurrently via its own
   `parallel` step (legal — not nested inside another `parallel` branch,
@@ -31,6 +31,11 @@ steps:
   # Decides server-side: reviewable -> array of Proposals to create; not
   # reviewable -> dismisses the Investigation, returns []. Always an array,
   # so create_proposals needs no `if` — empty is just a zero-item fan-out.
+  # Tag contract: the /package route also applies `needs-coverage` on
+  # metadata.tags unconditionally for every swept Investigation (hit or no
+  # hit, reviewable or dismissed), after hunt and correlation events are
+  # already appended. Detection Watch must match on the tag alone and must
+  # not filter on Investigation status.
   - name: decide_and_package
     type: kibana.request
     with:

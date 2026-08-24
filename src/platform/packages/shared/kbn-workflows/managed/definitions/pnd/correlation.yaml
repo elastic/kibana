@@ -1,7 +1,7 @@
 version: "1"
 name: Dark Watch - Correlation
 description: >
-  Worker invoked by the Dark Watch Orchestrator after coverage-gap.
+  Worker invoked by the Dark Watch Orchestrator after hunt.
   Correlates this report's hunt findings against other open Investigations
   by shared anchors (IOC hashes, entity ids) and actors, then appends a
   correlation event with related Proposal ids + a score matrix. Doesn't

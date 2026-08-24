@@ -76,4 +76,69 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
       target_technology: '{{ consts.watch_settings.targetTechnology }}',
     });
   });
+
+  it('runs hunt then correlation without a coverage-gap Worker', () => {
+    const document = parse(renderedYaml) as {
+      steps: Array<{ name: string; steps?: Array<{ name: string }> }>;
+    };
+    const branchStepNames =
+      document.steps.find(({ name }) => name === 'report_fan_out')?.steps?.map(({ name }) => name) ??
+      [];
+
+    expect(branchStepNames).toEqual([
+      'find_or_create_investigation',
+      'hunt',
+      'correlation',
+      'package_report',
+      'start_proposal_gates',
+    ]);
+  });
+
+  it('selects candidates with never-hunted inclusion and rank sort', () => {
+    const document = parse(renderedYaml) as {
+      steps: Array<{
+        name: string;
+        with?: {
+          query?: unknown;
+          sort?: unknown;
+        };
+      }>;
+    };
+    const selectStep = document.steps.find(({ name }) => name === 'select_candidate_reports');
+
+    expect(selectStep?.with?.query).toEqual({
+      bool: {
+        filter: [
+          { term: { reportable: true } },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    last_hunted_at: {
+                      lte: `now-${values.scheduleEveryMinutes}m`,
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'last_hunted_at',
+                      },
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+    expect(selectStep?.with?.sort).toEqual([
+      { corroborated_rank_score: { order: 'desc', missing: '_last' } },
+      { rank_score: { order: 'desc', missing: 0 } },
+    ]);
+  });
 });
