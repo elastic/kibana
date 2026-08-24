@@ -9,10 +9,10 @@
 
 import { monaco } from '@kbn/monaco';
 import {
+  checkForTripleQuotesAndEsqlQuery,
   getLineRemainderWithoutConsoleComments,
   isEscaped,
   isInsideConsoleString,
-  isInsideTripleQuotedJsonValue,
 } from '@kbn/monaco/src/languages/console/utils';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
@@ -323,14 +323,15 @@ export const getBodyCompletionItems = async (
   // loading async suggestions
   if (context.asyncResultsState?.isLoading && context.asyncResultsState) {
     const results = await context.asyncResultsState.results;
-    return getSuggestions(model, position, results, context, bodyContentBeforePosition);
+    return getSuggestions(model, position, results, context, bodyContentBeforePosition, bodyTokens);
   }
   return getSuggestions(
     model,
     position,
     context.autoCompleteSet ?? [],
     context,
-    bodyContentBeforePosition
+    bodyContentBeforePosition,
+    bodyTokens
   );
 };
 
@@ -368,6 +369,8 @@ const findOpeningQuoteStartColumn = (lineContentBeforePosition: string): number 
     }
   }
 };
+
+const isCompletingObjectKey = (bodyTokens: string[]): boolean => bodyTokens.at(-1) === '{';
 
 // If there is a closing `"` after the cursor, include it in the replacement range so accepting
 // a suggestion replaces the rest of the token instead of duplicating the quote.
@@ -414,7 +417,8 @@ const getCompletionLineState = (
     getLineRemainderWithoutConsoleComments(bodyContentBeforePosition, lineContentAfterPosition)
   );
   const isInsideQuotedString = isInsideConsoleString(bodyContentBeforePosition);
-  const isInsideTripleQuotedString = isInsideTripleQuotedJsonValue(bodyContentBeforePosition);
+  const { insideTripleQuotes: isInsideTripleQuotedString } =
+    checkForTripleQuotesAndEsqlQuery(bodyContentBeforePosition);
 
   return {
     canInsertTemplate,
@@ -436,7 +440,8 @@ const getSuggestions = (
   position: monaco.Position,
   autocompleteSet: ResultTerm[],
   context: AutoCompleteContext,
-  bodyContentBeforePosition: string
+  bodyContentBeforePosition: string,
+  bodyTokens: string[]
 ) => {
   // get the word before suggestions to replace when selecting a suggestion from the list
   const wordUntilPosition = model.getWordUntilPosition(position);
@@ -448,12 +453,15 @@ const getSuggestions = (
     lineContentBeforePosition,
   } = getCompletionLineState(model, position, bodyContentBeforePosition);
   context.addTemplate = canInsertTemplate;
+  const completingObjectKey = isCompletingObjectKey(bodyTokens);
+  const openingQuoteStartColumn =
+    isInsideQuotedString && findOpeningQuoteStartColumn(lineContentBeforePosition);
   // Check if we're typing a field name with a trailing dot
   // Check if we're typing a nested field name (contains a dot)
   // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
-  const quotedFieldWithDotMatch = /:\s*"[^"]*$/.test(lineContentBeforePosition)
-    ? null
-    : lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  const quotedFieldWithDotMatch = completingObjectKey
+    ? lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/)
+    : null;
   // Also check for unquoted fields with dots (e.g., index.mode without quotes)
   const unquotedFieldWithDotMatch = lineContentBeforePosition.match(
     /(?:^|[\s{:,\[])([a-zA-Z_][\w]*(?:\.[\w]+)+)$/
@@ -494,11 +502,15 @@ const getSuggestions = (
   // quoted string the replacement range must also cover the opening quote. Monaco can start the
   // current word after JSON punctuation (`-`, `.`), so scan back to the string boundary instead
   // of shifting by one column.
-  const primitiveTermRangeStartColumn =
-    isInsideQuotedString && findOpeningQuoteStartColumn(lineContentBeforePosition);
   const primitiveTermRange =
-    primitiveTermRangeStartColumn !== false && primitiveTermRangeStartColumn !== undefined
-      ? { ...range, startColumn: primitiveTermRangeStartColumn }
+    openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
+      ? { ...range, startColumn: openingQuoteStartColumn }
+      : range;
+  const quotedValueRange =
+    openingQuoteStartColumn !== false &&
+    openingQuoteStartColumn !== undefined &&
+    !completingObjectKey
+      ? { ...range, startColumn: openingQuoteStartColumn + 1 }
       : range;
 
   return (
@@ -532,7 +544,7 @@ const getSuggestions = (
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
-          range: typeof item.name !== 'string' ? primitiveTermRange : range,
+          range: typeof item.name !== 'string' ? primitiveTermRange : quotedValueRange,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           ...(endsInsideEmptyContainer
             ? { command: { id: 'editor.action.triggerSuggest', title: '' } }
