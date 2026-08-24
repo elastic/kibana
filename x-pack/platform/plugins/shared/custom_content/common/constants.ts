@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
-
 // injectCsp() in prepare_html.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =
   '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\';">';
