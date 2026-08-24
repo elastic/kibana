@@ -15,6 +15,7 @@ import type {
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
+  ConversationParentRelation,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -114,6 +115,14 @@ const convertBaseFromEs = (document: Document) => {
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
+    ...(document._source.parent_conversation
+      ? {
+          parent_conversation: {
+            id: document._source.parent_conversation.id,
+            relation: document._source.parent_conversation.relation as ConversationParentRelation,
+          },
+        }
+      : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -314,6 +323,11 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
+      : {}),
+    // Only events-native conversations persist their timeline; legacy ones keep deriving it
+    // from rounds on read (see fromEs).
     ...(isEventsNative
       ? {
           events: conversation.events ?? [],
@@ -383,12 +397,17 @@ export const createRequestToEs = ({
   creationDate: Date;
   space: string;
 }): ConversationProperties => {
+  // Honor conversation.user override if provided (used for persistent sub-agent
+  // creations where ownership is snapshotted from the parent conversation).
+  const effectiveUser = conversation.user ?? currentUser;
   const createdAt = creationDate.toISOString();
 
+  // The initial timeline is derived from the rounds being created, using the same user that
+  // gets persisted so `user_message` actors match the stored ownership.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: currentUser.id, username: currentUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
@@ -399,8 +418,8 @@ export const createRequestToEs = ({
 
   return {
     agent_id: conversation.agent_id,
-    user_id: currentUser.id,
-    user_name: currentUser.username,
+    user_id: effectiveUser.id,
+    user_name: effectiveUser.username,
     space,
     title: conversation.title,
     created_at: createdAt,
@@ -424,6 +443,9 @@ export const createRequestToEs = ({
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
+      : {}),
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
       : {}),
   };
 };
