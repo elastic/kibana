@@ -34,7 +34,7 @@ export class ImportResolver {
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
     readFileSync: memoize(readFileSync),
-    packageFilter(pkg: Record<string, unknown>) {
+    packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
         return {
@@ -45,7 +45,7 @@ export class ImportResolver {
 
       return pkg;
     },
-  };
+  } satisfies Resolve.SyncOpts;
 
   constructor(
     /**
