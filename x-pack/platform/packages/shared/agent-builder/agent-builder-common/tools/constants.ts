@@ -80,10 +80,7 @@ export const platformSignificantEventsTools = {
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
-/**
- * Memory tools follow the standard verb-based D3 shape: remember / recall / forget.
- * All three live in `defaultAgentToolIds` — no skill-hop required.
- */
+/** Memory tools follow the standard verb-based D3 shape: remember / recall / forget. */
 export const platformMemoryTools = {
   remember: `${internalNamespaces.platformMemory}.remember`,
   recall: `${internalNamespaces.platformMemory}.recall`,
@@ -171,12 +168,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
-  // Agent Memory tools — remember / recall / forget (D3 verb shape)
-  // All three are in defaultAgentToolIds: forget is the only user-facing delete path.
-  // When xpack.agentMemory.enabled is false the ids are simply unregistered and ignored.
-  platformMemoryTools.remember,
-  platformMemoryTools.recall,
-  platformMemoryTools.forget,
 ];
 
 /**
