@@ -93,6 +93,7 @@ export const startSessionReplay = async (core: CoreStart): Promise<void> => {
         enabled: true,
         samplingRate: settings.sampleRate,
         errorSamplingRate: 100,
+        quality: { recordCanvas: true },
         ...(settings.maskTextSelector
           ? { privacy: { maskAllInputs: true, maskTextSelector: settings.maskTextSelector } }
           : {}),

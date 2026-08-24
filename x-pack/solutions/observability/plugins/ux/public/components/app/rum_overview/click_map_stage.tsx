@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { RumClickPoint, RumClickMapSnapshot } from '../../../../common/rum_click_map';
 import { ClickMapHotspotCard } from './click_map_hotspot';
 import { clickBinRadius, clickMapStageFit } from './click_map_hit';
+import { rrwebCanvasReplay } from '../../../session_replay/rrweb_canvas_replay';
 
 interface ReplayerInstance {
   pause: (timeOffset?: number) => void;
@@ -146,6 +147,7 @@ export function ClickMapStage({
         root: mount,
         skipInactive: true,
         mouseTail: false,
+        ...rrwebCanvasReplay,
       }) as unknown as ReplayerInstance;
       if (cancelled) {
         try {

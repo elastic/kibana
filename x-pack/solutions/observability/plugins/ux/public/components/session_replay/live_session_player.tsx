@@ -35,6 +35,7 @@ import {
   livePlayFromMs,
 } from '../../../common/session_replay_live';
 import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
+import { rrwebCanvasReplay } from '../../session_replay/rrweb_canvas_replay';
 
 interface ReplayerInstance {
   play: (timeOffset?: number) => void;
@@ -267,6 +268,7 @@ export function LiveSessionPlayer({ http, sessionId, pollMs, active }: Props) {
         useVirtualDom: false,
         skipInactive: false,
         mouseTail: false,
+        ...rrwebCanvasReplay,
       }) as unknown as ReplayerInstance;
       replayer.on('resize', (raw) => {
         const size = raw as { width?: number; height?: number };

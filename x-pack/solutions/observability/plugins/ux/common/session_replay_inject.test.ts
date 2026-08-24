@@ -68,6 +68,7 @@ describe('buildSessionReplaySdkHtmlSnippet', () => {
     );
     expect(html).toContain('window.edotBrowser = startBrowserSdk(');
     expect(html).toContain('colleague-app');
+    expect(html).toContain('"recordCanvas": true');
     expect(html).not.toContain('devtools-inject');
   });
 });
@@ -81,6 +82,7 @@ describe('buildSessionReplayInjectPreview', () => {
 
     expect(preview).toContain('colleague-app');
     expect(preview).toContain('https://abc.trycloudflare.com');
+    expect(preview).toContain('recordCanvas');
     expect(preview).not.toContain(FAKE_AGENT);
   });
 });

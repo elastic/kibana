@@ -13,6 +13,7 @@ import { extractPageSnapshot } from '../../../common/rum_click_map';
 import { PREVIEW_REPLAY_EVENT_PAGE_SIZE } from '../../../common/session_replay_live';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
+import { rrwebCanvasReplay } from '../../session_replay/rrweb_canvas_replay';
 
 interface ReplayerInstance {
   pause: (timeOffset?: number) => void;
@@ -79,6 +80,7 @@ export function ReplayThumbnail({ sessionId, onOpen }: { sessionId: string; onOp
           root,
           skipInactive: true,
           mouseTail: false,
+          ...rrwebCanvasReplay,
         }) as unknown as ReplayerInstance;
         if (cancelled) {
           try {

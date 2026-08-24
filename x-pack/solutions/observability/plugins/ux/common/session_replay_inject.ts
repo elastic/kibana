@@ -72,6 +72,7 @@ const injectConfig = ({
       enabled: true,
       samplingRate: sampleRate ?? 100,
       errorSamplingRate: 100,
+      quality: { recordCanvas: true },
       ...(maskTextSelector ? { privacy: { maskAllInputs: true, maskTextSelector } } : {}),
     },
   };

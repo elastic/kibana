@@ -36,6 +36,7 @@ import {
 } from '../../utils/rum_search';
 import { serviceNameFromPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
 import { skipIdleSeekMs } from '../../../common/session_replay_skip_idle';
+import { rrwebCanvasReplay } from '../../session_replay/rrweb_canvas_replay';
 
 interface ReplayerMirror {
   getId: (node: Node) => number;
@@ -794,6 +795,7 @@ export function SessionPlayerPage() {
           root: containerRef.current,
           speed: Number(speedRef.current),
           skipInactive: false,
+          ...rrwebCanvasReplay,
         }) as unknown as ReplayerInstance;
 
         const meta = replayer.getMetaData();
