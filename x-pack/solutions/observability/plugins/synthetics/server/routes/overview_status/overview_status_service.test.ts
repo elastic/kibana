@@ -1463,6 +1463,62 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('discovers CPS linked-project monitors that have no local saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'linked-monitor-1',
+                locationId: 'us-west-1',
+              },
+              status: {
+                key: 'us-west-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'Linked HTTP check',
+                      'monitor.type': 'http',
+                      config_id: 'linked-config-1',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [
+                  { key: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const linked = result.upConfigs['obs-prod-linked-config-1-us-west-1'];
+      expect(linked).toBeDefined();
+      expect(linked.name).toBe('Linked HTTP check');
+      expect(linked.remote).toEqual({ remoteName: 'obs-prod' });
+      expect(result.up).toBe(1);
+    });
+
     it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
       // Regression: two remote clusters can host the same imported monitor in
       // the same locationId. Before keying the bucket by remoteName the second

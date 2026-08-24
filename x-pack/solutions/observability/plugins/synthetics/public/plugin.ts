@@ -68,6 +68,12 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { getSyntheticsProjectPickerAccess } from './cps_app_access';
+import {
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -129,6 +135,7 @@ export interface ClientPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   settings: SettingsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
@@ -233,6 +240,18 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+
+    if (
+      coreStart.featureFlags.getBooleanValue(
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      pluginsStart.cps?.cpsManager?.registerAppAccess(
+        'synthetics',
+        getSyntheticsProjectPickerAccess
+      );
+    }
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

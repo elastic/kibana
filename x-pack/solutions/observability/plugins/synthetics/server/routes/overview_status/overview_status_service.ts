@@ -35,7 +35,11 @@ import {
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
-import { isCCSEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
+import {
+  isCCSEnabled,
+  isRemoteIndexMetadataEnabled,
+  getRemoteMonitorInfo,
+} from '../../lib/remote_result_utils';
 
 interface LocationStatusEntry {
   status: string;
@@ -507,7 +511,7 @@ export class OverviewStatusService {
     // lookup stays cheap (scoped to the pending monitors being probed).
     monitorIds?: string[];
   }) {
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    const remoteIndexMetadataEnabled = isRemoteIndexMetadataEnabled(this.routeContext.server);
 
     return withApmSpan('monitor_status_data', async () => {
       const range = this.getStatusQueryRange();
@@ -533,8 +537,8 @@ export class OverviewStatusService {
         { field: 'monitor.interval' },
         { field: 'config_id' },
         { field: 'tags' },
-        // kibanaUrl is only meaningful for remote deep-links, so it stays gated.
-        ...(ccsEnabled ? [{ field: 'kibanaUrl' }] : []),
+        // kibanaUrl is only meaningful for remote deep-links (CCS / CPS).
+        ...(remoteIndexMetadataEnabled ? [{ field: 'kibanaUrl' }] : []),
       ];
 
       // The `timespan` filter is a "currently fresh" constraint anchored to
@@ -636,9 +640,9 @@ export class OverviewStatusService {
                   // so we use a separate terms agg to determine the source index.
                   // For a given monitor+location bucket the latest ping typically
                   // comes from a single index, so size:1 is sufficient. Only
-                  // needed to detect remote (CCS) monitors via their cluster
-                  // alias prefix, so it stays gated on CCS.
-                  ...(ccsEnabled
+                  // needed to detect remote (CCS / CPS) monitors via their
+                  // cluster or project-alias prefix.
+                  ...(remoteIndexMetadataEnabled
                     ? {
                         index_name: {
                           terms: {
@@ -739,7 +743,7 @@ export class OverviewStatusService {
           }
 
           // _index and observer.geo.name come from terms sub-aggs, not top_metrics
-          const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
+          const indexNameAgg = remoteIndexMetadataEnabled ? (rest as any).index_name : undefined;
           const indexName = indexNameAgg?.buckets?.[0]?.key;
           const locationNameAgg = (rest as any).location_name;
           const locationLabel =
@@ -747,7 +751,7 @@ export class OverviewStatusService {
             (bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : undefined);
           const spaceIdAgg = (rest as any).space_id;
           const hasMetaSpaceId = (spaceIdAgg?.buckets?.length ?? 0) > 0;
-          const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
+          const kibanaUrl = remoteIndexMetadataEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = metrics?.['monitor.name'];
           const monitorType = metrics?.['monitor.type'];
           const monitorInterval = metrics?.['monitor.interval'];
@@ -974,13 +978,12 @@ export class OverviewStatusService {
 
     // Process monitors that have no local saved object, discovered purely from
     // ping data. Two flavors share the exact same shape (pings exist, no SO):
-    //   - remote (CCS) monitors: pings from a remote cluster, identified by a
-    //     `<alias>:` prefix on `_index`. Gated on CCS being enabled.
+    //   - remote (CCS / CPS) monitors: pings from a remote cluster or linked
+    //     project, identified by a `<alias>:` prefix on `_index`.
     //   - local Heartbeat / Elastic Agent monitors: local pings whose
     //     `monitor.id` has no matching saved object (most notably Kubernetes/
     //     Docker autodiscovery). Surfaced read-only via `origin: 'heartbeat'`,
     //     capped to protect the overview against autodiscovery churn.
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
     // Opt-out (persisted client-side) to hide read-only local Heartbeat / Agent
     // monitors. Only skips when explicitly `false`; remote (CCS) monitors are
     // synthesized regardless.
@@ -1012,10 +1015,9 @@ export class OverviewStatusService {
           return;
         }
 
-        const remote =
-          ccsEnabled && locData.index
-            ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
-            : undefined;
+        const remote = locData.index
+          ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
+          : undefined;
 
         const configId = locData.configId || monitorId;
         const scheduleMinutes = locData.monitorIntervalSeconds
