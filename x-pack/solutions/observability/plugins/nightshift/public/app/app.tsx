@@ -25,11 +25,13 @@ import { useKibana } from '../hooks/use_kibana';
 import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   byCriticalityAndUpdatedAtDesc,
+  getLatestInvestigation,
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../event/significant_event_status';
 import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { getImpactedServiceStreamNames } from '../common/impacted_services';
@@ -94,6 +96,14 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
 
+  const investigationExecutionIds = useMemo(
+    () =>
+      events
+        .map((event) => getLatestInvestigation(event)?.workflow_execution_id)
+        .filter((executionId): executionId is string => Boolean(executionId)),
+    [events]
+  );
+  const { data: investigationStatuses } = useFetchInvestigationStatuses(investigationExecutionIds);
   const selectedEventIdFromUrl = useMemo(() => getNightshiftEventIdFromSearch(search), [search]);
 
   // Derived from the freshest fetched list (not a click-time snapshot), so
@@ -301,6 +311,7 @@ export function NightshiftApp(): React.ReactElement {
 
   const sharedListProps = {
     closingEventUuid,
+    investigationStatuses,
     onChatClick,
     onCloseClick: handleCloseSignificantEvent,
     onEventClick: handleEventClick,
