@@ -22,6 +22,8 @@ import { computeSeedState } from '../../utils/compute_seed_state';
 import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
 
+export type ManageRegionsState = ReturnType<typeof useManageRegionsState>;
+
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
   const {
@@ -173,6 +175,16 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const handleLocationTypeChange = useCallback(
+    (next: PolicyMode) => {
+      setActiveTab(next);
+      geoSelection.clear();
+      regionTab.regionSelection.clear();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [geoSelection.clear, regionTab.regionSelection.clear]
+  );
+
   const regionTabReturn = useMemo(
     () => ({
       zoneGroups: regionTab.zoneGroups,
@@ -244,6 +256,7 @@ export const useManageRegionsState = (onClose: () => void) => {
       setActiveTab,
       setUseCustomPolicy,
       handleDismissCallOut,
+      handleLocationTypeChange,
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,
