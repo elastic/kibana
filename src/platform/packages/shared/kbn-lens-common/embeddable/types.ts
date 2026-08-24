@@ -302,10 +302,6 @@ export type LensComponentProps = Simplify<
        */
       disabledActions?: string[];
       /**
-       * Toggles the inspector
-       */
-      showInspector?: boolean;
-      /**
        * Toggle inline editing feature
        */
       canEditInline?: boolean;

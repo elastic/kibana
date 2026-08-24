@@ -6,8 +6,9 @@
  */
 
 import { injectable } from 'inversify';
+import { noDataStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
-import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
 import { BasicTransitionStrategy } from './basic_strategy';
@@ -122,6 +123,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const basicResult = super.getNextState(ctx);
 
     if (!stateTransition) {
+      return basicResult;
+    }
+
+    if (
+      alertEvent.status === alertEventStatus.no_data &&
+      rule.no_data_strategy === noDataStrategy.recover
+    ) {
       return basicResult;
     }
 

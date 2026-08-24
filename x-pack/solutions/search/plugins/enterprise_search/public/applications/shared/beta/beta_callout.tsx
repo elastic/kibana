@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 interface BetaCallOutProps {
   description: string;
@@ -17,17 +18,14 @@ interface BetaCallOutProps {
 
 export const BetaCallOut: React.FC<BetaCallOutProps> = ({ title, description }) => {
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="flask"
+    <KbnWarningCallout
       title={
         title ||
         i18n.translate('xpack.enterpriseSearch.betaCalloutTitle', {
           defaultMessage: 'Beta feature',
         })
       }
-    >
-      {description}
-    </EuiCallOut>
+      text={description}
+    />
   );
 };
