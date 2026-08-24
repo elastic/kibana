@@ -512,10 +512,12 @@ export const updateRiskEngineConfigSO = async ({
   }
 };
 
-const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
-  if (response.status !== statusCode) {
+const assertStatusCode = (statusCode: number | number[], response: SuperTest.Response) => {
+  const expected = Array.isArray(statusCode) ? statusCode : [statusCode];
+  if (!expected.includes(response.status)) {
     throw new Error(
-      `Expected status code ${statusCode}, but got ${response.statusCode} \n` + response.text
+      `Expected status code ${expected.join(' or ')}, but got ${response.statusCode} \n` +
+        response.text
     );
   }
 };
@@ -590,7 +592,7 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
       return response;
     },
 
-    scheduleNow: async (expectStatusCode: number = 200) => {
+    scheduleNow: async (expectStatusCode: number | number[] = 200) => {
       const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
         .set('kbn-xsrf', 'true')

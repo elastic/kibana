@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { deleteAllAlerts, deleteAllRules, waitFor } from '@kbn/detections-response-ftr-services';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -65,7 +65,15 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
 
       // second risk engine run
-      await riskEngineRoutes.scheduleNow();
+      await waitFor(
+        async () => {
+          // don't throw an error if the status is 409 (conflict), just retry
+          const { status } = await riskEngineRoutes.scheduleNow([200, 409]);
+          return status === 200;
+        },
+        'waitForScheduleNow',
+        log
+      );
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 }); // Should calculate risk score again for the same document
     });
   });
