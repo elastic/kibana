@@ -8,7 +8,7 @@
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import { scoreToolUsage, scoreToolUsageContinuation } from './tool_usage';
-import { platformStreamsMemoryTools } from '@kbn/significant-events-plugin/server';
+import { memoryToolIds } from '../../utils/tool_usage';
 
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 const {
@@ -21,7 +21,7 @@ const {
   memoryRead: TOOL_ID_MEMORY_READ,
   memoryPatch: TOOL_ID_MEMORY_PATCH,
   memoryWrite: TOOL_ID_MEMORY_WRITE,
-} = platformStreamsMemoryTools;
+} = memoryToolIds;
 
 const toolCall = (
   toolId: string,

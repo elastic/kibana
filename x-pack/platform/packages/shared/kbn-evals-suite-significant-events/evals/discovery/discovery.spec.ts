@@ -259,7 +259,6 @@ evaluate.describe(
                   await resetMemoryPages({ esClient, log });
                   if (memoryPages && memoryPages.length > 0) {
                     await replayIntoMemoryPages({
-                      esClient,
                       log,
                       kbnClient,
                       memoryPages,

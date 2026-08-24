@@ -7,11 +7,11 @@
 
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
-import { platformStreamsMemoryTools } from '@kbn/significant-events-plugin/server';
 import {
   extractOrderedToolCalls,
   extractToolCallIds,
   isToolId,
+  memoryToolIds,
   summarizePersistenceCalls,
 } from '../../utils/tool_usage';
 import {
@@ -36,7 +36,7 @@ const {
   memoryRead: TOOL_ID_MEMORY_READ,
   memoryPatch: TOOL_ID_MEMORY_PATCH,
   memoryWrite: TOOL_ID_MEMORY_WRITE,
-} = platformStreamsMemoryTools;
+} = memoryToolIds;
 
 export interface ToolUsageScore {
   score: number;
@@ -264,6 +264,7 @@ const hasSuccessfulPostReadConfirmation = (
       isTool(toolId, TOOL_ID_MEMORY_READ) &&
       results.some((result) => isSuccessfulToolResult(result))
   );
+  if (readIndex === -1) return false;
   return orderedCalls.some(
     ({ results, toolId }, index) =>
       index > readIndex &&

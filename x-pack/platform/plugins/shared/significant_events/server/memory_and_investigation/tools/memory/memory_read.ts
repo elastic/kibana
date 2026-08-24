@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isBoom } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -105,7 +106,7 @@ export const createMemoryReadTool = ({
         try {
           entry = await memoryService.get({ id });
         } catch (error) {
-          if (!name) throw error;
+          if (!name || !(isBoom(error) && error.output.statusCode === 404)) throw error;
           entry = await memoryService.getByName({ name });
         }
       } else {

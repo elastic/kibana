@@ -43,10 +43,9 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
     );
-    const recordedNoise = alreadyRecordedNoiseUuids(extractOrderedToolCalls(output.steps ?? []), [
-      ...expectedRuleUuids,
-    ]);
-    const ranConfirmationQuery = extractOrderedToolCalls(output.steps ?? []).some(
+    const orderedCalls = extractOrderedToolCalls(output.steps ?? []);
+    const recordedNoise = alreadyRecordedNoiseUuids(orderedCalls, [...expectedRuleUuids]);
+    const ranConfirmationQuery = orderedCalls.some(
       ({ results, toolId }) =>
         isToolId(toolId, platformCoreTools.executeEsql) &&
         results.some(
@@ -56,7 +55,8 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
             'data' in result &&
             typeof result.data === 'object' &&
             result.data !== null &&
-            !('error' in result.data)
+            !('error' in result.data) &&
+            typeof (result.data as Record<string, unknown>).message !== 'string'
         )
     );
     const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);

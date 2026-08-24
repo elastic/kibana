@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { platformStreamsMemoryTools } from '@kbn/significant-events-plugin/server';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
-import { isToolId, type OrderedToolCall } from './tool_usage';
+import { isRecord, isToolId, memoryToolIds, type OrderedToolCall } from './tool_usage';
 
-const { memoryRead: TOOL_ID_MEMORY_READ } = platformStreamsMemoryTools;
+const TOOL_ID_MEMORY_READ = memoryToolIds.memoryRead;
 const { eventsWrite: TOOL_ID_EVENTS_WRITE } = platformSignificantEventsTools;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 const NOISE_ON_LINE = /dismissed|false[-\s]?positive|expected noise/i;
 

@@ -240,7 +240,7 @@ Example:
 
 **Mandatory sequencing gate:** Complete all steps below before emit output. Do not skip steps, unless instructed to do so. `platform_sig_events_events_write` is forbidden until payload is built; an empty or placeholder payload is invalid. Do not invoke it to inspect the schema — assemble a complete payload offline, then call once. If any required step or field is incomplete, stop and do not invoke `platform_sig_events_events_write`.
 
-**Memory preamble:** Before grounding, run one batch memory search and read at most three relevant pages. A confirmed known-noise exit is terminal. An exact known-ongoing match establishes a durable `known_ongoing` classification: carry it through grounding, routing, continuation matching, and severity. Grounding clears it when it proves a different mechanism or shows the documented mechanism newly elevated (a clear rate step-up over the page's documented baseline); a current row at the documented background rate preserves it. Every other memory outcome follows this procedure unchanged.
+**Memory preamble:** Before grounding, run one batch memory search and read at most three relevant pages. A confirmed known-noise exit is terminal. An exact known-ongoing match establishes a durable `known_ongoing` classification: carry it through grounding, routing, continuation matching, and severity. Grounding clears it when it proves a different mechanism or shows the documented mechanism newly elevated (a clear rate step-up or first-onset over the page's documented baseline); a current row at the documented background rate preserves it. Every other memory outcome follows this procedure unchanged.
 
 ### Step 1: Retrieve memory context
 

@@ -8,7 +8,17 @@
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+// Memory tool IDs are inlined here to avoid a package→plugin-server dependency.
+// These must stay in sync with platformStreamsMemoryTools in the plugin's tool_ids.ts.
+const MEMORY_NAMESPACE = 'platform.sig_events.memory';
+export const memoryToolIds = {
+  memorySearch: `${MEMORY_NAMESPACE}.search`,
+  memoryRead: `${MEMORY_NAMESPACE}.read`,
+  memoryWrite: `${MEMORY_NAMESPACE}.write`,
+  memoryPatch: `${MEMORY_NAMESPACE}.patch`,
+} as const;
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 

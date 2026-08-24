@@ -548,56 +548,36 @@ export const resetMemoryPages = async ({
   await esClient.indices
     .deleteDataStream({ name: SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM })
     .catch((error: unknown) => {
-      if (
-        !(
-          typeof error === 'object' &&
-          error !== null &&
-          'statusCode' in error &&
-          error.statusCode === 404
-        )
-      ) {
-        throw error;
-      }
+      if (!isNotFoundError(error)) throw error;
     });
   log.debug('Reset significant events memory data stream');
 };
 
 export const replayIntoMemoryPages = async ({
-  esClient,
   log,
   memoryPages,
   kbnClient,
 }: {
-  esClient: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
   memoryPages: Array<{ name: string; content: string }>;
 }): Promise<void> => {
-  for (const page of memoryPages ?? []) {
-    // Seed through the memory API so the data stream is provisioned and the page
-    // is embedded (with lexical fallback) exactly as production pages are.
-    const response = await kbnClient.request<{
-      id: string;
-      name: string;
-    }>({
-      path: '/internal/streams/memory/entries',
-      method: 'POST',
-      body: page,
-    });
-    if (response.data.name !== page.name || !response.data.id) {
-      throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
-    }
-    const readResponse = await kbnClient.request<{
-      id: string;
-      name: string;
-    }>({
-      path: `/internal/streams/memory/entries/${response.data.id}`,
-      method: 'GET',
-    });
-    if (readResponse.data.id !== response.data.id) {
-      throw new Error(`Seeded memory page "${page.name}" could not be read by ID`);
-    }
-
-    log.info(`Seeded memory page "${page.name}"`);
-  }
+  // Seed through the memory API so the data stream is provisioned and each page
+  // is embedded (with lexical fallback) exactly as production pages are.
+  await Promise.all(
+    memoryPages.map(async (page) => {
+      const response = await kbnClient.request<{
+        id: string;
+        name: string;
+      }>({
+        path: '/internal/streams/memory/entries',
+        method: 'POST',
+        body: page,
+      });
+      if (response.data.name !== page.name || !response.data.id) {
+        throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
+      }
+      log.info(`Seeded memory page "${page.name}"`);
+    })
+  );
 };

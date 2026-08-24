@@ -8,7 +8,7 @@
 import type { SignificantEvent, Detection, SignalEntry } from '@kbn/significant-events-schema';
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { platformStreamsMemoryTools } from '@kbn/significant-events-plugin/server';
+import { memoryToolIds } from '../../utils/tool_usage';
 import { evidenceCollectionEvaluator } from './evidence_collection';
 
 const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
@@ -132,7 +132,7 @@ describe('evidenceCollectionEvaluator', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: platformStreamsMemoryTools.memoryRead,
+        tool_id: memoryToolIds.memoryRead,
         tool_call_id: 'read',
         params: { id: 'page-1' },
         results: [
@@ -162,7 +162,7 @@ describe('evidenceCollectionEvaluator', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: platformStreamsMemoryTools.memoryRead,
+        tool_id: memoryToolIds.memoryRead,
         tool_call_id: 'read',
         params: { id: 'stale-page-id', name: 'known-noise' },
         results: [
