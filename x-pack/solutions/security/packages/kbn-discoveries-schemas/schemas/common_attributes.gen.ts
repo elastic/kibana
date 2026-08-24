@@ -57,6 +57,31 @@ export type Replacements = z.infer<typeof Replacements>;
 export const Replacements = z.object({}).catchall(z.string());
 
 /**
+ * A single contributing factor behind a confidence score
+ */
+export type ConfidenceFactor = z.infer<typeof ConfidenceFactor>;
+export const ConfidenceFactor = z.object({
+  name: z.string().max(1024),
+  assessment: z.string().max(4096),
+  weight: z.number().optional(),
+  evidence: z.string().max(4096).optional(),
+});
+
+/**
+ * Calibrated confidence for an attack discovery (how sure it is real; orthogonal to severity)
+ */
+export type Confidence = z.infer<typeof Confidence>;
+export const Confidence = z.object({
+  /**
+   * Confidence from 0.0 (not sure) to 1.0 (certain)
+   */
+  score: z.number(),
+  band: z.enum(['high', 'medium', 'low']).optional(),
+  rationale: z.string().max(4096),
+  factors: z.array(ConfidenceFactor).max(100),
+});
+
+/**
  * LLM Provider
  */
 export type Provider = z.infer<typeof Provider>;

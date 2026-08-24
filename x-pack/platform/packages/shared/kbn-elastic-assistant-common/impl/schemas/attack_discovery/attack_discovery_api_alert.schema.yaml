@@ -69,6 +69,9 @@ components:
           items:
             type: string
           type: array
+        confidence:
+          description: Optional calibrated confidence for this attack discovery
+          $ref: './common_attributes.schema.yaml#/components/schemas/Confidence'
         replacements:
           description: Key-value pairs that are used to replace placeholders in the markdown fields
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

@@ -18,6 +18,9 @@ export const normalizeAttackDiscovery = (raw: unknown): AttackDiscovery => {
 
   return {
     alertIds: (d.alertIds ?? d.alert_ids ?? []) as string[],
+    // `confidence` and its factor keys are single words, so snake_case ===
+    // camelCase and a plain passthrough is correct (no key remapping needed).
+    confidence: (d.confidence ?? undefined) as AttackDiscovery['confidence'],
     detailsMarkdown: (d.detailsMarkdown ?? d.details_markdown ?? '') as string,
     entitySummaryMarkdown: (d.entitySummaryMarkdown ?? d.entity_summary_markdown) as
       | string
