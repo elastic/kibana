@@ -44,6 +44,7 @@ const BASE_SERVICE: AwsServiceMatrixEntry = {
   policyTemplate: 's3',
   deploymentMethods: [{ method: 'managed_integration' }],
   defaultEnabled: false,
+  defaultEnabledInputs: [],
   showInUI: true,
 };
 

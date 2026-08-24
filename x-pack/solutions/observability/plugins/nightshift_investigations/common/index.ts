@@ -32,7 +32,14 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
-export type InvestigationStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export const INVESTIGATION_STATUSES = [
+  'pending',
+  'running',
+  'completed',
+  'failed',
+  'cancelled',
+] as const;
+export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
 export interface GetInvestigationResponse {
   investigation_id: string;
@@ -42,4 +49,32 @@ export interface GetInvestigationResponse {
   completed_at?: string;
   conclusions?: string;
   error?: string;
+}
+
+export interface ListInvestigationsRequest {
+  statuses?: InvestigationStatus[];
+  started_after?: string;
+  started_before?: string;
+  finished_after?: string;
+  finished_before?: string;
+  sort_field?: 'created_at' | 'finished_at';
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+}
+
+export interface ListInvestigationItem {
+  investigation_id: string;
+  status: InvestigationStatus;
+  started_at?: string;
+  completed_at?: string;
+  concurrency_key?: string;
+  executed_by?: string;
+}
+
+export interface ListInvestigationsResponse {
+  results: ListInvestigationItem[];
+  page: number;
+  size: number;
+  total: number;
 }
