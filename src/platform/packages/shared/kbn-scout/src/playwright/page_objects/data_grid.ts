@@ -19,6 +19,8 @@ const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 // EUI internal class on the react-window scroll container. `UnifiedDataTable` queries the same
 // class to decide `hasScrolledToBottom` (see `data_table.tsx`, which carries a TODO asking EUI to
 // expose `outerRef` via `virtualizationOptions`) — keep the two in sync until it does.
+// `EuiDataGridObject` in `@elastic/eui-test-helpers` exposes no scroll API yet; requesting one
+// from Apps DX (#kibana-qa) is the way out of this workaround.
 const EUI_DATA_GRID_VIRTUALIZED_CLASS = 'euiDataGrid__virtualized';
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
@@ -217,6 +219,19 @@ export class DataGrid {
     return this.getPaginationContainer(scope).locator('[data-test-subj="pagination-button-next"]');
   }
 
+  /**
+   * The sample-size footer. Only mounts in `singlePage` pagination once the user has scrolled to
+   * the bottom, or on the last page in `multiPage`.
+   */
+  getFooter(): Locator {
+    return this.page.testSubj.locator('unifiedDataTableFooter');
+  }
+
+  /** The footer's "Load more" link. Absent in an embeddable, which passes no `onFetchMoreRecords`. */
+  getLoadMoreButton(): Locator {
+    return this.page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
+  }
+
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
@@ -260,7 +275,7 @@ export class DataGrid {
   }
 
   async getDataGridFooterText(): Promise<string> {
-    const footer = this.page.testSubj.locator('unifiedDataTableFooter');
+    const footer = this.getFooter();
     await footer.waitFor({ state: 'visible' });
 
     return footer.innerText();
@@ -654,43 +669,34 @@ export class DataGrid {
   /**
    * Scrolls the virtualized grid body to the bottom. In `singlePage` pagination the footer only
    * mounts once a scroll event lands within `scrollBottomMargin` (100 px) of the bottom, and only
-   * on a grid that is actually scrollable — so this polls the scroll position instead of sleeping
-   * between increments, and fails if there is nothing to scroll. Works for the main Discover table
-   * and for an embedded grid (e.g. a dashboard panel): `discoverDocTable` is set by
-   * `UnifiedDataTable` in both.
+   * on a grid that is actually scrollable — so this waits for both preconditions the app checks and
+   * then jumps once. Works for the main Discover table and for an embedded grid (e.g. a dashboard
+   * panel): `discoverDocTable` is set by `UnifiedDataTable` in both. Pass `container` to
+   * disambiguate when the page holds more than one grid (e.g. two saved-search panels).
    */
-  async scrollToBottom() {
-    const container = this.page.testSubj.locator('discoverDocTable');
-
+  async scrollToBottom(container: Locator = this.page.testSubj.locator('discoverDocTable')) {
+    // `handleOnScroll` in `data_table.tsx` drops the event unless the fetch has settled and the
+    // grid overflows, so gate on both rather than re-scrolling: re-assigning the same `scrollTop`
+    // fires no further scroll event, which makes a retry loop inert anyway.
     // `discoverDataGridUpdating` only exists in Discover's layout, so it is no readiness signal in
     // a dashboard panel. `data-render-complete` is set by UnifiedDataTable in both contexts.
     await expect(container).toHaveAttribute('data-render-complete', 'true');
 
     const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS}`);
 
-    // UnifiedDataTable ignores scroll events unless the grid overflows its container, so a grid
-    // with nothing to scroll would leave the footer unmounted and make an absence assertion pass
-    // for the wrong reason. Fail loudly instead. 10s (over the 5s default) covers a slow first
-    // paint on CI, where rows can still be measuring right after `data-render-complete` flips.
+    // Same comparison the app uses for `isScrollable`, so this can't disagree with it: a grid with
+    // nothing to scroll would leave the footer unmounted and make an absence assertion pass for
+    // the wrong reason. Fail loudly instead.
     await expect
-      .poll(() => grid.evaluate((el) => el.scrollHeight - el.clientHeight), { timeout: 10_000 })
+      .poll(() => grid.evaluate((el: HTMLElement) => el.scrollHeight - el.offsetHeight))
       .toBeGreaterThan(0);
 
-    // 20s: the grid re-measures row heights as virtualized rows mount, so `scrollHeight` can grow
-    // across several iterations before it settles. The interval stays above the app's 200 ms scroll
-    // throttle, and a fetch in flight (which makes the app drop scroll events) is absorbed by the
-    // next tick.
-    await expect
-      .poll(
-        () =>
-          grid.evaluate((el) => {
-            // Assigning scrollTop fires a real scroll event that react-window forwards.
-            el.scrollTop = el.scrollHeight;
-            return el.scrollHeight - (el.scrollTop + el.clientHeight);
-          }),
-        { timeout: 20_000, intervals: [250] }
-      )
-      .toBeLessThanOrEqual(100);
+    // Row heights are fixed (`discover:rowHeightOption` defaults to 3 lines), so react-window's
+    // total height is known upfront and one assignment lands at the bottom. Assertions on what the
+    // scroll reveals stay in the specs, where they retry past the app's 200 ms scroll throttle.
+    await grid.evaluate((el: HTMLElement) => {
+      el.scrollTop = el.scrollHeight;
+    });
   }
 
   /**

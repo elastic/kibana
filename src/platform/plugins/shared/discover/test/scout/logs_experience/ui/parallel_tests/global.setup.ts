@@ -10,7 +10,7 @@
 import { log as logDoc, timerange } from '@kbn/synthtrace-client';
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { LOGS } from '../fixtures';
+import { deleteLogsExperienceData, LOGS } from '../fixtures';
 
 globalSetupHook('Setup logs experience tests data', async ({ esClient, log, config }) => {
   const from = new Date(LOGS.DEFAULT_START_TIME).getTime();
@@ -25,8 +25,10 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
 
   // Seeding is delete-then-create so a re-run against a long-lived stack produces the same
   // state as a fresh one. Without this, indexing appends and doc counts drift on every run,
-  // which would silently break count-dependent assertions.
-  await logsEsClient.clean();
+  // which would silently break count-dependent assertions. Scoped to this suite's own resources
+  // rather than `logsEsClient.clean()`, which resolves `logs-*-*` and would delete data seeded by
+  // any other suite sharing the stack.
+  await deleteLogsExperienceData(esClient);
 
   await logsEsClient.index([
     timerange(from, to)
@@ -41,10 +43,6 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
           .dataset(LOGS.SYNTH_LOGS_DATASET)
           .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
           .logLevel('info')
-          .defaults({
-            'event.dataset': LOGS.SYNTH_LOGS_DATASET,
-            'log.level': 'info',
-          })
       ),
   ]);
   log.debug('[setup:logs] synthtrace logs data indexed');
@@ -53,13 +51,8 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
   //
-  // Delete-then-create for the same reason as the logs data above: a leftover index from an
+  // Already deleted above, for the same reason as the logs data: a leftover index from an
   // interrupted run would otherwise accumulate duplicate documents on the bulk below.
-  await esClient.indices.delete({ index: LOGS.NON_LOGS_INDEX }).catch((err: Error) => {
-    // Absent on a clean run; anything else is a real failure.
-    if (!err.message.includes('index_not_found_exception')) throw err;
-  });
-
   await esClient.indices.create({
     index: LOGS.NON_LOGS_INDEX,
     mappings: {

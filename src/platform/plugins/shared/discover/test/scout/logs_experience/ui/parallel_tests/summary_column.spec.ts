@@ -43,7 +43,7 @@ spaceTest.describe(
       // Scoped to the seeded dataset and explicitly sorted so row 0 is deterministic.
       await discover.goto({ queryMode: 'esql' });
       await discover.writeAndSubmitEsqlQuery(
-        `from logs-${LOGS.SYNTH_LOGS_DATASET}-* | sort @timestamp desc | limit 1`
+        `from ${LOGS.SYNTH_LOGS_DATA_VIEW} | sort @timestamp desc | limit 1`
       );
 
       const summaryCell = dataGrid.getCellValue(0, SUMMARY_COLUMN_ID);
@@ -57,7 +57,7 @@ spaceTest.describe(
         const { discover, dataGrid } = pageObjects;
 
         await discover.goto({ queryMode: 'classic' });
-        await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW, { createAdHocIfMissing: false });
+        await discover.selectDataView(LOGS.SYNTH_LOGS_DATA_VIEW);
         await discover.waitUntilTabIsLoaded();
 
         // Summary is contributed by the logs profile as a default column.
@@ -78,7 +78,7 @@ spaceTest.describe(
         // computed column is what it renders.
         await discover.goto({ queryMode: 'esql' });
         await discover.writeAndSubmitEsqlQuery(
-          `from logs-${LOGS.SYNTH_LOGS_DATASET}-* | sort @timestamp desc | limit 1 ` +
+          `from ${LOGS.SYNTH_LOGS_DATA_VIEW} | sort @timestamp desc | limit 1 ` +
             `| eval custom_bytes = network.bytes * 2 | drop message`
         );
 

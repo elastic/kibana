@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutParallelWorkerFixtures, ScoutTestConfig, SpaceSolutionView } from '@kbn/scout';
+import type {
+  EsClient,
+  ScoutParallelWorkerFixtures,
+  ScoutTestConfig,
+  SpaceSolutionView,
+} from '@kbn/scout';
 import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { LOGS } from './constants';
 
@@ -70,6 +75,21 @@ export async function createNonLogsDiscoverSession(
     } satisfies DiscoverSessionApiDataInput,
     spaceId
   );
+}
+
+/**
+ * Delete the synthetic data seeded by global setup. Scoped to this suite's own data stream and
+ * index: `logsEsClient.clean()` resolves `logs-*-*`, so it would take every other suite's logs
+ * data down with it on a shared or long-lived stack. Shared by global setup (which deletes before
+ * seeding so doc counts stay stable across re-runs) and global teardown.
+ */
+export async function deleteLogsExperienceData(esClient: EsClient) {
+  await esClient.indices.deleteDataStream(
+    { name: `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}` },
+    { ignore: [404] }
+  );
+
+  await esClient.indices.delete({ index: LOGS.NON_LOGS_INDEX, ignore_unavailable: true });
 }
 
 export async function teardownLogsExperience(

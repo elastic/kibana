@@ -45,14 +45,14 @@ spaceTest.describe(
 
     spaceTest(
       'should use numbered pagination for a non-logs data view',
-      async ({ apiServices, discoverScoutSpace, pageObjects }) => {
+      async ({ apiServices, scoutSpace, pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
 
         // A data view whose index pattern matches no allowed log base pattern, so the default
         // multiPage mode applies.
         const sessionId = await createNonLogsDiscoverSession(
           apiServices,
-          discoverScoutSpace.id,
+          scoutSpace.id,
           'non-logs-pagination'
         );
 
@@ -62,6 +62,9 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
 
         // Numbered pagination controls must be present, showing the default rows per page.
+        // Asserted on the locator rather than via `getCurrentRowsPerPage()`: that helper throws
+        // when the label isn't parseable yet, and `expect.poll` does not retry a throwing
+        // callback, so the locator assertion is the one that tolerates a late-rendering toolbar.
         await expect(dataGrid.getRowsPerPageButton()).toContainText('Rows per page: 100');
         await expect(dataGrid.getPreviousPageButton()).toBeVisible();
         await expect(dataGrid.getNextPageButton()).toBeVisible();
@@ -72,11 +75,11 @@ spaceTest.describe(
 
     spaceTest(
       'should switch to singlePage mode with a Load-more footer for a logs data view',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
 
         await discover.goto({ queryMode: 'classic' });
-        await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW, { createAdHocIfMissing: false });
+        await discover.selectDataView(LOGS.SYNTH_LOGS_DATA_VIEW);
         await discover.waitUntilTabIsLoaded();
 
         // singlePage mode: no EUI pagination toolbar.
@@ -84,14 +87,15 @@ spaceTest.describe(
         await expect(dataGrid.getPreviousPageButton()).toBeHidden();
         await expect(dataGrid.getNextPageButton()).toBeHidden();
 
+        const footer = dataGrid.getFooter();
+        const loadMore = dataGrid.getLoadMoreButton();
+
         // Footer is absent before scrolling: hasScrolledToBottom starts false.
-        await expect(page.testSubj.locator('unifiedDataTableFooter')).toBeHidden();
+        await expect(footer).toBeHidden();
 
         // Scroll to the bottom — the throttled scroll handler flips hasScrolledToBottom.
         await dataGrid.scrollToBottom();
 
-        const footer = page.testSubj.locator('unifiedDataTableFooter');
-        const loadMore = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
         await expect(footer).toBeVisible();
         await expect(loadMore).toBeVisible();
 
@@ -109,14 +113,14 @@ spaceTest.describe(
 
     spaceTest(
       'should render no pagination toolbar and no footer in ES|QL mode',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
 
         // `logs-*` resolves the logs profile, which sets paginationMode: 'singlePage'.
         // ES|QL overrides that: isPaginationEnabled={false} disables both the toolbar and footer.
         await discover.goto({ queryMode: 'esql' });
         await discover.writeAndSubmitEsqlQuery(
-          `from logs-${LOGS.SYNTH_LOGS_DATASET}-* | sort @timestamp desc | limit 200`
+          `from ${LOGS.SYNTH_LOGS_DATA_VIEW} | sort @timestamp desc | limit 200`
         );
 
         // The assertions below are all absences, so prove the grid actually rendered rows first.
@@ -128,13 +132,13 @@ spaceTest.describe(
         await expect(dataGrid.getRowsPerPageButton()).toBeHidden();
         await expect(dataGrid.getPreviousPageButton()).toBeHidden();
         await expect(dataGrid.getNextPageButton()).toBeHidden();
-        await expect(page.testSubj.locator('unifiedDataTableFooter')).toBeHidden();
+        await expect(dataGrid.getFooter()).toBeHidden();
       }
     );
 
     spaceTest(
       'should render the singlePage footer without a Load-more button in a dashboard panel',
-      async ({ page, apiServices, scoutSpace, pageObjects }) => {
+      async ({ apiServices, scoutSpace, pageObjects }) => {
         const { dashboard, dataGrid } = pageObjects;
 
         // Build the dashboard and its panel via the API — no archives, no UI steps.
@@ -158,7 +162,7 @@ spaceTest.describe(
                     {
                       data_source: {
                         type: 'data_view_spec',
-                        index_pattern: `logs-${LOGS.SYNTH_LOGS_DATASET}-*`,
+                        index_pattern: LOGS.SYNTH_LOGS_DATA_VIEW,
                         time_field: '@timestamp',
                       },
                     },
@@ -181,13 +185,13 @@ spaceTest.describe(
         await expect(dataGrid.getNextPageButton()).toBeHidden();
 
         // Footer is hidden until the user scrolls to the bottom.
-        await expect(page.testSubj.locator('unifiedDataTableFooter')).toBeHidden();
+        await expect(dataGrid.getFooter()).toBeHidden();
 
         // Embeddables do not pass `onFetchMoreRecords`, so the message-only footer renders
         // (no Load-more button) once hasScrolledToBottom flips.
         await dataGrid.scrollToBottom();
-        await expect(page.testSubj.locator('unifiedDataTableFooter')).toBeVisible();
-        await expect(page.testSubj.locator('dscGridSampleSizeFetchMoreLink')).toBeHidden();
+        await expect(dataGrid.getFooter()).toBeVisible();
+        await expect(dataGrid.getLoadMoreButton()).toBeHidden();
       }
     );
   }
