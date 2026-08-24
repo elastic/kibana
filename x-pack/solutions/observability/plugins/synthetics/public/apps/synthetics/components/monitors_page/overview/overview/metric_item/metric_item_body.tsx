@@ -13,7 +13,6 @@ import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import { SyntheticsRemoteBadge } from '../../../../common/components/synthetics_remote_badge';
 import { SyntheticsHeartbeatBadge } from '../../../../common/components/synthetics_heartbeat_badge';
-import * as labels from '../../../management/monitor_list_table/labels';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const MetricItemBody = ({
@@ -29,7 +28,6 @@ export const MetricItemBody = ({
   const typeBadge = (
     <MonitorTypeBadge
       monitorType={monitor.type}
-      ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
       onClick={() => {
         history.push({
           search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,

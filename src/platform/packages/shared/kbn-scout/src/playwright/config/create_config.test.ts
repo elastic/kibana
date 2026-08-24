@@ -39,25 +39,28 @@ describe('createPlaywrightConfig', () => {
 
   const originalCI = process.env.CI;
   const originalRetries = process.env.SCOUT_TEST_RETRIES;
+  const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
+
+  const restoreEnvVar = (name: string, value: string | undefined) => {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.TEST_RUN_ID;
     delete process.env.CI;
     delete process.env.SCOUT_TEST_RETRIES;
+    delete process.env.BUILDKITE_RETRY_COUNT;
   });
 
   afterAll(() => {
-    if (originalCI === undefined) {
-      delete process.env.CI;
-    } else {
-      process.env.CI = originalCI;
-    }
-    if (originalRetries === undefined) {
-      delete process.env.SCOUT_TEST_RETRIES;
-    } else {
-      process.env.SCOUT_TEST_RETRIES = originalRetries;
-    }
+    restoreEnvVar('CI', originalCI);
+    restoreEnvVar('SCOUT_TEST_RETRIES', originalRetries);
+    restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -208,10 +211,48 @@ describe('createPlaywrightConfig', () => {
       expect(config.retries).toBe(0);
     });
 
-    it('is 1 on CI', () => {
+    it('is 1 on the first CI attempt of a step', () => {
       process.env.CI = 'true';
       const config = createPlaywrightConfig({ testDir: './my_tests' });
       expect(config.retries).toBe(1);
+    });
+
+    it('is 1 when BUILDKITE_RETRY_COUNT reports the first attempt', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('is 0 when the Buildkite step is retried', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '1';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(0);
+    });
+
+    it('is 1 on CI when BUILDKITE_RETRY_COUNT is not a number', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('SCOUT_TEST_RETRIES wins over the step attempt count in both directions', () => {
+      process.env.CI = 'true';
+
+      // flaky runner: stays at 0 even on the first attempt
+      process.env.SCOUT_TEST_RETRIES = '0';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // flaky runner: stays at 0 when its step is retried
+      process.env.BUILDKITE_RETRY_COUNT = '2';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // an explicit opt-in still applies on a retried step
+      process.env.SCOUT_TEST_RETRIES = '1';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(1);
     });
 
     it('SCOUT_TEST_RETRIES=0 overrides CI=true — the flaky-runner guard', () => {

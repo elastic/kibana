@@ -23,8 +23,9 @@ import type {
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer } from '../types';
+import type { CustomCellRenderer, SourceDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
+import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
@@ -43,6 +44,8 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
+  sourceDisplayMode,
+  selectedColumns,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -54,6 +57,8 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
+  sourceDisplayMode: SourceDisplayMode;
+  selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -129,6 +134,21 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
+    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+
+    if (isSourceColumn && sourceDisplayMode === 'json') {
+      return (
+        <SourceDocumentJsonMode
+          row={row}
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          fieldFormats={fieldFormats}
+          selectedColumns={selectedColumns}
+        />
+      );
+    }
+
     if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
@@ -172,11 +192,7 @@ export const getRenderCellValueFn = ({
       });
     }
 
-    if (
-      field?.type === '_source' ||
-      useTopLevelObjectColumns ||
-      (isPlainRecord && columnId === '_source')
-    ) {
+    if (isSourceColumn || useTopLevelObjectColumns) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
