@@ -7,13 +7,15 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
+import { EuiFocusTrap, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { CommandSelector } from './command_selector';
 
 export interface InputAreaPopoverProps {
   /** Should be the Console's input area */
@@ -27,6 +29,13 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
   const show = useWithInputShowPopover();
   const isPopoverOpen = show !== undefined;
   const dispatch = useConsoleStateDispatch();
+  const { enteredCommand } = useWithInputTextEntered();
+
+  // ID should be passed down to whatever component is rendered in the popover, so that
+  // `focus` can be applied to it after the popover is opened
+  const initialFocusId = useMemo(() => {
+    return `inputPopover_${Math.random().toString(36).substring(2, 15)}`;
+  }, []);
 
   const popoverPanelStyles = useMemo<CSSProperties>(() => {
     return {
@@ -41,6 +50,23 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       clickOutsideDisables: true,
     };
   }, []);
+
+  const popoverTitle = useMemo(() => {
+    if (show === 'command-selector') {
+      if (!enteredCommand?.commandDefinition) {
+        return i18n.translate('xpack.securitySolution.inputAreaPopover.commandListTitle', {
+          defaultMessage: 'Available commands',
+        });
+      } else {
+        return i18n.translate('xpack.securitySolution.inputAreaPopover.commandArgListTitle', {
+          defaultMessage: '{commandName} command arguments',
+          values: { commandName: enteredCommand?.commandDefinition.name },
+        });
+      }
+    }
+
+    return '';
+  }, [enteredCommand?.commandDefinition, show]);
 
   const handlePopoverOnClose = useCallback(() => {
     dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
@@ -66,14 +92,18 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       attachToAnchor={true}
       focusTrapProps={focusTrapProps}
       ownFocus={false}
+      initialFocus={`#${initialFocusId}`}
       data-test-subj={getTestId('inputPopover')}
       aria-label={i18n.translate('xpack.securitySolution.console.inputAreaPopover.ariaLabel', {
         defaultMessage: 'Command input history',
       })}
     >
+      {show && popoverTitle && <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>}
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>
-          {show === 'input-history' && <CommandInputHistory />}
+          {show === 'input-history' && <CommandInputHistory initialFocusId={initialFocusId} />}
+
+          {show === 'command-selector' && <CommandSelector initialFocusId={initialFocusId} />}
         </EuiFocusTrap>
       )}
     </EuiPopover>
