@@ -15,7 +15,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
 } as const;
 
-export type ContextEngineWriteOutcome = 'success' | 'failure';
+export type ContextEngineWriteOutcome = 'success' | 'failure' | 'aborted';
 
 export interface ReportKiWriteEventParams {
   ai_index_id: string;
@@ -44,7 +44,8 @@ const kiWriteEventSchema: RootSchema<ReportKiWriteEventParams> = {
   outcome: {
     type: 'keyword',
     _meta: {
-      description: 'Whether the write succeeded: "success" or "failure".',
+      description:
+        'The write outcome: "success", "failure", or "aborted" when the run was cancelled.',
       optional: false,
     },
   },

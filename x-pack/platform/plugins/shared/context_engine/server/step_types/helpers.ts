@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { isRequestAbortedError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -31,6 +32,10 @@ export interface ResolvedAiIndex {
   dest: AiIndexDest;
   managed: boolean;
 }
+
+/** Whether the error is a cancellation, not a write failure. */
+export const isAbortError = (error: unknown): boolean =>
+  isRequestAbortedError(error) || (error instanceof Error && error.name === 'AbortError');
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */
 export const assertKiWritePrivilege = async (

@@ -254,13 +254,13 @@ describe('getDeleteKiStepDefinition', () => {
     );
   });
 
-  it('does not report a failure event when the run was cancelled', async () => {
+  it('reports an aborted event when the run was cancelled', async () => {
     const abortController = new AbortController();
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
       delete: jest.fn().mockImplementation(() => {
         abortController.abort();
-        return Promise.reject(new Error('Request aborted'));
+        return Promise.reject(new errors.RequestAbortedError('Request aborted'));
       }),
     };
     const context = createMockStepContext({
@@ -279,7 +279,16 @@ describe('getDeleteKiStepDefinition', () => {
     });
     await expect(handler(context)).rejects.toThrow('Request aborted');
 
-    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'delete',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'aborted',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI delete aborted in AI index 'hashed-ai-index-id'"
+    );
   });
 
   it('throws NotFoundError when the AI index does not exist', async () => {

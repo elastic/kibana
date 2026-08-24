@@ -13,6 +13,7 @@ import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   assertWritableDest,
+  isAbortError,
   resolveOrCreateAiIndex,
 } from './helpers';
 
@@ -67,23 +68,22 @@ export const getCreateKiStepDefinition = ({
         );
         return { output: { id: response._id } };
       } catch (error) {
-        // A cancelled run is not a write failure; skip reporting.
-        if (!context.abortSignal.aborted) {
-          const errorType = errorTypeForTelemetry(error);
-          analyticsService.reportKiWrite({
-            action: 'create',
-            aiIndexId,
-            managed,
-            outcome: 'failure',
-            errorType,
-          });
-          logger.debug(
-            `KI create failed in AI index '${analyticsService.aiIndexIdForTelemetry(
-              aiIndexId,
-              managed
-            )}': ${errorType}`
-          );
-        }
+        // A cancelled run is not a write failure; report it as aborted.
+        const aborted = isAbortError(error);
+        const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+        analyticsService.reportKiWrite({
+          action: 'create',
+          aiIndexId,
+          managed,
+          outcome: aborted ? 'aborted' : 'failure',
+          errorType,
+        });
+        const idForLog = analyticsService.aiIndexIdForTelemetry(aiIndexId, managed);
+        logger.debug(
+          aborted
+            ? `KI create aborted in AI index '${idForLog}'`
+            : `KI create failed in AI index '${idForLog}': ${errorType}`
+        );
         throw error;
       }
     },

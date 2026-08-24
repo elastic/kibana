@@ -285,13 +285,13 @@ describe('getUpdateKiStepDefinition', () => {
     );
   });
 
-  it('does not report a failure event when the run was cancelled', async () => {
+  it('reports an aborted event when the run was cancelled', async () => {
     const abortController = new AbortController();
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
       update: jest.fn().mockImplementation(() => {
         abortController.abort();
-        return Promise.reject(new Error('Request aborted'));
+        return Promise.reject(new errors.RequestAbortedError('Request aborted'));
       }),
     };
     const context = createMockStepContext({
@@ -310,7 +310,50 @@ describe('getUpdateKiStepDefinition', () => {
     });
     await expect(handler(context)).rejects.toThrow('Request aborted');
 
-    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'update',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'aborted',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI update aborted in AI index 'hashed-ai-index-id'"
+    );
+  });
+
+  it('reports a failure event for a genuine error even when the signal is aborted', async () => {
+    const abortController = new AbortController();
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockImplementation(() => {
+        abortController.abort();
+        return Promise.reject(createNotFoundResponseError());
+      }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { title: 'New title' } },
+      esClient,
+      abortController,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...telemetry,
+    });
+    await handler(context).catch(() => {});
+
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'update',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'failure',
+      errorType: 'NotFoundError',
+    });
   });
 
   it('throws NotFoundError when the AI index does not exist', async () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
@@ -303,12 +304,12 @@ describe('getCreateKiStepDefinition', () => {
     });
   });
 
-  it('does not report a failure event when the run was cancelled', async () => {
+  it('reports an aborted event when the run was cancelled', async () => {
     const abortController = new AbortController();
     const esClient = {
       index: jest.fn().mockImplementation(() => {
         abortController.abort();
-        return Promise.reject(new Error('Request aborted'));
+        return Promise.reject(new errors.RequestAbortedError('Request aborted'));
       }),
     };
     const context = createMockStepContext({
@@ -327,7 +328,16 @@ describe('getCreateKiStepDefinition', () => {
     });
     await expect(handler(context)).rejects.toThrow('Request aborted');
 
-    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'create',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'aborted',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI create aborted in AI index 'hashed-ai-index-id'"
+    );
   });
 
   it('propagates unexpected AI index service errors unwrapped', async () => {

@@ -14,6 +14,7 @@ import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiBackingIndex,
+  isAbortError,
   kiNotFoundError,
   resolveAiIndex,
 } from './helpers';
@@ -88,23 +89,22 @@ export const getUpdateKiStepDefinition = ({
           },
         };
       } catch (error) {
-        // A cancelled run is not a write failure; skip reporting.
-        if (!context.abortSignal.aborted) {
-          const errorType = errorTypeForTelemetry(error);
-          analyticsService.reportKiWrite({
-            action: 'update',
-            aiIndexId,
-            managed,
-            outcome: 'failure',
-            errorType,
-          });
-          logger.debug(
-            `KI update failed in AI index '${analyticsService.aiIndexIdForTelemetry(
-              aiIndexId,
-              managed
-            )}': ${errorType}`
-          );
-        }
+        // A cancelled run is not a write failure; report it as aborted.
+        const aborted = isAbortError(error);
+        const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+        analyticsService.reportKiWrite({
+          action: 'update',
+          aiIndexId,
+          managed,
+          outcome: aborted ? 'aborted' : 'failure',
+          errorType,
+        });
+        const idForLog = analyticsService.aiIndexIdForTelemetry(aiIndexId, managed);
+        logger.debug(
+          aborted
+            ? `KI update aborted in AI index '${idForLog}'`
+            : `KI update failed in AI index '${idForLog}': ${errorType}`
+        );
         throw error;
       }
     },
