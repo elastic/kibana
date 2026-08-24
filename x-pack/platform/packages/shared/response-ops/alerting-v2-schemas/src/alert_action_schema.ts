@@ -9,12 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
-export enum ALERT_EPISODE_STATUS {
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-  ACTIVE = 'active',
-  RECOVERING = 'recovering',
-}
+export const ALERT_EPISODE_STATUS = {
+  INACTIVE: 'inactive',
+  PENDING: 'pending',
+  ACTIVE: 'active',
+  RECOVERING: 'recovering',
+} as const;
 
 export type AlertEpisodeStatus = (typeof ALERT_EPISODE_STATUS)[keyof typeof ALERT_EPISODE_STATUS];
 
