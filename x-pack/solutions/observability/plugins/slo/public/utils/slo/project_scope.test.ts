@@ -11,7 +11,7 @@ import {
   getProjectScopeLabel,
   getSelectedProjectCount,
   getStaticProjectScopeLabel,
-  isThisProjectRouting,
+  isOriginProjectRouting,
   toStoredProjectRouting,
 } from './project_scope';
 
@@ -25,25 +25,25 @@ const project = (id: string): CPSProject => ({
 const ORIGIN_ID = 'origin-1';
 const availableProjects = [project(ORIGIN_ID), project('linked-1'), project('linked-2')];
 
-describe('isThisProjectRouting', () => {
+describe('isOriginProjectRouting', () => {
   it('matches the canonical origin alias', () => {
-    expect(isThisProjectRouting(LOCAL_PROJECT_ROUTING, ORIGIN_ID)).toBe(true);
+    expect(isOriginProjectRouting(LOCAL_PROJECT_ROUTING, ORIGIN_ID)).toBe(true);
   });
 
   it('matches an equivalent origin id clause', () => {
-    expect(isThisProjectRouting('_id:origin-1', ORIGIN_ID)).toBe(true);
+    expect(isOriginProjectRouting('_id:origin-1', ORIGIN_ID)).toBe(true);
   });
 
   it('does not match another project id', () => {
-    expect(isThisProjectRouting('_id:linked-1', ORIGIN_ID)).toBe(false);
+    expect(isOriginProjectRouting('_id:linked-1', ORIGIN_ID)).toBe(false);
   });
 
   it('still matches the canonical alias without a known origin id', () => {
-    expect(isThisProjectRouting(LOCAL_PROJECT_ROUTING, undefined)).toBe(true);
+    expect(isOriginProjectRouting(LOCAL_PROJECT_ROUTING, undefined)).toBe(true);
   });
 
   it('cannot match an id clause without a known origin id', () => {
-    expect(isThisProjectRouting('_id:origin-1', undefined)).toBe(false);
+    expect(isOriginProjectRouting('_id:origin-1', undefined)).toBe(false);
   });
 });
 

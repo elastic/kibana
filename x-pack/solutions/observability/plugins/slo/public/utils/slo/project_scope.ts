@@ -39,7 +39,7 @@ export const getProjectCountLabel = (selectedCount: number, totalCount: number):
     values: { selectedCount, totalCount },
   });
 
-export const isThisProjectRouting = (
+export const isOriginProjectRouting = (
   projectRouting: string,
   originProjectId: string | undefined
 ): boolean => {
@@ -64,7 +64,7 @@ export const toStoredProjectRouting = (
     return ALL_PROJECT_ROUTING;
   }
 
-  if (isThisProjectRouting(emitted, originProjectId)) {
+  if (isOriginProjectRouting(emitted, originProjectId)) {
     return LOCAL_PROJECT_ROUTING;
   }
 
@@ -80,7 +80,7 @@ export const getStaticProjectScopeLabel = (
     return ALL_PROJECTS_LABEL;
   }
 
-  if (isThisProjectRouting(projectRouting, originProjectId)) {
+  if (isOriginProjectRouting(projectRouting, originProjectId)) {
     return THIS_PROJECT_LABEL;
   }
 
@@ -100,7 +100,7 @@ export const getSelectedProjectCount = ({
     return availableProjects.length;
   }
 
-  if (isThisProjectRouting(projectRouting, originProjectId)) {
+  if (isOriginProjectRouting(projectRouting, originProjectId)) {
     return originProjectId ? 1 : 0;
   }
 
