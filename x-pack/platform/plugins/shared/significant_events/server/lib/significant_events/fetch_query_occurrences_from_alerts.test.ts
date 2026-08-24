@@ -121,6 +121,28 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(calledWith.query).not.toContain('rule-b');
   });
 
+  it('carries expires_at from the link so the durability indicator reflects real expiry', async () => {
+    const expiring = makeQueryLink({
+      id: 'qa',
+      rule_id: 'rule-a',
+      expires_at: '2099-01-01T00:00:00.000Z',
+    });
+    const durable = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
+    const { kiClient, esClient, esql } = createMocks([expiring, durable]);
+
+    esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
+
+    const seriesA = result.queries.find((e) => e.id === 'qa');
+    const seriesB = result.queries.find((e) => e.id === 'qb');
+    expect(seriesA?.expires_at).toBe('2099-01-01T00:00:00.000Z');
+    expect(seriesB?.expires_at).toBeUndefined();
+  });
+
   it('synthesizes a rule-scoped series when no query link matches the requested rule UUIDs', async () => {
     const { kiClient, esClient, esql } = createMocks([
       makeQueryLink({ id: 'qa', rule_id: 'rule-a' }),

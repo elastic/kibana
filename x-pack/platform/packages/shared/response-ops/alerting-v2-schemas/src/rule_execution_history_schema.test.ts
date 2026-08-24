@@ -22,10 +22,10 @@ import {
 const validView = {
   id: 'doc-1',
   rule: { id: 'rule-1', version: null },
-  spaceId: 'default',
-  startedAt: '2026-06-01T00:00:00.000Z',
-  endedAt: '2026-06-01T00:00:01.500Z',
-  timings: { duration: 1500, scheduledDelay: 250 },
+  space_id: 'default',
+  started_at: '2026-06-01T00:00:00.000Z',
+  ended_at: '2026-06-01T00:00:01.500Z',
+  timings: { duration: 1500, scheduled_delay: 250 },
   outcome: 'success' as const,
   reason: null,
   error: null,
@@ -212,7 +212,7 @@ describe('rule_execution_history_schema', () => {
       });
 
       it('rejects unknown sort fields', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ sort: 'createdAt' }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ sort: 'created_at' }).success).toBe(
           false
         );
       });
@@ -333,7 +333,7 @@ describe('rule_execution_history_schema', () => {
         ...validView,
         outcome: 'failure' as const,
         reason: 'rule executor threw',
-        error: { message: 'boom', stackTrace: null },
+        error: { message: 'boom', stack_trace: null },
       };
       expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
     });
@@ -369,17 +369,17 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('rejects negative duration', () => {
-      const row = { ...validView, timings: { duration: -1, scheduledDelay: 0 } };
+      const row = { ...validView, timings: { duration: -1, scheduled_delay: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('allows a negative scheduledDelay (run started ahead of scheduled time)', () => {
-      const row = { ...validView, timings: { duration: 100, scheduledDelay: -50 } };
-      expect(ruleExecutionViewSchema.parse(row).timings.scheduledDelay).toBe(-50);
+    it('allows a negative scheduled_delay (run started ahead of scheduled time)', () => {
+      const row = { ...validView, timings: { duration: 100, scheduled_delay: -50 } };
+      expect(ruleExecutionViewSchema.parse(row).timings.scheduled_delay).toBe(-50);
     });
 
     it('rejects non-integer timings', () => {
-      const row = { ...validView, timings: { duration: 1.5, scheduledDelay: 0 } };
+      const row = { ...validView, timings: { duration: 1.5, scheduled_delay: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -393,7 +393,7 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('requires error.message when error is present', () => {
-      const row = { ...validView, error: { stackTrace: null } };
+      const row = { ...validView, error: { stack_trace: null } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -409,7 +409,7 @@ describe('rule_execution_history_schema', () => {
         items: [],
         total: 0,
         page: 1,
-        perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+        per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
       });
       expect(parsed.items).toEqual([]);
     });
@@ -419,7 +419,7 @@ describe('rule_execution_history_schema', () => {
         items: [validView],
         total: 1,
         page: 1,
-        perPage: 20,
+        per_page: 20,
       });
       expect(parsed.items).toHaveLength(1);
     });
@@ -430,18 +430,18 @@ describe('rule_execution_history_schema', () => {
           items: [],
           total: -1,
           page: 1,
-          perPage: 20,
+          per_page: 20,
         }).success
       ).toBe(false);
     });
 
-    it('rejects page or perPage below 1', () => {
+    it('rejects page or per_page below 1', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
           total: 0,
           page: 0,
-          perPage: 20,
+          per_page: 20,
         }).success
       ).toBe(false);
 
@@ -450,7 +450,7 @@ describe('rule_execution_history_schema', () => {
           items: [],
           total: 0,
           page: 1,
-          perPage: 0,
+          per_page: 0,
         }).success
       ).toBe(false);
     });
@@ -462,7 +462,7 @@ describe('rule_execution_history_schema', () => {
           items: [badItem],
           total: 1,
           page: 1,
-          perPage: 20,
+          per_page: 20,
         }).success
       ).toBe(false);
     });

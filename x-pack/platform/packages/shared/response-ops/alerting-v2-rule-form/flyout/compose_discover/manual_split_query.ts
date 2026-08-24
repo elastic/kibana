@@ -9,15 +9,12 @@ import type { RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { splitResultToRuleQuery } from './use_heuristic_split';
 
-const preserveRecoveryBlock = (source: RuleQuery, result: RuleQuery): RuleQuery => {
-  if (result.format !== 'composed') {
-    return result;
-  }
+const preserveRecoveryBlock = (
+  source: RuleQuery,
+  result: Extract<RuleQuery, { format: 'composed' }>
+): Extract<RuleQuery, { format: 'composed' }> => {
   if (source.format === 'composed' && source.recovery) {
     return { ...result, recovery: source.recovery };
-  }
-  if (source.format === 'standalone' && source.recovery) {
-    return { ...result, recovery: { segment: source.recovery.query } };
   }
   return result;
 };
@@ -36,18 +33,13 @@ export const enterManualSplitQuery = (sourceQuery: RuleQuery): RuleQuery => {
   const fullQuery = getBreachQuery(sourceQuery);
   const { query, outcome } = splitResultToRuleQuery(fullQuery);
 
-  if (outcome === 'success' && query.format === 'composed') {
+  if (outcome === 'success') {
     return preserveRecoveryBlock(sourceQuery, query);
   }
 
-  const pipeline =
-    outcome === 'no_alert_condition' && query.format === 'standalone'
-      ? query.breach.query
-      : fullQuery;
-
   return preserveRecoveryBlock(sourceQuery, {
     format: 'composed',
-    base: pipeline,
+    base: fullQuery,
     breach: { segment: '' },
   });
 };

@@ -25,6 +25,8 @@ import {
   isSignalQueryBreachOnly,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
+  isNoDataQueryConsistentWithStrategy,
+  isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
@@ -55,37 +57,62 @@ const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
 export const setMetadataOperationSchema = metadataSchema
   .partial()
   .omit({ owner: true })
-  .extend({ operation: z.literal('set_metadata') });
+  .extend({ operation: z.literal('set_metadata') })
+  .describe(
+    'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
+  );
 
-export const setKindOperationSchema = z.object({
-  operation: z.literal('set_kind'),
-  kind: ruleKindSchema,
-});
+export const setKindOperationSchema = z
+  .object({
+    operation: z.literal('set_kind'),
+    kind: ruleKindSchema,
+  })
+  .describe(
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
+  );
 
 export const setScheduleOperationSchema = scheduleSchema
   .partial()
-  .extend({ operation: z.literal('set_schedule') });
+  .extend({ operation: z.literal('set_schedule') })
+  .describe(
+    'Use `set_schedule` to control how often the rule runs (`every`) and how far back each run looks (`lookback`).'
+  );
 
-export const setQueryOperationSchema = z.object({
-  operation: z.literal('set_query'),
-  query: querySchema,
-  recovery_strategy: recoveryStrategySchema.optional(),
-  no_data_strategy: noDataStrategySchema.optional(),
-});
+export const setQueryOperationSchema = z
+  .object({
+    operation: z.literal('set_query'),
+    query: querySchema,
+    recovery_strategy: recoveryStrategySchema.optional(),
+    no_data_strategy: noDataStrategySchema.optional(),
+  })
+  .describe(
+    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+  );
 
-export const setGroupingOperationSchema = groupingSchema.extend({
-  operation: z.literal('set_grouping'),
-});
+export const setGroupingOperationSchema = groupingSchema
+  .extend({
+    operation: z.literal('set_grouping'),
+  })
+  .describe(
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+  );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
   .unwrap()
   .unwrap()
   .omit({ pending_operator: true, recovering_operator: true })
-  .extend({ operation: z.literal('set_state_transition') });
+  .extend({ operation: z.literal('set_state_transition') })
+  .describe(
+    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
+  );
 
-export const validateOperationSchema = z.object({
-  operation: z.literal('validate'),
-});
+export const validateOperationSchema = z
+  .object({
+    operation: z.literal('validate'),
+  })
+  .describe(
+    'Use `validate` as the last operation to confirm the rule is complete and ready to save.'
+  );
 
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
@@ -241,6 +268,17 @@ export const executeRuleOperations = async (
           throw new RuleOperationValidationError(
             'recovery_strategy "query" requires a recovery block in the query ' +
               '(recovery: { segment } for composed, recovery: { query } for standalone).'
+          );
+        }
+        if (!isNoDataQueryConsistentWithStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
+          );
+        }
+        if (!isNoDataQueryProvidedForStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'no_data_strategy (other than "none") requires a no_data block in the query ' +
+              'for standalone-format rules.'
           );
         }
         break;

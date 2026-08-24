@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** @deprecated Import from `@kbn/app-menu` instead. */
 export {
   AppMenuComponent,
+  AppMenuLoading,
   AppMenuItem,
   AppMenuActionButton,
   AppMenuOverflowButton,
   AppMenuPopover,
   AppMenuPopoverActionButtons,
   APP_MENU_ITEM_LIMIT,
+  APP_MENU_EBT_ELEMENT,
+  APP_MENU_EBT_OPEN_MORE_ACTION,
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
   getAppMenuActionButtonTestSubj,
@@ -22,22 +26,26 @@ export {
   getShouldOverflow,
   isDisabled,
   getTooltip,
+  getAppMenuEbtDomProps,
   mapAppMenuItemToPanelItem,
   getAppMenuItems,
   getPopoverPanels,
   getPopoverActionItems,
   getIsSelectedColor,
   hasNonGlobalStaticItems,
-} from '@kbn/ui-app-menu';
+} from '@kbn/app-menu';
 
+/** @deprecated Import from `@kbn/app-menu` instead. */
 export type {
+  AppMenuLoadingProps,
   AppMenuBreakpointSource,
   AppMenuRunAction,
   AppMenuRunActionParams,
   AppMenuConfig,
+  AppMenuEbtAttrs,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
   AppMenuStaticItem,
-} from '@kbn/ui-app-menu';
+} from '@kbn/app-menu';

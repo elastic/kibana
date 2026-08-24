@@ -7,27 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBoxObject } from '@elastic/eui-test-helpers';
-import { EuiDataGridObject } from './data_grid_object';
-import { EuiGlobalToastListObject } from './global_toast_list_object';
-import { EuiSuperSelectObject } from './super_select_object';
-import { EuiDataGridWrapper } from './data_grid';
-import { EuiToastWrapper } from './toast';
-import { EuiFieldTextWrapper } from './field_text';
-import { EuiCodeBlockWrapper } from './code_block';
-import { EuiSuperSelectWrapper } from './super_select';
-
+// Component Objects from the published `@elastic/eui-test-helpers`, consumed
+// through the `page.components` factories. Re-exported here so `@kbn/scout` and
+// the solution Scout packages expose them under a single entry point.
 export {
-  // Component Objects (@elastic/eui-test-helpers + prototypes destined for it),
-  // consumed through the `page.components` factories.
   EuiComboBoxObject,
   EuiDataGridObject,
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
-  // Deprecated wrappers, kept until all consumers are migrated to `page.components`.
-  EuiDataGridWrapper,
-  EuiToastWrapper,
-  EuiFieldTextWrapper,
-  EuiCodeBlockWrapper,
-  EuiSuperSelectWrapper,
-};
+} from '@elastic/eui-test-helpers';
+
+// Prototype destined for `@elastic/eui-test-helpers`; lives here until it is
+// ported and published.
+export { EuiSelectableObject } from './selectable_object';
+export { EuiBasicTableObject } from './basic_table_object';
+export { EuiDraggableObject } from './draggable_object';

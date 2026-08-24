@@ -8,8 +8,18 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   ContentListFooter,
   ContentListTable,
@@ -25,9 +35,9 @@ import {
   useContentListSelection,
   useContentListState,
 } from '@kbn/content-list-provider';
-import { filter } from '@kbn/content-list-toolbar';
+import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
-import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
+import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
@@ -68,6 +78,10 @@ interface Props {
   enablePolicy: (id: string) => void;
   disablePolicy: (id: string) => void;
 }
+
+const TAG_SEARCH_DEBOUNCE_MS = 300;
+/** Keeps the search field and the cap hint readable when tag names are short. */
+const TAGS_POPOVER_MIN_WIDTH = 320;
 
 const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.title', {
   defaultMessage: 'Tags',
@@ -134,7 +148,7 @@ export const ActionPoliciesTableContent = ({
   );
   const updatedByUids = useMemo(
     () =>
-      items.map((item) => toPolicy(item).updatedBy).filter((uid): uid is string => Boolean(uid)),
+      items.map((item) => toPolicy(item).updated_by).filter((uid): uid is string => Boolean(uid)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({
@@ -190,7 +204,7 @@ export const ActionPoliciesTableContent = ({
           id="updatedBy"
           name={UPDATED_BY_COLUMN_NAME}
           render={(item) => {
-            const { updatedBy } = toPolicy(item);
+            const { updated_by: updatedBy } = toPolicy(item);
             if (!updatedBy) return null;
             if (isProfileLoadingRef.current)
               return (
@@ -256,7 +270,7 @@ export const ActionPoliciesTableContent = ({
             const policy = toPolicy(item);
             if (!policy.enabled || !canWrite) return null;
             return (
-              <ActionPolicySnoozePopover
+              <ActionPolicySnoozeButton
                 policy={policy}
                 onSnooze={onSnooze}
                 onCancelSnooze={onCancelSnooze}
@@ -264,6 +278,7 @@ export const ActionPoliciesTableContent = ({
                   (isSnoozing && snoozeVariables?.id === policy.id) ||
                   (isUnsnoozing && unsnoozeVariables === policy.id)
                 }
+                isDisabled={isBulkActionInProgress}
               />
             );
           }}
@@ -284,8 +299,6 @@ export const ActionPoliciesTableContent = ({
                 onEdit={onEdit}
                 onClone={onClone}
                 onDelete={onDelete}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
                 onUpdateApiKey={onUpdateApiKey}
                 isDisabled={isBulkActionInProgress}
               />
@@ -323,6 +336,10 @@ export const ActionPoliciesTableContent = ({
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)
           }
+          isSnoozeLoading={
+            (isSnoozing && snoozeVariables?.id === policyToView.id) ||
+            (isUnsnoozing && unsnoozeVariables === policyToView.id)
+          }
         />
       )}
     </>
@@ -350,6 +367,7 @@ const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void 
 
 const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+  const { refetch } = useContentListState();
 
   if (selectedCount === 0) return null;
 
@@ -360,11 +378,17 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((p) => p.id);
+    // The list is fetched through the content list data source, so invalidating
+    // the policy query keys is not enough to reflect the new state.
+    const onSuccess = () => {
+      clearSelection();
+      refetch();
+    };
 
     if (action === 'snooze' && snoozedUntil) {
-      bulkAction({ action, ids, snoozedUntil }, { onSuccess: clearSelection });
+      bulkAction({ action, ids, snoozedUntil }, { onSuccess });
     } else if (action !== 'snooze') {
-      bulkAction({ action, ids }, { onSuccess: clearSelection });
+      bulkAction({ action, ids }, { onSuccess });
     }
   };
 
@@ -385,8 +409,29 @@ const TagsFilterComponent = ({
   query?: Query;
   onChange?: (query: Query) => void;
 }) => {
-  const { data: tagNames = [] } = useFetchTags();
-  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
+  const [tagSearch, setTagSearch] = useState('');
+  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
+  const { selection } = useFieldQueryFilter({
+    fieldName: TAG_FILTER_ID,
+    query,
+    onChange,
+  });
+  const { data: tagNames = [], isLoading } = useFetchTags({
+    search: debouncedTagSearch || undefined,
+  });
+
+  const options = useMemo(() => {
+    // Selected tags outside the capped result set would otherwise disappear
+    // from the popover, leaving an active filter the user cannot untick.
+    const apiTagSet = new Set(tagNames);
+    const orphans = Object.keys(selection)
+      .filter((tag) => !apiTagSet.has(tag))
+      .map((tag) => ({ key: tag, label: tag }));
+    return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
+  }, [tagNames, selection]);
+
+  const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
+
   return (
     <SelectableFilterPopover
       fieldName={TAG_FILTER_ID}
@@ -394,6 +439,31 @@ const TagsFilterComponent = ({
       query={query}
       onChange={onChange}
       options={options}
+      isLoading={isLoading}
+      panelMinWidth={TAGS_POPOVER_MIN_WIDTH}
+      hideSearch
+      headerContent={
+        <EuiFieldSearch
+          compressed
+          value={tagSearch}
+          onChange={(event) => setTagSearch(event.target.value)}
+          placeholder={i18n.translate(
+            'xpack.alertingV2.actionPoliciesList.filter.tags.searchPlaceholder',
+            { defaultMessage: 'Search tags' }
+          )}
+          data-test-subj="actionPoliciesTagsFilterSearch"
+        />
+      }
+      footerContent={
+        showCapGuidance ? (
+          <EuiText size="xs" color="subdued" data-test-subj="actionPoliciesTagsFilterCapGuidance">
+            {i18n.translate('xpack.alertingV2.actionPoliciesList.filter.tags.capGuidance', {
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
+            })}
+          </EuiText>
+        ) : undefined
+      }
       renderOption={(option, { isActive }) => (
         <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
       )}
