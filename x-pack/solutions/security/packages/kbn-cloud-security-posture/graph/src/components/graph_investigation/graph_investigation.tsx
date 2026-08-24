@@ -10,7 +10,7 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
+import { buildEsQuery, isCombinedFilter, FilterStateStore } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
@@ -29,7 +29,11 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+  addFilter,
+} from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
@@ -259,6 +263,47 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       entityIds ?? emptyEntityIds,
       dataView?.id ?? ''
     );
+    const defaultFilters = useMemo<Filter[]>(() => {
+      if (!originEventIds || originEventIds.length === 0 || !dataView?.id) return [];
+      const eventIds = originEventIds.map(({ id }) => id);
+
+      if (eventIds.length === 1) {
+        return [
+          {
+            $state: { store: FilterStateStore.APP_STATE },
+            meta: {
+              key: EVENT_ID,
+              index: dataView.id,
+              negate: false,
+              disabled: false,
+              type: 'phrase' as const,
+              field: EVENT_ID,
+              controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+              params: { query: eventIds[0] },
+            },
+            query: { match_phrase: { [EVENT_ID]: eventIds[0] } },
+          },
+        ];
+      }
+
+      return [
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            key: EVENT_ID,
+            index: dataView.id,
+            negate: false,
+            disabled: false,
+            type: 'phrases' as const,
+            field: EVENT_ID,
+            controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+            params: eventIds,
+          },
+          query: { terms: { [EVENT_ID]: eventIds } },
+        },
+      ];
+    }, [originEventIds, dataView?.id]);
+
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -575,10 +620,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   dateRangeTo={timeRange.to}
                   query={kquery}
                   indexPatterns={[dataView]}
-                  filters={searchFilters}
+                  filters={[...defaultFilters, ...searchFilters]}
                   submitButtonStyle={'iconOnly'}
                   onFiltersUpdated={(newFilters) => {
-                    setSearchFilters(newFilters);
+                    setSearchFilters(
+                      newFilters.filter(
+                        (f) =>
+                          f.meta.controlledBy !== CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER
+                      )
+                    );
                   }}
                   onQuerySubmit={(payload, isUpdate) => {
                     if (isUpdate) {

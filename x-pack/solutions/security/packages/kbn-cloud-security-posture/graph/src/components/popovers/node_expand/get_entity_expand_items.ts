@@ -111,6 +111,8 @@ export interface GetEntityExpandItemsOptions {
   shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
   showEntityDetailsDisabled?: boolean;
+  /** Whether the node is a grouped entities node. Changes the entity details label. Defaults to false. */
+  isGrouped?: boolean;
   /** Whether entity relationships is currently expanded (controls show/hide label) */
   isEntityRelationshipsExpanded?: boolean;
   /** Whether the entity is part of the initial set of entities (e.g., from the original graph request) */
@@ -145,6 +147,7 @@ export const getEntityExpandItems = (
     isInitialEntity = false,
     toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
+    isGrouped = false,
   } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
@@ -273,10 +276,15 @@ export const getEntityExpandItems = (
       type: 'item',
       iconType: 'maximize',
       testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-      label: i18n.translate(
-        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-        { defaultMessage: 'Show entity details' }
-      ),
+      label: isGrouped
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showGroupedEntities',
+            { defaultMessage: 'Show grouped entities' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            { defaultMessage: 'Show entity details' }
+          ),
       disabled: showEntityDetailsDisabled,
       onClick: handleEntityDetailsClick,
       showToolTip: showEntityDetailsDisabled,
