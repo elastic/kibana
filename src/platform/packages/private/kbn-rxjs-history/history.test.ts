@@ -11,7 +11,7 @@ import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
 import { startTrackingHistory } from './history';
 
 const setupHistory = ({
-  initial = { value: 0 },
+  initial,
   maxSize = 10,
   disableUndoRedoInitial = false,
   mapState = (s) => s,
@@ -21,7 +21,7 @@ const setupHistory = ({
   disableUndoRedoInitial?: boolean;
   mapState?: (input: object) => object;
 }) => {
-  const state$ = new BehaviorSubject<object>(initial);
+  const state$ = new BehaviorSubject<object | undefined>(initial);
   const disableUndoRedo$ = new BehaviorSubject<boolean>(disableUndoRedoInitial);
   const { api, cleanup } = startTrackingHistory<object>({
     state$,

@@ -95,6 +95,7 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
     anyStateChange$: of(),
+    latestState$: of(panel1.config),
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
   };

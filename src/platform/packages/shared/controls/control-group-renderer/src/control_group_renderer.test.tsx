@@ -47,6 +47,7 @@ const getTestEmbeddableFactory = () =>
         }),
         anyStateChange$: of(),
         applySerializedState: jest.fn(),
+        latestState$: of(initialState),
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
