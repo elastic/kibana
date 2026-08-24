@@ -12,6 +12,7 @@ import { AlertEvent } from './alert_event';
 import { TestProviders } from '../../../../common/mock';
 import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
@@ -21,6 +22,7 @@ import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../pages/use_fetch_alert_data');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
@@ -42,6 +44,7 @@ describe('AlertEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, hasAlertsAll: true });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });
@@ -117,6 +120,28 @@ describe('AlertEvent', () => {
 
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
+  });
+
+  describe('when the user cannot read alerts', () => {
+    it('shows "Unknown rule" instead of an infinite spinner when the fetch is permanently skipped', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({
+        hasAlertsRead: false,
+        hasAlertsAll: false,
+      });
+      // useQueryAlerts is skipped → refetch stays null forever; must not produce a permanent spinner
+      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+
+      const { container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(`alerts-user-action-${savedObjectId}`)).toHaveTextContent(
+        'Unknown rule'
+      );
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).not.toBeInTheDocument();
+    });
   });
 
   describe('when rule info is absent from metadata (live fetch required)', () => {

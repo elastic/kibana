@@ -11,6 +11,7 @@ import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
@@ -62,6 +63,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
       rules: { read: canReadRules },
     },
   } = useUserPrivileges();
+  const { hasAlertsRead } = useAlertsPrivileges();
 
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
@@ -121,9 +123,11 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
+  // refetchAlertData stays null permanently when hasAlertsRead=false (query is skipped).
+  // Guard with hasAlertsRead so users without alert access reach the fallback label.
   if (
     loadingAlertData ||
-    (!hasRuleIdFromMetadata && refetchAlertData === null) ||
+    (!hasRuleIdFromMetadata && hasAlertsRead && refetchAlertData === null) ||
     firstFetchReturnedNoData
   ) {
     return <EuiLoadingSpinner size="m" />;
