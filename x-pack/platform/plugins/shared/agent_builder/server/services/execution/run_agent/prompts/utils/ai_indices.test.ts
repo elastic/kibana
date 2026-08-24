@@ -108,7 +108,11 @@ describe('getAiIndicesInstructions', () => {
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'marketing',
     });
-    const params = JSON.parse(instructions.match(/```json\n(.+)\n```/)![1]);
+    const match = instructions.match(/```json\n(.+)\n```/);
+    if (!match) {
+      throw new Error('Expected the instructions to contain a JSON query template block');
+    }
+    const params = JSON.parse(match[1]);
 
     expect(params).toEqual({
       query: 'FROM ai-index-* | LIMIT 100',
