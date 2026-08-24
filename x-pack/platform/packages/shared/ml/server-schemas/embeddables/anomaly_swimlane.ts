@@ -10,8 +10,6 @@ import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { severityThresholdSchema } from './anomaly_charts';
-
 const baseProps = {
   ...serializedTitlesSchema.shape,
   ...serializedTimeRangeSchema.shape,
@@ -23,8 +21,9 @@ const baseProps = {
     description:
       'Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.',
   }),
-  severity_threshold: z.array(severityThresholdSchema).max(5).optional().meta({
-    description: 'Severity threshold ranges used to filter anomaly results.',
+  severity_threshold: z.number().min(0).max(100).optional().meta({
+    description:
+      'Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.',
   }),
 };
 

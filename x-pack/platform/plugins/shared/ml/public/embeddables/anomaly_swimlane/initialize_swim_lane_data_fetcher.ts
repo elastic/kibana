@@ -95,6 +95,8 @@ export const initializeSwimLaneDataFetcher = (
         }
 
         const { viewBy, swimlaneType, perPage, fromPage, severityThreshold } = input;
+        const severityThresholds =
+          severityThreshold !== undefined ? [{ min: severityThreshold }] : undefined;
 
         let appliedFilters: estypes.QueryDslQueryContainer;
         try {
@@ -112,7 +114,7 @@ export const initializeSwimLaneDataFetcher = (
             explorerJobs,
             undefined,
             bucketInterval,
-            severityThreshold
+            severityThresholds
           )
         ).pipe(
           switchMap((overallSwimlaneData) => {
@@ -133,7 +135,7 @@ export const initializeSwimLaneDataFetcher = (
                   undefined,
                   appliedFilters,
                   bucketInterval,
-                  severityThreshold
+                  severityThresholds
                 )
               ).pipe(
                 map((viewBySwimlaneData) => {

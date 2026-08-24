@@ -15,7 +15,6 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { map } from 'rxjs';
-import { getSeverityThresholdMax } from '../../common/util/severity_threshold';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 
 export const ANOMALY_SWIMLANE_SEVERITY_BADGE_ID = 'anomaly-swimlane-severity-badge';
@@ -25,7 +24,9 @@ function isSwimlaneWithSeverity(embeddable: unknown): embeddable is AnomalySwimL
 }
 
 export class AnomalySwimlaneSeverityBadge
-  implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
+  implements
+    Action<EmbeddableApiContext>,
+    FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
   public readonly type = ANOMALY_SWIMLANE_SEVERITY_BADGE_ID;
   public readonly id = ANOMALY_SWIMLANE_SEVERITY_BADGE_ID;
@@ -43,34 +44,16 @@ export class AnomalySwimlaneSeverityBadge
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isSwimlaneWithSeverity(embeddable)) return false;
     const threshold = embeddable.severityThreshold.value;
-    // Show badge only when some (not all) severity bands are selected
-    return Array.isArray(threshold) && threshold.length > 0 && threshold.length < 5;
+    return typeof threshold === 'number' && threshold > 0;
   }
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isSwimlaneWithSeverity(embeddable)) throw new IncompatibleActionError();
     const threshold = embeddable.severityThreshold.value;
-    if (!Array.isArray(threshold)) throw new IncompatibleActionError();
-    const sorted = [...threshold].sort((a, b) => a.min - b.min);
-    const isContiguousToTop =
-      sorted.every(
-        (t, i) => i === sorted.length - 1 || getSeverityThresholdMax(t) === sorted[i + 1].min
-      ) && getSeverityThresholdMax(sorted[sorted.length - 1]) === undefined;
-    if (isContiguousToTop) {
-      return i18n.translate('xpack.ml.swimlaneEmbeddable.severityBadge.label', {
-        defaultMessage: 'Max anomaly score > {minScore}',
-        values: { minScore: sorted[0].min },
-      });
-    }
-    const ranges = sorted
-      .map((t) => {
-        const max = getSeverityThresholdMax(t);
-        return max !== undefined ? `${t.min}–${max}` : `${t.min}+`;
-      })
-      .join(', ');
-    return i18n.translate('xpack.ml.swimlaneEmbeddable.severityBadge.rangesLabel', {
-      defaultMessage: 'Max anomaly score {ranges}',
-      values: { ranges },
+    if (typeof threshold !== 'number') throw new IncompatibleActionError();
+    return i18n.translate('xpack.ml.swimlaneEmbeddable.severityBadge.label', {
+      defaultMessage: 'Severity ≥ {threshold}',
+      values: { threshold },
     });
   }
 

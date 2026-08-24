@@ -19,7 +19,6 @@ import type {
   AnomalySwimLaneEmbeddableState,
   SwimlaneType,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -37,11 +36,11 @@ export interface AnomalySwimLaneComponentApi {
   perPage: PublishingSubject<number | undefined>;
   fromPage: PublishingSubject<number>;
   interval: PublishingSubject<number | undefined>;
-  severityThreshold: PublishingSubject<SeverityThreshold[] | undefined>;
+  severityThreshold: PublishingSubject<number | undefined>;
   setInterval: (interval: number | undefined) => void;
   updateUserInput: (input: AnomalySwimLaneEmbeddableState) => void;
   updatePagination: (update: { perPage?: number; fromPage: number }) => void;
-  updateSeverityThreshold: (threshold: SeverityThreshold[] | undefined) => void;
+  updateSeverityThreshold: (threshold: number | undefined) => void;
 }
 
 export type AnomalySwimLaneEmbeddableApi = MlEmbeddableBaseApi<AnomalySwimLaneEmbeddableState> &
