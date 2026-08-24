@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import { authorizeMemoryRequest } from '../core/authorize_request';
+import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
 import { writeMemory } from '../core/write_memory';
 import { MEMORY_RECALL_STEP_ID, MEMORY_REMEMBER_STEP_ID, registerMemoryWorkflowSteps } from '.';
 
-jest.mock('../core/authorize_request');
+jest.mock('../core/resolve_identity');
 jest.mock('../core/recall_memory');
 jest.mock('../core/write_memory');
 
 const request = { request: true };
 const currentUserEsClient = { currentUser: true };
 const storage = { storage: true };
-const security = { security: true };
 const coreSecurity = { coreSecurity: true };
 const identity = { author: 'profile-user-1', author_kind: 'profile_uid' as const };
 
 const registerStepDefinition = jest.fn();
 const getStorage = jest.fn().mockReturnValue(storage);
-const getSecurityStart = jest.fn().mockReturnValue(security);
 const getCoreSecurity = jest.fn().mockReturnValue(coreSecurity);
 const getCurrentUserEsClient = jest.fn().mockReturnValue(currentUserEsClient);
 
@@ -40,7 +38,6 @@ const registerSteps = () => {
   registerMemoryWorkflowSteps(
     { registerStepDefinition } as never,
     getStorage as never,
-    getSecurityStart as never,
     getCoreSecurity as never,
     getCurrentUserEsClient as never
   );
@@ -54,22 +51,12 @@ describe('registerMemoryWorkflowSteps', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getStorage.mockReturnValue(storage);
-    getSecurityStart.mockReturnValue(security);
     getCoreSecurity.mockReturnValue(coreSecurity);
     getCurrentUserEsClient.mockReturnValue(currentUserEsClient);
-    jest.mocked(authorizeMemoryRequest).mockResolvedValue({ status: 'authorized', identity });
+    jest.mocked(resolveIdentity).mockReturnValue(identity);
   });
 
-  it('registers memory.recall and memory.remember without a memory.retain alias', async () => {
-    const { recallStep, rememberStepLoader } = registerSteps();
-    const rememberStep = await rememberStepLoader();
-
-    expect(recallStep.id).toBe(MEMORY_RECALL_STEP_ID);
-    expect(rememberStep.id).toBe(MEMORY_REMEMBER_STEP_ID);
-    expect([recallStep.id, rememberStep.id]).not.toContain('memory.retain');
-  });
-
-  it('authorizes and delegates recall input to the shared recall core', async () => {
+  it('registers memory.recall and delegates input to the shared recall core', async () => {
     jest.mocked(recallMemory).mockResolvedValue({
       memories: [
         {
@@ -84,18 +71,21 @@ describe('registerMemoryWorkflowSteps', () => {
         },
       ],
     });
-    const { recallStep } = registerSteps();
+    const { recallStep, rememberStepLoader } = registerSteps();
+    const rememberStep = await rememberStepLoader();
 
+    expect(registerStepDefinition).toHaveBeenCalledTimes(2);
+    expect([recallStep.id, rememberStep.id]).toEqual([
+      MEMORY_RECALL_STEP_ID,
+      MEMORY_REMEMBER_STEP_ID,
+    ]);
     const result = await recallStep.handler(
       createContext({ query: 'preferences', category: 'preferences', limit: 4 })
     );
 
-    expect(authorizeMemoryRequest).toHaveBeenCalledWith({
+    expect(resolveIdentity).toHaveBeenCalledWith({
       request,
-      spaceId: 'space-1',
-      privilege: 'read_agent_memory',
-      security,
-      coreSecurity,
+      security: coreSecurity,
     });
     expect(getCurrentUserEsClient).toHaveBeenCalledWith(request);
     expect(getStorage).toHaveBeenCalledWith(currentUserEsClient);
@@ -113,11 +103,12 @@ describe('registerMemoryWorkflowSteps', () => {
     expect(recallStep.outputSchema.parse(result.output)).toEqual(result.output);
   });
 
-  it('authorizes and delegates remember input to the shared write core', async () => {
+  it('registers memory.remember without the legacy alias and delegates to write core', async () => {
     jest.mocked(writeMemory).mockResolvedValue({ id: 'memory-1', revision: 2, action: 'updated' });
     const { rememberStepLoader } = registerSteps();
     const rememberStep = await rememberStepLoader();
 
+    expect(rememberStep.id).toBe(MEMORY_REMEMBER_STEP_ID);
     const result = await rememberStep.handler(
       createContext({
         title: 'Preferred sources',
@@ -129,12 +120,9 @@ describe('registerMemoryWorkflowSteps', () => {
       })
     );
 
-    expect(authorizeMemoryRequest).toHaveBeenCalledWith({
+    expect(resolveIdentity).toHaveBeenCalledWith({
       request,
-      spaceId: 'space-1',
-      privilege: 'write_agent_memory',
-      security,
-      coreSecurity,
+      security: coreSecurity,
     });
     expect(getCurrentUserEsClient).toHaveBeenCalledWith(request);
     expect(getStorage).toHaveBeenCalledWith(currentUserEsClient);
@@ -154,5 +142,24 @@ describe('registerMemoryWorkflowSteps', () => {
       },
     });
     expect(result.output).toEqual({ id: 'memory-1', revision: 2, action: 'updated' });
+  });
+
+  it('handles missing identity for both recall and remember', async () => {
+    jest.mocked(resolveIdentity).mockReturnValue(undefined);
+    const { recallStep, rememberStepLoader } = registerSteps();
+    const rememberStep = await rememberStepLoader();
+
+    await expect(recallStep.handler(createContext({ query: 'preferences' }))).resolves.toEqual({
+      output: { memories: [] },
+    });
+    await expect(
+      rememberStep.handler(
+        createContext({ title: 'Preferred sources', description: 'Use primary sources.' })
+      )
+    ).rejects.toThrow('Cannot remember memory: no user identity available for scoping.');
+
+    expect(getCurrentUserEsClient).not.toHaveBeenCalled();
+    expect(recallMemory).not.toHaveBeenCalled();
+    expect(writeMemory).not.toHaveBeenCalled();
   });
 });

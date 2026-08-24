@@ -48,7 +48,7 @@ const DEFAULT_LIMIT = 10;
  *
  * Mandatory filters (G3) are applied unconditionally via `buildRetriever`:
  *  - `space_id` — isolation per Kibana space
- *  - `author` — isolation per user identity
+ *  - user scope with `scope_id` set to the authenticated identity
  * These are injected before any caller-supplied params; no param can widen them.
  */
 export const recallMemory = async ({
@@ -99,7 +99,8 @@ export const recallMemory = async ({
   const retrieverParams = {
     query,
     space_id,
-    author: identity.author,
+    scope_kind: 'user' as const,
+    scope_id: identity.author,
     category,
     limit,
   };

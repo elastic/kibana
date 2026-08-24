@@ -5,899 +5,441 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { errors } from '@elastic/elasticsearch';
-import type { MemoryDocument } from '../storage/memory_storage';
+import { OccConflictError } from '@kbn/occ';
 import { AGENT_MEMORY_INDEX } from '../../common';
-import { writeMemory } from './write_memory';
+import type { MemoryDocument } from '../storage/memory_storage';
+import { writeMemory, type WriteMemoryParams } from './write_memory';
 
 const CURRENT_TIME = '2026-08-13T12:00:00.000Z';
-const unusedEsClient = {} as never;
 
 interface IndexRequest {
   id: string;
   document: MemoryDocument;
+  op_type?: 'create';
   if_seq_no?: number;
   if_primary_term?: number;
 }
 
-interface BulkCreateRequest {
-  operations: [{ create: { _id: string; document: MemoryDocument } }];
+interface StoredDocument {
+  source: MemoryDocument;
+  seqNo: number;
+  primaryTerm: number;
 }
 
-interface BulkCreateResponse {
-  errors: boolean;
-  items: Array<{
-    create: {
-      status: number;
-      error?: string | { type?: string; reason?: string };
+const responseError = (statusCode: number) =>
+  new errors.ResponseError({
+    statusCode,
+    body: {
+      error: {
+        type: statusCode === 409 ? 'version_conflict_engine_exception' : 'internal_server_error',
+      },
+    },
+    headers: {},
+    warnings: [],
+    meta: {} as never,
+  });
+
+const createHarness = () => {
+  const documents = new Map<string, StoredDocument>();
+  const search = jest.fn();
+  let beforeConditionalIndex:
+    | ((request: IndexRequest, current: StoredDocument) => void)
+    | undefined;
+  let conditionalError: Error | undefined;
+  let createError: Error | undefined;
+
+  const index = jest.fn(async (request: IndexRequest) => {
+    const existing = documents.get(request.id);
+
+    if (request.op_type === 'create') {
+      if (createError) {
+        throw createError;
+      }
+      if (existing) {
+        throw responseError(409);
+      }
+      documents.set(request.id, {
+        source: request.document,
+        seqNo: 0,
+        primaryTerm: 1,
+      });
+      return { _seq_no: 0, _primary_term: 1 };
+    }
+
+    if (!existing) {
+      throw responseError(404);
+    }
+
+    beforeConditionalIndex?.(request, existing);
+    if (conditionalError) {
+      throw conditionalError;
+    }
+
+    const latest = documents.get(request.id)!;
+    if (request.if_seq_no !== latest.seqNo || request.if_primary_term !== latest.primaryTerm) {
+      throw responseError(409);
+    }
+
+    const next = {
+      source: request.document,
+      seqNo: latest.seqNo + 1,
+      primaryTerm: latest.primaryTerm,
     };
-  }>;
-}
+    documents.set(request.id, next);
+    return { _seq_no: next.seqNo, _primary_term: next.primaryTerm };
+  });
 
-const createDependencies = (
-  hits: Array<{
-    _id: string;
-    _source: MemoryDocument;
-    _seq_no?: number;
-    _primary_term?: number;
-  }> = []
-) => {
-  const search = jest.fn().mockResolvedValue({ hits: { hits } });
-  const index = jest.fn(async (_request: IndexRequest) => ({}));
-  const bulk = jest.fn(
-    async (_request: BulkCreateRequest): Promise<BulkCreateResponse> => ({
-      errors: false,
-      items: [{ create: { status: 201 } }],
-    })
-  );
+  const get = jest.fn(async ({ index: requestedIndex, id }: { index: string; id: string }) => {
+    expect(requestedIndex).toBe(AGENT_MEMORY_INDEX);
+    const document = documents.get(id);
+    if (!document) {
+      throw responseError(404);
+    }
+    return {
+      _id: id,
+      _source: document.source,
+      _seq_no: document.seqNo,
+      _primary_term: document.primaryTerm,
+    };
+  });
 
   return {
+    documents,
     search,
     index,
-    bulk,
+    get,
     storage: {
-      getClient: () => ({ search, index, bulk }),
+      getClient: () => ({ search, index }),
     } as never,
+    esClient: { get } as never,
+    setBeforeConditionalIndex: (
+      callback: ((request: IndexRequest, current: StoredDocument) => void) | undefined
+    ) => {
+      beforeConditionalIndex = callback;
+    },
+    setConditionalError: (error: Error | undefined) => {
+      conditionalError = error;
+    },
+    setCreateError: (error: Error | undefined) => {
+      createError = error;
+    },
   };
 };
 
+const createParams = (overrides: Partial<WriteMemoryParams> = {}): WriteMemoryParams => ({
+  title: 'Preferred editor',
+  description: 'The user prefers Vim.',
+  space_id: 'default',
+  identity: { author: 'user-1', author_kind: 'profile_uid' },
+  ...overrides,
+});
+
 describe('writeMemory', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
+  });
+
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('sets timestamps and semantic content when creating a memory', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const { storage, bulk } = createDependencies();
+  it('creates deterministic scope-aware IDs without searching', async () => {
+    const harness = createHarness();
 
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'New memory',
-        description: 'New description',
+    const created = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams(),
+    });
+    expect(created).toEqual({
+      id: expect.any(String),
+      revision: 1,
+      action: 'created',
+    });
+
+    const request = harness.index.mock.calls[0][0];
+    expect(request).toMatchObject({
+      id: expect.any(String),
+      op_type: 'create',
+      document: {
+        created_at: CURRENT_TIME,
+        '@timestamp': CURRENT_TIME,
+        content: 'Preferred editor\n\nThe user prefers Vim.',
         space_id: 'default',
-        identity: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
+        memory: {
+          scope_kind: 'user',
+          scope_id: 'user-1',
+          revision: 1,
+          provenance: {
+            author: 'user-1',
+            author_kind: 'profile_uid',
+          },
         },
       },
     });
+    expect(request.document.id).toBe(request.id);
 
-    const writtenDocument = bulk.mock.calls[0][0].operations[0].create.document;
+    const variantParams = [
+      createParams({ identity: { author: 'user-2', author_kind: 'profile_uid' } }),
+      createParams({ space_id: 'another-space' }),
+      createParams({ description: 'The user prefers Emacs.' }),
+    ];
+    const results = [created];
+    for (const params of variantParams) {
+      results.push(
+        await writeMemory({
+          storage: harness.storage,
+          esClient: harness.esClient,
+          params,
+        })
+      );
+    }
 
-    expect(writtenDocument.created_at).toBe(CURRENT_TIME);
-    expect(writtenDocument['@timestamp']).toBe(CURRENT_TIME);
-    expect(writtenDocument.content).toBe('New memory\n\nNew description');
+    expect(new Set(results.map(({ id }) => id))).toHaveProperty('size', 4);
+    expect(harness.documents).toHaveProperty('size', 4);
+    expect(harness.search).not.toHaveBeenCalled();
+
+    const expectedContentHash = createHash('sha256').update('The user prefers Vim.').digest('hex');
+    const expectedId = createHash('sha256')
+      .update(JSON.stringify(['default', 'user', 'user-1', expectedContentHash]))
+      .digest('hex');
+    expect(created.id).toBe(expectedId);
   });
 
-  it('defaults new memories to the resolved user scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const { storage, bulk } = createDependencies();
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'New memory',
-        description: 'New description',
-        space_id: 'default',
-        identity: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
+  it('updates the deterministic document while preserving creation and creator metadata', async () => {
+    const harness = createHarness();
+    const created = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ call_source: 'agent', expires_at: '2026-09-01T00:00:00.000Z' }),
+    });
+    const stored = harness.documents.get(created.id)!;
+    harness.documents.set(created.id, {
+      ...stored,
+      source: {
+        ...stored.source,
+        memory: {
+          ...stored.source.memory,
+          provenance: {
+            author: 'original-creator',
+            author_kind: 'username',
+            call_source: 'agent',
+          },
         },
       },
     });
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
 
-    expect(bulk.mock.calls[0][0].operations[0].create.document.memory).toMatchObject({
-      scope_kind: 'user',
-      scope_id: 'user-1',
+    const expectedScopedId = createHash('sha256')
+      .update(JSON.stringify(['default', 'user', 'user-1', stored.source.memory.content_hash]))
+      .digest('hex');
+    const provenanceSubstitutedId = createHash('sha256')
+      .update(
+        JSON.stringify(['default', 'user', 'original-creator', stored.source.memory.content_hash])
+      )
+      .digest('hex');
+
+    const preserved = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ title: 'Preserve call source' }),
     });
-  });
-
-  it('resurrects a legacy memory in place with a new revision timestamp and default scope', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      deleted: true,
-      '@timestamp': '2026-08-02T00:00:00.000Z',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        provenance: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
-        },
-      },
-    };
-    const { storage, search, index } = createDependencies([
-      {
-        _id: 'memory-1',
-        _source: existingDocument,
-        _seq_no: 7,
-        _primary_term: 3,
-      },
-    ]);
+    expect(preserved).toEqual({ id: expectedScopedId, revision: 2, action: 'updated' });
+    expect(preserved.id).not.toBe(provenanceSubstitutedId);
+    expect(harness.documents.get(created.id)!.source.memory.provenance).toEqual({
+      author: 'original-creator',
+      author_kind: 'username',
+      call_source: 'agent',
+    });
 
     const result = await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Restored title',
-        description: existingDocument.description,
-        space_id: 'default',
-        identity: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
-        },
-      },
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({
+        title: 'Updated title',
+        tags: ['updated'],
+        call_source: 'workflow',
+      }),
     });
 
-    const request = index.mock.calls[0][0];
-
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        seq_no_primary_term: true,
-      })
-    );
-    expect(result).toMatchObject({ id: 'memory-1', action: 'updated' });
-    expect(request).toMatchObject({
-      id: 'memory-1',
-      if_seq_no: 7,
-      if_primary_term: 3,
-    });
-    expect(request.document).toMatchObject({
-      deleted: false,
-      created_at: existingDocument.created_at,
-      '@timestamp': CURRENT_TIME,
+    const updated = harness.documents.get(created.id)!.source;
+    expect(result).toEqual({ id: expectedScopedId, revision: 3, action: 'updated' });
+    expect(result.id).not.toBe(provenanceSubstitutedId);
+    expect(updated).toMatchObject({
+      created_at: CURRENT_TIME,
+      '@timestamp': '2026-08-14T12:00:00.000Z',
+      title: 'Updated title',
+      tags: ['updated'],
+      expires_at: '2026-09-01T00:00:00.000Z',
       memory: {
         scope_kind: 'user',
         scope_id: 'user-1',
-      },
-    });
-    expect(request.document.content).toBe('Restored title\n\nSame description');
-  });
-
-  it('preserves an explicit non-user scope when superseding', async () => {
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        scope_kind: 'agent',
-        scope_id: 'agent-123',
+        revision: 3,
         provenance: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
-        },
-      },
-    };
-    const { storage, index } = createDependencies([
-      {
-        _id: 'memory-1',
-        _source: existingDocument,
-      },
-    ]);
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Updated title',
-        description: existingDocument.description,
-        space_id: 'default',
-        identity: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
+          author: 'original-creator',
+          author_kind: 'username',
+          call_source: 'workflow',
         },
       },
     });
+    expect(harness.get).toHaveBeenCalled();
+    expect(harness.search).not.toHaveBeenCalled();
 
-    expect(index.mock.calls[0][0].document.memory).toMatchObject({
-      scope_kind: 'agent',
-      scope_id: 'agent-123',
-    });
-  });
-
-  it('clears a stale expiry when resurrecting a deleted memory without a new expiry', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      deleted: true,
-      expires_at: '2026-08-01T00:00:00.000Z',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const { storage, index } = createDependencies([{ _id: 'memory-1', _source: existingDocument }]);
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Restored title',
-        description: existingDocument.description,
-        space_id: 'default',
-        identity: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    });
-
-    expect(index.mock.calls[0][0].document.expires_at).toBeUndefined();
-  });
-
-  it('clears a stale expiry when resurrecting an expired memory without a new expiry', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      deleted: false,
-      expires_at: '2026-08-01T00:00:00.000Z',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const { storage, index } = createDependencies([{ _id: 'memory-1', _source: existingDocument }]);
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Restored title',
-        description: existingDocument.description,
-        space_id: 'default',
-        identity: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    });
-
-    expect(index.mock.calls[0][0].document.expires_at).toBeUndefined();
-  });
-
-  it('preserves a non-expired expiry on an ordinary update', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      deleted: false,
-      expires_at: '2026-09-01T00:00:00.000Z',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const { storage, index } = createDependencies([{ _id: 'memory-1', _source: existingDocument }]);
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Updated title',
-        description: existingDocument.description,
-        space_id: 'default',
-        identity: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    });
-
-    expect(index.mock.calls[0][0].document.expires_at).toBe(existingDocument.expires_at);
-  });
-
-  it('replaces an existing expiry when the caller supplies a new one', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
-    const existingDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      expires_at: '2026-09-01T00:00:00.000Z',
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'existing-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const { storage, index } = createDependencies([{ _id: 'memory-1', _source: existingDocument }]);
-
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Updated title',
-        description: existingDocument.description,
-        expires_at: '2026-10-01T00:00:00.000Z',
-        space_id: 'default',
-        identity: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    });
-
-    expect(index.mock.calls[0][0].document.expires_at).toBe('2026-10-01T00:00:00.000Z');
-  });
-
-  it('does not embed the prior revision when superseding', async () => {
-    const priorDocument: MemoryDocument = {
-      id: 'memory-1',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Original description',
-      content: 'Original title\n\nOriginal description',
-      tags: ['original'],
-      created_at: '2026-08-01T00:00:00.000Z',
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'original-hash',
-        provenance: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
-        },
-      },
-    };
-    const existingDocument: MemoryDocument = {
-      ...priorDocument,
-      title: 'Existing title',
-      description: 'Existing description',
-      content: 'Existing title\n\nExisting description',
-      tags: ['existing'],
-      memory: {
-        ...priorDocument.memory,
-        revision: 2,
-        content_hash: 'existing-hash',
-      },
-    };
-    const search = jest.fn().mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'memory-1',
-            _source: existingDocument,
-            _seq_no: 7,
-            _primary_term: 3,
-          },
-        ],
-      },
-    });
-    const index = jest.fn(
-      async (_request: {
-        id: string;
-        document: MemoryDocument;
-        if_seq_no?: number;
-        if_primary_term?: number;
-      }) => ({})
-    );
-    const storage = {
-      getClient: () => ({ search, index }),
-    } as never;
-    await writeMemory({
-      storage,
-      esClient: unusedEsClient,
-      params: {
-        title: 'Updated title',
-        description: 'Updated description',
-        space_id: 'default',
-        identity: {
-          author: 'user-1',
-          author_kind: 'profile_uid',
-        },
-      },
-    });
-
-    const writtenDocument = index.mock.calls[0][0].document;
-    expect(writtenDocument.memory).not.toHaveProperty('prior_document');
-  });
-
-  it('leaves one logical document after concurrent writes of the same memory', async () => {
-    const documents = new Map<
-      string,
-      { source: MemoryDocument; seqNo: number; primaryTerm: number }
-    >();
-    const search = jest.fn(async () => ({ hits: { hits: [] } }));
-    const bulk = jest.fn(
-      async ({
-        operations,
-      }: {
-        operations: Array<{ create: { _id: string; document: MemoryDocument } }>;
-      }) => {
-        const { _id: id, document } = operations[0].create;
-        if (documents.has(id)) {
-          return {
-            errors: true,
-            items: [{ create: { _id: id, status: 409, error: { type: 'version_conflict' } } }],
-          };
-        }
-        documents.set(id, { source: document, seqNo: 0, primaryTerm: 1 });
-        return { errors: false, items: [{ create: { _id: id, status: 201 } }] };
-      }
-    );
-    const nativeGet = jest.fn(async ({ id }: { id: string }) => {
-      const document = documents.get(id);
-      if (!document) {
-        throw new Error(`Missing document ${id}`);
-      }
-      return {
-        _id: id,
-        _source: document.source,
-        _seq_no: document.seqNo,
-        _primary_term: document.primaryTerm,
-      };
-    });
-    const index = jest.fn(async (request: IndexRequest) => {
-      const current = documents.get(request.id);
-      if (
-        current &&
-        request.if_seq_no === current.seqNo &&
-        request.if_primary_term === current.primaryTerm
-      ) {
-        documents.set(request.id, {
-          source: request.document,
-          seqNo: current.seqNo + 1,
-          primaryTerm: current.primaryTerm,
-        });
-      } else {
-        documents.set(request.id, { source: request.document, seqNo: 0, primaryTerm: 1 });
-      }
-      return {};
-    });
-    const storage = {
-      getClient: () => ({ search, bulk, index }),
-    } as never;
-    const write = () =>
+    await expect(
       writeMemory({
-        storage,
-        esClient: { get: nativeGet } as never,
-        params: {
-          title: 'Preferred editor',
-          description: 'The user prefers Vim.',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: harness.storage,
+        esClient: harness.esClient,
+        params: createParams({ expires_at: '2026-10-01T00:00:00.000Z' }),
+      })
+    ).resolves.toEqual({ id: expectedScopedId, revision: 4, action: 'updated' });
+    expect(harness.documents.get(created.id)!.source.expires_at).toBe('2026-10-01T00:00:00.000Z');
+  });
+
+  it('resurrects tombstoned and expired memories while clearing stale expiry', async () => {
+    const staleStates = [
+      { deleted: true, expires_at: '2026-08-01T00:00:00.000Z' },
+      { deleted: false, expires_at: '2026-08-12T00:00:00.000Z' },
+    ];
+
+    for (const state of staleStates) {
+      const harness = createHarness();
+      const created = await writeMemory({
+        storage: harness.storage,
+        esClient: harness.esClient,
+        params: createParams(),
+      });
+      const stored = harness.documents.get(created.id)!;
+      harness.documents.set(created.id, {
+        ...stored,
+        source: { ...stored.source, ...state },
       });
 
-    const results = await Promise.all([write(), write()]);
+      const result = await writeMemory({
+        storage: harness.storage,
+        esClient: harness.esClient,
+        params: createParams({ title: 'Restored title' }),
+      });
 
-    expect(documents).toHaveProperty('size', 1);
-    expect(new Set(results.map(({ id }) => id))).toHaveProperty('size', 1);
-    expect(results.map(({ action }) => action).sort()).toEqual(['created', 'updated']);
+      const restored = harness.documents.get(created.id)!.source;
+      expect(result).toEqual({ id: created.id, revision: 2, action: 'updated' });
+      expect(restored.deleted).toBe(false);
+      expect(restored.expires_at).toBeUndefined();
+    }
   });
 
-  it('converges three concurrent initial writes without failing a caller', async () => {
-    const documents = new Map<
-      string,
-      { source: MemoryDocument; seqNo: number; primaryTerm: number }
-    >();
-    const search = jest.fn(async () => ({ hits: { hits: [] } }));
-    const bulk = jest.fn(
-      async ({
-        operations,
-      }: {
-        operations: Array<{ create: { _id: string; document: MemoryDocument } }>;
-      }) => {
-        const { _id: id, document } = operations[0].create;
-        if (documents.has(id)) {
-          return {
-            errors: true,
-            items: [{ create: { _id: id, status: 409, error: { type: 'version_conflict' } } }],
-          };
-        }
-        documents.set(id, { source: document, seqNo: 0, primaryTerm: 1 });
-        return { errors: false, items: [{ create: { _id: id, status: 201 } }] };
-      }
-    );
-    const nativeGet = jest.fn(async ({ id }: { id: string }) => {
-      const document = documents.get(id);
-      if (!document) {
-        throw new Error(`Missing document ${id}`);
-      }
-      return {
-        _id: id,
-        _source: document.source,
-        _seq_no: document.seqNo,
-        _primary_term: document.primaryTerm,
-      };
-    });
-    const index = jest.fn(async (request: IndexRequest) => {
-      const current = documents.get(request.id);
-      if (
-        !current ||
-        request.if_seq_no !== current.seqNo ||
-        request.if_primary_term !== current.primaryTerm
-      ) {
-        throw new errors.ResponseError({
-          statusCode: 409,
-          body: { error: { type: 'version_conflict_engine_exception' } },
-          headers: {},
-          warnings: [],
-          meta: {} as never,
-        });
-      }
-      documents.set(request.id, {
-        source: request.document,
-        seqNo: current.seqNo + 1,
-        primaryTerm: current.primaryTerm,
-      });
-      return {};
-    });
-    const storage = {
-      getClient: () => ({ search, bulk, index }),
-    } as never;
-    const esClient = { get: nativeGet } as never;
+  it('converges same-scope writes and re-reads the latest conflict winner', async () => {
+    const harness = createHarness();
     const write = () =>
       writeMemory({
-        storage,
-        esClient,
-        params: {
-          title: 'Preferred editor',
-          description: 'The user prefers Vim.',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: harness.storage,
+        esClient: harness.esClient,
+        params: createParams(),
       });
 
     const results = await Promise.all([write(), write(), write()]);
 
-    expect(documents).toHaveProperty('size', 1);
+    expect(harness.documents).toHaveProperty('size', 1);
     expect(new Set(results.map(({ id }) => id))).toHaveProperty('size', 1);
-    expect(documents.values().next().value?.source.memory.revision).toBe(3);
-  });
+    expect(results.map(({ action }) => action).sort()).toEqual(['created', 'updated', 'updated']);
+    expect(harness.documents.values().next().value?.source.memory.revision).toBe(3);
 
-  it('recovers when concurrent writes conflict on an existing random-id memory', async () => {
-    const id = 'legacy-random-id';
-    let current: {
-      source: MemoryDocument;
-      seqNo: number;
-      primaryTerm: number;
-    } = {
-      source: {
-        id,
-        type: 'memory',
-        title: 'Original title',
-        description: 'Same description',
-        content: 'Original title\n\nSame description',
-        deleted: false,
-        created_at: CURRENT_TIME,
-        space_id: 'default',
-        memory: {
-          revision: 1,
-          content_hash: 'legacy-hash',
-          provenance: { author: 'user-1', author_kind: 'profile_uid' },
-        },
-      } satisfies MemoryDocument,
-      seqNo: 0,
-      primaryTerm: 1,
-    };
-    const search = jest.fn(async () => ({
-      hits: {
-        hits: [
-          {
-            _id: id,
-            _source: current.source,
-            _seq_no: current.seqNo,
-            _primary_term: current.primaryTerm,
-          },
-        ],
-      },
-    }));
-    const index = jest.fn(async (request: IndexRequest) => {
-      if (request.if_seq_no !== current.seqNo || request.if_primary_term !== current.primaryTerm) {
-        throw new errors.ResponseError({
-          statusCode: 409,
-          body: { error: { type: 'version_conflict_engine_exception' } },
-          headers: {},
-          warnings: [],
-          meta: {} as never,
-        });
+    const winnerHarness = createHarness();
+    const created = await writeMemory({
+      storage: winnerHarness.storage,
+      esClient: winnerHarness.esClient,
+      params: createParams(),
+    });
+    let injected = false;
+    winnerHarness.setBeforeConditionalIndex((_request, current) => {
+      if (injected) {
+        return;
       }
-      current = {
-        source: request.document,
+      injected = true;
+      winnerHarness.documents.set(created.id, {
+        source: {
+          ...current.source,
+          memory: { ...current.source.memory, revision: 5 },
+        },
         seqNo: current.seqNo + 1,
         primaryTerm: current.primaryTerm,
-      };
-      return {};
-    });
-    const nativeGet = jest.fn(async () => ({
-      _id: id,
-      _source: current.source,
-      _seq_no: current.seqNo,
-      _primary_term: current.primaryTerm,
-    }));
-    const storage = { getClient: () => ({ search, index }) } as never;
-    const esClient = { get: nativeGet } as never;
-    const write = () =>
-      writeMemory({
-        storage,
-        esClient,
-        params: {
-          title: 'Updated title',
-          description: 'Same description',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
       });
+    });
 
-    const results = await Promise.all([write(), write()]);
+    const result = await writeMemory({
+      storage: winnerHarness.storage,
+      esClient: winnerHarness.esClient,
+      params: createParams(),
+    });
 
-    expect(results).toHaveLength(2);
-    expect(results.every(({ action }) => action === 'updated')).toBe(true);
-    expect(current.source.memory.revision).toBe(3);
+    expect(result.revision).toBe(6);
+    expect(winnerHarness.documents.get(created.id)!.source.memory.revision).toBe(6);
+    expect(winnerHarness.get).toHaveBeenCalledTimes(2);
   });
 
-  it('uses native Elasticsearch get after a deterministic create conflict', async () => {
-    const winner: MemoryDocument = {
-      id: 'deterministic-id',
-      type: 'memory',
-      title: 'Preferred editor',
-      description: 'The user prefers Vim.',
-      content: 'Preferred editor\n\nThe user prefers Vim.',
-      deleted: false,
-      created_at: CURRENT_TIME,
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const adapterGet = jest.fn().mockRejectedValue(new Error('search-backed get was used'));
-    const index = jest.fn().mockResolvedValue({});
-    const storage = {
-      getClient: () => ({
-        search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-        bulk: jest.fn().mockResolvedValue({
-          errors: true,
-          items: [
-            {
-              create: {
-                status: 409,
-                error: { type: 'version_conflict_engine_exception' },
-              },
-            },
-          ],
-        }),
-        get: adapterGet,
-        index,
-      }),
-    } as never;
-    const nativeGet = jest.fn().mockResolvedValue({
-      _id: 'deterministic-id',
-      _source: winner,
-      _seq_no: 0,
-      _primary_term: 1,
+  it('throws OccConflictError after exactly three update attempts', async () => {
+    const harness = createHarness();
+    await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams(),
     });
+    harness.index.mockClear();
+    harness.get.mockClear();
+    harness.setConditionalError(responseError(409));
 
     await expect(
       writeMemory({
-        storage,
-        esClient: { get: nativeGet } as never,
-        params: {
-          title: winner.title,
-          description: winner.description,
-          space_id: winner.space_id,
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: harness.storage,
+        esClient: harness.esClient,
+        params: createParams(),
       })
-    ).resolves.toMatchObject({ action: 'updated' });
+    ).rejects.toBeInstanceOf(OccConflictError);
 
-    expect(adapterGet).not.toHaveBeenCalled();
-    expect(nativeGet).toHaveBeenCalledWith({
-      index: AGENT_MEMORY_INDEX,
-      id: expect.any(String),
-    });
-  });
-
-  it('propagates the final 409 after three update attempts', async () => {
-    const existingDocument: MemoryDocument = {
-      id: 'legacy-random-id',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      created_at: CURRENT_TIME,
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'legacy-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const conflicts = Array.from(
-      { length: 3 },
-      () =>
-        new errors.ResponseError({
-          statusCode: 409,
-          body: { error: { type: 'version_conflict_engine_exception' } },
-          headers: {},
-          warnings: [],
-          meta: {} as never,
-        })
+    const updateCalls = harness.index.mock.calls.filter(
+      ([request]) => request.op_type !== 'create'
     );
-    const index = jest
-      .fn()
-      .mockRejectedValueOnce(conflicts[0])
-      .mockRejectedValueOnce(conflicts[1])
-      .mockRejectedValueOnce(conflicts[2]);
-    const storage = {
-      getClient: () => ({
-        search: jest.fn().mockResolvedValue({
-          hits: {
-            hits: [
-              {
-                _id: existingDocument.id,
-                _source: existingDocument,
-                _seq_no: 0,
-                _primary_term: 1,
-              },
-            ],
-          },
-        }),
-        index,
-      }),
-    } as never;
-    const nativeGet = jest.fn().mockResolvedValue({
-      _id: existingDocument.id,
-      _source: existingDocument,
-      _seq_no: 0,
-      _primary_term: 1,
-    });
-
-    await expect(
-      writeMemory({
-        storage,
-        esClient: { get: nativeGet } as never,
-        params: {
-          title: 'Updated title',
-          description: existingDocument.description,
-          space_id: existingDocument.space_id,
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
-      })
-    ).rejects.toBe(conflicts[2]);
-
-    expect(index).toHaveBeenCalledTimes(3);
-    expect(nativeGet).toHaveBeenCalledTimes(2);
+    expect(updateCalls).toHaveLength(3);
+    expect(harness.get).toHaveBeenCalledTimes(3);
   });
 
-  it('does not retry a non-409 update failure', async () => {
-    const existingDocument: MemoryDocument = {
-      id: 'legacy-random-id',
-      type: 'memory',
-      title: 'Original title',
-      description: 'Same description',
-      content: 'Original title\n\nSame description',
-      created_at: CURRENT_TIME,
-      space_id: 'default',
-      memory: {
-        revision: 1,
-        content_hash: 'legacy-hash',
-        provenance: { author: 'user-1', author_kind: 'profile_uid' },
-      },
-    };
-    const serverError = new errors.ResponseError({
-      statusCode: 500,
-      body: { error: { type: 'internal_server_error' } },
-      headers: {},
-      warnings: [],
-      meta: {} as never,
-    });
-    const index = jest.fn().mockRejectedValue(serverError);
-    const storage = {
-      getClient: () => ({
-        search: jest.fn().mockResolvedValue({
-          hits: {
-            hits: [
-              {
-                _id: existingDocument.id,
-                _source: existingDocument,
-                _seq_no: 0,
-                _primary_term: 1,
-              },
-            ],
-          },
-        }),
-        index,
-      }),
-    } as never;
-    const nativeGet = jest.fn();
+  it('propagates non-conflict create and update errors without retries', async () => {
+    const createHarnessWithError = createHarness();
+    const createError = responseError(500);
+    createHarnessWithError.setCreateError(createError);
 
     await expect(
       writeMemory({
-        storage,
-        esClient: { get: nativeGet } as never,
-        params: {
-          title: 'Updated title',
-          description: existingDocument.description,
-          space_id: existingDocument.space_id,
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: createHarnessWithError.storage,
+        esClient: createHarnessWithError.esClient,
+        params: createParams(),
       })
-    ).rejects.toBe(serverError);
+    ).rejects.toBe(createError);
 
-    expect(index).toHaveBeenCalledTimes(1);
-    expect(nativeGet).not.toHaveBeenCalled();
-  });
+    expect(createHarnessWithError.index).toHaveBeenCalledTimes(1);
+    expect(createHarnessWithError.get).not.toHaveBeenCalled();
 
-  it('propagates non-conflict bulk create errors with Elasticsearch details', async () => {
-    const { storage, bulk } = createDependencies();
-    bulk.mockResolvedValue({
-      errors: true,
-      items: [
-        {
-          create: {
-            status: 500,
-            error: {
-              type: 'strict_dynamic_mapping_exception',
-              reason: 'mapping rejected the document',
-            },
-          },
-        },
-      ],
+    const updateHarnessWithError = createHarness();
+    await writeMemory({
+      storage: updateHarnessWithError.storage,
+      esClient: updateHarnessWithError.esClient,
+      params: createParams(),
     });
+    updateHarnessWithError.index.mockClear();
+    updateHarnessWithError.get.mockClear();
+    const updateError = responseError(500);
+    updateHarnessWithError.setConditionalError(updateError);
 
     await expect(
       writeMemory({
-        storage,
-        esClient: unusedEsClient,
-        params: {
-          title: 'Preferred editor',
-          description: 'The user prefers Vim.',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: updateHarnessWithError.storage,
+        esClient: updateHarnessWithError.esClient,
+        params: createParams(),
       })
-    ).rejects.toThrow(
-      'Agent Memory create failed: strict_dynamic_mapping_exception: mapping rejected the document'
-    );
+    ).rejects.toBe(updateError);
+
+    expect(updateHarnessWithError.index).toHaveBeenCalledTimes(2);
+    expect(updateHarnessWithError.get).toHaveBeenCalledTimes(1);
   });
 });

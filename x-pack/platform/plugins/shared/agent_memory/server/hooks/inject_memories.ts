@@ -13,14 +13,13 @@ import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
-import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
+import { MEMORY_SKILL_ID } from '../skills/memory_skill';
 import type { GetMemoryStorage } from '../types';
 
 /** Max length of the user message used as the recall query. */
@@ -44,7 +43,7 @@ const EMPTY_RECALL_ATTRIBUTES = {
 } as const;
 
 const isRecallEnabled = (agentConfiguration: AgentConfiguration): boolean =>
-  agentConfiguration.enable_elastic_capabilities === true ||
+  agentConfiguration.skill_ids?.includes(MEMORY_SKILL_ID) === true ||
   agentConfiguration.tools.some(({ tool_ids: toolIds }) =>
     toolIds.some(
       (toolId) => toolId === platformMemoryTools.recall || toolId === allToolsSelectionWildcard
@@ -97,12 +96,12 @@ export const renderUntrustedBlock = (
 /**
  * Registers the `beforeAgent` hook that auto-injects recalled memories.
  *
- * The hook skips if recall is not enabled, the user lacks `read_agent_memory`,
- * has no identity, or sends an empty message. Any recall error fails open —
- * the agent round continues without memories.
+ * The hook skips if recall is not enabled, has no identity, or sends an empty
+ * message. Any recall error, including an Elasticsearch authorization failure,
+ * fails open so the agent round continues without memories.
  *
- * `getSecurity` (plugin) provides authz; `getCoreSecurity` (core) provides authc.
- * The two are not interchangeable — see `resolveIdentity`.
+ * Core security provides stable request identity; Elasticsearch authorization
+ * is enforced by the request-scoped client.
  *
  * Recalled content is injected into `nextInput.attachment_context` (prepended
  * if context already exists). It is NOT persisted in the conversation round —
@@ -112,18 +111,13 @@ export const registerMemoryHook = ({
   hooksSetup,
   getStorage,
   getCurrentUserEsClient,
-  getSecurity,
   getCoreSecurity,
-  getSpaceId,
   logger,
 }: {
   hooksSetup: HooksServiceSetup;
   getStorage: GetMemoryStorage;
   getCurrentUserEsClient: (request: KibanaRequest) => ElasticsearchClient;
-  getSecurity: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
-  /** Returns the Kibana space ID for the given request. */
-  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): void => {
   hooksSetup.register({
@@ -139,28 +133,9 @@ export const registerMemoryHook = ({
               MEMORY_HOOK_SPAN_NAME,
               { attributes: EMPTY_RECALL_ATTRIBUTES },
               async (span) => {
-                const { request, nextInput, agentConfiguration } = context;
+                const { request, nextInput, agentConfiguration, spaceId } = context;
                 if (!isRecallEnabled(agentConfiguration)) {
                   span?.setAttribute('agent_memory.recall.outcome', 'skipped_not_enabled');
-                  return {};
-                }
-
-                const security = getSecurity();
-                const spaceId = getSpaceId(request);
-
-                // ── Authz check — fail open if user lacks read privilege ──────────
-                try {
-                  const { hasAllRequested } = await security.authz
-                    .checkPrivilegesWithRequest(request)
-                    .atSpace(spaceId, {
-                      kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
-                    });
-                  if (!hasAllRequested) {
-                    span?.setAttribute('agent_memory.recall.outcome', 'skipped_no_privilege');
-                    return {};
-                  }
-                } catch {
-                  span?.setAttribute('agent_memory.recall.outcome', 'skipped_authz_error');
                   return {};
                 }
 
@@ -198,8 +173,8 @@ export const registerMemoryHook = ({
                     'agent_memory.injection.characters': block.length,
                     'agent_memory.injection.estimated_tokens_per_llm_call': estimateTokens(block),
                   });
-                } catch (err) {
-                  logger.warn(`Memory hook recall failed (fail open): ${(err as Error).message}`);
+                } catch {
+                  logger.warn('Memory hook recall failed (fail open)');
                   span?.setAttribute('agent_memory.recall.outcome', 'error');
                   span?.recordException(new Error('Memory recall failed'));
                   span?.setStatus({ code: SpanStatusCode.ERROR });

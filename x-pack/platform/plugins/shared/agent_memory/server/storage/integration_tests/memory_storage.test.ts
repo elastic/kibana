@@ -160,7 +160,8 @@ describe('Agent Memory AI Index integration', () => {
     const retriever = buildRetriever({
       query: semanticQuery,
       space_id: spaceId,
-      author: identity.author,
+      scope_kind: 'user',
+      scope_id: identity.author,
       limit: 10,
     });
     const recalled = await storage.getClient().search({

@@ -10,12 +10,10 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { authorizeMemoryRequest } from '../core/authorize_request';
+import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
-import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import { recallInputSchema, rememberInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
 
@@ -73,7 +71,6 @@ const RememberOutputSchema = z.object({
 export const registerMemoryWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
   getStorage: GetMemoryStorage,
-  getSecurityStart: () => SecurityPluginStart,
   getCoreSecurity: () => SecurityServiceStart,
   getCurrentUserEsClient: (request: KibanaRequest) => ElasticsearchClient
 ): void => {
@@ -88,24 +85,20 @@ export const registerMemoryWorkflowSteps = (
       outputSchema: RecallOutputSchema,
       handler: async (context) => {
         const { query, category, limit } = context.input;
-        const security = getSecurityStart();
         const request = context.contextManager.getFakeRequest();
         const spaceId = context.contextManager.getContext().workflow.spaceId;
-        const authorization = await authorizeMemoryRequest({
+        const identity = resolveIdentity({
           request,
-          spaceId,
-          privilege: AGENT_MEMORY_API_PRIVILEGES.read,
-          security,
-          coreSecurity: getCoreSecurity(),
+          security: getCoreSecurity(),
         });
 
-        if (authorization.status !== 'authorized') {
+        if (!identity) {
           return { output: { memories: [] } };
         }
 
         const result = await recallMemory({
           storage: getStorage(getCurrentUserEsClient(request)),
-          params: { query, category, limit, space_id: spaceId, identity: authorization.identity },
+          params: { query, category, limit, space_id: spaceId, identity },
         });
 
         return { output: { memories: result.memories } };
@@ -123,29 +116,19 @@ export const registerMemoryWorkflowSteps = (
       label: 'Remember memory',
       description:
         'Stores a new memory or supersedes an existing one with identical content ' +
-        '(find-or-create on content hash). Writes as the executing user.',
+        '(deterministic key within the executing user scope).',
       inputSchema: rememberInputSchema,
       outputSchema: RememberOutputSchema,
       handler: async (context) => {
         const { title, description, category, type, tags, expires_at } = context.input;
-        const security = getSecurityStart();
         const request = context.contextManager.getFakeRequest();
         const spaceId = context.contextManager.getContext().workflow.spaceId;
-        const authorization = await authorizeMemoryRequest({
+        const identity = resolveIdentity({
           request,
-          spaceId,
-          privilege: AGENT_MEMORY_API_PRIVILEGES.write,
-          security,
-          coreSecurity: getCoreSecurity(),
+          security: getCoreSecurity(),
         });
 
-        if (authorization.status === 'forbidden') {
-          throw new Error(
-            'Forbidden: the executing user does not have the write_agent_memory privilege.'
-          );
-        }
-
-        if (authorization.status === 'missing_identity') {
+        if (!identity) {
           throw new Error('Cannot remember memory: no user identity available for scoping.');
         }
 
@@ -162,7 +145,7 @@ export const registerMemoryWorkflowSteps = (
             expires_at,
             call_source: 'workflow',
             space_id: spaceId,
-            identity: authorization.identity,
+            identity,
           },
         });
 

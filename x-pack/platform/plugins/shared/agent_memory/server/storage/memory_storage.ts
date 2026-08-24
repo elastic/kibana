@@ -69,20 +69,19 @@ export const memoryStorageSettings = {
           // Revision / content addressing
           /** Monotonically increasing integer; incremented on each supersession. */
           revision: types.long({}),
-          /** SHA-256 of the normalised description; drives find-or-create dedup. */
+          /** SHA-256 of the normalised description; part of the scope-aware dedup key. */
           content_hash: types.keyword({}),
 
-          // Scope. New writes default to user/author; missing legacy scope is
-          // treated as user-scoped by mandatory author + space recall filters.
-          /** 'user' | 'agent' | 'space' — stored visibility metadata. */
+          // Authoritative application visibility and ownership scope.
+          /** 'user' today; 'team' is reserved for future use. */
           scope_kind: types.keyword({}),
-          /** Identifier for the scoped entity (agent_id, space_id, …). */
+          /** Identifier for the scoped user or future team. */
           scope_id: types.keyword({}),
 
-          // Provenance block
+          // Creator provenance; never used for visibility or ownership.
           provenance: types.object({
             properties: {
-              /** Identity key: profile_uid or username (see author_kind). */
+              /** Creator identity key: profile_uid or username (see author_kind). */
               author: types.keyword({}),
               /** 'profile_uid' | 'username' — disambiguates the author field. */
               author_kind: types.keyword({}),

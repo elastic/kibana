@@ -24,13 +24,11 @@ export interface TombstoneMemoryResult {
 /**
  * Soft-deletes a memory by setting `deleted: true` in place.
  *
- * The document is never hard-deleted. This bounds blast radius if the authz
- * gate is ever bypassed, and preserves the audit trail. Memories excluded from
- * recall results because `deleted === true` are still visible in ES|QL for
- * admin inspection and can be physically removed via Index Management.
+ * The document is never hard-deleted, preserving the audit trail. Memories
+ * excluded from recall results because `deleted === true` are still visible in
+ * ES|QL for admin inspection and can be physically removed via Index Management.
  *
- * Validates that the caller owns the memory (matching `space_id` and `author`)
- * before applying the tombstone.
+ * Validates authoritative space and user scope before applying the tombstone.
  */
 export const tombstoneMemory = async ({
   storage,
@@ -67,10 +65,11 @@ export const tombstoneMemory = async ({
     return { result: 'not_found' };
   }
 
-  // Ownership gate: author + space must match.
-  const author = existing.memory?.provenance?.author;
+  // Ownership gate: visibility scope + space must match. Provenance is creator metadata only.
+  const scopeKind = existing.memory?.scope_kind;
+  const scopeId = existing.memory?.scope_id;
   const docSpaceId = existing.space_id;
-  if (author !== identity.author || docSpaceId !== space_id) {
+  if (scopeKind !== 'user' || scopeId !== identity.author || docSpaceId !== space_id) {
     // Treat as not-found to avoid leaking existence of foreign memories.
     return { result: 'not_found' };
   }

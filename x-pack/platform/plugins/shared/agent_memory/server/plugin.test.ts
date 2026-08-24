@@ -8,19 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { HookLifecycle } from '@kbn/agent-builder-common';
-import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
+import { defaultAgentToolIds, platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { AGENT_MEMORY_INDEX } from '../common';
 import type { AgentMemoryConfig } from './config';
 import { AgentMemoryPlugin } from './plugin';
-import type {
-  AgentMemorySetupDependencies,
-  AgentMemoryStartDependencies,
-  GetMemoryStorage,
-} from './types';
+import { MEMORY_SKILL_ID } from './skills/memory_skill';
+import type { AgentMemorySetupDependencies, GetMemoryStorage } from './types';
 import { MEMORY_RECALL_STEP_ID } from './workflow_steps';
 
 jest.mock('./storage/memory_storage', () => ({
@@ -54,8 +49,6 @@ describe('AgentMemoryPlugin', () => {
     };
     const setupDependencies: AgentMemorySetupDependencies = {
       agentBuilder,
-      features: featuresPluginMock.createSetup(),
-      security: securityMock.createSetup(),
       workflowsExtensions,
     };
 
@@ -67,6 +60,11 @@ describe('AgentMemoryPlugin', () => {
       platformMemoryTools.forget,
     ]);
     const registeredTools = agentBuilder.tools.register.mock.calls.map(([tool]) => tool);
+    expect(registeredTools).toEqual([
+      expect.objectContaining({ id: platformMemoryTools.recall, excludeFromMcp: true }),
+      expect.objectContaining({ id: platformMemoryTools.remember, excludeFromMcp: true }),
+      expect.objectContaining({ id: platformMemoryTools.forget, excludeFromMcp: true }),
+    ]);
     expect(registeredTools.find(({ id }) => id === platformMemoryTools.remember)).toEqual(
       expect.objectContaining({
         confirmation: expect.objectContaining({ askUser: 'never' }),
@@ -81,13 +79,27 @@ describe('AgentMemoryPlugin', () => {
       expect(tool).toEqual(expect.objectContaining({ handler: expect.any(Function) }));
     }
 
-    expect(agentBuilder.skills.register).toHaveBeenCalledWith(
+    const registeredSkill = agentBuilder.skills.register.mock.calls[0]?.[0];
+    expect(registeredSkill).toEqual(
       expect.objectContaining({
-        id: 'agent-memory',
-        name: 'agent-memory',
+        id: MEMORY_SKILL_ID,
+        name: MEMORY_SKILL_ID,
         content: expect.stringContaining(`FROM ${AGENT_MEMORY_INDEX}`),
+        excludeFromElasticCapabilities: true,
+        getRegistryTools: expect.any(Function),
       })
     );
+    if (!registeredSkill?.getRegistryTools) {
+      throw new Error('Expected Agent Memory skill to bind registry tools');
+    }
+    expect(await registeredSkill.getRegistryTools()).toEqual([
+      platformMemoryTools.remember,
+      platformMemoryTools.recall,
+      platformMemoryTools.forget,
+    ]);
+    for (const memoryToolId of Object.values(platformMemoryTools)) {
+      expect(defaultAgentToolIds).not.toContain(memoryToolId);
+    }
 
     const hook = agentBuilder.hooks.register.mock.calls[0]?.[0];
     expect(hook).toEqual(
@@ -125,9 +137,7 @@ describe('AgentMemoryPlugin', () => {
     const coreStart = coreMock.createStart();
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-    await plugin.start(coreStart, {
-      security: {},
-    } as AgentMemoryStartDependencies);
+    await plugin.start(coreStart, { agentBuilder: agentBuilderMocks.createStart() });
 
     const { createStorage } = plugin as unknown as {
       createStorage: GetMemoryStorage;

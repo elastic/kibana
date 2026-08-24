@@ -29,7 +29,7 @@ describe('memoryStorageSettings', () => {
     type: 'date',
   } as const;
 
-  it('configures the exact index and component-template composition', () => {
+  it('configures the index, component composition, and Agent Memory-owned mappings', () => {
     expect(AGENT_MEMORY_INDEX).toBe('ai-index-idx-agent-memory');
     expect({
       name: memoryStorageSettings.name,
@@ -44,9 +44,7 @@ describe('memoryStorageSettings', () => {
         optional: ['ai-index@custom'],
       },
     });
-  });
 
-  it('maps only Agent Memory-owned fields in its component template', () => {
     const rootProperties = memoryStorageSettings.schema.properties;
 
     expect(rootProperties).toEqual({

@@ -20,8 +20,10 @@ const lexicalMemory: MemoryDocument = {
   memory: {
     revision: 1,
     content_hash: 'hash',
+    scope_kind: 'user',
+    scope_id: 'user-1',
     provenance: {
-      author: 'user-1',
+      author: 'original-creator',
       author_kind: 'profile_uid',
     },
   },
@@ -62,7 +64,7 @@ describe('recallMemory', () => {
           type: undefined,
           tags: undefined,
           created_at: '2026-08-01T00:00:00.000Z',
-          author: 'user-1',
+          author: 'original-creator',
           author_kind: 'profile_uid',
           revision: 1,
         },
@@ -73,12 +75,22 @@ describe('recallMemory', () => {
     expect(search.mock.calls[1][0].retriever).toEqual(
       expect.objectContaining({
         standard: expect.objectContaining({
-          query: expect.objectContaining({ multi_match: expect.any(Object) }),
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([
+                expect.objectContaining({ multi_match: expect.any(Object) }),
+              ]),
+            }),
+          }),
         }),
       })
     );
     expect(search.mock.calls[1][0].retriever).not.toHaveProperty('rrf');
     expect(JSON.stringify(search.mock.calls[1][0].retriever)).not.toContain('content.semantic');
+    expect(JSON.stringify(search.mock.calls[1][0].retriever)).toContain('memory.scope_id');
+    expect(JSON.stringify(search.mock.calls[1][0].retriever)).not.toContain(
+      'memory.provenance.author'
+    );
   });
 
   it('fails open after both recall attempts fail without logging memory content', async () => {

@@ -15,8 +15,6 @@ import type {
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentMemoryConfig } from './config';
 import type {
   AgentMemoryPluginSetup,
@@ -25,7 +23,6 @@ import type {
   AgentMemoryStartDependencies,
   GetMemoryStorage,
 } from './types';
-import { registerFeatures } from './features';
 import { createRecallTool } from './tools/recall';
 import { createRememberTool } from './tools/remember';
 import { createForgetTool } from './tools/forget';
@@ -51,8 +48,6 @@ export class AgentMemoryPlugin
    * fixed index-template operations use the internal client.
    */
   private createStorage?: GetMemoryStorage;
-  /** Plugin security: exposes authz for privilege checks in tools. */
-  private securityStart?: SecurityPluginStart;
   /**
    * Core security: exposes authc for identity resolution. Only core's
    * `getCurrentUser` resolves the user behind a Task Manager fake request,
@@ -60,7 +55,6 @@ export class AgentMemoryPlugin
    */
   private coreSecurity?: SecurityServiceStart;
   private elasticsearch?: CoreStart['elasticsearch'];
-  private spacesStart?: SpacesPluginStart;
 
   constructor(context: PluginInitializerContext<AgentMemoryConfig>) {
     this.logger = context.logger.get();
@@ -75,8 +69,6 @@ export class AgentMemoryPlugin
       this.logger.debug('Agent Memory is disabled via config; skipping setup');
       return {};
     }
-
-    registerFeatures({ features: setupDeps.features });
 
     // ── Lazy getters ──────────────────────────────────────────────────────────
     // All start-time services are exposed through getters so setup() registrations
@@ -95,31 +87,19 @@ export class AgentMemoryPlugin
       return this.elasticsearch.client.asScoped(request).asCurrentUser;
     };
 
-    const getSecurityStart = (): SecurityPluginStart => {
-      if (!this.securityStart)
-        throw new Error('AgentMemoryPlugin: security accessed before start()');
-      return this.securityStart;
-    };
-
     const getCoreSecurity = (): SecurityServiceStart => {
       if (!this.coreSecurity)
         throw new Error('AgentMemoryPlugin: core security accessed before start()');
       return this.coreSecurity;
     };
 
-    const getSpaceId = (request: KibanaRequest): string =>
-      this.spacesStart?.spacesService.getSpaceId(request) ?? 'default';
-
     // ── Tools ─────────────────────────────────────────────────────────────────
     const { tools, skills, hooks } = setupDeps.agentBuilder;
 
-    tools.register(
-      createRecallTool({ getStorage: getMemoryStorage, getSecurityStart, getCoreSecurity })
-    );
+    tools.register(createRecallTool({ getStorage: getMemoryStorage, getCoreSecurity }));
     tools.register(
       createRememberTool({
         getStorage: getMemoryStorage,
-        getSecurityStart,
         getCoreSecurity,
         writeConfirmation: this.config.writeConfirmation,
       })
@@ -127,7 +107,6 @@ export class AgentMemoryPlugin
     tools.register(
       createForgetTool({
         getStorage: getMemoryStorage,
-        getSecurityStart,
         getCoreSecurity,
         writeConfirmation: this.config.writeConfirmation,
       })
@@ -141,9 +120,7 @@ export class AgentMemoryPlugin
       hooksSetup: hooks,
       getStorage: getMemoryStorage,
       getCurrentUserEsClient,
-      getSecurity: getSecurityStart,
       getCoreSecurity,
-      getSpaceId,
       logger: this.logger.get('hook'),
     });
 
@@ -151,7 +128,6 @@ export class AgentMemoryPlugin
     registerMemoryWorkflowSteps(
       setupDeps.workflowsExtensions,
       getMemoryStorage,
-      getSecurityStart,
       getCoreSecurity,
       getCurrentUserEsClient
     );
@@ -161,7 +137,7 @@ export class AgentMemoryPlugin
 
   async start(
     coreStart: CoreStart,
-    startDeps: AgentMemoryStartDependencies
+    _startDeps: AgentMemoryStartDependencies
   ): Promise<AgentMemoryPluginStart> {
     if (!this.config.enabled) {
       return {};
@@ -173,10 +149,8 @@ export class AgentMemoryPlugin
 
     // Populate lazy-getter targets. These must be set before any request handler
     // could run — Kibana guarantees start() completes before the first request.
-    this.securityStart = startDeps.security;
     this.coreSecurity = coreStart.security;
     this.elasticsearch = coreStart.elasticsearch;
-    this.spacesStart = startDeps.spaces;
 
     // Belief-store factory — callers pass asCurrentUser for data operations;
     // the internal user manages only the plugin-owned index template.

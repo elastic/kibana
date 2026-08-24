@@ -9,13 +9,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorKind } from '../storage/memory_storage';
 
 /**
- * The resolved author key used to scope memories.
+ * The resolved user identity used for scope and creator provenance.
  *
  * `author_kind` records which field `author` came from. Username fallbacks are
  * realm-qualified so equal usernames in different realms cannot share memory.
  */
 export interface ResolvedIdentity {
-  /** The scoping key stored in `memory.provenance.author`. */
+  /** Stored in `memory.scope_id` for personal scope and as creator provenance on create. */
   author: string;
   /** Whether `author` is a `profile_uid` or a `username`. */
   author_kind: AuthorKind;

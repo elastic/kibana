@@ -6,10 +6,13 @@
  */
 
 import type { SkillsSetup } from '@kbn/agent-builder-server';
+import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import { AGENT_MEMORY_INDEX } from '../../common';
 
 // SkillDefinition is not exported from the package; extract it from SkillsSetup.register.
 type SkillDefinition = Parameters<SkillsSetup['register']>[0];
+
+export const MEMORY_SKILL_ID = 'agent-memory' as const;
 
 const SKILL_CONTENT = `
 # Agent Memory
@@ -72,15 +75,18 @@ Use the \`category\` field to classify memories:
 // `defineSkillType` is a no-op identity helper not exported from the package.
 // We type the object directly instead.
 export const memorySkill: SkillDefinition = {
-  id: 'agent-memory',
-  name: 'agent-memory',
+  id: MEMORY_SKILL_ID,
+  name: MEMORY_SKILL_ID,
   basePath: 'skills/platform/context-engine',
   description:
     'Guides the agent on when and how to use the persistent memory tools ' +
     '(remember, recall, forget) to store and retrieve user context across conversations.',
   content: SKILL_CONTENT,
   referencedContent: [],
-  // The three memory tools are already in defaultAgentToolIds, so they are
-  // always available. getRegistryTools is omitted intentionally — the skill
-  // provides guidance, not additional tool access.
+  excludeFromElasticCapabilities: true,
+  getRegistryTools: () => [
+    platformMemoryTools.remember,
+    platformMemoryTools.recall,
+    platformMemoryTools.forget,
+  ],
 };

@@ -11,11 +11,9 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { authorizeMemoryRequest } from '../core/authorize_request';
+import { resolveIdentity } from '../core/resolve_identity';
 import { writeMemory } from '../core/write_memory';
-import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import { rememberInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
 
@@ -23,19 +21,15 @@ import type { GetMemoryStorage } from '../types';
  * Creates the `platform.memory.remember` registered tool.
  *
  * Writes via `asCurrentUser` because Agent Memory is user data, so `kibana_system`
- * is unauthorized. Gated by the `write_agent_memory` Kibana
- * privilege checked via `checkPrivilegesWithRequest` before any ES call.
- * If the privilege check fails or the identity is missing, returns a typed
- * error without throwing (SIGN-OFF #2, verification item 6).
+ * is unauthorized. Elasticsearch authorization is enforced by the request-scoped
+ * client. If the identity is missing, returns a typed error without throwing.
  */
 export const createRememberTool = ({
   getStorage,
-  getSecurityStart,
   getCoreSecurity,
   writeConfirmation = 'always',
 }: {
   getStorage: GetMemoryStorage;
-  getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
   writeConfirmation?: ToolConfirmationPolicyMode;
 }): BuiltinToolDefinition<typeof rememberInputSchema> => ({
@@ -56,6 +50,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
   `.trim(),
   schema: rememberInputSchema,
   tags: [],
+  excludeFromMcp: true,
   confirmation: {
     askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({
@@ -85,29 +80,12 @@ On success returns { id, revision, action } where action is 'created' or 'update
     openWorldHint: false,
   },
   handler: async ({ title, description, category, type, tags, expires_at }, context) => {
-    const authorization = await authorizeMemoryRequest({
+    const identity = resolveIdentity({
       request: context.request,
-      spaceId: context.spaceId,
-      privilege: AGENT_MEMORY_API_PRIVILEGES.write,
-      security: getSecurityStart(),
-      coreSecurity: getCoreSecurity(),
+      security: getCoreSecurity(),
     });
 
-    if (authorization.status === 'forbidden') {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message:
-                'Forbidden: the current user does not have the write_agent_memory privilege.',
-            },
-          },
-        ],
-      };
-    }
-
-    if (authorization.status === 'missing_identity') {
+    if (!identity) {
       return {
         results: [
           {
@@ -134,7 +112,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
         expires_at,
         call_source: context.callContext.callSource,
         space_id: context.spaceId,
-        identity: authorization.identity,
+        identity,
       },
     });
 

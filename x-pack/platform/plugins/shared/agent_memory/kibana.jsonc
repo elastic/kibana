@@ -9,12 +9,6 @@
     "server": true,
     "browser": false,
     "configPath": ["xpack", "agentMemory"],
-    "requiredPlugins": [
-      "agentBuilder",
-      "features",
-      "security",
-      "workflowsExtensions"
-    ],
-    "optionalPlugins": ["spaces"]
+    "requiredPlugins": ["agentBuilder", "workflowsExtensions"]
   }
 }

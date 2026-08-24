@@ -10,10 +10,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { authorizeMemoryRequest } from '../core/authorize_request';
+import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
-import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import { recallInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
 
@@ -22,18 +20,16 @@ import type { GetMemoryStorage } from '../types';
  *
  * Uses `asCurrentUser` for storage access because Agent Memory is user data,
  * so `kibana_system` is unauthorized. Data isolation is enforced via
- * mandatory `space_id + author` filters in `buildRetriever` (G3). Gated by
- * `read_agent_memory` checked via `checkPrivilegesWithRequest` before any ES
- * call. Recall **fails open**: ES errors return empty results rather than
- * propagating to the agent (D-security, G5).
+ * mandatory personal-scope filters (`space_id + scope_kind + scope_id`) in
+ * `buildRetriever` (G3). Elasticsearch authorization is enforced by the request-scoped
+ * client. Recall **fails open**: ES errors return empty results rather than propagating
+ * to the agent (D-security, G5).
  */
 export const createRecallTool = ({
   getStorage,
-  getSecurityStart,
   getCoreSecurity,
 }: {
   getStorage: GetMemoryStorage;
-  getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
 }): BuiltinToolDefinition<typeof recallInputSchema> => ({
   id: platformMemoryTools.recall,
@@ -53,6 +49,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
   `.trim(),
   schema: recallInputSchema,
   tags: [],
+  excludeFromMcp: true,
   annotations: {
     title: 'Recall Memories',
     readOnlyHint: true,
@@ -61,26 +58,12 @@ Fails open: if the memory service is unavailable, returns an empty list without 
     openWorldHint: false,
   },
   handler: async ({ query, category, limit }, context) => {
-    const authorization = await authorizeMemoryRequest({
+    const identity = resolveIdentity({
       request: context.request,
-      spaceId: context.spaceId,
-      privilege: AGENT_MEMORY_API_PRIVILEGES.read,
-      security: getSecurityStart(),
-      coreSecurity: getCoreSecurity(),
+      security: getCoreSecurity(),
     });
 
-    if (authorization.status === 'forbidden') {
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: { memories: [], note: 'Insufficient privileges to recall memories.' },
-          },
-        ],
-      };
-    }
-
-    if (authorization.status === 'missing_identity') {
+    if (!identity) {
       // No identity — fail open with an informational message.
       return {
         results: [
@@ -99,7 +82,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
         category,
         limit,
         space_id: context.spaceId,
-        identity: authorization.identity,
+        identity,
       },
     });
 

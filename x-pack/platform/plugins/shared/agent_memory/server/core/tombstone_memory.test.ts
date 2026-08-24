@@ -11,6 +11,19 @@ import { tombstoneMemory } from './tombstone_memory';
 
 const CURRENT_TIME = '2026-08-13T12:00:00.000Z';
 
+const responseError = (statusCode: number) =>
+  new errors.ResponseError({
+    statusCode,
+    body: {
+      error: {
+        type: statusCode === 404 ? 'resource_not_found_exception' : 'internal_server_error',
+      },
+    },
+    headers: {},
+    warnings: [],
+    meta: {} as never,
+  });
+
 describe('tombstoneMemory', () => {
   afterEach(() => {
     jest.useRealTimers();
@@ -31,8 +44,10 @@ describe('tombstoneMemory', () => {
       memory: {
         revision: 2,
         content_hash: 'memory-hash',
+        scope_kind: 'user',
+        scope_id: 'user-1',
         provenance: {
-          author: 'user-1',
+          author: 'original-creator',
           author_kind: 'profile_uid',
         },
       },
@@ -84,50 +99,128 @@ describe('tombstoneMemory', () => {
     });
   });
 
-  it('propagates non-404 Elasticsearch errors', async () => {
-    const error = new errors.ResponseError({
-      statusCode: 500,
-      body: { error: { type: 'internal_server_error' } },
-      headers: {},
-      warnings: [],
-      meta: {} as never,
-    });
-    const storage = {
+  it('does not mutate foreign, team, or malformed scopes even when provenance matches', async () => {
+    const scopeVariants = [
+      { space_id: 'default', scope_kind: 'user', scope_id: 'user-2' },
+      { space_id: 'default', scope_kind: 'team', scope_id: 'team-1' },
+      { space_id: 'another-space', scope_kind: 'user', scope_id: 'user-1' },
+    ] as const;
+
+    for (const scope of scopeVariants) {
+      const existingDocument: MemoryDocument = {
+        id: 'memory-1',
+        type: 'memory',
+        title: 'Memory title',
+        description: 'Memory description',
+        content: 'Memory title\n\nMemory description',
+        deleted: false,
+        created_at: '2026-08-01T00:00:00.000Z',
+        space_id: scope.space_id,
+        memory: {
+          revision: 1,
+          content_hash: 'memory-hash',
+          scope_kind: scope.scope_kind,
+          scope_id: scope.scope_id,
+          provenance: {
+            author: 'user-1',
+            author_kind: 'profile_uid',
+          },
+        },
+      };
+      const index = jest.fn();
+      const storage = {
+        getClient: () => ({
+          get: jest.fn().mockResolvedValue({
+            found: true,
+            _source: existingDocument,
+            _seq_no: 7,
+            _primary_term: 3,
+          }),
+          index,
+        }),
+      } as never;
+
+      await expect(
+        tombstoneMemory({
+          storage,
+          params: {
+            id: existingDocument.id,
+            space_id: 'default',
+            identity: { author: 'user-1', author_kind: 'profile_uid' },
+          },
+        })
+      ).resolves.toEqual({ result: 'not_found' });
+      expect(index).not.toHaveBeenCalled();
+    }
+
+    const malformed = {
+      id: 'memory-1',
+      type: 'memory',
+      title: 'Memory title',
+      description: 'Memory description',
+      content: 'Memory title\n\nMemory description',
+      deleted: false,
+      created_at: '2026-08-01T00:00:00.000Z',
+      space_id: 'default',
+      memory: {
+        revision: 1,
+        content_hash: 'memory-hash',
+        provenance: { author: 'user-1', author_kind: 'profile_uid' },
+      },
+    } as unknown as MemoryDocument;
+    const malformedIndex = jest.fn();
+    const malformedStorage = {
+      getClient: () => ({
+        get: jest.fn().mockResolvedValue({
+          found: true,
+          _source: malformed,
+          _seq_no: 7,
+          _primary_term: 3,
+        }),
+        index: malformedIndex,
+      }),
+    } as never;
+
+    await expect(
+      tombstoneMemory({
+        storage: malformedStorage,
+        params: {
+          id: malformed.id,
+          space_id: 'default',
+          identity: { author: 'user-1', author_kind: 'profile_uid' },
+        },
+      })
+    ).resolves.toEqual({ result: 'not_found' });
+    expect(malformedIndex).not.toHaveBeenCalled();
+  });
+
+  it('returns not_found only for genuine 404 errors and propagates other failures', async () => {
+    const params = {
+      id: 'memory-1',
+      space_id: 'default',
+      identity: { author: 'user-1', author_kind: 'profile_uid' as const },
+    };
+    const error = responseError(500);
+    const errorStorage = {
       getClient: () => ({ get: jest.fn().mockRejectedValue(error) }),
     } as never;
 
     await expect(
       tombstoneMemory({
-        storage,
-        params: {
-          id: 'memory-1',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: errorStorage,
+        params,
       })
     ).rejects.toBe(error);
-  });
 
-  it('returns not_found for a genuine Elasticsearch 404', async () => {
-    const notFoundError = new errors.ResponseError({
-      statusCode: 404,
-      body: { error: { type: 'resource_not_found_exception' } },
-      headers: {},
-      warnings: [],
-      meta: {} as never,
-    });
-    const storage = {
+    const notFoundError = responseError(404);
+    const notFoundStorage = {
       getClient: () => ({ get: jest.fn().mockRejectedValue(notFoundError) }),
     } as never;
 
     await expect(
       tombstoneMemory({
-        storage,
-        params: {
-          id: 'missing-memory',
-          space_id: 'default',
-          identity: { author: 'user-1', author_kind: 'profile_uid' },
-        },
+        storage: notFoundStorage,
+        params,
       })
     ).resolves.toEqual({ result: 'not_found' });
   });

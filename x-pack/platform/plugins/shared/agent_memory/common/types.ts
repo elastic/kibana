@@ -9,8 +9,9 @@ export type MemoryType = 'episodic' | 'semantic' | 'procedural';
 export type MemoryCategory = 'profile' | 'preferences' | 'events' | 'trajectories';
 export type AuthorKind = 'profile_uid' | 'username';
 export type CallSource = 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown';
-export type MemoryScopeKind = 'user' | 'agent' | 'space';
+export type MemoryScopeKind = 'user' | 'team';
 
+/** Creator metadata for display and audit; scope controls visibility and ownership. */
 export interface MemoryProvenance {
   readonly author: string;
   readonly author_kind: AuthorKind;
@@ -22,8 +23,8 @@ export interface MemoryPayload {
   readonly category?: MemoryCategory;
   readonly revision: number;
   readonly content_hash: string;
-  readonly scope_kind?: MemoryScopeKind;
-  readonly scope_id?: string;
+  readonly scope_kind: MemoryScopeKind;
+  readonly scope_id: string;
   readonly provenance: MemoryProvenance;
 }
 

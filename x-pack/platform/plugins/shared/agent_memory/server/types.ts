@@ -7,10 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { MemoryStorage } from './storage/memory_storage';
 
 // Plugin contracts — both are intentionally empty for Phase 1.
@@ -20,15 +17,11 @@ export type AgentMemoryPluginStart = object;
 
 export interface AgentMemorySetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  features: FeaturesPluginSetup;
-  security: SecurityPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentMemoryStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
 }
 
 /**

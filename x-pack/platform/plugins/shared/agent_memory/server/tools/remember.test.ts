@@ -25,14 +25,6 @@ const asInternalUser = { _tag: 'kibana-system' } as unknown as ElasticsearchClie
 
 const mockStorage = { getClient: jest.fn() };
 const getStorage = jest.fn().mockReturnValue(mockStorage);
-const getSecurityStart = jest.fn().mockReturnValue({
-  authz: {
-    checkPrivilegesWithRequest: () => ({
-      atSpace: async () => ({ hasAllRequested: true }),
-    }),
-    actions: { api: { get: (privilege: string) => privilege } },
-  },
-});
 const getCoreSecurity = jest.fn().mockReturnValue({});
 
 const mockContext = {
@@ -50,10 +42,9 @@ describe('createRememberTool', () => {
     (resolveIdentity as jest.Mock).mockReturnValue({ author: 'user-1', author_kind: 'username' });
   });
 
-  it('requires primary confirmation that shows the memory title and content', async () => {
+  it('requires primary confirmation and writes as the current user', async () => {
     const tool = createRememberTool({
       getStorage,
-      getSecurityStart,
       getCoreSecurity,
     });
 
@@ -63,6 +54,7 @@ describe('createRememberTool', () => {
         title: 'Preferred editor',
         description: 'The user prefers Vim.',
       },
+      context: mockContext,
     });
 
     expect(confirmation).toEqual({
@@ -70,14 +62,6 @@ describe('createRememberTool', () => {
       message: 'Save this memory for future conversations?\n\nThe user prefers Vim.',
       confirm_text: 'Remember',
       color: 'primary',
-    });
-  });
-
-  it('writes to Agent Memory as the current user, not kibana_system', async () => {
-    const tool = createRememberTool({
-      getStorage,
-      getSecurityStart,
-      getCoreSecurity,
     });
 
     const result = await tool.handler(
@@ -87,6 +71,10 @@ describe('createRememberTool', () => {
 
     expect(getStorage).toHaveBeenCalledWith(asCurrentUser);
     expect(getStorage).not.toHaveBeenCalledWith(asInternalUser);
+    expect(resolveIdentity).toHaveBeenCalledWith({
+      request: mockContext.request,
+      security: getCoreSecurity(),
+    });
     expect(writeMemory).toHaveBeenCalledWith(
       expect.objectContaining({
         storage: mockStorage,
@@ -101,5 +89,26 @@ describe('createRememberTool', () => {
         },
       ],
     });
+  });
+
+  it('returns a clear error when identity is unavailable', async () => {
+    (resolveIdentity as jest.Mock).mockReturnValue(undefined);
+    const tool = createRememberTool({ getStorage, getCoreSecurity });
+
+    await expect(
+      tool.handler(
+        { title: "User's name is Susah", description: "The user's name is Susah." },
+        mockContext
+      )
+    ).resolves.toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Cannot store memory: no user identity available for scoping.' },
+        },
+      ],
+    });
+
+    expect(writeMemory).not.toHaveBeenCalled();
   });
 });

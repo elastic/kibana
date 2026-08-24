@@ -7,7 +7,8 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
+import { isNotFoundError } from '@kbn/es-errors';
+import { isOccConflictError, OccWriter, type OccMetadata } from '@kbn/occ';
 import { AGENT_MEMORY_INDEX } from '../../common';
 import type { CallSource, MemoryCategory, MemoryType } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
@@ -36,11 +37,6 @@ export interface WriteMemoryResult {
   action: 'created' | 'updated';
 }
 
-/**
- * Normalises the description before hashing: collapse runs of whitespace and
- * trim leading/trailing space. This makes semantic duplicates (same text,
- * different whitespace) collapse to a single memory.
- */
 const normalise = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
 const contentHash = (description: string): string =>
@@ -48,29 +44,34 @@ const contentHash = (description: string): string =>
 
 const deterministicDocumentId = ({
   spaceId,
-  author,
+  scopeKind,
+  scopeId,
   hash,
 }: {
   spaceId: string;
-  author: string;
+  scopeKind: 'user';
+  scopeId: string;
   hash: string;
-}): string => createHash('sha256').update(`${spaceId}\0${author}\0${hash}`).digest('hex');
+}): string =>
+  createHash('sha256')
+    .update(JSON.stringify([spaceId, scopeKind, scopeId, hash]))
+    .digest('hex');
 
-const MAX_UPDATE_ATTEMPTS = 3;
+const requireOccMetadata = (
+  response: { _seq_no?: number; _primary_term?: number },
+  id: string
+): OccMetadata => {
+  if (response._seq_no === undefined || response._primary_term === undefined) {
+    throw new Error(`Agent Memory index response missing OCC metadata for "${id}"`);
+  }
+  return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+};
 
 /**
- * Creates a new memory or supersedes an existing one with the same content
- * (same description, same author, same space).
+ * Creates or supersedes the deterministic document for the current user scope.
  *
- * Supersession strategy: in-place update via `index` on the same `_id`, with
- * `memory.revision` incremented. This keeps the document count stable.
- *
- * The inherited `content` field carries `title + "\n\n" + description` so
- * that semantic recall covers both the concise label and the full content.
- *
- * If a tombstoned doc is found (same content_hash + author + space), it is
- * resurrected rather than duplicated — re-remembering forgotten content should
- * restore the memory, not create a second copy.
+ * The document key is `space_id + scope_kind + scope_id + content_hash`.
+ * Creator provenance is retained independently from authoritative visibility scope.
  */
 export const writeMemory = async ({
   storage,
@@ -83,120 +84,51 @@ export const writeMemory = async ({
 }): Promise<WriteMemoryResult> => {
   const { title, description, category, type, tags, expires_at, call_source, space_id, identity } =
     params;
-
+  const scopeKind = 'user' as const;
+  const scopeId = identity.author;
   const hash = contentHash(description);
-  const client = storage.getClient();
+  const id = deterministicDocumentId({ spaceId: space_id, scopeKind, scopeId, hash });
   const now = new Date().toISOString();
+  const client = storage.getClient();
 
-  const updateExisting = async ({
-    id,
-    previous,
-    seqNo,
-    primaryTerm,
-  }: {
-    id: string;
-    previous: MemoryDocument;
-    seqNo?: number;
-    primaryTerm?: number;
-  }): Promise<WriteMemoryResult> => {
-    let current = { previous, seqNo, primaryTerm };
-
-    for (let attempt = 1; attempt <= MAX_UPDATE_ATTEMPTS; attempt++) {
-      const nextRevision = (current.previous.memory.revision ?? 0) + 1;
-      const previousIsExpired =
-        current.previous.expires_at !== undefined &&
-        Date.parse(current.previous.expires_at) <= Date.parse(now);
-      const updated: MemoryDocument = {
-        ...current.previous,
-        deleted: false,
-        '@timestamp': now,
-        title,
-        description,
-        content: `${title}\n\n${description}`,
-        tags: tags ?? current.previous.tags,
-        expires_at:
-          expires_at ??
-          (current.previous.deleted || previousIsExpired ? undefined : current.previous.expires_at),
-        memory: {
-          scope_kind: current.previous.memory.scope_kind ?? 'user',
-          scope_id: current.previous.memory.scope_id ?? identity.author,
-          type: type ?? current.previous.memory.type,
-          category: category ?? current.previous.memory.category,
-          revision: nextRevision,
-          content_hash: hash,
-          provenance: {
-            author: current.previous.memory.provenance.author,
-            author_kind: current.previous.memory.provenance.author_kind,
-            call_source: call_source ?? current.previous.memory.provenance.call_source,
-          },
-        },
-      };
-
+  const writer = new OccWriter<MemoryDocument>({
+    get: async (documentId) => {
       try {
-        await client.index({
-          id,
-          document: updated,
-          ...(current.seqNo !== undefined && current.primaryTerm !== undefined
-            ? { if_seq_no: current.seqNo, if_primary_term: current.primaryTerm }
-            : {}),
+        const response = await esClient.get<MemoryDocument>({
+          index: AGENT_MEMORY_INDEX,
+          id: documentId,
         });
-        return { id, revision: nextRevision, action: 'updated' };
-      } catch (error) {
-        if (
-          !isResponseError(error) ||
-          error.statusCode !== 409 ||
-          attempt === MAX_UPDATE_ATTEMPTS
-        ) {
-          throw error;
+        if (!response._source) {
+          throw new Error(`Agent Memory document "${documentId}" has no source`);
         }
-        const latest = await esClient.get<MemoryDocument>({ index: AGENT_MEMORY_INDEX, id });
-        if (!latest._source) {
-          throw new Error('Agent Memory conflict winner has no source');
-        }
-        current = {
-          previous: latest._source,
-          seqNo: latest._seq_no,
-          primaryTerm: latest._primary_term,
+        return {
+          id: documentId,
+          source: response._source,
+          occ: requireOccMetadata(response, documentId),
         };
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return null;
+        }
+        throw error;
       }
-    }
-
-    throw new Error('Agent Memory update retries exhausted');
-  };
-
-  // ── Find-or-create on content_hash + author + space ───────────────────────
-  // Search without the `deleted` filter so that re-remembering a tombstoned
-  // doc resurrects it in place instead of creating a duplicate (C13).
-  const existing = await client.search({
-    size: 1,
-    track_total_hits: false,
-    seq_no_primary_term: true,
-    query: {
-      bool: {
-        filter: [
-          { term: { 'memory.content_hash': hash } },
-          { term: { 'memory.provenance.author': identity.author } },
-          { term: { space_id } },
-        ],
-      },
     },
-    _source: true,
+    index: async ({ id: documentId, document, create, ifSeqNo, ifPrimaryTerm }) => {
+      const response = await client.index({
+        id: documentId,
+        document,
+        ...(create ? { op_type: 'create' as const } : {}),
+        ...(ifSeqNo !== undefined && ifPrimaryTerm !== undefined
+          ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+          : {}),
+      });
+      return requireOccMetadata(response, documentId);
+    },
+    maxRetries: 2,
+    retryDelayMs: 0,
   });
 
-  const existingHit = existing.hits.hits[0];
-
-  if (existingHit) {
-    return updateExisting({
-      id: existingHit._id!,
-      previous: existingHit._source as MemoryDocument,
-      seqNo: existingHit._seq_no,
-      primaryTerm: existingHit._primary_term,
-    });
-  }
-
-  // ── New memory ─────────────────────────────────────────────────────────────
-  const id = deterministicDocumentId({ spaceId: space_id, author: identity.author, hash });
-  const newDoc: MemoryDocument = {
+  const newDocument: MemoryDocument = {
     id,
     type: 'memory',
     title,
@@ -213,8 +145,8 @@ export const writeMemory = async ({
       category,
       revision: 1,
       content_hash: hash,
-      scope_kind: 'user',
-      scope_id: identity.author,
+      scope_kind: scopeKind,
+      scope_id: scopeId,
       provenance: {
         author: identity.author,
         author_kind: identity.author_kind,
@@ -223,37 +155,50 @@ export const writeMemory = async ({
     },
   };
 
-  const createResponse = await client.bulk({
-    operations: [{ create: { _id: id, document: newDoc } }],
+  try {
+    await writer.create({ id, document: newDocument });
+    return { id, revision: 1, action: 'created' };
+  } catch (error) {
+    if (!isOccConflictError(error)) {
+      throw error;
+    }
+  }
+
+  const result = await writer.readModifyWrite({
+    id,
+    mutate: (previous) => {
+      const previousIsExpired =
+        previous.expires_at !== undefined && Date.parse(previous.expires_at) <= Date.parse(now);
+      return {
+        ...previous,
+        deleted: false,
+        '@timestamp': now,
+        title,
+        description,
+        content: `${title}\n\n${description}`,
+        tags: tags ?? previous.tags,
+        expires_at:
+          expires_at ?? (previous.deleted || previousIsExpired ? undefined : previous.expires_at),
+        memory: {
+          scope_kind: scopeKind,
+          scope_id: scopeId,
+          type: type ?? previous.memory.type,
+          category: category ?? previous.memory.category,
+          revision: previous.memory.revision + 1,
+          content_hash: hash,
+          provenance: {
+            author: previous.memory.provenance.author,
+            author_kind: previous.memory.provenance.author_kind,
+            call_source: call_source ?? previous.memory.provenance.call_source,
+          },
+        },
+      };
+    },
   });
-  const createResult = createResponse.items[0]?.create;
 
-  if (!createResult) {
-    throw new Error('Agent Memory create failed: Elasticsearch returned no create result');
-  }
-
-  if (createResult.error) {
-    if (createResult.status !== 409) {
-      const errorDetails =
-        typeof createResult.error === 'string'
-          ? createResult.error
-          : [createResult.error.type ?? 'unknown_error', createResult.error.reason]
-              .filter(Boolean)
-              .join(': ');
-      throw new Error(`Agent Memory create failed: ${errorDetails}`);
-    }
-
-    const winner = await esClient.get<MemoryDocument>({ index: AGENT_MEMORY_INDEX, id });
-    if (!winner._source) {
-      throw new Error('Agent Memory create conflict winner has no source');
-    }
-    return updateExisting({
-      id,
-      previous: winner._source,
-      seqNo: winner._seq_no,
-      primaryTerm: winner._primary_term,
-    });
-  }
-
-  return { id, revision: 1, action: 'created' };
+  return {
+    id,
+    revision: result.document.memory.revision,
+    action: 'updated',
+  };
 };

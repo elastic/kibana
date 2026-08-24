@@ -12,11 +12,9 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { authorizeMemoryRequest } from '../core/authorize_request';
+import { resolveIdentity } from '../core/resolve_identity';
 import { tombstoneMemory } from '../core/tombstone_memory';
-import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import type { GetMemoryStorage } from '../types';
 
 const forgetSchema = z.object({
@@ -31,18 +29,15 @@ const forgetSchema = z.object({
  *
  * Soft-deletes a memory (`deleted: true`). The document is never hard-deleted
  * and remains visible in ES|QL for admin inspection. Ownership is validated
- * before applying the tombstone (author + space must match).
- *
- * Gated by `write_agent_memory` privilege before any ES call.
+ * before applying the tombstone (user scope + space must match).
+ * Elasticsearch authorization is enforced by the request-scoped client.
  */
 export const createForgetTool = ({
   getStorage,
-  getSecurityStart,
   getCoreSecurity,
   writeConfirmation = 'always',
 }: {
   getStorage: GetMemoryStorage;
-  getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
   writeConfirmation?: ToolConfirmationPolicyMode;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
@@ -61,6 +56,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
   `.trim(),
   schema: forgetSchema,
   tags: [],
+  excludeFromMcp: true,
   confirmation: {
     askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({
@@ -90,29 +86,12 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
     openWorldHint: false,
   },
   handler: async ({ id }, context) => {
-    const authorization = await authorizeMemoryRequest({
+    const identity = resolveIdentity({
       request: context.request,
-      spaceId: context.spaceId,
-      privilege: AGENT_MEMORY_API_PRIVILEGES.write,
-      security: getSecurityStart(),
-      coreSecurity: getCoreSecurity(),
+      security: getCoreSecurity(),
     });
 
-    if (authorization.status === 'forbidden') {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message:
-                'Forbidden: the current user does not have the write_agent_memory privilege.',
-            },
-          },
-        ],
-      };
-    }
-
-    if (authorization.status === 'missing_identity') {
+    if (!identity) {
       return {
         results: [
           {
@@ -129,7 +108,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
       params: {
         id,
         space_id: context.spaceId,
-        identity: authorization.identity,
+        identity,
       },
     });
 

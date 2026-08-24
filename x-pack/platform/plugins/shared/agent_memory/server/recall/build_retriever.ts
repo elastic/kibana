@@ -13,16 +13,15 @@ import type {
 /**
  * Parameters for the hybrid RRF retriever used in recall.
  *
- * The retriever enforces G3: `space_id` AND `author` filters are mandatory
- * and are never overridable by tool params. They are injected unconditionally
- * so a crafted recall call cannot widen the scope.
+ * The retriever enforces authoritative space and user-scope filters that are
+ * never overridable by tool params.
  */
 export interface BuildRetrieverParams {
   query: string;
   /** Mandatory scope filter — injected unconditionally (G3). */
   space_id: string;
-  /** Mandatory author filter — injected unconditionally (G3). */
-  author: string;
+  scope_kind: 'user';
+  scope_id: string;
   /** Optional category filter applied on top of the belief filter. */
   category?: string;
   /** Max results to return. */
@@ -38,11 +37,12 @@ export interface BuildRetrieverParams {
  *
  * Always adds:
  *  - `space_id` scope (G3)
- *  - `author` identity scope (G3)
+ *  - `memory.scope_kind` and `memory.scope_id` (G3)
  */
 const buildBeliefFilter = (
   space_id: string,
-  author: string,
+  scope_kind: 'user',
+  scope_id: string,
   category?: string
 ): QueryDslQueryContainer[] => {
   const now = new Date().toISOString();
@@ -50,7 +50,8 @@ const buildBeliefFilter = (
   const filters: QueryDslQueryContainer[] = [
     // G3: mandatory scope filters — never optional
     { term: { space_id } },
-    { term: { 'memory.provenance.author': author } },
+    { term: { 'memory.scope_kind': scope_kind } },
+    { term: { 'memory.scope_id': scope_id } },
 
     // Belief-state filters
     { term: { deleted: false } },
@@ -102,14 +103,15 @@ const buildBm25Query = (query: string): QueryDslQueryContainer => ({
 export const buildKeywordRetriever = ({
   query,
   space_id,
-  author,
+  scope_kind,
+  scope_id,
   category,
 }: BuildRetrieverParams): RetrieverContainer => ({
   standard: {
     query: buildBm25Query(query),
     filter: {
       bool: {
-        filter: buildBeliefFilter(space_id, author, category),
+        filter: buildBeliefFilter(space_id, scope_kind, scope_id, category),
       },
     },
   },
@@ -128,11 +130,12 @@ export const buildKeywordRetriever = ({
 export const buildRetriever = ({
   query,
   space_id,
-  author,
+  scope_kind,
+  scope_id,
   category,
   limit,
 }: BuildRetrieverParams): RetrieverContainer => {
-  const beliefFilter = buildBeliefFilter(space_id, author, category);
+  const beliefFilter = buildBeliefFilter(space_id, scope_kind, scope_id, category);
   const combinedFilter: QueryDslQueryContainer = { bool: { filter: beliefFilter } };
 
   // Leg 1: BM25 keyword match
