@@ -67,7 +67,7 @@ const storageSettings = {
       status: types.keyword({}),
       // legacy field, superseded by read_by
       read: types.boolean({}),
-      read_by: types.object({
+      read_by: types.nested({
         properties: {
           userId: types.keyword({}),
         },
