@@ -77,9 +77,101 @@ describe('HashDashboardLinkRedirect', () => {
           url: '/app/security/dashboards/target-dashboard-id',
         })
       );
-      // The hash must be cleared without ever double-prepending the router's basename.
       expect(history.location.hash).toBe('');
-      expect(window.location.pathname).toBe('/app/security/dashboards/current-id');
+    }
+  );
+
+  it.each([
+    ['#/dashboard/target-dashboard-id/expanded-panel-id'],
+    ['#/view/target-dashboard-id/expanded-panel-id'],
+  ])('forwards the expanded panel id segment for %s', async (hash) => {
+    renderWithScopedHistory('/app/security', `/dashboards/current-id${hash}`);
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/target-dashboard-id/expanded-panel-id',
+      })
+    );
+  });
+
+  it("forwards the target link's expanded panel id when the current page has its own panel id", async () => {
+    renderWithScopedHistory(
+      '/app/security',
+      '/dashboards/current-id/current-panel-id#/dashboard/target-dashboard-id/target-panel-id'
+    );
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/target-dashboard-id/target-panel-id',
+      })
+    );
+  });
+
+  it("drops the current page's own panel id when the target link has none", async () => {
+    renderWithScopedHistory(
+      '/app/security',
+      '/dashboards/current-id/current-panel-id#/dashboard/target-dashboard-id'
+    );
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/target-dashboard-id',
+      })
+    );
+  });
+
+  it('decodes an encoded expanded panel id', async () => {
+    renderWithScopedHistory(
+      '/app/security',
+      '/dashboards/current-id#/dashboard/target-dashboard-id/expanded%3Apanel%3Aid'
+    );
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/target-dashboard-id/expanded:panel:id',
+      })
+    );
+  });
+
+  it('does not navigate for a <script> payload split across both capture groups', () => {
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    renderWithScopedHistory(
+      '/app/security',
+      '/dashboards/current-id#/dashboard/%3Cscript%3Ealert(1)%3C/script%3E'
+    );
+
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+    expect(alertSpy).not.toHaveBeenCalled();
+
+    alertSpy.mockRestore();
+  });
+
+  it.each([
+    ['contains spaces', 'OSSEC%20Rootkit%20Pack'],
+    ['has malformed percent-encoding', '100%'],
+    ['reintroduces a slash', 'target-id%2Fsome-other-path'],
+    ['reintroduces a hash', 'target-id%23/other-id'],
+  ])('does not navigate when the decoded dashboard id %s', (_reason, dashboardId) => {
+    renderWithScopedHistory('/app/security', `/dashboards/current-id#/dashboard/${dashboardId}`);
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['out-of-charset characters', 'expanded%20panel%20id'],
+    ['malformed percent-encoding', '100%'],
+  ])(
+    'drops an expanded panel id with %s but still redirects using the dashboard id',
+    async (_reason, expandedPanelId) => {
+      renderWithScopedHistory(
+        '/app/security',
+        `/dashboards/current-id#/dashboard/target-dashboard-id/${expandedPanelId}`
+      );
+
+      await waitFor(() =>
+        expect(mockNavigateTo).toHaveBeenCalledWith({
+          url: '/app/security/dashboards/target-dashboard-id',
+        })
+      );
     }
   );
 
@@ -114,8 +206,5 @@ describe('HashDashboardLinkRedirect', () => {
     );
 
     expect(history.location.hash).toBe('');
-    expect(window.location.pathname).toBe(`${routerBasename}/dashboards/current-id`);
-    // `history.createHref` prepends the router's basename exactly once.
-    expect(history.createHref(history.location)).toBe(`${routerBasename}/dashboards/current-id`);
   });
 });

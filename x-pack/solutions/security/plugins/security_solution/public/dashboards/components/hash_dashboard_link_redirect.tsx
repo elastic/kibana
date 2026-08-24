@@ -12,17 +12,62 @@ import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
 /**
- * Matches legacy Kibana hash-based dashboard routes, e.g. `#/dashboard/<id>` or `#/view/<id>`.
- * Captures the dashboard id up to the next query/hash delimiter.
+ * Matches legacy Kibana hash-based dashboard routes, e.g. `#/dashboard/<id>`, `#/view/<id>`,
+ * or `#/dashboard/<id>/<expandedPanelId>` when a panel was expanded to full screen.
+ * Captures the dashboard id and, when present, the expanded panel id, each up to the next
+ * path/query/hash delimiter.
  */
-const LEGACY_HASH_DASHBOARD_LINK = /^#\/(?:dashboard|view)\/([^/?#]+)/;
+const LEGACY_HASH_DASHBOARD_LINK = /^#\/(?:dashboard|view)\/([^/?#]+)(?:\/([^/?#]+))?/;
 
-const getLegacyDashboardIdFromHash = (hash: string): string | undefined => {
+interface LegacyDashboardHashMatch {
+  dashboardId: string;
+  expandedPanelId?: string;
+}
+
+/**
+ * Real Kibana saved-object ids are always a UUID or a URL-safe slug (e.g.
+ * `osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05`), so an allowlist is both safe and, in
+ * particular, not bypassable by splitting a disallowed character across the dashboard id and
+ * expanded panel id capture groups: e.g. `#/dashboard/<script>alert(1)</script>` decodes to two
+ * individually "clean" halves (`<script>alert(1)<` and `script>`) that get rejoined with `/`
+ * when building the target path. A denylist that only rejects `/`, `?`, `#` would let each half
+ * through on its own; requiring the *whole* decoded value to match a known-safe charset rejects
+ * it regardless of how it's split.
+ */
+const isSafeHashSegmentId = (decoded: string): boolean => /^[\w.:-]+$/.test(decoded);
+
+/**
+ * Decodes a single captured hash segment, failing safe instead of trusting content-controlled
+ * data: malformed percent-encoding throws (`decodeURIComponent('100%')`), and anything that
+ * decodes outside the safe id charset (`isSafeHashSegmentId`) is rejected rather than spliced
+ * verbatim into the path string handed to `history.push`.
+ */
+const decodeHashSegment = (value: string): string | undefined => {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+  return isSafeHashSegmentId(decoded) ? decoded : undefined;
+};
+
+const getLegacyDashboardMatchFromHash = (hash: string): LegacyDashboardHashMatch | undefined => {
   const match = hash.match(LEGACY_HASH_DASHBOARD_LINK);
   if (!match?.[1]) {
     return undefined;
   }
-  return decodeURIComponent(match[1]);
+  const dashboardId = decodeHashSegment(match[1]);
+  if (!dashboardId) {
+    return undefined;
+  }
+  if (!match[2]) {
+    return { dashboardId };
+  }
+  // A malformed or delimiter-reintroducing expanded panel id is dropped on its own; the
+  // dashboard id is still valid, so the redirect can still proceed without it.
+  const expandedPanelId = decodeHashSegment(match[2]);
+  return expandedPanelId ? { dashboardId, expandedPanelId } : { dashboardId };
 };
 
 /**
@@ -38,10 +83,12 @@ export const HashDashboardLinkRedirect = () => {
 
   useEffect(() => {
     const redirectOnLegacyDashboardHash = () => {
-      const dashboardId = getLegacyDashboardIdFromHash(window.location.hash);
-      if (!dashboardId) {
+      const legacyDashboardMatch = getLegacyDashboardMatchFromHash(window.location.hash);
+      if (!legacyDashboardMatch) {
         return;
       }
+      const { dashboardId, expandedPanelId } = legacyDashboardMatch;
+
       // Correct the hash in the URL, e.g.
       // /s/my-space/app/security/dashboards/current-dashboard-id#/dashboard/osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05
       // → /s/my-space/app/security/dashboards/current-dashboard-id
@@ -51,7 +98,7 @@ export const HashDashboardLinkRedirect = () => {
       navigateTo({
         url: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.dashboards,
-          path: dashboardId,
+          path: expandedPanelId ? `${dashboardId}/${expandedPanelId}` : dashboardId,
         }),
       });
     };

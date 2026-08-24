@@ -61,6 +61,20 @@ describe('Legacy hash-based dashboard links', { tags: ['@ess', '@serverless'] },
     cy.location('hash').should('eq', '');
     cy.get('#dashboardTitle').should('contain', OSSEC_ROOTKIT_PACK_DASHBOARD_TITLE);
   });
+
+  it('forwards an expanded panel id segment', () => {
+    const EXPANDED_PANEL_ID = 'some-panel-id';
+    visit(
+      `${DASHBOARDS_URL}/${OSSEC_ROOTKIT_PACK_DASHBOARD_ID}#/dashboard/${COMPLIANCE_PACK_DASHBOARD_ID}/${EXPANDED_PANEL_ID}`
+    );
+
+    cy.url().should(
+      'include',
+      `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}/${EXPANDED_PANEL_ID}`
+    );
+    cy.location('hash').should('eq', '');
+    cy.get('#dashboardTitle').should('contain', COMPLIANCE_PACK_DASHBOARD_TITLE);
+  });
 });
 
 describe('Legacy hash-based dashboard links in a non-default space', { tags: ['@ess'] }, () => {
