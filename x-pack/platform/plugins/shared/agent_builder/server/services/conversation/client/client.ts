@@ -247,6 +247,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -257,10 +258,14 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
-    if (!hit || !hit._id) {
+    if (!hit) {
       return undefined;
+    }
+
+    if (!isConversationDocument(hit)) {
+      throw createInternalError('Conversation origin search returned an incomplete hit');
     }
 
     try {
@@ -612,11 +617,11 @@ class ConversationClientImpl implements ConversationClient {
       return undefined;
     }
 
-    if (hit._seq_no === undefined || hit._primary_term === undefined) {
+    if (!isConversationDocument(hit)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return hit as Document;
+    return hit;
   }
 
   private async findChildConversationIds(parentId: string): Promise<string[]> {

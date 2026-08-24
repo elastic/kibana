@@ -430,6 +430,9 @@ describe('ConversationClient', () => {
       });
 
       await expect(client.exists('conversation-1')).resolves.toBe(true);
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ seq_no_primary_term: true })
+      );
     });
 
     it('returns true when the document exists but agent use access fails', async () => {
@@ -575,6 +578,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
+          seq_no_primary_term: true,
           query: {
             bool: {
               filter: [
