@@ -121,10 +121,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
           '--xpack.cases.analytics.index.enabled=true',
-          // Registers the unified `security.entity` attachment type so the cases
-          // attachment tests exercise it (gated behind this experimental flag).
+          // Registers the unified `security.entity` and `security.attack` attachment
+          // types so the cases attachment tests exercise them (both are gated behind
+          // these experimental flags).
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAttachmentsEnabled',
+            'attackAttachmentsEnabled',
           ])}`,
           ...(options.kbnServerArgs ?? []),
         ],
