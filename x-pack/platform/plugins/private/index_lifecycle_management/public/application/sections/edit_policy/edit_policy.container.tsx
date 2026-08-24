@@ -31,9 +31,12 @@ const policyListTitle = i18n.translate('xpack.indexLifecycleMgmt.policyTable.sec
   defaultMessage: 'Index Lifecycle Policies',
 });
 
-const createPolicyTitle = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-  defaultMessage: 'Create policy',
-});
+const createPolicyTitle = i18n.translate(
+  'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
+  {
+    defaultMessage: 'Create policy',
+  }
+);
 
 export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
   match: {
