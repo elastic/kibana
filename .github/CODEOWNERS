@@ -1259,6 +1259,7 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ml/evals @elastic/search-ml-ux
+x-pack/platform/plugins/shared/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
@@ -1347,7 +1348,6 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team

@@ -7844,7 +7844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/nightshift-investigations-plugin@link:x-pack/solutions/observability/plugins/nightshift_investigations":
+"@kbn/nightshift-investigations-plugin@link:x-pack/platform/plugins/shared/nightshift_investigations":
   version "0.0.0"
   uid ""
 
