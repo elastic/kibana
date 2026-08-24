@@ -41,6 +41,9 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
+/** App-specific context recorded with the feedback payload. */
+export type FeedbackContext = Record<string, string | boolean | number>;
+
 /** The full feedback payload recorded in telemetry. */
 export interface FeedbackSubmittedData {
   app_id: string;
@@ -51,6 +54,7 @@ export interface FeedbackSubmittedData {
   csat_score?: number;
   questions?: FeedbackQuestion[];
   organization_id?: string;
+  context?: FeedbackContext;
 }
 
 /** The subset of feedback data collected from the form. */
@@ -61,6 +65,7 @@ interface AppDetails {
   title: string;
   id: string;
   url: string;
+  context?: FeedbackContext;
 }
 
 /** Props accepted by the `FeedbackTriggerButton` component. */
@@ -83,8 +88,25 @@ export interface FeedbackContainerProps {
   hideFeedbackContainer: () => void;
 }
 
+/** Props accepted by the `FeedbackSuccessToastBody` component. */
+export interface FeedbackSuccessToastBodyProps {
+  onDismiss: () => void;
+  surveyUrl: string;
+}
+
 /** Header feedback trigger button (compiled to a function declaration in `.d.ts`). */
 export declare function FeedbackTriggerButton(props: FeedbackTriggerButtonProps): React.ReactNode;
 
 /** Feedback form modal body (compiled to a function declaration in `.d.ts`). */
 export declare function FeedbackContainer(props: FeedbackContainerProps): React.ReactNode;
+
+/** Title content for the feedback submission success toast. */
+export declare function FeedbackSuccessToastTitle(): React.ReactNode;
+
+/** Body content for the feedback submission success toast. */
+export declare function FeedbackSuccessToastBody(
+  props: FeedbackSuccessToastBodyProps
+): React.ReactNode;
+
+/** How long the feedback submission success toast remains on screen. */
+export declare const FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS: number;

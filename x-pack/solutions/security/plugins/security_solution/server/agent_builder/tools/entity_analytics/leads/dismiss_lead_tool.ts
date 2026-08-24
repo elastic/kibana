@@ -44,6 +44,13 @@ export const dismissLeadTool = (
       'Use when the user decides a lead is not worth investigating.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'Dismiss Lead',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -62,10 +69,7 @@ export const dismissLeadTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (
-          !privileges.adhoc.has_write_permissions ||
-          !privileges.scheduled.has_write_permissions
-        ) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to dismiss leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {

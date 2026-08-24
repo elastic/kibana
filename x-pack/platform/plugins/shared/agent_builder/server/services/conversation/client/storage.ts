@@ -19,6 +19,7 @@ import type {
   TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -66,7 +67,15 @@ const storageSettings = {
       status: types.keyword({}),
       read: types.boolean({}),
       pinned: types.boolean({}),
+      read_only: types.boolean({}),
       workspace_id: types.keyword({}),
+      parent_conversation: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          relation: types.keyword({}),
+        },
+      }),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -87,9 +96,20 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      metadata: types.flattened({}),
+      template_id: types.keyword({}),
+      template_version: types.long({}),
     },
   },
 } satisfies IndexStorageSettings;
+
+/**
+ * Persistent shape of the parent-conversation link.
+ */
+export interface PersistentConversationParentLink {
+  id: string;
+  relation: string;
+}
 
 export interface ConversationProperties {
   user_id?: string;
@@ -108,9 +128,14 @@ export interface ConversationProperties {
   status?: ConversationRoundStatus;
   read?: boolean;
   pinned?: boolean;
+  read_only?: boolean;
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
+  parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
+  metadata?: Record<string, SerializedMetadataValue>;
+  template_id?: string;
+  template_version?: number;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

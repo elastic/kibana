@@ -68,6 +68,7 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.STATS_WHERE,
     Location.RERANK,
     Location.JOIN,
+    Location.HIGHLIGHT_QUERY,
   ],
   signatures: [
     {
@@ -98,6 +99,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.STATS_WHERE,
       Location.RERANK,
       Location.JOIN,
+      Location.HIGHLIGHT_QUERY,
     ],
     signatures: [
       {
@@ -127,6 +129,8 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.RENAME,
       Location.RERANK,
       Location.JOIN,
+      // HIGHLIGHT's optional `prefix = "..."` modifier, like RERANK's `target = "query"`
+      Location.HIGHLIGHT_QUERY,
     ],
     signatures: [
       {

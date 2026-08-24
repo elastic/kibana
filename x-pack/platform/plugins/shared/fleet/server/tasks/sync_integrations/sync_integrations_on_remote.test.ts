@@ -143,6 +143,21 @@ describe('syncIntegrationsOnRemote', () => {
     };
   }
 
+  it('should do nothing if no follower index exists', async () => {
+    getIndicesMock.mockResolvedValue({});
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      soClientMock,
+      packageClientMock,
+      signal,
+      loggerMock
+    );
+
+    expect(searchMock).not.toHaveBeenCalled();
+    expect(packageClientMock.getInstallation).not.toHaveBeenCalled();
+  });
+
   it('should do nothing if no matching remote output has sync enabled', async () => {
     getIndicesMock.mockResolvedValue({
       'fleet-synced-integrations-ccr-remote1': {},
