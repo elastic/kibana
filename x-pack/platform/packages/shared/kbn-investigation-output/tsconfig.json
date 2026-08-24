@@ -21,6 +21,7 @@
     "@kbn/i18n-react",
     "@kbn/workflows",
     "@kbn/workflows-ui",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/zod"
   ]
 }
