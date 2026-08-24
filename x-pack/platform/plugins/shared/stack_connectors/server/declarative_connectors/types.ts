@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
+import type { ActionScope, AuthTypeDef, ConnectorMetadata } from '@kbn/connector-specs';
 
 export interface DeclarativeConnectorIcon {
   path: string;
@@ -79,6 +79,10 @@ export interface DeclarativeAction {
   request: DeclarativeRequest;
 }
 
+export interface DeclarativeAuthTypeDef extends AuthTypeDef {
+  prefix?: string;
+}
+
 export interface DeclarativeConnectorSpec {
   schemaVersion: 1;
   id: string;
@@ -86,11 +90,7 @@ export interface DeclarativeConnectorSpec {
   metadata: DeclarativeConnectorMetadata;
   config: DeclarativeJsonSchema;
   auth: {
-    type: 'api_key_header' | 'basic' | 'bearer' | 'none';
-    header?: string;
-    prefix?: string;
-    label?: string;
-    placeholder?: string;
+    types: Array<string | DeclarativeAuthTypeDef>;
   };
   actions: Record<string, DeclarativeAction>;
   test: {

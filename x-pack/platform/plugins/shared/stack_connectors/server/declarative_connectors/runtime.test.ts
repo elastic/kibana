@@ -22,9 +22,13 @@ const connector: DeclarativeConnectorSpec = {
   },
   config: { type: 'object' },
   auth: {
-    type: 'api_key_header',
-    header: 'Authorization',
-    prefix: 'SSWS ',
+    types: [
+      {
+        type: 'api_key_header',
+        defaults: { headerField: 'Authorization' },
+        prefix: 'SSWS ',
+      },
+    ],
   },
   actions: {},
   test: {
@@ -39,7 +43,7 @@ const createContext = (request: jest.Mock): ActionContext =>
   ({
     client: { request } as unknown as ActionContext['client'],
     config: { baseUrl: 'https://example.test' },
-    secrets: { Authorization: 'token' },
+    secrets: { authType: 'api_key_header', Authorization: 'token' },
     log: loggerMock.create(),
     getClient: jest.fn(),
   } as ActionContext);
@@ -84,24 +88,29 @@ describe('executeDeclarativeRequest', () => {
     );
   });
 
-  it('sends an API key header without requiring a prefix', async () => {
+  it('leaves unprefixed auth to the connectors v2 client', async () => {
     const requestMock = jest.fn().mockResolvedValue(response({ ok: true }));
     const context = createContext(requestMock);
-    context.secrets = { Key: 'raw-token' };
+    context.secrets = { authType: 'api_key_header', Key: 'raw-token' };
 
     await executeDeclarativeRequest({
       context,
       connector: {
         ...connector,
-        auth: { type: 'api_key_header', header: 'Key' },
+        auth: {
+          types: [
+            {
+              type: 'api_key_header',
+              defaults: { headerField: 'Key' },
+            },
+          ],
+        },
       },
       request: { method: 'GET', url: 'https://example.test/check' },
       input: {},
     });
 
-    expect(requestMock).toHaveBeenCalledWith(
-      expect.objectContaining({ headers: { Key: 'raw-token' } })
-    );
+    expect(requestMock).toHaveBeenCalledWith(expect.objectContaining({ headers: {} }));
   });
 
   it('follows same-origin Link headers up to the configured page bound', async () => {

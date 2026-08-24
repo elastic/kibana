@@ -27,6 +27,55 @@ describe('declarative connector parsing', () => {
     expect(() => materialized.actions.checkIp.input.parse({ ipAddress: 'not-an-ip' })).toThrow();
   });
 
+  it('accepts any auth type registered by connectors v2', () => {
+    const parsed = parseDeclarativeConnectorSpec(
+      ABUSE_IPDB_SPEC_FIXTURE.replace(
+        `auth:
+  types:
+    - type: api_key_header
+      defaults:
+        headerField: Key`,
+        `auth:
+  types:
+    - api_key_query`
+      )
+    );
+
+    expect(materializeDeclarativeConnectorSpec(parsed).auth?.types).toEqual(['api_key_query']);
+  });
+
+  it('normalizes the legacy auth shape for published definitions', () => {
+    const parsed = parseDeclarativeConnectorSpec(
+      ABUSE_IPDB_SPEC_FIXTURE.replace(
+        `auth:
+  types:
+    - type: api_key_header
+      defaults:
+        headerField: Key`,
+        `auth:
+  type: api_key_header
+  header: Key`
+      )
+    );
+
+    expect(materializeDeclarativeConnectorSpec(parsed).auth?.types).toEqual([
+      {
+        type: 'api_key_header',
+        defaults: { headerField: 'Key' },
+      },
+    ]);
+  });
+
+  it('rejects auth types that are not registered in this Kibana version', () => {
+    const parsed = parseDeclarativeConnectorSpec(
+      ABUSE_IPDB_SPEC_FIXTURE.replace('type: api_key_header', 'type: future_auth_type')
+    );
+
+    expect(() => materializeDeclarativeConnectorSpec(parsed)).toThrow(
+      'auth type "future_auth_type", which is not registered in this Kibana version'
+    );
+  });
+
   it('parses the local catalog manifest', () => {
     const manifest = parseDeclarativeCatalogManifest({
       schemaVersion: 1,

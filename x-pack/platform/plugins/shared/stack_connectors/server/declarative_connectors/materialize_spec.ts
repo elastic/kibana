@@ -6,31 +6,28 @@
  */
 
 import type { ActionContext, AuthTypeDef, ConnectorSpec } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs/server';
 import type { z } from '@kbn/zod/v4';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
 import { executeDeclarativeRequest } from './runtime';
 import type { DeclarativeConnectorSpec } from './types';
 
+const registeredAuthTypeIds = new Set(Object.values(authTypeSpecs).map(({ id }) => id));
+
 const buildAuthTypes = (connector: DeclarativeConnectorSpec): Array<string | AuthTypeDef> => {
-  const { auth } = connector;
-  if (auth.type !== 'api_key_header') return [auth.type];
-  if (!auth.header) {
-    throw new Error(`Declarative connector "${connector.id}" requires an auth header.`);
-  }
-  return [
-    {
-      type: 'api_key_header',
-      defaults: { headerField: auth.header },
-      overrides: {
-        meta: {
-          [auth.header]: {
-            ...(auth.label ? { label: auth.label } : {}),
-            ...(auth.placeholder ? { placeholder: auth.placeholder } : {}),
-          },
-        },
-      },
-    },
-  ];
+  return connector.auth.types.map((authType) => {
+    const authTypeId = typeof authType === 'string' ? authType : authType.type;
+    if (!registeredAuthTypeIds.has(authTypeId)) {
+      throw new Error(
+        `Declarative connector "${connector.id}" uses auth type "${authTypeId}", which is not registered in this Kibana version.`
+      );
+    }
+    if (typeof authType === 'string') {
+      return authType;
+    }
+    const { prefix: _prefix, ...authTypeDefinition } = authType;
+    return authTypeDefinition;
+  });
 };
 
 export const materializeDeclarativeConnectorSpec = (

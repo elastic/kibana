@@ -110,13 +110,27 @@ const buildAuthHeaders = (
   connector: DeclarativeConnectorSpec,
   context: ActionContext
 ): Record<string, string> => {
-  const { auth } = connector;
-  if (auth.type !== 'api_key_header' || !auth.header) return {};
-  const rawValue = context.secrets?.[auth.header];
-  if (typeof rawValue !== 'string' || !rawValue.trim()) {
-    throw new Error(`Connector secret "${auth.header}" is required.`);
+  const selectedAuthType = context.secrets?.authType;
+  const authType = connector.auth.types.find(
+    (candidate) => (typeof candidate === 'string' ? candidate : candidate.type) === selectedAuthType
+  );
+  if (
+    !authType ||
+    typeof authType === 'string' ||
+    authType.type !== 'api_key_header' ||
+    !authType.prefix
+  ) {
+    return {};
   }
-  return { [auth.header]: `${auth.prefix ?? ''}${rawValue.trim()}` };
+  const header = authType.defaults.headerField;
+  if (typeof header !== 'string' || !header) {
+    throw new Error(`Connector auth type "${authType.type}" requires a headerField default.`);
+  }
+  const rawValue = context.secrets?.[header];
+  if (typeof rawValue !== 'string' || !rawValue.trim()) {
+    throw new Error(`Connector secret "${header}" is required.`);
+  }
+  return { [header]: `${authType.prefix}${rawValue.trim()}` };
 };
 
 const toFormBody = (value: unknown): URLSearchParams => {

@@ -130,6 +130,79 @@ const requestSchema = z
     }
   });
 
+const authTypeIdSchema = z.string().min(1).max(128);
+
+const authTypeDefinitionSchema = z
+  .object({
+    type: authTypeIdSchema,
+    isRecommended: z.boolean().optional(),
+    isLegacy: z.boolean().optional(),
+    isExperimental: z.boolean().optional(),
+    defaults: z.record(z.string(), z.unknown()),
+    overrides: z
+      .object({
+        label: z.string().max(256).optional(),
+        meta: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
+      })
+      .strict()
+      .optional(),
+    prefix: z.string().max(128).optional(),
+  })
+  .strict();
+
+const connectorSpecAuthSchema = z
+  .object({
+    types: z
+      .array(z.union([authTypeIdSchema, authTypeDefinitionSchema]))
+      .min(1)
+      .max(16),
+  })
+  .strict();
+
+const legacyAuthSchema = z
+  .object({
+    type: authTypeIdSchema,
+    header: z.string().optional(),
+    prefix: z.string().max(128).optional(),
+    label: z.string().max(256).optional(),
+    placeholder: z.string().max(256).optional(),
+  })
+  .strict()
+  .superRefine((auth, context) => {
+    if (auth.type === 'api_key_header' && !auth.header) {
+      context.addIssue({
+        code: 'custom',
+        message: 'api_key_header requires a header.',
+      });
+    }
+  })
+  .transform(({ type, header, prefix, label, placeholder }) => {
+    if (type !== 'api_key_header' || !header) {
+      return { types: [type] };
+    }
+    return {
+      types: [
+        {
+          type,
+          defaults: { headerField: header },
+          ...(prefix ? { prefix } : {}),
+          ...(label || placeholder
+            ? {
+                overrides: {
+                  meta: {
+                    [header]: {
+                      ...(label ? { label } : {}),
+                      ...(placeholder ? { placeholder } : {}),
+                    },
+                  },
+                },
+              }
+            : {}),
+        },
+      ],
+    };
+  });
+
 const connectorSpecSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -153,15 +226,7 @@ const connectorSpecSchema = z
       })
       .strict(),
     config: jsonSchema,
-    auth: z
-      .object({
-        type: z.enum(['api_key_header', 'basic', 'bearer', 'none']),
-        header: z.string().optional(),
-        prefix: z.string().optional(),
-        label: z.string().optional(),
-        placeholder: z.string().optional(),
-      })
-      .strict(),
+    auth: z.union([connectorSpecAuthSchema, legacyAuthSchema]),
     actions: z
       .record(
         z.string(),

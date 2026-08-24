@@ -30,8 +30,10 @@ config:
       format: uri
       default: http://127.0.0.1:8090
 auth:
-  type: api_key_header
-  header: Key
+  types:
+    - type: api_key_header
+      defaults:
+        headerField: Key
 actions:
   checkIp:
     input:
@@ -77,9 +79,11 @@ config:
       type: string
       format: uri
 auth:
-  type: api_key_header
-  header: Authorization
-  prefix: "SSWS "
+  types:
+    - type: api_key_header
+      defaults:
+        headerField: Authorization
+      prefix: "SSWS "
 actions:
   listUsers:
     input:
