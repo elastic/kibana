@@ -1565,7 +1565,7 @@
     "monaco-editor": "0.54.0",
     "monaco-marker-data-provider": "1.2.5",
     "monaco-promql": "1.8.0",
-    "monaco-yaml": "5.4.0",
+    "monaco-yaml": "5.5.1",
     "mongodb": "6.21.0",
     "mongodb-connection-string-url": "3.0.2",
     "murmurhash": "2.0.1",
