@@ -137,14 +137,10 @@ const ScopeGroup: React.FC<ScopeGroupProps> = ({
           />
         </EuiFlexItem>
         {/* Clicking anywhere on the rest of the header toggles the group open/closed */}
-        <EuiFlexItem
-          grow
-          onClick={() => setIsOpen((v) => !v)}
-          style={{ cursor: 'pointer' }}
-        >
+        <EuiFlexItem grow onClick={() => setIsOpen((v) => !v)} style={{ cursor: 'pointer' }}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={SCOPE_ICONS[scope]} />
+              <EuiIcon type={SCOPE_ICONS[scope]} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="none">
@@ -166,7 +162,7 @@ const ScopeGroup: React.FC<ScopeGroupProps> = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
+              <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} aria-hidden={true} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -305,9 +301,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   const handleToggleAction = useCallback(
     (name: string) => {
       const current = rawSelected ?? [];
-      const next = selectedSet.has(name)
-        ? current.filter((n) => n !== name)
-        : [...current, name];
+      const next = selectedSet.has(name) ? current.filter((n) => n !== name) : [...current, name];
       onChange(next);
     },
     [rawSelected, selectedSet, onChange]

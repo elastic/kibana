@@ -342,10 +342,9 @@ export const getConnectorSpecResponseBodySchema = schema.object({
         meta: { description: 'Whether this action is exposed as an agent tool.' },
       }),
       scope: schema.maybe(
-        schema.oneOf(
-          [schema.literal('read'), schema.literal('write'), schema.literal('destroy')],
-          { meta: { description: 'Permission scope of this action (read, write, or destroy).' } }
-        )
+        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
+          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+        })
       ),
     }),
     {
