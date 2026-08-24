@@ -44,10 +44,6 @@ export interface ProcessedRoundInput {
   attachment_refs?: ProcessedAttachmentVersionRef[];
   /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
   attachment_context?: string;
-  /**
-   * Author attributed to this input. Mirrors `ConversationRound.author` for
-   * previous rounds; on the next input, this is the author of the current
-   * (in-progress) round.
-   */
+  /** Author attributed to this input */
   author?: ConversationRoundAuthor;
 }
