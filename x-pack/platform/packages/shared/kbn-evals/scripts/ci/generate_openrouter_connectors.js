@@ -115,9 +115,7 @@ async function httpJson(url, apiKey) {
 async function fetchAvailableModels(baseUrl, apiKey, httpJsonFn = httpJson) {
   const response = await httpJsonFn(`${baseUrl}/models/user`, apiKey);
   const entries = response && Array.isArray(response.data) ? response.data : [];
-  /** @type {Map<string, object>} */
   const byId = new Map();
-  /** @type {Map<string, string>} */
   const byConnectorId = new Map();
 
   for (const entry of entries) {
