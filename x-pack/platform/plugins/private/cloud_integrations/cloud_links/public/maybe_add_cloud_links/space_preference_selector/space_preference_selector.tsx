@@ -88,7 +88,7 @@ export function SpaceConfigurationUI({
       data-test-subj="spacePreferenceSelector"
     >
       {i18n.translate('xpack.cloudLinks.userMenuLinks.spaceConfigurationLinkText', {
-        defaultMessage: 'Space preferences',
+        defaultMessage: 'Spaces preferences',
       })}
     </EuiContextMenuItem>
   );

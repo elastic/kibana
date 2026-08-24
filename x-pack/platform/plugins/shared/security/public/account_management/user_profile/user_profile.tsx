@@ -684,7 +684,7 @@ function UserSpacePreferenceEditor({ formik }: { formik: ReturnType<typeof useUs
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupTitle"
-            defaultMessage="Space preferences"
+            defaultMessage="Spaces preferences"
           />
         </h2>
       }
