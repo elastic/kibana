@@ -21,7 +21,7 @@ const unpinnedKey = (agentId: string) =>
 const pinnedKey = (agentId: string) => queryKeys.conversations.byAgent(agentId, { pinned: true });
 
 const getNextPageParam = (lastPage: ListConversationsResponse) => {
-  const { page, per_page: pp, total } = lastPage._meta;
+  const { page, per_page: pp, total } = lastPage.pagination;
   const next = page + 1;
   return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
 };
@@ -45,7 +45,7 @@ const buildSidebarConversationListRow = (p: {
 
 /**
  * Walk every paged list variant whose key starts with queryKeys.conversations.list and apply
- * `updater` to each page's `results` array. Updates `_meta.total` by `delta`.
+ * `updater` to each page's `results` array. Updates `pagination.total` by `delta`.
  */
 const applyToAllListVariants = (
   queryClient: QueryClient,
@@ -63,7 +63,7 @@ const applyToAllListVariants = (
         if (newResults === page.results) return page;
         return {
           ...page,
-          _meta: { ...page._meta, total: Math.max(0, page._meta.total + delta) },
+          pagination: { ...page.pagination, total: Math.max(0, page.pagination.total + delta) },
           results: newResults,
         };
       });
@@ -88,7 +88,9 @@ const prependConversationToList = (
   let inserted = false;
   queryClient.setQueryData<ConversationListCache>(key, (prev) => {
     const data: ConversationListCache = prev ?? {
-      pages: [{ _meta: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] }],
+      pages: [
+        { pagination: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] },
+      ],
       pageParams: [undefined],
     };
     if (data.pages.some((p) => p.results.some((c) => c.id === row.id))) return prev;
@@ -99,7 +101,7 @@ const prependConversationToList = (
       pages: [
         {
           ...firstPage,
-          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
+          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
           results: [row, ...firstPage.results],
         },
         ...rest,
@@ -239,7 +241,7 @@ export const movePinnedConversationBetweenLists = ({
       movedRow = page.results[idx];
       return {
         ...page,
-        _meta: { ...page._meta, total: Math.max(0, page._meta.total - 1) },
+        pagination: { ...page.pagination, total: Math.max(0, page.pagination.total - 1) },
         results: [...page.results.slice(0, idx), ...page.results.slice(idx + 1)],
       };
     });
@@ -266,7 +268,7 @@ export const movePinnedConversationBetweenLists = ({
       pages: [
         {
           ...firstPage,
-          _meta: { ...firstPage._meta, total: firstPage._meta.total + 1 },
+          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
           results: [row, ...firstPage.results],
         },
         ...rest,

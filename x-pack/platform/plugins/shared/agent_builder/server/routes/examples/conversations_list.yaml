@@ -7,7 +7,7 @@ responses:
           listConversationsResponseExample:
             description: "Example response returning the first page of conversations for all agents"
             value:
-              _meta:
+              pagination:
                 total: 128
                 page: 1
                 per_page: 50
@@ -25,7 +25,7 @@ responses:
           listConversationsPinnedExample:
             description: "Example response filtered to pinned conversations only"
             value:
-              _meta:
+              pagination:
                 total: 3
                 page: 1
                 per_page: 50

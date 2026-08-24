@@ -61,7 +61,7 @@ export const useConversationList = ({
         perPage: perPage ?? MAX_CONVERSATIONS_PER_PAGE,
       }),
     getNextPageParam: (lastPage) => {
-      const { page, per_page: pp, total } = lastPage._meta;
+      const { page, per_page: pp, total } = lastPage.pagination;
       const next = page + 1;
       // No more pages if we've fetched all results, or the next offset would exceed the ES window.
       return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
@@ -72,7 +72,7 @@ export const useConversationList = ({
     () => dedupeById(data?.pages.flatMap((p) => p.results) ?? []),
     [data]
   );
-  const total = data?.pages[0]?._meta.total ?? 0;
+  const total = data?.pages[0]?.pagination.total ?? 0;
 
   return {
     conversations,

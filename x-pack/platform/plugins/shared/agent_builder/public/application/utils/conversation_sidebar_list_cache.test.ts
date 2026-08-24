@@ -48,7 +48,7 @@ const buildPage = (
   page = 1,
   total?: number
 ): ListConversationsResponse => ({
-  _meta: { total: total ?? items.length, page, per_page: 50 },
+  pagination: { total: total ?? items.length, page, per_page: 50 },
   results: items,
 });
 
@@ -95,7 +95,7 @@ describe('conversation_sidebar_list_cache', () => {
       const cached = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(cached?.pages[0].results.map((c) => c.id)).toEqual(['c1', 'existing-1', 'existing-2']);
       // total is bumped
-      expect(cached?.pages[0]._meta.total).toBe(3);
+      expect(cached?.pages[0].pagination.total).toBe(3);
     });
 
     it('prefetch stores data in InfiniteData shape (pages / pageParams), not a flat array', async () => {
@@ -202,7 +202,7 @@ describe('conversation_sidebar_list_cache', () => {
 
       const cachedAll = queryClient.getQueryData<ConversationListCache>(allKey);
       expect(cachedAll?.pages[0].results.map((c) => c.id)).toContain('c-new');
-      expect(cachedAll?.pages[0]._meta.total).toBe(2);
+      expect(cachedAll?.pages[0].pagination.total).toBe(2);
     });
 
     it('does not duplicate a row that already exists on a later loaded page', async () => {
@@ -227,7 +227,7 @@ describe('conversation_sidebar_list_cache', () => {
       // c1 must not appear in page 1.
       expect(cached?.pages[0].results.map((c) => c.id)).not.toContain('c1');
       // total must not be incremented.
-      expect(cached?.pages[0]._meta.total).toBe(2);
+      expect(cached?.pages[0].pagination.total).toBe(2);
     });
   });
 
@@ -244,7 +244,7 @@ describe('conversation_sidebar_list_cache', () => {
 
       const cached = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(cached?.pages[0].results.map((c) => c.id)).toEqual(['c2']);
-      expect(cached?.pages[0]._meta.total).toBe(1);
+      expect(cached?.pages[0].pagination.total).toBe(1);
     });
 
     it('applies to all list variants under the prefix', () => {
@@ -289,12 +289,12 @@ describe('conversation_sidebar_list_cache', () => {
 
       const unpinned = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(unpinned?.pages[0].results.map((c) => c.id)).toEqual(['c2']);
-      expect(unpinned?.pages[0]._meta.total).toBe(1); // correctly decremented
+      expect(unpinned?.pages[0].pagination.total).toBe(1); // correctly decremented
 
       const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
       expect(pinned?.pages[0].results.map((c) => c.id)).toEqual(['c3']); // unchanged
       // Must NOT be decremented — c1 was never in the pinned list.
-      expect(pinned?.pages[0]._meta.total).toBe(1);
+      expect(pinned?.pages[0].pagination.total).toBe(1);
     });
   });
 
@@ -385,12 +385,12 @@ describe('conversation_sidebar_list_cache', () => {
 
       const unpinned = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(unpinned?.pages[0].results.map((c) => c.id)).toEqual(['c2']);
-      expect(unpinned?.pages[0]._meta.total).toBe(1);
+      expect(unpinned?.pages[0].pagination.total).toBe(1);
 
       const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
       expect(pinned?.pages[0].results.map((c) => c.id)).toEqual(['c1']);
       expect(pinned?.pages[0].results[0].pinned).toBe(true);
-      expect(pinned?.pages[0]._meta.total).toBe(1);
+      expect(pinned?.pages[0].pagination.total).toBe(1);
     });
 
     it('moves a row from the pinned list to the unpinned list', () => {
@@ -413,12 +413,12 @@ describe('conversation_sidebar_list_cache', () => {
 
       const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
       expect(pinned?.pages[0].results).toHaveLength(0);
-      expect(pinned?.pages[0]._meta.total).toBe(0);
+      expect(pinned?.pages[0].pagination.total).toBe(0);
 
       const unpinned = queryClient.getQueryData<ConversationListCache>(unpinnedKey);
       expect(unpinned?.pages[0].results.map((c) => c.id)).toEqual(['c1', 'c2']);
       expect(unpinned?.pages[0].results[0].pinned).toBe(false);
-      expect(unpinned?.pages[0]._meta.total).toBe(2);
+      expect(unpinned?.pages[0].pagination.total).toBe(2);
     });
 
     it('is a no-op on the target when the source conversation is not found', () => {

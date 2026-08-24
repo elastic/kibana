@@ -184,7 +184,7 @@ export function registerConversationRoutes({
 
         return response.ok<ListConversationsResponse>({
           body: {
-            _meta: { total, page, per_page: perPage },
+            pagination: { total, page, per_page: perPage },
             results,
           },
         });

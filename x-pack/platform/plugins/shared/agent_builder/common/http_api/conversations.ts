@@ -24,7 +24,7 @@ export type GetConversationResponse = ConversationWithPermissions;
 export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
-  _meta: {
+  pagination: {
     total: number;
     page: number;
     per_page: number;

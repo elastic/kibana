@@ -96,10 +96,10 @@ apiTest.describe(
 
       expect(res).toHaveStatusCode(200);
       const body = res.body as ListConversationsResponse;
-      expect(typeof body._meta.total).toBe('number');
-      expect(body._meta.total).toBeGreaterThanOrEqual(7);
-      expect(body._meta.page).toBe(1);
-      expect(body._meta.per_page).toBe(PER_PAGE);
+      expect(typeof body.pagination.total).toBe('number');
+      expect(body.pagination.total).toBeGreaterThanOrEqual(7);
+      expect(body.pagination.page).toBe(1);
+      expect(body.pagination.per_page).toBe(PER_PAGE);
     });
 
     apiTest(
@@ -112,8 +112,8 @@ apiTest.describe(
 
         expect(res).toHaveStatusCode(200);
         const body = res.body as ListConversationsResponse;
-        expect(body._meta.page).toBe(1);
-        expect(body._meta.per_page).toBe(MAX_CONVERSATIONS_PER_PAGE);
+        expect(body.pagination.page).toBe(1);
+        expect(body.pagination.per_page).toBe(MAX_CONVERSATIONS_PER_PAGE);
         // All 7 test conversations fit within the default page size, so they
         // should all be returned in a single page.
         const ids = body.results.map((c) => c.id);
@@ -169,7 +169,7 @@ apiTest.describe(
       const body = res.body as ListConversationsResponse;
       // 7 conversations ÷ per_page=5 → page 2 has 2 items.
       expect(body.results.length).toBeGreaterThanOrEqual(1);
-      expect(body._meta.page).toBe(2);
+      expect(body.pagination.page).toBe(2);
     });
 
     apiTest(
