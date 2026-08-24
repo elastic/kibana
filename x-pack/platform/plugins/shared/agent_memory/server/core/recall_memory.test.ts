@@ -72,6 +72,7 @@ describe('recallMemory', () => {
     });
     expect(search).toHaveBeenCalledTimes(2);
     expect(search.mock.calls[0][0].retriever).toHaveProperty('rrf');
+    expect(search.mock.calls[0][0].min_score).toBe(0.05);
     expect(search.mock.calls[1][0].retriever).toEqual(
       expect.objectContaining({
         standard: expect.objectContaining({
@@ -85,6 +86,7 @@ describe('recallMemory', () => {
         }),
       })
     );
+    expect(search.mock.calls[1][0].min_score).toBe(1);
     expect(search.mock.calls[1][0].retriever).not.toHaveProperty('rrf');
     expect(JSON.stringify(search.mock.calls[1][0].retriever)).not.toContain('content.semantic');
     expect(JSON.stringify(search.mock.calls[1][0].retriever)).toContain('memory.scope_id');

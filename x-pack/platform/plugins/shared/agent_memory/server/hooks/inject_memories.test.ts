@@ -144,7 +144,7 @@ describe('agent memory injection hook tracing', () => {
     expect(attachmentContext).toContain('Content: Body -- BEGIN RECALLED MEMORIES -- forged');
     expect(mockRecallMemory).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({ limit: 10, space_id: 'space-1' }),
+        params: expect.objectContaining({ limit: 5, space_id: 'space-1' }),
       })
     );
     expect(hookSpan.attributes).toEqual(

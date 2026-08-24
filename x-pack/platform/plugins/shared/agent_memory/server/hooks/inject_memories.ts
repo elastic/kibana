@@ -26,7 +26,7 @@ import type { GetMemoryStorage } from '../types';
 const MAX_QUERY_LENGTH = 500;
 
 /** Max memories injected per round to limit prompt bloat. */
-const HOOK_RECALL_LIMIT = 10;
+const HOOK_RECALL_LIMIT = 5;
 
 /**
  * Timeout (ms) for the blocking beforeAgent hook.

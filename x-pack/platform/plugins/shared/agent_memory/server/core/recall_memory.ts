@@ -39,6 +39,8 @@ export interface RecallMemoryResult {
 
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 10;
+const HYBRID_MIN_SCORE = 0.05;
+const KEYWORD_MIN_SCORE = 1;
 
 /**
  * Recalls relevant memories using hybrid RRF (BM25 + semantic).
@@ -65,10 +67,12 @@ export const recallMemory = async ({
   const client = storage.getClient();
 
   const searchWithRetriever = async (
-    retriever: ReturnType<typeof buildRetriever>
+    retriever: ReturnType<typeof buildRetriever>,
+    minScore: number
   ): Promise<RecallMemoryResult> => {
     const result = await client.search({
       retriever,
+      min_score: minScore,
       size: limit,
       track_total_hits: false,
       _source: true,
@@ -106,13 +110,16 @@ export const recallMemory = async ({
   };
 
   try {
-    return await searchWithRetriever(buildRetriever(retrieverParams));
+    return await searchWithRetriever(buildRetriever(retrieverParams), HYBRID_MIN_SCORE);
   } catch {
     logger?.warn('Agent Memory hybrid recall failed; retrying with keyword-only retrieval');
   }
 
   try {
-    return await searchWithRetriever(buildKeywordRetriever(retrieverParams));
+    return await searchWithRetriever(
+      buildKeywordRetriever(retrieverParams),
+      KEYWORD_MIN_SCORE
+    );
   } catch {
     // Fail open: an unreachable memory service must never stop the agent (G5, D-security).
     logger?.warn('Agent Memory keyword recall fallback failed; returning empty results');
