@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- *
- * @jest-environment node
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -50,7 +48,8 @@ describe('unzip', () => {
       '/path_traversal.zip': PATH_TRAVERSAL_ZIP,
       '/output': {},
     });
-    await unzip('/path_traversal.zip', '/output');
+
+    await expect(unzip('/path_traversal.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
     expect(existsSync('/escaped.txt')).toBe(false);
   });
 
@@ -59,7 +58,8 @@ describe('unzip', () => {
       '/symlink_escape.zip': SYMLINK_ESCAPE_ZIP,
       '/output': {},
     });
-    await unzip('/symlink_escape.zip', '/output');
+
+    await expect(unzip('/symlink_escape.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
     expect(existsSync('/escaped.txt')).toBe(false);
     expect(existsSync('/output/escaped.txt')).toBe(false);
   });
