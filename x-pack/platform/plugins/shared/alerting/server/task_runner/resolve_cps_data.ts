@@ -80,11 +80,7 @@ export const resolveCpsData = async (
         : [];
     } catch (error) {
       const statusCode = (error as { statusCode?: number })?.statusCode;
-      if (statusCode === 404 || statusCode === 400) {
-        // An unknown route (e.g. local dev ES that does not implement /_project/tags) is a
-        // legitimate "no linked projects" case: report an empty scope silently.
-        linkedProjects = [];
-      } else if (statusCode === 401 || statusCode === 403) {
+      if (statusCode === 401 || statusCode === 403) {
         // The rule's execution principal cannot list linked projects. This typically means the
         // run fell back to a project-scoped ES API key instead of a cross-project-capable UIAM
         // key, so the run could not search linked projects either. Leave linked projects

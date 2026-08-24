@@ -218,7 +218,7 @@ describe('resolveCpsData', () => {
   );
 
   it.each([400, 404])(
-    'reports empty linkedProjects silently when the tags request fails with %s',
+    'leaves linkedProjects unresolved and logs a warning when the tags request fails with %s',
     async (statusCode) => {
       internalUserEsClient.transport.request.mockResolvedValueOnce({
         expression: '_alias:*',
@@ -234,9 +234,11 @@ describe('resolveCpsData', () => {
 
       expect(result).toEqual({
         resolvedExpression: '_alias:*',
-        linkedProjects: [],
+        linkedProjects: undefined,
       });
-      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to resolve linked projects via /_project/tags')
+      );
     }
   );
 });
