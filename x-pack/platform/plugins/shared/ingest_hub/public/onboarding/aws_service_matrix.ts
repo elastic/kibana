@@ -154,13 +154,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway',
-    name: 'AWS API Gateway',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'lambda',
-    name: 'AWS Lambda',
     category: 'compute',
     packageName: 'aws',
   },
@@ -168,7 +166,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Compute ───────────────────────────────────────────────
   {
     id: 'ec2',
-    name: 'Amazon EC2',
     category: 'compute',
     packageName: 'aws',
   },
@@ -179,7 +176,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'emr',
-    name: 'Amazon EMR',
     category: 'compute',
     packageName: 'aws',
   },
@@ -211,7 +207,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — management_governance / security_identity_compliance ──
   {
     id: 'cloudtrail',
-    name: 'AWS CloudTrail',
     category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
@@ -229,25 +224,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'config',
-    name: 'AWS Config',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'guardduty',
-    name: 'AWS GuardDuty',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'inspector',
-    name: 'AWS Inspector',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'firewall',
-    name: 'AWS Network Firewall',
     category: 'security_identity_compliance',
     packageName: 'aws',
     // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
@@ -255,13 +246,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'securityhub',
-    name: 'AWS Security Hub',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'waf',
-    name: 'AWS WAF',
     category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
@@ -291,7 +280,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'elb',
-    name: 'AWS ELB',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
@@ -302,7 +290,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'route53',
-    name: 'AWS Route 53',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
@@ -313,7 +300,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'vpcflow',
-    name: 'AWS VPC Flow',
     category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
@@ -343,7 +329,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 's3',
-    name: 'Amazon S3',
     category: 'storage',
     packageName: 'aws',
   },
@@ -395,14 +380,12 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'aws_bedrock',
-    name: 'AWS Bedrock',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'aws_bedrock_agentcore',
-    name: 'AWS Bedrock AgentCore',
     category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
     showInUI: false,
@@ -411,7 +394,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
     id: 'awsfargate',
-    name: 'AWS Fargate',
     category: 'containers',
     packageName: 'awsfargate',
   },
@@ -420,7 +402,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'amazon_mq',
-    name: 'AWS MQ',
     category: 'application_integration',
     packageName: 'aws_mq',
     showInUI: false,
@@ -429,7 +410,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
-    name: 'AWS Logs (Generic)',
     category: 'management_governance',
     packageName: 'aws_logs',
   },
