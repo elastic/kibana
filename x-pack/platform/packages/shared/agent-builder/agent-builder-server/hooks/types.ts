@@ -22,6 +22,7 @@ interface AgentHookContextBase {
 }
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
+  spaceId: string;
   nextInput: ProcessedRoundInput;
   agentConfiguration: AgentConfiguration;
 }

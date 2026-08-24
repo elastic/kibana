@@ -198,6 +198,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
+    spaceId: context.spaceId,
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,

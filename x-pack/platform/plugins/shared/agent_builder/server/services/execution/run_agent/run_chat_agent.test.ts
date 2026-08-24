@@ -152,7 +152,7 @@ describe('runDefaultAgentMode', () => {
     );
   });
 
-  it('passes the effective agent configuration to the beforeAgent hook', async () => {
+  it('passes the effective agent configuration and space ID to the beforeAgent hook', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
@@ -186,7 +186,7 @@ describe('runDefaultAgentMode', () => {
 
     expect(context.hooks.run).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ agentConfiguration })
+      expect.objectContaining({ agentConfiguration, spaceId: context.spaceId })
     );
   });
 
