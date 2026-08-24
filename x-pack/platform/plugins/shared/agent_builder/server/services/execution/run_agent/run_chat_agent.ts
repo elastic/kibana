@@ -185,6 +185,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
+    nextInputAuthor: pendingRound?.author ?? author,
     previousRounds: conversation?.rounds ?? [],
     context,
     action,

@@ -20,6 +20,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
@@ -57,18 +58,13 @@ describe('POST /internal/evals/_evaluate', () => {
     name,
     version,
     kind,
+    origin: 'built_in',
     description: `${name} evaluator`,
     evaluate,
   });
 
-  const buildEvaluatorRegistry = (definitions: EvaluatorDefinition[] = []): EvaluatorRegistry => ({
-    list: () => definitions,
-    get: (name: string, version?: string) =>
-      definitions.find(
-        (definition) =>
-          definition.name === name && (version === undefined || definition.version === version)
-      ),
-  });
+  const buildEvaluatorRegistry = (definitions: EvaluatorDefinition[] = []): EvaluatorRegistry =>
+    createEvaluatorRegistryMock(definitions);
 
   const buildContext = (
     searchMock: jest.Mock = jest.fn().mockResolvedValue({
@@ -92,12 +88,15 @@ describe('POST /internal/evals/_evaluate', () => {
   const setup = ({
     evaluatorRegistry,
     inferenceStart,
+    spaceId,
   }: {
     evaluatorRegistry?: EvaluatorRegistry;
     inferenceStart?: InferenceServerStart;
+    spaceId?: string;
   } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
+    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
 
     registerEvaluateRoute({
@@ -112,13 +111,14 @@ describe('POST /internal/evals/_evaluate', () => {
         } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId,
     });
 
     const route = versionedRouter.getRoute('post', EVALS_EVALUATE_URL);
     const routeConfig = versionedRouter.post.mock.calls[0][0];
     const { handler } = route.versions[API_VERSIONS.internal.v1];
 
-    return { handler, routeConfig, logger };
+    return { handler, routeConfig, logger, getSpaceId };
   };
 
   beforeEach(() => {
@@ -135,6 +135,32 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(routeConfig.security).toEqual({
       authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
     });
+  });
+
+  it('resolves evaluators from the active space', async () => {
+    const latency = buildEvaluator({ name: 'latency', kind: 'code' });
+    const evaluatorRegistry = buildEvaluatorRegistry([latency]);
+    const asScoped = jest.spyOn(evaluatorRegistry, 'asScoped');
+    const { handler, getSpaceId } = setup({
+      evaluatorRegistry,
+      spaceId: 'marketing',
+    });
+    const request = {
+      body: {
+        subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+        evaluators: [{ name: 'latency' }],
+      },
+    } as unknown as Parameters<typeof handler>[1];
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getSpaceId).toHaveBeenCalledWith(request);
+    expect(asScoped).toHaveBeenCalledWith({ spaceId: 'marketing' });
   });
 
   it('returns two ok results, reuses one trace accessor, and caches inference client by connector', async () => {
