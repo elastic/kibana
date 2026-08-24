@@ -560,7 +560,6 @@ function setupMocks({
     updateDeployAndDetectStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
-    retryDeploy: jest.fn(),
   });
 
   mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
@@ -593,6 +592,22 @@ describe('useDeploy', () => {
     expect(result.current.namespace).toBe('default');
     expect(result.current.isDeploying).toBe(false);
     expect(result.current.failedInstances).toEqual([]);
+  });
+
+  it('initializes failedInstances from persisted deployAndDetectStep state (survives remount)', () => {
+    // Simulate the post-Back/Next remount: session storage still has a failure from a prior deploy,
+    // but deployAttempted and local failedInstances are both reset to their initial values.
+    // The hook must seed from the persisted store so the error callout remains visible.
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      deployAndDetectStep: {
+        serviceStatuses: { ec2_metrics: 'error' },
+        failedInstances: ['ec2_metrics'],
+      },
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    expect(result.current.failedInstances).toEqual(['ec2_metrics']);
   });
 
   it('navigates immediately and completes API call on success', async () => {
@@ -719,7 +734,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when all selected instances are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
-      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'receiving' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -901,6 +916,53 @@ describe('useDeploy', () => {
     // or similar and would fire a separate call or appear enabled in the single call).
     const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));
     expect(hasCloudtrailInput).toBe(false);
+  });
+
+  describe('isAlreadyDeployed', () => {
+    it('is false when serviceStatuses is empty', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: {} },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is false when status is instantiating (deploy in flight)', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is false when status is error', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'error' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is true when all members have status receiving', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'receiving' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
+    it('is true when all members have status detecting', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2_metrics'],
+        deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'detecting' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
   });
 
   it('includes non-managed_integration services as gray instantiating chips without deploying them', async () => {
