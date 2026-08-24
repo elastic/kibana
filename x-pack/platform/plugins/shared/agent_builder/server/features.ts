@@ -17,6 +17,7 @@ import {
   apiPrivileges,
   subFeaturePrivilegeIds,
 } from '../common/features';
+import { AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -36,9 +37,10 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           ApiPrivileges.manage('llm_product_doc'),
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
+        // Read the space-settings singleton for UI resolution of default Agent
         savedObject: {
           all: [],
-          read: [],
+          read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show, uiPrivileges.write],
       },
@@ -48,7 +50,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
           all: [],
-          read: [],
+          read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show],
       },
@@ -70,7 +72,10 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 ),
                 includeIn: 'all',
                 api: [apiPrivileges.manageAgents],
-                savedObject: { all: [], read: [] },
+                savedObject: {
+                  all: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
+                  read: [],
+                },
                 ui: [uiPrivileges.manageAgents],
               },
               {
