@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '..';
 import { EuiGlobalToastListObject } from '../eui_components';
 import type { ScoutPage } from '../fixtures/scope/test';
 
 export class Toasts {
   private readonly toastList: EuiGlobalToastListObject;
   constructor(page: ScoutPage) {
-    this.toastList = new EuiGlobalToastListObject(page);
+    this.toastList = new EuiGlobalToastListObject(page, 'globalToastList');
   }
 
   /** Waits up to 10s for a toast to appear; throws when none does. */
@@ -52,6 +53,25 @@ export class Toasts {
    */
   async closeAll() {
     await this.waitFor();
+    await this.toastList.closeAll();
+  }
+
+  /**
+   * Waits for a toast containing `text`. Strict: throws when several toasts match.
+   *
+   * Prefer not to assert on toast content at all — see {@link getHeaderText}. This exists
+   * for the cases where the toast *is* the behaviour under test, such as invalid filter
+   * references reported after a data view changes.
+   */
+  async waitForToastWithText(text: string, timeout = 15_000): Promise<void> {
+    await expect(this.toastList.toasts.filter({ hasText: text })).toBeVisible({ timeout });
+  }
+
+  /**
+   * Dismisses any visible toasts without waiting for one to appear.
+   * Use before clicks that toasts can intercept (e.g. top-nav Share).
+   */
+  async dismissAll() {
     await this.toastList.closeAll();
   }
 }

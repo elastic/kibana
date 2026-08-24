@@ -72,4 +72,40 @@ describe('validateWorkflowYaml', () => {
 
     expect(outcome.ok).toBe(false);
   });
+
+  it('does not fail the run when the only schema issue is a managed __TOKEN__ (--variant managed)', async () => {
+    const yaml = [
+      'version: "1"',
+      'name: wf',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: detect',
+      '    type: console',
+      '    with:',
+      '      value: __DETECTION_INTERVAL_MINUTES__',
+      '',
+    ].join('\n');
+    const validateSchema = failFn([
+      {
+        instancePath: '/steps/0/with/value',
+        schemaPath: '#/properties/with/properties/value/type',
+        keyword: 'type',
+        params: { type: 'number' },
+        message: 'must be number',
+      },
+    ] as ErrorObject[]);
+
+    const outcome = await validateWorkflowYaml({
+      file: 'wf.yaml',
+      yaml,
+      validateSchema,
+      variantMode: 'managed',
+    });
+
+    expect(outcome.ok).toBe(true);
+    expect(outcome.issues.some((issue) => issue.source === 'managed-placeholder')).toBe(true);
+    expect(outcome.issues.some((issue) => issue.severity !== 'warning')).toBe(false);
+  });
 });

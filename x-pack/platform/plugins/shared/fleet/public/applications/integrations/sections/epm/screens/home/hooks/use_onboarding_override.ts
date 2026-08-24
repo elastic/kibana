@@ -30,7 +30,7 @@ export function useOnboardingOverride() {
   const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const navigateToOnboarding = useCallback(() => {
-    application.navigateToApp('onboarding', { path: '/aws' });
+    application.navigateToApp('onboarding', { path: '/aws', state: { newSession: true } });
   }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {

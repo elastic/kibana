@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_platform
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/config-schema'
@@ -26,6 +27,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
+  - '@kbn/esql-utils'
   - '@kbn/product-doc-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/i18n'
@@ -47,6 +49,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

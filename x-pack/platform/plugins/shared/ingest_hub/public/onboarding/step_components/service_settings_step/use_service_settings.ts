@@ -8,30 +8,99 @@
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getDefaultTransport, getRequiredTextFields } from './field_config';
-import type { TransportType } from './field_config';
+import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceVars {
-  trigger: TransportType | null;
-  vars: Record<string, string>;
+  /** Input types that are enabled for this service instance (e.g. ['httpjson'], ['aws-s3']). */
+  enabledInputs: string[];
+  /**
+   * Var values keyed by input type, then var name.
+   * Mirrors Fleet's positional scoping (inputs[].streams[].vars).
+   * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
+   */
+  varsByInput: Record<string, Record<string, string>>;
 }
 
-interface PersistedState {
+/**
+ * A row in the step-2 table. `instanceId` is the stable row identity;
+ * `serviceId` is the data-stream / Fleet join key and remains unchanged.
+ * Original instances keep instanceId === serviceId for backward compat with
+ * session storage written by earlier builds.
+ */
+export interface ServiceInstance {
+  instanceId: string;
+  serviceId: string;
+  /** Display name — defaults to service.name, "[Duplicate]"-suffixed for copies. */
+  name: string;
+  isDuplicate: boolean;
+}
+
+export interface ServiceSettingsPersistedState {
   globalRegion: string;
+  /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
+  /** Absent in old sessions — reconciled on read from selectedServiceIds. */
+  instances?: ServiceInstance[];
 }
 
-export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
+
+/** Derive the canonical base instances (one per serviceId) from the selected ids list. */
+function baseInstances(
+  selectedServiceIds: string[],
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
+): ServiceInstance[] {
+  return selectedServiceIds
+    .map((id) => {
+      const service = awsServicesMap?.get(id);
+      if (!service || !service.showInUI) return null;
+      return { instanceId: id, serviceId: id, name: service.name, isDuplicate: false };
+    })
+    .filter((i): i is ServiceInstance => i !== null);
+}
+
+/**
+ * Reconcile persisted instances against the current selectedServiceIds.
+ * - Keep instances whose serviceId is still selected.
+ * - Add a base instance for any newly-selected service with no existing instance.
+ * - Drop instances for deselected services.
+ */
+function reconcileInstances(
+  selectedServiceIds: string[],
+  persisted: ServiceInstance[] | undefined,
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
+): ServiceInstance[] {
+  const selectedSet = new Set(selectedServiceIds);
+
+  if (!persisted || persisted.length === 0) {
+    return baseInstances(selectedServiceIds, awsServicesMap);
+  }
+
+  const kept = persisted.filter((inst) => selectedSet.has(inst.serviceId));
+  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
+
+  const added: ServiceInstance[] = [];
+  for (const id of selectedServiceIds) {
+    if (!coveredServiceIds.has(id)) {
+      const service = awsServicesMap?.get(id);
+      if (service?.showInUI) {
+        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
+      }
+    }
+  }
+
+  return [...kept, ...added];
+}
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep } = useOnboardingFlow();
+  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<PersistedState>(
+  const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     {
       globalRegion: '',
@@ -51,97 +120,194 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
-  const selectedServices: AwsServiceMatrixEntry[] = useMemo(
-    () =>
-      selectedServiceIds
-        .map((id) => AWS_SERVICES_MAP.get(id))
-        .filter((s): s is AwsServiceMatrixEntry => s !== undefined),
-    [selectedServiceIds]
+  // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
+  const instances: ServiceInstance[] = useMemo(
+    () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
+    [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
 
   const getServiceVars = useCallback(
-    (serviceId: string): ServiceVars => {
-      const existing = persisted?.serviceVars?.[serviceId];
-      if (existing) return existing;
-      const service = AWS_SERVICES_MAP.get(serviceId);
+    (instanceId: string): ServiceVars => {
+      const raw = persisted?.serviceVars?.[instanceId] as ServiceVars | undefined;
+      if (raw) {
+        return raw;
+      }
+      const inst = instances.find((i) => i.instanceId === instanceId);
+      const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
-        trigger: service ? getDefaultTransport(service) : null,
-        vars: {},
+        enabledInputs: service?.defaultEnabledInputs ?? [],
+        varsByInput: {},
       };
     },
-    [persisted]
+    [persisted, instances, awsServicesMap]
   );
 
-  // Applies multiple field changes (and optional transport) in a single write to avoid
+  // Applies multiple field changes (and optional enabled-inputs update) in a single write to avoid
   // stale-closure overwrites when several vars are committed at once (flyout Save).
-  const setServiceFieldsAndTransport = useCallback(
-    (serviceId: string, newFields: Record<string, string>, transport: TransportType | null) => {
-      const current = getServiceVars(serviceId);
+  const setServiceFieldsAndInputs = useCallback(
+    (
+      instanceId: string,
+      fieldsByInput: Record<string, Record<string, string>>,
+      enabledInputs: string[]
+    ) => {
+      const current = getServiceVars(instanceId);
+      const merged: Record<string, Record<string, string>> = { ...current.varsByInput };
+      for (const [input, fields] of Object.entries(fieldsByInput)) {
+        merged[input] = { ...(merged[input] ?? {}), ...fields };
+      }
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [serviceId]: {
-            trigger: transport ?? current.trigger,
-            vars: { ...current.vars, ...newFields },
+          [instanceId]: { enabledInputs, varsByInput: merged },
+        },
+      });
+    },
+    [persisted, setPersisted, getServiceVars, instances]
+  );
+
+  const addDuplicate = useCallback(
+    (
+      sourceInstanceId: string,
+      newName: string,
+      fieldsByInput: Record<string, Record<string, string>>,
+      enabledInputs: string[]
+    ) => {
+      const source = instances.find((i) => i.instanceId === sourceInstanceId);
+      if (!source) return;
+
+      const existingIds = new Set(instances.map((i) => i.instanceId));
+      let n = instances.filter((i) => i.serviceId === source.serviceId && i.isDuplicate).length + 1;
+      let newInstanceId = `${source.serviceId}__dup-${n}`;
+      while (existingIds.has(newInstanceId)) {
+        newInstanceId = `${source.serviceId}__dup-${++n}`;
+      }
+
+      const sourceVars = getServiceVars(sourceInstanceId);
+      const mergedByInput: Record<string, Record<string, string>> = { ...sourceVars.varsByInput };
+      for (const [input, fields] of Object.entries(fieldsByInput)) {
+        mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+      }
+      const newInstance: ServiceInstance = {
+        instanceId: newInstanceId,
+        serviceId: source.serviceId,
+        name: newName,
+        isDuplicate: true,
+      };
+
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        instances: [...instances, newInstance],
+        serviceVars: {
+          ...(persisted?.serviceVars ?? {}),
+          [newInstanceId]: {
+            enabledInputs: enabledInputs.length ? enabledInputs : sourceVars.enabledInputs,
+            varsByInput: mergedByInput,
           },
         },
       });
     },
-    [persisted, setPersisted, getServiceVars]
+    [persisted, setPersisted, instances, getServiceVars]
+  );
+
+  const removeInstance = useCallback(
+    (instanceId: string) => {
+      const next = instances.filter((i) => i.instanceId !== instanceId);
+      const nextVars = { ...(persisted?.serviceVars ?? {}) };
+      delete nextVars[instanceId];
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        instances: next,
+        serviceVars: nextVars,
+      });
+      // Prune deploy state so removed instances don't leave orphaned chips,
+      // stale failedInstances entries, or undismissable error callouts in step 4.
+      removeDeployInstance(instanceId);
+    },
+    [persisted, setPersisted, instances, removeDeployInstance]
   );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
 
-  const filteredServices = useMemo(() => {
+  const filteredInstances = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return selectedServices.filter(
-      (s) =>
-        (signalFilter === 'all' || s.signalType === signalFilter) &&
-        (q === '' || s.name.toLowerCase().includes(q))
-    );
-  }, [selectedServices, searchQuery, signalFilter]);
+    return instances.filter((inst) => {
+      const service = awsServicesMap?.get(inst.serviceId);
+      if (!service) return false;
+      if (signalFilter !== 'all' && service.signalType !== signalFilter) return false;
+      if (q !== '' && !inst.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [instances, searchQuery, signalFilter, awsServicesMap]);
 
-  const incompleteServices = useMemo(
+  const incompleteInstances = useMemo(
     () =>
-      selectedServices.filter((service) => {
-        const config = getServiceVars(service.id);
-        const required = getRequiredTextFields(service, config.trigger);
-        return required.some((f) => (config.vars[f] ?? '').trim() === '');
+      instances.filter((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        if (!service) return false;
+        const config = getServiceVars(inst.instanceId);
+        const activeInputs = config.enabledInputs?.length
+          ? config.enabledInputs
+          : service.defaultEnabledInputs?.length
+          ? service.defaultEnabledInputs
+          : service.inputs?.slice(0, 1) ?? [];
+        return activeInputs.some((inp) =>
+          getRequiredTextFields(service, inp).some((f) => {
+            const meta = resolveFieldMeta(service, inp, f);
+            const raw = config.varsByInput?.[inp]?.[f];
+            const effective = meta ? toTyped(raw, meta) : raw ?? '';
+            if (Array.isArray(effective)) return effective.length === 0;
+            return typeof effective === 'string' && effective.trim() === '';
+          })
+        );
       }),
-    [selectedServices, getServiceVars]
+    [instances, getServiceVars, awsServicesMap]
   );
 
-  const incompleteServiceIds = useMemo(
-    () => new Set(incompleteServices.map((s) => s.id)),
-    [incompleteServices]
+  const incompleteInstanceIds = useMemo(
+    () => new Set(incompleteInstances.map((i) => i.instanceId)),
+    [incompleteInstances]
   );
 
   const isReady = useMemo(
-    () => !!globalRegion.trim() && incompleteServices.length === 0,
-    [globalRegion, incompleteServices]
+    () => !!globalRegion.trim() && incompleteInstances.length === 0,
+    [globalRegion, incompleteInstances]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
+    // Flush instances to session storage so step 4 can read them without going through step 2 again.
+    // instances is computed in-memory (reconcileInstances) and only written on explicit saves;
+    // without this flush, step 4 sees serviceSettings.instances === undefined → [] → no ECF section.
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      instances,
+    });
     onContinue();
-  }, [onContinue]);
+  }, [onContinue, persisted, setPersisted, instances]);
+
+  // All instance display names — used by the duplicate modal for collision detection.
+  const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
 
   return {
     globalRegion,
     setGlobalRegion,
-    selectedServices,
-    filteredServices,
-    incompleteServices,
-    incompleteServiceIds,
+    instances,
+    filteredInstances,
+    incompleteInstances,
+    incompleteInstanceIds,
     searchQuery,
     setSearchQuery,
     signalFilter,
     setSignalFilter,
     getServiceVars,
-    setServiceFieldsAndTransport,
+    setServiceFieldsAndInputs,
+    addDuplicate,
+    removeInstance,
+    allInstanceNames,
     globalRegionTouched,
     setGlobalRegionTouched,
     isReady,
