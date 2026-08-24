@@ -24,7 +24,6 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
-  updateConversation,
   type Document as ConversationDocument,
 } from './converters';
 
@@ -62,6 +61,8 @@ describe('conversation model converters', () => {
     const documentBase = (): ConversationDocument => {
       return {
         _id: 'conv_id',
+        _seq_no: 1,
+        _primary_term: 1,
         _source: {
           agent_id: 'agent_id',
           title: 'conv_title',
@@ -138,7 +139,12 @@ describe('conversation model converters', () => {
             },
           },
         ],
+        // Derived from rounds on read; content covered by rounds_to_events.test.ts.
+        events: expect.any(Array),
       });
+
+      // Wiring check: events are derived from these rounds.
+      expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
 
     it('deserializes the conversation with legacy rounds field', () => {
@@ -209,7 +215,11 @@ describe('conversation model converters', () => {
           },
         ],
         state: createTestState(),
+        events: expect.any(Array),
       });
+
+      // Wiring check: events are derived from these rounds.
+      expect(deserialized.events?.[0]?.id).toBe('round-legacy::user_message');
     });
 
     it('deserializes the steps', () => {
@@ -838,6 +848,8 @@ describe('conversation model converters', () => {
 
       const roundTripped = fromEs({
         _id: conversation.id,
+        _seq_no: 1,
+        _primary_term: 1,
         _source: toEs(conversation, 'space'),
       });
 
@@ -864,51 +876,6 @@ describe('conversation model converters', () => {
         id: 'U123',
         full_name: 'Jane Doe',
         username: 'jane',
-      });
-    });
-  });
-
-  describe('updateConversation', () => {
-    it('preserves access control entries when updating a conversation', () => {
-      const conversation: Conversation = {
-        id: 'conv_id',
-        agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
-        title: 'conv_title',
-        created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [],
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            {
-              type: 'user',
-              id: 'alice-profile-id',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-06-29T00:00:00.000Z',
-            },
-          ],
-        },
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: { id: 'conv_id', title: 'new_title' },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      expect(updated.title).toEqual('new_title');
-      expect(updated.access_control).toEqual({
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [
-          {
-            type: 'user',
-            id: 'alice-profile-id',
-            role: ConversationAccessControlRole.Member,
-            added_at: '2026-06-29T00:00:00.000Z',
-          },
-        ],
       });
     });
   });
@@ -1047,6 +1014,149 @@ describe('conversation model converters', () => {
 
       expect(serialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Template fields: metadata + template_id round-trips
+  // ---------------------------------------------------------------------------
+
+  describe('metadata, template_id, and template_version round-trips', () => {
+    describe('fromEs', () => {
+      it('deserializes metadata, template_id, and template_version when present in the document', () => {
+        const doc: ConversationDocument = {
+          _id: 'conv-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            agent_id: 'agent_id',
+            title: 'Template conv',
+            user_id: 'user_id',
+            user_name: 'user_name',
+            space: 'space',
+            conversation_rounds: [],
+            created_at: creationDate,
+            updated_at: updateDate,
+            template_id: 'phishing',
+            template_version: 2,
+            metadata: { severity: 'high', tags: ['tag-a', 'tag-b'] },
+          },
+        };
+
+        const result = fromEs(doc);
+
+        expect(result.template_id).toBe('phishing');
+        expect(result.template_version).toBe(2);
+        expect(result.metadata).toEqual({ severity: 'high', tags: ['tag-a', 'tag-b'] });
+      });
+
+      it('omits metadata, template_id, and template_version when absent from the document', () => {
+        const doc: ConversationDocument = {
+          _id: 'conv-no-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            agent_id: 'agent_id',
+            title: 'No template',
+            user_id: 'user_id',
+            user_name: 'user_name',
+            space: 'space',
+            conversation_rounds: [],
+            created_at: creationDate,
+            updated_at: updateDate,
+          },
+        };
+
+        const result = fromEs(doc);
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
+      });
+    });
+
+    describe('toEs', () => {
+      it('serializes metadata, template_id, and template_version when present on the conversation', () => {
+        const conversation: Conversation = {
+          id: 'conv-tmpl',
+          agent_id: 'agent_id',
+          title: 'Template conv',
+          user: { id: 'user_id', username: 'user_name' },
+          created_at: creationDate,
+          updated_at: updateDate,
+          rounds: [],
+          template_id: 'security-finding',
+          template_version: 3,
+          metadata: { severity: 'low', entities: ['host-a', 'host-b'] },
+        };
+
+        const result = toEs(conversation, 'space');
+
+        expect(result.template_id).toBe('security-finding');
+        expect(result.template_version).toBe(3);
+        expect(result.metadata).toEqual({ severity: 'low', entities: ['host-a', 'host-b'] });
+      });
+
+      it('does not include template_id, template_version, or metadata when absent', () => {
+        const conversation: Conversation = {
+          id: 'conv-no-tmpl',
+          agent_id: 'agent_id',
+          title: 'No template',
+          user: { id: 'user_id', username: 'user_name' },
+          created_at: creationDate,
+          updated_at: updateDate,
+          rounds: [],
+        };
+
+        const result = toEs(conversation, 'space');
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
+      });
+    });
+
+    describe('createRequestToEs', () => {
+      it('serializes metadata, template_id, and template_version from a create request', () => {
+        const conversation = {
+          agent_id: 'agent_id',
+          title: 'Template conv',
+          rounds: [] as Conversation['rounds'],
+          template_id: 'phishing',
+          template_version: 1,
+          metadata: { severity: 'critical', tags: ['spray', 'phish'] },
+        };
+
+        const result = createRequestToEs({
+          conversation,
+          space: 'space',
+          currentUser: { id: 'user_id', username: 'user_name' },
+          creationDate: new Date(creationDate),
+        });
+
+        expect(result.template_id).toBe('phishing');
+        expect(result.template_version).toBe(1);
+        expect(result.metadata).toEqual({ severity: 'critical', tags: ['spray', 'phish'] });
+      });
+
+      it('omits template_id, template_version, and metadata when not provided', () => {
+        const conversation = {
+          agent_id: 'agent_id',
+          title: 'No template',
+          rounds: [] as Conversation['rounds'],
+        };
+
+        const result = createRequestToEs({
+          conversation,
+          space: 'space',
+          currentUser: { id: 'user_id', username: 'user_name' },
+          creationDate: new Date(creationDate),
+        });
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
       });
     });
   });

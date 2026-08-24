@@ -9,7 +9,6 @@ import React, { useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -27,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndicesWithNoSourceFields } from '@kbn/search-queries';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -43,9 +43,8 @@ const IndicesErrorCallout = ({ emptyIndices, isFieldsLoading }: IndicesErrorCall
 
   if (emptyIndices.length > 0) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
         data-test-subj="NoIndicesFieldsMessage"
         title={
           <FormattedMessage
