@@ -273,13 +273,22 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     // Read after `evaluate` so evaluators that learn their model from
                     // the `_evaluate` response have it by now.
                     model: evaluator.getModel?.(),
+                    version: evaluator.getVersion?.(),
                   };
                 })
               );
 
-              for (const { evaluatorName, result, evaluatorTraceId, kind, model } of results) {
+              for (const {
+                evaluatorName,
+                result,
+                evaluatorTraceId,
+                kind,
+                model,
+                version,
+              } of results) {
                 const evalRun = {
                   name: evaluatorName,
+                  ...(version && { version }),
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
