@@ -134,7 +134,13 @@ export class WatchlistConfigClient {
         },
       });
     } catch (err) {
-      await this.deps.soClient.delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' });
+      await this.deps.soClient
+        .delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' })
+        .catch((deleteErr) =>
+          this.deps.logger.error(
+            `Failed to roll back watchlist saved object '${so.id}' after index creation failed: ${deleteErr.message}`
+          )
+        );
       throw err;
     }
 
