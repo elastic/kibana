@@ -66,6 +66,17 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
 
+      it('should reject an API Key with a name exceeding 256 characters', async () => {
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'n'.repeat(257),
+            role_descriptors: {},
+          })
+          .expect(400);
+      });
+
       it(`${basic ? 'basic' : 'trial'} license should ${
         basic ? 'not allow' : 'allow'
       } a cross cluster API Key to be created`, async () => {
