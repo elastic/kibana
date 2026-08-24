@@ -26,6 +26,8 @@
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
     "@types/d3-color",
+    // watchpack has no type declarations; knip cannot associate this package with its import.
+    "@types/watchpack",
     // used by our FTR; knip can't trace this.
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
