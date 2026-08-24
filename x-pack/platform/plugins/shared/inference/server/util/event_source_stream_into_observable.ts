@@ -10,8 +10,8 @@ import { createParser } from 'eventsource-parser';
 import { Observable } from 'rxjs';
 import { createInferenceRequestError } from '@kbn/inference-common';
 
-/** Caps hung inference streams at 10 minutes so Kibana terminates them with a typed error. */
-const MAX_STREAM_DURATION_MS = 10 * 60 * 1000;
+/** Caps hung inference streams at 5 minutes so Kibana terminates them with a typed error. */
+const MAX_STREAM_DURATION_MS = 5 * 60 * 1000;
 
 export function eventSourceStreamIntoObservable(
   readable: Readable,
