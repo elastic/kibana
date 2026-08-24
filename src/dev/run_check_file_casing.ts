@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import { globby } from 'globby';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';

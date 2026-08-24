@@ -54,7 +54,8 @@ apiTest.describe(
       asAdmin: AuthedApiClient,
       input: string,
       title: string,
-      accessControl?: { access_mode: ConversationAccessControlMode }
+      accessControl?: { access_mode: ConversationAccessControlMode },
+      readOnly?: boolean
     ): Promise<ChatResponse> {
       await setupAgentDirectAnswer({
         proxy: llmProxy,
@@ -67,6 +68,7 @@ apiTest.describe(
           connector_id: connectorId,
           _execution_mode: 'local',
           ...(accessControl ? { access_control: accessControl } : {}),
+          ...(readOnly === undefined ? {} : { read_only: readOnly }),
         },
         responseType: 'json',
       });
@@ -303,6 +305,75 @@ apiTest.describe(
         entries: [],
       });
     });
+
+    apiTest('converse create stores the read_only flag', async ({ asAdmin }) => {
+      const defaultBody = await createConversationWithResponse(
+        asAdmin,
+        'Default read only test',
+        'Default Read Only Test'
+      );
+      const defaultRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(defaultBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(defaultRes).toHaveStatusCode(200);
+      expect((defaultRes.body as Conversation).read_only).toBe(false);
+
+      const readOnlyBody = await createConversationWithResponse(
+        asAdmin,
+        'Read only create test',
+        'Read Only Create Test',
+        undefined,
+        true
+      );
+      const readOnlyRes = await asAdmin.get(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(readOnlyBody.conversation_id)}`,
+        { responseType: 'json' }
+      );
+      expect(readOnlyRes).toHaveStatusCode(200);
+      expect((readOnlyRes.body as Conversation).read_only).toBe(true);
+    });
+
+    apiTest(
+      'converse ignores read_only when continuing a conversation, and a read-only conversation can still be continued',
+      async ({ asAdmin }) => {
+        const readOnlyBody = await createConversationWithResponse(
+          asAdmin,
+          'Immutable read only create test',
+          'Immutable Read Only Create Test',
+          undefined,
+          true
+        );
+
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          response: 'Response to: Immutable read only continue test',
+          continueConversation: true,
+        });
+        // read_only carries no authorization meaning: appending a round must still succeed
+        const continueRes = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+          body: {
+            input: 'Immutable read only continue test',
+            conversation_id: readOnlyBody.conversation_id,
+            connector_id: connectorId,
+            _execution_mode: 'local',
+            read_only: false,
+          },
+          responseType: 'json',
+        });
+        expect(continueRes).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const conversationRes = await asAdmin.get(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(readOnlyBody.conversation_id)}`,
+          { responseType: 'json' }
+        );
+        expect(conversationRes).toHaveStatusCode(200);
+        const conversation = conversationRes.body as Conversation;
+        expect(conversation.read_only).toBe(true);
+        expect(conversation.rounds).toHaveLength(2);
+      }
+    );
 
     apiTest('GET /conversations/:id returns 404 for missing id', async ({ asAdmin }) => {
       const response = await asAdmin.get(

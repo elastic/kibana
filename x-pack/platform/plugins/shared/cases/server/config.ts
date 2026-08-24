@@ -19,10 +19,7 @@ export const ConfigSchema = schema.object({
    * `full_name`, `email`) on the cases saved object at write time.
    */
   assigneeIdentity: schema.object({
-    enabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-      traditional: schema.boolean({ defaultValue: true }),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   analytics: schema.object({
     index: schema.object({
@@ -171,6 +168,11 @@ export const ConfigSchema = schema.object({
   // field-definition documents created while enabled remain in the index.
   templates: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Temporary feature flag for running workflows from Cases.
+  runWorkflows: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).

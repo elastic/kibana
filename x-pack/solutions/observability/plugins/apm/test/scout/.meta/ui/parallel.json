@@ -1,26 +1,10 @@
 {
-  "sha1": "c5ba8c2ed9842dd0b13b894f25d561c9408b4fcd",
+  "sha1": "5b3a0af0b91b2cbe38b3ccf6c0551c3d4a1bb244",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
-      "title": "Clean up APM data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 6,
-        "column": 1
-      }
-    },
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -47,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 80,
+        "line": 78,
         "column": 40
       }
     },
@@ -61,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 82,
+        "line": 80,
         "column": 13
       }
     },
@@ -701,7 +685,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 81,
+        "line": 79,
         "column": 12
       }
     },
@@ -717,7 +701,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 119,
+        "line": 117,
         "column": 15
       }
     },
@@ -733,7 +717,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 129,
+        "line": 127,
         "column": 93
       }
     },
@@ -749,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 144,
+        "line": 142,
         "column": 20
       }
     },
@@ -1441,7 +1425,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 61,
+        "line": 59,
         "column": 29
       }
     },
@@ -1457,7 +1441,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 67,
+        "line": 65,
         "column": 9
       }
     },
@@ -1853,7 +1837,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 62,
+        "line": 60,
         "column": 15
       }
     },
@@ -3585,7 +3569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 56,
+        "line": 54,
         "column": 9
       }
     },
@@ -3601,7 +3585,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 73,
+        "line": 71,
         "column": 45
       }
     },
@@ -3635,6 +3619,22 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
         "line": 32,
         "column": 24
+      }
+    },
+    {
+      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
+      "title": "Clean up APM data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

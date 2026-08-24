@@ -22,7 +22,7 @@ jest.mock('@kbn/rspack-optimizer', () => ({
   runBuild: jest.fn(),
 }));
 
-jest.mock('globby', () => jest.fn());
+jest.mock('globby', () => ({ globby: jest.fn() }));
 
 const mockReadFile = jest.fn();
 const mockWriteFile = jest.fn();
@@ -48,7 +48,9 @@ jest.mock('../lib', () => {
 });
 
 const mockedRunBuild = runBuild as jest.MockedFunction<typeof runBuild>;
-const mockedGlobby = jest.requireMock('globby') as jest.MockedFunction<typeof import('globby')>;
+const { globby: mockedGlobby } = jest.requireMock('globby') as {
+  globby: jest.MockedFunction<(patterns: string | string[], options?: object) => Promise<string[]>>;
+};
 const mockedWrite = write as jest.MockedFunction<typeof write>;
 
 describe('BuildRspackBundles', () => {
