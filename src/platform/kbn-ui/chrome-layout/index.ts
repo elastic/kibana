@@ -62,4 +62,5 @@ export {
   getHighContrastSeparator,
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
+  focusMainContent,
 } from './src/utils';

@@ -200,3 +200,5 @@ export declare function useIsWithinChromeApplicationBreakpoints(
   breakpoints: EuiBreakpointSize[],
   isResponsive?: boolean
 ): boolean;
+
+export declare function focusMainContent(): void;

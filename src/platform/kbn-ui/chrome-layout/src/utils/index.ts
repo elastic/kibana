@@ -31,3 +31,5 @@ export {
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
 } from './application_breakpoints';
+
+export { focusMainContent } from './focus_main_content';

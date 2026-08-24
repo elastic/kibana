@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  MAIN_CONTENT_SELECTORS: ['#main-content'],
-}));
-
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 import { focusMainContent } from './focus_main_content';
 
 describe('focusMainContent', () => {
   it('focuses the first matching main content element', () => {
     const main = document.createElement('div');
-    main.id = 'main-content';
+    main.id = APP_MAIN_SCROLL_CONTAINER_ID;
 
     const focusSpy = jest.spyOn(main, 'focus');
 
@@ -25,6 +22,7 @@ describe('focusMainContent', () => {
     focusMainContent();
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
+    expect(main.getAttribute('tabindex')).toBe('-1');
 
     main.remove();
   });

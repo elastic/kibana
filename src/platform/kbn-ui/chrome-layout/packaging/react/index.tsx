@@ -50,6 +50,7 @@ import {
   getHighContrastSeparator,
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
+  focusMainContent,
 } from '../../src/utils';
 import type { ScrollContainer, HighContrastSeparatorOptions } from '../../src/utils';
 import type {
@@ -107,6 +108,7 @@ export {
   getHighContrastSeparator,
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
+  focusMainContent,
 };
 
 export const ChromeLayoutConfigProvider = LayoutConfigProvider;

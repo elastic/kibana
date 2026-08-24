@@ -12,11 +12,11 @@ import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiButtonIconProps, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { focusMainContent } from '@kbn/ui-chrome-layout';
 
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
-import { focusMainContent } from '../../utils/focus_main_content';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NewItemIndicator } from '../new_item_indicator';
 
