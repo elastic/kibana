@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
+// Disabling for Cloud runs due to flakiness. See https://github.com/elastic/kibana/issues/268088
+test.describe('CustomStatusAlert', { tag: '@local-stateful-classic' }, () => {
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
