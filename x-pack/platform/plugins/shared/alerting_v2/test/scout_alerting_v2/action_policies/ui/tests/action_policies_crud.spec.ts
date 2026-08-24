@@ -53,8 +53,11 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
     const { actionPoliciesList, actionPolicyForm } = pageObjects;
 
     await test.step('fill in and submit the create form', async () => {
-      await actionPoliciesList.goto();
-      await actionPoliciesList.createButton.click();
+      // `beforeAll` leaves the list empty, which hides the header create
+      // button (`createActionPolicyButton`) — create options live on the
+      // empty-state cards instead. Open the form by URL; empty-state vs
+      // header create is covered by the list page RTL suite.
+      await actionPolicyForm.gotoCreate();
       await expect(actionPolicyForm.container).toBeVisible();
       // A missing workflows privilege or a disabled `workflows:ui:enabled`
       // swaps the combo box for a callout, which would otherwise surface as an

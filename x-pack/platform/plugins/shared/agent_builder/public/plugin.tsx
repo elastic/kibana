@@ -93,6 +93,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -327,6 +328,11 @@ export class AgentBuilderPlugin
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
       setChatConfig: (config: EmbeddableConversationProps) => {

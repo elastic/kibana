@@ -56,6 +56,9 @@ export interface CreateRuleOptions {
   initialRevision?: number;
 }
 
+/** Matches HTTP create `template_id` maxLength. */
+export const RULE_CREATE_TEMPLATE_ID_MAX_LENGTH = 1024;
+
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
@@ -81,6 +84,12 @@ export async function createRule<Params extends RuleParams = never>(
     allowMissingConnectorSecrets,
     templateId,
   } = createParams;
+
+  if (templateId !== undefined && templateId.length > RULE_CREATE_TEMPLATE_ID_MAX_LENGTH) {
+    throw Boom.badRequest(
+      `Error validating create data - templateId must be at most ${RULE_CREATE_TEMPLATE_ID_MAX_LENGTH} characters`
+    );
+  }
 
   const actionsClient = await context.getActionsClient();
 
