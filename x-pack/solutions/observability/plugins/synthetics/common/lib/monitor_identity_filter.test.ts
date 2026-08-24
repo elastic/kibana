@@ -25,8 +25,8 @@ describe('getMonitorIdentityFilter', () => {
   });
 
   it('filters local Heartbeat / Agent monitors by monitor.id', () => {
-    expect(
-      getMonitorIdentityFilter({ monitorId: 'k8s-http', origin: 'heartbeat' })
-    ).toEqual({ term: { 'monitor.id': 'k8s-http' } });
+    expect(getMonitorIdentityFilter({ monitorId: 'k8s-http', origin: 'heartbeat' })).toEqual({
+      term: { 'monitor.id': 'k8s-http' },
+    });
   });
 });
