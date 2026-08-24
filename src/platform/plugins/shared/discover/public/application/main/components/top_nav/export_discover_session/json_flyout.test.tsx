@@ -120,13 +120,11 @@ describe('Discover export JSON flyout', () => {
         useUrl: mockUseUrl,
       })
     );
-    const apiVersionQuery =
-      DISCOVER_SESSION_API_ACCESS === 'internal'
-        ? `?apiVersion=${DISCOVER_SESSION_API_VERSION}`
-        : '';
 
+    // Remove `apiVersion` from the Console request when the API becomes public.
+    expect(DISCOVER_SESSION_API_ACCESS).toBe('internal');
     expect(openInConsole?.getRequest('{}')).toBe(
-      `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}${apiVersionQuery}\n{}`
+      `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}?apiVersion=${DISCOVER_SESSION_API_VERSION}\n{}`
     );
   });
 
@@ -158,9 +156,7 @@ describe('Discover export JSON flyout', () => {
 
     const props = mockExportJsonFlyoutContent.mock.calls[0][0];
 
-    mockSanitizeExportJson.mockRejectedValueOnce(
-      new Error('Unable to sanitize Discover session')
-    );
+    mockSanitizeExportJson.mockRejectedValueOnce(new Error('Unable to sanitize Discover session'));
 
     await expect(props.prepareExportJson(props.getExportJson())).rejects.toThrow(
       'Unable to sanitize Discover session'
