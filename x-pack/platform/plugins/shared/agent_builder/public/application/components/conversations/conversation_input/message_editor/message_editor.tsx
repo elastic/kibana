@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  euiTextTruncate,
-  keys,
-  useEuiFontSize,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { euiTextTruncate, keys, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
@@ -26,10 +20,18 @@ import {
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
+  createImagePlaceholderElement,
+  IMAGE_PLACEHOLDER_ATTRIBUTE,
+  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './image_placeholder';
+import { useEditorFontStyles, useImagePlaceholderStyles } from './use_editor_styles';
+import {
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
   getSelectionRange,
   insertNodeAtCursor,
+  insertSpaceAfter,
+  placeCursorAfter,
 } from './utils';
 
 const EDITOR_MAX_HEIGHT = 240;
@@ -119,6 +121,18 @@ interface MessageEditorProps {
   placeholder?: string;
   ariaLabel?: string;
   'data-test-subj'?: string;
+  /** Called with the pasted file. Returns the name used for the placeholder, or undefined to skip. */
+  onPasteFile?: (file: File) => string | undefined;
+  /** When true, a chip is inserted at the caret after onPasteFile returns a name. */
+  insertImagePlaceholderOnPaste?: boolean;
+  /** Called on every editor input event (after onChange). Use to detect placeholder removals. */
+  onAfterInput?: () => void;
+  /** Called when the pointer enters or leaves an image placeholder span. */
+  onHoveredPlaceholderChange?: (name: string | null) => void;
+  /** Name of the placeholder to highlight (driven by thumbnail pill hover). */
+  highlightedPlaceholderName?: string | null;
+  /** Names of images currently uploading — drives the progress bar on inline placeholder chips. */
+  uploadingNames?: ReadonlySet<string>;
 }
 
 export const MessageEditor: React.FC<MessageEditorProps> = ({
@@ -128,6 +142,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   placeholder = '',
   ariaLabel,
   'data-test-subj': dataTestSubj,
+  onPasteFile,
+  insertImagePlaceholderOnPaste = false,
+  onAfterInput,
+  onHoveredPlaceholderChange,
+  highlightedPlaceholderName,
+  uploadingNames,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
   const commandMenuRef = useRef<CommandMenuHandle>(null);
@@ -142,9 +162,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       display: block;
     }
   `;
-  const fontStyles = css`
-    ${useEuiFontSize('s')}
-  `;
+  const fontStyles = useEditorFontStyles();
+  const imagePlaceholderStyles = useImagePlaceholderStyles();
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
       display: inline-flex;
@@ -172,7 +191,32 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     placeholderStyles,
     fontStyles,
     commandBadgeStyles,
+    imagePlaceholderStyles,
   ];
+
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((el) => {
+      el.classList.toggle(
+        'image-placeholder-highlighted',
+        el.dataset.placeholderName === highlightedPlaceholderName
+      );
+    });
+  }, [highlightedPlaceholderName, ref]);
+
+  // Sync data-uploading attribute on chips whenever the uploading set changes.
+  // The paste handler also sets data-uploading immediately on insertion (before the React
+  // state update propagates), so this effect primarily handles removal when upload finishes.
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((el) => {
+      if (uploadingNames?.has(el.dataset.placeholderName ?? '')) {
+        el.setAttribute('data-uploading', 'true');
+      } else {
+        el.removeAttribute('data-uploading');
+      }
+    });
+  }, [uploadingNames, ref]);
 
   const handleCompositionStart = () => setIsComposing(true);
   const handleCompositionEnd = () => {
@@ -201,12 +245,62 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         data-placeholder={placeholder}
         data-test-subj={dataTestSubj}
         css={editorStyles}
-        onInput={onChange}
+        onInput={() => {
+          onChange();
+          onAfterInput?.();
+        }}
+        onMouseDown={(event) => {
+          const target = event.target as Element;
+          const removeButton = target.closest?.(`[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`);
+          if (!removeButton) return;
+          const chip = removeButton.closest(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
+          if (!chip) return;
+          event.preventDefault();
+          chip.remove();
+          onChange();
+          onAfterInput?.();
+        }}
+        onMouseOver={(event) => {
+          const target = event.target as HTMLElement;
+          const placeholderEl = target.closest?.(
+            `[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`
+          ) as HTMLElement | null;
+          onHoveredPlaceholderChange?.(placeholderEl?.dataset.placeholderName ?? null);
+        }}
+        onMouseLeave={() => onHoveredPlaceholderChange?.(null)}
         onFocus={onFocus}
         onBlur={messageEditor.dismissActionMenu}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
         onPaste={(event) => {
+          if (onPasteFile) {
+            const imageItem = Array.from(event.clipboardData.items).find(
+              (item) => item.kind === 'file' && item.type.startsWith('image/')
+            );
+            if (imageItem) {
+              event.preventDefault();
+              const file = imageItem.getAsFile();
+              if (file) {
+                const label = onPasteFile(file);
+                if (insertImagePlaceholderOnPaste && label) {
+                  const chipEl = createImagePlaceholderElement(label);
+                  // Mark uploading immediately; the useEffect will clear it once upload finishes.
+                  chipEl.setAttribute('data-uploading', 'true');
+                  insertNodeAtCursor(chipEl);
+                  const sel = window.getSelection();
+                  if (sel) {
+                    const space = insertSpaceAfter(chipEl);
+                    if (space) {
+                      placeCursorAfter(space, sel);
+                    }
+                  }
+                  onChange();
+                }
+              }
+              return;
+            }
+          }
+
           event.preventDefault();
 
           const htmlData = event.clipboardData.getData('text/html');

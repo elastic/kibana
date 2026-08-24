@@ -22,6 +22,7 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -65,6 +66,9 @@ jest.mock('./input_actions', () => ({
 jest.mock('./attachment_pills_row', () => ({
   AttachmentPillsRow: () => null,
 }));
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: jest.fn(),
+}));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -81,6 +85,7 @@ const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
+const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 
 const submitMessage = jest.fn();
 const editorController = {
@@ -89,6 +94,8 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
+  getPlaceholderNames: jest.fn(() => []),
+  removePlaceholderByName: jest.fn(),
 };
 
 describe('ConversationInput', () => {
@@ -113,9 +120,18 @@ describe('ConversationInput', () => {
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
+      upsertAttachments: jest.fn(),
+      removeAttachment: jest.fn(),
+      resetAttachments: jest.fn(),
       isEmbeddedContext: false,
       conversationActions: {} as never,
     });
+    mockedUseAgentBuilderServices.mockReturnValue({
+      filesClient: {
+        create: jest.fn().mockResolvedValue({ file: { id: 'test-file-id' } }),
+        upload: jest.fn().mockResolvedValue(undefined),
+      },
+    } as never);
     mockedUseSubmitMessage.mockReturnValue(submitMessage);
     mockedUseToasts.mockReturnValue({
       addErrorToast: jest.fn(),

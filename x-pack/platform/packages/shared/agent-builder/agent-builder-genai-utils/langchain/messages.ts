@@ -128,6 +128,31 @@ export const createUserMessage = (
   return new HumanMessage({ content: text });
 };
 
+/**
+ * Creates a HumanMessage carrying both a text part and one or more image_url parts.
+ * Used by the prompt builder to inject images as visual input after an attachment_read tool result.
+ *
+ * createUserMessage is string-only with many call sites — adding multimodal content
+ * here rather than widening its param keeps callers stable.
+ */
+export const createUserImageMessage = ({
+  text,
+  images,
+}: {
+  text: string;
+  images: Array<{ base64: string; mimeType: string }>;
+}): HumanMessage => {
+  return new HumanMessage({
+    content: [
+      { type: 'text', text },
+      ...images.map((i) => ({
+        type: 'image_url' as const,
+        image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
+      })),
+    ],
+  });
+};
+
 export const createAIMessage = (
   content: string,
   { clean = false }: { clean?: boolean } = {}

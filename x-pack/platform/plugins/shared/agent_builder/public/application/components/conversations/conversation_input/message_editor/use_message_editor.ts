@@ -9,8 +9,12 @@ import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
-import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
+import { createCommandBadgeElement, deserializeInputSegments } from './command_badge';
 import { serializeEditorContent } from './serialize';
+import {
+  getPlaceholderNamesFromElement,
+  removePlaceholderByName as removePlaceholderByNameFromDom,
+} from './image_placeholder';
 import {
   createCommandRange,
   createTextFragment,
@@ -40,6 +44,8 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  getPlaceholderNames: () => string[];
+  removePlaceholderByName: (name: string) => void;
 }
 
 /**
@@ -115,8 +121,10 @@ const useMessageEditorInstance = ({
         commandRange.insertNode(badge);
         ensureCaretTargetBeforeFirstBadge(ref.current);
 
-        const space = insertSpaceAfter(badge, ref.current);
-        placeCursorAfter(space, sel);
+        const space = insertSpaceAfter(badge);
+        if (space) {
+          placeCursorAfter(space, sel);
+        }
 
         syncIsEmpty();
         dismissCommandMenu();
@@ -170,7 +178,7 @@ const useMessageEditorController = ({
         if (!ref.current) {
           return;
         }
-        const segments = deserializeCommandBadge(text);
+        const segments = deserializeInputSegments(text);
         ref.current.innerHTML = '';
 
         for (const segment of segments) {
@@ -189,6 +197,13 @@ const useMessageEditorController = ({
         if (ref.current) {
           ref.current.innerHTML = '';
           setIsEmpty(true);
+        }
+      },
+      getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
+      removePlaceholderByName: (name: string) => {
+        if (ref.current) {
+          removePlaceholderByNameFromDom(ref.current, name);
+          syncIsEmpty();
         }
       },
       isEmpty,

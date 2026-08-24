@@ -6,6 +6,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
 import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
 import type { OpenSidebarInternalOptions } from '../sidebar/types';
@@ -25,6 +26,7 @@ import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
 
 export interface AgentBuilderInternalService {
+  filesClient: ScopedFilesClient;
   agentService: AgentService;
   attachmentsService: AttachmentsService;
   renderersService: RenderersService;

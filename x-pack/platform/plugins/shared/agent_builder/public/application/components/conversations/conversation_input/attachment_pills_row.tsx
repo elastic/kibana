@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlexGroupProps } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
-import { isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { AttachmentGroupPill } from './attachment_group_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -18,7 +19,53 @@ export interface AttachmentPillsRowProps {
   attachments: ConversationAttachment[];
   removable?: boolean;
   justifyContent?: EuiFlexGroupProps['justifyContent'];
+  /** Called when a pill's remove button is clicked; overrides the default index-based removal. */
+  onRemoveAttachment?: (attachment: ConversationAttachment) => void;
+  /** Names of images currently uploading — each renders an animated spinner pill. */
+  uploadingNames?: Set<string>;
+  /** Name of the image placeholder currently hovered in the editor (drives pill highlight). */
+  hoveredImageName?: string | null;
+  /** Called when the pointer enters/leaves a thumbnail pill. */
+  onHoverImageName?: (name: string | null) => void;
 }
+
+// NOTE: filesClient.upload uses http.put with no onProgress callback; true upload % is unavailable.
+// Using an indeterminate animation that matches the design's visual intent (thin line at bottom edge).
+const indeterminateProgressSweep = keyframes`
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+`;
+
+const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      aria-label={name}
+      css={css`
+        position: relative;
+        width: 72px;
+        height: 32px;
+        border-radius: ${euiTheme.border.radius.small};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+        overflow: hidden;
+        flex-shrink: 0;
+      `}
+      data-test-subj={`agentBuilderUploadingPill-${name}`}
+    >
+      <div
+        css={css`
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 2px;
+          width: 40%;
+          background: ${euiTheme.colors.borderStrongPrimary};
+          animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
+        `}
+      />
+    </div>
+  );
+};
 
 const labels = {
   attachments: i18n.translate('xpack.agentBuilder.attachmentPillsRow.attachments', {
@@ -30,10 +77,15 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   attachments,
   removable = false,
   justifyContent = 'flexStart',
+  onRemoveAttachment,
+  uploadingNames,
+  hoveredImageName,
+  onHoverImageName,
 }) => {
   const { removeAttachment } = useConversationContext();
+  const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
 
-  if (attachments.length === 0) {
+  if (attachments.length === 0 && uploadingEntries.length === 0) {
     return null;
   }
 
@@ -53,13 +105,24 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
             <EuiFlexItem key={attachment.id} grow={false}>
               <AttachmentGroupPill
                 group={attachment}
-                onRemove={removable ? () => removeAttachment?.(index) : undefined}
+                onRemove={
+                  removable
+                    ? () =>
+                        onRemoveAttachment
+                          ? onRemoveAttachment(attachment)
+                          : removeAttachment?.(index)
+                    : undefined
+                }
               />
             </EuiFlexItem>
           );
         }
 
         const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
+        const imageName =
+          attachment.type === AttachmentType.image
+            ? (attachment.data as { name?: string }).name
+            : undefined;
         return (
           <EuiFlexItem key={attachmentId} grow={false}>
             <AttachmentPill
@@ -70,11 +133,26 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
                 hidden: attachment.hidden,
                 origin: attachment.origin,
               }}
-              onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+              onRemoveAttachment={
+                removable
+                  ? () =>
+                      onRemoveAttachment
+                        ? onRemoveAttachment(attachment)
+                        : removeAttachment?.(index)
+                  : undefined
+              }
+              isHighlighted={Boolean(imageName && hoveredImageName === imageName)}
+              onHoverStart={imageName ? () => onHoverImageName?.(imageName) : undefined}
+              onHoverEnd={imageName ? () => onHoverImageName?.(null) : undefined}
             />
           </EuiFlexItem>
         );
       })}
+      {uploadingEntries.map((name) => (
+        <EuiFlexItem key={`uploading-${name}`} grow={false}>
+          <UploadingImagePill name={name} />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

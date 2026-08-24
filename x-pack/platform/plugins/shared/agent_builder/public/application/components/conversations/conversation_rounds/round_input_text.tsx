@@ -7,22 +7,22 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { euiTextTruncate, useEuiTheme, EuiToolTip } from '@elastic/eui';
-import { deserializeCommandBadge } from '../conversation_input/message_editor/command_badge';
+import { euiTextTruncate, useEuiTheme, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { deserializeInputSegments } from '../conversation_input/message_editor/command_badge';
 import { COMMAND_BADGE_MAX_WIDTH_CH } from '../conversation_input/message_editor/command_badge/constants';
 import { getCommandDefinition } from '../conversation_input/message_editor/command_menu';
 
-interface CommandBadgeTextProps {
+interface RoundInputTextProps {
   text: string;
 }
 
 /**
- * Renders text with inline command badge styling.
- * Parses serialized badge markdown-links and renders them as styled spans.
+ * Renders text with inline command badge and image badge styling.
+ * Parses serialized badge and image markdown-links and renders them as styled spans.
  */
-export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
+export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
   const { euiTheme } = useEuiTheme();
-  const segments = useMemo(() => deserializeCommandBadge(text), [text]);
+  const segments = useMemo(() => deserializeInputSegments(text), [text]);
 
   const { badgeStyle, commandBadgeWrapperCss, commandBadgeInnerCss } = useMemo(
     () => ({
@@ -53,6 +53,39 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
     ]
   );
 
+  const imageBadgeWrapperCss = useMemo(
+    () => css`
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      gap: ${euiTheme.size.xs};
+      min-width: 0;
+      max-width: 24ch;
+      line-height: inherit;
+      background: ${euiTheme.colors.backgroundFilledPrimary};
+      color: ${euiTheme.colors.textInverse};
+      border-radius: ${euiTheme.border.radius.small};
+      padding: 0 ${euiTheme.size.xs};
+      &:hover .image-badge-label {
+        text-decoration: underline;
+      }
+    `,
+    [
+      euiTheme.border.radius.small,
+      euiTheme.colors.backgroundFilledPrimary,
+      euiTheme.colors.textInverse,
+      euiTheme.size.xs,
+    ]
+  );
+
+  const imageBadgeInnerCss = useMemo(
+    () => css`
+      min-width: 0;
+      ${euiTextTruncate('100%')}
+    `,
+    []
+  );
+
   const hasNoBadges = segments.every((s) => s.type === 'text');
   if (hasNoBadges) {
     return <>{text}</>;
@@ -63,6 +96,19 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
       {segments.map((segment, index) => {
         if (segment.type === 'text') {
           return <React.Fragment key={index}>{segment.value}</React.Fragment>;
+        }
+
+        if (segment.type === 'image') {
+          return (
+            <EuiToolTip key={index} content={segment.name} disableScreenReaderOutput>
+              <span css={imageBadgeWrapperCss} tabIndex={0}>
+                <EuiIcon type="document" size="s" aria-hidden={true} />
+                <span className="image-badge-label" css={imageBadgeInnerCss}>
+                  {segment.name}
+                </span>
+              </span>
+            </EuiToolTip>
+          );
         }
 
         const sequence = getCommandDefinition(segment.data.commandId)?.sequence ?? '';

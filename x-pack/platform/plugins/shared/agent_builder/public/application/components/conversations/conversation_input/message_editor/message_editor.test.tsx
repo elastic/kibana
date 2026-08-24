@@ -8,9 +8,13 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
-import { createTextFragment } from './utils';
+import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
+import {
+  createImagePlaceholderElement,
+  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './image_placeholder';
 import type {
   CommandMenuComponentProps,
   CommandMenuHandle,
@@ -75,6 +79,8 @@ const createMockMessageEditor = (): {
       getContent: jest.fn(() => ''),
       setContent: jest.fn(),
       isEmpty: false,
+      getPlaceholderNames: jest.fn(() => []),
+      removePlaceholderByName: jest.fn(),
     },
   };
 };
@@ -365,6 +371,256 @@ describe('MessageEditor', () => {
     expect(editor.querySelectorAll('br').length).toBe(5);
     expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
     expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+  });
+
+  it('calls onPasteFile and inserts a placeholder chip when pasting an image', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    const dataTransfer = {
+      getData: jest.fn().mockReturnValue(''),
+      items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+    };
+
+    fireEvent.paste(editor, { clipboardData: dataTransfer });
+
+    expect(onPasteFile).toHaveBeenCalledWith(pngFile);
+    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+  });
+
+  it('marks a pasted placeholder chip as uploading immediately', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        uploadingNames={new Set(['screenshot.png'])}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+    expect(chip.getAttribute('data-uploading')).toBe('true');
+  });
+
+  it('removes data-uploading from a chip when its name leaves uploadingNames', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    const { rerender } = render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        uploadingNames={new Set(['screenshot.png'])}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    // Upload finishes — rerender with empty uploadingNames
+    rerender(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        uploadingNames={new Set()}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+    expect(chip.getAttribute('data-uploading')).toBeNull();
+  });
+
+  it('pasting an image inserts a trailing non-breaking space and places the caret after it', () => {
+    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: jest.fn().mockReturnValue(''),
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+      },
+    });
+
+    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    expect(chip).not.toBeNull();
+
+    const spaceNode = chip.nextSibling;
+    expect(spaceNode).not.toBeNull();
+    expect(spaceNode?.nodeType).toBe(Node.TEXT_NODE);
+    expect(spaceNode?.textContent).toBe(NON_BREAKING_SPACE);
+
+    const currentSel = window.getSelection()!;
+    expect(currentSel.rangeCount).toBeGreaterThan(0);
+    const currentRange = currentSel.getRangeAt(0);
+    expect(currentRange.collapsed).toBe(true);
+    expect(currentRange.startContainer).toBe(spaceNode);
+    expect(currentRange.startOffset).toBe(1);
+  });
+
+  it('does not insert a placeholder when onPasteFile returns undefined', () => {
+    const onPasteFile = jest.fn().mockReturnValue(undefined);
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+    const dataTransfer = {
+      getData: jest.fn().mockReturnValue(''),
+      items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+    };
+
+    fireEvent.paste(editor, { clipboardData: dataTransfer });
+
+    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+  });
+
+  it('plain-text paste still works when an image paste handler is registered', () => {
+    const onPasteFile = jest.fn();
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onPasteFile={onPasteFile}
+        insertImagePlaceholderOnPaste
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()!.removeAllRanges();
+    window.getSelection()!.addRange(range);
+
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
+        items: [],
+      },
+    });
+
+    expect(onPasteFile).not.toHaveBeenCalled();
+    expect(editor.textContent).toContain('hello world');
+  });
+
+  it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {
+    const onAfterInput = jest.fn();
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        onAfterInput={onAfterInput}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const chip = createImagePlaceholderElement('test.png');
+    editor.appendChild(chip);
+    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+
+    const crossIcon = chip.querySelector(
+      `[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
+    ) as SVGSVGElement;
+    expect(crossIcon).not.toBeNull();
+
+    fireEvent.mouseDown(crossIcon);
+
+    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(messageEditor.onChange).toHaveBeenCalled();
+    expect(onAfterInput).toHaveBeenCalled();
   });
 
   it('calls handleCommandSelect when a menu option is clicked', () => {
