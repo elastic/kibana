@@ -14,8 +14,21 @@ import {
   hasIndexMonitorPrivilege,
 } from '../../../lib/fetch_index_vector_count';
 
-const paramsSchema = schema.object({
-  indexName: schema.string({ maxLength: 1000 }),
+const INVALID_INDEX_NAME_CHARS = /[\\/*?"<>|,#:\s]/;
+
+// `_stats` expands comma-separated lists and wildcards, but the privilege check treats the same
+// string as one literal name, so a multi-target value would read indices the caller was never
+// authorized for.
+const isSingleIndexName = (indexName: string): boolean =>
+  !INVALID_INDEX_NAME_CHARS.test(indexName) && !/^[-_+]/.test(indexName);
+
+export const paramsSchema = schema.object({
+  indexName: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    validate: (indexName) =>
+      isSingleIndexName(indexName) ? undefined : 'must be a single index name',
+  }),
 });
 
 export function registerVectorCountRoute({ router, lib: { handleEsError } }: RouteDependencies) {

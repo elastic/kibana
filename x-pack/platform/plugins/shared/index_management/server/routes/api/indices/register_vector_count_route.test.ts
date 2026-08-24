@@ -9,7 +9,7 @@ import type { RequestMock } from '../../../test/helpers';
 import { routeDependencies, RouterMock } from '../../../test/helpers';
 import { addInternalBasePath } from '..';
 import { registerIndicesRoutes } from './register_indices_routes';
-import { registerVectorCountRoute } from './register_vector_count_route';
+import { paramsSchema, registerVectorCountRoute } from './register_vector_count_route';
 
 describe('[Index management API Routes] vector count', () => {
   const router = new RouterMock();
@@ -47,6 +47,7 @@ describe('[Index management API Routes] vector count', () => {
     });
 
     expect(getIndicesStats).toHaveBeenCalledWith({
+      expand_wildcards: 'none',
       index: 'my_index',
       level: 'cluster',
       metric: ['dense_vector', 'sparse_vector'],
@@ -80,6 +81,27 @@ describe('[Index management API Routes] vector count', () => {
     });
 
     expect(getIndicesStats).not.toHaveBeenCalled();
+  });
+
+  describe('index name validation', () => {
+    const validate = (indexName: string) => () => paramsSchema.validate({ indexName });
+
+    it.each(['my_index', '.ds-logs-generic-default-000001'])('accepts %s', (indexName) => {
+      expect(validate(indexName)).not.toThrow();
+    });
+
+    // the privilege check reads the name as a single resource, so anything Elasticsearch would
+    // expand into a different set of indices has to be refused before the elevated read happens
+    it.each([
+      ['a comma-separated list', 'logs-foo,secret-bar'],
+      ['a wildcard', 'logs-*'],
+      ['the _all shorthand', '_all'],
+      ['an exclusion pattern', '-logs-foo'],
+      ['date math', '<logs-{now/d}>'],
+      ['a remote cluster target', 'remote:secret-bar'],
+    ])('rejects %s', (_, indexName) => {
+      expect(validate(indexName)).toThrow();
+    });
   });
 
   describe('registration', () => {

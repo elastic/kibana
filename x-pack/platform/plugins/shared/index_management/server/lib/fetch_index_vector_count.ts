@@ -18,11 +18,6 @@ interface IndexStatsWithVectors {
   sparse_vector?: VectorStats;
 }
 
-/**
- * Whether the caller may read stats for the given index. The count itself is read with elevated
- * privileges, so Elasticsearch will not reject an unprivileged caller on its own and the route has
- * to ask on their behalf. Errors deny access rather than granting it.
- */
 export const hasIndexMonitorPrivilege = async (
   client: IScopedClusterClient,
   indexName: string
@@ -39,16 +34,12 @@ export const hasIndexMonitorPrivilege = async (
   }
 };
 
-/**
- * Counts the dense and sparse vector values indexed in an index. Reads `_stats`, which is
- * operator-only in serverless and so runs as the internal user. Callers must gate it on
- * `hasIndexMonitorPrivilege` first. Primaries only, otherwise replicas are counted twice.
- */
 export const fetchIndexVectorCount = async (
   client: IScopedClusterClient,
   indexName: string
 ): Promise<number> => {
   const { _all: all } = await client.asInternalUser.indices.stats({
+    expand_wildcards: 'none',
     index: indexName,
     level: 'cluster',
     metric: ['dense_vector', 'sparse_vector'],
