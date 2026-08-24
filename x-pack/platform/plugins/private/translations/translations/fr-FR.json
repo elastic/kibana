@@ -23347,7 +23347,6 @@
     "xpack.fleet.overviewPageSubtitle": "Gestion centralisée des agents Elastic Agent.",
     "xpack.fleet.overviewPageTitle": "Fleet",
     "xpack.fleet.packageCard.activeLabel": "Actif",
-    "xpack.fleet.packageCard.collectionButton.copy": "Afficher la collection",
     "xpack.fleet.packageCard.contentPackageLabel": "Contenu uniquement",
     "xpack.fleet.packageCard.deprecatedLabel": "Obsolète",
     "xpack.fleet.packageCard.faileAttemptDescription": "Échec le {attemptDate}.",

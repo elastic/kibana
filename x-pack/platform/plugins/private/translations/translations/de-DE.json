@@ -23419,7 +23419,6 @@
     "xpack.fleet.overviewPageSubtitle": "Zentralisierte Verwaltung für Elastic Agents.",
     "xpack.fleet.overviewPageTitle": "Fleet",
     "xpack.fleet.packageCard.activeLabel": "Aktiv",
-    "xpack.fleet.packageCard.collectionButton.copy": "Kollektion anzeigen",
     "xpack.fleet.packageCard.contentPackageLabel": "Nur Inhalt",
     "xpack.fleet.packageCard.deprecatedLabel": "Veraltet",
     "xpack.fleet.packageCard.faileAttemptDescription": "Fehlgeschlagen am {attemptDate}.",

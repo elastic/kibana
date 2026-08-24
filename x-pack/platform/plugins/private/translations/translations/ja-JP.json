@@ -23486,7 +23486,6 @@
     "xpack.fleet.overviewPageSubtitle": "Elasticエージェントの集中管理。",
     "xpack.fleet.overviewPageTitle": "Fleet",
     "xpack.fleet.packageCard.activeLabel": "アクティブ",
-    "xpack.fleet.packageCard.collectionButton.copy": "コレクションを表示",
     "xpack.fleet.packageCard.contentPackageLabel": "コンテンツのみ",
     "xpack.fleet.packageCard.deprecatedLabel": "廃止予定",
     "xpack.fleet.packageCard.faileAttemptDescription": "{attemptDate}に失敗しました。",
