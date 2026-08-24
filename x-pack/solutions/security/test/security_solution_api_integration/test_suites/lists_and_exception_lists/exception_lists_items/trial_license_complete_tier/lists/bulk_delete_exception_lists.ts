@@ -358,6 +358,71 @@ export default ({ getService }: FtrProviderContext) => {
           await getList('unreferenced-list').expect(404);
         });
 
+        // Verifies the reference check works for agnostic lists: the stored SO reference
+        // uses type 'exception-list-agnostic', not 'exception-list'. If the two ever
+        // diverged, this test would catch it while all single-namespace tests stayed green.
+        it('should block deletion of an agnostic detection list referenced by a rule in the same space', async () => {
+          const { body: list } = await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...getCreateExceptionListDetectionSchemaMock(),
+              list_id: 'agnostic-referenced-list',
+              namespace_type: 'agnostic',
+            })
+            .expect(200);
+
+          const { body: rule } = await detectionsApi
+            .createRule({
+              body: {
+                description: 'Rule referencing an agnostic exception list',
+                enabled: false,
+                exceptions_list: [
+                  {
+                    id: list.id,
+                    list_id: list.list_id,
+                    namespace_type: 'agnostic' as const,
+                    type: ExceptionListTypeEnum.DETECTION,
+                  },
+                ],
+                index: ['auditbeat-*'],
+                name: 'Rule referencing agnostic list',
+                query: 'host.name: *',
+                risk_score: 1,
+                rule_id: 'bulk-delete-ref-rule-agnostic',
+                severity: 'high',
+                type: 'query' as const,
+              },
+            })
+            .expect(200);
+
+          const { body } = await exceptionsApi
+            .bulkDeleteExceptionLists({
+              body: { action: 'delete', ids: [list.id], namespace_type: 'agnostic' },
+            })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.eql([]);
+          expect(body.errors).to.have.length(1);
+          expect(body.errors[0].status_code).to.eql(409);
+          expect(body.errors[0].lists).to.eql([
+            { id: list.id, list_id: 'agnostic-referenced-list' },
+          ]);
+          expect(body.errors[0].rule_references).to.eql([
+            {
+              rule_id: 'bulk-delete-ref-rule-agnostic',
+              id: rule.id,
+              name: 'Rule referencing agnostic list',
+            },
+          ]);
+
+          await supertest
+            .get(`${EXCEPTION_LIST_URL}?list_id=agnostic-referenced-list&namespace_type=agnostic`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        });
+
         // Guards against a fix that refuses everything: with no rule in the system the
         // reference check must find nothing and the delete must still go through.
         it('should delete a detection list that no rule references', async () => {

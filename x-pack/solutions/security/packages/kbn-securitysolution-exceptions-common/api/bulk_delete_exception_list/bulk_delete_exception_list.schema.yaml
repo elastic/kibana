@@ -22,6 +22,10 @@ paths:
         non-artifact list in the request, even when no rules reference those lists, because
         the endpoint cannot verify the absence of references. The list is not deleted in
         that case.
+
+        The reference check searches only within the caller's current Kibana space. A rule
+        in another space that references a space-agnostic list is not detected and does not
+        block the deletion. Cross-space reference checking is deferred to a future release.
       requestBody:
         required: true
         content:
