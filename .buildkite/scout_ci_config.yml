@@ -73,6 +73,7 @@ plugins:
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
