@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useService } from '@kbn/core-di-browser';
 import type { AlertingV2Feature } from '../../common/feature_privileges';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import type { UserCapabilities } from '../services/user_capabilities';
 import { RequireAlertingPrivilege } from './require_alerting_privilege';
 import type { RequireAlertingPrivilegeProps } from './require_alerting_privilege';
@@ -68,7 +69,9 @@ describe('RequireAlertingPrivilege', () => {
     expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
     expect(screen.getByText('Privileges required')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingRequiredPrivilege-alerting_rules')).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`alertingRequiredPrivilege-${ALERTING_V2_FEATURE_IDS.rules}`)
+    ).toBeInTheDocument();
   });
 
   it('checks read access for the requested feature', () => {
@@ -102,7 +105,7 @@ describe('RequireAlertingPrivilege', () => {
       expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
       expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
       expect(
-        screen.getByTestId('alertingRequiredPrivilege-alerting_action_policies')
+        screen.getByTestId(`alertingRequiredPrivilege-${ALERTING_V2_FEATURE_IDS.actionPolicies}`)
       ).toBeInTheDocument();
     });
   });

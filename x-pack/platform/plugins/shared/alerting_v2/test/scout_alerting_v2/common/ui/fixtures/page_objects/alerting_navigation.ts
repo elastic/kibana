@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 export type AlertingApp =
   | 'rules'
@@ -26,27 +27,27 @@ interface AlertingAppMeta {
 export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   rules: {
     path: 'management/alertingV2/rules',
-    featureId: 'alerting_rules',
+    featureId: ALERTING_V2_FEATURE_IDS.rules,
     heading: /^Rules/i,
   },
   ruleLibrary: {
     path: 'management/alertingV2/rule_library',
-    featureId: 'alerting_v2_rules',
+    featureId: ALERTING_V2_FEATURE_IDS.rules,
     heading: /rule library/i,
   },
   alerts: {
     path: 'management/alertingV2/episodes',
-    featureId: 'alerting_alerts',
+    featureId: ALERTING_V2_FEATURE_IDS.alerts,
     heading: /alert episodes/i,
   },
   actionPolicies: {
     path: 'management/alertingV2/action_policies',
-    featureId: 'alerting_action_policies',
+    featureId: ALERTING_V2_FEATURE_IDS.actionPolicies,
     heading: /action policies/i,
   },
   executionHistory: {
     path: 'management/alertingV2/execution_history',
-    featureId: 'alerting_execution_history',
+    featureId: ALERTING_V2_FEATURE_IDS.executionHistory,
     heading: /execution history/i,
   },
 };

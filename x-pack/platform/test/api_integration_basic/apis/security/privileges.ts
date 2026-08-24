@@ -8,6 +8,10 @@
 import { diff } from 'jest-diff';
 import { isEqual, isEqualWith } from 'lodash';
 import util from 'util';
+import {
+  ALERTING_V2_DEPRECATED_FEATURE_IDS,
+  ALERTING_V2_FEATURE_IDS,
+} from '@kbn/alerting-v2-constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -97,14 +101,44 @@ export default function ({ getService }: FtrProviderContext) {
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.rules]: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.alerts]: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.actionPolicies]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_FEATURE_IDS.executionHistory]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.rules]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.alerts]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.actionPolicies]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.executionHistory]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -627,14 +661,44 @@ export default function ({ getService }: FtrProviderContext) {
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
-            alerting_v2_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.rules]: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.alerts]: ['all', 'read', 'minimal_all', 'minimal_read'],
+            [ALERTING_V2_FEATURE_IDS.actionPolicies]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_FEATURE_IDS.executionHistory]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.rules]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.alerts]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.actionPolicies]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
+            [ALERTING_V2_DEPRECATED_FEATURE_IDS.executionHistory]: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+            ],
           },
           reserved: [
             'fleet-setup',

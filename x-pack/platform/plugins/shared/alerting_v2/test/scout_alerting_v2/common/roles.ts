@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
 
@@ -35,10 +36,10 @@ export const ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_rules: ['all'],
-        alerting_alerts: ['all'],
-        alerting_action_policies: ['all'],
-        alerting_execution_history: ['all'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['all'],
+        [ALERTING_V2_FEATURE_IDS.alerts]: ['all'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['all'],
+        [ALERTING_V2_FEATURE_IDS.executionHistory]: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -56,10 +57,10 @@ export const READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_rules: ['read'],
-        alerting_alerts: ['read'],
-        alerting_action_policies: ['read'],
-        alerting_execution_history: ['read'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['read'],
+        [ALERTING_V2_FEATURE_IDS.alerts]: ['read'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['read'],
+        [ALERTING_V2_FEATURE_IDS.executionHistory]: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -69,7 +70,7 @@ export const READ_ROLE: KibanaRole = {
 
 /**
  * Role with no alerting_v2 privileges. Used to assert that endpoints reject
- * users that lack the required `alerting_v2_*` feature privileges (typically
+ * users that lack the required alerting v2 feature privileges (typically
  * with a `403`) and, in UI tests, that unprivileged users are redirected away
  * from the alerting_v2 management pages.
  */
@@ -100,7 +101,7 @@ export const ALERTING_V2_RULES_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_rules: ['all'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -114,7 +115,7 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_rules: ['read'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -128,7 +129,7 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_alerts: ['all'],
+        [ALERTING_V2_FEATURE_IDS.alerts]: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -142,7 +143,7 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_alerts: ['read'],
+        [ALERTING_V2_FEATURE_IDS.alerts]: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -156,7 +157,7 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_action_policies: ['all'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -170,7 +171,7 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_action_policies: ['read'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -180,8 +181,8 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
 
 /**
  * Composite role granting full access to action policies plus read access to
- * rules. Used by routes that also need `alerting_rules: ['read']`, such as
- * matching action policies for a rule.
+ * rules. Used by routes that also need rules read, such as matching action
+ * policies for a rule.
  */
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
@@ -189,8 +190,8 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_action_policies: ['all'],
-        alerting_rules: ['read'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['all'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['read'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -203,10 +204,10 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
  * round-trip in the browser. Each extra privilege is one the form actually
  * exercises:
  *
- * - `alerting_rules: ['read']` — the create and upsert routes require
- *   `rules.read` on top of `actionPolicies.write`.
- * - `alerting_alerts: ['read']` — the matcher input fetches data-field
- *   suggestions from `GET /suggestions/rule_event_fields`.
+ * - rules `read` — the create and upsert routes require `rules.read` on top of
+ *   `actionPolicies.write`.
+ * - alerts `read` — the matcher input fetches data-field suggestions from
+ *   `GET /suggestions/rule_event_fields`.
  * - `workflowsManagement: ['read']` — destinations are workflow references, so
  *   the `destinationsInput` combo box lists workflows via the workflows plugin.
  */
@@ -216,9 +217,9 @@ export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_action_policies: ['all'],
-        alerting_rules: ['read'],
-        alerting_alerts: ['read'],
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: ['all'],
+        [ALERTING_V2_FEATURE_IDS.rules]: ['read'],
+        [ALERTING_V2_FEATURE_IDS.alerts]: ['read'],
         workflowsManagement: ['read'],
         discover: ['all'],
       },
@@ -233,7 +234,7 @@ export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_execution_history: ['all'],
+        [ALERTING_V2_FEATURE_IDS.executionHistory]: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -247,7 +248,7 @@ export const ALERTING_V2_EXECUTION_HISTORY_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_execution_history: ['read'],
+        [ALERTING_V2_FEATURE_IDS.executionHistory]: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],

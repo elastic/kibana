@@ -13,6 +13,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 const mockNavigateToUrl = jest.fn();
 const mockNavigateToApp = jest.fn();
@@ -28,8 +29,12 @@ const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
 const mockBulkGet = jest.fn();
 
-const WRITE_CAPABILITIES = { alerting_action_policies: { read: true, all: true } };
-const READ_ONLY_CAPABILITIES = { alerting_action_policies: { read: true, all: false } };
+const WRITE_CAPABILITIES = {
+  [ALERTING_V2_FEATURE_IDS.actionPolicies]: { read: true, all: true },
+};
+const READ_ONLY_CAPABILITIES = {
+  [ALERTING_V2_FEATURE_IDS.actionPolicies]: { read: true, all: false },
+};
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;

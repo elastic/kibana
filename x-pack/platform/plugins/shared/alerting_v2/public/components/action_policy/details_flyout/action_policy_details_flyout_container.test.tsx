@@ -29,11 +29,12 @@ jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../../services/user_capabilities'
   );
+  const { ALERTING_V2_FEATURE_IDS: featureIds } = jest.requireActual('@kbn/alerting-v2-constants');
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({
-          capabilities: { alerting_action_policies: { read: true, all: true } },
+          capabilities: { [featureIds.actionPolicies]: { read: true, all: true } },
         });
       }
       if (token === 'application') return { navigateToUrl: mockNavigateToUrl };

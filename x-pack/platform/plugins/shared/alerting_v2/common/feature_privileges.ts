@@ -12,8 +12,10 @@ import type {
 } from '@kbn/features-plugin/common';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
+  ALERTING_V2_DEPRECATED_FEATURE_IDS as DEPRECATED_FEATURE_IDS,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_FEATURE_IDS,
   ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
@@ -144,7 +146,7 @@ export const getFeatureManagementApps = (
 
 export const ALERTING_V2_FEATURES = {
   rules: {
-    id: 'alerting_rules',
+    id: ALERTING_V2_FEATURE_IDS.rules,
     name: 'Rules',
     managementApp: ALERTING_V2_RULES_APP_ID,
     additionalManagementApps: [ALERTING_V2_RULE_LIBRARY_APP_ID],
@@ -173,7 +175,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   alerts: {
-    id: 'alerting_alerts',
+    id: ALERTING_V2_FEATURE_IDS.alerts,
     name: 'Alerts',
     managementApp: ALERTING_V2_EPISODES_APP_ID,
     privileges: {
@@ -199,7 +201,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   actionPolicies: {
-    id: 'alerting_action_policies',
+    id: ALERTING_V2_FEATURE_IDS.actionPolicies,
     name: 'Action Policies',
     managementApp: ALERTING_V2_ACTION_POLICIES_APP_ID,
     privileges: {
@@ -231,7 +233,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   executionHistory: {
-    id: 'alerting_execution_history',
+    id: ALERTING_V2_FEATURE_IDS.executionHistory,
     name: 'Execution history',
     managementApp: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
     privileges: {
@@ -258,17 +260,10 @@ export const ALERTING_V2_FEATURES = {
 
 export type AlertingV2Feature = keyof typeof ALERTING_V2_FEATURES;
 
-/**
- * Feature IDs granted in 9.5.0/9.5.1 before the `v2` qualifier was dropped.
- * Keep these registered as deprecated so existing roles and space settings
- * continue to grant/hide the renamed features.
- */
-export const ALERTING_V2_DEPRECATED_FEATURE_IDS = {
-  rules: 'alerting_v2_rules',
-  alerts: 'alerting_v2_alerts',
-  actionPolicies: 'alerting_v2_action_policies',
-  executionHistory: 'alerting_v2_execution_history',
-} as const satisfies Record<AlertingV2Feature, string>;
+export const ALERTING_V2_DEPRECATED_FEATURE_IDS = DEPRECATED_FEATURE_IDS satisfies Record<
+  AlertingV2Feature,
+  string
+>;
 
 export type WritableAlertingV2Feature = {
   [K in AlertingV2Feature]: 'write' extends keyof (typeof ALERTING_V2_API_PRIVILEGES)[K]

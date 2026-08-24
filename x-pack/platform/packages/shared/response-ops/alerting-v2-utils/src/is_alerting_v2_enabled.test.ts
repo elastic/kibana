@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
@@ -51,7 +52,7 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.application.capabilities = {
       ...core.application.capabilities,
-      alerting_rules: {
+      [ALERTING_V2_FEATURE_IDS.rules]: {
         all: true,
       },
     };
@@ -64,7 +65,7 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
   it('returns false when the user lacks alerting v2 rules write capability', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
-      alerting_rules: {
+      [ALERTING_V2_FEATURE_IDS.rules]: {
         read: true,
       },
     };
@@ -73,7 +74,7 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
   });
 
   it('returns false when alerting v2 rules capabilities are unavailable', () => {
-    const { alerting_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+    const { [ALERTING_V2_FEATURE_IDS.rules]: _alertingV2Rules, ...capabilitiesWithoutRules } =
       core.application.capabilities;
 
     core.application.capabilities = capabilitiesWithoutRules;

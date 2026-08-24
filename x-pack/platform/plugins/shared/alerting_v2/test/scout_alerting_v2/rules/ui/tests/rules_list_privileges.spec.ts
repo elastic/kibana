@@ -14,7 +14,7 @@ import {
 } from '../fixtures';
 
 /*
- * Verifies that the server-side Kibana feature capability (alerting_rules
+ * Verifies that the server-side Kibana feature capability (rules feature
  * `read` vs `all`) actually reaches the client and drives
  * `UserCapabilities.canWrite('rules')` on the Rules list page.
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on

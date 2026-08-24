@@ -25,11 +25,12 @@ import {
   createEpisodeActions,
   type EpisodeActionContext,
 } from '@kbn/alerting-v2-episodes-ui/actions';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
 
-const WRITE_CAPABILITIES = { alerting_alerts: { read: true, all: true } };
-const READ_ONLY_CAPABILITIES = { alerting_alerts: { read: true, all: false } };
+const WRITE_CAPABILITIES = { [ALERTING_V2_FEATURE_IDS.alerts]: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { [ALERTING_V2_FEATURE_IDS.alerts]: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
 jest.mock('@kbn/core-di-browser', () => {

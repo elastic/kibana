@@ -9,7 +9,7 @@
  * These specs exercise the Elasticsearch-side *implicit* index privileges the
  * `KibanaAlertsImplicitPrivilegesProvider` grants (elastic/elasticsearch#148331):
  * a role that holds the Kibana `alerts:read` application privilege (via the
- * `alerting_alerts` feature) implicitly gains `read` on `.alert-actions*` and
+ * alerts feature) implicitly gains `read` on `.alert-actions*` and
  * `.rule-events*`, document-level-security-scoped by `space_id`. There are no
  * Kibana routes involved - we talk to Elasticsearch directly (`esClient`) to
  * observe the grant and its DLS filter.
@@ -23,7 +23,11 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { EsClient, KibanaRole } from '@kbn/scout';
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  ALERT_EVENTS_DATA_STREAM,
+  ALERTING_V2_FEATURE_IDS,
+} from '@kbn/alerting-v2-constants';
 import { apiTest, buildAlertEvent } from '../fixtures';
 
 // The two index patterns the provider grants read on; also what a search must target so an
@@ -103,30 +107,30 @@ const PERSONAS = {
 
   // Custom roles.
   readAllSpaces: {
-    role: alertingV2Role({ alerting_alerts: ['read'] }, ['*']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.alerts]: ['read'] }, ['*']),
     user: 'impl_priv_u_read_all',
   },
   allAllSpaces: {
-    role: alertingV2Role({ alerting_alerts: ['all'] }, ['*']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.alerts]: ['all'] }, ['*']),
     user: 'impl_priv_u_all_all',
   },
 
   readMarketing: {
-    role: alertingV2Role({ alerting_alerts: ['read'] }, ['marketing']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.alerts]: ['read'] }, ['marketing']),
     user: 'impl_priv_u_read_marketing',
   },
   allMarketing: {
-    role: alertingV2Role({ alerting_alerts: ['all'] }, ['marketing']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.alerts]: ['all'] }, ['marketing']),
     user: 'impl_priv_u_all_marketing',
   },
 
   readMarketingFinance: {
-    role: alertingV2Role({ alerting_alerts: ['read'] }, ['marketing', 'finance']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.alerts]: ['read'] }, ['marketing', 'finance']),
     user: 'impl_priv_u_read_multi',
   },
 
   rulesOnly: {
-    role: alertingV2Role({ alerting_rules: ['read'] }, ['*']),
+    role: alertingV2Role({ [ALERTING_V2_FEATURE_IDS.rules]: ['read'] }, ['*']),
     user: 'impl_priv_u_rules_only',
   },
   noAlertingV2: {

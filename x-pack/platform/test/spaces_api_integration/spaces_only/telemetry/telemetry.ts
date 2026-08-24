@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import {
+  ALERTING_V2_DEPRECATED_FEATURE_IDS,
+  ALERTING_V2_FEATURE_IDS,
+} from '@kbn/alerting-v2-constants';
+import expect from '@kbn/expect/expect';
 
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -66,14 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
         stackAlerts: 0,
         stackAlertsOnly: 0,
         streams: 0,
-        alerting_rules: 0,
-        alerting_alerts: 0,
-        alerting_action_policies: 0,
-        alerting_execution_history: 0,
-        alerting_v2_rules: 0,
-        alerting_v2_alerts: 0,
-        alerting_v2_action_policies: 0,
-        alerting_v2_execution_history: 0,
+        [ALERTING_V2_FEATURE_IDS.rules]: 0,
+        [ALERTING_V2_FEATURE_IDS.alerts]: 0,
+        [ALERTING_V2_FEATURE_IDS.actionPolicies]: 0,
+        [ALERTING_V2_FEATURE_IDS.executionHistory]: 0,
+        [ALERTING_V2_DEPRECATED_FEATURE_IDS.rules]: 0,
+        [ALERTING_V2_DEPRECATED_FEATURE_IDS.alerts]: 0,
+        [ALERTING_V2_DEPRECATED_FEATURE_IDS.actionPolicies]: 0,
+        [ALERTING_V2_DEPRECATED_FEATURE_IDS.executionHistory]: 0,
         generalCases: 0,
         generalCasesV2: 0,
         generalCasesV3: 0,

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
 
 describe('RequiredPrivilegesPrompt', () => {
@@ -18,12 +19,12 @@ describe('RequiredPrivilegesPrompt', () => {
           pageName="Alerts"
           requiredPrivileges={[
             {
-              featureId: 'alerting_alerts',
+              featureId: ALERTING_V2_FEATURE_IDS.alerts,
               featureName: 'Alerts',
               privilege: 'read',
             },
             {
-              featureId: 'alerting_rules',
+              featureId: ALERTING_V2_FEATURE_IDS.rules,
               featureName: 'Rules',
               privilege: 'read',
             },
@@ -32,11 +33,15 @@ describe('RequiredPrivilegesPrompt', () => {
       </I18nProvider>
     );
 
-    const alertsItem = screen.getByTestId('alertingRequiredPrivilege-alerting_alerts');
+    const alertsItem = screen.getByTestId(
+      `alertingRequiredPrivilege-${ALERTING_V2_FEATURE_IDS.alerts}`
+    );
     expect(within(alertsItem).getByText('Alerts')).toBeInTheDocument();
     expect(within(alertsItem).getByText('Read')).toBeInTheDocument();
 
-    expect(screen.getByTestId('alertingRequiredPrivilege-alerting_rules')).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`alertingRequiredPrivilege-${ALERTING_V2_FEATURE_IDS.rules}`)
+    ).toBeInTheDocument();
   });
 
   it('does not surface the underlying UI capability id', () => {
@@ -46,7 +51,7 @@ describe('RequiredPrivilegesPrompt', () => {
           pageName="Rules"
           requiredPrivileges={[
             {
-              featureId: 'alerting_rules',
+              featureId: ALERTING_V2_FEATURE_IDS.rules,
               featureName: 'Rules',
               privilege: 'read',
             },
@@ -55,7 +60,9 @@ describe('RequiredPrivilegesPrompt', () => {
       </I18nProvider>
     );
 
-    expect(screen.queryByText(/alerting_rules\.read/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(new RegExp(`${ALERTING_V2_FEATURE_IDS.rules}\\.read`))
+    ).not.toBeInTheDocument();
   });
 
   it('renders the All privilege label', () => {
@@ -65,7 +72,7 @@ describe('RequiredPrivilegesPrompt', () => {
           pageName="Rules"
           requiredPrivileges={[
             {
-              featureId: 'alerting_rules',
+              featureId: ALERTING_V2_FEATURE_IDS.rules,
               featureName: 'Rules',
               privilege: 'all',
             },
@@ -74,7 +81,9 @@ describe('RequiredPrivilegesPrompt', () => {
       </I18nProvider>
     );
 
-    const rulesItem = screen.getByTestId('alertingRequiredPrivilege-alerting_rules');
+    const rulesItem = screen.getByTestId(
+      `alertingRequiredPrivilege-${ALERTING_V2_FEATURE_IDS.rules}`
+    );
     expect(within(rulesItem).getByText('All')).toBeInTheDocument();
   });
 });

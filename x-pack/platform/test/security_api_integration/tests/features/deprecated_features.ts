@@ -7,6 +7,7 @@
 
 import { expect } from 'expect';
 
+import { ALERTING_V2_DEPRECATED_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
 import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
@@ -183,40 +184,39 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       // **NOTE**: This test is to ensure the AppEx Security team has a chance to review all features marked as
-      // deprecated. If you’re adding a new deprecated feature, make sure to add it to the list below manually or by
-      // running the API integration test locally with the --updateSnapshot flag.
-      expectSnapshot(
+      // deprecated. If you’re adding a new deprecated feature, make sure to add it to the list below.
+      expect(
         (features as KibanaFeatureConfig[]).flatMap((f) => (f.deprecated ? [f.id] : [])).sort()
-      ).toMatchInline(`
-        Array [
-          "alerting_v2_action_policies",
-          "alerting_v2_alerts",
-          "alerting_v2_execution_history",
-          "alerting_v2_rules",
-          "case_1_feature_a",
-          "case_2_feature_a",
-          "case_3_feature_a",
-          "case_4_feature_a",
-          "case_4_feature_b",
-          "dashboard",
-          "discover",
-          "generalCases",
-          "generalCasesV2",
-          "maps",
-          "observabilityCases",
-          "observabilityCasesV2",
-          "securitySolutionCases",
-          "securitySolutionCasesV2",
-          "securitySolutionRulesV1",
-          "securitySolutionRulesV2",
-          "securitySolutionRulesV3",
-          "siem",
-          "siemV2",
-          "siemV3",
-          "siemV4",
-          "visualize",
-        ]
-      `);
+      ).toEqual(
+        [
+          ALERTING_V2_DEPRECATED_FEATURE_IDS.actionPolicies,
+          ALERTING_V2_DEPRECATED_FEATURE_IDS.alerts,
+          ALERTING_V2_DEPRECATED_FEATURE_IDS.executionHistory,
+          ALERTING_V2_DEPRECATED_FEATURE_IDS.rules,
+          'case_1_feature_a',
+          'case_2_feature_a',
+          'case_3_feature_a',
+          'case_4_feature_a',
+          'case_4_feature_b',
+          'dashboard',
+          'discover',
+          'generalCases',
+          'generalCasesV2',
+          'maps',
+          'observabilityCases',
+          'observabilityCasesV2',
+          'securitySolutionCases',
+          'securitySolutionCasesV2',
+          'securitySolutionRulesV1',
+          'securitySolutionRulesV2',
+          'securitySolutionRulesV3',
+          'siem',
+          'siemV2',
+          'siemV3',
+          'siemV4',
+          'visualize',
+        ].sort()
+      );
     });
 
     it('all deprecated features are replaced by a single feature only or explicitly specify replacement features', async () => {

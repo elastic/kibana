@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -104,10 +105,10 @@ export default function ({ getService }: FtrProviderContext) {
             'agentBuilder',
             'agentBuilderSml',
             'contextEngine',
-            'alerting_action_policies',
-            'alerting_alerts',
-            'alerting_execution_history',
-            'alerting_rules',
+            ALERTING_V2_FEATURE_IDS.actionPolicies,
+            ALERTING_V2_FEATURE_IDS.alerts,
+            ALERTING_V2_FEATURE_IDS.executionHistory,
+            ALERTING_V2_FEATURE_IDS.rules,
             'enterpriseSearch',
             'enterpriseSearchApplications',
             'enterpriseSearchAnalytics',

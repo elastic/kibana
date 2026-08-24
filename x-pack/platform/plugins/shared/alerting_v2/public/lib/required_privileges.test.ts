@@ -6,12 +6,13 @@
  */
 
 import { getAlertingRequiredPrivileges } from './required_privileges';
+import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 
 describe('getAlertingRequiredPrivileges', () => {
   it('maps a feature to its id, name, and privilege level', () => {
     expect(getAlertingRequiredPrivileges(['rules'])).toEqual([
       {
-        featureId: 'alerting_rules',
+        featureId: ALERTING_V2_FEATURE_IDS.rules,
         featureName: 'Rules',
         privilege: 'read',
       },
@@ -21,15 +22,15 @@ describe('getAlertingRequiredPrivileges', () => {
   it('preserves order and maps every feature in the set', () => {
     const result = getAlertingRequiredPrivileges(['alerts', 'actionPolicies']);
     expect(result.map(({ featureId }) => featureId)).toEqual([
-      'alerting_alerts',
-      'alerting_action_policies',
+      ALERTING_V2_FEATURE_IDS.alerts,
+      ALERTING_V2_FEATURE_IDS.actionPolicies,
     ]);
   });
 
   it('reflects the requested capability in the privilege level', () => {
     expect(getAlertingRequiredPrivileges(['executionHistory'], 'all')).toEqual([
       {
-        featureId: 'alerting_execution_history',
+        featureId: ALERTING_V2_FEATURE_IDS.executionHistory,
         featureName: 'Execution history',
         privilege: 'all',
       },

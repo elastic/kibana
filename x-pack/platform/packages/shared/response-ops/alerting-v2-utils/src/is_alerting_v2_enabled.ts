@@ -6,16 +6,16 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-
-/** Feature id from `@kbn/alerting-v2-plugin/common/feature_privileges`. */
-const ALERTING_V2_RULES_FEATURE_ID = 'alerting_rules';
+import {
+  ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_FEATURE_IDS,
+} from '@kbn/alerting-v2-constants';
 
 /** UI capability key for write access from `ALERTING_V2_UI_CAPABILITIES.rules.all`. */
 const ALERTING_V2_RULES_WRITE_UI_CAPABILITY = 'all';
 
 const hasAlertingV2RulesWriteCapability = (core: CoreStart): boolean => {
-  const rulesCapabilities = core.application.capabilities[ALERTING_V2_RULES_FEATURE_ID] as
+  const rulesCapabilities = core.application.capabilities[ALERTING_V2_FEATURE_IDS.rules] as
     | Record<string, boolean>
     | undefined;
 
