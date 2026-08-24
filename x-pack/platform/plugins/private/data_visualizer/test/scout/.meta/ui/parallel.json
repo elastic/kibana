@@ -1,5 +1,5 @@
 {
-  "sha1": "a59d25d0a175549454aee50cf1d4afd3f296bc9d",
+  "sha1": "22d4af09b89d76fb8ca3ee76ec038fb0a00c48dd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -27,7 +27,7 @@
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
         "line": 23,
-        "column": 13
+        "column": 51
       }
     },
     {
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 40,
+        "line": 42,
         "column": 23
       }
     },
@@ -54,7 +54,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 68,
+        "line": 70,
         "column": 14
       }
     },
@@ -68,7 +68,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 71,
+        "line": 73,
         "column": 26
       }
     },
@@ -82,8 +82,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_saved_search.spec.ts",
-        "line": 27,
-        "column": 35
+        "line": 29,
+        "column": 7
       }
     },
     {
