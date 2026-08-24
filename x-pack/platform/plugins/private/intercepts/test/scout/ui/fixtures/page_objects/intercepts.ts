@@ -50,24 +50,30 @@ export class InterceptsPageObject {
     await this.clickNpsButton(faker.number.int({ min: 1, max: maxRating }));
   }
 
+  async completeNpsQuestionsUntilCompletion(maxAttempts: number = 10) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await this.clickRandomNpsButton();
+      try {
+        await this.waitForCompletionStep(1000);
+        return;
+      } catch {
+        // Another NPS step is still showing; keep going.
+      }
+    }
+
+    await this.waitForCompletionStep();
+  }
+
   async getSurveyLinkHref(): Promise<string> {
     const locator = this.page.testSubj.locator('productInterceptSurveyLink');
     return (await locator.getAttribute('href')) || '';
   }
 
-  async isProgressionButtonVisible(): Promise<boolean> {
-    try {
-      const locator = this.page.testSubj.locator('productInterceptProgressionButton');
-      await locator.waitFor({ state: 'visible' });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async getProgressionButtonText(): Promise<string> {
-    const locator = this.page.testSubj.locator('productInterceptProgressionButton');
-    return (await locator.textContent()) || '';
+  async waitForCompletionStep(timeout?: number) {
+    await this.page.testSubj.waitForSelector('interceptStep-completion', {
+      state: 'visible',
+      timeout,
+    });
   }
 
   async getInterceptText(triggerId: string): Promise<string> {

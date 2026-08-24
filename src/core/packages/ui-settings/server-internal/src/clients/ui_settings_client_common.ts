@@ -113,6 +113,10 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     await this.write({ changes, handleWriteErrors });
 
+    // Invalidate again after the write commits: a concurrent read landing in the window between the
+    // pre-write invalidation and the ES commit can re-cache the pre-write value for a fresh TTL.
+    this.sharedUserProvidedCache?.del(this.namespace);
+
     this.log.debug(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
   }
 
