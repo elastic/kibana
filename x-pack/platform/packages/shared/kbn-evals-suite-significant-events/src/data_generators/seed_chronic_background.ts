@@ -122,9 +122,7 @@ export const seedChronicBackground = async ({
     },
   });
 
-  const detectionTimestamp = new Date(
-    now - config.detection_offset_minutes * 60_000
-  ).toISOString();
+  const detectionTimestamp = new Date(now - config.detection_offset_minutes * 60_000).toISOString();
   log.info(
     `Seeded chronic background "${ruleName}": ${operations.length / 2} docs over ` +
       `${config.duration_minutes}m at ${config.rate_per_minute}/min, change point ${detectionTimestamp}`

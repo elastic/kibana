@@ -126,7 +126,12 @@ describe('summarizePersistenceCalls', () => {
         ],
         persistenceToolId
       )
-    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false, retriedSchemaFailure: false });
+    ).toEqual({
+      count: 2,
+      valid: false,
+      retriedPartialFailure: false,
+      retriedSchemaFailure: false,
+    });
   });
 
   it('accepts exactly one retry after a schema or tool error', () => {
@@ -171,7 +176,12 @@ describe('summarizePersistenceCalls', () => {
         ],
         persistenceToolId
       )
-    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false, retriedSchemaFailure: false });
+    ).toEqual({
+      count: 2,
+      valid: false,
+      retriedPartialFailure: false,
+      retriedSchemaFailure: false,
+    });
   });
 });
 
