@@ -13,7 +13,7 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
-import { cardinalityToESQL } from '@kbn/lens-common';
+import { toEsqlRegistry } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
@@ -173,7 +173,7 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: cardinalityToESQL,
+  toESQL: toEsqlRegistry[CARDINALITY_ID],
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
       id: columnId,

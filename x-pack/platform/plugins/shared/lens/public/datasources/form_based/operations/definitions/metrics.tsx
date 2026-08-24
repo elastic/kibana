@@ -34,7 +34,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { buildMetricToESQL } from '@kbn/lens-common';
+import { toEsqlRegistry } from '@kbn/lens-common';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -206,7 +206,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: buildMetricToESQL(type),
+    toESQL: toEsqlRegistry[type],
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,

@@ -21,7 +21,7 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '@kbn/lens-common';
-import { rangesToESQL } from '@kbn/lens-common';
+import { toEsqlRegistry, RANGE_ID } from '@kbn/lens-common';
 import { RangeEditor } from './range_editor';
 import type { OperationDefinition } from '..';
 import { updateColumnParam } from '../../layer_helpers';
@@ -124,7 +124,7 @@ export const rangeOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: rangesToESQL,
+  toESQL: toEsqlRegistry[RANGE_ID],
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
     if (params.type === MODES.Range) {

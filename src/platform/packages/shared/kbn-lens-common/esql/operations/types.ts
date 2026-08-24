@@ -31,12 +31,16 @@ export interface UiSettingsReader {
 /**
  * Signature of a per-operation DSL-to-ES|QL conversion function.
  * Mirrors `OperationDefinition['toESQL']` but only depends on node-safe types.
+ * Declared via a method signature so the column parameter is bivariant,
+ * allowing operation-specific functions to be stored in a shared registry.
  */
-export type ToEsqlFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = (
-  column: C,
-  columnId: string,
-  indexPattern: IndexPattern,
-  layer: FormBasedLayer,
-  uiSettings: UiSettingsReader,
-  dateRange: DateRange
-) => ESQLExpressionWithParams | undefined;
+export type ToEsqlFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = {
+  fn(
+    column: C,
+    columnId: string,
+    indexPattern: IndexPattern,
+    layer: FormBasedLayer,
+    uiSettings: UiSettingsReader,
+    dateRange: DateRange
+  ): ESQLExpressionWithParams | undefined;
+}['fn'];

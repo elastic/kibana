@@ -32,7 +32,8 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
-  dateHistogramToESQL,
+  toEsqlRegistry,
+  DATE_HISTOGRAM_ID,
   AUTO_INTERVAL,
   getTimeZoneAndInterval,
   restrictedInterval,
@@ -190,7 +191,7 @@ export const dateHistogramOperation: OperationDefinition<
     }
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
-  toESQL: dateHistogramToESQL,
+  toESQL: toEsqlRegistry[DATE_HISTOGRAM_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(
