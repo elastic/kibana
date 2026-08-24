@@ -15,9 +15,18 @@ describe('errorTypeForTelemetry', () => {
     expect(errorTypeForTelemetry(error)).toBe('PermissionError');
   });
 
-  it('returns the error name for other errors', () => {
+  it('returns the error name for other known errors', () => {
     expect(errorTypeForTelemetry(new AiIndexNotFoundError('missing'))).toBe('AiIndexNotFoundError');
-    expect(errorTypeForTelemetry(new TypeError('boom'))).toBe('TypeError');
+  });
+
+  it('returns "unknown" for unrecognized error types', () => {
+    expect(errorTypeForTelemetry(new TypeError('boom'))).toBe('unknown');
+    const dynamic = new Error('boom');
+    dynamic.name = 'SomeArbitraryString';
+    expect(errorTypeForTelemetry(dynamic)).toBe('unknown');
+    expect(errorTypeForTelemetry(new ExecutionError({ type: 'CustomType', message: 'boom' }))).toBe(
+      'unknown'
+    );
   });
 
   it('returns "unknown" for non-errors', () => {

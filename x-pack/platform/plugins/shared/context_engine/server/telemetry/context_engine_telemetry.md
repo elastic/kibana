@@ -37,7 +37,7 @@ A cancelled workflow run (aborted signal) does not report a failure event; cance
 | `ai_index_id` | The AI index the KI write targets. The id is hashed when user-owned, verbatim when managed, and `unknown` when the hash salt is not available yet. |
 | `managed` | Whether the AI index is managed (registered from code). The field is optional and omitted when the managed state is unknown, which is the case on some failures. |
 | `outcome` | The write outcome: `success` or `failure`. |
-| `error_type` | On failure, the error name (for example `AiIndexNotFoundError`) or the workflow `ExecutionError` type (for example `PermissionError`, `NotFoundError`, `ValidationError`). Never the error message. |
+| `error_type` | On failure, the error name (for example `AiIndexNotFoundError`) or the workflow `ExecutionError` type (for example `PermissionError`, `NotFoundError`, `ValidationError`), limited to a fixed set in `error_utils.ts`; anything else reports as `unknown`. Never the error message. |
 
 ## Logs
 
