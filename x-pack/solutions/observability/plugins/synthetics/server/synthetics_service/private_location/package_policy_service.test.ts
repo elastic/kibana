@@ -56,7 +56,7 @@ const makeServer = () => {
       agentPolicyService: { getByIds, bumpRevision },
     },
     coreStart: {
-      savedObjects: { getUnsafeInternalClient },
+      savedObjects: { getUnsafeInternalClient, createInternalRepository: () => ({}) },
       elasticsearch: { client: { asInternalUser: { __es: true } } },
     },
   } as unknown as SyntheticsServerSetup;
@@ -507,7 +507,10 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
         agentPolicyService: { getByIds, bumpRevision },
       },
       coreStart: {
-        savedObjects: { getUnsafeInternalClient: () => ({ asScopedToNamespace }) },
+        savedObjects: {
+          getUnsafeInternalClient: () => ({ asScopedToNamespace }),
+          createInternalRepository: () => ({}),
+        },
         elasticsearch: { client: { asInternalUser: { __es: true } } },
       },
     } as unknown as SyntheticsServerSetup;
