@@ -75,7 +75,7 @@ describe('useOutdatedMwAgentLocationIds', () => {
 
     const [fetch, deps] = mockUseFetcher.mock.calls[0];
     expect(deps).toEqual([1, 'team-a']);
-    await fetch();
+    await fetch({ signal: new AbortController().signal });
     expect(mockApiGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,
       { spaceId: 'team-a' }
