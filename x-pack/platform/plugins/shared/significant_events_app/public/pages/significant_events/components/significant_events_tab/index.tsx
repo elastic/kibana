@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import {
-  EuiBasicTable,
   EuiBadge,
+  EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
@@ -38,10 +38,10 @@ import type {
   Severity,
 } from '@kbn/significant-events-schema';
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
-import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
@@ -151,6 +151,12 @@ const TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Significant Events',
   }
 );
+const EVENT_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.eventNotFound',
+  {
+    defaultMessage: 'Significant event was not found',
+  }
+);
 const LOADING_MESSAGE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.loadingMessage',
   {
@@ -160,6 +166,11 @@ const LOADING_MESSAGE = i18n.translate(
 const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
+
+const RESET_FILTERS_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.resetFilters',
+  { defaultMessage: 'Reset filters' }
+);
 
 export const getSignificantEventTableColumns = ({
   selectedEventId,
@@ -322,6 +333,7 @@ const buildSelectableOptions = <T extends string>({
 export const SignificantEventsTab = () => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
+  const { updateTimeRange } = useTimeRangeUpdate();
 
   const { filteredStreams } = useKiGeneration();
   // Closed events are hidden by default; users can opt back in via the Status filter.
@@ -332,8 +344,27 @@ export const SignificantEventsTab = () => {
     ...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER,
   ]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { selectedEventId, openEventId, toggleEvent, closeEvent, clearSelectedEvent } =
+    useSignificantEventsUrlState();
+
+  // Pre-fill the search bar with the deep-linked event_id so the user can see what's active
+  // and clear it naturally by clearing the search.
+  const [searchQuery, setSearchQuery] = useState(() => selectedEventId ?? '');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
+
+  // Sync the search bar with selectedEventId transitions (deep-link arrival, browser
+  // back/forward). On arrival the id is written into the box; when the selection clears
+  // externally the stale id is removed — but a query the user typed themselves is kept.
+  const prevSelectedEventIdRef = useRef(selectedEventId);
+  useEffect(() => {
+    const prev = prevSelectedEventIdRef.current;
+    prevSelectedEventIdRef.current = selectedEventId;
+    if (selectedEventId) {
+      setSearchQuery((current) => (current === selectedEventId ? current : selectedEventId));
+    } else if (prev) {
+      setSearchQuery((current) => (current === prev ? '' : current));
+    }
+  }, [selectedEventId]);
 
   const streamOptions = useMemo(
     () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
@@ -343,7 +374,9 @@ export const SignificantEventsTab = () => {
   const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
-  const { data, isLoading, isError, refetch, pagination, setPagination } =
+  // When selectedEvent is active the list is filtered to just that event (server-side,
+  // bypassing time range). Otherwise fetch with the current filters and time window.
+  const { data, isLoading, isSuccess, isError, refetch, pagination, setPagination } =
     useFetchSignificantEvents({
       from: timeState.start,
       to: timeState.end,
@@ -351,49 +384,131 @@ export const SignificantEventsTab = () => {
       severity: severityFilter.length > 0 ? severityFilter : undefined,
       stream: streamFilter.length > 0 ? streamFilter : undefined,
       search: debouncedSearch || undefined,
+      eventId: selectedEventId,
     });
+
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
-  const { selectedEventId, toggleEvent, closeEvent } = useSignificantEventsUrlState();
-
-  // Fast path: event is already loaded in the current list page.
-  const eventFromList = selectedEventId
-    ? (data?.hits ?? []).find((e) => e.event_id === selectedEventId)
-    : undefined;
-
-  // Deeplink fallback: fetch via lifecycle when the event isn't in the current list
-  // (e.g. different time range or page). react-query caches this, so the flyout's
-  // own lifecycle fetch is a cache hit.
-  const { data: lifecycleData } = useFetchSignificantEventLifecycle(
-    selectedEventId && !eventFromList ? selectedEventId : undefined
+  // The flyout is open iff the openEvent URL param is present (the URL-state hook normalizes
+  // openEvent = selectedEvent on deep-link arrival). Resolved from the loaded list.
+  const flyoutEvent = useMemo(
+    () => (openEventId ? (data?.hits ?? []).find((e) => e.event_id === openEventId) : undefined),
+    [openEventId, data?.hits]
   );
-  const eventFromDeeplink = lifecycleData?.events.at(-1);
 
-  const selectedEvent = eventFromList ?? eventFromDeeplink;
+  // Not-found only applies to the selectedEvent (deep-link) path — once the list fetch
+  // settles and no event matches, the deep link target no longer exists.
+  const eventNotFound = Boolean(selectedEventId && isSuccess && (data?.total ?? 0) === 0);
+
+  // Drop a stale openEvent param once the fetch settles without the event (shared URL to
+  // another page of results, or the event left the list after a status change) — otherwise
+  // the row toggle and flyout state point at an event that cannot render.
+  useEffect(() => {
+    if (
+      selectedEventId &&
+      openEventId &&
+      isSuccess &&
+      !(data?.hits ?? []).some((e) => e.event_id === openEventId)
+    ) {
+      closeEvent();
+    }
+  }, [selectedEventId, openEventId, isSuccess, data, closeEvent]);
+
+  // When the linked event resolves, adapt filters to its actual properties so the filter
+  // controls reflect the event rather than the user's previous defaults. Keyed on the event's
+  // own property values, so a filter edit by the user does not re-trigger it, while an update
+  // to the event itself (e.g. status change) re-adapts.
+  const resolvedSelectedEvent = useMemo(
+    () =>
+      selectedEventId ? (data?.hits ?? []).find((e) => e.event_id === selectedEventId) : undefined,
+    [selectedEventId, data?.hits]
+  );
+
+  const resolvedStreamNames = useMemo(
+    () => resolvedSelectedEvent?.stream_names.join(','),
+    [resolvedSelectedEvent]
+  );
+
+  const priorTimeRangeRef = useRef<{ from: string; to: string } | null>(null);
+
+  useEffect(() => {
+    if (!resolvedSelectedEvent?.status || !resolvedSelectedEvent?.severity) {
+      return;
+    }
+
+    const resolvedCreatedAt = resolvedSelectedEvent.created_at;
+    const resolvedLatestAt = resolvedSelectedEvent['@timestamp'];
+
+    setStatusFilter([resolvedSelectedEvent.status]);
+    setSeverityFilter([resolvedSelectedEvent.severity]);
+    setStreamFilter(resolvedStreamNames ? resolvedStreamNames.split(',') : []);
+
+    if (!resolvedCreatedAt || !resolvedLatestAt) {
+      return;
+    }
+
+    if (!priorTimeRangeRef.current) {
+      priorTimeRangeRef.current = {
+        from: new Date(timeState.start).toISOString(),
+        to: new Date(timeState.end).toISOString(),
+      };
+    }
+
+    updateTimeRange({ from: resolvedCreatedAt, to: resolvedLatestAt });
+  }, [resolvedSelectedEvent, resolvedStreamNames, timeState.start, timeState.end, updateTimeRange]);
 
   const columns = useMemo(
     () =>
       getSignificantEventTableColumns({
-        selectedEventId,
+        selectedEventId: openEventId,
         onToggleEvent: toggleEvent,
       }),
-    [selectedEventId, toggleEvent]
+    [openEventId, toggleEvent]
+  );
+
+  const handleResetFilters = useCallback(() => {
+    setStatusFilter(SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((s) => s === 'open'));
+    setSeverityFilter([...DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER]);
+    setStreamFilter([]);
+    clearSelectedEvent();
+    if (priorTimeRangeRef.current) {
+      updateTimeRange(priorTimeRangeRef.current);
+      priorTimeRangeRef.current = null;
+    }
+  }, [clearSelectedEvent, updateTimeRange]);
+
+  const areFiltersAtDefault = useMemo(
+    () =>
+      statusFilter.length === 1 &&
+      statusFilter[0] === 'open' &&
+      severityFilter.length === DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.length &&
+      DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.every((s) => severityFilter.includes(s)) &&
+      streamFilter.length === 0,
+    [statusFilter, severityFilter, streamFilter]
   );
 
   const onStatusChange = useCallback(
-    (opts: EuiSelectableOption[]) =>
-      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus)),
-    []
+    (opts: EuiSelectableOption[]) => {
+      setStatusFilter(extractCheckedKeys(opts).filter(isSignificantEventStatus));
+      clearSelectedEvent();
+    },
+    [clearSelectedEvent]
   );
 
   const onStreamChange = useCallback(
-    (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
-    []
+    (opts: EuiSelectableOption[]) => {
+      setStreamFilter(extractCheckedKeys(opts));
+      clearSelectedEvent();
+    },
+    [clearSelectedEvent]
   );
 
   const onSeverityChange = useCallback(
-    (opts: EuiSelectableOption[]) => setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity)),
-    []
+    (opts: EuiSelectableOption[]) => {
+      setSeverityFilter(extractCheckedKeys(opts).filter(isSeverity));
+      clearSelectedEvent();
+    },
+    [clearSelectedEvent]
   );
 
   const filters = useMemo(
@@ -473,69 +588,91 @@ export const SignificantEventsTab = () => {
   };
 
   const handleQueryChange: SignificantEventsSearchBarProps['onQueryChange'] = (queryPayload) => {
-    setSearchQuery(String(queryPayload.query?.query ?? ''));
+    const next = String(queryPayload.query?.query ?? '');
+    setSearchQuery(next);
+    // Editing the pre-filled text exits the deep-link selection context. Guarded on an actual
+    // edit: this handler is also wired to onQuerySubmit, which fires on date-range changes and
+    // Enter — neither of which must destroy the selection.
+    if (selectedEventId && next !== selectedEventId) {
+      clearSelectedEvent();
+    }
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem
-            grow
-            css={css`
-              min-width: 0;
-            `}
-          >
-            <SignificantEventsSearchBar
-              onQuerySubmit={handleQueryChange}
-              onQueryChange={handleQueryChange}
-              placeholder={SEARCH_PLACEHOLDER}
-              query={{
-                query: searchQuery,
-                language: 'text',
-              }}
-              showDatePicker
-              showQueryInput
-              enableDateRangePicker
-              submitButtonStyle="iconOnly"
-              isClearable
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup compressed>
-              {filters.map((f) => (
-                <FilterPopover
-                  key={f.label}
-                  label={f.label}
-                  ariaLabel={f.ariaLabel}
-                  options={f.options}
-                  numFilters={f.numFilters}
-                  numActiveFilters={f.numActiveFilters}
-                  onChange={f.onChange}
-                />
-              ))}
-            </EuiFilterGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FindSignificantEventsButton
-              onRun={handleRun}
-              onCancel={handleCancel}
-              isRunning={isRunning}
-              isCanceling={isCanceling}
-              isDisabled={isRunning || blocksActivity}
-              disabledTooltip={activityBlockTooltip}
-            />
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" direction="column" responsive={false} wrap={false}>
+          <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow>
+              <SignificantEventsSearchBar
+                onQuerySubmit={handleQueryChange}
+                onQueryChange={handleQueryChange}
+                placeholder={SEARCH_PLACEHOLDER}
+                query={{
+                  query: searchQuery,
+                  language: 'text',
+                }}
+                showDatePicker
+                showQueryInput
+                enableDateRangePicker
+                submitButtonStyle="iconOnly"
+                isClearable
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                {filters.map((f) => (
+                  <FilterPopover
+                    key={f.label}
+                    label={f.label}
+                    ariaLabel={f.ariaLabel}
+                    options={f.options}
+                    numFilters={f.numFilters}
+                    numActiveFilters={f.numActiveFilters}
+                    onChange={f.onChange}
+                  />
+                ))}
+              </EuiFilterGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={handleResetFilters}
+                flush="left"
+                disabled={areFiltersAtDefault && !selectedEventId}
+              >
+                {RESET_FILTERS_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FindSignificantEventsButton
+                onRun={handleRun}
+                onCancel={handleCancel}
+                isRunning={isRunning}
+                isCanceling={isCanceling}
+                isDisabled={isRunning || blocksActivity}
+                disabledTooltip={activityBlockTooltip}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexItem>
       {isError && (
         <EuiFlexItem grow={false}>
-          <EuiCallOut
+          <KbnDangerCallout announceOnMount title={FETCH_ERROR_TITLE} size="s" />
+        </EuiFlexItem>
+      )}
+      {eventNotFound && (
+        <EuiFlexItem grow={false}>
+          <KbnDangerCallout
             announceOnMount
-            title={FETCH_ERROR_TITLE}
-            color="danger"
-            iconType="error"
+            title={EVENT_NOT_FOUND_TITLE}
             size="s"
+            onDismiss={clearSelectedEvent}
+            data-test-subj="significantEventNotFoundCallout"
           />
         </EuiFlexItem>
       )}
@@ -560,12 +697,12 @@ export const SignificantEventsTab = () => {
           onChange={onTableChange}
           loading={isLoading}
           rowProps={(item) => ({
-            isSelected: selectedEventId === item.event_id,
+            isSelected: openEventId === item.event_id,
           })}
           noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
         />
       </EuiFlexItem>
-      {selectedEvent && <SignificantEventFlyout event={selectedEvent} onClose={closeEvent} />}
+      {flyoutEvent && <SignificantEventFlyout event={flyoutEvent} onClose={closeEvent} />}
     </EuiFlexGroup>
   );
 };

@@ -11,74 +11,78 @@ import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_PATH, COMMON_HEADERS } from '../fixtures/constants';
 
-apiTest.describe('DELETE /api/data_views/{id} - as code', { tag: tags.deploymentAgnostic }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  let viewerApiCredentials: RoleApiCredentials;
+apiTest.describe(
+  'DELETE /api/data_views/v2/{id} - as code',
+  { tag: tags.deploymentAgnostic },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminApiCredentials = await requestAuth.getApiKeyForAdmin();
-    viewerApiCredentials = await requestAuth.getApiKeyForViewer();
-  });
-
-  apiTest('can delete an existing data view', async ({ apiClient, apiServices }) => {
-    const uniqueTitle = `delete-me-${Date.now()}-${Math.random()}-*`;
-
-    // Create a data view to delete
-    const { data: dataView } = await apiServices.dataViews.create({
-      title: uniqueTitle,
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminApiCredentials = await requestAuth.getApiKeyForAdmin();
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
-    // Delete it
-    const deleteResponse = await apiClient.delete(`${BASE_PATH}/${dataView.id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-    });
+    apiTest('can delete an existing data view', async ({ apiClient, apiServices }) => {
+      const uniqueTitle = `delete-me-${Date.now()}-${Math.random()}-*`;
 
-    expect(deleteResponse).toHaveStatusCode(200);
+      // Create a data view to delete
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: uniqueTitle,
+      });
 
-    // Verify it no longer exists
-    const getResponse = await apiClient.get(`${BASE_PATH}/${dataView.id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-    });
-
-    expect(getResponse).toHaveStatusCode(404);
-  });
-
-  apiTest('returns 404 when deleting a non-existing data view', async ({ apiClient }) => {
-    const nonExistingId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-
-    const response = await apiClient.delete(`${BASE_PATH}/${nonExistingId}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(404);
-  });
-
-  apiTest(
-    'returns 403 when user does not have indexPatterns:manage privilege',
-    async ({ apiClient }) => {
-      const nonExistingId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-
-      const forbiddenDeleteResponse = await apiClient.delete(`${BASE_PATH}/${nonExistingId}`, {
+      // Delete it
+      const deleteResponse = await apiClient.delete(`${BASE_PATH}/${dataView.id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...viewerApiCredentials.apiKeyHeader,
+          ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
-      expect(forbiddenDeleteResponse).toHaveStatusCode(403);
-    }
-  );
-});
+      expect(deleteResponse).toHaveStatusCode(200);
+
+      // Verify it no longer exists
+      const getResponse = await apiClient.get(`${BASE_PATH}/${dataView.id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(getResponse).toHaveStatusCode(404);
+    });
+
+    apiTest('returns 404 when deleting a non-existing data view', async ({ apiClient }) => {
+      const nonExistingId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+
+      const response = await apiClient.delete(`${BASE_PATH}/${nonExistingId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(404);
+    });
+
+    apiTest(
+      'returns 403 when user does not have indexPatterns:manage privilege',
+      async ({ apiClient }) => {
+        const nonExistingId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+
+        const forbiddenDeleteResponse = await apiClient.delete(`${BASE_PATH}/${nonExistingId}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...viewerApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(forbiddenDeleteResponse).toHaveStatusCode(403);
+      }
+    );
+  }
+);
