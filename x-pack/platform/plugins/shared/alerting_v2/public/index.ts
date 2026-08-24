@@ -259,6 +259,20 @@ const pluginModule = new ContainerModule(({ bind }) => {
             );
           }
         );
+        import(
+          /* webpackChunkName: "alerting_v2_episode_attachment" */
+          './agent_builder/attachments/episode_attachment_definition'
+        ).then(
+          ({
+            createEpisodeAttachmentDefinition,
+            EPISODE_ATTACHMENT_TYPE: episodeAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              episodeAttachmentType,
+              createEpisodeAttachmentDefinition()
+            );
+          }
+        );
       }
     });
   });
