@@ -173,6 +173,14 @@ describe('events_write tool', () => {
       }
     });
 
+    it('accepts an open 60-high item whose only grounded signal is off_topic (observed-error path)', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('off_topic')] }],
+        }).success
+      ).toBe(true);
+    });
+
     it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
       const quiet = {
         type: 'detection' as const,
