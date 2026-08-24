@@ -6,10 +6,10 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useInheritedAiIndices } from './use_inherited_ai_indices';
+import { useAgentAiIndicesById } from './use_agent_ai_indices_by_id';
 
 const mockAddErrorToast = jest.fn();
-const mockListBaseConfigurations = jest.fn();
+const mockGetAgentAiIndices = jest.fn();
 
 jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock('@kbn/react-query', () => ({
 jest.mock('../use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
     agentService: {
-      listBaseConfigurations: mockListBaseConfigurations,
+      getAgentAiIndices: mockGetAgentAiIndices,
     },
   }),
 }));
@@ -35,7 +35,7 @@ jest.mock('@kbn/agent-builder-browser', () => ({
 
 const { useQuery } = jest.requireMock('@kbn/react-query');
 
-describe('useInheritedAiIndices', () => {
+describe('useAgentAiIndicesById', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -48,7 +48,7 @@ describe('useInheritedAiIndices', () => {
       isError: true,
     });
 
-    renderHook(() => useInheritedAiIndices());
+    renderHook(() => useAgentAiIndicesById('chat-agent'));
 
     await waitFor(() => {
       expect(mockAddErrorToast).toHaveBeenCalledWith({
@@ -66,8 +66,46 @@ describe('useInheritedAiIndices', () => {
       isError: true,
     });
 
-    renderHook(() => useInheritedAiIndices({ enabled: false }));
+    renderHook(() => useAgentAiIndicesById('chat-agent', { enabled: false }));
 
     expect(mockAddErrorToast).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch when the agent id is missing', () => {
+    useQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: undefined,
+      isError: false,
+    });
+
+    renderHook(() => useAgentAiIndicesById(undefined));
+
+    expect(useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+  });
+
+  it('returns the effective AI indices for the agent', () => {
+    useQuery.mockReturnValue({
+      data: {
+        ai_indices: [
+          { id: 'elastic', is_default: true },
+          { id: 'sales', is_default: false },
+        ],
+      },
+      isLoading: false,
+      error: undefined,
+      isError: false,
+    });
+
+    const { result } = renderHook(() => useAgentAiIndicesById('chat-agent'));
+
+    expect(result.current.aiIndices).toEqual([
+      { id: 'elastic', is_default: true },
+      { id: 'sales', is_default: false },
+    ]);
   });
 });

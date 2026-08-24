@@ -25,9 +25,8 @@ import { css } from '@emotion/react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
-import { getActiveAiIndices } from '../../../utils/ai_indices';
 import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
-import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
+import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_indices_by_id';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -52,8 +51,6 @@ export interface SettingsSectionProps {
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
   agentId: string;
-  /** AI indices assigned to the agent itself; the ones its type contributes are loaded here. */
-  assignedAiIndices: string[];
 }
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
@@ -64,26 +61,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   canEditAgent,
   onOpenEditFlyout,
   agentId,
-  assignedAiIndices,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { inheritedAiIndicesByAgentId, isLoading: isLoadingInheritedAiIndices } =
-    useInheritedAiIndices({
-      enabled: isContextEngineEnabled,
-    });
-  const inheritedAiIndices = inheritedAiIndicesByAgentId[agentId] ?? [];
-  const inheritedAiIndexSet = new Set(inheritedAiIndices);
-  // Inherited indices are named as defaults, matching how the edit form labels them.
-  const aiIndicesSummary = getActiveAiIndices({
-    assigned: assignedAiIndices,
-    inherited: inheritedAiIndices,
-  })
-    .map((id) => (inheritedAiIndexSet.has(id) ? labels.aiIndices.defaultIndexBadge(id) : id))
+  const { aiIndices: agentAiIndices, isLoading: isLoadingAgentAiIndices } = useAgentAiIndicesById(
+    agentId,
+    { enabled: isContextEngineEnabled }
+  );
+  const aiIndicesSummary = agentAiIndices
+    .map(({ id, is_default: isDefault }) =>
+      isDefault ? labels.aiIndices.defaultIndexBadge(id) : id
+    )
     .join(', ');
-  // While the inherited ids load, a missing entry does not mean "inherits nothing", so the row
+  // While the effective indices load, a missing entry does not mean "inherits nothing", so the row
   // shows a placeholder rather than a premature "Not set" that flips once the query settles.
-  const hasAiIndices = isLoadingInheritedAiIndices || Boolean(aiIndicesSummary);
+  const hasAiIndices = isLoadingAgentAiIndices || Boolean(aiIndicesSummary);
 
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};
@@ -288,7 +280,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        {isLoadingInheritedAiIndices ? (
+                        {isLoadingAgentAiIndices ? (
                           <EuiSkeletonText
                             lines={1}
                             css={css`

@@ -19,11 +19,15 @@ jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
   useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
 }));
 jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
-  useListAiIndices: () => ({ aiIndices: mockAiIndices, isLoading: false, error: undefined }),
+  useListAiIndices: () => ({
+    aiIndices: mockAvailableAiIndices,
+    isLoading: false,
+    error: undefined,
+  }),
 }));
-jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
-  useInheritedAiIndices: () => ({
-    inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
+jest.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
+  useAgentAiIndicesById: () => ({
+    aiIndices: mockAgentAiIndices,
     isLoading: false,
     error: undefined,
   }),
@@ -32,8 +36,8 @@ jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
 const AGENT_ID = 'my-agent';
 
 let mockIsContextEngineEnabled = true;
-let mockInheritedIds: string[] = [];
-let mockAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
+let mockAgentAiIndices: Array<{ id: string; is_default: boolean }> = [];
+let mockAvailableAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
 
 const onSubmit = jest.fn();
 
@@ -67,8 +71,8 @@ describe('AiIndicesSection (edit settings flyout)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
-    mockInheritedIds = [];
-    mockAiIndices = [{ id: 'sales-outreach', managed: false }];
+    mockAgentAiIndices = [];
+    mockAvailableAiIndices = [{ id: 'sales-outreach', managed: false }];
   });
 
   it('renders nothing when the Context Engine is off', () => {
@@ -86,7 +90,7 @@ describe('AiIndicesSection (edit settings flyout)', () => {
   });
 
   it('lists the AI indices the agent type contributes', () => {
-    mockInheritedIds = ['sig-events'];
+    mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
     renderSection();
 

@@ -51,7 +51,7 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({
   agentId,
   isFormDisabled,
 }) => {
-  const { aiIndices, inheritedIds, isLoading, error } = useAiIndices(agentId);
+  const { availableAiIndices, inheritedIds, isLoading, error } = useAiIndices(agentId);
 
   return (
     <>
@@ -82,7 +82,7 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({
             control={control}
             render={({ field }) => (
               <AiIndicesFields
-                aiIndices={aiIndices}
+                aiIndices={availableAiIndices}
                 assignedIds={field.value ?? []}
                 inheritedIds={inheritedIds}
                 isLoading={isLoading}

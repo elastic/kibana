@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
-import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
+import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_indices_by_id';
 import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices';
 import { labels } from '../../../utils/i18n';
 
@@ -28,23 +28,27 @@ import { labels } from '../../../utils/i18n';
  * saved, so the inherited lookup is skipped entirely.
  */
 export const useAiIndices = (agentId?: string) => {
-  const { aiIndices, isLoading: isLoadingAiIndices, error: aiIndicesError } = useListAiIndices();
   const {
-    inheritedAiIndicesByAgentId,
-    isLoading: isLoadingInherited,
-    error: inheritedError,
-  } = useInheritedAiIndices({ enabled: Boolean(agentId) });
+    aiIndices: availableAiIndices,
+    isLoading: isLoadingAiIndices,
+    error: aiIndicesError,
+  } = useListAiIndices();
+  const {
+    aiIndices: agentAiIndices,
+    isLoading: isLoadingAgentAiIndices,
+    error: agentAiIndicesError,
+  } = useAgentAiIndicesById(agentId, { enabled: Boolean(agentId) });
 
   const inheritedIds = useMemo(
-    () => (agentId ? inheritedAiIndicesByAgentId[agentId] ?? [] : []),
-    [agentId, inheritedAiIndicesByAgentId]
+    () => agentAiIndices.filter(({ is_default: isDefault }) => isDefault).map(({ id }) => id),
+    [agentAiIndices]
   );
 
   return {
-    aiIndices,
+    availableAiIndices,
     inheritedIds,
-    isLoading: isLoadingAiIndices || isLoadingInherited,
-    error: aiIndicesError ?? inheritedError,
+    isLoading: isLoadingAiIndices || isLoadingAgentAiIndices,
+    error: aiIndicesError ?? agentAiIndicesError,
   };
 };
 

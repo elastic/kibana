@@ -16,10 +16,10 @@ import type { SettingsSectionProps } from './settings_section';
 jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
   useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
 }));
-jest.mock('../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
-  useInheritedAiIndices: () => ({
-    inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
-    isLoading: mockInheritedIsLoading,
+jest.mock('../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
+  useAgentAiIndicesById: () => ({
+    aiIndices: mockAgentAiIndices,
+    isLoading: mockAgentAiIndicesIsLoading,
     error: undefined,
   }),
 }));
@@ -27,8 +27,8 @@ jest.mock('../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
 const AGENT_ID = 'my-agent';
 
 let mockIsContextEngineEnabled = true;
-let mockInheritedIds: string[] = [];
-let mockInheritedIsLoading = false;
+let mockAgentAiIndices: Array<{ id: string; is_default: boolean }> = [];
+let mockAgentAiIndicesIsLoading = false;
 
 const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
   render(
@@ -42,7 +42,6 @@ const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
           canEditAgent
           onOpenEditFlyout={jest.fn()}
           agentId={AGENT_ID}
-          assignedAiIndices={[]}
           {...props}
         />
       </IntlProvider>
@@ -53,21 +52,21 @@ describe('SettingsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
-    mockInheritedIds = [];
-    mockInheritedIsLoading = false;
+    mockAgentAiIndices = [];
+    mockAgentAiIndicesIsLoading = false;
   });
 
   describe('AI indices row', () => {
     it('is hidden when the Context Engine is off', () => {
       mockIsContextEngineEnabled = false;
 
-      renderSection({ assignedAiIndices: ['sales'] });
+      renderSection();
 
       expect(screen.queryByTestId('agentOverviewAiIndices')).not.toBeInTheDocument();
     });
 
     it('names the AI indices the agent type contributes as defaults', () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
       renderSection();
 
@@ -77,15 +76,20 @@ describe('SettingsSection', () => {
     });
 
     it('names the AI indices assigned to the agent', () => {
-      renderSection({ assignedAiIndices: ['sales'] });
+      mockAgentAiIndices = [{ id: 'sales', is_default: false }];
+
+      renderSection();
 
       expect(screen.getByTestId('agentOverviewAiIndices')).toHaveTextContent('sales');
     });
 
     it('lists both layers, defaults first', () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [
+        { id: 'sig-events', is_default: true },
+        { id: 'sales', is_default: false },
+      ];
 
-      renderSection({ assignedAiIndices: ['sales'] });
+      renderSection();
 
       expect(screen.getByTestId('agentOverviewAiIndices')).toHaveTextContent(
         'sig-events (default), sales'
@@ -94,9 +98,9 @@ describe('SettingsSection', () => {
 
     // An id in both layers already applies as a default, so naming it twice would be misleading.
     it('names an id in both layers once', () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
-      renderSection({ assignedAiIndices: ['sig-events'] });
+      renderSection();
 
       expect(screen.getByTestId('agentOverviewAiIndices')).toHaveTextContent(
         'sig-events (default)'
@@ -109,10 +113,10 @@ describe('SettingsSection', () => {
       expect(screen.getByTestId('agentOverviewAiIndices')).toHaveTextContent('Not set');
     });
 
-    // A missing inherited entry means nothing while the query is in flight, so the row must not
-    // claim "Not set" and then flip once the defaults arrive.
-    it('shows a placeholder instead of "Not set" while the inherited ids load', () => {
-      mockInheritedIsLoading = true;
+    // A missing entry means nothing while the query is in flight, so the row must not claim "Not
+    // set" and then flip once the defaults arrive.
+    it('shows a placeholder instead of "Not set" while the effective indices load', () => {
+      mockAgentAiIndicesIsLoading = true;
 
       renderSection();
 

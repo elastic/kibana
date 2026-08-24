@@ -172,7 +172,6 @@ export const AgentOverview: React.FC = () => {
           canEditAgent={canEditAgent}
           onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
           agentId={agent.id}
-          assignedAiIndices={agent.configuration?.ai_indices ?? []}
         />
 
         {isEditFlyoutOpen && agent && (

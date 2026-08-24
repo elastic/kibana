@@ -19,22 +19,26 @@ jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
   useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
 }));
 jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
-  useListAiIndices: () => ({ aiIndices: mockAiIndices, isLoading: false, error: mockListError }),
-}));
-jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
-  useInheritedAiIndices: () => ({
-    inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
+  useListAiIndices: () => ({
+    aiIndices: mockAvailableAiIndices,
     isLoading: false,
-    error: mockInheritedError,
+    error: mockListError,
+  }),
+}));
+jest.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
+  useAgentAiIndicesById: () => ({
+    aiIndices: mockAgentAiIndices,
+    isLoading: false,
+    error: mockAgentAiIndicesError,
   }),
 }));
 
 const AGENT_ID = 'my-agent';
 
 let mockIsContextEngineEnabled = true;
-let mockInheritedIds: string[] = [];
-let mockInheritedError: Error | undefined;
-let mockAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
+let mockAgentAiIndices: Array<{ id: string; is_default: boolean }> = [];
+let mockAgentAiIndicesError: Error | undefined;
+let mockAvailableAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
 let mockListError: Error | undefined;
 
 const onSubmit = jest.fn();
@@ -80,10 +84,10 @@ describe('AiIndicesSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
-    mockInheritedIds = [];
-    mockInheritedError = undefined;
+    mockAgentAiIndices = [];
+    mockAgentAiIndicesError = undefined;
     mockListError = undefined;
-    mockAiIndices = [
+    mockAvailableAiIndices = [
       { id: 'elastic-ai-index', description: 'Ready', managed: false },
       { id: 'sales-outreach', description: 'Ready', managed: false },
       { id: 'nightshift', managed: true },
@@ -113,7 +117,7 @@ describe('AiIndicesSection', () => {
   });
 
   it('shows a callout when the default AI indices failed to load', () => {
-    mockInheritedError = new Error('boom');
+    mockAgentAiIndicesError = new Error('boom');
 
     renderSection();
 
@@ -122,7 +126,7 @@ describe('AiIndicesSection', () => {
 
   describe('default indices', () => {
     it('are listed as badges', () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
       renderSection();
 
@@ -140,8 +144,8 @@ describe('AiIndicesSection', () => {
     // They already apply, so offering them again would let the user store a redundant id whose
     // removal changes nothing on screen.
     it('are not offered as additional indices', async () => {
-      mockInheritedIds = ['sig-events'];
-      mockAiIndices = [...mockAiIndices, { id: 'sig-events', managed: true }];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
+      mockAvailableAiIndices = [...mockAvailableAiIndices, { id: 'sig-events', managed: true }];
 
       renderSection();
       await openList();
@@ -150,7 +154,7 @@ describe('AiIndicesSection', () => {
     });
 
     it('are never written back onto the agent', async () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
       renderSection({ assignedIds: ['sales-outreach'] });
 
@@ -162,7 +166,7 @@ describe('AiIndicesSection', () => {
     // An id in both layers has no pill of its own, so an edit must not silently drop it from the
     // agent's configuration: it would stop applying if the type ever stops contributing it.
     it('survive on the agent when the selection changes, if also assigned', async () => {
-      mockInheritedIds = ['sig-events'];
+      mockAgentAiIndices = [{ id: 'sig-events', is_default: true }];
 
       renderSection({ assignedIds: ['sig-events', 'sales-outreach'] });
       await removePill('sales-outreach');

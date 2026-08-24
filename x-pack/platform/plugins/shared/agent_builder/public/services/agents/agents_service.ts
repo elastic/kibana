@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type { AgentAccessControl } from '@kbn/agent-builder-common';
 import type {
   AgentAccessControlUpdateRequest,
@@ -14,12 +14,13 @@ import type {
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type {
-  AgentBaseConfigurationItem,
+  AgentAiIndicesItem,
   CreateAgentResponse,
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
+  GetAgentAiIndicesResponse,
   GetAgentResponse,
-  ListAgentBaseConfigurationResponse,
+  ListAgentAiIndicesResponse,
   ListAgentResponse,
   ListAgentResponseItem,
   UpdateAgentAccessControlResponse,
@@ -28,7 +29,8 @@ import type {
 import { internalApiPath, publicApiPath } from '../../../common/constants';
 
 /** Static, so it does not read as a dynamic http path. */
-const AGENT_BASE_CONFIGURATION_PATH = `${internalApiPath}/agents/_base_configuration`;
+const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
+const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -53,16 +55,23 @@ export class AgentService {
   }
 
   /**
-   * Lists the configuration each listed agent inherits from its type, keyed by agent id.
+   * Lists the effective AI indices for each listed agent, with type-contributed ones flagged.
    *
    * `list()` only reports an agent's own configuration, so this is the only way to tell which
    * values are contributed by the type and therefore not editable on the agent.
    */
-  async listBaseConfigurations(): Promise<AgentBaseConfigurationItem[]> {
-    const res = await this.http.get<ListAgentBaseConfigurationResponse>(
-      AGENT_BASE_CONFIGURATION_PATH
-    );
+  async listAgentAiIndices(): Promise<AgentAiIndicesItem[]> {
+    const res = await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);
     return res.results;
+  }
+
+  /**
+   * Returns the effective AI indices for one agent, with type-contributed ones flagged.
+   */
+  async getAgentAiIndices(id: string): Promise<GetAgentAiIndicesResponse> {
+    return await this.http.get<GetAgentAiIndicesResponse>(
+      buildPath(AGENT_AI_INDICES_BY_ID_PATH, { id })
+    );
   }
 
   /**

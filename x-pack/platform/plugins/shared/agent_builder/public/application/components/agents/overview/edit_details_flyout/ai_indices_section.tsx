@@ -34,7 +34,7 @@ export const AiIndicesSection: React.FC<AiIndicesSectionProps> = ({ agentId, isD
 
 const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId, isDisabled }) => {
   const { control } = useFormContext<EditDetailsFormData>();
-  const { aiIndices, inheritedIds, isLoading, error } = useAiIndices(agentId);
+  const { availableAiIndices, inheritedIds, isLoading, error } = useAiIndices(agentId);
 
   return (
     <>
@@ -52,7 +52,7 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId, isD
           control={control}
           render={({ field }) => (
             <AiIndicesFields
-              aiIndices={aiIndices}
+              aiIndices={availableAiIndices}
               assignedIds={field.value ?? []}
               inheritedIds={inheritedIds}
               isLoading={isLoading}

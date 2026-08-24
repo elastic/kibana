@@ -34,13 +34,12 @@ import { resolveOwnerLabel } from '../../../utils/owner';
 import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
+import { useAgentAiIndices } from '../../../hooks/ai_indices/use_agent_ai_indices';
 import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import { getActiveAiIndices } from '../../../utils/ai_indices';
 import { labels as i18nLabels } from '../../../utils/i18n';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
@@ -134,10 +133,9 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const profileMap = useOwnerProfiles(agents ?? []);
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { inheritedAiIndicesByAgentId, isLoading: isLoadingInheritedAiIndices } =
-    useInheritedAiIndices({
-      enabled: isContextEngineEnabled,
-    });
+  const { aiIndicesByAgentId, isLoading: isLoadingAgentAiIndices } = useAgentAiIndices({
+    enabled: isContextEngineEnabled,
+  });
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
@@ -231,18 +229,13 @@ export const AgentsList: React.FC = () => {
       width: '14%',
       valign: 'top',
       name: columnNames.aiIndices,
-      // While the inherited ids load, a missing entry does not mean "inherits nothing", so the
+      // While the effective indices load, a missing entry does not mean "inherits nothing", so the
       // cell shows a placeholder rather than claiming the agent has no AI indices.
       render: (agent) =>
-        isLoadingInheritedAiIndices ? (
+        isLoadingAgentAiIndices ? (
           <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />
         ) : (
-          <AgentAiIndices
-            aiIndices={getActiveAiIndices({
-              assigned: agent.configuration.ai_indices,
-              inherited: inheritedAiIndicesByAgentId[agent.id],
-            })}
-          />
+          <AgentAiIndices aiIndices={(aiIndicesByAgentId[agent.id] ?? []).map(({ id }) => id)} />
         ),
       'data-test-subj': 'agentBuilderAgentsListAiIndices',
     };
@@ -368,8 +361,8 @@ export const AgentsList: React.FC = () => {
     manageAgents,
     canManageAgentAccess,
     isContextEngineEnabled,
-    inheritedAiIndicesByAgentId,
-    isLoadingInheritedAiIndices,
+    aiIndicesByAgentId,
+    isLoadingAgentAiIndices,
     profileMap,
     dateFormat,
   ]);

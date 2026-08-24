@@ -14,10 +14,10 @@ import { internalApiPath } from '../../../common/constants';
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
-describe('registerInternalAgentRoutes - base configuration', () => {
-  let registeredPath: string | undefined;
-  let handler: Handler;
+describe('registerInternalAgentRoutes - agent AI indices', () => {
+  const handlers = new Map<string, Handler>();
   let mockList: jest.Mock;
+  let mockGet: jest.Mock;
   let mockResolveBase: jest.Mock;
 
   const createMockContext = (contextEngineEnabled: boolean) => ({
@@ -40,34 +40,58 @@ describe('registerInternalAgentRoutes - base configuration', () => {
     ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
   };
 
-  const call = (contextEngineEnabled: boolean) =>
-    handler(createMockContext(contextEngineEnabled), {}, mockResponse) as Promise<{
+  const callList = (contextEngineEnabled: boolean) =>
+    handlers.get(`${internalApiPath}/agents/_ai_indices`)!(
+      createMockContext(contextEngineEnabled),
+      {},
+      mockResponse
+    ) as Promise<{
       type: string;
-      body: { results: Array<{ agent_id: string; configuration: { ai_indices: string[] } }> };
+      body: {
+        results: Array<{
+          agent_id: string;
+          ai_indices: Array<{ id: string; is_default: boolean }>;
+        }>;
+      };
+    }>;
+
+  const callById = (contextEngineEnabled: boolean, id = 'chat-agent') =>
+    handlers.get(`${internalApiPath}/agents/{id}/_ai_indices`)!(
+      createMockContext(contextEngineEnabled),
+      { params: { id } },
+      mockResponse
+    ) as Promise<{
+      type: string;
+      body: { ai_indices: Array<{ id: string; is_default: boolean }> };
     }>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    handlers.clear();
 
     mockList = jest.fn().mockResolvedValue([
-      { id: 'chat-agent', type: 'chat', configuration: { tools: [] } },
+      { id: 'chat-agent', type: 'chat', configuration: { tools: [], ai_indices: ['my-index'] } },
       { id: 'discovery-agent', type: 'platform.sig_events.discovery-type', configuration: {} },
     ]);
+    mockGet = jest.fn().mockResolvedValue({
+      id: 'chat-agent',
+      type: 'chat',
+      configuration: { tools: [], ai_indices: ['my-index'] },
+    });
     mockResolveBase = jest.fn(async ({ agent }) =>
       agent.type === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
     );
 
     const getInternalServices = jest.fn().mockReturnValue({
       agents: {
-        getRegistry: jest.fn().mockResolvedValue({ list: mockList }),
+        getRegistry: jest.fn().mockResolvedValue({ list: mockList, get: mockGet }),
         resolveAgentBaseConfiguration: mockResolveBase,
       },
     });
 
     const mockRouter = {
       get: jest.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {
-        registeredPath = config.path;
-        handler = routeHandler;
+        handlers.set(config.path, routeHandler);
       }),
       versioned: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
     } as unknown as jest.Mocked<IRouter>;
@@ -79,55 +103,65 @@ describe('registerInternalAgentRoutes - base configuration', () => {
     } as unknown as RouteDependencies);
   });
 
-  it('registers the route under the internal api path', () => {
-    expect(handler).toBeDefined();
-    expect(registeredPath).toBe(`${internalApiPath}/agents/_base_configuration`);
+  describe('GET /agents/_ai_indices', () => {
+    it('registers the list route under the internal api path', () => {
+      expect(handlers.has(`${internalApiPath}/agents/_ai_indices`)).toBe(true);
+    });
+
+    it('reports effective AI indices with type-contributed ones flagged', async () => {
+      const result = await callList(true);
+
+      expect(result.body.results).toEqual([
+        {
+          agent_id: 'chat-agent',
+          ai_indices: [
+            { id: 'elastic', is_default: true },
+            { id: 'my-index', is_default: false },
+          ],
+        },
+        {
+          agent_id: 'discovery-agent',
+          ai_indices: [{ id: 'another-one', is_default: true }],
+        },
+      ]);
+    });
+
+    it('lists agents with no options, matching the public list endpoint visibility', async () => {
+      await callList(true);
+
+      expect(mockList).toHaveBeenCalledWith();
+    });
+
+    it('returns no results and does not resolve anything when the Context Engine is disabled', async () => {
+      const result = await callList(false);
+
+      expect(result.body.results).toEqual([]);
+      expect(mockResolveBase).not.toHaveBeenCalled();
+      expect(mockList).not.toHaveBeenCalled();
+    });
   });
 
-  it('reports the base AI indices contributed by each agent type', async () => {
-    const result = await call(true);
+  describe('GET /agents/{id}/_ai_indices', () => {
+    it('registers the by-id route under the internal api path', () => {
+      expect(handlers.has(`${internalApiPath}/agents/{id}/_ai_indices`)).toBe(true);
+    });
 
-    expect(result.body.results).toEqual([
-      { agent_id: 'chat-agent', configuration: { ai_indices: ['elastic'] } },
-      { agent_id: 'discovery-agent', configuration: { ai_indices: ['another-one'] } },
-    ]);
-  });
+    it('reports effective AI indices for the requested agent', async () => {
+      const result = await callById(true);
 
-  it('lists agents with no options, matching the public list endpoint visibility', async () => {
-    await call(true);
+      expect(mockGet).toHaveBeenCalledWith('chat-agent');
+      expect(result.body.ai_indices).toEqual([
+        { id: 'elastic', is_default: true },
+        { id: 'my-index', is_default: false },
+      ]);
+    });
 
-    expect(mockList).toHaveBeenCalledWith();
-  });
+    it('returns an empty list and does not load the agent when the Context Engine is disabled', async () => {
+      const result = await callById(false);
 
-  it('defaults to an empty list when a type contributes no ai_indices', async () => {
-    mockResolveBase.mockResolvedValue({});
-
-    const result = await call(true);
-
-    expect(result.body.results.map(({ configuration }) => configuration.ai_indices)).toEqual([
-      [],
-      [],
-    ]);
-  });
-
-  // An unregistered type resolves to `undefined`. The execution path would substitute the `chat`
-  // type's base here, but reporting another type's AI indices as this agent's would be a guess.
-  it('reports nothing when the agent type is not registered', async () => {
-    mockResolveBase.mockResolvedValue(undefined);
-
-    const result = await call(true);
-
-    expect(result.body.results.map(({ configuration }) => configuration.ai_indices)).toEqual([
-      [],
-      [],
-    ]);
-  });
-
-  it('returns no results and does not resolve anything when the Context Engine is disabled', async () => {
-    const result = await call(false);
-
-    expect(result.body.results).toEqual([]);
-    expect(mockResolveBase).not.toHaveBeenCalled();
-    expect(mockList).not.toHaveBeenCalled();
+      expect(result.body.ai_indices).toEqual([]);
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockResolveBase).not.toHaveBeenCalled();
+    });
   });
 });
