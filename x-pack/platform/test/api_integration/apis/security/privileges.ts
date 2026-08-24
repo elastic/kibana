@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ALERTING_V2_DEPRECATED_FEATURE_IDS,
   ALERTING_V2_FEATURE_IDS,

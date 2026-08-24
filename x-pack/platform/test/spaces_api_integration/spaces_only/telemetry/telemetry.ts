@@ -9,7 +9,7 @@ import {
   ALERTING_V2_DEPRECATED_FEATURE_IDS,
   ALERTING_V2_FEATURE_IDS,
 } from '@kbn/alerting-v2-constants';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 

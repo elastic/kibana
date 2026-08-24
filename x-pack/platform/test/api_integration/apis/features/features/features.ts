@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ALERTING_V2_FEATURE_IDS } from '@kbn/alerting-v2-constants';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
