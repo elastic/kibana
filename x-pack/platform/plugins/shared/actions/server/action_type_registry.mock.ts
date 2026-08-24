@@ -12,6 +12,8 @@ const createActionTypeRegistryMock = () => {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
+    tryResolveActionType: jest.fn(),
+    resolveActionType: jest.fn(),
     list: jest.fn(),
     getAllTypes: jest.fn(),
     ensureActionTypeEnabled: jest.fn(),

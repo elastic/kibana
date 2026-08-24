@@ -101,6 +101,7 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
+  specId?: string;
   specVersion?: string;
 }
 
@@ -274,7 +275,13 @@ export interface ActionTypeCoreFields<
    */
   getConnectorSpec?: () => ConnectorSpec | undefined;
   getConnectorSpecs?: () => ConnectorSpec[];
-  getConnectorValidation?: (version: string) => Promise<
+  getConnectorSpecById?: (id: string, version?: string) => ConnectorSpec | undefined;
+  getConnectorSpecsById?: (id: string) => ConnectorSpec[];
+  getConnectorSpecsForDiscovery?: () => ConnectorSpec[];
+  getConnectorValidation?: (
+    version: string,
+    specId?: string
+  ) => Promise<
     | (ActionTypeValidation<Config, Secrets, Params> & {
         params: ValidatorType<Params>;
       })
@@ -333,6 +340,7 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  specId?: string;
   specVersion?: string;
 }
 

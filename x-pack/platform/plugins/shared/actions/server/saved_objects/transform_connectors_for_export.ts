@@ -10,18 +10,32 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { validateSecrets } from '../lib';
 import type { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
 
-export function transformConnectorsForExport(
+export async function transformConnectorsForExport(
   connectors: SavedObject[],
   actionTypeRegistry: ActionTypeRegistryContract
-): Array<SavedObject<RawAction>> {
-  return connectors.map((c) => {
-    const connector = c as SavedObject<RawAction>;
-    return transformConnectorForExport(
-      connector,
-      actionTypeRegistry.get(connector.attributes.actionTypeId),
-      actionTypeRegistry.getUtils()
-    );
-  });
+): Promise<Array<SavedObject<RawAction>>> {
+  return Promise.all(
+    connectors.map(async (savedObject) => {
+      const connector = savedObject as SavedObject<RawAction>;
+      const { actionType, specId, connectorSpec } = actionTypeRegistry.resolveActionType(
+        connector.attributes.specId ?? connector.attributes.actionTypeId,
+        connector.attributes.specVersion
+      );
+      const connectorValidation =
+        connectorSpec?.version && actionType.getConnectorValidation
+          ? await actionType.getConnectorValidation(connectorSpec.version, specId)
+          : undefined;
+      const actionTypeForValidation = connectorValidation
+        ? { ...actionType, validate: connectorValidation }
+        : actionType;
+
+      return transformConnectorForExport(
+        connector,
+        actionTypeForValidation,
+        actionTypeRegistry.getUtils()
+      );
+    })
+  );
 }
 
 function transformConnectorForExport(

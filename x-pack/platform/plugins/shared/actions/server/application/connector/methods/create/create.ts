@@ -73,18 +73,35 @@ export async function create({
     );
   }
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
+  const { actionType, registeredActionTypeId, connectorSpec, specId } =
+    context.actionTypeRegistry.resolveActionType(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
-  const validatedActionTypeConfig = validateConfig(actionType, config, {
-    configurationUtilities,
-  });
-  const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-    configurationUtilities,
-  });
-  if (actionType.validate?.connector) {
-    validateConnector(actionType, { config, secrets });
+  const connectorValidation =
+    specId && connectorSpec?.version && actionType.getConnectorValidation
+      ? await actionType.getConnectorValidation(connectorSpec.version, specId)
+      : undefined;
+  if (specId && actionType.getConnectorValidation && !connectorValidation) {
+    throw Boom.badRequest(
+      `Connector specification "${specId}" version "${connectorSpec?.version}" is unavailable.`
+    );
   }
-  context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  const actionTypeForValidation = connectorValidation
+    ? { ...actionType, validate: connectorValidation }
+    : actionType;
+  const validatedActionTypeConfig = validateConfig(actionTypeForValidation, config, {
+    configurationUtilities,
+  });
+  const validatedActionTypeSecrets = validateSecrets(actionTypeForValidation, secrets, {
+    configurationUtilities,
+  });
+  if (actionTypeForValidation.validate?.connector) {
+    validateConnector(actionTypeForValidation, { config, secrets });
+  }
+  if (specId) {
+    context.actionTypeRegistry.ensureActionTypeEnabled(specId, connectorSpec.version);
+  } else {
+    context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  }
 
   if (options?.id) {
     validateConnectorId(options.id);
@@ -137,16 +154,20 @@ export async function create({
           validatedActionTypeSecrets as Record<string, unknown>
         )
       : validatedActionTypeConfig;
-  const connectorSpec = actionType.getConnectorSpec?.();
   const specPin =
-    connectorSpec?.version !== undefined ? { specVersion: connectorSpec.version } : {};
+    connectorSpec?.version !== undefined
+      ? {
+          ...(specId ? { specId } : {}),
+          specVersion: connectorSpec.version,
+        }
+      : {};
 
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create(
         'action',
         {
-          actionTypeId,
+          actionTypeId: registeredActionTypeId,
           name,
           isMissingSecrets: false,
           config: configForSave as SavedObjectAttributes,
@@ -211,7 +232,7 @@ export async function create({
 
   return {
     id: result.id,
-    actionTypeId: result.attributes.actionTypeId,
+    actionTypeId: specId ?? result.attributes.actionTypeId,
     isMissingSecrets: result.attributes.isMissingSecrets,
     name: result.attributes.name,
     config: result.attributes.config,
@@ -220,5 +241,7 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(specId !== undefined ? { specId } : {}),
+    ...(connectorSpec?.version !== undefined ? { specVersion: connectorSpec.version } : {}),
   };
 }

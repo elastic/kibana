@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { Buffer } from 'buffer';
 import fetch from 'node-fetch';
 import type { Logger } from '@kbn/core/server';
-import type { ConnectorMetadata, ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { isNotFoundError } from '@kbn/es-errors';
 import { materializeDeclarativeConnectorSpec } from './materialize_spec';
 import { parseDeclarativeCatalogManifest, parseDeclarativeConnectorSpec } from './parse_spec';
@@ -21,7 +21,6 @@ import {
 import type {
   DeclarativeCatalogEntry,
   DeclarativeCatalogHealth,
-  DeclarativeConnectorSpec,
   StoredDeclarativeCatalog,
   StoredDeclarativeSpec,
 } from './types';
@@ -34,7 +33,6 @@ const REQUEST_TIMEOUT_MS = 10_000;
 interface DeclarativeConnectorCatalogServiceOptions {
   registryUrl: string;
   refreshIntervalMs: number;
-  connectorMetadata: ConnectorMetadata[];
   logger: Logger;
 }
 
@@ -62,7 +60,6 @@ const validateSvgIcon = (raw: string): void => {
 };
 
 export class DeclarativeConnectorCatalogService {
-  private readonly connectorMetadata: Map<string, ConnectorMetadata>;
   private activeVersions = new Map<string, string>();
   private materializedSpecs = new Map<string, ConnectorSpec>();
   private storedSpecs = new Map<string, StoredDeclarativeSpec>();
@@ -74,11 +71,7 @@ export class DeclarativeConnectorCatalogService {
   private lastRefreshAt?: string;
   private lastError?: { message: string; at: string };
 
-  constructor(private readonly options: DeclarativeConnectorCatalogServiceOptions) {
-    this.connectorMetadata = new Map(
-      options.connectorMetadata.map((metadata) => [metadata.id, metadata])
-    );
-  }
+  constructor(private readonly options: DeclarativeConnectorCatalogServiceOptions) {}
 
   public start(storage: DeclarativeConnectorCatalogStorage): void {
     this.storage = storage;
@@ -101,10 +94,20 @@ export class DeclarativeConnectorCatalogService {
     if (this.refreshTimer) clearInterval(this.refreshTimer);
   }
 
-  public getCurrentSpec = (id: string): ConnectorSpec | undefined => {
-    const version = this.activeVersions.get(id);
-    return version ? this.materializedSpecs.get(buildSpecKey(id, version)) : undefined;
+  public getCurrentSpec = (id: string): ConnectorSpec | undefined => this.getCachedSpec(id);
+
+  public getCachedSpec = (id: string, version?: string): ConnectorSpec | undefined => {
+    const resolvedVersion = version ?? this.activeVersions.get(id);
+    return resolvedVersion
+      ? this.materializedSpecs.get(buildSpecKey(id, resolvedVersion))
+      : undefined;
   };
+
+  public getCurrentSpecs = (): ConnectorSpec[] =>
+    [...this.activeVersions].flatMap(([id, version]) => {
+      const spec = this.materializedSpecs.get(buildSpecKey(id, version));
+      return spec ? [spec] : [];
+    });
 
   public getSpecs = (id: string): ConnectorSpec[] =>
     [...this.materializedSpecs.values()].filter((spec) => spec.metadata.id === id);
@@ -211,7 +214,6 @@ export class DeclarativeConnectorCatalogService {
         );
       }
       const parsed = parseDeclarativeConnectorSpec(raw);
-      this.validateConnectorMetadata(parsed);
       if (parsed.id !== entry.id || parsed.version !== entry.version) {
         throw new Error(
           `Catalog entry "${entry.id}@${entry.version}" does not match its definition "${parsed.id}@${parsed.version}".`
@@ -267,7 +269,6 @@ export class DeclarativeConnectorCatalogService {
         );
       }
       const parsed = parseDeclarativeConnectorSpec(stored.raw);
-      this.validateConnectorMetadata(parsed);
       if (parsed.id !== stored.id || parsed.version !== stored.version) {
         throw new Error(
           `Stored declarative connector "${stored.id}@${stored.version}" is invalid.`
@@ -315,32 +316,11 @@ export class DeclarativeConnectorCatalogService {
   }
 
   private validateCatalogEntry(entry: DeclarativeCatalogEntry, seenVersions: Set<string>): void {
-    if (!this.connectorMetadata.has(entry.id)) {
-      throw new Error(`Catalog contains unsupported development connector "${entry.id}".`);
-    }
     const key = buildSpecKey(entry.id, entry.version);
     if (seenVersions.has(key)) {
       throw new Error(`Catalog contains duplicate connector version "${key}".`);
     }
     seenVersions.add(key);
-  }
-
-  private validateConnectorMetadata(spec: DeclarativeConnectorSpec): void {
-    const expected = this.connectorMetadata.get(spec.id);
-    if (!expected) {
-      throw new Error(`Catalog contains unsupported development connector "${spec.id}".`);
-    }
-    const expectedFeatures = [...expected.supportedFeatureIds].sort();
-    const actualFeatures = [...spec.metadata.supportedFeatureIds].sort();
-    if (
-      spec.metadata.displayName !== expected.displayName ||
-      spec.metadata.description !== expected.description ||
-      spec.metadata.minimumLicense !== expected.minimumLicense ||
-      spec.metadata.isTechnicalPreview !== expected.isTechnicalPreview ||
-      expectedFeatures.join(',') !== actualFeatures.join(',')
-    ) {
-      throw new Error(`Catalog metadata for "${spec.id}" does not match its registered metadata.`);
-    }
   }
 
   private resolveRegistryUrl(path: string): string {

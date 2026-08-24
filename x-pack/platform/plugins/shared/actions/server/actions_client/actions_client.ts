@@ -576,7 +576,7 @@ export class ActionsClient {
       throw e;
     }
     const {
-      attributes: { actionTypeId, config, authMode },
+      attributes: { actionTypeId, config, authMode, specId },
     } = rawAction;
 
     let actionType: ActionType | undefined;
@@ -623,7 +623,7 @@ export class ActionsClient {
     // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
     void invokePostDeleteListeners(
       this.context.connectorLifecycleListeners,
-      actionTypeId,
+      specId ?? actionTypeId,
       {
         connectorId: id,
         config,

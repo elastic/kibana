@@ -129,6 +129,65 @@ describe('bulkExecute()', () => {
     });
   });
 
+  test('schedules catalog connectors through the generic declarative task type', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: '.declarative',
+            specId: '.declarative-okta',
+            specVersion: '1.0.0',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+          },
+          references: [],
+        },
+      ],
+    });
+
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { subAction: 'listUsers' },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        actionTypeId: '.declarative-okta',
+      },
+    ]);
+
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledWith([
+      expect.objectContaining({ taskType: 'actions:.declarative' }),
+    ]);
+    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+      '123',
+      '.declarative-okta',
+      { notifyUsage: true },
+      '1.0.0'
+    );
+  });
+
   test('schedules the action with all given parameters and consumer', async () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({

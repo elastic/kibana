@@ -50,22 +50,6 @@ const createService = () =>
   new DeclarativeConnectorCatalogService({
     registryUrl: 'http://catalog.test',
     refreshIntervalMs: 0,
-    connectorMetadata: [
-      {
-        id: '.declarative-abuseipdb',
-        displayName: 'AbuseIPDB',
-        description: 'Test AbuseIPDB connector',
-        minimumLicense: 'gold',
-        supportedFeatureIds: ['workflows'],
-      },
-      {
-        id: '.declarative-okta',
-        displayName: 'Okta',
-        description: 'Test Okta connector',
-        minimumLicense: 'enterprise',
-        supportedFeatureIds: ['workflows'],
-      },
-    ],
     logger: loggerMock.create(),
   });
 
@@ -106,6 +90,10 @@ describe('DeclarativeConnectorCatalogService', () => {
 
     expect(spec?.metadata.id).toBe('.declarative-okta');
     expect(spec?.version).toBe('1.0.0');
+    expect(service.getCurrentSpecs().map(({ metadata }) => metadata.id)).toEqual([
+      '.declarative-abuseipdb',
+      '.declarative-okta',
+    ]);
     expect((await service.getSpec('.declarative-abuseipdb', '1.0.0'))?.metadata.icon).toEqual(
       expect.stringMatching(/^data:image\/svg\+xml;base64,/)
     );
@@ -264,7 +252,7 @@ describe('DeclarativeConnectorCatalogService', () => {
     service.stop();
   });
 
-  it('rejects catalog metadata that differs from registration metadata', async () => {
+  it('uses connector metadata supplied by the catalog', async () => {
     const storage = createStorage();
     const mismatchedRaw = abuseIpDbRaw.replace(
       'displayName: AbuseIPDB',
@@ -274,6 +262,9 @@ describe('DeclarativeConnectorCatalogService', () => {
       .get('/catalog.json')
       .reply(200, {
         ...manifest,
+        activeVersions: {
+          '.declarative-abuseipdb': '1.0.0',
+        },
         connectors: [
           {
             ...manifest.connectors[0],
@@ -282,17 +273,16 @@ describe('DeclarativeConnectorCatalogService', () => {
         ],
       })
       .get('/connectors/abuseipdb/1.0.0.yaml')
-      .reply(200, mismatchedRaw);
+      .reply(200, mismatchedRaw)
+      .get('/connectors/abuseipdb/1.0.0.svg')
+      .reply(200, CONNECTOR_ICON_FIXTURE);
 
     const service = createService();
     service.start(storage);
     const spec = await service.getSpec('.declarative-abuseipdb', '1.0.0');
 
-    expect(spec).toBeUndefined();
-    expect(storage.index).not.toHaveBeenCalled();
-    expect(service.getHealth().lastError?.message).toContain(
-      'does not match its registered metadata'
-    );
+    expect(spec?.metadata.displayName).toBe('Unexpected AbuseIPDB');
+    expect(storage.index).toHaveBeenCalled();
     service.stop();
   });
 });

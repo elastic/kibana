@@ -20,6 +20,7 @@ export function connectorFromSavedObject(
   return {
     id: savedObject.id,
     ...restAttributes,
+    actionTypeId: restAttributes.specId ?? restAttributes.actionTypeId,
     isPreconfigured: false,
     isDeprecated,
     isSystemAction: false,

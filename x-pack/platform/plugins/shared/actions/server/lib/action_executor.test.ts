@@ -346,6 +346,70 @@ describe('Action Executor', () => {
     expect(getConnectorValidation).toHaveBeenCalledWith('1.0.0');
   });
 
+  test('resolves declarative execution with the saved spec identity', async () => {
+    const getConnectorValidation = jest.fn().mockResolvedValue(connectorType.validate);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: {
+        ...connectorSavedObject.attributes,
+        actionTypeId: '.declarative',
+        specId: '.declarative-okta',
+        specVersion: '1.0.0',
+      },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      id: '.declarative',
+      source: ACTION_TYPE_SOURCES.spec,
+      getConnectorValidation,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+      CONNECTOR_ID,
+      '.declarative-okta',
+      { notifyUsage: true },
+      '1.0.0'
+    );
+    expect(getConnectorValidation).toHaveBeenCalledWith('1.0.0', '.declarative-okta');
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        specId: '.declarative-okta',
+        specVersion: '1.0.0',
+      })
+    );
+  });
+
+  test('returns an execution error when pinned specification loading fails', async () => {
+    const getConnectorValidation = jest.fn().mockRejectedValue(new Error('catalog unavailable'));
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      attributes: {
+        ...connectorSavedObject.attributes,
+        actionTypeId: '.declarative',
+        specId: '.declarative-okta',
+        specVersion: '1.0.0',
+      },
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      id: '.declarative',
+      source: ACTION_TYPE_SOURCES.spec,
+      getConnectorValidation,
+    });
+
+    await expect(actionExecutor.execute(executeParams)).resolves.toEqual(
+      expect.objectContaining({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        message: 'catalog unavailable',
+        errorSource: TaskErrorSource.FRAMEWORK,
+      })
+    );
+    expect(connectorType.executor).not.toHaveBeenCalled();
+  });
+
   test('passes the in-memory revision sentinel for preconfigured spec connectors', async () => {
     connectorTypeRegistry.get.mockReturnValueOnce({
       ...connectorType,

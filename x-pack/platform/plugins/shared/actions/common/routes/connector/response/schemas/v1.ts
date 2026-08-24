@@ -162,6 +162,13 @@ export const connectorTypeResponseSchema = schema.object(
         description: 'Indicates whether the connector type supports testing.',
       },
     }),
+    icon: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional icon key or data URL for this connector type in the UI.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );

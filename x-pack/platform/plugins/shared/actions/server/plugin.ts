@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -198,6 +199,8 @@ export interface PluginStartContract {
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+
+  getConnectorSpec(id: string, version?: string): ConnectorSpec | undefined;
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -879,6 +882,8 @@ export class ActionsPlugin
       listTypes: (featureId?: string) => {
         return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
       },
+      getConnectorSpec: (id: string, version?: string) =>
+        this.actionTypeRegistry!.tryResolveActionType(id, version)?.connectorSpec,
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },

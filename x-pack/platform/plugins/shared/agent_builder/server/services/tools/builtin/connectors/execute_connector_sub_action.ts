@@ -95,9 +95,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let connectorSpecVersion: string | undefined;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      connectorSpecVersion = connector.specVersion;
     } catch (error) {
       return {
         results: [
@@ -110,7 +112,9 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     // Validate that we have a known connector spec
-    const spec = getConnectorSpec(connectorType);
+    const spec =
+      actions.getConnectorSpec(connectorType, connectorSpecVersion) ??
+      getConnectorSpec(connectorType);
     if (!spec) {
       return {
         results: [

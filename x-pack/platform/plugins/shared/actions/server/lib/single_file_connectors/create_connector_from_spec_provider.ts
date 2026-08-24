@@ -27,9 +27,10 @@ import { buildExecutableActions } from './create_connector_from_spec';
 
 export interface ConnectorSpecProvider {
   metadata: ConnectorMetadata;
-  getCurrentSpec: () => ConnectorSpec | undefined;
-  getSpecs: () => ConnectorSpec[];
-  getSpec: (version?: string) => Promise<ConnectorSpec | undefined>;
+  getCurrentSpec: (id?: string, version?: string) => ConnectorSpec | undefined;
+  getSpecs: (id?: string) => ConnectorSpec[];
+  getSpec: (version?: string, id?: string) => Promise<ConnectorSpec | undefined>;
+  getSpecsForDiscovery?: () => ConnectorSpec[];
 }
 
 const getCurrentSpecOrThrow = (provider: ConnectorSpecProvider): ConnectorSpec => {
@@ -104,17 +105,16 @@ export const createConnectorTypeFromSpecProvider = (
         },
       },
     },
-    getConnectorValidation: async (version) => {
-      const spec = await provider.getSpec(version);
+    getConnectorValidation: async (version, specId) => {
+      const spec = await provider.getSpec(version, specId);
       return spec ? buildValidation(spec) : undefined;
     },
     executor: async (execOptions) => {
-      const spec = await provider.getSpec(execOptions.specVersion);
+      const spec = await provider.getSpec(execOptions.specVersion, execOptions.specId);
       if (!spec) {
+        const id = execOptions.specId ?? provider.metadata.id;
         const version = execOptions.specVersion ? ` version "${execOptions.specVersion}"` : '';
-        throw new Error(
-          `Connector specification "${provider.metadata.id}"${version} is unavailable.`
-        );
+        throw new Error(`Connector specification "${id}"${version} is unavailable.`);
       }
       const result = await generateExecutorFunction({
         actions: buildExecutableActions(spec),
@@ -152,5 +152,12 @@ export const createConnectorTypeFromSpecProvider = (
     isTestable: true,
     getConnectorSpec: provider.getCurrentSpec,
     getConnectorSpecs: provider.getSpecs,
+    ...(provider.getSpecsForDiscovery
+      ? {
+          getConnectorSpecById: provider.getCurrentSpec,
+          getConnectorSpecsById: provider.getSpecs,
+          getConnectorSpecsForDiscovery: provider.getSpecsForDiscovery,
+        }
+      : {}),
   };
 };

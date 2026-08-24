@@ -18,6 +18,7 @@ export const connectorSchema = schema.object({
   isSystemAction: schema.boolean(),
   isConnectorTypeDeprecated: schema.boolean({ defaultValue: false }),
   authMode: schema.maybe(schema.oneOf([schema.literal('shared'), schema.literal('per-user')])),
+  specId: schema.maybe(schema.string()),
   specVersion: schema.maybe(schema.string()),
 });
 

@@ -37,6 +37,7 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
+  icon?: string;
 }
 
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';

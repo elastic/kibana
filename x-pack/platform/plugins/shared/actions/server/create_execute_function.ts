@@ -232,7 +232,7 @@ function validateConnector({
   connector: InMemoryConnector | RawAction;
   actionTypeRegistry: ActionTypeRegistryContract;
 }) {
-  const { name, isMissingSecrets, actionTypeId } = connector;
+  const { name, isMissingSecrets, actionTypeId, specId, specVersion } = connector;
 
   if (isMissingSecrets) {
     throw new Error(
@@ -240,8 +240,22 @@ function validateConnector({
     );
   }
 
-  if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  const connectorTypeId = specId ?? actionTypeId;
+  const executable =
+    specId && specVersion
+      ? actionTypeRegistry.isActionExecutable(
+          id,
+          connectorTypeId,
+          { notifyUsage: true },
+          specVersion
+        )
+      : actionTypeRegistry.isActionExecutable(id, connectorTypeId, { notifyUsage: true });
+  if (!executable) {
+    if (specId) {
+      actionTypeRegistry.ensureActionTypeEnabled(specId, specVersion);
+    } else {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
   }
 }
 

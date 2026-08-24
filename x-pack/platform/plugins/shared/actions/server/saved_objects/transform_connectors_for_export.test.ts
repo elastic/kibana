@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -220,9 +221,14 @@ describe('transform connector for export', () => {
     },
   ];
 
-  it('should not change connectors without secrets', () => {
-    actionTypeRegistry.get.mockReturnValue(connectorType);
-    expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
+  it('should not change connectors without secrets', async () => {
+    actionTypeRegistry.resolveActionType.mockReturnValue({
+      registeredActionTypeId: connectorType.id,
+      actionType: connectorType,
+    });
+    await expect(
+      transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)
+    ).resolves.toEqual(
       connectorsWithNoSecrets.map((connector) => ({
         ...connector,
         attributes: {
@@ -233,8 +239,8 @@ describe('transform connector for export', () => {
     );
   });
 
-  it('should remove secrets for connectors with secrets', () => {
-    actionTypeRegistry.get.mockReturnValue({
+  it('should remove secrets for connectors with secrets', async () => {
+    const connectorTypeWithRequiredSecrets = {
       ...connectorType,
       validate: {
         config: { schema: z.object({}) },
@@ -243,8 +249,14 @@ describe('transform connector for export', () => {
           schema: z.object({}).refine(() => false, { message: 'i need secrets!' }),
         },
       },
+    };
+    actionTypeRegistry.resolveActionType.mockReturnValue({
+      registeredActionTypeId: connectorType.id,
+      actionType: connectorTypeWithRequiredSecrets,
     });
-    expect(transformConnectorsForExport(connectorsWithSecrets, actionTypeRegistry)).toEqual(
+    await expect(
+      transformConnectorsForExport(connectorsWithSecrets, actionTypeRegistry)
+    ).resolves.toEqual(
       connectorsWithSecrets.map((connector) => ({
         ...connector,
         attributes: {
@@ -253,6 +265,70 @@ describe('transform connector for export', () => {
           isMissingSecrets: true,
         },
       }))
+    );
+  });
+
+  it('uses the pinned declarative specification when validating secrets', async () => {
+    const connectorSpec: ConnectorSpec = {
+      version: '1.0.0',
+      metadata: {
+        id: '.declarative-http',
+        displayName: 'HTTP',
+        description: 'HTTP connector',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['workflows'],
+      },
+      actions: {},
+      test: { enabled: false, handler: async () => ({}) },
+    };
+    const genericActionType = {
+      ...connectorType,
+      id: '.declarative',
+      getConnectorValidation: jest.fn().mockResolvedValue({
+        config: { schema: z.object({}) },
+        params: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+      }),
+      validate: {
+        ...connectorType.validate,
+        secrets: {
+          schema: z.object({}).refine(() => false, { message: 'generic validator used' }),
+        },
+      },
+    };
+    actionTypeRegistry.resolveActionType.mockReturnValue({
+      registeredActionTypeId: '.declarative',
+      actionType: genericActionType,
+      connectorSpec,
+      specId: '.declarative-http',
+    });
+    const connector = {
+      id: 'declarative-connector',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.declarative',
+        specId: '.declarative-http',
+        specVersion: '1.0.0',
+        name: 'HTTP',
+        isMissingSecrets: false,
+        config: {},
+        secrets: 'encrypted',
+      },
+      references: [],
+    };
+
+    await expect(transformConnectorsForExport([connector], actionTypeRegistry)).resolves.toEqual([
+      {
+        ...connector,
+        attributes: {
+          ...connector.attributes,
+          secrets: {},
+        },
+      },
+    ]);
+    expect(genericActionType.getConnectorValidation).toHaveBeenCalledWith(
+      '1.0.0',
+      '.declarative-http'
     );
   });
 });

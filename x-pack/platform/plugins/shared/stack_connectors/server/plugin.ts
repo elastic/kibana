@@ -28,11 +28,10 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
 import {
-  DECLARATIVE_CONNECTOR_METADATA,
   DeclarativeConnectorCatalogService,
   createDeclarativeConnectorCatalogStorage,
   registerDeclarativeConnectorCatalogRoutes,
-  registerDeclarativeConnectorTypes,
+  registerDeclarativeConnectorType,
 } from './declarative_connectors';
 
 export interface ConnectorsPluginsSetup {
@@ -71,7 +70,6 @@ export class StackConnectorsPlugin
       this.declarativeCatalog = new DeclarativeConnectorCatalogService({
         registryUrl: this.config.declarativeCatalog.registryUrl,
         refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
-        connectorMetadata: DECLARATIVE_CONNECTOR_METADATA,
         logger: context.logger.get('declarativeCatalog'),
       });
     }
@@ -116,7 +114,7 @@ export class StackConnectorsPlugin
     }
 
     if (this.declarativeCatalog) {
-      registerDeclarativeConnectorTypes({ actions, catalog: this.declarativeCatalog });
+      registerDeclarativeConnectorType({ actions, catalog: this.declarativeCatalog });
       registerDeclarativeConnectorCatalogRoutes({
         router,
         catalog: this.declarativeCatalog,

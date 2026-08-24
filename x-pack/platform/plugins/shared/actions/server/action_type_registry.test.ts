@@ -7,6 +7,7 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -89,7 +90,6 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
-              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -255,6 +255,134 @@ describe('actionTypeRegistry', () => {
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('discovers catalog specs through one registered action type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const connectorSpec: ConnectorSpec = {
+        version: '1.0.0',
+        metadata: {
+          id: '.declarative-okta',
+          displayName: 'Okta',
+          description: 'Catalog Okta connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: ['workflows'],
+        },
+        actions: {
+          listUsers: {
+            description: 'List users',
+            input: z.object({ limit: z.number() }),
+            handler: async () => ({}),
+          },
+        },
+        test: { enabled: false, handler: async () => ({}) },
+      };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const discoveredSpecs: ConnectorSpec[] = [];
+      const genericActionType = getConnectorType({
+        id: '.declarative',
+        name: 'Declarative connector',
+        source: 'spec',
+        getConnectorSpecById: (id: string, version?: string) =>
+          version === connectorSpec.version
+            ? connectorSpec
+            : discoveredSpecs.find((spec) => spec.metadata.id === id),
+        getConnectorSpecsById: () => [connectorSpec],
+        getConnectorSpecsForDiscovery: () => discoveredSpecs,
+      });
+      actionTypeRegistry.register(genericActionType);
+
+      expect(actionTypeRegistry.list({ exposeSpecActions: true })).toEqual([]);
+      discoveredSpecs.push(connectorSpec);
+      expect(actionTypeRegistry.list({ exposeSpecActions: true })).toEqual([
+        expect.objectContaining({
+          id: '.declarative-okta',
+          name: 'Okta',
+          minimumLicenseRequired: 'enterprise',
+          supportedFeatureIds: ['workflows'],
+          specActionNames: ['listUsers'],
+        }),
+      ]);
+      expect(actionTypeRegistry.resolveActionType('.declarative-okta')).toEqual({
+        registeredActionTypeId: '.declarative',
+        actionType: genericActionType,
+        connectorSpec,
+        specId: '.declarative-okta',
+      });
+      discoveredSpecs.length = 0;
+      expect(actionTypeRegistry.list({ exposeSpecActions: true })).toEqual([]);
+      expect(actionTypeRegistry.resolveActionType('.declarative-okta', '1.0.0').connectorSpec).toBe(
+        connectorSpec
+      );
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'actions:.declarative': expect.any(Object),
+        })
+      );
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          'actions:.declarative-okta': expect.any(Object),
+        })
+      );
+    });
+
+    test('resolves a version from a connector that exposes only its current spec', () => {
+      const connectorSpec: ConnectorSpec = {
+        version: '1.0.0',
+        metadata: {
+          id: '.single-spec',
+          displayName: 'Single spec',
+          description: 'Single spec connector',
+          minimumLicense: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        actions: {},
+        test: { enabled: false, handler: async () => ({}) },
+      };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const actionType = getConnectorType({
+        id: '.single-spec',
+        getConnectorSpec: () => connectorSpec,
+      });
+      actionTypeRegistry.register(actionType);
+
+      expect(actionTypeRegistry.resolveActionType('.single-spec', '1.0.0').connectorSpec).toBe(
+        connectorSpec
+      );
+      expect(actionTypeRegistry.tryResolveActionType('.single-spec', '2.0.0')).toBeUndefined();
+      expect(() => actionTypeRegistry.resolveActionType('.single-spec', '2.0.0')).toThrow(
+        'Action type ".single-spec" is not registered.'
+      );
+    });
+
+    test('rejects catalog connector IDs that conflict with registered action types', () => {
+      const connectorSpec: ConnectorSpec = {
+        version: '1.0.0',
+        metadata: {
+          id: '.registered',
+          displayName: 'Conflicting spec',
+          description: 'Conflicting spec connector',
+          minimumLicense: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        actions: {},
+        test: { enabled: false, handler: async () => ({}) },
+      };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType({ id: '.registered' }));
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.declarative',
+          getConnectorSpecsForDiscovery: () => [connectorSpec],
+        })
+      );
+
+      expect(() => actionTypeRegistry.list()).toThrow(
+        'Connector type ".registered" conflicts with another action type.'
+      );
+      expect(actionTypeRegistry.resolveActionType('.registered').registeredActionTypeId).toBe(
+        '.registered'
+      );
     });
 
     test('returns list of connector types with parameter schema', () => {

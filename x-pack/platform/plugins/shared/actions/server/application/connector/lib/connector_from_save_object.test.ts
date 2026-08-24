@@ -55,8 +55,23 @@ describe('connectorFromSavedObject', () => {
     expect(result.authMode).toBe('shared');
   });
 
+  it('uses the declarative spec ID as the public connector type', () => {
+    const so = makeSavedObject('conn-4', {
+      actionTypeId: '.declarative',
+      specId: '.declarative-okta',
+      specVersion: '1.0.0',
+    });
+    const result = connectorFromSavedObject(so, false, false);
+
+    expect(result).toMatchObject({
+      actionTypeId: '.declarative-okta',
+      specId: '.declarative-okta',
+      specVersion: '1.0.0',
+    });
+  });
+
   it('propagates isDeprecated and isConnectorTypeDeprecated from arguments', () => {
-    const so = makeSavedObject('conn-4');
+    const so = makeSavedObject('conn-5');
     const result = connectorFromSavedObject(so, true, true);
     expect(result.isDeprecated).toBe(true);
     expect(result.isConnectorTypeDeprecated).toBe(true);

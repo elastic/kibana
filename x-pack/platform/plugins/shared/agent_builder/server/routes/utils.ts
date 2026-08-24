@@ -6,7 +6,7 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isToolAction, type ConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -31,8 +31,11 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = (actionTypeId: string): ConnectorSubAction[] => {
-  const spec = getConnectorSpec(actionTypeId);
+export const getConnectorSubActions = (
+  actionTypeId: string,
+  connectorSpec?: ConnectorSpec
+): ConnectorSubAction[] => {
+  const spec = connectorSpec ?? getConnectorSpec(actionTypeId);
   if (!spec) return [];
   return Object.entries(spec.actions)
     .filter(([name]) => isToolAction(spec, name))
@@ -43,6 +46,7 @@ export const toConnectorItem = (
   connector: Connector,
   options?: {
     oauthStatus?: OAuthStatus;
+    connectorSpec?: ConnectorSpec;
   }
 ): ConnectorItem => {
   return {
@@ -57,6 +61,6 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options?.oauthStatus,
-    subActions: getConnectorSubActions(connector.actionTypeId),
+    subActions: getConnectorSubActions(connector.actionTypeId, options?.connectorSpec),
   };
 };

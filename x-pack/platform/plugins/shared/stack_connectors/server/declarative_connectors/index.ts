@@ -7,8 +7,8 @@
 
 export { DeclarativeConnectorCatalogService } from './catalog_service';
 export {
-  DECLARATIVE_CONNECTOR_METADATA,
-  registerDeclarativeConnectorTypes,
+  DECLARATIVE_CONNECTOR_ID,
+  registerDeclarativeConnectorType,
 } from './register_connector_types';
 export {
   DECLARATIVE_CONNECTOR_CATALOG_INDEX,

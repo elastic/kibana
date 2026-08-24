@@ -11,7 +11,6 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 import type { ActionType as CommonActionType } from '../common';
@@ -41,6 +40,22 @@ interface ListOpts {
   exposeValidation?: boolean;
   exposeSpecActions?: boolean;
 }
+
+interface RegisteredActionTypeResolution {
+  registeredActionTypeId: string;
+  actionType: ActionType;
+  connectorSpec?: ConnectorSpec;
+  specId?: undefined;
+}
+
+interface VirtualActionTypeResolution {
+  registeredActionTypeId: string;
+  actionType: ActionType;
+  connectorSpec: ConnectorSpec;
+  specId: string;
+}
+
+export type ResolvedActionType = RegisteredActionTypeResolution | VirtualActionTypeResolution;
 
 const serializeActionSchemas = (
   connectorSpec: ConnectorSpec
@@ -80,11 +95,19 @@ export class ActionTypeRegistry {
   /**
    * Throws error if action type is not enabled.
    */
-  public ensureActionTypeEnabled(id: string) {
-    this.actionsConfigUtils.ensureActionTypeEnabled(id);
+  public ensureActionTypeEnabled(id: string, version?: string) {
+    const { registeredActionTypeId, actionType, connectorSpec } = this.resolveActionType(
+      id,
+      version
+    );
+    this.actionsConfigUtils.ensureActionTypeEnabled(registeredActionTypeId);
     // Important to happen last because the function will notify of feature usage at the
     // same time and it shouldn't notify when the action type isn't enabled
-    this.licenseState.ensureLicenseForActionType(this.get(id));
+    this.licenseState.ensureLicenseForActionType(
+      connectorSpec
+        ? { ...actionType, minimumLicenseRequired: connectorSpec.metadata.minimumLicense }
+        : actionType
+    );
   }
 
   /**
@@ -92,11 +115,19 @@ export class ActionTypeRegistry {
    */
   public isActionTypeEnabled(
     id: string,
-    options: { notifyUsage: boolean } = { notifyUsage: false }
+    options: { notifyUsage: boolean } = { notifyUsage: false },
+    version?: string
   ) {
+    const { registeredActionTypeId, actionType, connectorSpec } = this.resolveActionType(
+      id,
+      version
+    );
+    const actionTypeForLicense = connectorSpec
+      ? { ...actionType, minimumLicenseRequired: connectorSpec.metadata.minimumLicense }
+      : actionType;
     return (
-      this.actionsConfigUtils.isActionTypeEnabled(id) &&
-      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid === true
+      this.actionsConfigUtils.isActionTypeEnabled(registeredActionTypeId) &&
+      this.licenseState.isLicenseValidForActionType(actionTypeForLicense, options).isValid === true
     );
   }
 
@@ -108,15 +139,19 @@ export class ActionTypeRegistry {
   public isActionExecutable(
     actionId: string,
     actionTypeId: string,
-    options: { notifyUsage: boolean } = { notifyUsage: false }
+    options: { notifyUsage: boolean } = { notifyUsage: false },
+    version?: string
   ) {
+    const { actionType, connectorSpec } = this.resolveActionType(actionTypeId, version);
     const validLicense = this.licenseState.isLicenseValidForActionType(
-      this.get(actionTypeId),
+      connectorSpec
+        ? { ...actionType, minimumLicenseRequired: connectorSpec.metadata.minimumLicense }
+        : actionType,
       options
     ).isValid;
     if (validLicense === false) return false;
 
-    const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
+    const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options, version);
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
@@ -243,7 +278,6 @@ export class ActionTypeRegistry {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
-          taskTypeGroup: TaskTypeGroup.Actions,
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
@@ -279,6 +313,92 @@ export class ActionTypeRegistry {
     return this.actionTypes.get(id)! as ActionType<Config, Secrets, Params, ExecutorResultData>;
   }
 
+  public tryResolveActionType(id: string, version?: string): ResolvedActionType | undefined {
+    const actionType = this.actionTypes.get(id);
+    if (actionType) {
+      const currentSpec = actionType.getConnectorSpec?.();
+      const connectorSpec = version
+        ? currentSpec?.version === version
+          ? currentSpec
+          : actionType.getConnectorSpecs?.().find((spec) => spec.version === version)
+        : currentSpec;
+      if (
+        version &&
+        (actionType.getConnectorSpec || actionType.getConnectorSpecs) &&
+        !connectorSpec
+      ) {
+        return undefined;
+      }
+      return {
+        registeredActionTypeId: id,
+        actionType,
+        ...(connectorSpec ? { connectorSpec } : {}),
+      };
+    }
+
+    const virtualActionTypes = this.getVirtualActionTypes();
+    const discoveredActionType = virtualActionTypes.get(id);
+    if (
+      discoveredActionType &&
+      (!version || discoveredActionType.connectorSpec.version === version)
+    ) {
+      return discoveredActionType;
+    }
+
+    let resolved: VirtualActionTypeResolution | undefined;
+    for (const [actionTypeId, candidate] of this.actionTypes) {
+      const connectorSpec = candidate.getConnectorSpecById?.(id, version);
+      if (connectorSpec) {
+        if (resolved) {
+          throw new Error(`Connector type "${id}" is provided by multiple action types.`);
+        }
+        resolved = {
+          registeredActionTypeId: actionTypeId,
+          actionType: candidate,
+          connectorSpec,
+          specId: id,
+        };
+      }
+    }
+
+    return resolved;
+  }
+
+  public resolveActionType(id: string, version?: string): ResolvedActionType {
+    const resolved = this.tryResolveActionType(id, version);
+    if (resolved) {
+      return resolved;
+    }
+
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
+        defaultMessage: 'Action type "{id}" is not registered.',
+        values: {
+          id,
+        },
+      })
+    );
+  }
+
+  private getVirtualActionTypes(): Map<string, VirtualActionTypeResolution> {
+    const virtualActionTypes = new Map<string, VirtualActionTypeResolution>();
+    for (const [registeredActionTypeId, actionType] of this.actionTypes) {
+      for (const connectorSpec of actionType.getConnectorSpecsForDiscovery?.() ?? []) {
+        const specId = connectorSpec.metadata.id;
+        if (this.actionTypes.has(specId) || virtualActionTypes.has(specId)) {
+          throw new Error(`Connector type "${specId}" conflicts with another action type.`);
+        }
+        virtualActionTypes.set(specId, {
+          registeredActionTypeId,
+          actionType,
+          connectorSpec,
+          specId,
+        });
+      }
+    }
+    return virtualActionTypes;
+  }
+
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
@@ -288,65 +408,114 @@ export class ActionTypeRegistry {
       exposeSpecActions: false,
     }
   ): CommonActionType[] {
-    return Array.from(this.actionTypes)
-      .filter(([_, actionType]) => {
-        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
-      })
-      .map(([actionTypeId, actionType]) => {
-        const connectorSpec =
-          exposeValidation === true || exposeSpecActions === true
-            ? actionType.getConnectorSpec?.()
-            : undefined;
-        const connectorSpecs =
-          exposeValidation === true || exposeSpecActions === true
-            ? actionType.getConnectorSpecs?.() ?? []
-            : [];
-        return {
+    const includeSpecs = exposeValidation === true || exposeSpecActions === true;
+    const virtualActionTypes = this.getVirtualActionTypes();
+    const buildCommonActionType = ({
+      id,
+      registeredId,
+      actionType,
+      connectorSpec,
+      connectorSpecs,
+    }: {
+      id: string;
+      registeredId: string;
+      actionType: ActionType;
+      connectorSpec?: ConnectorSpec;
+      connectorSpecs: ConnectorSpec[];
+    }): CommonActionType => {
+      const metadata = connectorSpec?.metadata;
+      const actionTypeForLicense = metadata
+        ? { ...actionType, minimumLicenseRequired: metadata.minimumLicense }
+        : actionType;
+      const enabledInConfig = this.actionsConfigUtils.isActionTypeEnabled(registeredId);
+      const enabledInLicense =
+        this.licenseState.isLicenseValidForActionType(actionTypeForLicense).isValid === true;
+
+      return {
+        id,
+        name: metadata?.displayName ?? actionType.name,
+        minimumLicenseRequired: metadata?.minimumLicense ?? actionType.minimumLicenseRequired,
+        enabled: enabledInConfig && enabledInLicense,
+        enabledInConfig,
+        enabledInLicense,
+        supportedFeatureIds: metadata?.supportedFeatureIds ?? actionType.supportedFeatureIds,
+        isSystemActionType: !!actionType.isSystemActionType,
+        source: actionType.source || ACTION_TYPE_SOURCES.stack,
+        subFeature: actionType.subFeature,
+        ...(exposeValidation === true && registeredId === id && actionType.validate.params
+          ? {
+              validate: {
+                params: actionType.validate.params,
+              },
+            }
+          : {}),
+        isDeprecated: !!actionType.isDeprecated,
+        allowMultipleSystemActions: actionType.allowMultipleSystemActions,
+        description: metadata?.description ?? actionType.description,
+        isExperimental: metadata?.isTechnicalPreview ?? actionType.isExperimental,
+        isTestable: connectorSpec ? connectorSpec.test.enabled : Boolean(actionType.isTestable),
+        ...(includeSpecs && connectorSpec
+          ? {
+              specActionNames: [
+                ...new Set([
+                  ...Object.keys(connectorSpec.actions),
+                  ...connectorSpecs.flatMap((spec) => Object.keys(spec.actions)),
+                ]),
+              ],
+              specActionSchemas: serializeActionSchemas(connectorSpec),
+              ...(connectorSpecs.length > 0
+                ? {
+                    specActionSchemasByVersion: Object.fromEntries(
+                      connectorSpecs.flatMap((spec) =>
+                        spec.version ? [[spec.version, serializeActionSchemas(spec)]] : []
+                      )
+                    ),
+                  }
+                : {}),
+              ...(metadata?.icon ? { icon: metadata.icon } : {}),
+            }
+          : {}),
+      };
+    };
+
+    return Array.from(this.actionTypes).flatMap(([actionTypeId, actionType]) => {
+      if (actionType.getConnectorSpecsForDiscovery) {
+        return [...virtualActionTypes.values()]
+          .filter(({ registeredActionTypeId }) => registeredActionTypeId === actionTypeId)
+          .filter(({ connectorSpec }) =>
+            featureId
+              ? connectorSpec.metadata.supportedFeatureIds.some(
+                  (supportedFeatureId) => supportedFeatureId === featureId
+                )
+              : true
+          )
+          .map((resolved) =>
+            buildCommonActionType({
+              id: resolved.specId,
+              registeredId: resolved.registeredActionTypeId,
+              actionType: resolved.actionType,
+              connectorSpec: resolved.connectorSpec,
+              connectorSpecs: includeSpecs
+                ? resolved.actionType.getConnectorSpecsById?.(resolved.specId) ?? []
+                : [],
+            })
+          );
+      }
+
+      if (featureId && !actionType.supportedFeatureIds.includes(featureId)) {
+        return [];
+      }
+      const connectorSpec = includeSpecs ? actionType.getConnectorSpec?.() : undefined;
+      return [
+        buildCommonActionType({
           id: actionTypeId,
-          name: actionType.name,
-          minimumLicenseRequired: actionType.minimumLicenseRequired,
-          enabled: this.isActionTypeEnabled(actionTypeId),
-          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-          supportedFeatureIds: actionType.supportedFeatureIds,
-          isSystemActionType: !!actionType.isSystemActionType,
-          source: actionType.source || ACTION_TYPE_SOURCES.stack,
-          subFeature: actionType.subFeature,
-          ...(exposeValidation === true && actionType.validate.params
-            ? {
-                validate: {
-                  params: actionType.validate.params,
-                },
-              }
-            : {}),
-          isDeprecated: !!actionType.isDeprecated,
-          allowMultipleSystemActions: actionType.allowMultipleSystemActions,
-          description: actionType.description,
-          isExperimental: actionType.isExperimental,
-          isTestable: Boolean(actionType.isTestable),
-          ...((exposeValidation === true || exposeSpecActions === true) && connectorSpec
-            ? {
-                specActionNames: [
-                  ...new Set([
-                    ...Object.keys(connectorSpec.actions),
-                    ...connectorSpecs.flatMap((spec) => Object.keys(spec.actions)),
-                  ]),
-                ],
-                specActionSchemas: serializeActionSchemas(connectorSpec),
-                ...(connectorSpecs.length > 0
-                  ? {
-                      specActionSchemasByVersion: Object.fromEntries(
-                        connectorSpecs.flatMap((spec) =>
-                          spec.version ? [[spec.version, serializeActionSchemas(spec)]] : []
-                        )
-                      ),
-                    }
-                  : {}),
-                ...(connectorSpec.metadata.icon ? { icon: connectorSpec.metadata.icon } : {}),
-              }
-            : {}),
-        };
-      });
+          registeredId: actionTypeId,
+          actionType,
+          connectorSpec,
+          connectorSpecs: includeSpecs ? actionType.getConnectorSpecs?.() ?? [] : [],
+        }),
+      ];
+    });
   }
 
   /**

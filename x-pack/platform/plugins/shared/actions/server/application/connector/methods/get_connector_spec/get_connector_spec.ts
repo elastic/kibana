@@ -27,10 +27,7 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const actionType = context.actionTypeRegistry.has(id)
-    ? context.actionTypeRegistry.get(id)
-    : undefined;
-  const spec = actionType?.getConnectorSpec?.();
+  const spec = context.actionTypeRegistry.tryResolveActionType(id)?.connectorSpec;
 
   if (!spec) {
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);

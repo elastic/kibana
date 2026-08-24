@@ -42,9 +42,10 @@ function createContext(): ActionsClientContext {
     authorization,
     auditLogger,
     actionTypeRegistry: {
-      has: (id: string) => specsById.has(id),
-      get: (id: string) => ({
-        getConnectorSpec: () => specsById.get(id),
+      tryResolveActionType: (id: string) => ({
+        registeredActionTypeId: id,
+        actionType: {},
+        connectorSpec: specsById.get(id),
       }),
     },
   } as unknown as ActionsClientContext;

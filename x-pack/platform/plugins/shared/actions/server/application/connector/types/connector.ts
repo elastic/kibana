@@ -22,6 +22,7 @@ export interface Connector {
   isSystemAction: ConnectorSchemaType['isSystemAction'];
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
+  specId?: ConnectorSchemaType['specId'];
   specVersion?: ConnectorSchemaType['specVersion'];
 }
 

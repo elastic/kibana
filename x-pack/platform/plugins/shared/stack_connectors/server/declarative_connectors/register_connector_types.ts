@@ -13,43 +13,30 @@ import {
 } from '@kbn/actions-plugin/server/lib';
 import type { DeclarativeConnectorCatalogService } from './catalog_service';
 
-export const DECLARATIVE_ABUSEIPDB_CONNECTOR_ID = '.declarative-abuseipdb';
-export const DECLARATIVE_OKTA_CONNECTOR_ID = '.declarative-okta';
+export const DECLARATIVE_CONNECTOR_ID = '.declarative';
 
-export const DECLARATIVE_CONNECTOR_METADATA: ConnectorMetadata[] = [
-  {
-    id: DECLARATIVE_ABUSEIPDB_CONNECTOR_ID,
-    displayName: 'AbuseIPDB (Declarative PoC)',
-    description: 'IP reputation checking and abuse reporting from a catalog-loaded YAML definition',
-    minimumLicense: 'gold',
-    isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
-  },
-  {
-    id: DECLARATIVE_OKTA_CONNECTOR_ID,
-    displayName: 'Okta (Declarative PoC)',
-    description:
-      'Read-only Okta users and System Log actions from a catalog-loaded YAML definition',
-    minimumLicense: 'enterprise',
-    isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
-  },
-];
+const DECLARATIVE_RUNNER_METADATA: ConnectorMetadata = {
+  id: DECLARATIVE_CONNECTOR_ID,
+  displayName: 'Declarative connector',
+  description: 'Executes connector specifications loaded from the declarative catalog',
+  minimumLicense: 'enterprise',
+  isTechnicalPreview: true,
+  supportedFeatureIds: ['workflows', 'agentBuilder'],
+};
 
-export const registerDeclarativeConnectorTypes = ({
+export const registerDeclarativeConnectorType = ({
   actions,
   catalog,
 }: {
   actions: ActionsPluginSetupContract;
   catalog: DeclarativeConnectorCatalogService;
 }): void => {
-  for (const metadata of DECLARATIVE_CONNECTOR_METADATA) {
-    const provider: ConnectorSpecProvider = {
-      metadata,
-      getCurrentSpec: () => catalog.getCurrentSpec(metadata.id),
-      getSpecs: () => catalog.getSpecs(metadata.id),
-      getSpec: (version) => catalog.getSpec(metadata.id, version),
-    };
-    actions.registerType(createConnectorTypeFromSpecProvider(provider, actions));
-  }
+  const provider: ConnectorSpecProvider = {
+    metadata: DECLARATIVE_RUNNER_METADATA,
+    getCurrentSpec: (id, version) => (id ? catalog.getCachedSpec(id, version) : undefined),
+    getSpecs: (id) => (id ? catalog.getSpecs(id) : []),
+    getSpec: (version, id) => (id ? catalog.getSpec(id, version) : Promise.resolve(undefined)),
+    getSpecsForDiscovery: catalog.getCurrentSpecs,
+  };
+  actions.registerType(createConnectorTypeFromSpecProvider(provider, actions));
 };

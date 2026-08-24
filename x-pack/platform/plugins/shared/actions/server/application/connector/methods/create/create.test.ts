@@ -52,6 +52,7 @@ const getAxiosInstanceWithAuth = jest.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
+  resolveActionType: jest.fn(),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -99,6 +100,14 @@ describe('create()', () => {
         },
       })
     );
+    (actionTypeRegistry.resolveActionType as jest.Mock).mockImplementation((id: string) => {
+      const actionType = (actionTypeRegistry.get as jest.Mock)(id);
+      return {
+        registeredActionTypeId: id,
+        actionType,
+        connectorSpec: actionType.getConnectorSpec?.(),
+      };
+    });
     (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
     (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(false);
     authorization.ensureAuthorized.mockResolvedValue(undefined);
@@ -439,6 +448,79 @@ describe('create()', () => {
         }),
         { id: 'mock-saved-object-id' }
       );
+    });
+
+    test('stores catalog connectors under the generic declarative action type', async () => {
+      const connectorSpec = {
+        version: '1.0.0',
+        metadata: {
+          id: '.declarative-okta',
+          displayName: 'Declarative Okta',
+          description: 'Test',
+          minimumLicense: 'basic' as const,
+          supportedFeatureIds: ['workflows'],
+        },
+        actions: {},
+        test: { enabled: false, handler: async () => ({}) },
+      };
+      const genericActionType = getConnectorType({
+        id: '.declarative',
+        source: ACTION_TYPE_SOURCES.spec,
+        getConnectorValidation: jest.fn().mockResolvedValue({
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        }),
+        validate: {
+          config: { schema: z.never() },
+          secrets: { schema: z.never() },
+          params: { schema: z.never() },
+        },
+      });
+      (actionTypeRegistry.resolveActionType as jest.Mock).mockReturnValue({
+        registeredActionTypeId: '.declarative',
+        actionType: genericActionType,
+        connectorSpec,
+        specId: '.declarative-okta',
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Declarative Okta',
+          actionTypeId: '.declarative',
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'Declarative Okta',
+          actionTypeId: '.declarative-okta',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(genericActionType.getConnectorValidation).toHaveBeenCalledWith(
+        '1.0.0',
+        '.declarative-okta'
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          actionTypeId: '.declarative',
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+      expect(result).toEqual(expect.objectContaining({ actionTypeId: '.declarative-okta' }));
     });
 
     test('creates an action with a custom ID when provided', async () => {

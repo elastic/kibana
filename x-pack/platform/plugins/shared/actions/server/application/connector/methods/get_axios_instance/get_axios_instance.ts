@@ -41,6 +41,7 @@ export async function getAxiosInstance(
 
   let actionTypeId: string | undefined;
   let authMode: AuthMode | undefined;
+  let specVersion: string | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {
@@ -55,15 +56,19 @@ export async function getAxiosInstance(
         connectorId
       );
 
-      actionTypeId = attributes.actionTypeId;
+      actionTypeId = attributes.specId ?? attributes.actionTypeId;
       authMode = attributes.authMode;
+      specVersion = attributes.specVersion;
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${connectorId}]`, err);
     throw err;
   }
 
-  const actionType = actionTypeRegistry.get(actionTypeId!);
+  const { actionType, connectorSpec, specId } = actionTypeRegistry.resolveActionType(
+    actionTypeId!,
+    specVersion
+  );
 
   if (!isWorkflowsOnlyConnectorType(actionType)) {
     throw new Error(
@@ -104,7 +109,16 @@ export async function getAxiosInstance(
   }
 
   const configurationUtilities = actionTypeRegistry.getUtils();
-  const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
+  const connectorValidation =
+    connectorSpec?.version && actionType.getConnectorValidation
+      ? await actionType.getConnectorValidation(connectorSpec.version, specId)
+      : undefined;
+  const actionTypeForValidation = connectorValidation
+    ? { ...actionType, validate: connectorValidation }
+    : actionType;
+  const validatedSecrets = validateSecrets(actionTypeForValidation, secrets, {
+    configurationUtilities,
+  });
 
   const profileUid = await getCurrentUserProfileId?.(request);
 

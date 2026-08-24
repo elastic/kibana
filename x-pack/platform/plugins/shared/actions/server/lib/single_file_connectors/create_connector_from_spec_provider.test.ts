@@ -74,4 +74,31 @@ describe('createConnectorTypeFromSpecProvider', () => {
       subActionParams: { historical: 'v' },
     });
   });
+
+  it('exposes catalog specs without registering each connector ID', async () => {
+    const catalogProvider: ConnectorSpecProvider = {
+      metadata: {
+        ...currentSpec.metadata,
+        id: '.declarative',
+        displayName: 'Declarative connector',
+      },
+      getCurrentSpec: (id) => (id === currentSpec.metadata.id ? currentSpec : undefined),
+      getSpecs: (id) => (id === currentSpec.metadata.id ? [currentSpec, historicalSpec] : []),
+      getSpec: async (version, id) =>
+        id === currentSpec.metadata.id && version === historicalSpec.version
+          ? historicalSpec
+          : undefined,
+      getSpecsForDiscovery: () => [currentSpec],
+    };
+
+    const connectorType = createConnectorTypeFromSpecProvider(catalogProvider, actions);
+
+    expect(connectorType.id).toBe('.declarative');
+    expect(connectorType.getConnectorSpecsForDiscovery?.()).toEqual([currentSpec]);
+    expect(connectorType.getConnectorSpecById?.('.declarative-test')).toBe(currentSpec);
+    const validation = await connectorType.getConnectorValidation?.('1.0.0', '.declarative-test');
+    expect(validation?.config.schema.parse({ historical: 'value' })).toEqual({
+      historical: 'value',
+    });
+  });
 });

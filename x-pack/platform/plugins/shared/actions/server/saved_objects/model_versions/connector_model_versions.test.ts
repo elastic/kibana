@@ -145,4 +145,64 @@ describe('Connector Model Versions', () => {
       );
     });
   });
+
+  describe('version 4', () => {
+    const version4 = connectorModelVersions['4'] as SavedObjectsFullModelVersion;
+
+    it('adds an optional declarative specification identity', () => {
+      const schema = version4.schemas?.create;
+
+      expect(version4.changes).toHaveLength(1);
+      expect(
+        schema?.validate({
+          actionTypeId: '.declarative',
+          name: 'Okta',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          authMode: 'shared',
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        })
+      ).toEqual(
+        expect.objectContaining({
+          specId: '.declarative-okta',
+          specVersion: '1.0.0',
+        })
+      );
+    });
+
+    it('migrates connector-specific declarative action types to the generic runner', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange?.type === 'data_backfill' ? backfillChange.backfillFn : undefined;
+      const document = {
+        id: 'declarative-connector-id',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.declarative-okta',
+          name: 'Okta',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          authMode: 'shared' as const,
+          specVersion: '1.0.0',
+        },
+        references: [],
+      };
+      const context = {
+        modelVersion: 4,
+        namespaceType: 'single',
+      } as SavedObjectModelTransformationContext;
+
+      expect(backfillFn?.(document, context)).toEqual({
+        ...document,
+        attributes: {
+          ...document.attributes,
+          actionTypeId: '.declarative',
+          specId: '.declarative-okta',
+        },
+      });
+    });
+  });
 });

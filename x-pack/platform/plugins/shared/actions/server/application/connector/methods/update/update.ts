@@ -104,11 +104,15 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const connectorValidation =
     attributes.specVersion && actionType.getConnectorValidation
-      ? await actionType.getConnectorValidation(attributes.specVersion)
+      ? attributes.specId
+        ? await actionType.getConnectorValidation(attributes.specVersion, attributes.specId)
+        : await actionType.getConnectorValidation(attributes.specVersion)
       : undefined;
   if (attributes.specVersion && actionType.getConnectorValidation && !connectorValidation) {
     throw Boom.badRequest(
-      `Connector specification "${actionTypeId}" version "${attributes.specVersion}" is unavailable.`
+      `Connector specification "${attributes.specId ?? actionTypeId}" version "${
+        attributes.specVersion
+      }" is unavailable.`
     );
   }
   const actionTypeForValidation = connectorValidation
@@ -125,7 +129,11 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     validateConnector(actionTypeForValidation, { config, secrets });
   }
 
-  context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  if (attributes.specId) {
+    context.actionTypeRegistry.ensureActionTypeEnabled(attributes.specId, attributes.specVersion);
+  } else {
+    context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  }
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
@@ -241,7 +249,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   return {
     id,
-    actionTypeId: result.attributes.actionTypeId as string,
+    actionTypeId: attributes.specId ?? (result.attributes.actionTypeId as string),
     isMissingSecrets: result.attributes.isMissingSecrets as boolean,
     name: result.attributes.name as string,
     config: result.attributes.config as Record<string, unknown>,
@@ -250,5 +258,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(attributes.specId ? { specId: attributes.specId } : {}),
+    ...(attributes.specVersion ? { specVersion: attributes.specVersion } : {}),
   };
 }
