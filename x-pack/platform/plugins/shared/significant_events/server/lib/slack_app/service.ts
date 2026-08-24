@@ -12,6 +12,7 @@ import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin
 import type {
   SlackAppBindingsResponse,
   SlackAppConnectResponse,
+  SlackAppConnectWithTokenResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
@@ -109,36 +110,23 @@ export class SlackAppService {
     return error instanceof Error ? error.message : String(error);
   }
 
-  async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
-    const relayClient = await this.getRelayClient();
-    if (!relayClient) {
-      throw new SlackAppUnavailableError(
-        'The Elastic Slack App is not available on this deployment'
-      );
-    }
-
-    const soClient = this.getSoClient(request);
-    const now = new Date().toISOString();
-
-    // A prior connection (connected, or a still-in-progress install) may already
-    // hold a live managed key. It's invalidated only once the new install
-    // succeeds (below), not here — invalidating it up front would brick a
-    // working connection if startInstall then failed, since the SO write also
-    // only happens on success.
-    const existingConnection = await this.readConnection(soClient);
-
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
-    // is granted on behalf of the connecting user but survives their deletion (ES keys
-    // outlive their owner). Because the grant intersects with the owner's privileges, the
-    // connecting user must themselves hold every privilege below or the key is silently
-    // under-privileged.
-    //
-    // - Observability signals get direct ES read: the obs agent tools query them as this key
-    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
-    //   without regenerating the key when new data is onboarded.
-    // - Significant Events and Streams data is reached through the `streams` Kibana feature
-    //   (read), and connectors/LLM through `actions` (read) — both go via the internal Kibana
-    //   client, so no grants on system/dot indices (unsupported in serverless) are needed.
+  /**
+   * Mint a managed, read-only, least-privilege ES API key for the Relay's Agent Builder.
+   * The key is granted on behalf of the connecting user but survives their deletion (ES keys
+   * outlive their owner). Because the grant intersects with the owner's privileges, the
+   * connecting user must themselves hold every privilege below or the key is silently
+   * under-privileged.
+   *
+   * - Observability signals get direct ES read: the obs agent tools query them as this key
+   *   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
+   *   without regenerating the key when new data is onboarded.
+   * - Significant Events and Streams data is reached through the `streams` Kibana feature
+   *   (read), and connectors/LLM through `actions` (read) — both go via the internal Kibana
+   *   client, so no grants on system/dot indices (unsupported in serverless) are needed.
+   */
+  private async mintManagedApiKey(
+    request: KibanaRequest
+  ): Promise<{ apiKeyId: string; encodedApiKey: string }> {
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -176,30 +164,69 @@ export class SlackAppService {
     const encodedApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
       'base64'
     );
+    return { apiKeyId: apiKeyResult.id, encodedApiKey };
+  }
 
-    const username = this.server.security.authc.getCurrentUser(request)?.username;
-
+  /**
+   * Build the common Relay install request body shared by both the OAuth and token
+   * install paths. The `kibana_api_key` (relay-service#78) is stored encrypted by the
+   * Relay against the binding and presented to Agent Builder; it is never returned by
+   * any Relay endpoint, so Kibana stores no secret at all.
+   */
+  private async buildInstallBody(
+    request: KibanaRequest,
+    encodedApiKey: string
+  ): Promise<{
+    kibana_api_key: string;
+    kibana_url: string;
+    kibana_version: string;
+    license_info: string;
+    created_by_user_key?: string;
+  }> {
     // Falls back to 'basic' in the (practically unreachable) case where no
     // license doc exists on the cluster at all, so the required field always
     // has a valid LicenseType value.
     const license = await this.server.licensing.getLicense();
+    const username = this.server.security.authc.getCurrentUser(request)?.username;
+    return {
+      kibana_api_key: encodedApiKey,
+      kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
+      kibana_version: this.server.kibanaVersion,
+      license_info: license.type ?? 'basic',
+      ...(username ? { created_by_user_key: username } : {}),
+    };
+  }
 
-    // The key is the caller-supplied `kibana_api_key` (relay-service#78): the Relay
-    // stores it encrypted against the binding and presents it to Agent Builder. It is
-    // never returned by any Relay endpoint, so Kibana stores no secret at all.
+  async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+
+    const soClient = this.getSoClient(request);
+    const now = new Date().toISOString();
+
+    // A prior connection (connected, or a still-in-progress install) may already
+    // hold a live managed key. It's invalidated only once the new install
+    // succeeds (below), not here — invalidating it up front would brick a
+    // working connection if startInstall then failed, since the SO write also
+    // only happens on success.
+    const existingConnection = await this.readConnection(soClient);
+
+    const { apiKeyId, encodedApiKey } = await this.mintManagedApiKey(request);
+    const username = this.server.security.authc.getCurrentUser(request)?.username;
+
     let installResponse;
     try {
-      installResponse = await relayClient.startInstall({
-        kibana_api_key: encodedApiKey,
-        kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
-        kibana_version: this.server.kibanaVersion,
-        license_info: license.type ?? 'basic',
-        ...(username ? { created_by_user_key: username } : {}),
-      });
+      installResponse = await relayClient.startInstall(
+        await this.buildInstallBody(request, encodedApiKey)
+      );
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
       // Do not leak an orphaned key if the Relay never took ownership of it.
-      await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
+      await this.invalidateApiKey(apiKeyId, 'after Relay install error');
       throw error;
     }
 
@@ -210,7 +237,7 @@ export class SlackAppService {
 
     await this.writeConnection(soClient, {
       status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
-      apiKeyId: apiKeyResult.id,
+      apiKeyId,
       claimId: installResponse.claim_id,
       tenantKey: null,
       surface: 'slack',
@@ -219,6 +246,72 @@ export class SlackAppService {
     });
 
     return { authorizeUrl: installResponse.authorize_url };
+  }
+
+  /**
+   * Direct bot-token install: creates a Slack Relay connection in a single request
+   * without an OAuth browser leg. The connection is immediately `connected` — no
+   * claim polling is needed. The bot token must belong to the Relay's own Slack app
+   * (`SLACK_APP_ID` on the Relay side); tokens for other apps are rejected with 400.
+   *
+   * The `botToken` is passed to the Relay but never stored or logged by Kibana.
+   */
+  async connectWithToken(
+    request: KibanaRequest,
+    botToken: string
+  ): Promise<SlackAppConnectWithTokenResponse> {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+
+    const soClient = this.getSoClient(request);
+    const now = new Date().toISOString();
+
+    // Read the existing connection before minting a key — if the install later fails we
+    // must not brick a working connection, so we only invalidate the old key on success.
+    const existingConnection = await this.readConnection(soClient);
+
+    const { apiKeyId, encodedApiKey } = await this.mintManagedApiKey(request);
+    const username = this.server.security.authc.getCurrentUser(request)?.username;
+
+    let installResponse;
+    try {
+      installResponse = await relayClient.installWithToken({
+        ...(await this.buildInstallBody(request, encodedApiKey)),
+        bot_token: botToken,
+      });
+    } catch (error) {
+      this.logger.error(`Slack app token install failed: ${this.toErrorMessage(error)}`);
+      // Do not leak an orphaned key if the Relay never took ownership of it.
+      await this.invalidateApiKey(apiKeyId, 'after Relay token install error');
+      throw error;
+    }
+
+    // A tenant key is required: every connected operation (listBindings / bind / unbind /
+    // disconnect) keys off it, and getStatus never self-heals a connected record without one.
+    if (!installResponse.team_id) {
+      await this.invalidateApiKey(apiKeyId, 'after Relay returned no tenant key');
+      throw new Error('Relay did not return a tenant key after token install');
+    }
+
+    // The new key has taken over — safe to invalidate whatever it's replacing now.
+    if (existingConnection?.apiKeyId) {
+      await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful token reconnect');
+    }
+
+    await this.writeConnection(soClient, {
+      status: RELAY_APP_CONNECTION_STATUS.connected,
+      apiKeyId,
+      tenantKey: installResponse.team_id,
+      surface: 'slack',
+      createdBy: username,
+      createdAt: now,
+    });
+
+    return { status: 'connected' };
   }
 
   /**

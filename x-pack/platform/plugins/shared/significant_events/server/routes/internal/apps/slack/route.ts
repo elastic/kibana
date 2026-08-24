@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
+import { badGateway, badRequest, conflict, forbidden, notFound } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -14,6 +14,7 @@ import type {
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppConnectResponse,
+  SlackAppConnectWithTokenResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
   SlackAppUnbindChannelResponse,
@@ -129,6 +130,40 @@ function throwRelayError(error: RelayRequestError): never {
   throw badGateway(msg);
 }
 
+const connectWithTokenSlackAppRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/apps/slack/connect/token',
+  options: {
+    access: 'internal',
+    summary: 'Connect the Elastic Slack App with a bot token',
+    description:
+      'Creates a Slack Relay connection directly from a caller-supplied bot token. ' +
+      'The connection is immediately `connected` — no OAuth browser leg or claim polling needed. ' +
+      "The token must belong to the Relay's own Slack app.",
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({ botToken: z.string().min(1).max(512) }),
+  }),
+  handler: async ({ params, request, server }): Promise<SlackAppConnectWithTokenResponse> => {
+    try {
+      return await new SlackAppService(server).connectWithToken(request, params.body.botToken);
+    } catch (error) {
+      if (error instanceof RelayRequestError) {
+        const msg = error.relayMessage ?? error.message;
+        // 400 from the Relay means the token (or kibana metadata) was rejected — surface as 400.
+        if (error.statusCode === 400) throw badRequest(msg);
+        // 409/403/404 and 5xx are mapped by the shared helper.
+        throwRelayError(error);
+      }
+      throw error;
+    }
+  },
+});
+
 const bindChannelSlackAppRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/apps/slack/bindings/{channelId}/bind',
   options: {
@@ -185,6 +220,7 @@ const unbindChannelSlackAppRoute = createServerRoute({
 
 export const internalSlackAppRoutes = {
   ...connectSlackAppRoute,
+  ...connectWithTokenSlackAppRoute,
   ...statusSlackAppRoute,
   ...disconnectSlackAppRoute,
   ...bindingsSlackAppRoute,

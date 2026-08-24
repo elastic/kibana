@@ -18,6 +18,7 @@ const request = {} as unknown as KibanaRequest;
 
 // Shared across tests via `createHarness`'s injected `relayClient`, reset in `beforeEach`.
 const startInstall = jest.fn();
+const installWithToken = jest.fn();
 const fetchClaim = jest.fn();
 const unbind = jest.fn();
 
@@ -57,7 +58,9 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     config: {},
     agentBuilder: {},
     kibanaVersion: '9.2.0',
-    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
+    relayClient: hasRelayClient
+      ? { startInstall, installWithToken, fetchClaim, unbind }
+      : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue },
@@ -78,6 +81,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 describe('SlackAppService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    installWithToken.mockReset();
   });
 
   describe('connect', () => {
@@ -221,6 +225,159 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
       expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
       expect(soClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connectWithToken', () => {
+    it('throws when the relay client is not available', async () => {
+      const { server } = createHarness({ hasRelayClient: false });
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'xoxb-token')
+      ).rejects.toBeInstanceOf(SlackAppUnavailableError);
+    });
+
+    it('throws when the feature flag is disabled', async () => {
+      const { server } = createHarness({ featureFlagEnabled: false });
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'xoxb-token')
+      ).rejects.toBeInstanceOf(SlackAppUnavailableError);
+    });
+
+    it('mints an API key, calls installWithToken, writes a connected SO, and returns status connected', async () => {
+      const { server, soClient, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      installWithToken.mockResolvedValue({
+        ok: true,
+        team_id: 'T123',
+        target_ref: 'deployment:dep-1',
+        message: 'Slack connected.',
+      });
+
+      const result = await new SlackAppService(server).connectWithToken(request, 'xoxb-token');
+
+      expect(installWithToken).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bot_token: 'xoxb-token',
+          kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
+          kibana_url: 'https://kibana.test',
+          kibana_version: '9.2.0',
+          license_info: 'platinum',
+          created_by_user_key: 'admin',
+        })
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-1',
+          tenantKey: 'T123',
+          surface: 'slack',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      // No claimId — the token path is terminal, nothing to poll.
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.not.objectContaining({ claimId: expect.anything() }),
+        expect.anything()
+      );
+      expect(result).toEqual({ status: 'connected' });
+    });
+
+    it('invalidates the minted key when the Relay call throws', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      installWithToken.mockRejectedValue(
+        new RelayRequestError(
+          '/v1/slack/install/token',
+          400,
+          'bot_token rejected by Slack: not a bot token'
+        )
+      );
+
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'bad-token')
+      ).rejects.toThrow('bot_token rejected by Slack: not a bot token');
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('leaves an existing connection untouched when the token install fails', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      installWithToken.mockRejectedValue(new Error('relay down'));
+
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'xoxb-token')
+      ).rejects.toThrow('relay down');
+
+      // Only the newly-minted (unused) key is invalidated; the existing connection is untouched.
+      expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the previous key after a successful token reconnect', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      installWithToken.mockResolvedValue({
+        ok: true,
+        team_id: 'T123',
+        target_ref: 'deployment:dep-1',
+      });
+
+      await new SlackAppService(server).connectWithToken(request, 'xoxb-token');
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+    });
+
+    it('invalidates the minted key and throws when the Relay returns no team_id', async () => {
+      const { server, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      installWithToken.mockResolvedValue({ ok: true, team_id: '', target_ref: '' });
+
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'xoxb-token')
+      ).rejects.toThrow('Relay did not return a tenant key after token install');
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+    });
+
+    it('does not include the bot token in any logger call', async () => {
+      const { server, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      installWithToken.mockRejectedValue(new Error('relay down'));
+
+      await expect(
+        new SlackAppService(server).connectWithToken(request, 'xoxb-super-secret')
+      ).rejects.toThrow();
+
+      const allLoggerCalls = [
+        ...(server.logger.error as jest.Mock).mock.calls,
+        ...(server.logger.warn as jest.Mock).mock.calls,
+        ...(server.logger.info as jest.Mock).mock.calls,
+      ];
+      for (const [msg] of allLoggerCalls) {
+        expect(String(msg)).not.toContain('xoxb-super-secret');
+      }
     });
   });
 

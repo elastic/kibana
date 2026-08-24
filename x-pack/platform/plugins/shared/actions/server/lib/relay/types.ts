@@ -18,6 +18,24 @@ export interface RelayInstallResponse {
   claim_id: string;
 }
 
+/** Request body for the direct bot-token install path (`POST /v1/slack/install/token`). */
+export interface RelayTokenInstallRequest extends RelayInstallRequest {
+  bot_token: string;
+}
+
+/**
+ * Response from the direct bot-token install path (`POST /v1/slack/install/token`).
+ * `team_id` is the Slack workspace id and doubles as the Relay tenant key used by
+ * all subsequent binding operations (listBindings, bind, unbind, disconnect).
+ */
+export interface RelayTokenInstallResponse {
+  ok: boolean;
+  /** Slack workspace id — also serves as the Relay tenant key. */
+  team_id: string;
+  target_ref: string;
+  message?: string;
+}
+
 export type RelayClaimResponse =
   | { status: 'pending' }
   | { status: 'complete'; tenant_key: string | undefined };
@@ -64,6 +82,8 @@ export interface RelayBindingsPage {
 
 export interface RelayClientContract {
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
+  /** Direct bot-token install: one request, no OAuth legs, no claim to poll. */
+  installWithToken(body: RelayTokenInstallRequest): Promise<RelayTokenInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
   /** Unbind a single workspace binding identified by its tenant key. */
   unbind(tenantKey: string): Promise<void>;

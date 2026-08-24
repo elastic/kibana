@@ -26,6 +26,14 @@ export interface SlackAppConnectResponse {
   authorizeUrl: string;
 }
 
+/**
+ * Response from the direct bot-token connect route. The connection is immediately
+ * `connected` — no OAuth legs, no claim polling.
+ */
+export interface SlackAppConnectWithTokenResponse {
+  status: 'connected';
+}
+
 /** Response from the status route driving the card state. */
 export interface SlackAppStatusResponse {
   /** `streams.significantEventsAppsEnabled` flag on + `xpack.actions.relay.url` set + agentBuilder available. */

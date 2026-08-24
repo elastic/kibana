@@ -66,6 +66,61 @@ describe('RelayClient', () => {
     );
   });
 
+  it('posts token installs to the token endpoint with Relay SSL overrides', async () => {
+    requestMock.mockResolvedValue({
+      status: 200,
+      data: {
+        ok: true,
+        team_id: 'T123',
+        target_ref: 'deployment:dep-1',
+        message: 'Slack connected.',
+      },
+    } as never);
+
+    await expect(
+      createClient().installWithToken({
+        bot_token: 'xoxb-token',
+        kibana_api_key: 'api-key',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.6.0',
+        license_info: 'platinum',
+      })
+    ).resolves.toEqual({
+      ok: true,
+      team_id: 'T123',
+      target_ref: 'deployment:dep-1',
+      message: 'Slack connected.',
+    });
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://relay.test/v1/slack/install/token',
+        method: 'post',
+        data: expect.objectContaining({ bot_token: 'xoxb-token', kibana_api_key: 'api-key' }),
+        configurationUtilities,
+        sslOverrides: relaySSLSettings,
+        maxRedirects: 0,
+      })
+    );
+  });
+
+  it('throws RelayRequestError on non-2xx from installWithToken', async () => {
+    requestMock.mockResolvedValue({
+      status: 400,
+      data: { message: 'bot_token rejected by Slack: not a bot token' },
+    } as never);
+
+    await expect(
+      createClient().installWithToken({
+        bot_token: 'bad-token',
+        kibana_api_key: 'api-key',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.6.0',
+        license_info: 'platinum',
+      })
+    ).rejects.toBeInstanceOf(RelayRequestError);
+  });
+
   it('maps claim responses', async () => {
     requestMock.mockResolvedValueOnce({ status: 202, data: {} } as never);
     await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({ status: 'pending' });

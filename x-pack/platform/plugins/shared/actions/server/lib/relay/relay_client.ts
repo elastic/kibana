@@ -20,6 +20,8 @@ import type {
   RelayInstallRequest,
   RelayInstallResponse,
   RelayListBindingsOptions,
+  RelayTokenInstallRequest,
+  RelayTokenInstallResponse,
 } from './types';
 
 export interface RelayClientOptions {
@@ -56,6 +58,11 @@ export class RelayClient implements RelayClientContract {
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
     const response = await this.post('/v1/slack/install', body);
     return response.data as RelayInstallResponse;
+  }
+
+  async installWithToken(body: RelayTokenInstallRequest): Promise<RelayTokenInstallResponse> {
+    const response = await this.post('/v1/slack/install/token', body);
+    return response.data as RelayTokenInstallResponse;
   }
 
   async fetchClaim(claimId: string): Promise<RelayClaimResponse> {
