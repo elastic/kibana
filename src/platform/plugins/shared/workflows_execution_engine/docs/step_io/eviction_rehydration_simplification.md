@@ -1,8 +1,9 @@
 # Simplifying the Eviction / Rehydration Mechanism
 
-This document evaluates two alternative approaches to replace the current
-`StepIoService` eviction/rehydration system and compares them honestly against
-the existing design.
+This document evaluates two alternative LRU-based approaches to replace the
+current `StepIoService` eviction/rehydration system and compares them honestly
+against the existing design. For a file-backed embedded-DB alternative see
+[duckdb_payload_store.md](duckdb_payload_store.md).
 
 ---
 
@@ -32,14 +33,14 @@ round-trips" goal. Relax that goal and the system simplifies dramatically.
 
 ---
 
-## Approach 1 — LRU cache, fetch-on-miss, no static analysis
+## Approach 1a — Per-workflow LRU cache, fetch-on-miss, no static analysis
 
 ### The idea
 
 Replace the eviction/rehydration orchestration with a time-bounded in-process
-LRU cache. Before each node, fetch every predecessor output that is absent from
-the cache (a simple `mget` for the missing IDs). No static analysis, no pin
-lifecycle, no transient tracking.
+LRU cache scoped to each workflow execution. Before each node, fetch every
+predecessor output that is absent from the cache (a simple `mget` for the
+missing IDs). No static analysis, no pin lifecycle, no transient tracking.
 
 ```
 before node runs:
@@ -50,6 +51,9 @@ before node runs:
 
 after node finishes:
   do nothing — LRU evicts by recency on its own
+
+after execution completes:
+  drop the LRU cache object (GC cleans up)
 ```
 
 ### What this eliminates
@@ -112,9 +116,10 @@ happens in `setStepOutput` (outside the read path). The whole class of TOCTOU
 races documented in `eviction_rehydration_bugs.md` disappears structurally.
 
 **5. Memory bound.**  
-An LRU sized by bytes (e.g. 50 MB) gives a hard bound on heap contribution from
-step outputs. The current system gives a soft bound (size threshold gate + eviction
-delay), which is why the bugs existed. A bytes-bounded LRU is simpler and safer.
+An LRU sized by bytes (e.g. 10 MB per execution) gives a hard bound on heap
+contribution from step outputs. The current system gives a soft bound (size
+threshold gate + eviction delay), which is why the bugs existed. A bytes-bounded
+LRU is simpler and safer.
 
 ### Verdict
 
@@ -125,143 +130,180 @@ TOCTOU class is eliminated by construction. The over-fetch on the hot path
 (fetching predecessors the node won't use) is the only real cost, and it is
 bounded by the LRU byte budget.
 
+The main limitation of this variant: each execution's budget is fixed and
+independent, so space unused by an idle workflow cannot be borrowed by a bursty
+one. With 100 concurrent executions at 10 MB each, the worst-case footprint is
+1 GB even if most workflows are barely active.
+
 ---
 
-## Approach 2 — DuckDB (or SQLite) as per-execution payload store
+## Approach 1b — Node-wide shared LRU cache
 
 ### The idea
 
-Instead of storing step outputs in the V8 heap and shuttling them to/from ES,
-store them in an embedded analytical database local to the Kibana process. The
-engine queries for only the specific JSON fields each template needs, so V8 never
-holds the full 50 MB object — it only receives the projected slice.
+A single LRU cache instance lives at the plugin level, shared across all
+workflow executions running on the same Kibana node. Each execution writes into
+the shared pool and explicitly evicts its own entries on completion. A per-entry
+TTL provides a safety-net eviction if explicit cleanup is skipped (e.g. on
+crash).
+
+Entries larger than a configurable fraction of the total budget (e.g. 5%) are
+**never cached** — they are always fetched from ES via `mget`. This prevents a
+single large output from dominating the LRU and causing churn for all other
+executions.
 
 ```
-step writes output:
-  INSERT INTO steps(id, output) VALUES (?, json(?))
+plugin setup:
+  cache = new NodeStepIoCache({ maxBytes: 100 MB, skipThresholdPct: 0.05, ttl: maxWorkflowTimeout })
 
-context read:
-  SELECT json_extract(output, '$.aggregations.by_rule.buckets')
-  FROM steps WHERE id = ?
+before node runs:
+  missing = predecessors whose IDs are not in shared cache
+  mget(missing) → for each result:
+    if size > cache.maxEntryBytes: skip (leave out of cache)
+    else: cache.set(execId, stepId, type, value, bytes)
+  run node
+
+after execution completes:
+  cache.evictWorkflow(execId)   // deletes all keys registered under this execId
 ```
 
-### What this eliminates
+The internal bookkeeping:
 
-Everything in Approach 1, plus V8 heap pressure entirely. The V8 heap holds only
-the extracted slice, not the full payload tree. No eviction needed at all because
-the database manages its own buffer pool.
+```ts
+class NodeStepIoCache {
+  private readonly lru: LRUCache<string, CacheEntry>;  // shared, byte-bounded
+  private readonly keysByExecution = new Map<string, Set<string>>();
+  readonly maxEntryBytes: number;                       // budget × skipThresholdPct
+
+  set(execId, stepId, type, value, bytes): void {
+    if (bytes > this.maxEntryBytes) return;            // skip large entries
+    const key = `${type}_${stepId}`;
+    this.lru.set(key, { value }, { size: bytes, ttl: this.ttl });
+    this.keysByExecution.get(execId)?.add(key);
+  }
+
+  evictWorkflow(execId): void {
+    for (const key of this.keysByExecution.get(execId) ?? []) {
+      this.lru.delete(key);
+    }
+    this.keysByExecution.delete(execId);
+  }
+}
+```
+
+### What this adds over Approach 1a
+
+- **Space reuse across executions.** An idle workflow's unused budget is
+  available to a bursty one. With 100 MB shared across 100 executions, a
+  workflow that needs 15 MB can use it if others are not actively writing —
+  instead of being hard-capped at 10 MB and triggering more ES fetches.
+- **Single node-level knob.** Total memory contribution of step-IO caching is
+  one setting, not N × per-execution budget.
+- **Large entries skip the cache entirely.** Outputs above the threshold (e.g.
+  5 MB in a 100 MB cache) are always fetched from ES. They never evict smaller,
+  frequently-accessed entries. The skip threshold also sets a natural ceiling on
+  how much any single step output can contribute to heap pressure via this cache.
 
 ### Where it gets complicated
 
-**1. Async context reads.**  
-DB reads are async. The same constraint as Approach 1 applies: context evaluation
-must be synchronous, so reads must be pre-warmed before evaluation starts. The
-`prepareForRead` pattern is still needed, just targeting DuckDB instead of ES.
-Static analysis already exists (`extractReferencedStepIds`) and gives the exact
-JSON paths needed — those paths feed directly into the projection query, so no
-new analysis layer is required.
+**1. Cross-execution LRU interference.**  
+The LRU evicts by global recency, not by execution. A burst of writes from
+execution A can silently evict hot entries from execution B, causing unexpected
+`mget` rehydration for B. Per-execution latency becomes non-deterministic under
+load. This is the primary trade-off vs Approach 1a.
 
-**2. Durability and resume.**  
-DuckDB's file is process-local. On Kibana restart or task boundary (workflow
-suspend/resume), the file is gone. Step outputs must still be persisted to ES for
-durability. The persistence path to ES therefore remains — DuckDB is a
-read-optimised local store, not a replacement for ES. Writes go to both: DuckDB
-for the current execution's hot reads, ES for durable storage.
+**2. Cleanup bookkeeping.**  
+Dropping the cache object (Approach 1a) is free. Here a `Map<execId, Set<key>>`
+must stay in sync with the LRU. If the LRU evicts a key before `evictWorkflow`
+runs (budget pressure), the key must be absent from `keysByExecution` or the
+`delete` call must be a safe no-op — `lru-cache.delete` on a missing key is
+fine, so this is manageable.
 
-Resume works the same as with LRU: metadata is loaded, IO fields are not. As
-steps execute, outputs are fetched from ES on demand and inserted into DuckDB.
-Subsequent references to the same output are DuckDB hits with projection, never
-ES round-trips.
+**3. TTL overhead.**  
+`lru-cache` checks TTL on every `get`. The cost per call is low but non-zero on
+the hot path. The TTL exists as a safety net for crash recovery, not as the
+primary eviction mechanism; it should be set to the maximum allowed workflow
+execution duration (e.g. 24 h), not a short window.
 
-**3. Concurrency model.**  
-DuckDB supports multiple concurrent readers but a single writer per connection.
-Parallel step branches write outputs concurrently. A write queue or connection-
-per-writer strategy is needed. The existing `pendingIoChanges` + periodic
-`flush()` pattern in `StepIoService` already serialises writes and could be
-adapted — DuckDB accepts batched inserts, so the flush loop maps naturally.
+**4. Skip-threshold semantics change with budget.**  
+5% of 10 MB = 500 KB. 5% of 100 MB = 5 MB. The right budget value is not
+obvious and is worth testing empirically (100 MB, 50 MB, 20 MB, 10 MB). The
+skip threshold should track the budget, not be a fixed byte value, so the
+behaviour scales consistently.
 
-**4. File I/O per execution.**  
-Each workflow execution gets its own DuckDB file (or a shared file with
-execution-scoped tables). Files must be created on execution start and cleaned up
-on completion/resume-handoff. This is manageable but adds operational surface
-(disk space tracking, cleanup on crash recovery).
-
-### Why DuckDB over SQLite here
-
-SQLite is the obvious embedded DB and was proposed in
-[security-team#17743](https://github.com/elastic/security-team/issues/17743).
-SQLite's JSON functions (`json_extract`) exist but are less capable than DuckDB's
-— DuckDB has first-class `STRUCT`, `LIST`, and JSON path extraction that aligns
-well with nested workflow output shapes. For read-mostly, analytical-style path
-projections on semi-structured data, DuckDB's query planner is a better fit.
-SQLite is better for frequent small key-value reads where projection is not the
-goal.
+**5. Frequently-accessed large outputs are always ES round-trips.**  
+If a step output exceeds the skip threshold but is referenced in a tight loop
+(e.g. a `base_payload` used by every foreach iteration), every reference pays
+an ES `mget`. The `mget` is batched and reuses the ES connection pool, so the
+cost is bounded, but it is higher than a cache hit.
 
 ### Verdict
 
-Strongly compelling for memory reduction when step outputs are large (MB-scale
-connector responses, large ES query results). The key claim — static analysis
-already extracts the needed paths, DuckDB on-disk stores the full payload, V8
-only receives the projected slice — holds up. Full outputs never enter the V8
-heap. No eviction mechanism needed. The TOCTOU class is eliminated.
+A meaningful improvement in space utilisation when many executions run
+concurrently with uneven IO patterns. The skip-threshold design prevents
+large-entry cache churn without special-casing the hot path. The operational
+cost — cleanup bookkeeping, cross-execution interference, TTL overhead — is
+real but manageable.
 
-The cost is operational: DuckDB file lifecycle, write serialisation, and the
-persistence path to ES remains for durability.
+The right budget value is an empirical question. Start with 100 MB and measure
+actual cache hit rates and ES `mget` call frequency at 50 MB, 20 MB, and 10 MB.
+The skip threshold (5% of budget by default) is a reasonable starting point but
+should be tunable.
 
 ---
 
 ## Both approaches reduce memory, via different mechanisms
 
-The two approaches are complementary, not competing. They attack memory pressure
+The two LRU approaches are complementary variants that attack the same problem
 from different angles:
 
-| | LRU cache | DuckDB file-backed |
+| | Per-workflow LRU (1a) | Node-wide shared LRU (1b) |
 |---|---|---|
-| **Primary goal** | Limit *how many* outputs are in V8 at once | Prevent *any* full output from entering V8 heap |
-| **Mechanism** | Evict least-recently-used from in-process map | Store full payloads on-disk; load only projected slices |
-| **Static analysis** | Not needed (fetch all missing predecessors) | Already exists; paths feed projection queries |
-| **Heap bound** | Soft: LRU byte budget | Hard: only projected slices enter V8 |
-| **Best for** | Many small-to-medium outputs | Few very large outputs (MB-scale) |
+| **Primary goal** | Limit how many outputs are in V8 per execution | Reuse idle space across concurrent executions |
+| **Mechanism** | Per-execution byte-bounded LRU, GC on completion | Single node-level LRU; explicit evict on completion, TTL fallback |
+| **Static analysis** | Not needed | Not needed |
+| **Heap bound** | Hard: per-execution budget | Hard: node-level budget |
+| **Large-entry handling** | Evicted by LRU like any entry | Skipped entirely (always ES) |
+| **Best for** | Simplicity; predictable per-execution footprint | Many concurrent executions with uneven IO patterns |
+| **Cross-execution interference** | None (isolated) | Yes (global LRU eviction) |
 | **Resume cold-start** | Metadata only; IO fetched on-demand per step | Metadata only; IO fetched on-demand per step |
 
-For the current problem (1k concurrent executions, moderate payload sizes), LRU
-is the simpler fix. For the OOM class of issue (single execution with multi-MB
-step outputs), DuckDB projection is the structural solution.
+Approach 1b is strictly more space-efficient than 1a but introduces
+cross-execution interference. For the OOM class of issue (single execution with
+multi-MB step outputs), see [duckdb_payload_store.md](duckdb_payload_store.md).
 
 ---
 
 ## Comparison with current system
 
-| Dimension | Current system | LRU cache | DuckDB file-backed |
-|-----------|---------------|-----------|-----------------|
-| Static analysis role | Drive targeted rehydration | Not needed | Drive JSON projection |
+| Dimension | Current system | Per-workflow LRU (1a) | Node-wide shared LRU (1b) |
+|-----------|---------------|-----------|-----------|
+| Static analysis role | Drive targeted rehydration | Not needed | Not needed |
 | TOCTOU race | Possible (background eviction loop) | Eliminated | Eliminated |
 | Pin/unpin lifecycle | Complex (loop + per-consumer) | Gone | Gone |
-| Memory bound | Soft (size threshold + delay) | Hard (LRU byte budget) | Hard (projection only) |
-| Full payload in V8 | Yes (until evicted) | Yes (until LRU evicts) | Never |
-| Resume cold-start | Metadata only; IO fetched on-demand per step | Metadata only; IO fetched on-demand, cached in LRU | Metadata only; IO fetched on-demand, inserted into DuckDB |
-| External dependency | ES | ES | ES + DuckDB npm |
-| Operational surface | None beyond ES | None | DuckDB file per execution |
-| Code size estimate | ~1300 lines | ~200–300 lines | ~400–500 lines |
+| Memory bound | Soft (size threshold + delay) | Hard (per-execution budget) | Hard (node-level budget) |
+| Full payload in V8 | Yes (until evicted) | Yes (until LRU evicts) | Yes (until LRU evicts; large entries skipped) |
+| Cross-execution isolation | N/A (per-execution) | Full | None (shared LRU) |
+| Resume cold-start | Metadata only; IO fetched on-demand | Metadata only; cached in LRU | Metadata only; cached in shared LRU |
+| External dependency | ES | ES | ES |
+| Operational surface | None beyond ES | None | Cleanup bookkeeping (`execId → keys` map) |
+| Code size estimate | ~1300 lines | ~200–300 lines | ~300–400 lines |
 
 ---
 
 ## Recommendation
 
-**Near-term (concurrency / memory bloat):** LRU cache. Eliminates every pin,
+**Simpler path:** Approach 1a, per-workflow LRU. Eliminates every pin,
 transient, and orchestration mechanism. Removes the TOCTOU bug class by
-construction. Resume is a non-issue — both the current system and LRU load
-metadata only and fetch IO on demand; LRU just caches the result. The only
-trade-off is fetching all missing predecessors per step rather than
-statically-targeted ones, which matters only on the hot path for steps with
-many predecessors, and is bounded by the LRU byte budget.
+construction. Resume is a non-issue. Predictable per-execution memory footprint
+with no cross-execution side effects.
 
-**Longer-term (large-payload / OOM prevention):** DuckDB with file-backed storage
-and JSON path projection. Full payloads never enter V8. The existing static
-analysis feeds the projection query directly. This is the right architectural
-response to the OOM-class incidents and scales better as workflows operate on
-larger data sources (bulk ES responses, large AI agent outputs).
+**Better space utilisation:** Approach 1b, node-wide shared LRU. Same
+simplification gains as 1a, plus idle space is reused by bursty executions. The
+right budget value (100 MB, 50 MB, 20 MB, 10 MB) is an empirical question —
+worth testing at production concurrency levels. The 5% skip threshold prevents
+large entries from polluting the cache and scales with the budget. The cost is
+cross-execution LRU interference and cleanup bookkeeping.
 
-The two are composable: build the LRU simplification first; add DuckDB projection
-as a drop-in replacement for the fetch-from-ES path when large-payload pressure
-demands it.
+The two are composable: build 1a first; migrate to 1b once concurrency numbers
+are known and the budget can be tuned empirically.
