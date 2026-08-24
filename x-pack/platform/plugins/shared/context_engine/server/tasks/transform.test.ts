@@ -308,4 +308,80 @@ describe('build', () => {
       'management'
     );
   });
+
+  describe('self-referential exclusion', () => {
+    const selfReferentialRow = (query: string, overrides: Partial<ExecuteToolSpan> = {}) =>
+      toolRow({
+        'attributes.gen_ai.tool.call.arguments': JSON.stringify({ query }),
+        ...overrides,
+      });
+
+    it.each([
+      'FROM context-engine-signals-* | WHERE tags == "empty_retrieval"',
+      'FROM context-engine-improvements | LIMIT 10',
+      'FROM traces-agent_builder.otel-default | LIMIT 10',
+      'FROM .contextengine-ai-indices | LIMIT 10',
+    ])('emits no signal for a read of the loop’s own indices: %s', (query) => {
+      const signals = build({
+        toolRows: [selfReferentialRow(query)],
+        convAgent: new Map([['trace-1', userAgent]]),
+      });
+
+      expect(signals).toHaveLength(0);
+    });
+
+    it('still emits signals for the non-self-referential queries in the same round', () => {
+      const signals = build({
+        toolRows: [
+          selfReferentialRow('FROM context-engine-signals-* | LIMIT 10', { span_id: 'span-1' }),
+          toolRow({ span_id: 'span-2' }),
+        ],
+        convAgent: new Map([['trace-1', userAgent]]),
+      });
+
+      expect(signals).toHaveLength(1);
+      expect(signals[0].signal_id).toBe('trace-1:span-2');
+    });
+
+    it('excludes self-referential spans from round context so they cannot fake a loop', () => {
+      const signals = build({
+        toolRows: [
+          selfReferentialRow('FROM context-engine-signals-* | LIMIT 10', { span_id: 'span-1' }),
+          selfReferentialRow('FROM traces-agent_builder.otel-default | LIMIT 10', {
+            span_id: 'span-2',
+          }),
+          toolRow({ span_id: 'span-3' }),
+        ],
+        convAgent: new Map([['trace-1', userAgent]]),
+      });
+
+      expect(signals).toHaveLength(1);
+      expect(signals[0].data.round_signals).toEqual({
+        esql_count: 1,
+        raw_query_count: 0,
+        ki_retrieval_count: 1,
+      });
+      expect(signals[0].data.looped).toBe(false);
+    });
+
+    it('excludes self-referential spans from the fallback determination', () => {
+      const signals = build({
+        toolRows: [
+          toolRow({
+            span_id: 'span-1',
+            'attributes.gen_ai.tool.call.arguments': JSON.stringify({
+              query: 'FROM ai-index-idx-foo | LIMIT 10',
+            }),
+          }),
+          selfReferentialRow('FROM context-engine-signals-default | LIMIT 10', {
+            span_id: 'span-2',
+          }),
+        ],
+        convAgent: new Map([['trace-1', userAgent]]),
+      });
+
+      expect(signals).toHaveLength(1);
+      expect(signals[0].data.fell_back_to_raw).toBe(false);
+    });
+  });
 });

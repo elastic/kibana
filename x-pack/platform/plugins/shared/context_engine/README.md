@@ -80,3 +80,23 @@ user against the current space's signals index):
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
 
+### Self-referential exclusion
+
+The feedback loop must not generate signals about itself. When the
+`analyze-and-improve` skill runs, it reads `context-engine-signals-*` and the
+Agent Builder traces indices through `execute_esql` — tool calls that would
+otherwise be traced, transformed into signals, and analyzed on the next pass,
+so that the loop's own reads become the dominant "evidence" in the store.
+
+`server/tasks/self_referential.ts` recognises reads of the loop's own
+observability surface — the `context-engine-` user namespace (signals,
+improvements), the `.contextengine-` system namespace (the AI index registry),
+and `traces-agent_builder.otel-*`. `build` in `server/tasks/transform.ts` drops
+those spans **before** round context is computed, so an analysis round neither
+emits signals nor inflates the `looped` / `fell_back_to_raw` counters of the
+round it shares a trace with.
+
+A bare `FROM *` is deliberately *not* treated as self-referential: it reads
+everything, so it is a genuine coverage signal rather than the loop observing
+itself.
+

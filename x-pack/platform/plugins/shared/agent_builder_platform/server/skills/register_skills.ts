@@ -13,6 +13,7 @@ import { skillManagementSkill } from './skill_management';
 import { connectorAuthoringSkill } from './connector_authoring';
 import { kiAutomationGenerationSkill } from './ki_automation_generation';
 import { kiRetrievalSkill } from './ki_retrieval';
+import { analyzeAndImproveSkill } from './analyze_and_improve';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -24,4 +25,5 @@ export const registerSkills = (
   agentBuilder.skills.register(connectorAuthoringSkill({ getActionsStart }));
   agentBuilder.skills.register(kiAutomationGenerationSkill);
   agentBuilder.skills.register(kiRetrievalSkill);
+  agentBuilder.skills.register(analyzeAndImproveSkill);
 };
