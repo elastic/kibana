@@ -306,6 +306,29 @@ describe('ConnectorsTab', () => {
     expect(screen.getByTestId('contextCreateConnectorFlyout')).toBeInTheDocument();
   });
 
+  it('invalidates connector queries when the flyout closes after save and test', () => {
+    const { getAddConnectorFlyout, queryClient } = renderConnectorsTab({ connectors: [] });
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+    fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
+
+    const flyoutProps = getAddConnectorFlyout.mock.calls.at(-1)?.[0];
+    act(() => {
+      flyoutProps?.onConnectorCreated?.(CREATED_CONNECTOR);
+      flyoutProps?.onTestConnector?.(CREATED_CONNECTOR);
+    });
+
+    invalidateQueries.mockClear();
+
+    act(() => {
+      flyoutProps?.onClose?.();
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'connectors', 'list'],
+    });
+  });
+
   it('passes flyout handlers for create, close, and save and test', () => {
     const { getAddConnectorFlyout } = renderConnectorsTab({ connectors: [] });
 

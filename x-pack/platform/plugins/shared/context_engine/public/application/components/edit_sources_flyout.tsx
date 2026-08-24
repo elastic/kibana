@@ -51,7 +51,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
-      size="m"
+      size="s"
       session="start"
       data-test-subj="contextEditSourcesFlyout"
     >

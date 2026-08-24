@@ -213,17 +213,23 @@ export const ConnectorsTab = ({
     [invalidateConnectorQueries, onToggle]
   );
 
+  const handleCloseCreateFlyout = useCallback(() => {
+    invalidateConnectorQueries();
+    closeCreateFlyout();
+  }, [closeCreateFlyout, invalidateConnectorQueries]);
+
   const createConnectorFlyout = useMemo(
     () =>
       isCreateFlyoutOpen
         ? triggersActionsUi.getAddConnectorFlyout({
             featureId: ContextEngineConnectorFeatureId,
-            onClose: closeCreateFlyout,
+            size: 'm',
+            onClose: handleCloseCreateFlyout,
             onConnectorCreated: handleConnectorCreated,
             onTestConnector: noop, // Required by CreateConnectorFlyout to render Save & test
           })
         : null,
-    [closeCreateFlyout, handleConnectorCreated, isCreateFlyoutOpen, triggersActionsUi]
+    [handleCloseCreateFlyout, handleConnectorCreated, isCreateFlyoutOpen, triggersActionsUi]
   );
 
   const createConnectorButton = canCreateConnector ? (
