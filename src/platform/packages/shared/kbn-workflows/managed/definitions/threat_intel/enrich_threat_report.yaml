@@ -172,22 +172,26 @@ steps:
         type: data.set
         with:
           relevance: "${{ steps.enrich_taxonomy.output.relevance | default: 0.5 }}"
-          detection_actionability: "{{ steps.enrich_taxonomy.output.detection_actionability | default: 'informational' }}"
           # False is Liquid-falsy, so `default:` covers both missing and explicit false.
           diamond_suitable: "${{ steps.enrich_taxonomy.output.diamond_suitable | default: false }}"
           # Sentinel so related-report `terms` never receives an empty array.
           technique_ids: "${{ '__no_techniques__' | split: ',' }}"
 
-      # Keep `pending` unless taxonomy and severity both returned usable output.
+      # Keep `pending` unless taxonomy and severity both succeeded.
+      # Probe step health via `.error`, not payload fields: every taxonomy
+      # field has a legitimate falsy value (relevance 0.0, diamond_suitable
+      # false, empty categories/regions). Both steps use on-failure continue,
+      # so a failure still reaches this gate with `.error` set. The enrich
+      # taxonomy route returns non-2xx when Zod validation fails.
       - name: mark_llm_enrich_complete
         type: data.set
-        if: "steps.classify_severity.output.level : * and steps.enrich_taxonomy.output.detection_actionability : *"
+        if: "${{ steps.classify_severity.error == null and steps.enrich_taxonomy.error == null }}"
         with:
           extraction_method: workflow_v2
 
       - name: mark_llm_enrich_incomplete
         type: data.set
-        if: "NOT steps.classify_severity.output.level : * OR NOT steps.enrich_taxonomy.output.detection_actionability : *"
+        if: "${{ steps.classify_severity.error != null or steps.enrich_taxonomy.error != null }}"
         with:
           extraction_method: pending
 
@@ -284,7 +288,6 @@ steps:
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               categories: "${{ steps.enrich_taxonomy.output.categories }}"
               relevance: "${{ variables.relevance }}"
-              detection_actionability: "{{ variables.detection_actionability }}"
               diamond:
                 suitable: "${{ variables.diamond_suitable }}"
               gate:

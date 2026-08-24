@@ -24,6 +24,10 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -175,6 +179,18 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
 import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
+import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
+import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
+import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
+import {
+  PROMOTE_THREAT_INDICATORS_TASK_ID,
+  registerPromoteThreatIndicatorsTask,
+  registerScrubReportContentTask,
+  schedulePromoteThreatIndicatorsTask,
+  scheduleScrubReportContentTask,
+  SCRUB_REPORT_CONTENT_TASK_ID,
+} from './threat_intel/tasks';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -218,6 +234,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private defendCpsEnabled = false;
   private platformCpsEnabled = false;
+
+  private threatIntelSpacesService: SpacesServiceStart | undefined;
+  private threatIntelInference: InferenceServerStart | undefined;
+  private threatIntelSearchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
+  private threatIntelTaskManager: TaskManagerStartContract | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -318,6 +339,138 @@ export class Plugin implements ISecuritySolutionPlugin {
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
+  }
+
+  /**
+   * Threat-intel supply pipeline setup. Gated on
+   * `threatIntelSupplyEnabled`. Does not install managed workflows (that
+   * lands in the follow-up PR that folds into the existing install-then-ready
+   * path).
+   */
+  private setupThreatIntel(
+    plugins: SecuritySolutionPluginSetupDependencies,
+    core: SecuritySolutionPluginCoreSetupDependencies
+  ): void {
+    const experimentalFeatures = this.config.experimentalFeatures;
+    if (!experimentalFeatures.threatIntelSupplyEnabled) {
+      this.logger.debug(
+        'Threat Intelligence supply not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelSupplyEnabled"]'
+      );
+      return;
+    }
+
+    registerThreatIntelInferenceFeatures(
+      plugins.searchInferenceEndpoints,
+      this.logger.get('threatIntel')
+    );
+
+    const router = core.http.createRouter();
+    registerThreatIntelRoutes({
+      router,
+      logger: this.logger.get('threatIntel'),
+      getSpacesService: () => this.threatIntelSpacesService,
+      getInference: () => this.threatIntelInference,
+      getSearchInferenceEndpoints: () => this.threatIntelSearchInferenceEndpoints,
+      getTaskManager: () => this.threatIntelTaskManager,
+    });
+    this.logger.info(
+      'Threat Intelligence supply routes registered (threatIntelSupplyEnabled is on)'
+    );
+
+    if (plugins.workflowsExtensions) {
+      registerThreatIntelWorkflowSteps({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger: this.logger.get('threatIntel'),
+        getActionsStart: async () => {
+          const [, startPlugins] = await core.getStartServices();
+          return startPlugins.actions;
+        },
+      });
+    } else {
+      this.logger.debug(
+        'workflowsExtensions plugin not available, skipping threat_intel.fetch_source registration'
+      );
+    }
+
+    // Bootstrap runs from `startThreatIntel`, not here — templates, migrations,
+    // and the seed check are the same work and running them twice per boot just
+    // doubles the template PUTs and mapping scans.
+
+    if (plugins.taskManager) {
+      registerPromoteThreatIndicatorsTask({
+        taskManager: plugins.taskManager,
+        coreSetup: core,
+        logger: this.logger.get('threatIntel', 'iocIndicatorSync'),
+      });
+      registerScrubReportContentTask({
+        taskManager: plugins.taskManager,
+        coreSetup: core,
+        logger: this.logger.get('threatIntel', 'contentRetention'),
+      });
+      this.logger.info(
+        'Threat Intelligence IOC indicator-sync and content-retention tasks registered (threatIntelSupplyEnabled is on)'
+      );
+    } else {
+      this.logger.warn(
+        'threatIntelSupplyEnabled is set but the optional `taskManager` plugin is not available, skipping promote task registration.'
+      );
+    }
+  }
+
+  /**
+   * Threat-intel supply pipeline start. Captures optional spaces /
+   * inference / actions / taskManager contracts, heals an empty catalog, and
+   * schedules the promote task. Does not install managed workflows.
+   */
+  private startThreatIntel(
+    plugins: SecuritySolutionPluginStartDependencies,
+    core: SecuritySolutionPluginCoreStartDependencies
+  ): void {
+    this.threatIntelSpacesService = plugins.spaces?.spacesService;
+    this.threatIntelInference = plugins.inference;
+    this.threatIntelSearchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.threatIntelTaskManager = plugins.taskManager;
+
+    if (!this.config.experimentalFeatures.threatIntelSupplyEnabled) {
+      // The task definition is only registered when the flag is on, so a task
+      // scheduled during an earlier flag-on boot would otherwise sit in the
+      // Task Manager index forever, un-runnable and invisible.
+      if (plugins.taskManager) {
+        for (const taskId of [PROMOTE_THREAT_INDICATORS_TASK_ID, SCRUB_REPORT_CONTENT_TASK_ID]) {
+          void plugins.taskManager.removeIfExists(taskId).catch((err: Error) => {
+            this.logger.warn(
+              `Failed to remove the orphaned threat intel task ${taskId}: ${err.message}`
+            );
+          });
+        }
+      }
+      return;
+    }
+
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const logger = this.logger.get('threatIntel');
+
+    void ensureThreatIntelBootstrap({ esClient, logger }).catch((err) => {
+      logger.error(`Failed to ensure threat intel bootstrap on start: ${(err as Error).message}`);
+    });
+
+    if (plugins.taskManager) {
+      void schedulePromoteThreatIndicatorsTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger.get('threatIntel', 'iocIndicatorSync'),
+      }).catch((err) => {
+        this.logger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
+      });
+
+      void scheduleScrubReportContentTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger.get('threatIntel', 'contentRetention'),
+      }).catch((err) => {
+        this.logger.error(
+          `Failed to schedule threat report content retention task: ${err.message}`
+        );
+      });
+    }
   }
 
   public setup(
@@ -846,6 +999,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
+    this.setupThreatIntel(plugins, core);
+
     setupAlertsCapabilitiesSwitcher({
       core,
       logger: this.logger,
@@ -884,6 +1039,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
       });
     }
+
+    this.startThreatIntel(plugins, core);
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
