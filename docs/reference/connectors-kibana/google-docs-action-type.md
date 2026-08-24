@@ -9,7 +9,7 @@ applies_to:
 
 # Google Docs connector [google-docs-action-type]
 
-The Google Docs connector enables reading and updating documents in Google Docs.
+The Google Docs connector enables reading documents as Markdown and applying batch updates. This connector is complementary to the [Google Drive connector](/reference/connectors-kibana/google-drive-action-type.md): use Drive to search or list files, then pass the document ID to the actions on this page.
 
 ## Create connectors in {{kib}} [define-google-docs-ui]
 
@@ -25,7 +25,7 @@ OAuth 2.0 authorization code
     - **Client ID** and **Client Secret**: from that OAuth client
     - **Redirect URI**: register {{kib}}'s OAuth callback in Google Cloud (see **Get API credentials**)
 
-    The connector automatically uses the correct Google OAuth endpoints and the required scopes.
+    The connector automatically uses the correct Google OAuth endpoints and the required scopes (`https://www.googleapis.com/auth/drive.readonly` and `https://www.googleapis.com/auth/documents`).
 
 ## Test connectors [google-docs-action-configuration]
 
@@ -63,7 +63,7 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
    - Select **Web Application**
    - The **Name** can be something like `Elastic` or `Kibana`
    - Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only —
-     for example `https://my-kibana.example.com`).
+     for example, `https://my-kibana.example.com`).
    - Under **Authorized redirect URIs**, add {{kib}}'s connector OAuth callback for your host. Copy the pattern below and
      substitute your public {{kib}} hostname:
      ```text
