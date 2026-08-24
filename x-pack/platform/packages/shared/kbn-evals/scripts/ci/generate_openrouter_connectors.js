@@ -198,7 +198,12 @@ async function generateOpenrouterConnectors({
         continue;
       }
       if (!supportsToolCalling(available.byId.get(modelId))) {
-        continue;
+        if (token === evalConnectorId) {
+          // Judges only need chat completions, not tool calling.
+          resolved.push(modelId);
+          continue;
+        }
+        throw new Error(`Requested model does not advertise tool calling: ${token}`);
       }
       resolved.push(modelId);
     }
