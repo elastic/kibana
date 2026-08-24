@@ -66,7 +66,6 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
 
-  // Only fetch live alert data when the attachment does not already carry rule info.
   const hasRuleIdFromMetadata = !isEmpty(ruleId);
   const idsToFetch = useMemo(
     () => (hasRuleIdFromMetadata ? [] : [alertId]),
@@ -74,15 +73,11 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   );
   const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
 
-  // hasRetried gates the single 300ms retry after a concurrent-race empty result.
-  // Using a ref so setting it doesn't trigger a re-render — we don't want the spinner
-  // to clear before the retry fetch starts.
+  // Ref so the retry gate doesn't cause a re-render when set.
   const hasRetried = useRef(false);
 
-  // useQueryAlerts (via useFetchAlertData) initialises refetch to null and only sets it
-  // after the first fetch attempt completes — see use_query.tsx. null therefore means
-  // "no fetch has run yet", which is distinct from "fetch returned empty results".
-  // This prevents a flash of "Unknown rule" on initial render (#284799).
+  // refetchAlertData is null until the first fetch completes (see use_query.tsx).
+  // null === "no fetch has run yet", which is distinct from "fetch returned empty".
   const firstFetchReturnedNoData =
     !hasRuleIdFromMetadata &&
     !loadingAlertData &&
@@ -90,17 +85,10 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     alertsData[alertId] == null &&
     !hasRetried.current;
 
-  // Schedule a single 300ms retry for the concurrent-race case (N components mounting
-  // simultaneously can overwhelm the data view and get empty results on the first round).
-  // Known limitation: if a parent re-render occurs between this effect setting
-  // hasRetried.current=true and the retry fetch setting loadingAlertData=true, the spinner
-  // will briefly drop. This window is 300ms and requires an external re-render trigger —
-  // acceptable given the improvement over the pre-fix "Unknown rule" staying permanently.
+  // Single 300ms retry for the concurrent-race case where N simultaneous mounts
+  // return empty on the first round. refetchAlertData != null narrows the type.
   useEffect(() => {
-    if (!firstFetchReturnedNoData) return;
-    // refetchAlertData !== null is guaranteed by firstFetchReturnedNoData above;
-    // the explicit check is required for TypeScript to narrow the type.
-    if (refetchAlertData == null) return;
+    if (!firstFetchReturnedNoData || refetchAlertData == null) return;
     hasRetried.current = true;
     const timer = setTimeout(refetchAlertData, 300);
     return () => clearTimeout(timer);
@@ -133,12 +121,6 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  // Show a spinner while:
-  // 1. the fetch is actively in progress,
-  // 2. we need a live fetch but none has completed yet (refetchAlertData is null before the
-  //    first fetch returns, covering both the pre-start and in-flight windows), OR
-  // 3. the first fetch returned no data — keep the spinner up while we're about to retry so
-  //    "Unknown rule" never flashes during the retry window (#284799).
   if (
     loadingAlertData ||
     (!hasRuleIdFromMetadata && refetchAlertData === null) ||
