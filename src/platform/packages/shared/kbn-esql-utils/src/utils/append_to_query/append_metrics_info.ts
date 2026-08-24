@@ -9,6 +9,9 @@
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
 import { hasTransformationalCommand, getLimitFromESQLQuery } from '../query_parsing_helpers';
+import { getSourceCommandFromESQLQuery } from '../get_index_pattern_from_query';
+import { appendToESQLQuery, buildJoinedFilter } from './utils';
+import { sanitazeESQLInput } from '../sanitaze_input';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
@@ -24,6 +27,10 @@ const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 export function buildMetricsInfoQuery(esql?: string, postFilter?: string): string {
   const trimmed = esql?.trim();
   if (!trimmed) {
+    return '';
+  }
+
+  if (getSourceCommandFromESQLQuery(trimmed) !== 'TS') {
     return '';
   }
 

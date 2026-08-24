@@ -16,9 +16,8 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('   ')).toBe('');
   });
 
-  it('appends | METRICS_INFO', () => {
-    expect(buildMetricsInfoQuery('FROM metrics-*')).toBe('FROM metrics-* | METRICS_INFO');
-    expect(buildMetricsInfoQuery('TS INDEX')).toBe('TS INDEX | METRICS_INFO');
+  it('appends | METRICS_INFO when no dimension filter', () => {
+    expect(buildMetricsInfoQuery('TS INDEX')).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
   it('returns query as-is when METRICS_INFO is already in the pipeline', () => {
@@ -53,41 +52,38 @@ describe('buildMetricsInfoQuery', () => {
 
   it('returns empty string for query with transformational command', () => {
     expect(buildMetricsInfoQuery('FROM x | STATS count()')).toBe('');
-    expect(buildMetricsInfoQuery('FROM x | STATS count()', 'foo == 1')).toBe('');
+    expect(buildMetricsInfoQuery('FROM x | STATS count()', ['a', 'b'])).toBe('');
+    expect(buildMetricsInfoQuery('TS x | STATS count()')).toBe('');
+  });
+
+  it('returns empty string for non-TS source command', () => {
+    expect(buildMetricsInfoQuery('FROM metrics-*')).toBe('');
+    expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100')).toBe('');
   });
 
   it('inserts METRICS_INFO before LIMIT when query has LIMIT', () => {
-    expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100')).toBe(
-      'FROM metrics-* | METRICS_INFO | LIMIT 100'
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(
+      `TS INDEX\n | METRICS_INFO | LIMIT 10`
     );
     expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe('TS INDEX | METRICS_INFO | LIMIT 10');
   });
 
   it('removes SORT from the query', () => {
-    expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100 | SORT timestamp DESC')).toBe(
-      'FROM metrics-* | METRICS_INFO | LIMIT 100'
+    expect(buildMetricsInfoQuery('TS metrics-* | LIMIT 100 | SORT timestamp DESC')).toBe(
+      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
     );
 
-    expect(buildMetricsInfoQuery('FROM metrics-* | SORT timestamp DESC | LIMIT 100 ')).toBe(
-      'FROM metrics-* | METRICS_INFO | LIMIT 100'
+    expect(buildMetricsInfoQuery('TS metrics-* | SORT timestamp DESC | LIMIT 100')).toBe(
+      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
     );
 
     expect(
       buildMetricsInfoQuery(
-        'FROM metrics-* | SORT timestamp DESC | LIMIT 100 | WHERE timestamp > now-1h',
-        'MV_CONTAINS(dimension_fields, "environment")'
+        'TS metrics-* | SORT timestamp DESC | LIMIT 100 | WHERE timestamp > now-1h',
+        ['environment', 'station.name']
       )
     ).toBe(
-      'FROM metrics-* | WHERE timestamp > now - 1h | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment") | LIMIT 100'
-    );
-  });
-
-  it('does not add a pre-METRICS_INFO presence filter', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | WHERE region == eu')).toBe(
-      'TS INDEX | WHERE region == eu | METRICS_INFO'
-    );
-    expect(buildMetricsInfoQuery('TS INDEX | WHERE region == eu', '')).toBe(
-      'TS INDEX | WHERE region == eu | METRICS_INFO'
+      `TS metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | LIMIT 100`
     );
   });
 });
