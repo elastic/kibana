@@ -521,10 +521,7 @@ export interface Conversation {
   read_only?: boolean;
   /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
   events?: TimelineEvent[];
-  /**
-   * Format version of the stored events projection. See `isEventsNativeVersion` in the
-   * conversation client converters for the gate.
-   */
+  /** Schema version of the stored events. */
   schema_version?: number;
 }
 

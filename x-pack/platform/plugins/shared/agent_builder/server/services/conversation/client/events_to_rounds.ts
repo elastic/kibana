@@ -18,7 +18,6 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-import { EXECUTION_ID_SUFFIX } from './rounds_to_events';
 
 /**
  * Reconstructs rounds from a timeline.
@@ -74,8 +73,8 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
  * conversion round-trips, otherwise fall back to the execution id.
  */
 const roundIdFromExecutionId = (executionId: string): string =>
-  executionId.endsWith(EXECUTION_ID_SUFFIX)
-    ? executionId.slice(0, -EXECUTION_ID_SUFFIX.length)
+  executionId.endsWith(ROUND_DERIVED_EVENT_ID_SUFFIXES.execution)
+    ? executionId.slice(0, -ROUND_DERIVED_EVENT_ID_SUFFIXES.execution.length)
     : executionId;
 
 const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;

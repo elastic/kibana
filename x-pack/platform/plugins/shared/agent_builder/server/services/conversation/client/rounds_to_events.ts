@@ -27,10 +27,8 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   userMessage: '::user_message',
   executionStarted: '::execution_started',
   executionTerminated: '::execution_terminated',
+  execution: '::execution',
 } as const;
-
-/** Suffix appended to a round id to form its execution id (`${roundId}::execution`). */
-export const EXECUTION_ID_SUFFIX = '::execution';
 
 const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = Object.values(
   ROUND_DERIVED_EVENT_ID_SUFFIXES
@@ -47,7 +45,7 @@ const roundDerivedEventIds = (roundId: string) => ({
   userMessage: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
   executionStarted: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
   executionTerminated: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`,
-  execution: `${roundId}${EXECUTION_ID_SUFFIX}`,
+  execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
 });
 
 /**

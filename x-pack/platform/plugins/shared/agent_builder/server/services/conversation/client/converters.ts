@@ -69,7 +69,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
 };
 
 export const isEventsNativeVersion = (v: number | undefined): v is number =>
-  typeof v === 'number' && v >= 1;
+  typeof v === 'number' && v >= CONVERSATION_SCHEMA_VERSION;
 
 /**
  * Rebuilds the stored timeline on write: round events keep their order, and additive events
