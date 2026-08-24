@@ -44,7 +44,11 @@ describe('AlertEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, hasAlertsAll: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+      loading: false,
+      hasAlertsRead: true,
+      hasAlertsAll: true,
+    });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });
@@ -122,9 +126,30 @@ describe('AlertEvent', () => {
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
   });
 
+  describe('while alert privileges are loading', () => {
+    it('shows spinner instead of "Unknown rule" when privileges have not resolved yet', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({
+        loading: true,
+        hasAlertsRead: false,
+        hasAlertsAll: false,
+      });
+      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+
+      const { container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+      expect(screen.queryByText('Unknown rule')).not.toBeInTheDocument();
+    });
+  });
+
   describe('when the user cannot read alerts', () => {
     it('shows "Unknown rule" instead of an infinite spinner when the fetch is permanently skipped', () => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({
+        loading: false,
         hasAlertsRead: false,
         hasAlertsAll: false,
       });

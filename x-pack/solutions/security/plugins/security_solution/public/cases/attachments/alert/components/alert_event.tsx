@@ -63,7 +63,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
       rules: { read: canReadRules },
     },
   } = useUserPrivileges();
-  const { hasAlertsRead } = useAlertsPrivileges();
+  const { loading: loadingPrivileges, hasAlertsRead } = useAlertsPrivileges();
 
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
@@ -128,9 +128,11 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
   // refetchAlertData stays null permanently when hasAlertsRead=false (query is skipped).
-  // Guard with hasAlertsRead so users without alert access reach the fallback label.
+  // Also guard on loadingPrivileges: hasAlertsRead defaults to false while loading,
+  // so without this guard authorized users briefly see "Unknown rule" before privileges resolve.
   if (
     loadingAlertData ||
+    loadingPrivileges ||
     (!hasRuleIdFromMetadata && hasAlertsRead && refetchAlertData === null) ||
     firstFetchReturnedNoData
   ) {
