@@ -166,6 +166,41 @@ describe('conversation model converters', () => {
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
 
+    it('seeds read_by for a legacy owner-read document', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(true);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner read_by for a legacy read document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit read_by instead of overwriting it from the legacy read flag', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+      serialized._source.read_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
     it('deserializes the conversation with legacy rounds field', () => {
       const serialized = documentBase();
       // @ts-ignore simulating legacy document

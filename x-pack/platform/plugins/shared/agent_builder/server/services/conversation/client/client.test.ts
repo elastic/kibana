@@ -80,6 +80,7 @@ describe('ConversationClient', () => {
     workspaceId,
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
+    hasReadBy = true,
     schemaVersion,
     events,
   }: {
@@ -98,6 +99,7 @@ describe('ConversationClient', () => {
     workspaceId?: string;
     read?: boolean;
     readBy?: Array<{ userId: string }>;
+    hasReadBy?: boolean;
     schemaVersion?: number;
     events?: TimelineEvent[];
   } = {}): Document =>
@@ -113,7 +115,7 @@ describe('ConversationClient', () => {
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         read,
-        ...(readBy ? { read_by: readBy } : {}),
+        ...(hasReadBy ? { read_by: readBy } : {}),
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -651,6 +653,23 @@ describe('ConversationClient', () => {
       );
       expectNoReadBy(result);
       expect(result.title).toBe('Renamed');
+    });
+
+    it('preserves legacy owner read state when renaming before read_by exists', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ read: true, hasReadBy: false })] },
+      });
+
+      const result = await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.read).toBeUndefined();
+      expect(document.read_by).toEqual([{ userId: 'user-1' }]);
+      expectNoReadBy(result);
+      expect(result.read).toBe(true);
     });
 
     it('denies rename access to a public non-owner conversation', async () => {
