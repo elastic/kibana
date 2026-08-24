@@ -6,14 +6,25 @@
   ],
   "tests": [
     {
+      "id": "180c2ab7059d4dc-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
+    {
       "id": "00326eb69e240b4-744ce32675c025c",
       "title": "Setup environment for streams tests",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
+        "line": 10,
+        "column": 16
       }
     },
     {
@@ -28,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 110,
-        "column": 41
+        "line": 125,
+        "column": 9
       }
     },
     {
@@ -44,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 116,
-        "column": 7
+        "line": 140,
+        "column": 9
       }
     },
     {
@@ -60,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 132,
-        "column": 7
+        "line": 159,
+        "column": 9
       }
     },
     {
@@ -76,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 173,
+        "column": 9
       }
     },
     {
@@ -92,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 155,
-        "column": 25
+        "line": 191,
+        "column": 9
       }
     },
     {
@@ -108,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 182,
-        "column": 25
+        "line": 224,
+        "column": 9
       }
     },
     {
@@ -124,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 201,
-        "column": 7
+        "line": 247,
+        "column": 9
       }
     },
     {
@@ -140,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 209,
-        "column": 25
+        "line": 259,
+        "column": 9
       }
     },
     {
@@ -156,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 230,
-        "column": 7
+        "line": 283,
+        "column": 9
       }
     },
     {
@@ -172,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 240,
-        "column": 24
+        "line": 297,
+        "column": 9
       }
     },
     {
@@ -188,19 +199,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 251,
-        "column": 13
-      }
-    },
-    {
-      "id": "180c2ab7059d4dc-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
+        "line": 310,
+        "column": 9
       }
     }
   ]
