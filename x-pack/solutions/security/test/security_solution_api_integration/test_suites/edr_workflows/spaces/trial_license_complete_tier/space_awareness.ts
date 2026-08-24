@@ -25,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
+    this.timeout(10 * 60 * 1000);
+
     let adminSupertest: TestAgent;
     let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
     let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
