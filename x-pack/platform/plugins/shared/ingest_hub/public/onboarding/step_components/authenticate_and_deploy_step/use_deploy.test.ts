@@ -9,16 +9,15 @@ import { renderHook, act } from '@testing-library/react';
 
 import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
 import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
-import type { AwsServiceMatrixEntry, ServiceVarDef } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 function makeVarDef(
   name: string,
   type: RegistryVarsEntry['type'],
-  opts: Partial<RegistryVarsEntry & { inputs: string[] }> = {}
-): ServiceVarDef {
-  const { inputs = [], ...rest } = opts;
-  return { def: { name, type, title: name, ...rest } as RegistryVarsEntry, inputs };
+  opts: Partial<RegistryVarsEntry> = {}
+): RegistryVarsEntry {
+  return { name, type, title: name, ...opts } as RegistryVarsEntry;
 }
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -145,6 +144,7 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     requiredConfig: ['region'],
     identityFederationSupported: true,
     defaultEnabled: false,
+    defaultEnabledInputs: [],
     showInUI: true,
     ...overrides,
   };
@@ -184,24 +184,33 @@ describe('getRegionFieldName', () => {
 describe('buildStreamVars', () => {
   it('passes through non-boolean vars as strings', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: { foo: 'bar' } }, '');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { foo: 'bar' } } },
+      '',
+      'aws-s3'
+    );
     expect(vars.foo).toBe('bar');
   });
 
   it('coerces boolean var names to boolean type', () => {
     const service = makeService({
       requiredConfig: ['region'],
-      varDefs: {
-        preserve_original_event: makeVarDef('preserve_original_event', 'bool', {
-          inputs: ['aws-s3', 'aws-cloudwatch'],
-        }),
-        collect_s3_logs: makeVarDef('collect_s3_logs', 'bool', { inputs: ['aws-s3'] }),
+      varDefsByInput: {
+        'aws-s3': {
+          preserve_original_event: makeVarDef('preserve_original_event', 'bool'),
+          collect_s3_logs: makeVarDef('collect_s3_logs', 'bool'),
+        },
       },
     });
     const vars = buildStreamVars(
       service,
-      { trigger: 'aws-s3', vars: { preserve_original_event: 'true', collect_s3_logs: 'false' } },
-      ''
+      {
+        enabledInputs: ['aws-s3'],
+        varsByInput: { 'aws-s3': { preserve_original_event: 'true', collect_s3_logs: 'false' } },
+      },
+      '',
+      'aws-s3'
     );
     expect(vars.preserve_original_event).toBe(true);
     expect(vars.collect_s3_logs).toBe(false);
@@ -209,7 +218,12 @@ describe('buildStreamVars', () => {
 
   it('falls back to globalRegion for single-region field when var is absent', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars.region).toBe('us-east-1');
   });
 
@@ -217,15 +231,21 @@ describe('buildStreamVars', () => {
     const service = makeService({ requiredConfig: ['region'] });
     const vars = buildStreamVars(
       service,
-      { trigger: 'aws-s3', vars: { region: 'eu-west-1' } },
-      'us-east-1'
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { region: 'eu-west-1' } } },
+      'us-east-1',
+      'aws-s3'
     );
     expect(vars.region).toBe('eu-west-1');
   });
 
   it('does not emit regions when not explicitly set (optional field, package default applies)', () => {
     const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('regions');
   });
 
@@ -233,27 +253,38 @@ describe('buildStreamVars', () => {
     const service = makeService({
       requiredConfig: [],
       optionalConfig: ['regions'],
-      varDefs: {
-        regions: makeVarDef('regions', 'text', { multi: true, inputs: [] }),
+      varDefsByInput: {
+        'aws-s3': { regions: makeVarDef('regions', 'text', { multi: true }) },
       },
     });
     const vars = buildStreamVars(
       service,
-      { trigger: null, vars: { regions: 'us-east-1,eu-west-1' } },
-      'ap-southeast-1'
+      { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { regions: 'us-east-1,eu-west-1' } } },
+      'ap-southeast-1',
+      'aws-s3'
     );
     expect(vars.regions).toEqual(['us-east-1', 'eu-west-1']);
   });
 
   it('does not emit regions when optionalConfig is absent', () => {
     const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('regions');
   });
 
   it('does not emit metrics when not stored in vars', () => {
     const service = makeService({ requiredConfig: [], optionalConfig: ['regions', 'metrics'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
     expect(vars).not.toHaveProperty('metrics');
   });
 });
@@ -270,7 +301,7 @@ describe('buildPackageInputs', () => {
     });
     const inputs = buildPackageInputs(
       [service],
-      { ec2_logs: { trigger: 'aws-s3', vars: {} } },
+      { ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
       'us-east-1'
     );
 
@@ -282,7 +313,11 @@ describe('buildPackageInputs', () => {
 
   it('uses bare inputType as key when no policyTemplate is set', () => {
     const service = makeService({ id: 'ec2_logs', inputs: ['aws-s3'], policyTemplate: undefined });
-    const inputs = buildPackageInputs([service], { ec2_logs: { trigger: 'aws-s3', vars: {} } }, '');
+    const inputs = buildPackageInputs(
+      [service],
+      { ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} } },
+      ''
+    );
     expect(inputs['aws-s3']).toBeDefined();
   });
 
@@ -294,7 +329,7 @@ describe('buildPackageInputs', () => {
     });
     const inputs = buildPackageInputs(
       [service],
-      { ec2_metrics: { trigger: null, vars: {} } },
+      { ec2_metrics: { enabledInputs: [], varsByInput: {} } },
       'us-west-2'
     );
     expect(inputs['ec2-aws/metrics']).toBeDefined();
@@ -307,8 +342,8 @@ describe('buildPackageInputs', () => {
     const inputs = buildPackageInputs(
       [service1, service2],
       {
-        ec2_logs: { trigger: 'aws-s3', vars: {} },
-        emr_logs: { trigger: 'aws-s3', vars: {} },
+        ec2_logs: { enabledInputs: ['aws-s3'], varsByInput: {} },
+        emr_logs: { enabledInputs: ['aws-s3'], varsByInput: {} },
       },
       ''
     );
@@ -317,7 +352,7 @@ describe('buildPackageInputs', () => {
     expect(inputs['emr-aws-s3'].streams['aws.emr_logs']).toBeDefined();
   });
 
-  it('falls back to first input type from service when serviceVars has no trigger', () => {
+  it('falls back to first input type from service when enabledInputs is empty', () => {
     const service = makeService({
       id: 'ec2_logs',
       policyTemplate: 'ec2',
@@ -327,7 +362,7 @@ describe('buildPackageInputs', () => {
     expect(inputs['ec2-aws-cloudwatch']).toBeDefined();
   });
 
-  it('defaults to aws-s3 when service has multiple inputs and no trigger is set', () => {
+  it('uses the first manifest input as default when no enabledInputs is set', () => {
     const service = makeService({
       id: 'cloudtrail',
       policyTemplate: 'cloudtrail',
@@ -338,9 +373,28 @@ describe('buildPackageInputs', () => {
     expect(inputs['cloudtrail-aws-cloudwatch']).toBeUndefined();
   });
 
+  it('builds both inputs when two are enabled', () => {
+    const service = makeService({
+      id: 'guardduty',
+      policyTemplate: 'guardduty',
+      inputs: ['httpjson', 'aws-s3'],
+    });
+    const inputs = buildPackageInputs(
+      [service],
+      { guardduty: { enabledInputs: ['httpjson', 'aws-s3'], varsByInput: {} } },
+      ''
+    );
+    expect(inputs['guardduty-httpjson']).toBeDefined();
+    expect(inputs['guardduty-aws-s3']).toBeDefined();
+  });
+
   it('skips services with no resolvable input type', () => {
     const service = makeService({ id: 'no_input', inputs: [] });
-    const inputs = buildPackageInputs([service], { no_input: { trigger: null, vars: {} } }, '');
+    const inputs = buildPackageInputs(
+      [service],
+      { no_input: { enabledInputs: [], varsByInput: {} } },
+      ''
+    );
     expect(Object.keys(inputs)).toHaveLength(0);
   });
 });
