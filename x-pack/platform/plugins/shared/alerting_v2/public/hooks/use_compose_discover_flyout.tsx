@@ -49,6 +49,8 @@ export const useComposeDiscoverFlyout = ({
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
@@ -77,12 +79,26 @@ export const useComposeDiscoverFlyout = ({
       dataViews,
       notifications,
       application,
+      uiSettings,
+      featureFlags,
       lens,
       uiActions,
       dashboard,
       cps,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions, dashboard, cps]
+    [
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      uiSettings,
+      featureFlags,
+      lens,
+      uiActions,
+      dashboard,
+      cps,
+    ]
   );
 
   const closeFlyout = useCallback(() => {
@@ -192,19 +208,22 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(payload, {
-          onSuccess: (rule) => {
-            const actions = ruleNotifications?.workflows ?? [];
-            if (actions.length > 0) {
-              setupNotificationsMutation.mutate(
-                { rule, actions },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            } else {
-              closeAndRedirect();
-            }
-          },
-        })
+        createRuleMutation.mutate(
+          { payload },
+          {
+            onSuccess: (rule) => {
+              const actions = ruleNotifications?.workflows ?? [];
+              if (actions.length > 0) {
+                setupNotificationsMutation.mutate(
+                  { rule, actions },
+                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+                );
+              } else {
+                closeAndRedirect();
+              }
+            },
+          }
+        )
       }
       onUpdateRule={(id, payload, ruleNotifications) =>
         updateRuleMutation.mutate(

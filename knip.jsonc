@@ -37,9 +37,6 @@
     "mocha-multi-reporters",
     "mochawesome",
     "mochawesome-merge",
-    // nyc is invoked from shell scripts (.buildkite/scripts/steps/code_coverage/)
-    // and osquery's package.json scripts; knip can't trace shell usage.
-    "nyc",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint",
@@ -81,14 +78,7 @@
         "config": [
           "packages/kbn-babel-preset/common_preset.js",
           "packages/kbn-babel-preset/webpack_preset.js",
-          "packages/kbn-babel-preset/node_preset.js",
-          "packages/kbn-babel-preset/istanbul_preset.js"
-        ]
-      },
-      "nyc": {
-        "config": [
-          "src/dev/code_coverage/nyc_config/nyc.jest.config.js",
-          "x-pack/platform/plugins/shared/osquery/.nycrc"
+          "packages/kbn-babel-preset/node_preset.js"
         ]
       },
       "webpack": {
