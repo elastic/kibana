@@ -77,9 +77,7 @@ async function advertiseDockerFleetServerHost(kbnClient: KbnClient): Promise<voi
     method: 'GET',
     path: '/api/fleet/fleet_server_hosts',
   });
-  const alreadyAdvertised = data.items.some((item) =>
-    item.host_urls?.includes(AGENT_FLEET_URL)
-  );
+  const alreadyAdvertised = data.items.some((item) => item.host_urls?.includes(AGENT_FLEET_URL));
   if (alreadyAdvertised) {
     return;
   }
