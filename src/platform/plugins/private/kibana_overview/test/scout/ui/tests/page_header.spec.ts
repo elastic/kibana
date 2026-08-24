@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, tags } from '@kbn/scout';
+import { test, tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+
+const clickPageHeaderAction = async (page: ScoutPage, testSubj: string) => {
+  const action = page.testSubj.locator(testSubj);
+  if (!(await action.isVisible())) {
+    await page.testSubj.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+  }
+  await action.click();
+};
 
 test.describe('Kibana Overview - Page Header', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -24,21 +33,21 @@ test.describe('Kibana Overview - Page Header', { tag: tags.stateful.classic }, (
   test('click on integrations leads to integrations', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('kibana_overview');
-    await page.testSubj.click('homeAddData');
+    await clickPageHeaderAction(page, APP_HEADER_TEST_SUBJECTS.menuAddIntegrations);
     await expect(page).toHaveURL(/app\/integrations\/browse/);
   });
 
   test('click on management leads to management', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('kibana_overview');
-    await page.testSubj.click('homeManage');
+    await clickPageHeaderAction(page, 'homeManage');
     await expect(page).toHaveURL(/app\/management/);
   });
 
   test('click on dev tools leads to dev tools', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('kibana_overview');
-    await page.testSubj.click('homeDevTools');
+    await clickPageHeaderAction(page, 'homeDevTools');
     await expect(page).toHaveURL(/app\/dev_tools/);
   });
 });
