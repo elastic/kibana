@@ -263,10 +263,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
           /* webpackChunkName: "alerting_v2_alert_attachment" */
           './agent_builder/attachments/alert_attachment_definition'
         ).then(
-          ({
-            createAlertAttachmentDefinition,
-            ALERT_ATTACHMENT_TYPE: alertAttachmentType,
-          }) => {
+          ({ createAlertAttachmentDefinition, ALERT_ATTACHMENT_TYPE: alertAttachmentType }) => {
             agentBuilder.attachments.addAttachmentType(
               alertAttachmentType,
               createAlertAttachmentDefinition()

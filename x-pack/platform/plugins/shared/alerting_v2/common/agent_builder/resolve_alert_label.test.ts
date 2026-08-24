@@ -98,9 +98,7 @@ describe('resolveAlertLabel', () => {
 
   it('falls back to rule ID when no rule name or grouping values are available', () => {
     expect(resolveAlertLabel({ episode: baseEpisode })).toBe('Alert for rule rule-1');
-    expect(resolveAlertLabel({ episode: baseEpisode, ruleName: '' })).toBe(
-      'Alert for rule rule-1'
-    );
+    expect(resolveAlertLabel({ episode: baseEpisode, ruleName: '' })).toBe('Alert for rule rule-1');
   });
 
   it('falls back to rule ID for malformed episode_data', () => {

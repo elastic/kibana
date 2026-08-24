@@ -270,16 +270,13 @@ describe('createAlertAttachmentType', () => {
 
       expect(result).toBeUndefined();
       expect(getEpisode).not.toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Unauthorized to resolve episode attachment',
-        {
-          labels: {
-            attachment_type: ALERT_ATTACHMENT_TYPE,
-            episode_id: 'ep-1',
-            space_id: SPACE_ID,
-          },
-        }
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
+        labels: {
+          attachment_type: ALERT_ATTACHMENT_TYPE,
+          episode_id: 'ep-1',
+          space_id: SPACE_ID,
+        },
+      });
     });
 
     it('resolves episode data when user has Alerts: Read', async () => {
