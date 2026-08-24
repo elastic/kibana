@@ -291,6 +291,7 @@ export {
   isRelevantSkillsStep,
   type ConversationListOptions,
   CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
