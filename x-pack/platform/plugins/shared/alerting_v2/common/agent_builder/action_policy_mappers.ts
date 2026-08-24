@@ -19,8 +19,8 @@ export const attachmentDataToActionPolicyPayload = (
   description: data.description ?? '',
   destinations: data.destinations ?? [],
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
-  ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
+  ...(data.group_by !== undefined ? { group_by: data.group_by ?? undefined } : {}),
   ...(data.tags !== undefined ? { tags: data.tags ?? undefined } : {}),
-  ...(data.groupingMode !== undefined ? { groupingMode: data.groupingMode ?? undefined } : {}),
+  ...(data.grouping_mode !== undefined ? { grouping_mode: data.grouping_mode ?? undefined } : {}),
   ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
 });

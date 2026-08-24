@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, type ReactNode } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React, { type ReactNode } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CcrApiError } from '../services/http_error';
 import { getErrorBody, isHttpFetchError } from '../services/http_error';
 
@@ -59,20 +59,16 @@ export function SectionError({ title, error, ...rest }: Props) {
   const rootCauses = getRootCauses();
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
-      <div>{message || errorString}</div>
+    <KbnDangerCallout title={title} text={message || errorString} {...rest}>
       {rootCauses && (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <ul>
-            {rootCauses.map(({ type, reason }, i) => (
-              <li key={i}>
-                {type}: {reason}
-              </li>
-            ))}
-          </ul>
-        </Fragment>
+        <ul>
+          {rootCauses.map(({ type, reason }, i) => (
+            <li key={i}>
+              {type}: {reason}
+            </li>
+          ))}
+        </ul>
       )}
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 }
