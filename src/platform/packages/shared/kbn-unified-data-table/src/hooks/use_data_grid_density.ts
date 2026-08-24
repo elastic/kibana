@@ -56,17 +56,8 @@ export const getDataGridDensityPadding = (euiTheme: EuiThemeComputed, density: D
 const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';
 const getStorageKey = (consumer: string) => `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
 
-// Returns the density stored in local storage, or `undefined` when the user has not chosen one.
-export const getStoredDataGridDensity = (
-  storage: Storage,
-  consumer: string
-): DataGridDensity | undefined => {
-  const stored = storage.get(getStorageKey(consumer));
-  return Object.values(DataGridDensity).includes(stored) ? stored : undefined;
-};
-
 export const getDataGridDensity = (storage: Storage, consumer: string): DataGridDensity => {
-  return getStoredDataGridDensity(storage, consumer) ?? DataGridDensity.COMPACT;
+  return storage.get(getStorageKey(consumer)) ?? DataGridDensity.COMPACT;
 };
 
 export const useDataGridDensity = ({

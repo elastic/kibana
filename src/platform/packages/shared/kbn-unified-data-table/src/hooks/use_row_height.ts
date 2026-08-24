@@ -88,27 +88,6 @@ export const getRowHeight = ({
   });
 };
 
-/**
- *  Returns the row height line count stored in local storage, or `undefined` when the user has not
- *  chosen one.
- */
-export const getStoredRowHeightLines = ({
-  storage,
-  consumer,
-  key = ROW_HEIGHT_STORAGE_KEY,
-  configRowHeight,
-}: {
-  storage: Storage;
-  consumer: string;
-  key?: string;
-  configRowHeight: number;
-}): number | undefined => {
-  const record = getStoredRowHeight(storage, consumer, key);
-  return record && record.previousConfigRowHeight === configRowHeight
-    ? record.previousRowHeight
-    : undefined;
-};
-
 export const useRowHeight = ({
   type,
   storage,

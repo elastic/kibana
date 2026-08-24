@@ -9,7 +9,7 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react';
-import { getStoredDataGridDensity, useDataGridDensity } from './use_data_grid_density';
+import { useDataGridDensity } from './use_data_grid_density';
 import { DATA_GRID_STYLE_EXPANDED, DataGridDensity } from '../constants';
 
 const localStorageMock = {
@@ -86,26 +86,5 @@ describe('useDataGridDensity', () => {
     onChangeDataGridDensity(DATA_GRID_STYLE_EXPANDED);
 
     expect(onUpdateDataGridDensity).toBeCalledWith(DataGridDensity.EXPANDED);
-  });
-});
-
-describe('getStoredDataGridDensity', () => {
-  const storage = localStorageMock as unknown as Storage;
-
-  beforeEach(() => localStorageMock.get.mockReset());
-
-  it('returns the stored density', () => {
-    localStorageMock.get.mockReturnValue(DataGridDensity.EXPANDED);
-    expect(getStoredDataGridDensity(storage, 'discover')).toBe(DataGridDensity.EXPANDED);
-  });
-
-  it('returns undefined when nothing is stored', () => {
-    localStorageMock.get.mockReturnValue(undefined);
-    expect(getStoredDataGridDensity(storage, 'discover')).toBeUndefined();
-  });
-
-  it('returns undefined for an invalid stored value', () => {
-    localStorageMock.get.mockReturnValue('nonsense');
-    expect(getStoredDataGridDensity(storage, 'discover')).toBeUndefined();
   });
 });

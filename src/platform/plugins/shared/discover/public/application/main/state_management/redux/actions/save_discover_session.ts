@@ -18,12 +18,6 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import {
-  getStoredDataGridDensity,
-  getStoredJsonModeSettings,
-  getStoredRowHeightLines,
-} from '@kbn/unified-data-table';
-import { ROW_HEIGHT_OPTION } from '@kbn/discover-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -82,27 +76,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             services,
           })
         );
-
-        // Display settings can still be coming from local storage on a fresh tab (not yet written to
-        // the tab's app state). Pin the value the user actually chose so the saved panel/session
-        // keeps what the user sees instead of following the viewer's local storage default later on.
-        // Only values present in local storage are pinned; unset settings keep following the config.
-        updatedTab.density =
-          updatedTab.density ?? getStoredDataGridDensity(services.storage, 'discover');
-        updatedTab.rowHeight =
-          updatedTab.rowHeight ??
-          getStoredRowHeightLines({
-            storage: services.storage,
-            consumer: 'discover',
-            configRowHeight: services.uiSettings.get(ROW_HEIGHT_OPTION),
-          });
-
-        if (services.discoverFeatureFlags.getDataTableJsonViewEnabled()) {
-          // `sourceDisplayMode` is intentionally not pinned from local storage here: getInitialAppState
-          // already seeds it into a new tab's app state.
-          updatedTab.jsonModeSettings =
-            updatedTab.jsonModeSettings ?? getStoredJsonModeSettings(services.storage, 'discover');
-        }
 
         // For non-initialized tabs, assign the current time range of the selected tab
         // if time restore is enabled and no time range was set yet for this tab
