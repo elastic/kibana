@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
@@ -22,11 +23,16 @@ import {
   generateGroupingModesDoc,
   generateThrottleStrategiesDoc,
   generateThrottleGroupingCompatibilityDoc,
+  generateMatcherContextDoc,
   getSeverityValues,
   getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
   generateNotificationsOverviewDoc,
+  generateWorkflowDestinationsDoc,
+  generateDispatchFlowDoc,
+  generateSingleRuleActionPolicyDoc,
+  generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
 /**
@@ -471,17 +477,121 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateGroupingModesDoc()).toMatchSnapshot();
     });
+
+    it('is a standalone reference that links to throttle compatibility', () => {
+      const doc = generateGroupingModesDoc();
+      expect(doc).toContain('# Grouping Modes');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
   });
 
   describe('generateThrottleStrategiesDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
     });
+
+    it('links to the dedicated compatibility reference', () => {
+      const doc = generateThrottleStrategiesDoc();
+      expect(doc).toContain('# Throttle Strategies');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
+  });
+
+  describe('generateMatcherContextDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMatcherContextDoc()).toMatchSnapshot();
+    });
+
+    it('documents every MATCHER_CONTEXT_FIELDS path', () => {
+      const doc = generateMatcherContextDoc();
+      for (const field of MATCHER_CONTEXT_FIELDS) {
+        expect(doc).toContain(`\`${field.path}\``);
+      }
+    });
+
+    it('enriches episode_status and severity with schema enum values', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('`active`');
+      expect(doc).toContain('`critical`');
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
+    });
+
+    it('documents every grouping mode from the schema, then lists caveats', () => {
+      const doc = generateThrottleGroupingCompatibilityDoc();
+      expect(doc).toContain('# Throttle / Grouping Compatibility');
+      expect(doc).toContain('Caveats:');
+      expect(doc).toContain('set_grouping');
+      expect(doc).toContain('set_throttle');
+
+      for (const { value } of getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')) {
+        expect(doc).toContain(`- \`${value}\`:`);
+      }
+    });
+  });
+
+  describe('generateWorkflowDestinationsDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateWorkflowDestinationsDoc()).toMatchSnapshot();
+    });
+
+    it('requires manual triggers and workflow IDs rather than connector IDs', () => {
+      const doc = generateWorkflowDestinationsDoc();
+      expect(doc).toContain('# Workflows');
+      expect(doc).toContain('workflow IDs');
+      expect(doc).toContain('triggers: - type: manual');
+      expect(doc).toContain('workflow-authoring');
+    });
+  });
+
+  describe('generateDispatchFlowDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateDispatchFlowDoc()).toMatchSnapshot();
+    });
+
+    it('covers matcher, grouping, throttle, and workflow dispatch', () => {
+      const doc = generateDispatchFlowDoc();
+      expect(doc).toContain('# Dispatch Flow');
+      expect(doc).toContain('Matcher evaluation');
+      expect(doc).toContain('scheduleWorkflow');
+      expect(doc).toContain("type == 'alert'");
+    });
+  });
+
+  describe('generateSingleRuleActionPolicyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
+    });
+
+    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+      expect(doc).toContain('# Single-rule Action Policies');
+      expect(doc).toContain('set_metadata');
+      expect(doc).toContain('set_destinations');
+      expect(doc).toContain('rule.id:');
+      expect(doc).toContain('kind: signal');
+      expect(doc).toContain('(./action-policy-multi-rule.md)');
+      expect(doc).not.toContain('./references/');
+    });
+  });
+
+  describe('generateMultiRuleActionPolicyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMultiRuleActionPolicyDoc()).toMatchSnapshot();
+    });
+
+    it('covers catch-all, tag, and severity matchers and links siblings without a ./references/ prefix', () => {
+      const doc = generateMultiRuleActionPolicyDoc();
+      expect(doc).toContain('# Multi-rule Action Policies');
+      expect(doc).toContain('Catch-all');
+      expect(doc).toContain('rule.tags');
+      expect(doc).toContain('(./action-policy-matchers.md)');
+      expect(doc).toContain('(./action-policy-single-rule.md)');
+      expect(doc).not.toContain('./references/');
     });
   });
 
@@ -523,6 +633,18 @@ describe('schema_to_skill_docs', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
     });
+
+    it('adds data-field notes and an example without a separate Liquid cookbook', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('### `data`');
+      expect(doc).toContain('ep.data.host.name');
+      expect(doc).toContain('| LIMIT 0');
+      expect(doc).toContain('## Example');
+      expect(doc).toContain('```yaml');
+      expect(doc).toContain('inputs.payload.rules[ep.rule_id].name');
+      expect(doc).not.toContain('## Liquid Templates');
+      expect(doc).not.toContain('./references/');
+    });
   });
 
   describe('Alerting v2 agent builder start contract', () => {
@@ -536,6 +658,10 @@ describe('schema_to_skill_docs', () => {
       ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
       ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
+      ['generateWorkflowDestinationsDoc', generateWorkflowDestinationsDoc],
+      ['generateDispatchFlowDoc', generateDispatchFlowDoc],
+      ['generateSingleRuleActionPolicyDoc', generateSingleRuleActionPolicyDoc],
+      ['generateMultiRuleActionPolicyDoc', generateMultiRuleActionPolicyDoc],
       ['generateRuleKindDoc from spec', generateRuleKindDoc],
       ['generateNotificationsOverviewDoc from spec', generateNotificationsOverviewDoc],
       ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
