@@ -10,6 +10,7 @@ import React from 'react';
 import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -156,6 +157,9 @@ describe('policy table', () => {
   test('shows empty state when there are no policies', () => {
     renderWithI18n(<TestComponent testPolicies={[]} />);
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Index Lifecycle Policies'
+    );
     expect(
       screen.getByRole('heading', { name: 'Create your first index lifecycle policy' })
     ).toBeInTheDocument();

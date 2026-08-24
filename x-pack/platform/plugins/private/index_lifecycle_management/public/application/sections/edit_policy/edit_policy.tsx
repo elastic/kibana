@@ -24,7 +24,6 @@ import {
   EuiTimeline,
   useEuiTheme,
 } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
 
 import {
   TextField,
@@ -95,7 +94,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   } = useEditPolicyContext();
 
   const {
-    services: { cloud, docLinks, history, navigateToUrl, overlays, http },
+    services: { cloud, history, navigateToUrl, overlays, http },
   } = useKibana();
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
@@ -196,31 +195,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   });
 
   return (
-    <>
-      <AppHeader
-        title={
-          isNewPolicy
-            ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                defaultMessage: 'Create policy',
-              })
-            : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                defaultMessage: 'Edit policy {originalPolicyName}',
-                values: { originalPolicyName },
-              })
-        }
-        back={{
-          href: history.createHref({ pathname: getPoliciesListPath() }),
-          label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionHeading', {
-            defaultMessage: 'Index Lifecycle Policies',
-          }),
-        }}
-        docLink={docLinks.links.elasticsearch.ilm}
-        spacing="bleed"
-      />
-
-      <EuiSpacer size="l" />
-
-      <Form form={form}>
+    <Form form={form}>
         {isNewPolicy ? null : (
           <Fragment>
             <EditWarning />
@@ -358,7 +333,6 @@ export const EditPolicy: React.FunctionComponent = () => {
             close={() => setIsShowingPolicyJsonFlyout(false)}
           />
         ) : null}
-      </Form>
-    </>
+    </Form>
   );
 };
