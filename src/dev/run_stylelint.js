@@ -17,6 +17,8 @@ async function main() {
   const { input } = meow({
     argv: args,
     allowUnknownFlags: true,
+    autoHelp: false,
+    autoVersion: false,
     booleanDefault: undefined,
     importMeta: { url: pathToFileURL(__filename).href },
   });
