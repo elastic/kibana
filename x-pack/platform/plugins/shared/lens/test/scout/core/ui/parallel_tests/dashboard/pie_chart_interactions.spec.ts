@@ -56,9 +56,7 @@ spaceTest.describe(
       await expect(page.testSubj.locator(`embeddablePanelHeading-${pieTitle}`)).toHaveText(
         pieTitle
       );
-      await expect(
-        page.testSubj.locator('~filter-key-geo.dest & ~filter-value-AL')
-      ).toBeVisible();
+      await expect(page.testSubj.locator('~filter-key-geo.dest & ~filter-value-AL')).toBeVisible();
 
       await filterBar.addFilter({ field: 'geo.src', operator: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
