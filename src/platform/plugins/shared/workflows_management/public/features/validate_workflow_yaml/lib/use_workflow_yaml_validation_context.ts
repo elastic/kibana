@@ -9,16 +9,21 @@
 
 import { type MutableRefObject, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { selectWorkflows } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  selectConnectorsLoadState,
+  selectWorkflows,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
 
 /** Live Kibana context shared by the YAML editor and change-history preview validators. */
 export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContext {
   const connectorsData = useAvailableConnectors();
+  const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
   const { application, http, data, licensing } = useKibana().services;
   const esqlCallbacks = useWorkflowEsqlCallbacks({
@@ -33,7 +38,12 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
 
   return useMemo(
     () => ({
-      connectorTypes: connectorsData?.connectorTypes ?? null,
+      connectorTypes:
+        connectorsLoadState.status === 'ready' && connectorsData
+          ? { status: 'ready' as const, value: connectorsData.connectorTypes }
+          : connectorsLoadState.status === 'failed'
+          ? connectorsLoadState
+          : { status: 'loading' as const },
       connectorsManagementUrl: application.getUrlForApp('management', {
         deepLinkId: 'triggersActionsConnectors',
         absolute: true,
@@ -42,9 +52,22 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
     }),
-    [application, connectorsData?.connectorTypes, getPropertyHandler, workflows]
+    [application, connectorsData, connectorsLoadState, getPropertyHandler, workflows]
   );
 }
+
+/** Returns an operational error when a validation prerequisite failed to load. */
+export const getWorkflowYamlValidationContextError = (
+  context: WorkflowYamlValidationContext
+): Error | null =>
+  context.connectorTypes.status === 'failed'
+    ? new Error(
+        i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
+          defaultMessage: 'Connector metadata is unavailable: {reason}',
+          values: { reason: context.connectorTypes.error },
+        })
+      )
+    : null;
 
 /** Ref wrapper for async validation paths that must read the latest context without effect churn. */
 export function useWorkflowYamlValidationContextRef(): MutableRefObject<WorkflowYamlValidationContext> {

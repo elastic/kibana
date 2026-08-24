@@ -27,10 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
-import type {
-  YamlValidationErrorSeverity,
-  YamlValidationResult,
-} from '../../../features/validate_workflow_yaml/model/types';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 const severityOrder = ['error', 'warning'];
@@ -112,30 +109,14 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   let buttonContent: React.ReactNode | null = null;
 
   const allValidationErrors: YamlValidationResult[] = useMemo(
-    () => [
-      ...(validationErrors?.filter(
-        (error) => error.severity === 'error' || error.severity === 'warning'
-      ) || []),
-      ...(errorValidating
-        ? [
-            {
-              id: 'error-validating',
-              endLineNumber: 0,
-              endColumn: 0,
-              hoverMessage: null,
-              severity: 'error' as YamlValidationErrorSeverity,
-              message: errorValidating.message,
-              owner: 'variable-validation' as const,
-              ruleId: 'validationRunFailed' as const,
-              startLineNumber: 0,
-              startColumn: 0,
-              afterMessage: null,
-            },
-          ]
-        : []),
-    ],
-    [validationErrors, errorValidating]
+    () =>
+      validationErrors?.filter(
+        (validationError) =>
+          validationError.severity === 'error' || validationError.severity === 'warning'
+      ) ?? [],
+    [validationErrors]
   );
+  const hasAccordionContent = allValidationErrors.length > 0 || errorValidating !== null;
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -180,7 +161,13 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         defaultMessage: 'Initializing validation...',
       }
     );
-  } else if (allValidationErrors?.length === 0) {
+  } else if (errorValidating) {
+    icon = <EuiIcon type="errorFill" color="danger" size="m" aria-hidden={true} />;
+    buttonContent = i18n.translate(
+      'workflowsManagement.workflowYAMLValidationErrors.validationFailed',
+      { defaultMessage: 'Validation failed' }
+    );
+  } else if (allValidationErrors.length === 0) {
     icon = (
       <EuiIcon
         type="checkCircleFill"
@@ -217,15 +204,41 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      arrowDisplay={allValidationErrors?.length > 0 ? 'left' : 'none'}
+      arrowDisplay={hasAccordionContent ? 'left' : 'none'}
       initialIsOpen={false}
-      isDisabled={allValidationErrors?.length === 0}
+      isDisabled={!hasAccordionContent}
       css={styles.accordion}
       extraAction={extraAction}
     >
       <div css={styles.separator} />
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
         <EuiFlexGroup direction="column" gutterSize="s">
+          {errorValidating ? (
+            <EuiFlexGroup
+              gutterSize="s"
+              responsive={false}
+              data-test-subj="workflowValidationRunError"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type="errorFill"
+                  color="danger"
+                  size="s"
+                  css={styles.validationErrorIcon}
+                  aria-hidden={true}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem css={styles.validationErrorText}>
+                <EuiText color="text" size="xs">
+                  <FormattedMessage
+                    id="workflowsManagement.workflowYAMLValidationErrors.validationRunError"
+                    defaultMessage="Validation could not be completed: {message}"
+                    values={{ message: errorValidating.message }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
           {sortedValidationErrors?.map((error, index) => (
             <button
               type="button"

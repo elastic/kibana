@@ -28,6 +28,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: mockValidationResults,
     isValidationLoading: mockIsValidationLoading,
+    validationError: null,
     handleValidationErrorClick: mockHandleValidationErrorClick,
   })),
 }));

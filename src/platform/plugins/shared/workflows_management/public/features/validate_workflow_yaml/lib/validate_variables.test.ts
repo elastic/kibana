@@ -168,7 +168,7 @@ describe('validateVariables', () => {
     expect(result[2].message).toBe('Variable anotherInvalidVar is invalid');
   });
 
-  it('skips checks when the context schema is unavailable', () => {
+  it('propagates context schema construction failures', () => {
     const variables = [
       createVariableItem({ key: 'var1', yamlPath: ['steps', 0, 'with', 'value'] }),
     ];
@@ -177,10 +177,21 @@ describe('validateVariables', () => {
       throw new Error('Invalid path');
     });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
-
-    expect(result).toEqual([]);
+    expect(() => validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition)).toThrow(
+      'Invalid path'
+    );
     expect(mockValidateVariable).not.toHaveBeenCalled();
+  });
+
+  it('propagates unexpected validator failures', () => {
+    const variable = createVariableItem();
+    mockValidateVariable.mockImplementation(() => {
+      throw new Error('Variable validator failed');
+    });
+
+    expect(() => validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition)).toThrow(
+      'Variable validator failed'
+    );
   });
 
   it('should process mixed valid and invalid variables', () => {
@@ -188,17 +199,11 @@ describe('validateVariables', () => {
       createVariableItem({ key: 'valid1', yamlPath: ['steps', 0, 'with', 'a'] }),
       createVariableItem({ key: 'invalid1', yamlPath: ['steps', 0, 'with', 'b'] }),
       createVariableItem({ key: 'valid2', yamlPath: ['steps', 0, 'with', 'c'] }),
-      createVariableItem({ key: 'contextError', yamlPath: ['steps', 1, 'with', 'd'] }),
       createVariableItem({ key: 'invalid2', yamlPath: ['steps', 2, 'with', 'e'] }),
     ];
 
-    // step-a succeeds (used by valid1, invalid1, valid2), step-b throws (contextError), step-c succeeds (invalid2)
-    mockGetContextSchemaForStep
-      .mockReturnValueOnce({} as any)
-      .mockImplementationOnce(() => {
-        throw new Error('Context error');
-      })
-      .mockReturnValueOnce({} as any);
+    // step-a is cached for the first three variables; step-c gets its own context.
+    mockGetContextSchemaForStep.mockReturnValueOnce({} as any).mockReturnValueOnce({} as any);
 
     mockValidateVariable
       .mockReturnValueOnce({

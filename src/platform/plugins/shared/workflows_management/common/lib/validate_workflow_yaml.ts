@@ -101,7 +101,7 @@ export function validateWorkflowYaml(
           severity: 'error',
           message: triggerError.message,
           source: 'trigger',
-          ruleId: 'invalidTriggerDefinition',
+          ruleId: 'invalidTriggerCondition',
         });
       }
     }

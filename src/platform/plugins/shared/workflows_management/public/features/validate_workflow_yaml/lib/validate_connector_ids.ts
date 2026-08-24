@@ -39,14 +39,10 @@ const TRANSLATIONS = {
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
   connectorsManagementUrl: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
-
-  if (!dynamicConnectorTypes) {
-    return results;
-  }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
     (item) => !isTemplateReference(item.key)

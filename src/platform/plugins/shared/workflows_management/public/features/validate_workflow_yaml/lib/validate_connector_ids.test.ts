@@ -65,16 +65,6 @@ describe('validateConnectorIds', () => {
     ...overrides,
   });
 
-  describe('when dynamicConnectorTypes is null', () => {
-    it('skips checks that depend on dynamic connector types', () => {
-      const connectorIdItems: ConnectorIdItem[] = [createConnectorIdItem()];
-
-      const results = validateConnectorIds(connectorIdItems, null, '');
-
-      expect(results).toEqual([]);
-    });
-  });
-
   describe('when connector is found by UUID', () => {
     it('should return valid result with beforeMessage containing connector name', () => {
       const connectorIdItems: ConnectorIdItem[] = [

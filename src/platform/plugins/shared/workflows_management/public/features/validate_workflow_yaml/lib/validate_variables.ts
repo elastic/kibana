@@ -62,60 +62,54 @@ export function validateVariables(
   for (const variableItem of variableItems) {
     const { yamlPath: path, offset } = variableItem;
 
-    let context: typeof DynamicStepContextSchema;
-    try {
-      const nearestStepPath = getNearestStepPath(path);
-      const nearestStep = nearestStepPath
-        ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
-        : undefined;
-      const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
+    const nearestStepPath = getNearestStepPath(path);
+    const nearestStep = nearestStepPath
+      ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
+      : undefined;
+    const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
 
-      let stepSchema = stepSchemaCache.get(cacheKey);
-      if (!stepSchema) {
-        if (nearestStep?.name) {
-          stepSchema = getContextSchemaForStep(baseSchema, workflowGraph, nearestStep.name);
-        } else {
-          stepSchema = baseSchema;
-        }
-        stepSchemaCache.set(cacheKey, stepSchema);
-      }
-
-      const pathSuffix = nearestStepPath ? path.slice(nearestStepPath.length) : [];
-      const pathContextKey = `${String(cacheKey)}:${pathSuffix.join('.')}`;
-
-      let pathSchema = pathContextCache.get(pathContextKey);
-      if (!pathSchema) {
-        pathSchema = nearestStepPath
-          ? extendWithPathSpecificContext(stepSchema, nearestStep, pathSuffix)
-          : stepSchema;
-        pathContextCache.set(pathContextKey, pathSchema);
-      }
-
-      const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
-      if (yamlDocument != null && variableOffset !== undefined) {
-        const fullContextKey = `${pathContextKey}:${variableOffset}`;
-        const cachedContext = fullContextCache.get(fullContextKey);
-        if (cachedContext) {
-          context = cachedContext;
-        } else {
-          context = getContextSchemaWithTemplateLocals(
-            yamlDocument,
-            variableOffset,
-            pathSchema,
-            model?.getValue()
-          );
-          fullContextCache.set(fullContextKey, context);
-        }
+    let stepSchema = stepSchemaCache.get(cacheKey);
+    if (!stepSchema) {
+      if (nearestStep?.name) {
+        stepSchema = getContextSchemaForStep(baseSchema, workflowGraph, nearestStep.name);
       } else {
-        context = pathSchema;
+        stepSchema = baseSchema;
       }
+      stepSchemaCache.set(cacheKey, stepSchema);
+    }
 
-      const error = validateVariable(variableItem, context);
-      if (error) {
-        errors.push(error);
+    const pathSuffix = nearestStepPath ? path.slice(nearestStepPath.length) : [];
+    const pathContextKey = `${String(cacheKey)}:${pathSuffix.join('.')}`;
+
+    let pathSchema = pathContextCache.get(pathContextKey);
+    if (!pathSchema) {
+      pathSchema = nearestStepPath
+        ? extendWithPathSpecificContext(stepSchema, nearestStep, pathSuffix)
+        : stepSchema;
+      pathContextCache.set(pathContextKey, pathSchema);
+    }
+
+    const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
+    let context = pathSchema;
+    if (yamlDocument != null && variableOffset !== undefined) {
+      const fullContextKey = `${pathContextKey}:${variableOffset}`;
+      const cachedContext = fullContextCache.get(fullContextKey);
+      if (cachedContext) {
+        context = cachedContext;
+      } else {
+        context = getContextSchemaWithTemplateLocals(
+          yamlDocument,
+          variableOffset,
+          pathSchema,
+          model?.getValue()
+        );
+        fullContextCache.set(fullContextKey, context);
       }
-    } catch {
-      // Context schema construction is a prerequisite for these checks.
+    }
+
+    const error = validateVariable(variableItem, context);
+    if (error) {
+      errors.push(error);
     }
   }
 

@@ -45,7 +45,33 @@ describe('collectYamlSchemaValidationResults', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].owner).toBe('yaml');
+    expect(results[0].ruleId).toBe('schemaViolation');
     expect(results[0].message).toContain('steps');
+
+    model.dispose();
+  });
+
+  it('classifies yaml parser markers as syntax errors', () => {
+    const yaml = 'name: [unclosed';
+    const model = monaco.editor.createModel(yaml, 'yaml');
+
+    monaco.editor.setModelMarkers(model, 'yaml', [
+      {
+        startLineNumber: 1,
+        startColumn: 7,
+        endLineNumber: 1,
+        endColumn: 16,
+        message: 'Flow sequence in block collection must be sufficiently indented and end with a ]',
+        severity: monaco.MarkerSeverity.Error,
+        source: 'YAML',
+      },
+    ]);
+
+    const results = collectYamlSchemaValidationResults(model, null, workflowZodSchema);
+
+    expect(results).toEqual([
+      expect.objectContaining({ owner: 'yaml', ruleId: 'yamlSyntaxError' }),
+    ]);
 
     model.dispose();
   });

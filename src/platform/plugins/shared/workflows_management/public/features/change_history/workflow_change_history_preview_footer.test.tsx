@@ -18,13 +18,17 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
   WorkflowYamlValidationAccordion: ({
     validationErrors,
     isLoading,
+    error,
   }: {
     validationErrors?: YamlValidationResult[] | null;
     isLoading?: boolean;
+    error?: Error | null;
   }) => (
     <div data-test-subj="workflowYamlEditorValidationErrorsList">
       {isLoading || validationErrors === null
         ? 'Initializing validation...'
+        : error
+        ? `Validation failed: ${error.message}`
         : !validationErrors || validationErrors.length === 0
         ? 'No validation errors'
         : `${validationErrors.length} error(s)`}
@@ -55,6 +59,7 @@ const renderFooter = (
         validationResults={[]}
         isEditorMounted={true}
         isValidationLoading={false}
+        validationError={null}
         highlightValidationErrors={true}
         {...props}
       />
@@ -89,6 +94,14 @@ describe('WorkflowChangeHistoryPreviewFooter', () => {
 
     expect(screen.getByText('1 error(s)')).toBeInTheDocument();
     expect(screen.queryByText('Initializing validation...')).not.toBeInTheDocument();
+  });
+
+  it('shows operational validation failures separately from diagnostics', () => {
+    renderFooter({ validationError: new Error('Connector metadata is unavailable') });
+
+    expect(
+      screen.getByText('Validation failed: Connector metadata is unavailable')
+    ).toBeInTheDocument();
   });
 
   it('renders a spacer when highlight is disabled', () => {

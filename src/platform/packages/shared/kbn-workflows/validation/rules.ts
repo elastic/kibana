@@ -100,12 +100,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { reason: string };
   };
-  /** The validation run itself failed, so nothing could be checked. */
-  validationRunFailed: {
-    owner: 'variable-validation';
-    defaultSeverity: 'error';
-    values: { reason: string };
-  };
   // -- liquid templates ---------------------------------------------------------
   liquidSyntaxError: {
     owner: 'liquid-template-validation';
@@ -195,13 +189,6 @@ export interface WorkflowValidationRules {
     values: { reason: string };
   };
 
-  /** A trigger does not match its registered trigger definition. */
-  invalidTriggerDefinition: {
-    owner: 'trigger-validation';
-    defaultSeverity: 'error';
-    values: { reason: string };
-  };
-
   // -- json schema defaults -----------------------------------------------------
   /** A declared default value does not satisfy its own property schema. */
   invalidDefaultValue: {
@@ -284,7 +271,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   unknownVariableType: { owner: 'variable-validation', defaultSeverity: 'warning' },
   invalidCollectionPath: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidForeachParameter: { owner: 'variable-validation', defaultSeverity: 'warning' },
-  validationRunFailed: { owner: 'variable-validation', defaultSeverity: 'error' },
 
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
   liquidUnexpectedError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
@@ -306,7 +292,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidIfConditionSyntax: { owner: 'if-condition-validation', defaultSeverity: 'error' },
 
   invalidTriggerCondition: { owner: 'trigger-condition-validation', defaultSeverity: 'error' },
-  invalidTriggerDefinition: { owner: 'trigger-validation', defaultSeverity: 'error' },
 
   invalidDefaultValue: { owner: 'json-schema-default-validation', defaultSeverity: 'error' },
 

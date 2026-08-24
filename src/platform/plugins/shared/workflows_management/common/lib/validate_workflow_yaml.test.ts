@@ -73,6 +73,27 @@ steps:
       expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
     });
 
+    it('should provide an actionable message for an empty steps array', () => {
+      const yaml = `
+version: '1'
+name: Test
+triggers:
+  - type: manual
+steps: []
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          message: 'No steps found. Add at least one step.',
+          path: ['steps'],
+          ruleId: 'schemaViolation',
+          source: 'schema',
+        }),
+      ]);
+    });
+
     it('should detect invalid step type', () => {
       const yaml = `
 version: '1'
@@ -307,6 +328,9 @@ steps:
       expect(result.valid).toBe(false);
       const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
       expect(triggerErrors.length).toBeGreaterThan(0);
+      expect(triggerErrors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ ruleId: 'invalidTriggerCondition' })])
+      );
     });
 
     it('should skip trigger validation when no triggerDefinitions are provided', () => {

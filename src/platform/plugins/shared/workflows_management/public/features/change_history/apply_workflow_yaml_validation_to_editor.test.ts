@@ -29,7 +29,7 @@ import { BATCHED_CUSTOM_MARKER_OWNER } from '../validate_workflow_yaml/model/typ
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 const testValidationContext: WorkflowYamlValidationContext = {
-  connectorTypes: {},
+  connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },
   getPropertyHandler: () => null,

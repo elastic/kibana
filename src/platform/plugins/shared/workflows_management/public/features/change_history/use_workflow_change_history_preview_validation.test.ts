@@ -33,6 +33,7 @@ import {
 import { waitForPreviewYamlSchemaMarkers } from './wait_for_yaml_schema_markers_after_update';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
+import { getWorkflowYamlValidationContextError } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../validate_workflow_yaml/model/use_workflow_json_schema';
 
@@ -42,6 +43,7 @@ const mockCollectYamlResults = collectYamlSchemaValidationResults as jest.Mock;
 const mockUseWorkflowJsonSchema = useWorkflowJsonSchema as jest.Mock;
 const mockUseAvailableConnectors = useAvailableConnectors as jest.Mock;
 const mockWaitForPreviewYamlSchemaMarkers = waitForPreviewYamlSchemaMarkers as jest.Mock;
+const mockGetValidationContextError = getWorkflowYamlValidationContextError as jest.Mock;
 
 const { monaco: mockMonaco } = jest.requireMock('@kbn/code-editor') as {
   monaco: { editor: { getModelMarkers: jest.Mock } };
@@ -100,6 +102,7 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
       yamlDocument: null,
     });
     mockCollectYamlResults.mockReturnValue([]);
+    mockGetValidationContextError.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -129,7 +132,9 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
       params.validationDecorationsRef,
       undefined,
       expect.objectContaining({
-        validationContext: expect.objectContaining({ connectorTypes: {} }),
+        validationContext: expect.objectContaining({
+          connectorTypes: { status: 'ready', value: {} },
+        }),
       })
     );
   });
@@ -156,6 +161,20 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
     );
 
     expect(mockApplyHighlights).toHaveBeenCalledTimes(1);
+  });
+
+  it('publishes prerequisite failures outside diagnostic results', async () => {
+    mockGetValidationContextError.mockReturnValue(new Error('Connector metadata is unavailable'));
+    const params = createPreviewValidationHookParams({ highlightValidationErrors: true });
+
+    const { result } = mountPreviewValidationHook(() =>
+      useWorkflowChangeHistoryPreviewValidation(params)
+    );
+
+    await waitFor(() => {
+      expect(result.current.validationError?.message).toBe('Connector metadata is unavailable');
+      expect(result.current.validationResults).toEqual([samplePreviewCustomError]);
+    });
   });
 
   it('does not re-run validation when highlight stays enabled and editor remounts', async () => {
