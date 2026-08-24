@@ -38,6 +38,9 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { ConversationEventBus } from './workflows/triggers/conversation_event_bus';
+import { registerConversationWorkflowSteps } from './workflows';
+import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 
 export class AgentBuilderPlugin
   implements
@@ -57,6 +60,7 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private readonly conversationEventBus = new ConversationEventBus();
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -131,6 +135,17 @@ export class AgentBuilderPlugin
       getRunAgentStepDefinition(this.serviceManager)
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
+    registerConversationWorkflowSteps(
+      setupDeps.workflowsExtensions,
+      async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Conversation service not available — plugin has not started');
+        }
+        return services.conversations.getScopedClient({ request });
+      }
+    );
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -263,7 +278,14 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      conversationEventBus: this.conversationEventBus,
     });
+
+    registerConversationWorkflowEventBridge(
+      this.conversationEventBus,
+      startDeps.workflowsExtensions,
+      this.logger
+    );
 
     const {
       tools,
