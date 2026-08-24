@@ -139,7 +139,8 @@ describe('Attack attachment', () => {
     await waitFor(() =>
       expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith({
         attackId: 'attack-id-1',
-        indexName: '.alerts-security.attack.discovery.alerts-default',
+        // The snapshotted index is normalised to a pattern the user can read.
+        indexName: '.alerts-security.attack.discovery.alerts-*',
         attackTitle: 'Credential harvesting on host-1',
         origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       })

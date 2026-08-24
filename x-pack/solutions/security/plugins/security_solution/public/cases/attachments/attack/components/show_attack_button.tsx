@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +14,7 @@ import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/co
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { toReadableAttackIndexPattern } from '../utils';
 
 const SHOW_ATTACK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.showAttackDetails',
@@ -59,11 +60,16 @@ export const ShowAttackButton = ({
   const { openAttackFlyout } = useFlyoutApi();
   const { openFlyout } = useExpandableFlyoutApi();
 
+  // The flyout looks the attack up by id against this index, so it needs a pattern the user can
+  // read — not the concrete backing index the attachment snapshotted. See
+  // {@link toReadableAttackIndexPattern}.
+  const flyoutIndexName = useMemo(() => toReadableAttackIndexPattern(indexName), [indexName]);
+
   const onClick = useCallback(() => {
     if (enableNewFlyout) {
       openAttackFlyout({
         attackId,
-        indexName,
+        indexName: flyoutIndexName,
         attackTitle,
         origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       });
@@ -73,11 +79,11 @@ export const ShowAttackButton = ({
       openFlyout({
         right: {
           id: AttackDetailsRightPanelKey,
-          params: { attackId, indexName },
+          params: { attackId, indexName: flyoutIndexName },
         },
       });
     }
-  }, [attackId, attackTitle, enableNewFlyout, indexName, openAttackFlyout, openFlyout]);
+  }, [attackId, attackTitle, enableNewFlyout, flyoutIndexName, openAttackFlyout, openFlyout]);
 
   return (
     <EuiToolTip

@@ -90,6 +90,11 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     const getWorkflowFields = async (index: string, id: string) => {
+      // The sync runs `_update_by_query` with `conflicts: 'abort'`, which resolves ids through a
+      // search rather than a realtime get. Refreshing before each read keeps both this assertion
+      // and any follow-up status change working against the latest version, instead of aborting on
+      // a conflict with a write the index has not refreshed yet.
+      await es.indices.refresh({ index });
       const doc = await es.get<Record<string, string>>({ index, id });
       return {
         status: doc._source?.[ALERT_WORKFLOW_STATUS],

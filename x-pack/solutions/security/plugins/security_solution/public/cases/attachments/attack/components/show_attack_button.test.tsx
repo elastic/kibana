@@ -14,12 +14,16 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 
+// The attachment snapshots the attack document's `_index`, i.e. the concrete backing index.
 const props = {
   id: 'action-id',
   attackId: 'attack-id-1',
-  indexName: '.alerts-security.attack.discovery.alerts-default',
+  indexName: '.internal.alerts-security.attack.discovery.alerts-default-000001',
   attackTitle: 'Credential harvesting on host-1',
 };
+
+// What the flyout is opened with: the readable alias pattern, not the backing index.
+const EXPECTED_INDEX_NAME = '.alerts-security.attack.discovery.alerts-*';
 
 const TEST_SUBJ = 'comment-action-show-attack-action-id';
 
@@ -61,7 +65,7 @@ describe('ShowAttackButton', () => {
 
     expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith({
       attackId: 'attack-id-1',
-      indexName: '.alerts-security.attack.discovery.alerts-default',
+      indexName: EXPECTED_INDEX_NAME,
       attackTitle: 'Credential harvesting on host-1',
       origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
     });
@@ -77,10 +81,28 @@ describe('ShowAttackButton', () => {
         id: AttackDetailsRightPanelKey,
         params: {
           attackId: 'attack-id-1',
-          indexName: '.alerts-security.attack.discovery.alerts-default',
+          indexName: EXPECTED_INDEX_NAME,
         },
       },
     });
     expect(flyoutApi.openAttackFlyout).not.toHaveBeenCalled();
+  });
+
+  it('opens an adhoc attack with the adhoc index pattern', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(
+      <ShowAttackButton
+        {...props}
+        indexName=".internal.adhoc.alerts-security.attack.discovery.alerts-default-000001"
+      />
+    );
+    fireEvent.click(screen.getByTestId(TEST_SUBJ));
+
+    expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexName: '.adhoc.alerts-security.attack.discovery.alerts-*',
+      })
+    );
   });
 });
