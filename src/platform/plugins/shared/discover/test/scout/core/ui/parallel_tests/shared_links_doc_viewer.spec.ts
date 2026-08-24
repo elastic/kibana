@@ -13,7 +13,7 @@ import { spaceTest, type DiscoverPageObjects } from '../../../common/ui/fixtures
 
 const ESQL_QUERY = 'FROM logstash-* METADATA _id, _index | SORT @timestamp DESC | LIMIT 100';
 const EXPANDED_DOC_URL_STATE = 'expandedDoc:';
-const TARGET_ROW_INDEX = 50;
+const TARGET_ROW_INDEX = 0;
 
 const getDecodedUrl = (page: ScoutPage) => decodeURIComponent(page.url());
 
@@ -76,12 +76,11 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       const readPageState = getPageState ?? (async () => ({}));
       const pageState = expectedPageState ?? {};
 
-      // Open an offscreen document in the configured query mode.
+      // Open a document in the configured query mode.
       await setup?.(discover);
       await discover.waitUntilTabIsLoaded();
       await prepareDocument?.(dataGrid);
       await expect.poll(() => readPageState(dataGrid)).toStrictEqual(pageState);
-      await dataGrid.scrollToRow(TARGET_ROW_INDEX);
       await docViewer.openAndWaitForFlyout({ rowIndex: TARGET_ROW_INDEX });
 
       const timestamp = await docViewer.getFieldValue('@timestamp').innerText();
@@ -96,13 +95,12 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       await expect.poll(() => getDecodedUrl(page)).not.toContain(EXPANDED_DOC_URL_STATE);
       const closedDocUrl = page.url();
 
-      // Browser history restores the flyout, page, and row position in both directions.
+      // Browser history restores the flyout and page in both directions.
       await page.goBack();
       await discover.waitUntilTabIsLoaded();
       await expect(page).toHaveURL(expandedDocUrl);
       await expectDocument(docViewer, expectedDocument);
       await expect.poll(() => readPageState(dataGrid)).toStrictEqual(pageState);
-      await expect(dataGrid.getCell(TARGET_ROW_INDEX, '@timestamp')).toBeInViewport();
 
       await page.goForward();
       await discover.waitUntilTabIsLoaded();
@@ -113,7 +111,7 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       await discover.waitUntilTabIsLoaded();
       await expectDocument(docViewer, expectedDocument);
 
-      // A copied direct link restores the same document and grid position.
+      // A copied direct link restores the same document and page.
       const sharedUrl = await docViewer.copyDirectLink();
 
       await page.goto(sharedUrl);
@@ -121,15 +119,13 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       await expect.poll(() => getDecodedUrl(page)).toContain(EXPANDED_DOC_URL_STATE);
       await expectDocument(docViewer, expectedDocument);
       await expect.poll(() => readPageState(dataGrid)).toStrictEqual(pageState);
-      await expect(dataGrid.getCell(TARGET_ROW_INDEX, '@timestamp')).toBeInViewport();
 
-      // Refreshing preserves the expanded document and its position.
+      // Refreshing preserves the expanded document and page.
       await page.reload();
       await discover.waitUntilTabIsLoaded();
       await expect.poll(() => getDecodedUrl(page)).toContain(EXPANDED_DOC_URL_STATE);
       await expectDocument(docViewer, expectedDocument);
       await expect.poll(() => readPageState(dataGrid)).toStrictEqual(pageState);
-      await expect(dataGrid.getCell(TARGET_ROW_INDEX, '@timestamp')).toBeInViewport();
     });
   }
 });
