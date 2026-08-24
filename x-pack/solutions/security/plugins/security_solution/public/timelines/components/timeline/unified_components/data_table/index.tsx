@@ -165,6 +165,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       sampleSize,
       excludedRowRendererIds,
       columns: timelineColumns,
+      isSuperTimeline,
     } = useSelector((state: State) => selectTimelineById(state, timelineId));
 
     const settings: UnifiedDataTableProps['settings'] = useMemo(() => {
@@ -320,7 +321,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [timelineId, updatedAt]
     );
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
+    // isSuperTimeline in metadata invalidates the useBulkLoadActions cache when timeline mode changes.
+    const cellActionsMetadata = useMemo(
+      () => ({ scopeId: timelineId, isSuperTimeline }),
+      [timelineId, isSuperTimeline]
+    );
 
     const onUpdateSampleSize = useCallback(
       (newSampleSize: number) => {

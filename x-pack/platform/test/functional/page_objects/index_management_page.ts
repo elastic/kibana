@@ -15,83 +15,13 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
 
   const browser = getService('browser');
   return {
-    async sectionHeadingText() {
-      return await testSubjects.getVisibleText('appHeaderTitle');
-    },
-
     async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appHeaderTitle');
       expect(headingText).to.be('Index Management');
     },
 
-    async reloadIndices() {
-      await testSubjects.click('reloadIndicesButton');
-    },
-    async reloadIndicesButton() {
-      return await testSubjects.find('reloadIndicesButton');
-    },
     async toggleHiddenIndices() {
       await testSubjects.click('checkboxToggles-includeHiddenIndices');
-    },
-
-    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
-      await policyDetailsLinks[indexOfRow].click();
-    },
-
-    async clickIndexTemplate(name: string): Promise<void> {
-      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
-
-      for (const link of indexTemplateLinks) {
-        if ((await link.getVisibleText()).includes(name)) {
-          await link.click();
-          return;
-        }
-      }
-    },
-
-    async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
-      for (const dsName of dataStreamNames) {
-        const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);
-        if (!(await checkbox.isSelected())) {
-          await checkbox.click();
-        }
-      }
-      await testSubjects.click('dataStreamActionsPopoverButton');
-      await testSubjects.click('bulkEditDataRetentionButton');
-    },
-
-    async clickIndexTemplateNameLink(name: string): Promise<void> {
-      await find.clickByLinkText(name);
-    },
-
-    async clickDataStreamNameLink(name: string): Promise<void> {
-      await find.clickByLinkText(name);
-    },
-
-    async searchAndClickDataStreamNameLink(name: string): Promise<void> {
-      await retry.try(async () => {
-        await testSubjects.setValue('dataStreamSearch', name);
-        if (!(await find.existsByLinkText(name))) {
-          await testSubjects.click('reloadButton');
-          throw new Error(`Data stream "${name}" is not visible yet`);
-        }
-      });
-      await find.clickByLinkText(name);
-    },
-
-    async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const deleteButons = await testSubjects.findAll('deletePolicyButton');
-      await deleteButons[indexOfRow].click();
-    },
-
-    async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const executeButtons = await testSubjects.findAll('executePolicyButton');
-      await executeButtons[indexOfRow].click();
-    },
-
-    async clickConfirmModalButton(): Promise<void> {
-      await testSubjects.click('confirmModalConfirmButton');
     },
 
     async clickIndexDetailsTab(tabName: string): Promise<void> {
@@ -163,24 +93,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(tab);
     },
 
-    async changeMappingsEditorTab(
-      tab: 'mappedFields' | 'runtimeFields' | 'dynamicTemplates' | 'advancedOptions'
-    ) {
-      const index = [
-        'mappedFields',
-        'runtimeFields',
-        'dynamicTemplates',
-        'advancedOptions',
-      ].indexOf(tab);
-
-      const tabs = await testSubjects.findAll('formTab');
-      await tabs[index].click();
-    },
-
-    async clickNextButton() {
-      await testSubjects.click('nextButton');
-    },
-
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -234,10 +146,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
-    },
-    async setCreateIndexMode(value: string) {
-      await testSubjects.existOrFail('indexModeField');
-      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');

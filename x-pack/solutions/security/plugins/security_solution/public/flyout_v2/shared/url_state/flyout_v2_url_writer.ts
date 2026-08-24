@@ -11,6 +11,7 @@ import { encode } from '@kbn/rison';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { FlyoutDescriptor, FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
+import { markFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
 
 // ---------------------------------------------------------------------------
 // Generation tracking (cascade-close guard)
@@ -130,6 +131,7 @@ export const useFlyoutV2UrlWriter = (
 
   // Writes directly via history.replace so the URL update is synchronous.
   // Using history.replace (not push) means no extra Back/Forward stops are created.
+  // Mark before replace so useFlyoutV2RestoreFromUrl's history listener ignores self-writes.
   const writeToUrl = useCallback(
     (stack: FlyoutV2UrlParamValue | null) => {
       if (!hasUsableHistory) return;
@@ -140,6 +142,7 @@ export const useFlyoutV2UrlWriter = (
         params.delete(urlParamKey);
       }
       const serialized = params.toString();
+      markFlyoutV2UrlWrite(urlParamKey);
       history.replace({ ...history.location, search: serialized ? `?${serialized}` : '' });
     },
     [hasUsableHistory, history, urlParamKey]

@@ -12,6 +12,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
@@ -109,11 +111,13 @@ const validValidation = {
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <MemoryRouter>
-    <EuiThemeProvider>
-      <I18nProvider>{children}</I18nProvider>
-    </EuiThemeProvider>
-  </MemoryRouter>
+  <MockChromeContextProvider>
+    <MemoryRouter>
+      <EuiThemeProvider>
+        <I18nProvider>{children}</I18nProvider>
+      </EuiThemeProvider>
+    </MemoryRouter>
+  </MockChromeContextProvider>
 );
 
 describe('ModelSettings', () => {
@@ -159,7 +163,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('modelSettingsPageHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId('defaultModelSection')).toBeInTheDocument();
   });
 
@@ -205,17 +209,17 @@ describe('ModelSettings', () => {
     expect(screen.queryByTestId('settings-no-features')).not.toBeInTheDocument();
   });
 
-  it('save button is disabled when not dirty', () => {
+  it('save button is disabled when not dirty', async () => {
     render(
       <Wrapper>
         <ModelSettings />
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeDisabled();
   });
 
-  it('save button is enabled when feature settings are dirty', () => {
+  it('save button is enabled when feature settings are dirty', async () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
@@ -224,10 +228,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeEnabled();
   });
 
-  it('save button is enabled when only default model settings are dirty', () => {
+  it('save button is enabled when only default model settings are dirty', async () => {
     mockUseDefaultModelSettings.mockReturnValue({ ...defaultModelSettingsState, isDirty: true });
 
     render(
@@ -236,10 +240,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeEnabled();
   });
 
-  it('save button stays disabled when validation fails, even if dirty', () => {
+  it('save button stays disabled when validation fails, even if dirty', async () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
       isDirty: true,
@@ -255,10 +259,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeDisabled();
   });
 
-  it('clicking save is a no-op when validation fails', () => {
+  it('clicking save is a no-op when validation fails', async () => {
     const saveFeatures = jest.fn().mockResolvedValue(undefined);
     const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
 
@@ -283,7 +287,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    fireEvent.click(screen.getByTestId('save-settings-button'));
+    fireEvent.click(await screen.findByTestId('save-settings-button'));
 
     expect(saveFeatures).not.toHaveBeenCalled();
     expect(saveDefaultModel).not.toHaveBeenCalled();
@@ -310,7 +314,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    fireEvent.click(screen.getByTestId('save-settings-button'));
+    fireEvent.click(await screen.findByTestId('save-settings-button'));
 
     await waitFor(() => {
       expect(saveFeatures).toHaveBeenCalledTimes(1);
@@ -356,13 +360,15 @@ describe('ModelSettings', () => {
     });
 
     render(
-      <Router history={history}>
-        <EuiThemeProvider>
-          <I18nProvider>
-            <ModelSettings />
-          </I18nProvider>
-        </EuiThemeProvider>
-      </Router>
+      <MockChromeContextProvider>
+        <Router history={history}>
+          <EuiThemeProvider>
+            <I18nProvider>
+              <ModelSettings />
+            </I18nProvider>
+          </EuiThemeProvider>
+        </Router>
+      </MockChromeContextProvider>
     );
 
     act(() => {
@@ -534,13 +540,15 @@ describe('ModelSettings', () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
-      <Router history={history}>
-        <EuiThemeProvider>
-          <I18nProvider>
-            <ModelSettings />
-          </I18nProvider>
-        </EuiThemeProvider>
-      </Router>
+      <MockChromeContextProvider>
+        <Router history={history}>
+          <EuiThemeProvider>
+            <I18nProvider>
+              <ModelSettings />
+            </I18nProvider>
+          </EuiThemeProvider>
+        </Router>
+      </MockChromeContextProvider>
     );
 
     act(() => {
@@ -583,16 +591,6 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.queryByTestId('save-settings-button')).not.toBeInTheDocument();
-    });
-
-    it('still renders the documentation link', () => {
-      render(
-        <Wrapper>
-          <ModelSettings />
-        </Wrapper>
-      );
-
-      expect(screen.getByTestId('settings-api-documentation')).toBeInTheDocument();
     });
 
     it('passes disabled to DefaultModelSection', () => {

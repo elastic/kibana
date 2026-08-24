@@ -8,7 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface Props {
   onResendRequest: () => void;
@@ -25,25 +26,31 @@ export const LoadingError: FunctionComponent<Props> = ({
     <>
       <EuiSpacer size="s" />
 
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesLoadingFailedTitle"
             defaultMessage="Unable to load node data"
           />
         }
-        color="danger"
-      >
-        <p>
-          {message} ({statusCode})
-        </p>
-        <EuiButton onClick={onResendRequest} iconType="refresh" color="danger">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
-            defaultMessage="Try again"
-          />
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actionProps={{
+          primary: {
+            onClick: onResendRequest,
+            iconType: 'refresh',
+            children: (
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
+                defaultMessage="Try again"
+              />
+            ),
+          },
+        }}
+      />
 
       <EuiSpacer size="xl" />
     </>

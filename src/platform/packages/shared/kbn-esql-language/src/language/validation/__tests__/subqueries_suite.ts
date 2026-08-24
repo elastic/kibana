@@ -62,6 +62,12 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
           ['"inference_id" parameter is required for RERANK.']
         );
       });
+
+      it('validates time series functions against the FROM subquery source', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM (TS a_index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)))', []);
+      });
     });
 
     describe('WHERE IN subqueries', () => {
@@ -71,6 +77,20 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         await expectErrors(
           'FROM index | WHERE keywordField IN (FROM other_index | KEEP keywordField)',
           []
+        );
+      });
+
+      it('validates time series functions against the IN subquery source', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | WHERE 6.9 IN (TS a_index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)) | KEEP col0)',
+          []
+        );
+
+        await expectErrors(
+          'TS a_index | WHERE 6.9 IN (FROM index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)) | KEEP col0)',
+          ['Function AVG_OVER_TIME not allowed in STATS']
         );
       });
 
@@ -135,6 +155,25 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
             ]),
           }
         );
+      });
+    });
+
+    describe('EVAL IN subqueries', () => {
+      it('accepts a valid IN subquery with no errors', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | EVAL col0 = keywordField IN (FROM other_index | KEEP keywordField)',
+          []
+        );
+      });
+
+      it('validates sources inside IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM index | EVAL col0 = keywordField IN (FROM missing_index)', [
+          'Unknown index "missing_index"',
+        ]);
       });
     });
   });

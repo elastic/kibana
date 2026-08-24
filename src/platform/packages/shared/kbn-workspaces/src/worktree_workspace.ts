@@ -51,6 +51,7 @@ export class WorktreeWorkspace extends AbstractWorkspace {
       await checkout({
         log: this.context.log,
         dir: this.getDir(),
+        sourceRepo: this.context.repoRoot,
         sha,
       });
 
