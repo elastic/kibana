@@ -46,6 +46,18 @@ import {
   SearchRowsInputSchema,
 } from './types';
 
+const runSql = async (
+  ctx: ActionContext,
+  sql: string,
+  params?: string[]
+): Promise<unknown> => {
+  const pool = await ctx.getClient('mysql');
+  const [rows] = params
+    ? await pool.execute(sql, params as never[])
+    : await pool.execute(sql);
+  return rows;
+};
+
 export const MysqlConnector: ConnectorSpec = {
   metadata: {
     id: '.mysql',
@@ -133,15 +145,8 @@ export const MysqlConnector: ConnectorSpec = {
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
         assertReadOnly(input.sql);
-        // maxRows is a schema-validated integer — safe to inline directly.
-        // Avoid LIMIT ? binding: user SQL may contain '?' in string literals, causing
-        // a param-count mismatch in MySQL's binary prepared-statement protocol.
         const maxRows = input.maxRows ?? 100;
-        const pool = await ctx.getClient('mysql');
-        const [rows] = await pool.execute(
-          `SELECT * FROM (\n${input.sql}\n) AS _q LIMIT ${maxRows}`
-        );
-        return rows as unknown[];
+        return runSql(ctx, `SELECT * FROM (\n${input.sql}\n) AS _q LIMIT ${maxRows}`);
       },
     },
 
@@ -151,11 +156,7 @@ export const MysqlConnector: ConnectorSpec = {
       description:
         'List all databases available on the connected MySQL server. Use this first to discover what databases are accessible before querying tables.',
       input: ListDatabasesInputSchema,
-      handler: async (ctx) => {
-        const pool = await ctx.getClient('mysql');
-        const [rows] = await pool.execute('SHOW DATABASES');
-        return rows as unknown[];
-      },
+      handler: async (ctx) => runSql(ctx, 'SHOW DATABASES'),
     },
 
     listTables: {
@@ -166,9 +167,7 @@ export const MysqlConnector: ConnectorSpec = {
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const pool = await ctx.getClient('mysql');
-        const [rows] = await pool.execute(`SHOW TABLES FROM ${quoteIdentifier(db)}`);
-        return rows as unknown[];
+        return runSql(ctx, `SHOW TABLES FROM ${quoteIdentifier(db)}`);
       },
     },
 
@@ -180,11 +179,7 @@ export const MysqlConnector: ConnectorSpec = {
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const pool = await ctx.getClient('mysql');
-        const [rows] = await pool.execute(
-          `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`
-        );
-        return rows as unknown[];
+        return runSql(ctx, `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`);
       },
     },
 
@@ -204,10 +199,7 @@ export const MysqlConnector: ConnectorSpec = {
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
           ` WHERE ${whereClause} LIMIT ${maxRows}`;
-        const params = input.columns.map(() => likeParam);
-        const pool = await ctx.getClient('mysql');
-        const [rows] = await pool.execute(sql, params as never[]);
-        return rows as unknown[];
+        return runSql(ctx, sql, input.columns.map(() => likeParam));
       },
     },
 
@@ -217,11 +209,7 @@ export const MysqlConnector: ConnectorSpec = {
       description:
         'Execute any SQL statement against the MySQL database. No restrictions — INSERT, UPDATE, DELETE, DROP, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer query for read-only access.',
       input: ExecuteSqlInputSchema,
-      handler: async (ctx, input: ExecuteSqlInput) => {
-        const pool = await ctx.getClient('mysql');
-        const [result] = await pool.execute(input.sql);
-        return result as unknown;
-      },
+      handler: async (ctx, input: ExecuteSqlInput) => runSql(ctx, input.sql),
     },
   },
 
@@ -231,8 +219,7 @@ export const MysqlConnector: ConnectorSpec = {
     }),
     enabled: true,
     handler: async (ctx) => {
-      const pool = await ctx.getClient('mysql');
-      await pool.execute('SELECT 1');
+      await runSql(ctx, 'SELECT 1');
       return { message: 'Successfully connected to MySQL' };
     },
   },
