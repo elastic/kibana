@@ -18,3 +18,7 @@ export const ATTACK_TAB_EMPTY_TEST_ID = 'adCasesAttackTabEmpty';
 export const ATTACK_TAB_ROW_TITLE_TEST_ID = 'adCasesAttackTabRowTitle';
 export const ATTACK_TAB_ROW_STATUS_TEST_ID = 'adCasesAttackTabRowStatus';
 export const ATTACK_TAB_ROW_UNRESOLVED_TEST_ID = 'adCasesAttackTabRowUnresolved';
+export const REMOVE_ATTACK_BUTTON_TEST_ID = 'adCasesRemoveAttack';
+export const REMOVE_ATTACK_MODAL_TEST_ID = 'adCasesRemoveAttackModal';
+export const REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID = 'adCasesRemoveAttackAlertsCheckbox';
+export const REMOVE_ATTACK_ALERTS_EXPLANATION_TEST_ID = 'adCasesRemoveAttackAlertsExplanation';
