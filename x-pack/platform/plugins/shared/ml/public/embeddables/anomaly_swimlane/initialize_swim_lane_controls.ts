@@ -11,7 +11,6 @@ import type {
   AnomalySwimLaneEmbeddableState,
   SwimlaneType,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
@@ -38,7 +37,7 @@ export const initializeSwimLaneControls = (
   const perPage = new BehaviorSubject<number | undefined>(
     initialState.per_page ?? SWIM_LANE_DEFAULT_PAGE_SIZE
   );
-  const severityThreshold = new BehaviorSubject<SeverityThreshold[] | undefined>(
+  const severityThreshold = new BehaviorSubject<number | undefined>(
     initialState.severity_threshold
   );
 
@@ -50,7 +49,7 @@ export const initializeSwimLaneControls = (
     titlesApi.setTitle(update.title);
   };
 
-  const updateSeverityThreshold = (threshold: SeverityThreshold[] | undefined) => {
+  const updateSeverityThreshold = (threshold: number | undefined) => {
     severityThreshold.next(threshold);
   };
 
