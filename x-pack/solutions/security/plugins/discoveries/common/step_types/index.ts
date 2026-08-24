@@ -18,12 +18,31 @@ export {
 export { GenerateStepCommonDefinition, GenerateStepTypeId } from './generate_step';
 
 export {
+  GenericConfidenceStepCommonDefinition,
+  GenericConfidenceStepInputSchema,
+  GenericConfidenceStepOutputSchema,
+  GenericConfidenceStepTypeId,
+} from './generic_confidence_step';
+
+export {
   PersistDiscoveriesStepCommonDefinition,
   PersistDiscoveriesStepTypeId,
 } from './persist_discoveries_step';
 
 export { RunStepCommonDefinition, RunStepTypeId } from './run_step';
 
-export { AnonymizedAlertSchema, ApiConfigSchema, AttackDiscoverySchema } from './shared_schemas';
+export {
+  AnonymizedAlertSchema,
+  ApiConfigSchema,
+  AttackDiscoverySchema,
+  ConfidenceFactorSchema,
+  ConfidenceSchema,
+} from './shared_schemas';
 
-export type { AnonymizedAlert, ApiConfig, AttackDiscovery } from './shared_schemas';
+export type {
+  AnonymizedAlert,
+  ApiConfig,
+  AttackDiscovery,
+  Confidence,
+  ConfidenceFactor,
+} from './shared_schemas';

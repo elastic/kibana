@@ -32,6 +32,38 @@ export const ApiConfigSchema = z.object({
 export type ApiConfig = z.infer<typeof ApiConfigSchema>;
 
 /**
+ * A single contributing factor behind a confidence score. `weight` is a signed
+ * normalized contribution in [-1, 1] (negative for counter-evidence). Kept
+ * human-readable so the score stays auditable rather than a black-box number.
+ *
+ * NOTE: mirrors the reusable core in `@kbn/discoveries/impl/confidence` — that
+ * package is server-scoped, so this browser-safe `common` copy cannot import it.
+ * The two are consolidated when confidence is removed from the AD document.
+ */
+export const ConfidenceFactorSchema = z.object({
+  assessment: z.string(),
+  evidence: z.string().optional(),
+  name: z.string(),
+  weight: z.number().optional(),
+});
+
+export type ConfidenceFactor = z.infer<typeof ConfidenceFactorSchema>;
+
+/**
+ * Calibrated confidence for a security finding (an attack discovery or a bundle
+ * of related detection alerts). Orthogonal to severity / risk score: `score`
+ * (0.0-1.0) answers "how sure it's real", never "how bad".
+ */
+export const ConfidenceSchema = z.object({
+  band: z.enum(['high', 'medium', 'low']).optional(),
+  factors: z.array(ConfidenceFactorSchema),
+  rationale: z.string(),
+  score: z.number(),
+});
+
+export type Confidence = z.infer<typeof ConfidenceSchema>;
+
+/**
  * Reusable schema for a single generated attack discovery.
  */
 export const AttackDiscoverySchema = z.object({
