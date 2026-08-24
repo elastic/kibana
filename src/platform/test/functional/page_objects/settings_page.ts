@@ -774,18 +774,45 @@ export class SettingsPageObject extends FtrService {
 
   async removeIndexPattern() {
     let alertText;
+    let hasClickedConfirm = false;
     await this.retry.try(async () => {
       this.log.debug('click delete index pattern button');
+      // Best-effort: dismiss any lingering toasts before opening the flyout, while no
+      // overlay blocks the toast close buttons.
+      await this.toasts.dismissAll();
       await this.clickDeletePattern();
     });
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // The flyout can be found before its header text has painted; retry rather than
+      // accepting an empty read, which would only surface later as an assertion failure.
+      if (!alertText) {
+        throw new Error('deleteDataViewFlyoutHeader text not yet rendered');
+      }
     });
     await this.retry.try(async () => {
+      if (hasClickedConfirm && !(await this.testSubjects.exists('confirmFlyoutConfirmButton'))) {
+        // A previous click already succeeded and the flyout is gone (or on its way out);
+        // deleteDataViews() has no loading/disabled state, so re-clicking here would fire a
+        // second dataViews.delete() call that 404s and never calls onDelete(), wedging this
+        // retry. Nothing left to do.
+        return;
+      }
       this.log.debug('acceptConfirmation');
-      await this.toasts.dismissAllWithChecks();
-      await this.testSubjects.click('confirmFlyoutConfirmButton');
+      // Click via a short-retry element handle so an interception surfaces here instead of
+      // being swallowed by testSubjects.click's own long internal retry. Gate success on
+      // the flyout actually closing so an intercepted click causes the outer retry to
+      // re-try with a fresh state.
+      const confirmButton = await this.testSubjects.find('confirmFlyoutConfirmButton');
+      await confirmButton.click();
+      hasClickedConfirm = true;
+      // The Delete button's onClick kicks off a real saved-objects delete API call and the
+      // flyout only closes once that resolves; the default waitForExists timeout (2500ms) is
+      // far shorter than a real delete round-trip under CI load, so use the same longer
+      // timeout already used for this pattern elsewhere in this file (see
+      // indexPatternEditorFlyout above).
+      await this.testSubjects.missingOrFail('confirmFlyoutConfirmButton', { timeout: 30000 });
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
