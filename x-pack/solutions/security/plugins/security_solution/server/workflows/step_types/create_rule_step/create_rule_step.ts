@@ -18,10 +18,12 @@ export const createRuleStepDefinition = createServerStepDefinition({
   ...createRuleStepCommonDefinition,
   handler: async (context) => {
     try {
+      const { rule } = context.input;
       const { body } = await context.contextManager.callKibanaApi<CreateRuleOutput>({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_URL,
-        body: context.input,
+        // Rules created by this step are created as disabled unless "enabled" is explicitly set.
+        body: { ...rule, enabled: rule.enabled ?? false },
       });
       return { output: body };
     } catch (error) {

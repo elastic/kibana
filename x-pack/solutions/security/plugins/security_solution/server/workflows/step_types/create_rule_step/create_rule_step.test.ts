@@ -14,7 +14,7 @@ import type { createRuleInputSchema } from '../../../../common/workflows/step_ty
 
 type Context = StepHandlerContext<typeof createRuleInputSchema>;
 
-const ruleInput = {
+const rule = {
   type: 'esql',
   language: 'esql',
   name: 'Suspicious PowerShell Execution',
@@ -23,7 +23,7 @@ const ruleInput = {
   severity: 'high',
   risk_score: 73,
   enabled: false,
-} as Context['input'];
+} as Context['input']['rule'];
 
 describe('createRuleStepDefinition', () => {
   let mockContextManager: jest.Mocked<Context['contextManager']>;
@@ -36,13 +36,13 @@ describe('createRuleStepDefinition', () => {
     } as unknown as jest.Mocked<Context['contextManager']>;
 
     mockContext = {
-      input: ruleInput,
+      input: { rule },
       contextManager: mockContextManager,
     } as unknown as Context;
   });
 
-  it('forwards the step input verbatim to the rule creation endpoint and returns the created rule', async () => {
-    const createdRule = { ...ruleInput, id: 'rule-1', rule_id: 'rule-uuid-1' };
+  it('forwards the wrapped rule to the rule creation endpoint and returns the created rule', async () => {
+    const createdRule = { ...rule, id: 'rule-1', rule_id: 'rule-uuid-1' };
     mockContextManager.callKibanaApi.mockResolvedValue({
       status: 200,
       headers: {},
@@ -54,9 +54,51 @@ describe('createRuleStepDefinition', () => {
     expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
       method: 'POST',
       path: DETECTION_ENGINE_RULES_URL,
-      body: ruleInput,
+      body: rule,
     });
     expect(result.output).toEqual(createdRule);
+  });
+
+  it('defaults enabled to false when omitted from the wrapped rule', async () => {
+    const { enabled, ...ruleWithoutEnabled } = rule;
+    mockContext = {
+      input: { rule: ruleWithoutEnabled as Context['input']['rule'] },
+      contextManager: mockContextManager,
+    } as unknown as Context;
+    const createdRule = { ...ruleWithoutEnabled, enabled: false, id: 'rule-1' };
+    mockContextManager.callKibanaApi.mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: createdRule,
+    });
+
+    await createRuleStepDefinition.handler(mockContext);
+
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'POST',
+      path: DETECTION_ENGINE_RULES_URL,
+      body: { ...ruleWithoutEnabled, enabled: false },
+    });
+  });
+
+  it('forwards an explicit enabled value unchanged', async () => {
+    mockContext = {
+      input: { rule: { ...rule, enabled: true } },
+      contextManager: mockContextManager,
+    } as unknown as Context;
+    mockContextManager.callKibanaApi.mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ...rule, enabled: true, id: 'rule-1' },
+    });
+
+    await createRuleStepDefinition.handler(mockContext);
+
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'POST',
+      path: DETECTION_ENGINE_RULES_URL,
+      body: { ...rule, enabled: true },
+    });
   });
 
   it('routes API failures through toApiExecutionError', async () => {

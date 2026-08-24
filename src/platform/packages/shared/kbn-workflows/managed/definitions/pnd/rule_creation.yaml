@@ -180,19 +180,7 @@ steps:
     if: >-
       ${{ steps.review_creation.output.response.approved == true }}
     with:
-      type: esql
-      language: esql
-      name: "{{ steps.draft_creation.output.structured_output.name }}"
-      description: "{{ steps.draft_creation.output.structured_output.description }}"
-      query: "{{ steps.draft_creation.output.structured_output.query }}"
-      interval: "{{ steps.draft_creation.output.structured_output.interval }}"
-      from: "{{ steps.draft_creation.output.structured_output.from }}"
-      to: "{{ steps.draft_creation.output.structured_output.to }}"
-      severity: "{{ steps.draft_creation.output.structured_output.severity }}"
-      risk_score: "${{ steps.draft_creation.output.structured_output.risk_score }}"
-      threat: "${{ steps.draft_creation.output.structured_output.threat }}"
-      tags: "${{ steps.draft_creation.output.structured_output.tags }}"
-      enabled: false
+      rule: "${{ steps.draft_creation.output.structured_output }}"
 
   - name: emit_result
     type: workflow.output
