@@ -115,6 +115,8 @@ export interface Evaluator<
    * their model from the response. Undefined for CODE evaluators.
    */
   getModel?: () => ScoreModel | undefined;
+  /** Resolved evaluator version, read after `evaluate` for API-backed evaluators. */
+  getVersion?: () => string | undefined;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -181,6 +183,7 @@ export interface TaskRun {
 
 export interface EvaluationRun {
   name: string;
+  version?: string;
   result?: EvaluationResult;
   experimentRunId: string;
   traceId?: string | null;

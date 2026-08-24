@@ -107,10 +107,8 @@ export class EvaluatorApiClient {
     };
 
     return configs.flatMap((config) => {
-      // The judge model comes back with the first response for this config and is the
-      // same for every example, since it is derived from the config's own connector, so
-      // the examples evaluating in parallel all write the same value here.
       let resolvedModel: Model | undefined;
+      let resolvedVersion = config.version;
 
       const outputs: ScoreSelector[] = config.subScores
         ? config.subScores.map(({ key, evaluatorName }) => ({
@@ -131,6 +129,7 @@ export class EvaluatorApiClient {
         kind: config.kind,
         higherIsBetter: config.higherIsBetter,
         getModel: () => resolvedModel,
+        getVersion: () => resolvedVersion,
         evaluate: async (params) => {
           try {
             const result = await evaluateForTrace(params);
@@ -139,6 +138,7 @@ export class EvaluatorApiClient {
               throw new Error(`No evaluation result returned for "${config.name}"`);
             }
             resolvedModel = item.evaluator.model ?? resolvedModel;
+            resolvedVersion = item.evaluator.version;
             if (item.status === 'error') {
               throw new Error(item.error?.message ?? `Evaluator "${config.name}" failed`);
             }
