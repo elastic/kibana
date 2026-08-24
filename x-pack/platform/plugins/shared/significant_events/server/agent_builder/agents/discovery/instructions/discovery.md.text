@@ -297,7 +297,7 @@ For events returned by `platform_sig_events_event_search`, derive:
 - Maintain `continued_rule_uuids`, initially empty. It contains only rules accepted onto an open event; rule-search candidates and zero-result rules are never added. Add a detection's `rule_uuid` immediately on acceptance. Never assign the same `rule_uuid` twice.
 - **Rule Match** and **Topology Match** are independent accepts. A zero-result Rule Match does not block Topology Match. Topology Match does not require the new rule in `signal_rule_uuids` or a stored signal that passes `<incident_matching>` for that rule — compact search has no per-signal prose.
 - **Rule Match accept:** a stored signal for this `rule_uuid` passes `<incident_matching>`, or the Recovery reconciliation exception closes that same episode. A rule in `unresolved_rule_uuids` prevents closure but is not acceptance evidence by itself; a stored signal for a rule absent from that list has a non-confirming verdict and may be used only for Recovery reconciliation.
-- **Topology Match accept:** grounded topology overlaps the open event's stored topology, and the compact `title`, `summary`, and `symptom_hypothesis` describe the same incident this batch is confirming. That narrative-plus-topology test is enough to copy `event_id`.
+- **Topology Match accept:** grounded topology overlaps the open event's stored topology, and the current detection's grounded evidence passes `<incident_matching>` against the event's returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). That pair is enough to copy `event_id`.
 - Omit `event_id` only when neither phase accepts. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
 
 Before either routing search, derive each remaining detection's topology ID set from grounded `causal_features[].feature_id`, `blast_radius[].feature_id`, and matched query KI `features[].id`. Build `topology_feature_ids` as their distinct union.
@@ -322,10 +322,10 @@ This search runs on grounded topology inputs. It does not depend on Rule Match: 
 
 1. When `topology_feature_ids` is non-empty, call `platform_sig_events_event_search` with it; omit `rule_uuids` and `stream_names`.
 2. For each rule not in `continued_rule_uuids`, accept an event continuation when both hold:
-   - the current confirmed detection's grounded `causal_features[].feature_id` or exact `blast_radius[].feature_id` occurs in the returned open event's stored topology, and
-   - the open event's compact `title`, `summary`, and `symptom_hypothesis` support that this batch continues the same incident (same failure class and path; wording and local signatures may differ).
-   Reuse that `event_id`. Compact `signal_rule_uuids` need not contain the new rule. Different local error signatures, protocol layers, or upstream/downstream wording cannot split it.
-   - Reject only when **Current evidence** identifies a distinct resource or dependency path, or the stored narrative is a different incident.
+   - the current confirmed detection's grounded `causal_features[]` or exact `blast_radius[]` occurs in the returned open event's stored topology, and
+   - the current detection's grounded evidence passes `<incident_matching>` against the event's returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). Compact search has no per-signal prose.
+   Reuse that `event_id`. Compact `signal_rule_uuids` need not contain the new rule.
+   - Reject when `<incident_matching>` rejects, or when **Current evidence** identifies a distinct resource or dependency path.
      On accept, bind this detection's grounded `causal_features` and `blast_radius` for emit — both are required on the write payload even when stored topology from `event_search` is empty. `causal_features` without the grounded `blast_radius` dependency edges is incomplete.
    Add accepted rules to `continued_rule_uuids`.
 3. When `has_more` is true and some rules remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
@@ -469,5 +469,6 @@ Final payload constraints for `platform_sig_events_events_write`. The procedure 
 - `signals` (**required — never omit, never empty**): assemble at emit time from the final component assignment and grounding record. One signal per `metadata.rule_uuid`; each signal `description` maximum 350 characters including spaces. A critical event still requires the confirmation described in <critical_rules>.
 - `blast_radius`: grounded dependency edges (`type: "dependency"`) for confirmed hops. Omit extra `type: "entity"` nodes whose `feature_id` is already an edge `source` or `target`.
 - `causal_features`: every service whose signal in the item is `confirms`. Emit the deduplicated union finalized during grouping.
+- An `open` item with a `confirms` signal requires non-empty `causal_features` or `blast_radius`. Empty topology cannot be found by a later Topology Match search.
 
 </field_rules>
