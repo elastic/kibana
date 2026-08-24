@@ -148,7 +148,7 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     callOnCreateRule({ workflows: [existingAction] });
 
     expect(mockCreateMutate).toHaveBeenCalledWith(
-      { metadata: { name: 'My rule' } },
+      { payload: { metadata: { name: 'My rule' } } },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(mockSetupMutate).toHaveBeenCalledWith(
