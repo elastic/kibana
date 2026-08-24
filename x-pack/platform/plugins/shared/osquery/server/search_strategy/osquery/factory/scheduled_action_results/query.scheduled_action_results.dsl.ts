@@ -6,7 +6,10 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
+import {
+  ACTION_RESPONSES_DATA_STREAM_INDEX,
+  AGENT_CARDINALITY_PRECISION,
+} from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
 import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
@@ -63,6 +66,39 @@ export const buildScheduledActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
+              // Agent counts must use `agent_id` cardinality, not `doc_count`:
+              // a bucket can hold many response docs per agent (e.g. every run
+              // stamped `schedule_execution_count: 0` when the policy lacks
+              // `start_date`), which made doc counts render as inflated agents.
+              responded_agents: {
+                cardinality: {
+                  field: 'agent_id',
+                  precision_threshold: AGENT_CARDINALITY_PRECISION,
+                },
+              },
+              success_agents: {
+                filter: { bool: { must_not: { exists: { field: 'error' } } } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
+                },
+              },
+              error_agents: {
+                filter: { exists: { field: 'error' } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
+                },
+              },
+              // Doc counts retained: the status grid paginates response documents.
               responses: {
                 terms: {
                   script: {

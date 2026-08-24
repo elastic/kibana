@@ -389,7 +389,10 @@ describe('getScheduledActionResultsRoute', () => {
   });
 
   describe('aggregation extraction', () => {
-    it('should correctly extract success, failure, and row counts from nested aggregations', async () => {
+    // Legacy-shape fallback: responses from a cluster whose aggregation predates
+    // the `cardinality(agent_id)` sub-aggs still resolve via `doc_count`. Agent
+    // counts on the current shape are covered in `agent_count_regression.test.ts`.
+    it('should fall back to per-outcome doc counts when cardinality aggs are absent', async () => {
       const mockSearchFn = jest.fn().mockReturnValue(
         of(
           createMockScheduledResponse({

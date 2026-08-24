@@ -23,8 +23,9 @@ export interface ScheduledExecutionBucket {
   max_timestamp: { value: number; value_as_string: string };
   agent_count: { value: number };
   total_rows: { value: number };
-  success_count: { doc_count: number };
-  error_count: { doc_count: number };
+  // `agents.value` = agent cardinality; `doc_count` kept as pre-upgrade fallback.
+  success_count: { doc_count: number; agents?: { value: number } };
+  error_count: { doc_count: number; agents?: { value: number } };
   pack_id?: LabelTermsAggregation;
   pack_name?: LabelTermsAggregation;
   query_name?: LabelTermsAggregation;
@@ -131,8 +132,8 @@ export const processScheduledHistory = ({
       packId: packContext?.packId ?? firstLabel(bucket.pack_id),
       spaceId,
       agentCount: bucket.agent_count.value,
-      successCount: bucket.success_count.doc_count,
-      errorCount: bucket.error_count.doc_count,
+      successCount: bucket.success_count.agents?.value ?? bucket.success_count.doc_count,
+      errorCount: bucket.error_count.agents?.value ?? bucket.error_count.doc_count,
       totalRows: bucket.total_rows.value,
       scheduleId,
       executionCount,

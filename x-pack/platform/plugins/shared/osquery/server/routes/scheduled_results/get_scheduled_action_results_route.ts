@@ -30,6 +30,10 @@ interface ScheduledActionResultsAggregations {
   aggs: {
     responses_by_schedule: {
       rows_count: { value: number };
+      // Agent counts — `cardinality(agent_id)`, not document counts.
+      responded_agents?: { value: number };
+      success_agents?: { agents: { value: number } };
+      error_agents?: { agents: { value: number } };
       responses: {
         buckets: Array<{ key: string; doc_count: number }>;
       };
@@ -152,8 +156,21 @@ export const getScheduledActionResultsRoute = (
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
           const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
-          const successful = responsesBuckets?.find((b) => b.key === 'success')?.doc_count ?? 0;
-          const failed = responsesBuckets?.find((b) => b.key === 'error')?.doc_count ?? 0;
+          // Agent counts from `cardinality(agent_id)`; `doc_count` fallback only
+          // for pre-upgrade aggregation shapes.
+          const successful =
+            responsesBySchedule?.success_agents?.agents?.value ??
+            responsesBuckets?.find((b) => b.key === 'success')?.doc_count ??
+            0;
+          const failed =
+            responsesBySchedule?.error_agents?.agents?.value ??
+            responsesBuckets?.find((b) => b.key === 'error')?.doc_count ??
+            0;
+
+          // Overall cardinality, NOT `successful + failed` — an agent with both
+          // a success and an error doc would be double-counted by the sum.
+          const totalResponded =
+            responsesBySchedule?.responded_agents?.value ?? successful + failed;
 
           const total =
             typeof res.rawResponse.hits.total === 'number'
@@ -209,7 +226,7 @@ export const getScheduledActionResultsRoute = (
               totalPages: Math.ceil(total / pageSize),
               aggregations: {
                 totalRowCount: rowsCount,
-                totalResponded: successful + failed,
+                totalResponded,
                 successful,
                 failed,
                 pending: 0,
