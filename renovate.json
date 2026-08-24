@@ -1930,7 +1930,7 @@
     },
     {
       "groupName": "inquirer",
-      "matchDepNames": ["@types/inquirer", "inquirer"],
+      "matchDepNames": ["inquirer"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
