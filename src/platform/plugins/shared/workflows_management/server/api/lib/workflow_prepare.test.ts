@@ -8,7 +8,6 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { z } from '@kbn/zod/v4';
 
 import {
   applyFieldUpdates,
@@ -186,47 +185,54 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.triggerTypes).toEqual([]);
   });
 
-  describe('renaming a schema-invalid workflow', () => {
-    const realSchema: z.ZodType = getWorkflowZodSchema({}, [], { lightweight: true });
-    // Syntactically valid YAML that carries a name but fails schema validation
-    // (missing required triggers/steps), i.e. the state produced by renaming an invalid workflow.
-    const invalidYamlWithName = 'name: Renamed Invalid Workflow\ndescription: still broken';
+  it('surfaces validation errors when the renamed YAML still fails schema validation', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Renamed Invalid Workflow',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
 
-    it('extracts name from raw YAML so the rename persists', () => {
-      const result = applyYamlUpdate({
-        workflowYaml: invalidYamlWithName,
-        zodSchema: realSchema,
-        triggerDefinitions: [],
-      });
-      expect(result.updatedDataPatch.name).toBe('Renamed Invalid Workflow');
+    const result = applyYamlUpdate({
+      workflowYaml: invalidYamlWithName,
+      zodSchema,
+      triggerDefinitions: [],
     });
 
-    it('still reports the workflow as invalid', () => {
-      const result = applyYamlUpdate({
-        workflowYaml: invalidYamlWithName,
-        zodSchema: realSchema,
-        triggerDefinitions: [],
-      });
-      expect(result.updatedDataPatch.valid).toBe(false);
+    expect(result.validationErrors.length).toBeGreaterThan(0);
+  });
+
+  it('recovers tags from YAML that has valid tags but fails schema validation', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithTags = [
+      'version: "1"',
+      'name: Tagged Invalid Workflow',
+      'tags:',
+      '  - alpha',
+      '  - beta',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = applyYamlUpdate({
+      workflowYaml: invalidYamlWithTags,
+      zodSchema,
+      triggerDefinitions: [],
     });
 
-    it('still surfaces validation errors', () => {
-      const result = applyYamlUpdate({
-        workflowYaml: invalidYamlWithName,
-        zodSchema: realSchema,
-        triggerDefinitions: [],
-      });
-      expect(result.validationErrors.length).toBeGreaterThan(0);
-    });
-
-    it('omits name from the patch when the raw YAML has no string name', () => {
-      const result = applyYamlUpdate({
-        workflowYaml: 'description: no name here',
-        zodSchema: realSchema,
-        triggerDefinitions: [],
-      });
-      expect(result.updatedDataPatch).not.toHaveProperty('name');
-    });
+    expect(result.updatedDataPatch.tags).toEqual(['alpha', 'beta']);
+    expect(result.updatedDataPatch.valid).toBe(false);
   });
 
   it('recovers name/description from YAML that has a valid title but fails schema validation', () => {
@@ -279,6 +285,7 @@ describe('applyYamlUpdate', () => {
 
     expect(result.updatedDataPatch).not.toHaveProperty('name');
     expect(result.updatedDataPatch).not.toHaveProperty('description');
+    expect(result.updatedDataPatch).not.toHaveProperty('tags');
   });
 });
 

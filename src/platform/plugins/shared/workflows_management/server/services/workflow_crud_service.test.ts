@@ -2485,7 +2485,10 @@ describe('WorkflowCrudService', () => {
       jest.restoreAllMocks();
     });
 
-    it('persists a renamed name from invalid YAML into the stored document', async () => {
+    it('spreads the name from the yaml patch into the stored document', async () => {
+      // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
+      // returned patch (including `name`) into the indexed document — not that the name
+      // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
       jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
         updatedDataPatch: {
           definition: null,
