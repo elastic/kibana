@@ -238,7 +238,14 @@ export async function extractAndWriteSecrets(opts: {
     return { packagePolicy, secretReferences: [] };
   }
 
-  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+  // Skip paths that are already secret references (e.g. agent policy copy → bulkCreate).
+  // Without this, existing refs are re-posted to the secrets API and package policies fail to create.
+  const secretsToCreate = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
+  );
+  const existingSecretRefs = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value?.isSecretRef
+  );
 
   const secrets = await createSecrets({
     esClient,
@@ -253,7 +260,10 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secretReferences: secrets.map(({ id }) => ({ id })),
+    secretReferences: [
+      ...secrets.map(({ id }) => ({ id })),
+      ...existingSecretRefs.map((secretPath) => ({ id: secretPath.value.value.id })),
+    ],
   };
 }
 

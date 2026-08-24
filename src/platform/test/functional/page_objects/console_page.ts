@@ -158,6 +158,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -382,6 +389,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {

@@ -6,18 +6,17 @@
  */
 
 import { pick } from 'lodash';
-import type { ZodSchema } from '@kbn/zod';
 import { zodToJsonSchema, type JsonSchema7Type } from 'zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
-import { ToolDefinition } from '@langchain/core/language_models/base';
+import type { ToolDefinition } from '@langchain/core/language_models/base';
 import { isLangChainTool } from '@langchain/core/utils/function_calling';
-import { isZodSchema } from '@langchain/core/utils/types';
-import {
+import { isInteropZodSchema } from '@langchain/core/utils/types';
+import type {
   ToolDefinition as ToolDefinitionInference,
   ToolChoice as ToolChoiceInference,
-  ToolChoiceType,
   ToolSchema,
 } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolChoice } from '../types';
 
 export const toolDefinitionToInference = (
@@ -28,18 +27,12 @@ export const toolDefinitionToInference = (
     if (isLangChainTool(tool)) {
       definitions[tool.name] = {
         description: tool.description ?? tool.name,
-        schema: tool.schema
-          ? isZodSchema(tool.schema)
-            ? zodSchemaToInference(tool.schema)
-            : jsonSchemaToInference(tool.schema)
-          : undefined,
+        schema: tool.schema ? resolveToolSchema(tool.schema) : undefined,
       };
     } else if (isToolDefinition(tool)) {
       definitions[tool.function.name] = {
         description: tool.function.description ?? tool.function.name,
-        schema: isZodSchema(tool.function.parameters)
-          ? zodSchemaToInference(tool.function.parameters)
-          : (pick(tool.function.parameters, ['type', 'properties', 'required']) as ToolSchema),
+        schema: resolveToolSchema(tool.function.parameters),
       };
     }
   });
@@ -65,10 +58,13 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
   return 'type' in def && def.type === 'function' && 'function' in def && typeof def === 'object';
 }
 
-function zodSchemaToInference(schema: ZodSchema): ToolSchema {
-  return pick(zodToJsonSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
-}
-
-function jsonSchemaToInference(schema: JsonSchema7Type): ToolSchema {
-  return pick(schema, ['type', 'properties', 'required']) as ToolSchema;
+function resolveToolSchema(schema: unknown): ToolSchema {
+  if (isInteropZodSchema(schema)) {
+    return pick(zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]), [
+      'type',
+      'properties',
+      'required',
+    ]) as ToolSchema;
+  }
+  return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
 }

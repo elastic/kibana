@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client as ESClient, ClientOptions as ESClientOptions } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ClientOptions as ESClientOptions } from '@elastic/elasticsearch/lib/client';
+import { Client as ESClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
@@ -28,7 +29,10 @@ export async function getValidatedESClient(
   }
 ): Promise<ESClient> {
   const { log, cli = false } = helperSettings;
-  const es = new ESClient(esClientOptions);
+  const es = new ESClient({
+    requestTimeout: 60_000,
+    ...esClientOptions,
+  });
 
   try {
     const esInfo = await es.info();

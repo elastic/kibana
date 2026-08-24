@@ -19,7 +19,12 @@ import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { MonitorSummaryTLSRule } from './types';
 import { TLSLatestPing } from './tls_rule_executor';
-import { ALERT_DETAILS_URL } from '../action_variables';
+import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
+import {
+  generateAlertMessage,
+  getRelativeCertificatesViewInAppUrl,
+  getViewInAppUrl,
+} from '../common';
 import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
 import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
@@ -40,7 +45,6 @@ import {
   SERVICE_NAME,
   URL_FULL,
 } from '../../../common/field_names';
-import { generateAlertMessage } from '../common';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 interface TLSContent {
   summary: string;
@@ -74,6 +78,35 @@ const getValidAfter = (notAfter?: string): TLSContent => {
         summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
         status: tlsTranslations.expiringLabel,
       };
+};
+
+// Prefix that namespaces fingerprint-free browser-certificate alert ids so they
+// can never collide with a lightweight cert's raw sha256 and can be recognized
+// later (e.g. when enriching recovered-alert context).
+export const BROWSER_CERT_ALERT_ID_PREFIX = 'browser-cert';
+
+/**
+ * Derives the stable alert id for a certificate.
+ *
+ * Lightweight HTTP/TCP certificates always carry a `sha256` fingerprint, which
+ * we keep using verbatim so existing alerts retain their identity across the
+ * upgrade. Browser monitor network events do not index a fingerprint, so we
+ * fall back to the certificate's subject common name + issuer — the same dedupe
+ * key the Certificates page uses. That identity is stable across renewals (only
+ * `not_after` changes), so a renewed cert recovers the existing alert instead
+ * of spawning a duplicate. Returns `undefined` when neither identity is
+ * available, in which case the certificate is skipped.
+ */
+export const getTLSCertAlertId = (
+  cert: Partial<Pick<Cert, 'sha256' | 'common_name' | 'issuer'>>
+): string | undefined => {
+  if (cert.sha256) {
+    return cert.sha256;
+  }
+  if (cert.common_name) {
+    return `${BROWSER_CERT_ALERT_ID_PREFIX}:${cert.common_name}:${cert.issuer ?? ''}`;
+  }
+  return undefined;
 };
 
 export type CertSummary = ReturnType<typeof getCertSummary>;
@@ -117,6 +150,29 @@ export const getCertSummary = (
     checkedAt: cert['@timestamp'],
   };
 };
+
+const getTlsViewInAppUrl = (basePath: IBasePath, spaceId: string) =>
+  getViewInAppUrl(basePath, spaceId, getRelativeCertificatesViewInAppUrl());
+
+const getTlsAlertUrlContext = async (basePath: IBasePath, spaceId: string, alertUuid: string) => ({
+  [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, alertUuid),
+  [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
+});
+
+export const getTLSAlertContext = async ({
+  basePath,
+  spaceId,
+  summary,
+  alertUuid,
+}: {
+  basePath: IBasePath;
+  spaceId: string;
+  summary: CertSummary;
+  alertUuid: string;
+}) => ({
+  ...(await getTlsAlertUrlContext(basePath, spaceId, alertUuid)),
+  ...summary,
+});
 
 export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uuid: string) => ({
   [CERT_COMMON_NAME]: cert.common_name,
@@ -177,6 +233,34 @@ export const setTLSRecoveredAlertsContext = async ({
       values: { commonName: state.commonName, summary: state.summary },
     });
 
+    // Browser certificates carry no sha256 fingerprint and live on per-resource
+    // network events rather than the monitor's summary ping, so we cannot
+    // reconcile them against `latestPing` the way lightweight certs are below.
+    // Emit a fingerprint-free recovery message and move on.
+    if (!state.sha256) {
+      const newStatus = i18n.translate('xpack.synthetics.alerts.tls.browserRecovered.newStatus', {
+        defaultMessage:
+          'Certificate {commonName} is no longer expiring or aging within the configured threshold.',
+        values: { commonName: state.commonName },
+      });
+      const newSummary = i18n.translate('xpack.synthetics.alerts.tls.browserRecovered.newSummary', {
+        defaultMessage:
+          'Monitor certificate has been updated or is no longer within the alert threshold.',
+      });
+      alertsClient.setAlertData({
+        id: recoveredAlertId,
+        context: {
+          ...state,
+          newStatus,
+          previousStatus,
+          summary: newSummary,
+          [ALERT_DETAILS_URL]: alertUrl,
+          [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
+        },
+      });
+      continue;
+    }
+
     const newCommonName = latestPing?.tls?.server?.x509?.subject.common_name ?? '';
     const newExpiryDate = latestPing?.tls?.server?.x509?.not_after ?? '';
 
@@ -207,6 +291,7 @@ export const setTLSRecoveredAlertsContext = async ({
       previousStatus,
       summary: newSummary,
       [ALERT_DETAILS_URL]: alertUrl,
+      [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }

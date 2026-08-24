@@ -322,7 +322,6 @@
         "react-router",
         "react-router-config",
         "react-router-dom",
-        "react-router-dom-v5-compat",
         "@types/react-router",
         "@types/react-router-config",
         "@types/react-router-dom",
@@ -455,9 +454,9 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/kibana-cloud-security-posture dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "xterm"],
-      "reviewers": ["team:kibana-cloud-security-posture"],
+      "groupName": "@elastic/contextual-security-apps dependencies",
+      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
+      "reviewers": ["team:contextual-security-apps"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:all-open"],
       "enabled": true,
@@ -821,7 +820,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -899,7 +898,7 @@
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
-        "eslint-plugin-eslint-comments",
+        "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
         "eslint-plugin-jest",
@@ -1635,7 +1634,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: SecuritySolution", "backport:all-open", "release_note:skip"],
@@ -1776,7 +1775,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-yaml",
         "magic-bytes.js",
         "minimist",
         "object-hash",
@@ -1785,7 +1783,6 @@
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
-        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
@@ -1799,12 +1796,12 @@
       "enabled": true
     },
     {
-      "groupName": "platform security modules - ESM required",
-      "matchDepNames": ["@kayahr/text-encoding", "uuid", "@types/uuid"],
+      "groupName": "uuid",
+      "matchDepNames": ["uuid"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
-      "minimumReleaseAge": "7 days",
+      "addLabels": ["Team:Security"],
+      "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {

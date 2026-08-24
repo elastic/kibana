@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.20>>
 * <<release-notes-8.19.19>>
 * <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
@@ -126,10 +127,41 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.20]]
+== {kib} 8.19.20
+
+The 8.19.20 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.20]]
+=== Fixes
+Data ingestion and Fleet::
+* Fix Kafka outputs incorrectly accepting a proxy configuration, which Kafka doesn't support ({kibana-pull}282313[#282313]).
+* Fix preconfigured Fleet proxies being rewritten on every {kib} startup even when unchanged, which needlessly incremented dependent agent policies ({kibana-pull}281059[#281059]).
+* Fix Fleet package policy bulk creation to store secrets in the secrets index instead of inline on the saved object, matching the existing create, update, and bulk update behavior ({kibana-pull}282213[#282213]).
+* Fix the create enrollment API key request to preserve an existing expiration value when creating the key in {es} security ({kibana-pull}281324[#281324]).
+Data management::
+* Fix ILM Explain in Index Management to include hidden and system indices when filtering by lifecycle phase ({kibana-pull}282137[#282137]).
+* Fix Cross-Cluster Replication to clear selected follower indices after a pause, resume, or unfollow action, so the Manage menu reflects the updated state ({kibana-pull}273576[#273576]).
+Elastic Observability solution::
+* Fix the Synthetics monitors overview failing to load maintenance window status for users with read-only access ({kibana-pull}281894[#281894]).
+Elastic Security solution::
+For the Elastic Security 8.19.20 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Machine Learning::
+* Fix the trained model infer, update, and stop APIs to prevent a deployment ID from being used to access a different trained model ({kibana-pull}280511[#280511]).
+* Fix the annotation and anomaly result search APIs to enforce job-level space access checks, and require a job ID on anomaly searches to prevent bypassing those checks ({kibana-pull}277197[#277197]).
+* Fix {ml} saved objects APIs to accept any one of the anomaly detection, data frame analytics, or trained models privileges instead of requiring all three, and correctly check trained models access when removing a saved object from a space ({kibana-pull}276936[#276936]).
+
 [[release-notes-8.19.19]]
 == {kib} 8.19.19
 
 The 8.19.19 release includes the following enhancements and fixes.
+
+[IMPORTANT]
+====
+The 8.19.19 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
 
 [float]
 [[enhancement-v8.19.19]]
