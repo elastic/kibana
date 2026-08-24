@@ -6,10 +6,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID, PLUGIN_NAME, EVALS_UI_PRIVILEGES } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, APP_PATH, EVALS_UI_PRIVILEGES } from '../common';
 import type {
   AddToDatasetAction,
   AddToDatasetActionConfig,
@@ -49,6 +50,23 @@ export class EvalsPublicPlugin
     if (this.config.enabled && workflowsExtensions) {
       registerEvalsPublicWorkflowSteps(workflowsExtensions);
     }
+
+    coreSetup.application.register({
+      id: PLUGIN_ID,
+      title: i18n.translate('xpack.evals.app.title', {
+        defaultMessage: PLUGIN_NAME,
+      }),
+      appRoute: APP_PATH,
+      euiIconType: 'beaker',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+      keywords: [...MANAGEMENT_KEYWORDS],
+      async mount({ element, history }) {
+        const { mountStandaloneApp } = await import('./standalone_app/mount_app');
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return mountStandaloneApp({ coreStart, startDeps, element, history });
+      },
+    });
 
     if (management) {
       management.sections.section.ai.registerApp({

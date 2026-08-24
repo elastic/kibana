@@ -7,7 +7,8 @@
 
 export const PLUGIN_ID = 'evals' as const;
 export const PLUGIN_NAME = 'Evaluations' as const;
-export const APP_PATH = '/app/management/ai/evals' as const;
+export const APP_PATH = '/app/evals' as const;
+export const MANAGEMENT_APP_PATH = '/app/management/ai/evals' as const;
 
 export const EVALS_API_PRIVILEGES = {
   read: 'read_evals',
