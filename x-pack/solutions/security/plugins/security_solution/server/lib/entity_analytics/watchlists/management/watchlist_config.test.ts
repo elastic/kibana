@@ -91,7 +91,6 @@ describe('WatchlistConfigClient', () => {
         refresh: 'wait_for',
       });
     });
-
   });
 
   describe('getEntityCounts', () => {
