@@ -18,6 +18,7 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 
 /**
  * Reconstructs rounds from a timeline.
