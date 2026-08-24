@@ -79,13 +79,14 @@ describe('Legacy hash-based dashboard links', { tags: ['@ess', '@serverless'] },
 
 describe('Legacy hash-based dashboard links in a non-default space', { tags: ['@ess'] }, () => {
   const SPACE_ID = 'legacy-hash-dashboard-link-space';
-  const importedSavedObjects: Array<{ type: string; id: string }> = [];
+  let importedSavedObjects: Array<{ type: string; id: string }> = [];
 
   before(() => {
+    // The space must exist before anything can be imported into it; `activateSpace` is also
+    // called per-test in `beforeEach` below, but that runs after this hook.
     activateSpace(SPACE_ID);
     importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID).then((objects) => {
-      login();
-      activateSpace(SPACE_ID);
+      importedSavedObjects = objects;
     });
   });
 
