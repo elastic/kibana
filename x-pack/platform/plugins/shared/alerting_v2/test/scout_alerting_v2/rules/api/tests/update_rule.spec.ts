@@ -232,6 +232,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'update: persists a conditionless composed query without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-conditionless-composed' } })
+      );
+      const query = {
+        format: 'composed' as const,
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      };
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual(query);
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.query).toStrictEqual(query);
+    }
+  );
+
+  apiTest(
     'update: should update query to composed format with a recovery segment',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
