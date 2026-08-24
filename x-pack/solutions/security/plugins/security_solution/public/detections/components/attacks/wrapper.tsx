@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { PageScope } from '../../../data_view_manager/constants';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useIsCpsLinkedSearchSpace } from '../../../common/hooks/use_is_cps_linked_search_space';
+import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AttacksPageContent } from './content';
 import { UninitializedDataViewEmptyState } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
@@ -35,11 +34,6 @@ export const SKELETON_TEST_ID = 'attacks-page-skeleton';
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.attacksPage.dataViewError', {
   defaultMessage: 'Unable to retrieve the data view',
 });
-
-const DATAVIEW_DEGRADED_TITLE = i18n.translate(
-  'xpack.securitySolution.attacksPage.dataViewDegradedTitle',
-  { defaultMessage: 'Some attack data view fields are unavailable' }
-);
 
 /**
  * Renders the attacks page when the provided dataView is valid.
@@ -91,18 +85,15 @@ export const Wrapper = React.memo(() => {
       <>
         {isDataViewDegraded && (
           <>
-            <KbnWarningCallout
+            <DataViewDegradedCallout
+              dataView={dataView}
               data-test-subj={DATA_VIEW_DEGRADED_TEST_ID}
-              title={DATAVIEW_DEGRADED_TITLE}
             >
               <FormattedMessage
-                id="xpack.securitySolution.attacksPage.dataViewDegradedDescription"
-                defaultMessage="Index pattern {indexPattern} matched no indices. Attacks are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
-                values={{
-                  indexPattern: <EuiCode>{dataView.getIndexPattern()}</EuiCode>,
-                }}
+                id="xpack.securitySolution.attacksPage.dataViewDegradedDetailsDescription"
+                defaultMessage="Attacks are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
               />
-            </KbnWarningCallout>
+            </DataViewDegradedCallout>
             <EuiSpacer size="m" />
           </>
         )}
