@@ -55,6 +55,8 @@ export const buildSecurityApi = ({
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         grantAsInternalUser: (request, createParams) =>
           getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        bulkGrantAsInternalUser: (request, createParams) =>
+          getAuthc().apiKeys.bulkGrantAsInternalUser(request, createParams),
         cloneAsInternalUser: (request, cloneParams) =>
           getAuthc().apiKeys.cloneAsInternalUser(request, cloneParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),

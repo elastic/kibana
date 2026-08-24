@@ -18,6 +18,8 @@ export { getAuthorizationFilter } from './get_authorization_filter';
 export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';
 export { scheduleTask, bulkScheduleTask, buildTaskInstance } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
+export { grantBulkApiKeys } from './grant_bulk_api_keys';
+export type { GrantedKey, GrantBulkItem, GrantBulkResult } from './grant_bulk_api_keys';
 export { untrackRuleAlerts } from './untrack_rule_alerts';
 export { bulkMigrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actions';
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';

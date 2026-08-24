@@ -88,6 +88,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
+    | 'bulkGrantAsInternalUser'
     | 'cloneAsInternalUser'
     | 'invalidateAsInternalUser'
     | 'uiam'
@@ -464,6 +465,7 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
+        bulkGrantAsInternalUser: apiKeys.bulkGrantAsInternalUser.bind(apiKeys),
         cloneAsInternalUser: apiKeys.cloneAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),

@@ -12,6 +12,7 @@ import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
+  BulkGrantAPIKeyResult,
   ClientAuthentication,
   CloneAPIKeyParams,
   CloneAPIKeyResult,
@@ -52,18 +53,21 @@ export interface ConstructorOptions {
   uiam?: UiamServicePublic;
 }
 
-type GrantAPIKeyParams =
+type GrantCredentials =
   | {
-      api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'password';
       username: string;
       password: string;
     }
   | {
-      api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'access_token';
       access_token: string;
+      client_authentication?: ClientAuthentication;
     };
+
+type GrantAPIKeyParams = GrantCredentials & {
+  api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
+};
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -287,39 +291,9 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
-    let clientAuthentication: ClientAuthentication | undefined;
-
-    if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
-    } else {
-      const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
-        request,
-        ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
-      );
-
-      if (clientAuthorizationHeader) {
-        clientAuthentication = {
-          scheme: clientAuthorizationHeader.scheme,
-          value: clientAuthorizationHeader.credentials,
-        };
-      }
-    }
-
-    const { expiration, metadata, name } = createParams;
-    const roleDescriptors =
-      'role_descriptors' in createParams
-        ? createParams.role_descriptors
-        : this.parseRoleDescriptorsWithKibanaPrivileges(
-            createParams.kibana_role_descriptors,
-            this.kibanaFeatures,
-            false
-          );
-
+    const clientAuthentication = this.resolveClientAuthentication(request, authorizationHeader);
     const params = this.getGrantParams(
-      { expiration, metadata, name, role_descriptors: roleDescriptors },
+      this.toApiKeyBody(createParams),
       authorizationHeader,
       clientAuthentication
     );
@@ -334,6 +308,54 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     return result;
+  }
+
+  /**
+   * Tries to grant multiple API keys for the current user in a single Elasticsearch call.
+   */
+  async bulkGrantAsInternalUser(
+    request: KibanaRequest,
+    createParams: Array<CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams>
+  ): Promise<BulkGrantAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    if (createParams.length === 0) {
+      return { created: [] };
+    }
+
+    this.logger.debug(`Trying to bulk grant ${createParams.length} API keys`);
+
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        `Unable to grant an API Key, request does not contain an authorization header`
+      );
+    }
+
+    const clientAuthentication = this.resolveClientAuthentication(request, authorizationHeader);
+    const credentials = this.getGrantCredentials(authorizationHeader, clientAuthentication);
+    const apiKeys = createParams.map((params) => this.toApiKeyBody(params));
+
+    try {
+      const result =
+        await this.clusterClient.asInternalUser.transport.request<BulkGrantAPIKeyResult>({
+          method: 'POST',
+          path: '/_security/api_key/_bulk_grant',
+          body: {
+            ...credentials,
+            api_keys: apiKeys,
+          },
+        });
+      this.logger.debug(
+        `Bulk granted ${result.created.length}/${createParams.length} API keys successfully`
+      );
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to bulk grant API keys: ${e.message}`);
+      throw e;
+    }
   }
 
   /**
@@ -483,14 +505,36 @@ export class APIKeys implements NativeAPIKeysType {
     );
   }
 
-  private getGrantParams(
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+  private resolveClientAuthentication(
+    request: KibanaRequest,
+    authorizationHeader: HTTPAuthorizationHeader
+  ): ClientAuthentication | undefined {
+    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
+    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
+    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    if (this.uiam && isUiamCredential(authorizationHeader)) {
+      return this.uiam.getClientAuthentication();
+    }
+
+    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
+      request,
+      ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
+    );
+
+    if (clientAuthorizationHeader) {
+      return {
+        scheme: clientAuthorizationHeader.scheme,
+        value: clientAuthorizationHeader.credentials,
+      };
+    }
+  }
+
+  private getGrantCredentials(
     authorizationHeader: HTTPAuthorizationHeader,
     clientAuthentication?: ClientAuthentication
-  ): GrantAPIKeyParams {
+  ): GrantCredentials {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
-        api_key: createParams,
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
         ...(clientAuthentication ? { client_authentication: clientAuthentication } : {}),
@@ -502,7 +546,6 @@ export class APIKeys implements NativeAPIKeysType {
         authorizationHeader.credentials
       );
       return {
-        api_key: createParams,
         grant_type: 'password',
         username: basicCredentials.username,
         password: basicCredentials.password,
@@ -510,6 +553,36 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     throw new Error(`Unsupported scheme "${authorizationHeader.scheme}" for granting API Key`);
+  }
+
+  private toApiKeyBody(
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+  ): CreateRestAPIKeyParams {
+    const { expiration, metadata, name } = createParams;
+    return {
+      expiration,
+      metadata,
+      name,
+      role_descriptors:
+        'role_descriptors' in createParams
+          ? createParams.role_descriptors
+          : this.parseRoleDescriptorsWithKibanaPrivileges(
+              createParams.kibana_role_descriptors,
+              this.kibanaFeatures,
+              false
+            ),
+    };
+  }
+
+  private getGrantParams(
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    authorizationHeader: HTTPAuthorizationHeader,
+    clientAuthentication?: ClientAuthentication
+  ): GrantAPIKeyParams {
+    return {
+      ...this.getGrantCredentials(authorizationHeader, clientAuthentication),
+      api_key: createParams,
+    };
   }
 
   private parseRoleDescriptorsWithKibanaPrivileges(

@@ -90,6 +90,7 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  BulkGrantAPIKeyResult,
   CloneAPIKeyParams,
   CloneAPIKeyResult,
 } from '@kbn/core-security-server';

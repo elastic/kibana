@@ -34,6 +34,7 @@ import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
+import type { CreateAPIKeyResult } from './rules_client/types';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
@@ -231,7 +232,7 @@ export class RulesClientFactory {
         `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`,
         {
           tags: UIAM_LOGS_GRANT_TAGS,
-          error: { stack_trace: err.stack },
+          error: { stack_trace: err instanceof Error ? err.stack : undefined },
         }
       );
       return;
@@ -360,6 +361,124 @@ export class RulesClientFactory {
     await Promise.all(tasks);
   }
 
+  private async createAPIKeyForRule(
+    request: KibanaRequest,
+    name: string
+  ): Promise<CreateAPIKeyResult> {
+    if (!this.securityPluginStart) {
+      return { apiKeysEnabled: false };
+    }
+    const createUiamApiKeyResult = await this.createUiamApiKey(request, name);
+
+    let createEsAPIKeyResult;
+    try {
+      createEsAPIKeyResult = await this.securityService.authc.apiKeys.grantAsInternalUser(request, {
+        name,
+        role_descriptors: {},
+        metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+      });
+    } catch (err) {
+      if (createUiamApiKeyResult?.id) {
+        await this.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+      }
+      throw err;
+    }
+
+    if (!createEsAPIKeyResult) {
+      if (createUiamApiKeyResult?.id) {
+        await this.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+      }
+      return { apiKeysEnabled: false };
+    }
+
+    return {
+      apiKeysEnabled: true,
+      result: createEsAPIKeyResult,
+      ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
+    };
+  }
+
+  private async createAPIKeysForRules(
+    request: KibanaRequest,
+    names: string[]
+  ): Promise<CreateAPIKeyResult[]> {
+    if (names.length === 0) {
+      return [];
+    }
+    if (!this.securityPluginStart) {
+      return names.map(() => ({ apiKeysEnabled: false as const }));
+    }
+
+    const metadata = { managed: true, kibana: { type: 'alerting_rule' } };
+    const uiamResults = await Promise.all(
+      names.map((name) => this.createUiamApiKey(request, name))
+    );
+
+    const invalidateUiam = async (indices: number[]) => {
+      await Promise.all(
+        indices.map(async (i) => {
+          const uiam = uiamResults[i];
+          if (uiam?.id) {
+            await this.invalidateUiamApiKey(request, names[i], uiam.id);
+          }
+        })
+      );
+    };
+
+    const toResult = (
+      esResult: GrantAPIKeyResult | undefined,
+      uiamResult: GrantAPIKeyResult | undefined
+    ): CreateAPIKeyResult => {
+      if (!esResult) {
+        return { apiKeysEnabled: false };
+      }
+      return {
+        apiKeysEnabled: true,
+        result: esResult,
+        ...(uiamResult ? { uiamResult } : {}),
+      };
+    };
+
+    try {
+      const bulk = await this.securityService.authc.apiKeys.bulkGrantAsInternalUser(
+        request,
+        names.map((name) => ({ name, role_descriptors: {}, metadata }))
+      );
+
+      if (!bulk) {
+        await invalidateUiam(names.map((_, i) => i));
+        return names.map(() => ({ apiKeysEnabled: false as const }));
+      }
+
+      const results: CreateAPIKeyResult[] = [];
+      const failedIndices: number[] = [];
+      let createdIndex = 0;
+      for (let i = 0; i < names.length; i++) {
+        const created = bulk.created[createdIndex];
+        if (created && created.name === names[i]) {
+          results.push(toResult(created, uiamResults[i]));
+          createdIndex++;
+        } else {
+          failedIndices.push(i);
+          results.push({ apiKeysEnabled: false });
+        }
+      }
+      await invalidateUiam(failedIndices);
+      return results;
+    } catch (err) {
+      await invalidateUiam(names.map((_, i) => i));
+      if (isBulkGrantUnsupported(err)) {
+        this.logger.debug(
+          `bulk grant endpoint unavailable, falling back to per-rule grant: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        return Promise.all(names.map((name) => this.createAPIKeyForRule(request, name)));
+      }
+      throw err;
+    }
+  }
+
   private async createInternal({
     request,
     savedObjects,
@@ -427,43 +546,10 @@ export class RulesClientFactory {
         return user?.username ?? null;
       },
       async createAPIKey(name: string) {
-        if (!securityPluginStart) {
-          return { apiKeysEnabled: false };
-        }
-        // Create an API key using the new grant API - in this case the Kibana system user is creating the
-        // API key for the user, instead of having the user create it themselves, which requires api_key
-        // privileges
-        const createUiamApiKeyResult = await factory.createUiamApiKey(request, name);
-
-        let createEsAPIKeyResult;
-        try {
-          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
-            name,
-            role_descriptors: {},
-            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          });
-        } catch (err) {
-          // if the ES API key creation failed, we need to invalidate the UIAM API key
-          if (createUiamApiKeyResult?.id) {
-            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
-          }
-          // rethrow the error to be handled by the caller
-          throw err;
-        }
-
-        // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
-        if (!createEsAPIKeyResult) {
-          if (createUiamApiKeyResult?.id) {
-            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
-          }
-          return { apiKeysEnabled: false };
-        }
-
-        return {
-          apiKeysEnabled: true,
-          result: createEsAPIKeyResult,
-          ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
-        };
+        return factory.createAPIKeyForRule(request, name);
+      },
+      async createAPIKeys(names: string[]) {
+        return factory.createAPIKeysForRules(request, names);
       },
       async getActionsClient() {
         if (isExplicitSpaceOverride) {
@@ -576,3 +662,14 @@ export class RulesClientFactory {
     });
   }
 }
+
+const isBulkGrantUnsupported = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const status = (error as { statusCode?: number }).statusCode;
+  const bodyReason = (error as { body?: { error?: { reason?: string } } }).body?.error?.reason;
+  const message = error instanceof Error ? error.message : String(error);
+  const reason = bodyReason ?? message;
+  return status === 404 || status === 405 || /no handler found/i.test(reason);
+};

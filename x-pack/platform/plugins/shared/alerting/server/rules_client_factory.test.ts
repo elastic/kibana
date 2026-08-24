@@ -194,6 +194,7 @@ describe('RulesClientFactory', () => {
         getActionsClient: expect.any(Function),
         getEventLogClient: expect.any(Function),
         createAPIKey: expect.any(Function),
+        createAPIKeys: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
         encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
         kibanaVersion: '7.10.0',
@@ -274,6 +275,7 @@ describe('RulesClientFactory', () => {
         getUserName: expect.any(Function),
         changeTrackingService: scopedChangeTrackingService,
         createAPIKey: expect.any(Function),
+        createAPIKeys: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
         encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
         getActionsClient: expect.any(Function),
@@ -681,6 +683,100 @@ describe('RulesClientFactory', () => {
     expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
       id: 'uiam-id',
     });
+  });
+
+  test('createAPIKeys() bulk-grants ES keys in one call', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.apiKeys.bulkGrantAsInternalUser.mockResolvedValueOnce({
+      created: [
+        { id: 'a', name: 'key-a', api_key: 'secret-a' },
+        { id: 'b', name: 'key-b', api_key: 'secret-b' },
+      ],
+    });
+
+    const result = await constructorCall.createAPIKeys(['key-a', 'key-b']);
+
+    expect(securityService.authc.apiKeys.bulkGrantAsInternalUser).toHaveBeenCalledWith(
+      expect.any(Object),
+      [
+        {
+          name: 'key-a',
+          role_descriptors: {},
+          metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        },
+        {
+          name: 'key-b',
+          role_descriptors: {},
+          metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        },
+      ]
+    );
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    expect(result).toEqual([
+      { apiKeysEnabled: true, result: { id: 'a', name: 'key-a', api_key: 'secret-a' } },
+      { apiKeysEnabled: true, result: { id: 'b', name: 'key-b', api_key: 'secret-b' } },
+    ]);
+  });
+
+  test('createAPIKeys() falls back to per-rule grant when bulk endpoint is unavailable', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.apiKeys.bulkGrantAsInternalUser.mockRejectedValueOnce({
+      statusCode: 404,
+      message: 'no handler found for uri [/_security/api_key/_bulk_grant]',
+    });
+    securityService.authc.apiKeys.grantAsInternalUser
+      .mockResolvedValueOnce({ api_key: '1', id: 'a', name: 'key-a' })
+      .mockResolvedValueOnce({ api_key: '2', id: 'b', name: 'key-b' });
+
+    const result = await constructorCall.createAPIKeys(['key-a', 'key-b']);
+
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledTimes(2);
+    expect(result).toEqual([
+      { apiKeysEnabled: true, result: { api_key: '1', id: 'a', name: 'key-a' } },
+      { apiKeysEnabled: true, result: { api_key: '2', id: 'b', name: 'key-b' } },
+    ]);
+  });
+
+  test('createAPIKeys() maps omitted created keys as apiKeysEnabled: false', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.apiKeys.bulkGrantAsInternalUser.mockResolvedValueOnce({
+      created: [{ id: 'b', name: 'key-b', api_key: 'secret-b' }],
+      errors: { count: 1, details: { 'missing-id': { reason: 'failed' } } },
+    });
+
+    const result = await constructorCall.createAPIKeys(['key-a', 'key-b']);
+
+    expect(result).toEqual([
+      { apiKeysEnabled: false },
+      { apiKeysEnabled: true, result: { id: 'b', name: 'key-b', api_key: 'secret-b' } },
+    ]);
   });
 
   test('create() calls getSpaceId to derive spaceId from request', async () => {
