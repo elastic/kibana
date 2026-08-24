@@ -25,3 +25,41 @@ export {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
 } from './src/layouts/grid_global_app_style';
+
+export {
+  layoutVar,
+  layoutVarName,
+  layoutLevels,
+  APP_MAIN_SCROLL_CONTAINER_ID,
+  FLYOUT_SELECTOR,
+  MAIN_CONTENT_SELECTORS,
+  SIDE_PANEL_CONTENT_GAP,
+  euiIncludeSelectorInFocusTrap,
+} from './src/constants';
+export type {
+  LayoutVarName,
+  CSSVarName,
+  LayoutComponent,
+  LayoutProperty,
+  ApplicationComponent,
+  ApplicationVarName,
+} from './src/constants';
+
+export {
+  type ScrollContainer,
+  getScrollContainer,
+  scrollTo,
+  scrollToTop,
+  scrollToBottom,
+  getViewportHeight,
+  getViewportBoundaries,
+  getScrollPosition,
+  getScrollDimensions,
+  scrollBy,
+  isAtBottomOfPage,
+  type HighContrastSeparatorOptions,
+  getHighContrastBorder,
+  getHighContrastSeparator,
+  useCurrentChromeApplicationBreakpoint,
+  useIsWithinChromeApplicationBreakpoints,
+} from './src/utils';
