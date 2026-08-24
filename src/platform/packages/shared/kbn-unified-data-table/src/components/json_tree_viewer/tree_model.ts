@@ -62,6 +62,24 @@ export type JsonNode = CollectionNode | LeafNode;
 
 export type FormatValue = (leaf: { value: JsonPrimitive; path: readonly string[] }) => ReactNode;
 
+/** A trailing action rendered at the end of a leaf row (e.g. a filter button). */
+export interface JsonTreeRowAction {
+  id: string;
+  iconType: string;
+  /** Used as both the aria-label and the tooltip. */
+  label: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
+/** Called for each leaf row to build its actions (e.g. filter buttons). Hosts define the concrete actions. */
+export type GetLeafActions = (leaf: {
+  value: JsonPrimitive;
+  path: readonly string[];
+  /** True when the leaf is a direct element of an array (i.e. a multi-value field entry). */
+  isArrayItem: boolean;
+}) => JsonTreeRowAction[];
+
 /**
  * Turns a json document into a Nodes tree. Each node contains all the
  * metadata needed to perform operations in an easy way.

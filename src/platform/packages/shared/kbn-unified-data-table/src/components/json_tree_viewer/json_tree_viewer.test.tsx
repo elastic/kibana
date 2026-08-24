@@ -11,7 +11,12 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
-import { JsonTreeViewer, type FormatValue, type TreeExpansionState } from './json_tree_viewer';
+import {
+  JsonTreeViewer,
+  type FormatValue,
+  type GetLeafActions,
+  type TreeExpansionState,
+} from './json_tree_viewer';
 import { ROOT_ID, getNodeId } from './tree_model';
 
 jest.mock('@elastic/eui', () => ({
@@ -316,6 +321,89 @@ describe('JsonTreeViewer', () => {
 
       expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
       expect(screen.getByTestId('custom-header')).toBeVisible();
+    });
+  });
+
+  describe('getLeafActions', () => {
+    const twoActions =
+      (onFilterFor: () => void, onFilterOut: () => void): GetLeafActions =>
+      ({ path }) =>
+        [
+          {
+            id: 'filterFor',
+            iconType: 'plusCircle',
+            label: 'Filter for',
+            'data-test-subj': `treeFilterFor-${path.join('.')}`,
+            onClick: onFilterFor,
+          },
+          {
+            id: 'filterOut',
+            iconType: 'minusCircle',
+            label: 'Filter out',
+            'data-test-subj': `treeFilterOut-${path.join('.')}`,
+            onClick: onFilterOut,
+          },
+        ];
+
+    it('renders the host actions after the copy button on a leaf row', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const actions = within(screen.getByTestId(rowTestId('message')));
+      expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterOut-message')).toBeInTheDocument();
+    });
+
+    it('invokes an action onClick when the button is clicked', async () => {
+      const onFilterFor = jest.fn();
+      const onFilterOut = jest.fn();
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(onFilterFor, onFilterOut)}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('treeFilterFor-message'));
+      expect(onFilterFor).toHaveBeenCalledTimes(1);
+      expect(onFilterOut).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('treeFilterOut-message'));
+      expect(onFilterOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('moves focus across the copy and action buttons with Right/Left arrows, back to the row at the edges', async () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const row = screen.getByTestId(rowTestId('message'));
+      row.focus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterFor-message')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterOut-message')).toHaveFocus();
+
+      // Past the last action, focus returns to the row.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(row).toHaveFocus();
+
+      // And Left from the first action returns to the row too.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(row).toHaveFocus();
     });
   });
 

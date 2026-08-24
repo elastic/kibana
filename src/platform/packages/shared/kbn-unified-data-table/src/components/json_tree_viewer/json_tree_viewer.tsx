@@ -15,6 +15,7 @@ import {
   buildRows,
   collectExpandableIds,
   type FormatValue,
+  type GetLeafActions,
   type JsonValue,
 } from './tree_model';
 import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
@@ -25,7 +26,7 @@ import {
 } from './use_tree_interaction';
 import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_rows';
 
-export type { FormatValue, JsonValue } from './tree_model';
+export type { FormatValue, GetLeafActions, JsonTreeRowAction, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
 
 export interface JsonTreeViewerProps {
@@ -43,6 +44,8 @@ export interface JsonTreeViewerProps {
    * Function called for each leaf node to render its value. Used by highlighting.
    */
   formatValue?: FormatValue;
+  /** Actions appended after the copy button at each leaf node. */
+  getLeafActions?: GetLeafActions;
   /** Optional extra content rendered in the tree's header row, next to the expand/collapse control. */
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
@@ -55,6 +58,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   onStateChange,
   expandNodesContainingTerm,
   formatValue,
+  getLeafActions,
   extraHeaderContent,
   wrapLines = true,
 }: JsonTreeViewerProps) {
@@ -163,6 +167,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                 onFocus={() => setActive(row.node.id)}
                 onKeyDown={(event) => onRowKeyDown(event, row)}
                 formatValue={formatValue}
+                getLeafActions={getLeafActions}
               />
             );
           })}

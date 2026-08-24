@@ -225,10 +225,10 @@ export const useRovingTreeNavigation = (
           } else if (row.hasChildren && row.isExpanded) {
             focusRow(orderedIds[index + 1]);
           } else {
-            // Leaf row: step into its copy-value button, if it has one.
+            // Leaf row: step into its first trailing action (copy, then any host-defined actions).
             rowRefs.current
               .get(rowKey(row))
-              ?.querySelector<HTMLElement>('.jsonTreeViewerCopyButton')
+              ?.querySelector<HTMLElement>('.jsonTreeViewerRowAction')
               ?.focus();
           }
           break;
