@@ -23,13 +23,13 @@ tasks:
   # `.buildkite` tests read fixtures via process.cwd() expecting the repo root
   # (matching how the pipeline scripts run in CI), so jest must run from the
   # workspace root. Jest still scopes discovery to `.buildkite` because rootDir
-  # defaults to the location of jest.config.js. We invoke `.buildkite`'s own jest
+  # defaults to the location of jest.config.cjs. We invoke `.buildkite`'s own jest
   # binary (its isolated npm workspace), not the repo-root scripts/jest.
   jest:
     command: .buildkite/node_modules/.bin/jest
     args:
       - '--config'
-      - .buildkite/jest.config.js
+      - .buildkite/jest.config.cjs
     options:
       runFromWorkspaceRoot: true
     inputs:

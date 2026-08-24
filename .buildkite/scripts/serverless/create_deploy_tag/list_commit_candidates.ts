@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommitWithStatuses } from './shared';
-import { buildkite, COMMIT_INFO_CTX, SELECTED_COMMIT_META_KEY } from './shared';
+import type { CommitWithStatuses } from './shared.ts';
+import { buildkite, COMMIT_INFO_CTX, SELECTED_COMMIT_META_KEY } from './shared.ts';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
   makeCommitInfoWithBuildResultsHtml,
-} from './info_sections/build_info';
-import type { GitCommitExtract } from './info_sections/commit_info';
-import { getRecentCommits } from './info_sections/commit_info';
+} from './info_sections/build_info.ts';
+import type { GitCommitExtract } from './info_sections/commit_info.ts';
+import { getRecentCommits } from './info_sections/commit_info.ts';
 import type { BuildkiteInputStep } from '#pipeline-utils';
 
 async function main(commitCountArg: string) {

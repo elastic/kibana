@@ -11,7 +11,7 @@ jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
 }));
 
-import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners';
+import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners.ts';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',

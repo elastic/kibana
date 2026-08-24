@@ -9,10 +9,16 @@
 
 import { globbySync } from 'globby';
 
-import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
-import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
-import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { filterEmptyJestConfigs } from '../get_tests_from_config.ts';
+import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
 import { getKibanaDir } from '#pipeline-utils';
+
+const DISABLED_JEST_CONFIGS = loadBuildkiteJson<
+  typeof import('../../../disabled_jest_configs.json')
+>('disabled_jest_configs.json');
+const SHARDED_JEST_CONFIGS = loadBuildkiteJson<typeof import('../../../sharded_jest_configs.json')>(
+  'sharded_jest_configs.json'
+);
 
 export const SHARD_ANNOTATION_SEP = '||shard=';
 

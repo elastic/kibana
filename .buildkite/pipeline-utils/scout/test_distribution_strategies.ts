@@ -9,13 +9,13 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths';
-import { scoutTestTrack, type ScoutTestTrack } from './test_tracks';
-import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order';
-import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite';
-import { getKibanaDir } from '../utils';
-import { expandAgentQueue } from '../agent_images';
-import { collectEnvFromLabels } from '../pr_labels';
+import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths.ts';
+import { scoutTestTrack, type ScoutTestTrack } from './test_tracks.ts';
+import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order.ts';
+import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite/index.ts';
+import { getKibanaDir } from '../utils.ts';
+import { expandAgentQueue } from '../agent_images.ts';
+import { collectEnvFromLabels } from '../pr_labels.ts';
 
 function envVarsIfSet(envVarNames: string[]): Record<string, string> {
   const collectedVars: Record<string, string> = {};

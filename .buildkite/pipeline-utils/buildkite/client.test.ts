@@ -8,9 +8,9 @@
  */
 
 import { execFileSync } from 'child_process';
-import { BuildkiteClient } from './client';
-import type { Build } from './types/build';
-import type { Job } from './types/job';
+import { BuildkiteClient } from './client.ts';
+import type { Build } from './types/build.ts';
+import type { Job } from './types/job.ts';
 
 jest.mock('child_process', () => ({
   ...jest.requireActual('child_process'),

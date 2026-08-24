@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CiStatsClient } from './client.ts';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { getKibanaDir } from './get_kibana_dir.ts';
 
-const ciStats = new CiStatsClient();
-
-export async function onMetricsViable() {
-  if (!process.env.CI_STATS_BUILD_ID) {
-    return;
-  }
-
-  console.log('Marking build as a "valid baseline" so that it can be used to power PR reports');
-  await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
-}
+export const loadBuildkiteJson = <T>(relativePath: string): T =>
+  JSON.parse(readFileSync(resolve(getKibanaDir(), '.buildkite', relativePath), 'utf8')) as T;

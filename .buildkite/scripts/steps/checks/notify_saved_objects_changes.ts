@@ -8,6 +8,7 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
+import { basename } from 'node:path';
 import parseArgs from 'minimist';
 import { upsertComment } from '#pipeline-utils';
 
@@ -348,7 +349,7 @@ async function main() {
   console.log('PR comment posted successfully');
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'notify_saved_objects_changes.ts') {
   main().catch((error) => {
     console.error('Failed to post Saved Objects PR comment:', error);
     process.exit(1);

@@ -39,7 +39,7 @@ describe('Prompt Changes Detector', () => {
     } as any);
 
     // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
+    const { main } = await import('./prompt_changes_detector.ts');
     await main();
 
     expect(mockUpsertComment).toHaveBeenCalledWith({
@@ -54,7 +54,7 @@ describe('Prompt Changes Detector', () => {
     mockUpsertComment.mockRejectedValue(new Error('Test error'));
 
     // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
+    const { main } = await import('./prompt_changes_detector.ts');
 
     // Should not throw, but should exit with code 1
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();

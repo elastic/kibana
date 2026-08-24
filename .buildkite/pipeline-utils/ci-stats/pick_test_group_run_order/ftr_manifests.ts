@@ -10,11 +10,14 @@
 import { readFileSync } from 'node:fs';
 import { parse as loadYaml } from 'yaml';
 
-import {
-  serverless as serverlessFTRManifestPaths,
-  stateful as statefulFTRManifestPaths,
-} from '../../../ftr-manifests/ftr_configs_manifests.json';
-import { type FTRTestChannel, ftrTestChannel, ftrTestChannels } from './test_channels';
+import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
+import { type FTRTestChannel, ftrTestChannel, ftrTestChannels } from './test_channels.ts';
+
+const ftrConfigManifestPaths = loadBuildkiteJson<
+  typeof import('../../../ftr-manifests/ftr_configs_manifests.json')
+>('ftr-manifests/ftr_configs_manifests.json');
+const { serverless: serverlessFTRManifestPaths, stateful: statefulFTRManifestPaths } =
+  ftrConfigManifestPaths;
 
 export type FTRManifestFileEntry =
   | string

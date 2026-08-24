@@ -11,13 +11,17 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-jest.mock('../../../sharded_jest_configs.json', () => ({
-  'pkg/a/jest.config.js': 3,
-  'pkg/b/jest.integration.config.js': 2,
-  'pkg/c/jest.config.js': 1,
+jest.mock('../../load_buildkite_json.ts', () => ({
+  loadBuildkiteJson: jest.fn((filename: string) =>
+    filename === 'sharded_jest_configs.json'
+      ? {
+          'pkg/a/jest.config.js': 3,
+          'pkg/b/jest.integration.config.js': 2,
+          'pkg/c/jest.config.js': 1,
+        }
+      : []
+  ),
 }));
-
-jest.mock('../../../disabled_jest_configs.json', () => [], { virtual: false });
 
 let mockKibanaDir = process.cwd();
 
@@ -30,7 +34,7 @@ import {
   discoverJestUnitConfigs,
   expandShardedJestConfigs,
   globsForSolutions,
-} from './jest_configs';
+} from './jest_configs.ts';
 
 describe('expandShardedJestConfigs', () => {
   it('passes configs not in the shard map through unchanged', () => {

@@ -16,9 +16,9 @@ import {
   octokit,
   SELECTED_COMMIT_META_KEY,
   sendSlackMessage,
-} from './shared';
-import type { GithubCommitType } from './info_sections/commit_info';
-import { getUsefulLinks } from './info_sections/useful_links';
+} from './shared.ts';
+import type { GithubCommitType } from './info_sections/commit_info.ts';
+import { getUsefulLinks } from './info_sections/useful_links.ts';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';

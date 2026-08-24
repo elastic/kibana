@@ -22,7 +22,7 @@
  */
 
 import { minimatch } from 'minimatch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutLog } from './scout_log.ts';
 
 interface ImplicitConsumerRule {
   reason: string;
@@ -59,7 +59,7 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
 export function expandWithImplicitConsumers(
   affected: ReadonlySet<string>,
   changedFiles: readonly string[],
-  log: ToolingLog
+  log: ScoutLog
 ): Set<string> {
   const expanded = new Set(affected);
 

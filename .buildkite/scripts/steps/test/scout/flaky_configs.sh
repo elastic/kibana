@@ -62,7 +62,7 @@ run_failed_test_reporter_and_annotate() {
   fi
 
   buildkite-agent artifact upload 'target/test_failures/**/*'
-  ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+  node .buildkite/scripts/lifecycle/annotate_test_failures.ts
 }
 
 echo "--- Config: $config_path"

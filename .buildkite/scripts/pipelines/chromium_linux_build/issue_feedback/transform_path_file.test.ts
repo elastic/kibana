@@ -14,7 +14,7 @@ import { applyTransform } from 'jscodeshift/dist/testUtils';
 
 import { getKibanaDir } from '#pipeline-utils';
 
-import pathFileTransform from './transform_path_file';
+import pathFileTransform from './transform_path_file.cjs';
 
 // read contents of the path file our transform is built to update
 const pathFileContents = readFileSync(
@@ -23,7 +23,7 @@ const pathFileContents = readFileSync(
 );
 
 /**
- * @type {import('./transform_path_file').transformOptions}
+ * @type {import('./transform_path_file.cjs').transformOptions}
  */
 const transformOptions = {
   chromiumVersion: '130.6943.126',

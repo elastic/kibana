@@ -3,7 +3,7 @@ env:
 
 steps:
   - command: |
-      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+      node .buildkite/scripts/lifecycle/comment_on_pr.ts \
         --message "Linux headless chromium build started at: $BUILDKITE_BUILD_URL" \
         --context "chromium-linux-build-job-start" \
         --issue-number $GITHUB_ISSUE_NUMBER \
@@ -45,7 +45,7 @@ steps:
       - "x64"
       - "arm64"
 
-  - command: node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.js
+  - command: node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.cjs
     label: provided feedback to issue created to update puppeteer
     depends_on: "build_chromium"
     env:

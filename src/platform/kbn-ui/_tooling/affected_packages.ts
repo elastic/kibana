@@ -152,7 +152,7 @@ export const resolveAffectedPackages = ({
 
 const usage = (): string => 'usage: affected_packages.ts <base-ref> [head-ref]';
 
-const main = async (argv = process.argv.slice(2)): Promise<void> => {
+export const main = async (argv = process.argv.slice(2)): Promise<void> => {
   if (argv.length < 1) {
     process.stderr.write(`${usage()}\n`);
     process.exitCode = 2;

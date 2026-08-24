@@ -15,10 +15,10 @@ import {
   getAffectedPackages,
   listChangedFiles,
   touchedCriticalFiles,
-} from '../../affected-packages';
+} from '../../affected-packages/index.ts';
 
-import { expandJestImplicitConsumers } from './jest_implicit_consumers';
-import { SHARD_ANNOTATION_SEP } from './jest_configs';
+import { expandJestImplicitConsumers } from './jest_implicit_consumers.ts';
+import { SHARD_ANNOTATION_SEP } from './jest_configs.ts';
 
 /**
  * The shared inputs both per-variant filters need: which packages the PR

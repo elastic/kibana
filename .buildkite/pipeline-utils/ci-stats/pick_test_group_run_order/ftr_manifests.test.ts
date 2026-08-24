@@ -11,9 +11,15 @@ jest.mock('node:fs', () => ({
   readFileSync: jest.fn(),
 }));
 
+jest.mock('../../load_buildkite_json.ts', () => ({
+  loadBuildkiteJson: jest.fn(() =>
+    jest.requireActual('../../../ftr-manifests/ftr_configs_manifests.json')
+  ),
+}));
+
 import { readFileSync } from 'node:fs';
-import { ftrManifest } from './ftr_manifests';
-import { ftrTestChannel } from './test_channels';
+import { ftrManifest } from './ftr_manifests.ts';
+import { ftrTestChannel } from './test_channels.ts';
 
 describe('ftrTestChannel.fromString', () => {
   it('throws for an unknown channel', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SCOUT_EXCLUDED_MODULES, shouldSkipScoutTests } from './scout_ftr_modules';
+import { SCOUT_EXCLUDED_MODULES, shouldSkipScoutTests } from './scout_ftr_modules.ts';
 
 describe('SCOUT_EXCLUDED_MODULES', () => {
   const SCOUT_DEPENDENCIES = [

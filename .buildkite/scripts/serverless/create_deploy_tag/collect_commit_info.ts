@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { COMMIT_INFO_CTX, exec } from './shared';
+import { COMMIT_INFO_CTX, exec } from './shared.ts';
 import {
   toGitCommitExtract,
   getCurrentQARelease,
@@ -15,19 +15,19 @@ import {
   getCommitByHash,
   makeCommitInfoHtml,
   getRecentCommits,
-} from './info_sections/commit_info';
+} from './info_sections/commit_info.ts';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
   makeBuildkiteBuildInfoHtml,
-} from './info_sections/build_info';
+} from './info_sections/build_info.ts';
 import {
   compareSOSnapshots,
   makeSOComparisonBlockHtml,
   makeSOComparisonErrorHtml,
-} from './info_sections/so_snapshot_comparison';
-import { makeUsefulLinksHtml } from './info_sections/useful_links';
+} from './info_sections/so_snapshot_comparison.ts';
+import { makeUsefulLinksHtml } from './info_sections/useful_links.ts';
 
 async function main() {
   const previousSha = await getCurrentQARelease();

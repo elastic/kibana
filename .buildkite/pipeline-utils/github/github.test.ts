@@ -8,7 +8,7 @@
  */
 
 import type { RestEndpointMethodTypes } from '@octokit/rest';
-import { areChangesSkippable, doAnyChangesMatch } from './github';
+import { areChangesSkippable, doAnyChangesMatch } from './github.ts';
 
 describe('github', () => {
   const getMockChangedFile = (filename: string, previousFilename = '') => {
