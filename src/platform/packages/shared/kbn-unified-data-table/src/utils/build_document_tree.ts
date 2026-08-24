@@ -10,7 +10,6 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   DataTableRecord,
-  DataTableColumnsMeta,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
@@ -53,7 +52,6 @@ export const flattenedToNestedDocument = ({
 }: {
   row: DataTableRecord;
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   selectedColumns?: string[];
 }): NestedDocument => {
@@ -113,7 +111,6 @@ export const sourceDocumentToJsonString = (
   params: {
     row: DataTableRecord;
     dataView: DataView;
-    columnsMeta: DataTableColumnsMeta | undefined;
     shouldShowFieldHandler: ShouldShowFieldInTableHandler;
     selectedColumns?: string[];
   },

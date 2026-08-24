@@ -58,6 +58,7 @@
     "@kbn/restorable-state",
     "@kbn/lens-common",
     "@kbn/ebt-click",
+    "@kbn/data-source",
     "@kbn/apm-shared",
     "@kbn/ui-callout",
   ],

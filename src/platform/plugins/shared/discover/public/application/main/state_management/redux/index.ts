@@ -19,6 +19,7 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type ColumnsMeta,
   type ProfileAppStateDefaultField,
   type ProfileAppStateDefaultFields,
   type ProfileAppStateDefaults,

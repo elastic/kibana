@@ -23,7 +23,7 @@ import { useGenAiData } from './use_genai_data';
 export function DocViewerObsTracesGenAi({
   hit,
   dataView,
-  columnsMeta,
+  dataSource,
   textBasedHits,
   filter,
   onAddColumn,
@@ -73,7 +73,7 @@ export function DocViewerObsTracesGenAi({
             <GenAiDetailsTable
               hit={hit}
               dataView={dataView}
-              columnsMeta={columnsMeta}
+              dataSource={dataSource}
               textBasedHits={textBasedHits}
               filter={filter}
               onAddColumn={onAddColumn}

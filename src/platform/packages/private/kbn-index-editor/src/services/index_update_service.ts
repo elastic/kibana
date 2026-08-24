@@ -14,7 +14,7 @@ import type {
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type {
   DatatableColumn,
   DatatableColumnMeta,
@@ -100,6 +100,12 @@ interface PendingDocUpdate {
 }
 
 export type PendingSave = Map<DocUpdate['id'], { type: 'delete-doc' } | PendingDocUpdate>;
+
+/**
+ * Per-column type metadata used to decide how to parse a primitive value on
+ * inline edit (see {@link IndexUpdateService.updateDoc}).
+ */
+type ColumnTypeMeta = Record<string, { type?: string; esType?: string }>;
 
 export class IndexUpdateService {
   constructor(
@@ -1009,11 +1015,7 @@ export class IndexUpdateService {
   }
 
   /* Partial doc update */
-  public updateDoc(
-    id: string,
-    update: Record<string, unknown>,
-    columnsMeta: DataTableColumnsMeta = {}
-  ) {
+  public updateDoc(id: string, update: Record<string, unknown>, columnsMeta: ColumnTypeMeta = {}) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
       (acc, [key, value]) => {
         acc[key] = parsePrimitive(value, columnsMeta[key]?.type);

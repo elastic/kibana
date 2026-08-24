@@ -42,7 +42,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-          if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
+          if (!params.dataView?.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }
           ALLOWED_CELL_RENDER_FIELDS.forEach((fieldName) => {

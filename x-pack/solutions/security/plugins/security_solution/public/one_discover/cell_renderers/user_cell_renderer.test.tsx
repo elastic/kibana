@@ -79,13 +79,13 @@ const props: DataGridCellValueElementProps = {
     flattened: { 'user.name': 'user-1' },
   },
   dataView: dataViewMock,
+  dataSource: undefined,
   setCellProps: jest.fn(),
   isExpandable: false,
   rowIndex: 0,
   colIndex: 0,
   fieldFormats: fieldFormatsMock,
   closePopover: jest.fn(),
-  columnsMeta: undefined,
 };
 
 describe('UserCellRenderer', () => {

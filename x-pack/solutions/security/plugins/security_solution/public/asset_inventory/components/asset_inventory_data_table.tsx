@@ -17,6 +17,7 @@ import {
   type UnifiedDataTableSettingsColumn,
   type CustomCellRenderer,
 } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
@@ -226,6 +227,10 @@ export const AssetInventoryDataTable = ({
   }, [persistedSettings]);
 
   const { dataView, dataViewIsLoading } = useDataViewContext();
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
 
   const {
     uiActions,
@@ -381,7 +386,7 @@ export const AssetInventoryDataTable = ({
             className={styles.gridStyle}
             ariaLabelledBy={title}
             columns={currentColumns}
-            dataView={dataView}
+            dataSource={dataSource}
             loadingState={loadingState}
             onFilter={onAddFilter as DocViewFilterFn}
             onResize={onResize}

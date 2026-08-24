@@ -22,7 +22,6 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
-  type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
   type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableRenderCustomToolbarProps,
@@ -127,18 +126,6 @@ export function useTriggerEventTableConfig(
         },
       })),
     [rows]
-  );
-
-  const columnsMeta: DataTableColumnsMeta = useMemo(
-    () => ({
-      summary: { type: 'string' },
-      eventId: { type: 'string' },
-      triggerId: { type: 'string' },
-      spaceId: { type: 'string' },
-      subscriptions: { type: 'string' },
-      payload: { type: 'string' },
-    }),
-    []
   );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
@@ -329,7 +316,6 @@ export function useTriggerEventTableConfig(
     showTimeColumn,
     sort,
     dataTableRows,
-    columnsMeta,
     externalCustomRenderers,
     customGridColumnsConfiguration,
     unifiedDataTableServices,

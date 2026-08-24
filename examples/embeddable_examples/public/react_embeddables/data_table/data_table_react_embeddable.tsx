@@ -26,7 +26,8 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { useEffect } from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
+import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { StartDeps } from '../../plugin';
 import { DATA_TABLE_ID } from './constants';
@@ -95,6 +96,7 @@ export const getDataTableFactory = (
           dataLoading$,
           queryService.dataView$
         );
+        const dataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
 
         // stop query service on unmount
         useEffect(() => {
@@ -127,7 +129,7 @@ export const getDataTableFactory = (
                       rows={rows}
                       showTimeCol={true}
                       onFilter={() => {}}
-                      dataView={dataView}
+                      dataSource={dataSource}
                       sampleSizeState={100}
                       columns={fields ?? []}
                       services={allServices}

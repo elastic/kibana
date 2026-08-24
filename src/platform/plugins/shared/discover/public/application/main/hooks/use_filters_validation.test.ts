@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { IndexPatternSource } from '@kbn/data-source';
 import { useFiltersValidation } from './use_filters_validation';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
@@ -18,6 +19,8 @@ import { createDiscoverServicesMock } from '../../../__mocks__/services';
 describe('useFiltersValidation', () => {
   let filterUpdates$: Subject<void>;
   let services: ReturnType<typeof createDiscoverServicesMock>;
+  const dataSourceAdHoc = new IndexPatternSource(dataViewAdHoc);
+  const dataSourcePersisted = new IndexPatternSource(dataViewMock);
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -37,7 +40,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: dataSourceAdHoc,
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -59,7 +62,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewMock,
+        dataSource: dataSourcePersisted,
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -77,7 +80,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: dataSourceAdHoc,
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -92,7 +95,7 @@ describe('useFiltersValidation', () => {
   it('should not show warning when no filters exist', () => {
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: dataSourceAdHoc,
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -110,7 +113,7 @@ describe('useFiltersValidation', () => {
 
     const { unmount } = renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: dataSourceAdHoc,
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })

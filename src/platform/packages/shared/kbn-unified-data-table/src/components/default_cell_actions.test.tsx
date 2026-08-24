@@ -38,7 +38,11 @@ const createCellActionProps = (
 });
 
 const getField = (fieldName: string): DataViewField => {
-  const field = dataTableContextMock.dataView.getFieldByName(fieldName);
+  const dataView = dataTableContextMock.dataView;
+
+  if (!dataView) throw new Error('Missing test data view');
+
+  const field = dataView.getFieldByName(fieldName);
 
   if (!field) throw new Error(`Missing test field "${fieldName}"`);
 

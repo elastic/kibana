@@ -11,7 +11,7 @@ import React from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
@@ -33,6 +33,7 @@ import {
   CascadedDocumentsFetcher,
   type CascadedDocumentsStateManager,
 } from '../../../../data_fetching/cascaded_documents_fetcher';
+import type { ColumnsMeta } from '../../../../state_management/redux';
 import type { DiscoverServices } from '../../../../../../build_services';
 
 jest.mock('@kbn/unified-data-table', () => ({
@@ -47,7 +48,7 @@ const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMoc
 const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewWithTimefieldMock);
 const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
-const cascadedColumnsMeta: DataTableColumnsMeta = {
+const cascadedColumnsMeta: ColumnsMeta = {
   category: {
     type: 'string',
   },
@@ -187,7 +188,6 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId);
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
@@ -212,7 +212,6 @@ describe('ESQLDataCascadeLeafCell', () => {
     );
 
     let unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
     expect(unifiedDataTableProps.expandedDoc).toBeUndefined();
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBeUndefined();

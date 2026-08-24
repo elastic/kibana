@@ -11,6 +11,7 @@ import {
   dataTableContextComplexMock,
   dataTableContextComplexRowsMock,
 } from '../../__mocks__/table_context';
+import { dataViewComplexMock } from '../../__mocks__/data_view_complex';
 import { servicesMock } from '../../__mocks__/services';
 import {
   CopyAsTextFormat,
@@ -20,6 +21,7 @@ import {
   copyRowsAsTextToClipboard,
   copyValueToClipboard,
 } from './copy_value_to_clipboard';
+import { IndexPatternSource } from '@kbn/data-source';
 import { convertValueToString } from './convert_value_to_string';
 import type { ValueToStringConverter } from '../types';
 
@@ -30,11 +32,10 @@ describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: new IndexPatternSource(dataViewComplexMock),
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,
       columnId,
-      columnsMeta: undefined,
       options,
     });
 

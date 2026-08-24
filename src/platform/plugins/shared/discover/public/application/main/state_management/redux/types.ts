@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -135,10 +135,18 @@ export interface DiscoverAppState {
   esqlApproximation?: boolean;
 }
 
+/**
+ * Column name -> type metadata for the columns produced by an ES|QL cascade
+ * group's sub-query. Each cascade group is its own sub-query and can have a
+ * different column shape than the parent query, so this is tracked
+ * separately from the main {@link DiscoverDataSource}/`DataSource` columns.
+ */
+export type ColumnsMeta = Record<string, { type: string; esType?: string }>;
+
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
-  columnsMeta: DataTableColumnsMeta;
+  columnsMeta: ColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 

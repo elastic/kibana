@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -24,6 +26,50 @@ const columnsWithTimeCol = getVisibleColumns(
   true
 ) as string[];
 
+const makeResultColumn = (
+  name: string,
+  type: DatatableColumnType,
+  esType?: string
+): DatatableColumn => ({
+  id: name,
+  name,
+  meta: { type, esType },
+});
+
+/**
+ * Builds an `EsqlSource` for a text-based (ES|QL) columns scenario. Columns present in
+ * `columnsMeta` use the provided type/esType (mirroring the removed `columnsMeta` override
+ * behavior); any other column falls back to its type in `dataView`, matching the previous
+ * fallback-to-data-view behavior.
+ */
+const createTextBasedDataSource = ({
+  columns: resultColumnNames,
+  dataView,
+  columnsMeta = {},
+}: {
+  columns: string[];
+  dataView: DataView;
+  columnsMeta?: Record<string, { type: DatatableColumnType; esType?: string }>;
+}) => {
+  const resultColumns = resultColumnNames.map((name) => {
+    const meta = columnsMeta[name];
+    if (meta) {
+      return makeResultColumn(name, meta.type, meta.esType);
+    }
+    const field = dataView.fields.getByName(name);
+    return makeResultColumn(
+      name,
+      (field?.type as DatatableColumnType) ?? 'string',
+      field?.esTypes?.[0]
+    );
+  });
+  return EsqlSource.create({
+    query: `FROM ${dataView.name}`,
+    resultColumns,
+    timeFieldName: dataView.timeFieldName,
+  });
+};
+
 describe('Data table columns', function () {
   describe('getEuiGridColumns', () => {
     it('returns eui grid columns showing default columns', async () => {
@@ -31,7 +77,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'summary',
         columns,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: true,
         isSortEnabled: true,
         isPlainRecord: false,
@@ -56,7 +102,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'summary',
         columns: columnsWithTimeCol,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: false,
@@ -77,11 +123,20 @@ describe('Data table columns', function () {
     });
 
     it('returns eui grid with in memory sorting', async () => {
+      const dataSource = await createTextBasedDataSource({
+        columns: columnsWithTimeCol,
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+          timestamp: { type: 'date', esType: 'dateTime' },
+        },
+      });
       const actual = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: columnsWithTimeCol,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -95,11 +150,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-          timestamp: { type: 'date', esType: 'dateTime' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -109,11 +159,20 @@ describe('Data table columns', function () {
     describe('cell actions', () => {
       it('should replace cell actions', async () => {
         const cellAction = jest.fn();
+        const dataSource = await createTextBasedDataSource({
+          columns: columnsWithTimeCol,
+          dataView: dataViewWithTimefieldMock,
+          columnsMeta: {
+            extension: { type: 'string' },
+            message: { type: 'string', esType: 'keyword' },
+            timestamp: { type: 'date', esType: 'dateTime' },
+          },
+        });
         const actual = getEuiGridColumns({
           sourceDisplayMode: 'summary',
           columns: columnsWithTimeCol,
           settings: {},
-          dataView: dataViewWithTimefieldMock,
+          dataSource,
           isSummaryOnlyColumn: false,
           isSortEnabled: true,
           isPlainRecord: true,
@@ -127,11 +186,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'replace',
@@ -141,11 +195,20 @@ describe('Data table columns', function () {
 
       it('should append cell actions', async () => {
         const cellAction = jest.fn();
+        const dataSource = await createTextBasedDataSource({
+          columns: columnsWithTimeCol,
+          dataView: dataViewWithTimefieldMock,
+          columnsMeta: {
+            extension: { type: 'string' },
+            message: { type: 'string', esType: 'keyword' },
+            timestamp: { type: 'date', esType: 'dateTime' },
+          },
+        });
         const actual = getEuiGridColumns({
           sourceDisplayMode: 'summary',
           columns: columnsWithTimeCol,
           settings: {},
-          dataView: dataViewWithTimefieldMock,
+          dataSource,
           isSummaryOnlyColumn: false,
           isSortEnabled: true,
           isPlainRecord: true,
@@ -159,11 +222,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'append',
@@ -186,7 +244,7 @@ describe('Data table columns', function () {
         showColumnTokens: true,
         columns: columnsWithTimeCol,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: false,
@@ -207,16 +265,20 @@ describe('Data table columns', function () {
     });
 
     it('returns eui grid columns with tokens for custom column types', async () => {
-      const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
-        showColumnTokens: true,
+      const dataSource = await createTextBasedDataSource({
+        columns,
+        dataView: dataViewWithTimefieldMock,
         columnsMeta: {
           extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
+      });
+      const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
+        showColumnTokens: true,
         columns,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: false,
@@ -244,11 +306,18 @@ describe('Data table columns', function () {
         dataViewWithTimefieldMock,
         true
       ) as string[];
+      const dataSource = await createTextBasedDataSource({
+        columns: columnsNotInDataview,
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          extension: { type: 'string' },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: columnsNotInDataview,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -262,9 +331,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -273,11 +339,18 @@ describe('Data table columns', function () {
     });
 
     it('should not allow sorting on json columns', async () => {
+      const dataSource = await createTextBasedDataSource({
+        columns: ['geo.coordinates'],
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          'geo.coordinates': { type: 'geo_point' },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: ['geo.coordinates'],
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -291,9 +364,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          'geo.coordinates': { type: 'geo_point' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -302,11 +372,18 @@ describe('Data table columns', function () {
     });
 
     it('should allow sorting on version columns', async () => {
+      const dataSource = await createTextBasedDataSource({
+        columns: ['stack_version'],
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          stack_version: { type: 'version' as DatatableColumnType },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: ['stack_version'],
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -320,9 +397,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          stack_version: { type: 'version' as DatatableColumnType },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -331,11 +405,18 @@ describe('Data table columns', function () {
     });
 
     it('should allow sorting on ip columns', async () => {
+      const dataSource = await createTextBasedDataSource({
+        columns: ['ip_address'],
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          ip_address: { type: 'ip' },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: ['ip_address'],
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -349,9 +430,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          ip_address: { type: 'ip' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -365,11 +443,18 @@ describe('Data table columns', function () {
         dataViewWithTimefieldMock,
         true
       ) as string[];
+      const dataSource = await createTextBasedDataSource({
+        columns: columnsNotInDataview,
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          var_test: { type: 'number' },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns: columnsNotInDataview,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -383,9 +468,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          var_test: { type: 'number' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -394,11 +476,19 @@ describe('Data table columns', function () {
     });
 
     it('returns columns in correct format when column customisation is provided', async () => {
+      const dataSource = await createTextBasedDataSource({
+        columns,
+        dataView: dataViewWithTimefieldMock,
+        columnsMeta: {
+          extension: { type: 'string' },
+          message: { type: 'string', esType: 'keyword' },
+        },
+      });
       const gridColumns = getEuiGridColumns({
         sourceDisplayMode: 'summary',
         columns,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -412,10 +502,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -430,7 +516,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'summary',
         columns,
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         isPlainRecord: true,
@@ -445,10 +531,6 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -463,7 +545,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'summary',
         columns: ['_source'],
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: false,
         isSortEnabled: false,
         isPlainRecord: false,
@@ -497,7 +579,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'json',
         columns: ['_source'],
         settings: {},
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: false,
         isSortEnabled: false,
         isPlainRecord: false,
@@ -547,7 +629,7 @@ describe('Data table columns', function () {
         sourceDisplayMode: 'summary',
         columns: ['test_column_1', 'test_column_2', 'test_column_4'],
         settings: { columns: mockColumnHeaders },
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,

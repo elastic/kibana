@@ -23,6 +23,7 @@ import {
 import { getDocId } from '@kbn/discover-utils';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -474,6 +475,7 @@ describe('document selection', () => {
           const menuButton = await screen.findByRole('button', { name: /Selected/ });
 
           await userEvent.click(menuButton);
+          await waitForEuiPopoverOpen();
 
           return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
         },

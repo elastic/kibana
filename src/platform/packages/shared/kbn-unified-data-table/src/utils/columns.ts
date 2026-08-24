@@ -29,7 +29,7 @@ export const isSummaryOnlyColumn = (columns: string[]): boolean =>
  */
 export function getDisplayedColumns(
   stateColumns: string[] = [],
-  dataView: DataView,
+  dataView?: DataView,
   sourceDisplayMode: SourceDisplayMode = 'summary'
 ) {
   // JSON mode is a single JSON cell; selected fields filter that cell instead of becoming their own
@@ -40,7 +40,7 @@ export function getDisplayedColumns(
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
-    !(stateColumns.length === 1 && stateColumns[0] === dataView.timeFieldName)
+    !(stateColumns.length === 1 && stateColumns[0] === dataView?.timeFieldName)
     ? stateColumns
     : SOURCE_ONLY;
 }

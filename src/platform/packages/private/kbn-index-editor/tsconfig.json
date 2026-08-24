@@ -41,6 +41,7 @@
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/field-utils",
+    "@kbn/data-source",
     "@kbn/es-query",
     "@kbn/kql",
   ]

@@ -14,6 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import { getServiceNameCell } from './service_name_cell';
 import {
   EMPTY_CONTEXT_AWARENESS_TOOLKIT,
@@ -64,10 +65,10 @@ const renderCell = (
       isDetails={false}
       row={record}
       dataView={dataViewMock}
+      dataSource={new IndexPatternSource(dataViewMock)}
       fieldFormats={fieldFormats}
       setCellProps={() => {}}
       closePopover={() => {}}
-      columnsMeta={undefined}
     />
   );
 };

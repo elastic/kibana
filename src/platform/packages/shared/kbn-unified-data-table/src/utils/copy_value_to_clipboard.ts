@@ -175,7 +175,7 @@ export const copyRowsAsTextToClipboard = async ({
   sourceDisplayMode = 'summary',
 }: {
   columns: string[];
-  dataView: DataView;
+  dataView?: DataView;
   selectedRowIndices: number[];
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
@@ -208,7 +208,7 @@ export const copyRowsAsTextToClipboard = async ({
     .map((columnId) => {
       const columnDisplayName = getColumnDisplayName(
         columnId,
-        dataView.getFieldByName(columnId)?.displayName,
+        dataView?.getFieldByName(columnId)?.displayName,
         undefined,
         sourceDisplayMode
       );

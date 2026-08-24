@@ -6,7 +6,8 @@
  */
 
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { useCallback, useState } from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -35,6 +36,7 @@ interface Props {
 export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
   const services = useKibana().services;
   const { setValue, watch } = useFormContext<CreateSLOForm>();
+  const dataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
 
   const filter = watch(name) as QuerySchema;
 
@@ -103,7 +105,7 @@ export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
                     dataView,
                   })}
                   showColumnTokens
-                  dataView={dataView}
+                  dataSource={dataSource}
                   onFilter={(fieldK, val, mode) => {
                     if (fieldK && typeof fieldK !== 'string' && 'name' in fieldK) {
                       const dField = dataView.getFieldByName(fieldK?.name);

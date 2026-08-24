@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 import type { DocMap } from '../../../types';
@@ -17,8 +17,7 @@ import { SOURCE_COLUMN } from '../../../utils/columns';
 export const MAX_COMPARISON_FIELDS = 250;
 
 export interface UseComparisonFieldsProps {
-  dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataView?: DataView;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   showAllFields: boolean;
@@ -28,7 +27,6 @@ export interface UseComparisonFieldsProps {
 
 export const useComparisonFields = ({
   dataView,
-  columnsMeta,
   selectedFieldNames,
   selectedDocIds,
   showAllFields,
@@ -50,26 +48,20 @@ export const useComparisonFields = ({
     // Summary is not a comparable field; compare selected fields only
     let comparisonFields = selectedFieldNames.filter((fieldName) => fieldName !== SOURCE_COLUMN);
 
-    if (showAllFields) {
-      const dataViewFieldNames = dataView.fields.map((field) => field.name);
-      const columnsMetaFieldNames = columnsMeta ? Object.keys(columnsMeta) : [];
-      const fieldNames =
-        columnsMetaFieldNames.length > 0
-          ? [...new Set([...dataViewFieldNames, ...columnsMetaFieldNames])]
-          : dataViewFieldNames;
-
-      const sortedFields = fieldNames
-        .filter((fieldName) => {
-          if (fieldName === dataView.timeFieldName) {
+    if (showAllFields && dataView) {
+      const sortedFields = dataView.fields
+        .filter((field) => {
+          if (field.name === dataView.timeFieldName) {
             return false;
           }
 
           return (
-            baseDoc?.flattened[fieldName] != null ||
-            comparisonDocs.some((doc) => doc.flattened[fieldName] != null)
+            baseDoc?.flattened[field.name] != null ||
+            comparisonDocs.some((doc) => doc.flattened[field.name] != null)
           );
         })
-        .sort((a, b) => a.localeCompare(b));
+        .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        .map((field) => field.name);
 
       comparisonFields = dataView.isTimeBased()
         ? [dataView.timeFieldName, ...sortedFields]
@@ -91,13 +83,5 @@ export const useComparisonFields = ({
     }
 
     return { comparisonFields, totalFields };
-  }, [
-    baseDoc,
-    comparisonDocs,
-    columnsMeta,
-    dataView,
-    selectedFieldNames,
-    showAllFields,
-    showMatchingValues,
-  ]);
+  }, [baseDoc, comparisonDocs, dataView, selectedFieldNames, showAllFields, showMatchingValues]);
 };

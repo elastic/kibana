@@ -14,7 +14,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
@@ -34,7 +33,6 @@ const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
 export interface SourceDocumentJsonModeProps {
   row: DataTableRecord;
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   /** When set, the JSON tree is filtered to these fields; empty = whole document. */
@@ -44,7 +42,6 @@ export interface SourceDocumentJsonModeProps {
 export const SourceDocumentJsonMode = ({
   row,
   dataView,
-  columnsMeta,
   shouldShowFieldHandler,
   fieldFormats,
   selectedColumns,
@@ -62,7 +59,6 @@ export const SourceDocumentJsonMode = ({
   const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
-    columnsMeta,
     shouldShowFieldHandler,
     selectedColumns,
   });

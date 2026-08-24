@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type {
-  DataTableRecord,
-  DataTableColumnsMeta,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import { getFieldFromDataSource } from './get_field_from_data_source';
 import type { SourceDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
 import { sourceDocumentToJsonString } from './build_document_tree';
@@ -32,9 +28,8 @@ export const convertValueToString = ({
   rowIndex,
   rows,
   columnId,
-  dataView,
+  dataSource,
   fieldFormats,
-  columnsMeta,
   options,
   sourceDisplayMode,
   shouldShowFieldHandler,
@@ -43,9 +38,8 @@ export const convertValueToString = ({
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   fieldFormats: FieldFormatsStart;
-  columnsMeta: DataTableColumnsMeta | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner
@@ -61,12 +55,18 @@ export const convertValueToString = ({
       withFormula: false,
     };
   }
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
-  if (sourceDisplayMode === 'json' && columnId === SOURCE_COLUMN && shouldShowFieldHandler) {
+  if (
+    sourceDisplayMode === 'json' &&
+    columnId === SOURCE_COLUMN &&
+    shouldShowFieldHandler &&
+    dataView
+  ) {
     const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
     return {
       formattedString: sourceDocumentToJsonString(
-        { row, dataView, columnsMeta, shouldShowFieldHandler, selectedColumns },
+        { row, dataView, shouldShowFieldHandler, selectedColumns },
         { multiline }
       ),
       withFormula: false,
@@ -74,11 +74,7 @@ export const convertValueToString = ({
   }
 
   const value = row.flattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumnMeta({
-    fieldName: columnId,
-    dataView,
-    columnMeta: columnsMeta?.[columnId],
-  });
+  const field = getFieldFromDataSource(dataSource, columnId);
 
   return commonConvertValueToString({
     dataView,

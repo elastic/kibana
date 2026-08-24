@@ -9,7 +9,7 @@
 
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { columnsMetaWithCustomField, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
@@ -56,7 +56,6 @@ const fieldColumnId = 'fieldColumnId';
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
   const defaultProps: UseComparisonCellValueProps = {
     dataView: dataViewWithTimefieldMock,
-    columnsMeta: undefined,
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocIds: ['0', '1', '2'],
@@ -447,19 +446,5 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(6);
     renderComparisonCell(cellProps6);
     expect(calculateDiff).toHaveBeenCalledTimes(6);
-  });
-
-  it('should render icons from fields defined in columnsMeta (ES|QL computed columns)', () => {
-    const { renderCellValue } = renderComparisonCellValue({
-      columnsMeta: columnsMetaWithCustomField,
-      comparisonFields: ['custom_esql_field'],
-    });
-    const customFieldCell = renderComparisonCell({
-      columnId: fieldColumnId,
-      colIndex: 0,
-      rowIndex: 0,
-      renderCellValue,
-    });
-    expect(customFieldCell.getFieldIcon()).toBeInTheDocument();
   });
 });

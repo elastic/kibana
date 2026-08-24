@@ -177,7 +177,7 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
-  columnsMeta,
+  dataSource,
 }: ContentProps) => {
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
 
@@ -215,7 +215,7 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
     />
   );
 };
@@ -228,7 +228,7 @@ type FormattedSourceDocumentProps = Pick<
   | 'isCompressed'
   | 'row'
   | 'shouldShowFieldHandler'
-  | 'columnsMeta'
+  | 'dataSource'
 >;
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {

@@ -36,17 +36,22 @@ export interface FormatFieldValueTextParams extends FormatFieldValueBaseParams {
 }
 
 /**
- * Returns the appropriate field formatter for the given field and data view,
- * or the default string formatter if no field/data view is available.
+ * Resolves a formatter: prefers DataView's per-field formatter when both are
+ * available; otherwise falls back to the default formatter for the field's
+ * type (or STRING if the type is unknown).
  */
 const getFieldFormatter = (
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField
 ): FieldFormat => {
-  return !dataView || !field
-    ? fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-    : dataView.getFormatterForField(field);
+  if (dataView && field) {
+    return dataView.getFormatterForField(field);
+  }
+  if (field?.type) {
+    return fieldFormats.getDefaultInstance(field.type as KBN_FIELD_TYPES);
+  }
+  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
 
 /**

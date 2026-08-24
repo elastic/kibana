@@ -90,13 +90,13 @@ const baseProps: DataGridCellValueElementProps = {
     },
   },
   dataView: dataViewMock,
+  dataSource: undefined,
   setCellProps: jest.fn(),
   isExpandable: false,
   rowIndex: 0,
   colIndex: 0,
   fieldFormats: fieldFormatsMock,
   closePopover: jest.fn(),
-  columnsMeta: undefined,
 };
 
 describe('IpCellRenderer', () => {

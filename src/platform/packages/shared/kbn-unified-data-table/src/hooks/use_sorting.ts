@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
-import type { DataTableColumnsMeta } from '../types';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
+import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 export const useSorting = ({
   rows,
   visibleColumns,
-  columnsMeta,
+  dataSource,
+  fieldFormats,
   sort,
-  dataView,
   isPlainRecord,
   isSortEnabled,
   isInMemorySortEnabled,
@@ -32,9 +34,9 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
+  fieldFormats: FieldFormatsStart;
   sort: SortOrder[];
-  dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
   isInMemorySortEnabled: boolean;
@@ -51,20 +53,21 @@ export const useSorting = ({
     if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
+    const dataView =
+      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName: id,
-          columnMeta: columnsMeta?.[id],
-        });
+        const field = getFieldFromDataSource(dataSource, id);
 
         if (!field) {
           return acc;
         }
 
-        const sortField = getSortingCriteria(field.type, id, dataView.getFormatterForField(field));
+        const formatter = dataView
+          ? dataView.getFormatterForField(field)
+          : fieldFormats.getDefaultInstance(field.type as KBN_FIELD_TYPES);
+        const sortField = getSortingCriteria(field.type, id, formatter);
 
         acc.push((a, b) => sortField(a.flattened, b.flattened, direction as 'asc' | 'desc'));
 
@@ -72,7 +75,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, fieldFormats, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

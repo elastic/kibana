@@ -10,10 +10,10 @@
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import SourceDocument from './source_document';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
-  columnsMetaOverridingBytesType,
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
   dataViewMock,
@@ -51,8 +51,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={new IndexPatternSource(dataViewMock)}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -87,8 +86,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={new IndexPatternSource(dataViewMock)}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -115,8 +113,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={new IndexPatternSource(dataViewMock)}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -146,8 +143,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={new IndexPatternSource(dataViewMock)}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={2}
@@ -166,79 +162,39 @@ describe('Unified data table source document cell rendering', () => {
     expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
-      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
-      const testDataView = createDataViewWithBytesField();
+  it('uses the data view field type when rendering the document summary', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
 
-      const row = buildDataTableRecord(
-        {
-          _id: '1',
-          _index: 'test',
-          _score: 1,
-          _source: { bytes: 100 },
-        },
-        testDataView
-      );
+    const row = buildDataTableRecord(
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: { bytes: 100 },
+      },
+      testDataView
+    );
 
-      renderWithI18n(
-        <SourceDocument
-          columnId="_source"
-          columnsMeta={undefined}
-          dataView={testDataView}
-          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
-          maxEntries={100}
-          row={row}
-          shouldShowFieldHandler={() => true}
-          useTopLevelObjectColumns={false}
-        />
-      );
+    renderWithI18n(
+      <SourceDocument
+        columnId="_source"
+        dataSource={new IndexPatternSource(testDataView)}
+        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+        isPlainRecord={true}
+        maxEntries={100}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={false}
+      />
+    );
 
-      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
-      expect(within(descriptionList).getByText('bytes')).toBeVisible();
-      expect(within(descriptionList).getByText('_index')).toBeVisible();
-      expect(within(descriptionList).getByText('_score')).toBeVisible();
-      expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
-      formatFieldValueReactSpy.mockRestore();
-    });
-
-    it('should use columnsMeta type instead of data view field type when provided', () => {
-      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
-      const testDataView = createDataViewWithBytesField();
-
-      const row = buildDataTableRecord(
-        {
-          _id: '1',
-          _index: 'test',
-          _score: 1,
-          _source: { bytes: '100' },
-        },
-        testDataView
-      );
-
-      renderWithI18n(
-        <SourceDocument
-          columnId="_source"
-          columnsMeta={columnsMetaOverridingBytesType}
-          dataView={testDataView}
-          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
-          maxEntries={100}
-          row={row}
-          shouldShowFieldHandler={() => true}
-          useTopLevelObjectColumns={false}
-        />
-      );
-
-      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
-      expect(within(descriptionList).getByText('bytes')).toBeVisible();
-      expect(within(descriptionList).getByText('_index')).toBeVisible();
-      expect(within(descriptionList).getByText('_score')).toBeVisible();
-      expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
-      formatFieldValueReactSpy.mockRestore();
-    });
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('bytes')).toBeVisible();
+    expect(within(descriptionList).getByText('_index')).toBeVisible();
+    expect(within(descriptionList).getByText('_score')).toBeVisible();
+    expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    formatFieldValueReactSpy.mockRestore();
   });
 });

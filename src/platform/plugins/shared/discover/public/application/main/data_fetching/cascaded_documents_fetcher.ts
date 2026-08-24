@@ -13,9 +13,10 @@ import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_docume
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import type { ColumnsMeta } from '../state_management/redux';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -29,10 +30,22 @@ export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
 export interface CascadedDocumentsStateManager {
   getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
-  getColumnsMeta(): DataTableColumnsMeta;
+  getColumnsMeta(): ColumnsMeta;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
-  setColumnsMeta(columnsMeta: DataTableColumnsMeta): void;
+  setColumnsMeta(columnsMeta: ColumnsMeta): void;
 }
+
+/**
+ * Builds a column name -> {type, esType} map from the ES|QL result columns
+ * of a cascade group's sub-query.
+ */
+const getColumnsMetaFromEsqlColumns = (columns: DatatableColumn[]): ColumnsMeta =>
+  columns.reduce<ColumnsMeta>((acc, column) => {
+    acc[column.name] = column.meta.esType
+      ? { type: column.meta.type, esType: column.meta.esType }
+      : { type: column.meta.type };
+    return acc;
+  }, {});
 
 export class CascadedDocumentsFetcher {
   private readonly abortControllers: Map<string, AbortController> = new Map();
@@ -114,7 +127,7 @@ export class CascadedDocumentsFetcher {
       records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = esqlQueryColumns ? getTextBasedColumnsMeta(esqlQueryColumns) : {};
+      const columnsMeta = esqlQueryColumns ? getColumnsMetaFromEsqlColumns(esqlQueryColumns) : {};
       const previousColumnsMeta = this.stateManager.getColumnsMeta();
       if (!isEqual(previousColumnsMeta, columnsMeta)) {
         this.stateManager.setColumnsMeta(columnsMeta);

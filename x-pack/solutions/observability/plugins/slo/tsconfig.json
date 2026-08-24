@@ -72,6 +72,7 @@
     "@kbn/es-types",
     "@kbn/logging",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/unified-field-list",

@@ -12,11 +12,12 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { createContext, useContext } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
   CascadedDocumentsState,
+  ColumnsMeta,
   DiscoverAppState,
   internalStateActions,
 } from '../../../state_management/redux';
@@ -32,7 +33,7 @@ export type CascadedDocumentsDataGridUiStateMap = Record<
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
-  cascadedColumnsMeta: DataTableColumnsMeta;
+  cascadedColumnsMeta: ColumnsMeta;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;

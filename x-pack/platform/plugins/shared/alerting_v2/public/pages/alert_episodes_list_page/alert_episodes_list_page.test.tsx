@@ -162,6 +162,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
 
 const mockDataView = {
+  id: 'mock-data-view-id',
   fields: { forEach: jest.fn() },
   setFieldCustomLabel: jest.fn(),
   setFieldFormat: jest.fn(),

@@ -8,6 +8,7 @@
  */
 
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
@@ -96,7 +97,7 @@ const getProps = (): UnifiedDataTableProps => {
       someKey: 'someValue',
     },
     columns: [],
-    dataView: dataViewMock,
+    dataSource: new IndexPatternSource(dataViewMock),
     expandedDoc: undefined,
     loadingState: DataLoadingState.loaded,
     onFilter: jest.fn(),
@@ -1062,7 +1063,12 @@ describe('UnifiedDataTable', () => {
         },
       };
 
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
+      const dataSource = await EsqlSource.create({
+        query: 'FROM test | KEEP testField',
+        resultColumns: [
+          { id: 'testField', name: 'testField', meta: { type: 'number' as DatatableColumnType } },
+        ],
+      });
 
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
@@ -1072,7 +1078,7 @@ describe('UnifiedDataTable', () => {
 
       await renderComponent({
         ...getProps(),
-        columnsMeta: columnsMetaOverride,
+        dataSource,
         expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
@@ -1086,7 +1092,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        columnsMetaOverride
+        dataSource
       );
     },
     EXTENDED_JEST_TIMEOUT

@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  buildDataTableRecord,
-  type DataTableColumnsMeta,
-  type DataTableRecord,
-} from '@kbn/discover-utils';
+import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
+import type { ColumnsMeta } from '../state_management/redux';
 import type {
   CascadedDocumentsStateManager,
   FetchCascadedDocumentsParams,
@@ -47,14 +45,14 @@ jest.mock('@elastic/apm-rum', () => ({
 const mockFetchEsql = jest.mocked(fetchEsql);
 const mockConstructCascadeQuery = jest.mocked(constructCascadeQuery);
 const mockApmCaptureError = jest.mocked(apm.captureError);
-const columnsMeta: DataTableColumnsMeta = {
+const columnsMeta: ColumnsMeta = {
   extension: {
     type: 'string',
   },
 };
 
 const createStateManager = (
-  initialColumnsMeta: DataTableColumnsMeta = {}
+  initialColumnsMeta: ColumnsMeta = {}
 ): CascadedDocumentsStateManager => {
   const recordsById = new Map<string, DataTableRecord[]>();
   let currentColumnsMeta = initialColumnsMeta;
@@ -65,13 +63,13 @@ const createStateManager = (
     setCascadedDocuments: jest.fn((nodeId: string, records: DataTableRecord[]) => {
       recordsById.set(nodeId, records);
     }),
-    setColumnsMeta: jest.fn((nextColumnsMeta: DataTableColumnsMeta) => {
+    setColumnsMeta: jest.fn((nextColumnsMeta: ColumnsMeta) => {
       currentColumnsMeta = nextColumnsMeta;
     }),
   };
 };
 
-const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta) => {
+const createFetcher = (initialColumnsMeta?: ColumnsMeta) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
@@ -131,7 +129,9 @@ describe('CascadedDocumentsFetcher', () => {
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
     mockFetchEsql.mockResolvedValue({
       records,
-      esqlQueryColumns: [{ id: 'extension', name: 'extension', meta: columnsMeta.extension }],
+      esqlQueryColumns: [
+        { id: 'extension', name: 'extension', meta: columnsMeta.extension as DatatableColumnMeta },
+      ],
     });
 
     const params = createFetchParams({ nodeId: 'node-2' });
@@ -195,7 +195,9 @@ describe('CascadedDocumentsFetcher', () => {
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
     mockFetchEsql.mockResolvedValue({
       records,
-      esqlQueryColumns: [{ id: 'extension', name: 'extension', meta: columnsMeta.extension }],
+      esqlQueryColumns: [
+        { id: 'extension', name: 'extension', meta: columnsMeta.extension as DatatableColumnMeta },
+      ],
     });
 
     await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));

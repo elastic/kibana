@@ -19,7 +19,7 @@ export interface DataTableContext {
   setExpanded?: (hit?: DataTableRecord) => void;
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
-  dataView: DataView;
+  dataView?: DataView;
   selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;

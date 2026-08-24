@@ -15,6 +15,7 @@ import { getLogLevelBadgeCell } from './log_level_badge_cell';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { IndexPatternSource } from '@kbn/data-source';
 
 const renderCell = (logLevelField: string, record: DataTableRecord) => {
   const LogLevelBadgeCell = getLogLevelBadgeCell(logLevelField);
@@ -32,7 +33,7 @@ const renderCell = (logLevelField: string, record: DataTableRecord) => {
         fieldFormats={fieldFormatsMock}
         setCellProps={() => {}}
         closePopover={() => {}}
-        columnsMeta={undefined}
+        dataSource={new IndexPatternSource(dataViewMock)}
       />
     </EuiProvider>
   );

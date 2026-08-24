@@ -10,15 +10,13 @@
 import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -29,6 +27,7 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
+import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
@@ -37,7 +36,7 @@ export function SourceDocument({
   useTopLevelObjectColumns,
   row,
   columnId,
-  dataView,
+  dataSource,
   shouldShowFieldHandler,
   maxEntries,
   isPlainRecord,
@@ -45,12 +44,11 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  columnsMeta,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
   columnId: string;
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   maxEntries: number;
   isPlainRecord?: boolean;
@@ -58,17 +56,16 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
         row,
         columnId,
-        dataView,
+        dataSource,
         shouldShowFieldHandler,
         fieldFormats,
-        columnsMeta,
         Boolean(isPlainRecord)
       ).slice(0, maxEntries)
     : formatHitReact(
@@ -77,7 +74,6 @@ export function SourceDocument({
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,
-        columnsMeta,
         isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
@@ -120,12 +116,12 @@ export function SourceDocument({
 function getTopLevelObjectPairsReact(
   row: DataTableRecord,
   columnId: string,
-  dataView: DataView,
+  dataSource: DataSource | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined,
   skipNullishValues: boolean
 ): FormattedHit {
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
@@ -136,12 +132,8 @@ function getTopLevelObjectPairsReact(
       return;
     }
 
-    const subField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
-    const displayKey = dataView.fields.getByName
+    const subField = getFieldFromDataSource(dataSource, key);
+    const displayKey = dataView?.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
     // Join ReactNode values with ', ' separator, using keyed Fragments to avoid React warnings

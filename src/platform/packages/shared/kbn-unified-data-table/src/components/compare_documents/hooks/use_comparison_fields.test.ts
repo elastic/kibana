@@ -11,11 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { UseComparisonFieldsProps } from './use_comparison_fields';
 import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
-import {
-  buildDataViewMock,
-  columnsMetaWithCustomField,
-  generateEsHits,
-} from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { fieldList } from '@kbn/data-views-plugin/common';
@@ -52,7 +48,6 @@ const renderFields = ({
   } = renderHook(() =>
     useComparisonFields({
       dataView,
-      columnsMeta: undefined,
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
@@ -162,25 +157,5 @@ describe('useComparisonFields', () => {
     const { comparisonFields, totalFields } = renderFields({ props: { dataView } });
     expect(comparisonFields).toHaveLength(fields.length - overflow);
     expect(totalFields).toBe(fields.length);
-  });
-
-  it('should display computed fields from ES|QL querys (EVALS, RENAMES, etc.)', () => {
-    const { comparisonFields, totalFields } = renderFields({
-      props: { columnsMeta: columnsMetaWithCustomField },
-      transformHit: (hit) => {
-        hit.fields!.custom_esql_field = 'test';
-        return hit;
-      },
-    });
-    expect(comparisonFields).toEqual([
-      'timestamp',
-      '_index',
-      'bytes',
-      'custom_esql_field',
-      'extension',
-      'message',
-      'scripted',
-    ]);
-    expect(totalFields).toBe(7);
   });
 });

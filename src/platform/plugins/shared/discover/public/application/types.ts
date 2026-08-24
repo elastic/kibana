@@ -10,6 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { DataSource } from '@kbn/data-source';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -25,6 +26,8 @@ export interface RecordsFetchResponse {
   esqlQueryColumns?: DatatableColumn[];
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  /** Present only for ES|QL fetches (produced by fetch_esql.ts). */
+  dataSource?: DataSource;
 }
 
 export interface SidebarToggleState {

@@ -18,7 +18,6 @@ const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
   const { tree } = flattenedToNestedDocument({
     row: buildDataTableRecord(hit, dataViewMock),
     dataView: dataViewMock,
-    columnsMeta: undefined,
     shouldShowFieldHandler: () => true,
   });
   if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
@@ -52,7 +51,6 @@ describe('flattenedToNestedDocument', () => {
       flattenedToNestedDocument({
         row: { id: '1', raw: { _id: '1', _index: 'test' }, flattened },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: () => true,
         selectedColumns,
       }).tree;
@@ -83,7 +81,6 @@ describe('flattenedToNestedDocument', () => {
           flattened: { name: 'Alice', 'name.keyword': 'Alice' },
         },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         // `name.keyword` is a multi-field, hidden by the shared handler.
         shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
         selectedColumns: ['name.keyword'],
@@ -100,7 +97,6 @@ describe('flattenedToNestedDocument', () => {
           flattened: { name: 'Alice', 'name.keyword': 'Alice' },
         },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
         selectedColumns: ['name'],
       }).tree;
@@ -119,7 +115,6 @@ describe('flattenedToNestedDocument', () => {
         flattenedToNestedDocument({
           row,
           dataView: dataViewMock,
-          columnsMeta: undefined,
           shouldShowFieldHandler: () => true,
           selectedColumns,
         }).tree;
@@ -203,7 +198,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: nestedDataView,
-      columnsMeta: undefined,
       shouldShowFieldHandler: () => true,
     });
 
@@ -264,10 +258,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
-      columnsMeta: {
-        histogram: { type: 'number', esType: 'histogram' },
-        agg_metric: { type: 'number', esType: 'aggregate_metric_double' },
-      },
       shouldShowFieldHandler: () => true,
     });
 
@@ -287,7 +277,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
-      columnsMeta: { note: { type: 'string', esType: 'keyword' } },
       shouldShowFieldHandler: () => true,
     });
 
@@ -324,7 +313,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView,
-      columnsMeta: undefined,
       shouldShowFieldHandler: getShouldShowFieldHandler(
         ['agent', 'agent.keyword'],
         dataView,
@@ -343,7 +331,6 @@ describe('flattenedToNestedDocument', () => {
           dataViewMock
         ),
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: () => true,
       });
 

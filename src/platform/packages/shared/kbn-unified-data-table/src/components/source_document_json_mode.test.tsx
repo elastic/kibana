@@ -42,7 +42,6 @@ const renderCell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      columnsMeta={undefined}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       selectedColumns={selectedColumns}
