@@ -19,7 +19,13 @@ import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
-import type { CloudProjectContext, ServiceAccountsBackend } from './types';
+import type {
+  CloudProjectContext,
+  ListedServiceAccount,
+  ListServiceAccountsParams,
+  ListServiceAccountsResult,
+  ServiceAccountsBackend,
+} from './types';
 import type { SecurityLicense } from '../../common';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
@@ -44,6 +50,29 @@ import {
 const serviceAccountSchema = z.object({
   id: serviceAccountIdSchema,
   name: serviceAccountNameSchema,
+});
+
+const serviceAccountCreatorSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('user'),
+    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+    first_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+    last_name: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  }),
+  z.object({
+    type: z.literal('api-key'),
+    id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+    description: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  }),
+]);
+
+const listedServiceAccountSchema = serviceAccountSchema.extend({
+  creator: serviceAccountCreatorSchema,
+});
+
+const listServiceAccountsResponseSchema = z.object({
+  service_accounts: z.array(listedServiceAccountSchema),
+  after: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
 
 /**
@@ -194,6 +223,75 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     return parsed.data;
+  }
+
+  async list(
+    request: KibanaRequest,
+    params: ListServiceAccountsParams = {}
+  ): Promise<ListServiceAccountsResult> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot list service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'list service accounts',
+    });
+
+    this.logger.debug('Attempting to list service accounts');
+
+    try {
+      const result = await this.uiam.listServiceAccounts(params);
+      const parsed = listServiceAccountsResponseSchema.safeParse(result);
+      if (!parsed.success) {
+        this.logger.error(
+          `Service account list payload from UIAM failed validation: ${parsed.error.message}`
+        );
+        throw new Error(`Error occured during service account listing.`);
+      }
+
+      return parsed.data;
+    } catch (e) {
+      this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async get(request: KibanaRequest, id: string): Promise<ListedServiceAccount> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'get a service account',
+    });
+
+    this.logger.debug(`Attempting to get service account ${id}`);
+
+    try {
+      const result = await this.uiam.getServiceAccount(id);
+      const parsed = listedServiceAccountSchema.safeParse(result);
+      if (!parsed.success) {
+        this.logger.error(
+          `Service account payload from UIAM failed validation: ${parsed.error.message}`
+        );
+        throw new Error(`Error occured during service account retrieval.`);
+      }
+
+      return parsed.data;
+    } catch (e) {
+      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
   }
 
   /**

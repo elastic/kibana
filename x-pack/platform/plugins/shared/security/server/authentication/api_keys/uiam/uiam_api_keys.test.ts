@@ -63,6 +63,8 @@ describe('UiamAPIKeys', () => {
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
       createServiceAccount: jest.fn(),
+      listServiceAccounts: jest.fn(),
+      getServiceAccount: jest.fn(),
       exchangeServiceAccountToken: jest.fn(),
       authenticateAsKibana: jest.fn(),
       createOAuthClient: jest.fn(),
