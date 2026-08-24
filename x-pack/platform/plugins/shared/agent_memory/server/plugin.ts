@@ -17,7 +17,6 @@ import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentMemoryConfig } from './config';
 import type {
   AgentMemoryPluginSetup,
@@ -32,7 +31,6 @@ import { createRememberTool } from './tools/remember';
 import { createForgetTool } from './tools/forget';
 import { memorySkill } from './skills/memory_skill';
 import { registerMemoryHook } from './hooks/inject_memories';
-import { registerCaptureHook } from './hooks/capture_memories';
 import { registerMemoryWorkflowSteps } from './workflow_steps';
 
 export class AgentMemoryPlugin
@@ -63,7 +61,6 @@ export class AgentMemoryPlugin
   private coreSecurity?: SecurityServiceStart;
   private elasticsearch?: CoreStart['elasticsearch'];
   private spacesStart?: SpacesPluginStart;
-  private inferenceStart?: InferenceServerStart;
 
   constructor(context: PluginInitializerContext<AgentMemoryConfig>) {
     this.logger = context.logger.get();
@@ -113,12 +110,6 @@ export class AgentMemoryPlugin
     const getSpaceId = (request: KibanaRequest): string =>
       this.spacesStart?.spacesService.getSpaceId(request) ?? 'default';
 
-    const getInference = (): InferenceServerStart => {
-      if (!this.inferenceStart)
-        throw new Error('AgentMemoryPlugin: inference accessed before start()');
-      return this.inferenceStart;
-    };
-
     // ── Tools ─────────────────────────────────────────────────────────────────
     const { tools, skills, hooks } = setupDeps.agentBuilder;
 
@@ -156,24 +147,6 @@ export class AgentMemoryPlugin
       logger: this.logger.get('hook'),
     });
 
-    // ── Periodic capture hook ─────────────────────────────────────────────────
-    if (this.config.captureEveryNMessages > 0) {
-      this.logger.debug(
-        `Registering agent-memory-capture hook (every ${this.config.captureEveryNMessages} messages)`
-      );
-      registerCaptureHook({
-        hooksSetup: hooks,
-        getStorage: getMemoryStorage,
-        getCurrentUserEsClient,
-        getSecurity: getSecurityStart,
-        getCoreSecurity,
-        getSpaceId,
-        getInference,
-        captureEveryNMessages: this.config.captureEveryNMessages,
-        logger: this.logger.get('capture-hook'),
-      });
-    }
-
     // ── Workflow steps ────────────────────────────────────────────────────────
     registerMemoryWorkflowSteps(
       setupDeps.workflowsExtensions,
@@ -204,7 +177,6 @@ export class AgentMemoryPlugin
     this.coreSecurity = coreStart.security;
     this.elasticsearch = coreStart.elasticsearch;
     this.spacesStart = startDeps.spaces;
-    this.inferenceStart = startDeps.inference;
 
     // Belief-store factory — callers pass asCurrentUser for data operations;
     // the internal user manages only the plugin-owned index template.

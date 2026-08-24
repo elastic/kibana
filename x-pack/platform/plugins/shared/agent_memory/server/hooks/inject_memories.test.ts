@@ -112,8 +112,6 @@ describe('agent memory injection hook tracing', () => {
       nextInput: { message, attachments: [] },
       agentId: 'test-agent',
       agentConfiguration,
-      previousRounds: [],
-      connectorId: 'test-connector',
     } satisfies BeforeAgentHookContext);
 
   const getHookSpan = () => {

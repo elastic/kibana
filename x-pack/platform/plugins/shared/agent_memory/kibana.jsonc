@@ -12,7 +12,6 @@
     "requiredPlugins": [
       "agentBuilder",
       "features",
-      "inference",
       "security",
       "workflowsExtensions"
     ],

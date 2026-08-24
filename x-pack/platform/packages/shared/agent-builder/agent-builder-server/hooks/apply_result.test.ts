@@ -26,8 +26,6 @@ describe('apply_result', () => {
       request: createMockRequest(),
       nextInput: { message: 'original', attachments: [] },
       agentConfiguration: { tools: [] },
-      previousRounds: [],
-      connectorId: 'test-connector',
     };
 
     it('returns context unchanged when result is undefined', () => {
