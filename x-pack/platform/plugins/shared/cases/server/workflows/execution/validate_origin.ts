@@ -53,26 +53,24 @@ const getAttachedAlertPairSet = (comments: NonNullable<Case['comments']>): Set<s
   const pairs = new Set<string>();
 
   for (const comment of comments) {
-    if (!isAlertAttachmentType(comment.type)) {
-      continue;
-    }
+    if (isAlertAttachmentType(comment.type)) {
+      let ids: string[] = [];
+      let indices: string[] = [];
 
-    let ids: string[] = [];
-    let indices: string[] = [];
+      if ('alertId' in comment) {
+        // Legacy v1 alert attachment: alertId and index are parallel fields.
+        ids = toStringArray(comment.alertId);
+        indices = toStringArray((comment as Record<string, unknown>).index ?? []);
+      } else if ('attachmentId' in comment) {
+        // Unified v2 alert attachment: id is attachmentId, index lives in metadata.index.
+        ids = toStringArray(comment.attachmentId);
+        const meta = getRecord((comment as Record<string, unknown>).metadata);
+        indices = meta ? toStringArray(meta.index) : [];
+      }
 
-    if ('alertId' in comment) {
-      // Legacy v1 alert attachment: alertId and index are parallel fields.
-      ids = toStringArray(comment.alertId);
-      indices = toStringArray((comment as Record<string, unknown>).index ?? []);
-    } else if ('attachmentId' in comment) {
-      // Unified v2 alert attachment: id is attachmentId, index lives in metadata.index.
-      ids = toStringArray(comment.attachmentId);
-      const meta = getRecord((comment as Record<string, unknown>).metadata);
-      indices = meta ? toStringArray(meta.index) : [];
-    }
-
-    for (let i = 0; i < ids.length; i++) {
-      pairs.add(`${ids[i]}|${indices[i] ?? ''}`);
+      for (let i = 0; i < ids.length; i++) {
+        pairs.add(`${ids[i]}|${indices[i] ?? ''}`);
+      }
     }
   }
 
