@@ -57,14 +57,6 @@ export async function validateOutputForPolicy(
 ) {
   const data = { ...existingData, ...newData };
 
-  if (
-    Object.keys(existingData).length !== 0 &&
-    newData.data_output_id === existingData.data_output_id &&
-    newData.monitoring_output_id === existingData.monitoring_output_id
-  ) {
-    return;
-  }
-
   if (!data.supports_agentless) {
     const managedBulkOutputId = [data.data_output_id, data.monitoring_output_id].find(
       (outputId) => outputId && AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(outputId)
@@ -74,6 +66,14 @@ export async function validateOutputForPolicy(
         `Output "${managedBulkOutputId}" can only be used with an agentless agent policy.`
       );
     }
+  }
+
+  if (
+    Object.keys(existingData).length !== 0 &&
+    newData.data_output_id === existingData.data_output_id &&
+    newData.monitoring_output_id === existingData.monitoring_output_id
+  ) {
+    return;
   }
 
   const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
