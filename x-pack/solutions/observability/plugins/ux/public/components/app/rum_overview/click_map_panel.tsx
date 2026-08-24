@@ -28,7 +28,7 @@ import { isClickMapLongRange, type RumClickMapResponse } from '../../../../commo
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumClickMap } from '../../../services/rest/rum_api';
-import { pushRumPath } from '../../../utils/rum_search';
+import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { ClickMapStage } from './click_map_stage';
 import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
@@ -309,7 +309,18 @@ function ClickMapContent() {
 
       {data && data.snapshot && (
         <>
-          <ClickMapStage snapshot={data.snapshot} clicks={data.clicks} />
+          <ClickMapStage
+            snapshot={data.snapshot}
+            clicks={data.clicks}
+            sampledClicks={data.sampledClicks}
+            onViewSessions={(sessionIds) => {
+              pushRumPath(
+                history,
+                '/session-replay',
+                sessionsPatch({ sessionIds: sessionIds.join(',') })
+              );
+            }}
+          />
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.ux.overview.clickMap.stats', {

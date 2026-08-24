@@ -246,10 +246,12 @@ export const getRumClickMapRoute = createUxServerRoute({
       x: point.x,
       y: point.y,
       viewportWidth: point.viewportWidth,
+      sessionId: point.sessionId,
     }));
     const fromReplay = replay.clicks.map((point) => ({
       ...point,
       viewportWidth: snapshot?.width ?? null,
+      sessionId: snapshot?.sessionId ?? null,
     }));
     const merged = fromLogs.length > 0 ? fromLogs : fromReplay;
 
@@ -257,7 +259,7 @@ export const getRumClickMapRoute = createUxServerRoute({
       ? merged.filter((point) => inViewportBand(point.viewportWidth, snapshot.width))
       : merged;
     const usable = (viewportMatched.length >= 8 || !snapshot ? viewportMatched : merged).map(
-      (point) => ({ x: point.x, y: point.y })
+      (point) => ({ x: point.x, y: point.y, sessionId: point.sessionId })
     );
 
     const onViewport = snapshot

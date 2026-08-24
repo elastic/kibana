@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { RumClickPoint, RumClickMapSnapshot } from '../../../../common/rum_click_map';
+import { ClickMapHotspotCard } from './click_map_hotspot';
+import { clickBinRadius, clickMapStageFit } from './click_map_hit';
 
 interface ReplayerInstance {
   pause: (timeOffset?: number) => void;
@@ -17,6 +21,9 @@ interface ReplayerInstance {
 }
 
 const STAGE_HEIGHT = 420;
+
+const sameBin = (a: RumClickPoint | null, b: RumClickPoint | null): boolean =>
+  a != null && b != null && a.x === b.x && a.y === b.y;
 
 const drawHeatmap = (canvas: HTMLCanvasElement, clicks: RumClickPoint[]): void => {
   const ctx = canvas.getContext('2d');
@@ -27,7 +34,7 @@ const drawHeatmap = (canvas: HTMLCanvasElement, clicks: RumClickPoint[]): void =
   const maxCount = Math.max(1, ...clicks.map((click) => click.count));
   for (const click of clicks) {
     const intensity = 0.25 + 0.55 * (click.count / maxCount);
-    const radius = 28 + 16 * (click.count / maxCount);
+    const radius = clickBinRadius(click.count, maxCount);
     const gradient = ctx.createRadialGradient(click.x, click.y, 0, click.x, click.y, radius);
     gradient.addColorStop(0, `rgba(255, 48, 14, ${intensity})`);
     gradient.addColorStop(0.45, `rgba(255, 176, 32, ${intensity * 0.45})`);
@@ -44,14 +51,15 @@ const fitReplayToStage = (stage: HTMLElement, pageWidth: number, pageHeight: num
   if (!wrapper) {
     return;
   }
-  const stageWidth = stage.clientWidth;
-  const stageHeight = stage.clientHeight;
-  if (stageWidth <= 0 || stageHeight <= 0 || pageWidth <= 0 || pageHeight <= 0) {
+  const { scale, left, top } = clickMapStageFit(
+    stage.clientWidth,
+    stage.clientHeight,
+    pageWidth,
+    pageHeight
+  );
+  if (stage.clientWidth <= 0 || stage.clientHeight <= 0) {
     return;
   }
-  const scale = Math.min(stageWidth / pageWidth, stageHeight / pageHeight, 1);
-  const left = Math.max(0, (stageWidth - pageWidth * scale) / 2);
-  const top = Math.max(0, (stageHeight - pageHeight * scale) / 2);
   wrapper.style.transformOrigin = 'top left';
   wrapper.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
   wrapper.style.width = `${pageWidth}px`;
@@ -61,14 +69,62 @@ const fitReplayToStage = (stage: HTMLElement, pageWidth: number, pageHeight: num
 export function ClickMapStage({
   snapshot,
   clicks,
+  sampledClicks,
+  onViewSessions,
 }: {
   snapshot: RumClickMapSnapshot;
   clicks: RumClickPoint[];
+  sampledClicks: number;
+  onViewSessions?: (sessionIds: string[]) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const flyoutRef = useRef<HTMLDivElement | null>(null);
   const replayerRef = useRef<ReplayerInstance | null>(null);
+  const [fit, setFit] = useState({ scale: 1, left: 0, top: 0 });
+  const [hovered, setHovered] = useState<RumClickPoint | null>(null);
+  const [pinned, setPinned] = useState<RumClickPoint | null>(null);
+  const [anchor, setAnchor] = useState<{ left: number; top: number } | null>(null);
+
+  const maxCount = useMemo(() => Math.max(1, ...clicks.map((click) => click.count)), [clicks]);
+  const hotspots = useMemo(() => [...clicks].sort((a, b) => a.count - b.count), [clicks]);
+
+  const applyFit = useCallback(() => {
+    const stage = stageRef.current;
+    if (!stage) {
+      return;
+    }
+    const next = clickMapStageFit(
+      stage.clientWidth,
+      stage.clientHeight,
+      snapshot.width,
+      snapshot.height
+    );
+    setFit((current) =>
+      current.scale === next.scale && current.left === next.left && current.top === next.top
+        ? current
+        : next
+    );
+    fitReplayToStage(stage, snapshot.width, snapshot.height);
+  }, [snapshot.width, snapshot.height]);
+
+  useLayoutEffect(() => {
+    applyFit();
+    const stage = stageRef.current;
+    if (!stage || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const observer = new ResizeObserver(() => applyFit());
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [applyFit]);
+
+  useEffect(() => {
+    setHovered(null);
+    setPinned(null);
+    setAnchor(null);
+  }, [snapshot, clicks]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,7 +157,7 @@ export function ClickMapStage({
       }
       replayerRef.current = replayer;
       replayer.pause(0);
-      fitReplayToStage(stageRef.current, snapshot.width, snapshot.height);
+      applyFit();
 
       const wrapper = mount.querySelector('.replayer-wrapper') as HTMLElement | null;
       if (wrapper) {
@@ -122,16 +178,8 @@ export function ClickMapStage({
 
     void start();
 
-    const onResize = () => {
-      if (stageRef.current) {
-        fitReplayToStage(stageRef.current, snapshot.width, snapshot.height);
-      }
-    };
-    window.addEventListener('resize', onResize);
-
     return () => {
       cancelled = true;
-      window.removeEventListener('resize', onResize);
       if (replayerRef.current?.destroy) {
         try {
           replayerRef.current.destroy();
@@ -142,7 +190,47 @@ export function ClickMapStage({
       replayerRef.current = null;
       mount.innerHTML = '';
     };
-  }, [snapshot, clicks]);
+  }, [snapshot, clicks, applyFit]);
+
+  useEffect(() => {
+    if (!pinned) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPinned(null);
+      }
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) {
+        return;
+      }
+      if (flyoutRef.current?.contains(target)) {
+        return;
+      }
+      if (target.closest('[data-test-subj^="uxClickMapHotspot-"]')) {
+        return;
+      }
+      setPinned(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [pinned]);
+
+  const showPinned = pinned != null && anchor != null;
+  const showHover = hovered != null && pinned == null && anchor != null;
+  const flyoutClick = showPinned ? pinned : hovered;
+  const flipDown = (anchor?.top ?? 0) < 160;
+
+  const placeAnchor = (event: React.MouseEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setAnchor({ left: rect.left + rect.width / 2, top: rect.top });
+  };
 
   return (
     <div
@@ -166,6 +254,7 @@ export function ClickMapStage({
         iframe {
           border: 0;
           background: #fff;
+          pointer-events: none;
         }
       `}
     >
@@ -176,6 +265,86 @@ export function ClickMapStage({
           inset: 0;
         `}
       />
+      <div
+        data-test-subj="uxClickMapHitLayer"
+        css={css`
+          position: absolute;
+          left: ${fit.left}px;
+          top: ${fit.top}px;
+          width: ${snapshot.width * fit.scale}px;
+          height: ${snapshot.height * fit.scale}px;
+          z-index: 7;
+          pointer-events: none;
+        `}
+      >
+        {hotspots.map((click) => {
+          const radius = clickBinRadius(click.count, maxCount) * fit.scale;
+          return (
+            <button
+              key={`${click.x}:${click.y}`}
+              type="button"
+              data-test-subj={`uxClickMapHotspot-${click.x}-${click.y}`}
+              aria-label={i18n.translate('xpack.ux.overview.clickMap.hotspotAriaLabel', {
+                defaultMessage: '{count, plural, one {# click} other {# clicks}} in this area',
+                values: { count: click.count },
+              })}
+              css={css`
+                position: absolute;
+                left: ${click.x * fit.scale - radius}px;
+                top: ${click.y * fit.scale - radius}px;
+                width: ${radius * 2}px;
+                height: ${radius * 2}px;
+                border-radius: 50%;
+                pointer-events: auto;
+                background: transparent;
+                border: 0;
+                padding: 0;
+                cursor: pointer;
+              `}
+              onMouseEnter={(event) => {
+                setHovered(click);
+                if (!pinned) {
+                  placeAnchor(event);
+                }
+              }}
+              onMouseLeave={() => {
+                setHovered((current) => (sameBin(current, click) ? null : current));
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                placeAnchor(event);
+                setPinned((current) => (sameBin(current, click) ? null : click));
+              }}
+            />
+          );
+        })}
+      </div>
+      {flyoutClick && (showHover || showPinned) && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              ref={flyoutRef}
+              data-test-subj="uxClickMapFlyout"
+              css={css`
+                position: fixed;
+                left: ${anchor?.left ?? 0}px;
+                top: ${anchor?.top ?? 0}px;
+                transform: ${flipDown
+                  ? 'translate(-50%, 8px)'
+                  : 'translate(-50%, calc(-100% - 8px))'};
+                z-index: ${euiTheme.levels.flyout};
+                pointer-events: ${showPinned ? 'auto' : 'none'};
+              `}
+            >
+              <ClickMapHotspotCard
+                click={flyoutClick}
+                sampledClicks={sampledClicks}
+                showSessionsAction={showPinned}
+                onViewSessions={onViewSessions}
+              />
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }

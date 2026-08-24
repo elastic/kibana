@@ -12,7 +12,11 @@ export interface RumClickPoint {
   x: number;
   y: number;
   count: number;
+  /** Sample of sessions that clicked this bin — not exhaustive. */
+  sessionIds?: string[];
 }
+
+export const CLICK_BIN_SESSION_SAMPLE = 8;
 
 export interface RumClickMapSnapshot {
   sessionId: string;
@@ -172,8 +176,20 @@ export const extractReplayClicks = (
   return clicks;
 };
 
+const pushBinSessionId = (bin: RumClickPoint, sessionId?: string | null): void => {
+  if (!sessionId) {
+    return;
+  }
+  const ids = bin.sessionIds ?? [];
+  if (ids.length >= CLICK_BIN_SESSION_SAMPLE || ids.includes(sessionId)) {
+    return;
+  }
+  bin.sessionIds = ids;
+  ids.push(sessionId);
+};
+
 export const binClicks = (
-  points: Array<{ x: number; y: number }>,
+  points: Array<{ x: number; y: number; sessionId?: string | null }>,
   cell = 12,
   max = 800
 ): RumClickPoint[] => {
@@ -188,8 +204,11 @@ export const binClicks = (
     const current = bins.get(key);
     if (current) {
       current.count += 1;
+      pushBinSessionId(current, point.sessionId);
     } else {
-      bins.set(key, { x, y, count: 1 });
+      const created: RumClickPoint = { x, y, count: 1 };
+      pushBinSessionId(created, point.sessionId);
+      bins.set(key, created);
     }
   }
   return [...bins.values()].sort((a, b) => b.count - a.count).slice(0, max);

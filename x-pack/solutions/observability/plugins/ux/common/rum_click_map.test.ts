@@ -7,6 +7,7 @@
 
 import {
   binClicks,
+  CLICK_BIN_SESSION_SAMPLE,
   extractPageSnapshot,
   extractReplayClicks,
   inViewportBand,
@@ -96,6 +97,18 @@ describe('binClicks', () => {
     );
     expect(binned[0].count).toBe(2);
     expect(binned).toHaveLength(2);
+  });
+
+  it('keeps unique session ids on a bin and caps the sample', () => {
+    const ids = Array.from({ length: 12 }, (_, index) => `s${index}`);
+    const binned = binClicks(
+      ids.map((sessionId) => ({ x: 10, y: 10, sessionId })),
+      12,
+      10
+    );
+    expect(binned).toHaveLength(1);
+    expect(binned[0].count).toBe(12);
+    expect(binned[0].sessionIds).toEqual(ids.slice(0, CLICK_BIN_SESSION_SAMPLE));
   });
 });
 
