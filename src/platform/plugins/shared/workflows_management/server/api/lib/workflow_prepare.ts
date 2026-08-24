@@ -88,7 +88,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     name: looseMetadata.name ?? 'Untitled workflow',
     description: looseMetadata.description,
     enabled: false,
-    tags: [],
+    tags: looseMetadata.tags ?? [],
     definition: undefined,
     valid: false,
   };

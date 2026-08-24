@@ -346,5 +346,35 @@ describe('prepareWorkflowDocumentFromYaml', () => {
 
     expect(result.workflowData.name).toBe('Untitled workflow');
     expect(result.workflowData.description).toBeUndefined();
+    expect(result.workflowData.tags).toEqual([]);
+  });
+
+  it('recovers tags from YAML that has valid tags but fails schema validation', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithTags = [
+      'version: "1"',
+      'name: Tagged Invalid Workflow',
+      'tags:',
+      '  - alpha',
+      '  - beta',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithTags,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.tags).toEqual(['alpha', 'beta']);
+    expect(result.workflowData.valid).toBe(false);
   });
 });
