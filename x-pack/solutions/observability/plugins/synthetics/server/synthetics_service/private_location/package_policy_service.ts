@@ -29,7 +29,7 @@ interface GetByIdsOptions {
 interface PackagePolicyWithAgentPolicyIds {
   id?: string;
   policy_ids?: string[];
-  condition?: unknown;
+  condition?: string | null;
 }
 
 export class PackagePolicyService {

@@ -11,7 +11,16 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { PackagePolicyService } from './package_policy_service';
+import { AGENT_POLICY_REVISION_BATCH_WINDOW_MS } from './agent_policy_revision_batcher';
 import type { SyntheticsServerSetup } from '../../types';
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 // The space-scoped SO client is opaque here; we tag it with the namespace it was
 // scoped to so we can assert which space a package policy was written into.
@@ -165,7 +174,7 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
     }));
     const service = new PackagePolicyService(server);
 
-    await Promise.all([
+    const requests = Promise.all([
       service.bulkCreate({
         newPolicies: [policy({ id: 'monitor-1-policyId', condition: "agent.id == 'agent-1'" })],
         spaceId: DEFAULT_SPACE_ID,
@@ -175,6 +184,8 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
         spaceId: DEFAULT_SPACE_ID,
       }),
     ]);
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await requests;
 
     expect(fleetBulkCreate).toHaveBeenCalledTimes(2);
     expect(fleetBulkCreate).toHaveBeenNthCalledWith(
@@ -208,10 +219,12 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
       failedPolicies: [],
     });
 
-    await new PackagePolicyService(server).bulkUpdate({
+    const request = new PackagePolicyService(server).bulkUpdate({
       policiesToUpdate: [updatedPolicy],
       spaceId: DEFAULT_SPACE_ID,
     });
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await request;
 
     expect(fleetBulkUpdate).toHaveBeenCalledWith(
       expect.anything(),
@@ -231,10 +244,12 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
       { id: deletedPolicy.id, success: true, policy_ids: deletedPolicy.policy_ids },
     ]);
 
-    await new PackagePolicyService(server).bulkDelete({
+    const request = new PackagePolicyService(server).bulkDelete({
       policyIdsToDelete: [deletedPolicyId],
       spaceId: DEFAULT_SPACE_ID,
     });
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await request;
 
     expect(fleetDelete).toHaveBeenCalledWith(
       expect.anything(),
@@ -383,10 +398,12 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       updatedPolicies: [update('m1-loc'), update('m2-loc')],
     });
 
-    await new PackagePolicyService(server).bulkUpdateInSpace({
+    const request = new PackagePolicyService(server).bulkUpdateInSpace({
       policiesToUpdate: [update('m1-loc'), update('m2-loc')],
       spaceId: 'team-x',
     });
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await request;
 
     // Opts out of Fleet's own immediate bump so the rebalance task's write
     // shares the same coalesced/retried bump as concurrent monitor CRUD,
