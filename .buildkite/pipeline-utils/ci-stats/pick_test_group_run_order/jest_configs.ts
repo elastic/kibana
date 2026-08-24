@@ -10,20 +10,26 @@
 import * as globby from 'globby';
 
 import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
+import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { getKibanaDir } from '#pipeline-utils';
 
-/** Discover Jest unit configs honoring LIMIT_SOLUTIONS and the disabled list. */
+/** Discover Jest unit configs honoring LIMIT_SOLUTIONS, the disabled list, and empty filtering. */
 export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
-  return globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions);
+  return filterEmptyJestConfigs(
+    globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions)
+  );
 }
 
-/** Discover Jest integration configs honoring LIMIT_SOLUTIONS and the disabled list. */
+/** Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list, and empty filtering. */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
-  return globJestConfigs(['**/jest.integration.config.js', '!**/__fixtures__/**'], limitSolutions);
+  return filterEmptyJestConfigs(
+    globJestConfigs(['**/jest.integration.config.js', '!**/__fixtures__/**'], limitSolutions)
+  );
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
   return globby.sync(globsForSolutions(patterns, limitSolutions), {
-    cwd: process.cwd(),
+    cwd: getKibanaDir(),
     absolute: false,
     ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
   });
