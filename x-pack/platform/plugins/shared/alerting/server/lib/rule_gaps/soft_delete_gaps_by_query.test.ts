@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { softDeleteGapsByQuery } from './soft_delete_gaps_by_query';
@@ -93,15 +94,110 @@ describe('softDeleteGapsByQuery', () => {
     ).resolves.toBeUndefined();
   });
 
-  test('warns when the response reports version conflicts or failures', async () => {
+  // A client abort at `elasticsearch.requestTimeout` does not stop the
+  // Elasticsearch task, so it must not be reported as a failure.
+  test('warns instead of erroring when the client times out', async () => {
+    eventLogClient.softDeleteByQuery.mockRejectedValueOnce(
+      new EsErrors.TimeoutError('Request timed out')
+    );
+
+    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('client timed out'));
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  test('logs a debug summary on the happy path', async () => {
+    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('updated=3'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('bulk_retries=0'));
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  test('does not warn when the script skips documents as noops', async () => {
     eventLogClient.softDeleteByQuery.mockResolvedValue({
-      updated: 1,
-      version_conflicts: 2,
+      total: 7,
+      updated: 5,
+      noops: 2,
+      version_conflicts: 0,
       failures: [],
     } as estypes.UpdateByQueryResponse);
 
     await softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('version_conflicts=2'));
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('noops=2'));
+  });
+
+  test('warns when the response reports timed_out', async () => {
+    eventLogClient.softDeleteByQuery.mockResolvedValue({
+      updated: 1,
+      timed_out: true,
+      version_conflicts: 0,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+
+    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+
+    expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed_out=true'));
+  });
+
+  describe('version conflicts', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('retries the chunk once when the response reports version conflicts', async () => {
+      eventLogClient.softDeleteByQuery
+        .mockResolvedValueOnce({
+          updated: 1,
+          version_conflicts: 2,
+          failures: [],
+        } as estypes.UpdateByQueryResponse)
+        .mockResolvedValueOnce(okResponse);
+
+      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+      await jest.runAllTimersAsync();
+      await pending;
+
+      expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('warns when conflicts remain after the retry', async () => {
+      eventLogClient.softDeleteByQuery.mockResolvedValue({
+        updated: 1,
+        version_conflicts: 2,
+        failures: [],
+      } as estypes.UpdateByQueryResponse);
+
+      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+      await jest.runAllTimersAsync();
+      await pending;
+
+      expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('version_conflicts=2'));
+    });
+
+    test('does not retry a response that only reports failures', async () => {
+      eventLogClient.softDeleteByQuery.mockResolvedValue({
+        updated: 1,
+        version_conflicts: 0,
+        failures: [{ id: 'doc-1' }],
+      } as unknown as estypes.UpdateByQueryResponse);
+
+      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], eventLogClient, logger });
+      await jest.runAllTimersAsync();
+      await pending;
+
+      expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failures=1'));
+    });
   });
 });
