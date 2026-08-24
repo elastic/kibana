@@ -1198,7 +1198,7 @@ export function createLatencyEvaluator({ maxSeconds = 60 }: { maxSeconds?: numbe
   return {
     name: 'Latency',
     kind: 'CODE' as const,
-    higherIsBetter: false,
+    higherIsBetter: true,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
       const { latencyMs } = output;
       if (latencyMs == null) {
