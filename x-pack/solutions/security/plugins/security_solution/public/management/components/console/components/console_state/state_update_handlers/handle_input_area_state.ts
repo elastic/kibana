@@ -49,7 +49,8 @@ type InputAreaStateAction = ConsoleDataAction & {
     | 'updateInputTextEnteredState'
     | 'updateInputPlaceholderState'
     | 'setInputState'
-    | 'updateInputCommandArgState';
+    | 'updateInputCommandArgState'
+    | 'updateInputSuggestionState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -203,6 +204,15 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         };
       }
       break;
+
+    case 'updateInputSuggestionState':
+      return {
+        ...state,
+        input: {
+          ...state.input,
+          suggestion: payload.suggestion,
+        },
+      };
 
     case 'setInputState':
       if (state.input.visibleState !== payload.value) {
