@@ -161,7 +161,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+        query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
       }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
