@@ -16,7 +16,7 @@ export const createIndexPatternValidityEvaluator = (): Evaluator<
 > => ({
   name: 'Index Pattern Validity',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({
     output,
     expected,

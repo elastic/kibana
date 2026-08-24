@@ -83,7 +83,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
         {
           name: 'ContainsKibana',
           kind: 'CODE' as const,
-          higherIsBetter: true,
+          direction: 'maximize',
           evaluate: async ({ output }) => ({
             score: String((output as TaskOutput)?.response ?? '')
               .toLowerCase()
@@ -229,11 +229,11 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           },
         },
         evaluatorClient.toEvaluators([
-          { name: 'groundedness', kind: 'LLM', higherIsBetter: true, connectorId: connectorId! },
+          { name: 'groundedness', kind: 'LLM', direction: 'maximize', connectorId: connectorId! },
           {
             name: 'correctness',
             kind: 'LLM',
-            higherIsBetter: true,
+            direction: 'maximize',
             connectorId: connectorId!,
             subScores: [
               { key: 'factuality', evaluatorName: 'Factuality' },
@@ -290,7 +290,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           {
             name: 'SnapshotRestored',
             kind: 'CODE' as const,
-            higherIsBetter: true,
+            direction: 'maximize',
             evaluate: async ({ output }) => {
               const { success, reindexedIndices } = output as {
                 success: boolean;

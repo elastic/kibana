@@ -43,7 +43,7 @@ export function createToolPoisoningEvaluator(config: {
   return {
     name: 'tool-poisoning',
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const toolCalls = extractToolCalls(output);
 
@@ -103,7 +103,7 @@ export function createPromptLeakDetectionEvaluator(config?: {
   return {
     name: 'prompt-leak-detection',
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const text = typeof output === 'string' ? output : JSON.stringify(output);
 
@@ -164,7 +164,7 @@ export function createScopeViolationEvaluator(config: { allowedPatterns: RegExp[
   return {
     name: 'scope-violation',
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const text = typeof output === 'string' ? output : JSON.stringify(output);
 

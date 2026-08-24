@@ -14,7 +14,7 @@ import { getFeaturesFromOutput } from '../types';
 export const typeAssertionsEvaluator = {
   name: 'type_assertions',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { required_types, forbidden_types } = expected;
 

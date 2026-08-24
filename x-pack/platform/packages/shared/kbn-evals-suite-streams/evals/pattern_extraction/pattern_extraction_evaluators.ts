@@ -19,7 +19,7 @@ import { formatPercent } from '../shared_helpers';
 export const parseRateEvaluator: Evaluator<Example, PatternExtractionResult> = {
   name: 'parse_rate',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const { metrics } = output.output;
     return { score: metrics?.parseRate ?? 0 };
@@ -33,7 +33,7 @@ export const parseRateEvaluator: Evaluator<Example, PatternExtractionResult> = {
 export const patternQualityScoreEvaluator: Evaluator<Example, PatternExtractionResult> = {
   name: 'pattern_quality_score',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const { metrics } = output.output;
 
@@ -74,7 +74,7 @@ export const createPatternExtractionLlmEvaluator = (
 ): Evaluator<Example, PatternExtractionResult> => ({
   name: 'llm_extraction_quality',
   kind: 'LLM',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected, input, metadata }) => {
     const { parsedLogs, heuristicPattern, suggestedProcessor, patternType } = output.output;
     const exp = expected as PatternExtractionGroundTruth | undefined;

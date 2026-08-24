@@ -41,7 +41,7 @@ describe('createTraceBasedEvaluator', () => {
 
     mockConfig = {
       name: 'Test Evaluator',
-      higherIsBetter: true,
+      direction: 'maximize',
       buildQuery: (traceId: string) => `FROM traces-* | WHERE trace.id == "${traceId}"`,
       extractResult: (response) => response.values[0][0] as number | null,
     };

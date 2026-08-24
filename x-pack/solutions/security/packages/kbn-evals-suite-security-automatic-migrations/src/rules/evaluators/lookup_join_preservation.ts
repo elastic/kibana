@@ -16,7 +16,7 @@ export const createLookupJoinPreservationEvaluator = (): Evaluator<
 > => ({
   name: 'LOOKUP JOIN Preservation',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({
     output,
     expected,

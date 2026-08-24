@@ -17,7 +17,7 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
   return {
     name: ATTACK_DISCOVERY_BASIC_EVALUATOR_NAME,
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const insights = output?.insights;
       if (!insights || !Array.isArray(insights)) {

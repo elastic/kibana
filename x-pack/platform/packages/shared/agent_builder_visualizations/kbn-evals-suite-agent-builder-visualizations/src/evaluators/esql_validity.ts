@@ -33,7 +33,7 @@ export function createEsqlValidityEvaluator<
   return {
     name,
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }): Promise<EvaluationResult> => {
       let queries: string[];
 

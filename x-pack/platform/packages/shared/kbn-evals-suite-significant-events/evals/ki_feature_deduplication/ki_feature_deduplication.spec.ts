@@ -123,7 +123,7 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
 const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContextOutput> = {
   name: 'dedup_context_contract',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     if (!expected) {
       return { score: 0, explanation: 'Expected deduplication contract is missing' };

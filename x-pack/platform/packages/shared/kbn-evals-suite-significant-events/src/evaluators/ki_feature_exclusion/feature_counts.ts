@@ -28,7 +28,7 @@ const median = (nums: number[]): number => {
 export const initialFeatureCountEvaluator = {
   name: 'initial_feature_count',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }: { output: ExcludeOutput }) => {
     if (!output) {
       return { score: null, explanation: 'Experiment produced no output' };
@@ -55,7 +55,7 @@ export const initialFeatureCountEvaluator = {
 export const followUpReturnedCountEvaluator = {
   name: 'follow_up_returned_count',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }: { output: ExcludeOutput }) => {
     if (!output) {
       return { score: null, explanation: 'Experiment produced no output' };
@@ -90,7 +90,7 @@ export const followUpReturnedCountEvaluator = {
 export const followUpRetainedCountEvaluator = {
   name: 'follow_up_retained_count',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }: { output: ExcludeOutput }) => {
     if (!output) {
       return { score: null, explanation: 'Experiment produced no output' };

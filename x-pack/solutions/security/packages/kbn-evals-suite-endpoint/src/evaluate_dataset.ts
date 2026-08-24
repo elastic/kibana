@@ -40,7 +40,7 @@ export function createEndpointCriteriaEvaluator({
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const criteria: string[] = (expected as SecurityDatasetExample['output'])?.criteria ?? [];
       return evaluators.criteria(criteria).evaluate({ expected, ...rest });

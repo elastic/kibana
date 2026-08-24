@@ -9,23 +9,25 @@ import { gammaln, mean, tTest } from 'simple-statistics';
 import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/experiments/compare_experiments_route.gen';
 
+export type Direction = 'maximize' | 'minimize' | 'neutral';
+
 export interface PairedScore {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
   scoreA: number;
   scoreB: number;
-  higherIsBetter?: boolean;
+  direction?: Direction;
 }
 
 /**
- * Legacy name→polarity heuristic used before `evaluator.higher_is_better` was persisted.
+ * Legacy name→polarity heuristic used before `evaluator.direction` was persisted.
  * Kept only as a fallback for historical score docs that omit the field.
  */
 const LOWER_IS_BETTER_NAME_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
 
-function isHigherIsBetterFromEvaluatorName(evaluatorName: string): boolean {
-  return !LOWER_IS_BETTER_NAME_PATTERN.test(evaluatorName);
+function resolveDirectionFromEvaluatorName(evaluatorName: string): Direction {
+  return LOWER_IS_BETTER_NAME_PATTERN.test(evaluatorName) ? 'minimize' : 'maximize';
 }
 
 /**
@@ -34,18 +36,18 @@ function isHigherIsBetterFromEvaluatorName(evaluatorName: string): boolean {
  * - Only one side defined: use that side
  * - Both defined: prefer baseline
  */
-export function resolveHigherIsBetter(
-  baselineHigherIsBetter: boolean | undefined,
-  targetHigherIsBetter: boolean | undefined,
+export function resolveDirection(
+  baselineDirection: Direction | undefined,
+  targetDirection: Direction | undefined,
   evaluatorName: string
-): boolean {
-  if (baselineHigherIsBetter !== undefined) {
-    return baselineHigherIsBetter;
+): Direction {
+  if (baselineDirection !== undefined) {
+    return baselineDirection;
   }
-  if (targetHigherIsBetter !== undefined) {
-    return targetHigherIsBetter;
+  if (targetDirection !== undefined) {
+    return targetDirection;
   }
-  return isHigherIsBetterFromEvaluatorName(evaluatorName);
+  return resolveDirectionFromEvaluatorName(evaluatorName);
 }
 
 const MAX_BETA_ITERATIONS = 100;
@@ -107,9 +109,9 @@ export function pairScores(
 
     referenceMap.delete(key);
 
-    const higherIsBetter = resolveHigherIsBetter(
-      scoreA.evaluator.higher_is_better,
-      match.evaluator.higher_is_better,
+    const direction = resolveDirection(
+      scoreA.evaluator.direction,
+      match.evaluator.direction,
       scoreA.evaluator.name
     );
 
@@ -119,7 +121,7 @@ export function pairScores(
       evaluatorName: scoreA.evaluator.name,
       scoreA: scoreA.evaluator.score!,
       scoreB: match.evaluator.score!,
-      higherIsBetter,
+      direction,
     });
   }
 
@@ -187,9 +189,9 @@ export function computePairedTTestResults(
       pValue = tStatisticToPValue(tStatistic, differences.length - 1);
     }
 
-    const higherIsBetter =
-      group.find((pair) => pair.higherIsBetter !== undefined)?.higherIsBetter ??
-      resolveHigherIsBetter(undefined, undefined, group[0].evaluatorName);
+    const direction =
+      group.find((pair) => pair.direction !== undefined)?.direction ??
+      resolveDirection(undefined, undefined, group[0].evaluatorName);
 
     results.push({
       datasetId: group[0].datasetId,
@@ -199,7 +201,7 @@ export function computePairedTTestResults(
       meanA: mean(scoresAArr),
       meanB: mean(scoresBArr),
       pValue,
-      higherIsBetter,
+      direction,
     });
   }
 

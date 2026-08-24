@@ -53,7 +53,7 @@ const createEvent = (
     experimentRunId: 'run-1',
     traceId: 'trace-eval-1',
     exampleId: 'example-1',
-    higherIsBetter: true,
+    direction: 'maximize',
   },
   exampleId: 'example-1',
   ...overrides,
@@ -221,7 +221,7 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores[0].example).not.toHaveProperty('metadata');
   });
 
-  it('maps evaluationRun.higherIsBetter to evaluator.higher_is_better', () => {
+  it('maps evaluationRun.direction to evaluator.direction', () => {
     const requests = buildIngestRequest({
       taskModel,
       evaluatorModel,
@@ -233,7 +233,7 @@ describe('buildIngestRequest', () => {
         event: createEvent({
           evaluationRun: {
             ...createEvent().evaluationRun,
-            higherIsBetter: false,
+            direction: 'minimize',
           },
         }),
       },
@@ -241,11 +241,11 @@ describe('buildIngestRequest', () => {
 
     expect(requests[0].scores[0].evaluator).toMatchObject({
       name: 'Correctness',
-      higher_is_better: false,
+      direction: 'minimize',
     });
   });
 
-  it('persists higher_is_better: true for quality evaluators', () => {
+  it('persists direction: maximize for quality evaluators', () => {
     const requests = buildIngestRequest({
       taskModel,
       evaluatorModel,
@@ -255,7 +255,7 @@ describe('buildIngestRequest', () => {
       source: { kind: 'event', event: createEvent() },
     });
 
-    expect(requests[0].scores[0].evaluator.higher_is_better).toBe(true);
+    expect(requests[0].scores[0].evaluator.direction).toBe('maximize');
   });
 
   it('uses explicit executionId for metadata.execution_id when provided', () => {

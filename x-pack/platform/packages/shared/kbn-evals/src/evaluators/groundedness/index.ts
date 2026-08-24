@@ -109,7 +109,7 @@ export function createGroundednessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
-    higherIsBetter: true,
+    direction: 'maximize',
     name: QUALITATIVE_EVALUATOR_NAME,
   };
 }
@@ -140,7 +140,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       };
     },
     kind: 'LLM',
-    higherIsBetter: true,
+    direction: 'maximize',
     name: QUANTITATIVE_EVALUATOR_NAME,
   };
 }

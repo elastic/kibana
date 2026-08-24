@@ -32,7 +32,7 @@ export function createSkillInvocationEvaluator({
     log,
     config: {
       name: `Skill Invoked (${skillName})`,
-      higherIsBetter: true,
+      direction: 'maximize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
 | STATS

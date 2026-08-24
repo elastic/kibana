@@ -237,6 +237,13 @@ export const DIFF_HIGHER_IS_BETTER = i18n.translate(
   }
 );
 
+export const DIFF_NEUTRAL_DIRECTION = i18n.translate(
+  'xpack.evals.compareExperiments.diffNeutralDirection',
+  {
+    defaultMessage: 'Neutral',
+  }
+);
+
 export const FLYOUT_UNPAIRED_HINT = i18n.translate(
   'xpack.evals.compareExperiments.flyoutUnpairedHint',
   {

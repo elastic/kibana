@@ -12,7 +12,7 @@ function mockJudge(name: string, score: number | null): Evaluator {
   return {
     name,
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async (): Promise<EvaluationResult> => ({
       score,
       label: 'test',
@@ -25,7 +25,7 @@ function failingJudge(name: string): Evaluator {
   return {
     name,
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async (): Promise<EvaluationResult> => {
       throw new Error('Judge failed');
     },
@@ -52,7 +52,7 @@ describe('createMultiJudgeEvaluator', () => {
     const llmJudge: Evaluator = {
       name: 'llm',
       kind: 'LLM',
-      higherIsBetter: true,
+      direction: 'maximize',
       evaluate: async (): Promise<EvaluationResult> => ({
         score: 0.9,
         label: 'test',

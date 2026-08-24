@@ -16,7 +16,7 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanA: 0.8,
   meanB: 0.7,
   pValue: 0.03,
-  higherIsBetter: true,
+  direction: 'maximize',
   ...overrides,
 });
 

@@ -36,7 +36,7 @@ export const createSemanticUniquenessEvaluator = ({
 }) => ({
   name: 'llm_semantic_uniqueness',
   kind: 'LLM' as const,
-  higherIsBetter: true,
+  direction: 'maximize' as const,
   evaluate: async ({
     input,
     output,
@@ -143,7 +143,7 @@ const compactFeature = (feature: BaseFeature) => ({
 export const createIdReuseEvaluator = () => ({
   name: 'id_reuse',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize' as const,
   evaluate: async ({ output }: { output: DedupLoopOutput }) => {
     const { mergeEvents, fingerprintOnlyMergeEvents } = output;
     const totalDuplicates = mergeEvents.length + fingerprintOnlyMergeEvents.length;
@@ -190,7 +190,7 @@ export const createMergeCorrectnessEvaluator = ({
 }) => ({
   name: 'llm_merge_correctness',
   kind: 'LLM' as const,
-  higherIsBetter: true,
+  direction: 'maximize' as const,
   evaluate: async ({
     input,
     output,

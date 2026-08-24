@@ -26,7 +26,7 @@ export const createStrictTrajectoryEvaluator = ({
 }): Evaluator<AttackDiscoveryAgentBuilderExample, AttackDiscoveryAgentBuilderTaskOutput> => ({
   name: TRAJECTORY_EVALUATOR_NAME,
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const actual = extractToolCalls(output);
     const expectedPath = goldenPathExtractor(expected);

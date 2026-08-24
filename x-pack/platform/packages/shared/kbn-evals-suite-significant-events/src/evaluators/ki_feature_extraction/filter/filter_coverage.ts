@@ -16,7 +16,7 @@ import { getFeaturesFromOutput } from '../types';
 export const filterCoverageEvaluator = {
   name: 'filter_coverage',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     if (!expected.expect_entity_filters) {
       return { score: null, explanation: 'Entity filter evaluation not requested — skipping' };

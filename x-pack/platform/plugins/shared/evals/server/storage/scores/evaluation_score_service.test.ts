@@ -66,7 +66,7 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
         explanation: 'mostly correct',
         metadata: { rubric: 'v1' },
         trace_id: 'trace-evaluator-1',
-        higher_is_better: true,
+        direction: 'maximize',
       },
     },
   ],
@@ -142,7 +142,7 @@ describe('EvaluationScoreService', () => {
       evaluator: {
         model: request.evaluator_model,
         name: 'correctness',
-        higher_is_better: true,
+        direction: 'maximize',
       },
     });
     expect(computeScoreDocumentId(capturedDocuments[0])).toBe(
@@ -150,10 +150,10 @@ describe('EvaluationScoreService', () => {
     );
   });
 
-  it('leaves higher_is_better undefined when the ingest field is absent', async () => {
+  it('leaves direction undefined when the ingest field is absent', async () => {
     const logger = loggingSystemMock.createLogger();
     const request = getBaseRequest();
-    delete request.scores[0].evaluator.higher_is_better;
+    delete request.scores[0].evaluator.direction;
     const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
     const { coreDataStreams, create } = createDataStreamsMock();
 
@@ -168,16 +168,16 @@ describe('EvaluationScoreService', () => {
     const service = new EvaluationScoreService(logger, coreDataStreams);
     await service.write(request, ['default']);
 
-    expect(capturedDocuments[0].evaluator.higher_is_better).toBeUndefined();
+    expect(capturedDocuments[0].evaluator.direction).toBeUndefined();
   });
 
-  it('persists higher_is_better: false for lower-is-better evaluators', async () => {
+  it('persists direction: minimize for lower-is-better evaluators', async () => {
     const logger = loggingSystemMock.createLogger();
     const request = getBaseRequest();
     request.scores[0].evaluator = {
       ...request.scores[0].evaluator,
       name: 'Latency',
-      higher_is_better: false,
+      direction: 'minimize',
     };
     const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
     const { coreDataStreams, create } = createDataStreamsMock();
@@ -193,7 +193,7 @@ describe('EvaluationScoreService', () => {
     const service = new EvaluationScoreService(logger, coreDataStreams);
     await service.write(request, ['default']);
 
-    expect(capturedDocuments[0].evaluator.higher_is_better).toBe(false);
+    expect(capturedDocuments[0].evaluator.direction).toBe('minimize');
   });
   describe('evaluator model attribution', () => {
     const captureDocuments = async (request: IngestScoresRequestBody) => {

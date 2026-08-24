@@ -129,13 +129,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -199,7 +199,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -235,7 +235,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -250,7 +250,7 @@ describe('KibanaEvalsClient', () => {
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
-  it('copies evaluator.higherIsBetter onto each EvaluationRun', async () => {
+  it('copies evaluator.direction onto each EvaluationRun', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {
       name: 'ds',
@@ -262,13 +262,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'Latency',
         kind: 'CODE',
-        higherIsBetter: false,
+        direction: 'minimize',
         evaluate: async () => ({ score: 100 }),
       },
       {
         name: 'Quality',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async () => ({ score: 1 }),
       },
     ];
@@ -276,8 +276,8 @@ describe('KibanaEvalsClient', () => {
     const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
     const byName = Object.fromEntries(exp.evaluationRuns.map((run) => [run.name, run]));
 
-    expect(byName.Latency.higherIsBetter).toBe(false);
-    expect(byName.Quality.higherIsBetter).toBe(true);
+    expect(byName.Latency.direction).toBe('minimize');
+    expect(byName.Quality.direction).toBe('maximize');
   });
 
   it('prefers a task-provided traceId over the client task-span id for the stored run and evaluator output', async () => {
@@ -296,7 +296,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -330,7 +330,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -361,7 +361,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -436,7 +436,7 @@ describe('KibanaEvalsClient', () => {
     const evaluator: Evaluator<EvaluationDataset['examples'][number], { ok: boolean }> = {
       name: 'AlwaysOne',
       kind: 'CODE',
-      higherIsBetter: true,
+      direction: 'maximize',
       evaluate: async () => ({ score: 1 }),
     };
 
@@ -486,7 +486,7 @@ describe('KibanaEvalsClient', () => {
         {
           name: 'AlwaysOne',
           kind: 'CODE',
-          higherIsBetter: true,
+          direction: 'maximize',
           evaluate: async () => ({ score: 1 }),
         },
       ]
@@ -556,13 +556,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -628,6 +628,7 @@ describe('KibanaEvalsClient', () => {
           {
             name: 'Judge',
             kind: 'LLM',
+            direction: 'maximize',
             evaluate: async () => ({ score: 1 }),
             getModel: () => judgeModel,
           },
@@ -662,6 +663,7 @@ describe('KibanaEvalsClient', () => {
           {
             name: 'LateJudge',
             kind: 'LLM',
+            direction: 'maximize',
             evaluate: async () => {
               lateModel = { id: 'resolved-late' };
               return { score: 1 };
@@ -690,6 +692,7 @@ describe('KibanaEvalsClient', () => {
           {
             name: 'VersionedJudge',
             kind: 'LLM',
+            direction: 'maximize',
             evaluate: async () => {
               resolvedVersion = '1.2.0';
               return { score: 1 };

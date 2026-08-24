@@ -15,7 +15,7 @@ import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
   name: 'confirmed_evidences',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output }) => {
     const { significantEvents, steps } = output;
     const events = significantEvents ?? [];

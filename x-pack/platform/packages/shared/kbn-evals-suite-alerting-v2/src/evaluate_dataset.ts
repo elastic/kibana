@@ -62,7 +62,7 @@ export const collectScoredCriteria = (
 const createCriteriaEvaluator = (evaluators: DefaultEvaluators): Evaluator => ({
   name: 'Criteria',
   kind: 'LLM',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, ...rest }) => {
     const scoredCriteria = collectScoredCriteria(
       expected as RuleManagementExample['output'] | null | undefined

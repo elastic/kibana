@@ -31,7 +31,7 @@ export function createConversationCoherenceEvaluator(config: {
   return {
     name: 'conversation-coherence',
     kind: 'LLM',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }) => {
       const conversation = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
 

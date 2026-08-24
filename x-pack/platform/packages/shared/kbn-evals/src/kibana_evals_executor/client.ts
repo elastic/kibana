@@ -267,7 +267,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   );
                   return {
                     evaluatorName: evaluator.name,
-                    higherIsBetter: evaluator.higherIsBetter,
+                    direction: evaluator.direction,
                     result,
                     evaluatorTraceId,
                     kind: evaluator.kind,
@@ -281,7 +281,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               for (const {
                 evaluatorName,
-                higherIsBetter,
+                direction,
                 result,
                 evaluatorTraceId,
                 kind,
@@ -295,7 +295,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
-                  higherIsBetter,
+                  direction,
                   kind,
                   ...(model && { model }),
                 };

@@ -22,7 +22,7 @@ const createLog = () => ({ warning: jest.fn() } as unknown as ToolingLog);
 const stubEvaluator = (result: EvaluationResult): Evaluator => ({
   name: 'Stub',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: jest.fn(async () => result),
 });
 

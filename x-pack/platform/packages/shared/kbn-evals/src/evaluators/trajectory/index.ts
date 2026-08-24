@@ -69,7 +69,7 @@ export function createTrajectoryEvaluator(config: {
   return {
     name: 'trajectory',
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const actual = extractToolCalls(output);
       const golden = goldenPathExtractor(expected);

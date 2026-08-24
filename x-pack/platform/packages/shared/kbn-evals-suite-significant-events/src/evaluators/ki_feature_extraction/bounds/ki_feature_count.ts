@@ -15,7 +15,7 @@ import { getFeaturesFromOutput } from '../types';
 export const kiFeatureCountEvaluator = {
   name: 'ki_feature_count',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const count = getFeaturesFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EvaluationScoreDocument } from '@kbn/evals-common';
+import type { Direction, EvaluationScoreDocument } from '@kbn/evals-common';
 import { computePairedTTestResults, pairScores } from './statistical_analysis';
 
 const baseTaskModel = {
@@ -27,7 +27,7 @@ const createMockScore = ({
   evaluatorName = 'Correctness',
   repetitionIndex = 0,
   score = 0.5,
-  higherIsBetter,
+  direction,
 }: Partial<{
   datasetId: string;
   datasetName: string;
@@ -35,7 +35,7 @@ const createMockScore = ({
   evaluatorName: string;
   repetitionIndex: number;
   score: number | null;
-  higherIsBetter: boolean;
+  direction: Direction;
 }> = {}): EvaluationScoreDocument => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: 'exp-1',
@@ -60,7 +60,7 @@ const createMockScore = ({
     explanation: 'Mock evaluation',
     metadata: { successful: 1, failed: 0 },
     trace_id: 'trace-eval-456',
-    ...(higherIsBetter !== undefined && { higher_is_better: higherIsBetter }),
+    ...(direction !== undefined && { direction }),
     model: baseEvaluatorModel,
   },
   metadata: {
@@ -220,51 +220,64 @@ describe('computePairedTTestResults', () => {
     expect(fromPairs).toEqual(fromDocs);
   });
 
-  it('defaults higherIsBetter via legacy name heuristic when score docs omit the field', () => {
+  it('defaults direction via legacy name heuristic when score docs omit the field', () => {
     const quality = computePairedTTestResults(
       [createMockScore({ evaluatorName: 'Correctness', score: 0.8 })],
       [createMockScore({ evaluatorName: 'Correctness', score: 0.9 })]
     );
-    expect(quality[0].higherIsBetter).toBe(true);
+    expect(quality[0].direction).toBe('maximize');
 
     const latency = computePairedTTestResults(
       [createMockScore({ evaluatorName: 'Latency', score: 150 })],
       [createMockScore({ evaluatorName: 'Latency', score: 100 })]
     );
-    expect(latency[0].higherIsBetter).toBe(false);
+    expect(latency[0].direction).toBe('minimize');
   });
 
-  it('propagates higherIsBetter: true from quality evaluator metadata', () => {
-    const scoresA = [createMockScore({ score: 0.7, higherIsBetter: true })];
-    const scoresB = [createMockScore({ score: 0.9, higherIsBetter: true })];
+  it('propagates direction: maximize from quality evaluator metadata', () => {
+    const scoresA = [createMockScore({ score: 0.7, direction: 'maximize' })];
+    const scoresB = [createMockScore({ score: 0.9, direction: 'maximize' })];
 
     const [result] = computePairedTTestResults(scoresA, scoresB);
 
-    expect(result.higherIsBetter).toBe(true);
+    expect(result.direction).toBe('maximize');
   });
 
-  it('propagates higherIsBetter: false from lower-is-better evaluator metadata', () => {
+  it('propagates direction: minimize from lower-is-better evaluator metadata', () => {
     const scoresA = [
-      createMockScore({ evaluatorName: 'Latency', score: 150, higherIsBetter: false }),
+      createMockScore({ evaluatorName: 'Latency', score: 150, direction: 'minimize' }),
     ];
     const scoresB = [
-      createMockScore({ evaluatorName: 'Latency', score: 100, higherIsBetter: false }),
+      createMockScore({ evaluatorName: 'Latency', score: 100, direction: 'minimize' }),
     ];
 
     const [result] = computePairedTTestResults(scoresA, scoresB);
 
-    expect(result.higherIsBetter).toBe(false);
+    expect(result.direction).toBe('minimize');
   });
 
-  it('prefers a defined higherIsBetter when only one side has the field', () => {
+  it('propagates direction: neutral from ambiguous evaluator metadata', () => {
     const scoresA = [
-      createMockScore({ evaluatorName: 'Latency', score: 150, higherIsBetter: false }),
+      createMockScore({ evaluatorName: 'Extracted feature count', score: 5, direction: 'neutral' }),
+    ];
+    const scoresB = [
+      createMockScore({ evaluatorName: 'Extracted feature count', score: 7, direction: 'neutral' }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('neutral');
+  });
+
+  it('prefers a defined direction when only one side has the field', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Latency', score: 150, direction: 'minimize' }),
     ];
     const scoresB = [createMockScore({ evaluatorName: 'Latency', score: 100 })];
 
     const [result] = computePairedTTestResults(scoresA, scoresB);
 
-    expect(result.higherIsBetter).toBe(false);
+    expect(result.direction).toBe('minimize');
   });
 
   it('uses metadata over the name heuristic for Error handling quality', () => {
@@ -273,20 +286,20 @@ describe('computePairedTTestResults', () => {
       createMockScore({
         evaluatorName: 'Error handling quality',
         score: 0.4,
-        higherIsBetter: true,
+        direction: 'maximize',
       }),
     ];
     const scoresB = [
       createMockScore({
         evaluatorName: 'Error handling quality',
         score: 0.8,
-        higherIsBetter: true,
+        direction: 'maximize',
       }),
     ];
 
     const [result] = computePairedTTestResults(scoresA, scoresB);
 
-    expect(result.higherIsBetter).toBe(true);
+    expect(result.direction).toBe('maximize');
   });
 
   it('legacy name heuristic misclassifies Error handling quality when metadata is absent', () => {
@@ -295,6 +308,6 @@ describe('computePairedTTestResults', () => {
       [createMockScore({ evaluatorName: 'Error handling quality', score: 0.8 })]
     );
 
-    expect(result.higherIsBetter).toBe(false);
+    expect(result.direction).toBe('minimize');
   });
 });

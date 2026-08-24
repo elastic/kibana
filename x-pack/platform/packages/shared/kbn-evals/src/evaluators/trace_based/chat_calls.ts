@@ -28,7 +28,7 @@ export function createChatCallsEvaluator({
     log,
     config: {
       name: 'Chat Calls',
-      higherIsBetter: false,
+      direction: 'minimize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND attributes.gen_ai.operation.name == "chat"
 | STATS 

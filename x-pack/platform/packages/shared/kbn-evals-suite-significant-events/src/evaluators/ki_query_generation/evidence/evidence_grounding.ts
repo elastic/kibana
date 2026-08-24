@@ -211,7 +211,7 @@ function isFeatureGrounded(evidence: string, featureCorpus: string): boolean {
 export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ input, output }) => {
     const queries = getQueriesFromOutput(output);
     const taskOutput = output != null && !Array.isArray(output) ? output : undefined;

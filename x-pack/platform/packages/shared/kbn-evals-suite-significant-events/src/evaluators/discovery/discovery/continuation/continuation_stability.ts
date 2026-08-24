@@ -204,7 +204,7 @@ export type ContinuationEvaluator = Evaluator<
 export const continuationStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_stability',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
@@ -212,7 +212,7 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
 export const continuationRoutingEvaluator: ContinuationEvaluator = {
   name: 'continuation_routing',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationRouting(output.cycles ?? [])),
 };
 
@@ -220,7 +220,7 @@ export const continuationRoutingEvaluator: ContinuationEvaluator = {
 export const continuationTopologyStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_topology_stability',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output }) =>
     Promise.resolve(scoreContinuationTopologyStability(output.cycles ?? [])),
 };

@@ -18,7 +18,7 @@ import { getQueriesFromOutput } from '../types';
 export const queryTypeDistributionEvaluator: KIQueryGenerationEvaluator = {
   name: 'query_type_distribution',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const expectStats = expected.expect_stats;
     if (!expectStats) {

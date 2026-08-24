@@ -15,7 +15,7 @@ import { getFeaturesFromOutput } from '../types';
 export const evidenceCoverageEvaluator = {
   name: 'evidence_coverage',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     if (features.length === 0) {

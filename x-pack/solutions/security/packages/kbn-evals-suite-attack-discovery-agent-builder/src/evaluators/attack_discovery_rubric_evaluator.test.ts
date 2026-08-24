@@ -55,7 +55,7 @@ describe('createAttackDiscoveryRubricEvaluator', () => {
   const criteria = jest.fn(() => ({
     name: 'criteria',
     kind: 'LLM' as const,
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: judge,
   }));
   const evaluators = { criteria } as unknown as DefaultEvaluators;

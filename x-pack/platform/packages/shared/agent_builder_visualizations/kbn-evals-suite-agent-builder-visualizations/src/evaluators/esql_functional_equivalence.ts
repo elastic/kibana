@@ -167,7 +167,7 @@ export function createCalibratedEsqlEquivalenceEvaluator<
   return {
     name: ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const prediction = predictionExtractor(output);
       const groundTruth = groundTruthExtractor(expected);

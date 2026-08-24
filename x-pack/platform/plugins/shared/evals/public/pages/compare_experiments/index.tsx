@@ -33,7 +33,7 @@ import { css } from '@emotion/css';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -91,33 +91,42 @@ const formatDiff = (value: number): string => {
 const SignificanceBadge: React.FC<{
   pValue: number | null;
   diff: number;
-  higherIsBetter: boolean;
-}> = ({ pValue, diff, higherIsBetter }) => {
+  direction: Direction;
+}> = ({ pValue, diff, direction }) => {
   if (pValue === null || !Number.isFinite(pValue)) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const color = isImproved(diff, higherIsBetter) ? 'success' : 'danger';
+  const color =
+    direction === 'neutral' ? 'hollow' : isImproved(diff, direction) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
-const DiffValue: React.FC<{ diff: number; higherIsBetter: boolean }> = ({
-  diff,
-  higherIsBetter,
-}) => {
+const DIRECTION_HINTS: Record<Direction, string> = {
+  maximize: i18n.DIFF_HIGHER_IS_BETTER,
+  minimize: i18n.DIFF_LOWER_IS_BETTER,
+  neutral: i18n.DIFF_NEUTRAL_DIRECTION,
+};
+
+const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
-  const improved = isImproved(diff, higherIsBetter);
+  const improved = isImproved(diff, direction);
   let color: string | undefined;
-  if (diff !== 0) {
+  if (diff !== 0 && direction !== 'neutral') {
     color = improved ? euiTheme.colors.textSuccess : euiTheme.colors.textDanger;
   }
 
-  const directionHint = higherIsBetter ? i18n.DIFF_HIGHER_IS_BETTER : i18n.DIFF_LOWER_IS_BETTER;
-  const verdictHint = diff === 0 ? null : improved ? i18n.DIFF_IMPROVED : i18n.DIFF_REGRESSED;
+  const directionHint = DIRECTION_HINTS[direction];
+  const verdictHint =
+    diff === 0 || direction === 'neutral'
+      ? null
+      : improved
+      ? i18n.DIFF_IMPROVED
+      : i18n.DIFF_REGRESSED;
   const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
 
   return (
@@ -256,7 +265,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
-  higherIsBetter: boolean;
+  direction: Direction;
   executionIdA?: string;
   executionIdB?: string;
   onClose: () => void;
@@ -266,7 +275,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId,
   datasetName,
   evaluatorName,
-  higherIsBetter,
+  direction,
   executionIdA,
   executionIdB,
   onClose,
@@ -412,7 +421,7 @@ const ExampleDrilldownFlyout: React.FC<{
             return '-';
           }
           const diff = computeCompareDiff(item.scoreA, item.scoreB);
-          return <DiffValue diff={diff} higherIsBetter={higherIsBetter} />;
+          return <DiffValue diff={diff} direction={direction} />;
         },
       },
       {
@@ -451,7 +460,7 @@ const ExampleDrilldownFlyout: React.FC<{
         ),
       },
     ],
-    [hasRepetitions, higherIsBetter]
+    [hasRepetitions, direction]
   );
 
   return (
@@ -497,8 +506,8 @@ const ExampleDrilldownFlyout: React.FC<{
                 }
 
                 const diff = computeCompareDiff(item.scoreA!, item.scoreB!);
-                if (diff === 0) return {};
-                if (isImproved(diff, higherIsBetter)) {
+                if (diff === 0 || direction === 'neutral') return {};
+                if (isImproved(diff, direction)) {
                   return {
                     style: {
                       backgroundColor: hexToRgba(
@@ -589,7 +598,7 @@ export const CompareExperimentsPage: React.FC = () => {
     datasetId: string;
     datasetName: string;
     evaluatorName: string;
-    higherIsBetter: boolean;
+    direction: Direction;
   } | null>(null);
 
   const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
@@ -600,7 +609,7 @@ export const CompareExperimentsPage: React.FC = () => {
       datasetId: result.datasetId,
       datasetName: result.datasetName,
       evaluatorName: result.evaluatorName,
-      higherIsBetter: result.higherIsBetter,
+      direction: result.direction,
     });
   }, []);
 
@@ -736,10 +745,7 @@ export const CompareExperimentsPage: React.FC = () => {
       {
         name: i18n.COLUMN_DIFF,
         render: (item: PairedTTestResult) => (
-          <DiffValue
-            diff={computeCompareDiff(item.meanA, item.meanB)}
-            higherIsBetter={item.higherIsBetter}
-          />
+          <DiffValue diff={computeCompareDiff(item.meanA, item.meanB)} direction={item.direction} />
         ),
         align: 'right' as const,
       },
@@ -756,7 +762,7 @@ export const CompareExperimentsPage: React.FC = () => {
           <SignificanceBadge
             pValue={item.pValue}
             diff={computeCompareDiff(item.meanA, item.meanB)}
-            higherIsBetter={item.higherIsBetter}
+            direction={item.direction}
           />
         ),
       },
@@ -966,7 +972,7 @@ export const CompareExperimentsPage: React.FC = () => {
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
-          higherIsBetter={flyoutState.higherIsBetter}
+          direction={flyoutState.direction}
           executionIdA={executionIdForDetail}
           executionIdB={executionIdForDetailB}
           onClose={() => setFlyoutState(null)}

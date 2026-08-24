@@ -17,7 +17,7 @@ const createJudge = () => {
       ({
         name: 'criteria',
         kind: 'LLM',
-        higherIsBetter: true,
+        direction: 'maximize',
         evaluate,
       } as Evaluator)
   );

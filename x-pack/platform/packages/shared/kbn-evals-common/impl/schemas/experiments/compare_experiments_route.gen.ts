@@ -26,9 +26,9 @@ export const PairedTTestResult = lazySchema(() =>
     meanB: z.number(),
     pValue: z.number().nullable(),
     /**
-     * Whether a higher score is an improvement for this evaluator.
+     * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`) for this evaluator.
      */
-    higherIsBetter: z.boolean(),
+    direction: z.enum(['maximize', 'minimize', 'neutral']),
   })
 );
 export type PairedTTestResult = z.infer<typeof PairedTTestResult>;

@@ -12,6 +12,7 @@ import {
   EVALS_EVALUATE_URL,
   EvaluateResponse,
   type EvaluateRequestBodyInput,
+  type Direction,
   type Model,
 } from '@kbn/evals-common';
 import type { Evaluator, EvaluatorKind, EvaluatorParams, Example, TaskOutput } from '../types';
@@ -46,9 +47,11 @@ export interface EvaluatorConfig {
   name: string;
   kind: EvaluatorKind;
   /**
-   * Whether a higher score is an improvement.
+   * Whether a higher score is an improvement (`maximize`), a lower score is
+   * an improvement (`minimize`), or the score cannot be compared across arms
+   * at all (`neutral`).
    */
-  higherIsBetter: boolean;
+  direction: Direction;
   version?: string;
   connectorId?: string;
   /** When set, the evaluator is composite: one output evaluator is produced per sub-score. */
@@ -127,7 +130,7 @@ export class EvaluatorApiClient {
       return outputs.map(({ name, pickScore, describe }) => ({
         name,
         kind: config.kind,
-        higherIsBetter: config.higherIsBetter,
+        direction: config.direction,
         getModel: () => resolvedModel,
         getVersion: () => resolvedVersion,
         evaluate: async (params) => {

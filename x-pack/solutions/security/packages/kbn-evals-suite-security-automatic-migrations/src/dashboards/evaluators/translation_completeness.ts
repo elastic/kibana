@@ -16,7 +16,7 @@ export const createTranslationCompletenessEvaluator = (): Evaluator<
 > => ({
   name: 'Translation Completeness',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({
     output,
   }: {

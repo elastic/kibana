@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS, type Direction } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
@@ -24,7 +24,7 @@ const makeScoreDoc = ({
   evaluatorName = 'Correctness',
   score = 0.8,
   repetitionIndex = 0,
-  higherIsBetter,
+  direction,
 }: {
   experimentId?: string;
   datasetId?: string;
@@ -33,7 +33,7 @@ const makeScoreDoc = ({
   evaluatorName?: string;
   score?: number | null;
   repetitionIndex?: number;
-  higherIsBetter?: boolean;
+  direction?: Direction;
 } = {}) => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: experimentId,
@@ -54,7 +54,7 @@ const makeScoreDoc = ({
     explanation: null,
     metadata: null,
     trace_id: null,
-    ...(higherIsBetter !== undefined && { higher_is_better: higherIsBetter }),
+    ...(direction !== undefined && { direction }),
     model: { id: 'claude-3', family: 'claude', provider: 'anthropic' },
   },
   metadata: {
@@ -122,7 +122,7 @@ describe('GET /internal/evals/experiments/compare', () => {
         _source: expect.arrayContaining([
           'evaluator.name',
           'evaluator.score',
-          'evaluator.higher_is_better',
+          'evaluator.direction',
         ]),
       })
     );
@@ -231,7 +231,7 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].datasetId).toBe('ds-shared');
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
-    expect(response.payload.results[0].higherIsBetter).toBe(true);
+    expect(response.payload.results[0].direction).toBe('maximize');
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
@@ -239,13 +239,13 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.pairing.truncatedB).toBe(false);
   });
 
-  it('returns higherIsBetter: false for lower-is-better evaluator metadata', async () => {
+  it('returns direction: minimize for lower-is-better evaluator metadata', async () => {
     const { handler, context, evaluationScoreService } = setup();
     const sharedDataset = {
       datasetId: 'ds-shared',
       datasetName: 'Shared',
       evaluatorName: 'Latency',
-      higherIsBetter: false as const,
+      direction: 'minimize' as const,
     };
     evaluationScoreService.search
       .mockResolvedValueOnce({
@@ -272,7 +272,7 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toHaveLength(1);
     expect(response.payload.results[0].evaluatorName).toBe('Latency');
-    expect(response.payload.results[0].higherIsBetter).toBe(false);
+    expect(response.payload.results[0].direction).toBe('minimize');
   });
 
   it('uses metadata over name heuristic for Error handling quality', async () => {
@@ -281,7 +281,7 @@ describe('GET /internal/evals/experiments/compare', () => {
       datasetId: 'ds-shared',
       datasetName: 'Shared',
       evaluatorName: 'Error handling quality',
-      higherIsBetter: true as const,
+      direction: 'maximize' as const,
     };
     evaluationScoreService.search
       .mockResolvedValueOnce({
@@ -302,7 +302,7 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results[0].evaluatorName).toBe('Error handling quality');
     // Name regex would treat "Error" as lower-is-better; metadata must win.
-    expect(response.payload.results[0].higherIsBetter).toBe(true);
+    expect(response.payload.results[0].direction).toBe('maximize');
   });
 
   it('filters out hits with no _source', async () => {

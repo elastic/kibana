@@ -16,7 +16,7 @@ export const createMarkdownErrorDetectionEvaluator = (): Evaluator<
 > => ({
   name: 'Markdown Error Detection',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({
     output,
   }: {

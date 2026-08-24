@@ -249,7 +249,7 @@ export const scoreContinuationTopologyStability = (
 export const topologyCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'topology_correctness',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     const result = scoreTopologyCorrectness(
       output?.significantEvents ?? [],

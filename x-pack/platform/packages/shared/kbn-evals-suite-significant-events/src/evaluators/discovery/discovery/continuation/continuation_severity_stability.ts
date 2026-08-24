@@ -116,7 +116,7 @@ export const scoreContinuationSeverityStability = (
 export const continuationSeverityStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_severity_stability',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: ({ output }) =>
     Promise.resolve(scoreContinuationSeverityStability(output.cycles ?? [])),
 };

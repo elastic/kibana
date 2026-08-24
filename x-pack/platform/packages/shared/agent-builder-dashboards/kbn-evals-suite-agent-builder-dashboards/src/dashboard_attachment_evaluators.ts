@@ -247,7 +247,7 @@ export const dashboardAttachmentExistsEvaluator: Evaluator<
 > = {
   name: 'Dashboard attachment exists',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const expectedExists = expected?.expectedDashboardAttachment?.exists;
     if (typeof expectedExists !== 'boolean') {
@@ -274,7 +274,7 @@ export const dashboardAttachmentTitleEvaluator: Evaluator<
 > = {
   name: 'Dashboard attachment title',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const expectsNonEmptyTitle = expected?.expectedDashboardAttachment?.title?.nonEmpty;
     if (expectsNonEmptyTitle !== true) {
@@ -299,7 +299,7 @@ export const dashboardPanelCountEvaluator: Evaluator<
 > = {
   name: 'Dashboard panel count',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const panelCountExpectation = expected?.expectedDashboardAttachment?.panelCount;
     const { min, max } = panelCountExpectation ?? {};
@@ -330,7 +330,7 @@ export const dashboardSectionShapeEvaluator: Evaluator<
 > = {
   name: 'Dashboard section shape',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const expectedAttachment = expected?.expectedDashboardAttachment;
     const expectedSectionCount = expectedAttachment?.sectionCount;
@@ -390,7 +390,7 @@ export const dashboardGridBoundsEvaluator: Evaluator<
 > = {
   name: 'Dashboard grid bounds',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const gridExpectation = expected?.expectedDashboardAttachment?.grid;
     if (gridExpectation?.noOverflow !== true) {
@@ -419,7 +419,7 @@ export const dashboardGridRowLayoutEvaluator: Evaluator<
 > = {
   name: 'Dashboard grid row layout',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
     const gridExpectation = expected?.expectedDashboardAttachment?.grid;
     const expectedRows = gridExpectation?.rows ?? [];

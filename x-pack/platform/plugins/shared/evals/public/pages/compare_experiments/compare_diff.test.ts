@@ -17,25 +17,31 @@ describe('compare_diff', () => {
   });
 
   describe('isImproved', () => {
-    it('treats positive diff as improvement when higher is better', () => {
+    it('treats positive diff as improvement when direction is maximize', () => {
       // Quality metric: target mean 0.9 vs baseline 0.7 → green / improved
       const diff = computeCompareDiff(0.7, 0.9);
       expect(diff).toBeGreaterThan(0);
-      expect(isImproved(diff, true)).toBe(true);
-      expect(isImproved(-diff, true)).toBe(false);
+      expect(isImproved(diff, 'maximize')).toBe(true);
+      expect(isImproved(-diff, 'maximize')).toBe(false);
     });
 
-    it('treats negative diff as improvement when lower is better', () => {
+    it('treats negative diff as improvement when direction is minimize', () => {
       // Latency metric: target mean 100 vs baseline 150 → green / improved
       const diff = computeCompareDiff(150, 100);
       expect(diff).toBeLessThan(0);
-      expect(isImproved(diff, false)).toBe(true);
-      expect(isImproved(-diff, false)).toBe(false);
+      expect(isImproved(diff, 'minimize')).toBe(true);
+      expect(isImproved(-diff, 'minimize')).toBe(false);
     });
 
-    it('returns false for zero diff regardless of polarity', () => {
-      expect(isImproved(0, true)).toBe(false);
-      expect(isImproved(0, false)).toBe(false);
+    it('returns false for zero diff regardless of direction', () => {
+      expect(isImproved(0, 'maximize')).toBe(false);
+      expect(isImproved(0, 'minimize')).toBe(false);
+    });
+
+    it('always returns false for a neutral direction', () => {
+      expect(isImproved(5, 'neutral')).toBe(false);
+      expect(isImproved(-5, 'neutral')).toBe(false);
+      expect(isImproved(0, 'neutral')).toBe(false);
     });
   });
 });

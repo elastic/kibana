@@ -18,7 +18,7 @@ import { getQueriesFromOutput, getQueryAttempts } from './types';
 export const generationSuccessEvaluator: KIQueryGenerationEvaluator = {
   name: 'generation_success',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     const attempts = getQueryAttempts(output);

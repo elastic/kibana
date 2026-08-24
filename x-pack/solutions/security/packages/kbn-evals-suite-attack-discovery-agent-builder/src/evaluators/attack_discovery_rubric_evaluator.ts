@@ -44,7 +44,7 @@ export const createAttackDiscoveryRubricEvaluator = ({
   return {
     name: 'Rubric',
     kind: 'LLM',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ expected, output, input, metadata }) => {
       const referenceInsights = truncateInsightsForRubric(expected?.attackDiscoveries);
       // Without a reference discovery there is nothing for the judge to compare

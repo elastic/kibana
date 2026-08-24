@@ -32,7 +32,7 @@ export const createStatusCorrectnessEvaluator = (
 ): Evaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput> => ({
   name: 'status_correctness',
   kind: 'LLM',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async (params) => {
     const { output, expected } = params;
     const expectedGroundTruth = expected?.expected_ground_truth;

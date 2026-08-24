@@ -144,7 +144,7 @@ export function createVisualizationConfigValidityEvaluator<
   return {
     name,
     kind: 'CODE',
-    higherIsBetter: true,
+    direction: 'maximize',
     evaluate: async ({ output }): Promise<EvaluationResult> => {
       let visualizations: ExtractedVisualization[];
       try {

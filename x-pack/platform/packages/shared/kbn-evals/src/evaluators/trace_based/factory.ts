@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { isValidTraceId } from '@opentelemetry/api';
 import pRetry from 'p-retry';
+import type { Direction } from '@kbn/evals-common';
 import type { Evaluator } from '../../types';
 
 interface EsqlResponse {
@@ -37,9 +38,11 @@ export interface TraceBasedEvaluatorConfig {
     isTraceComplete: (response: EsqlResponse) => boolean;
   };
   /**
-   * Whether a higher score is an improvement.
+   * Whether a higher score is an improvement (`maximize`), a lower score is
+   * an improvement (`minimize`), or the score cannot be compared across arms
+   * at all (`neutral`).
    */
-  higherIsBetter: boolean;
+  direction: Direction;
 }
 
 export function createTraceBasedEvaluator({
@@ -58,11 +61,11 @@ export function createTraceBasedEvaluator({
     isResultValid,
     isNotReported,
     notReportedProbe,
-    higherIsBetter,
+    direction,
   } = config;
 
   return {
-    higherIsBetter,
+    direction,
     evaluate: async ({ output }) => {
       const traceId = (output as any)?.traceId;
 

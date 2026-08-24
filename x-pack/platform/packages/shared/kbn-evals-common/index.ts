@@ -35,6 +35,6 @@ export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl
 export {
   pairScores,
   computePairedTTestResults,
-  resolveHigherIsBetter,
+  resolveDirection,
 } from './impl/statistical_analysis';
-export type { PairedScore } from './impl/statistical_analysis';
+export type { PairedScore, Direction } from './impl/statistical_analysis';

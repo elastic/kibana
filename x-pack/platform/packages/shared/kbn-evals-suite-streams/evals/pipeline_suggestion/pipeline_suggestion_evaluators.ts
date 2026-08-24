@@ -19,7 +19,7 @@ import { formatPercent } from '../shared_helpers';
 export const pipelineQualityScoreEvaluator: Evaluator<Example, PipelineSuggestionResult> = {
   name: 'pipeline_quality_score',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const { metrics } = output.output;
 
@@ -68,7 +68,7 @@ export const createPipelineSuggestionLlmEvaluator = (
 ): Evaluator<Example, PipelineSuggestionResult> => ({
   name: 'llm_pipeline_quality',
   kind: 'LLM',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output, expected, input, metadata }) => {
     const { suggestedPipeline, metrics } = output.output;
     const exp = expected as PipelineSuggestionGroundTruth;

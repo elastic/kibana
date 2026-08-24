@@ -27,7 +27,7 @@ import { isEvidenceGrounded } from './is_evidence_grounded';
 export const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ input, output }) => {
     const features = getFeaturesFromOutput(output);
 

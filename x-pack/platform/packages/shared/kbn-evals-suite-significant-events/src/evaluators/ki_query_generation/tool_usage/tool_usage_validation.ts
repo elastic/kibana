@@ -19,7 +19,7 @@ interface ToolUsageTaskOutput {
 export const createToolUsageEvaluator = (): Evaluator => ({
   name: 'tool_usage_validation',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const toolUsage = (output as ToolUsageTaskOutput)?.toolUsage;
 

@@ -15,7 +15,7 @@ export const createUnsupportedPatternDetectionEvaluator = (): Evaluator<
 > => ({
   name: 'Unsupported Pattern Detection',
   kind: 'CODE',
-  higherIsBetter: true,
+  direction: 'maximize',
   evaluate: async ({
     output,
     expected,
