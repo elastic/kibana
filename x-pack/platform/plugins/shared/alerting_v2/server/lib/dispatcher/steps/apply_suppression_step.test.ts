@@ -10,7 +10,10 @@ import {
   createAlertEpisode,
   createAlertEpisodeSuppression,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('ApplySuppressionStep', () => {
   const step = new ApplySuppressionStep();
@@ -38,7 +41,7 @@ describe('ApplySuppressionStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -57,7 +60,7 @@ describe('ApplySuppressionStep', () => {
       suppressions: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -68,7 +71,7 @@ describe('ApplySuppressionStep', () => {
   it('handles empty episodes', async () => {
     const state = createDispatcherPipelineState({ episodes: [], suppressions: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

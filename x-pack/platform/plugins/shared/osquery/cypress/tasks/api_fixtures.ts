@@ -227,7 +227,7 @@ export const loadLiveQuery = (
     },
   }).then((response) => response.body.data);
 
-export const loadRule = (includeResponseActions = false) => {
+export const loadRule = (includeResponseActions = false, query = '_id:*') => {
   cy.login(ServerlessRoleName.SOC_MANAGER, false);
 
   return request<RuleResponse>({
@@ -270,7 +270,7 @@ export const loadRule = (includeResponseActions = false) => {
         },
       ],
       language: 'kuery',
-      query: '_id:*',
+      query,
       author: [],
       false_positives: [],
       references: [],

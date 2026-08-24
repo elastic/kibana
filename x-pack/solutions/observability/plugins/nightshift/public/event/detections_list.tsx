@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -21,6 +21,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
@@ -47,6 +48,8 @@ const SPARKLINE_SKELETON_HEIGHT = 32;
 /** Placeholder rows on first load before any lifecycle data exists. */
 const INITIAL_DETECTION_SKELETON_COUNT = 2;
 const MAX_VISIBLE_ENTITY_PILLS = 2;
+/** Detection cards shown before the list collapses behind a `+{n} more` toggle. */
+export const MAX_VISIBLE_DETECTIONS = 3;
 
 export interface DetectionsListProps {
   event: SignificantEvent;
@@ -309,7 +312,56 @@ function DetectionCardSkeleton(): React.ReactElement {
   );
 }
 
-function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.ReactElement {
+const getDetectionListFooterStyles = (euiTheme: EuiThemeComputed) => css`
+  border-top: ${euiTheme.border.thin};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
+
+interface DetectionListPanelProps {
+  items: React.ReactElement[];
+  footer?: React.ReactNode;
+}
+
+interface DetectionsOverflowToggleProps {
+  hiddenCount: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+function DetectionsOverflowToggle({
+  hiddenCount,
+  isExpanded,
+  onToggle,
+}: DetectionsOverflowToggleProps): React.ReactElement {
+  return (
+    <EuiButtonEmpty
+      aria-expanded={isExpanded}
+      data-test-subj={isExpanded ? 'nightshiftDetectionsShowLess' : 'nightshiftDetectionsShowMore'}
+      flush="left"
+      iconSide="right"
+      iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+      onClick={onToggle}
+      size="xs"
+      {...getEbtProps({
+        action: isExpanded
+          ? NIGHTSHIFT_EBT_ACTIONS.COLLAPSE_DETECTIONS
+          : NIGHTSHIFT_EBT_ACTIONS.EXPAND_DETECTIONS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_DETECTIONS,
+      })}
+    >
+      {isExpanded
+        ? i18n.translate('xpack.nightshift.flyout.detectionsShowLess', {
+            defaultMessage: 'Show less',
+          })
+        : i18n.translate('xpack.nightshift.flyout.detectionsShowMore', {
+            defaultMessage: '+{count} more',
+            values: { count: hiddenCount },
+          })}
+    </EuiButtonEmpty>
+  );
+}
+
+function DetectionListPanel({ items, footer }: DetectionListPanelProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -336,6 +388,7 @@ function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.R
           </li>
         ))}
       </ol>
+      {footer && <div css={getDetectionListFooterStyles(euiTheme)}>{footer}</div>}
     </EuiPanel>
   );
 }
@@ -354,6 +407,7 @@ export function DetectionsList({
   });
   const lifecycleQuery = lifecycleQueryFromParent ?? internalLifecycleQuery;
   const { data, isLoading, isError, refetch } = lifecycleQuery;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(
@@ -364,6 +418,26 @@ export function DetectionsList({
       ),
     [data]
   );
+
+  const hasOverflow = detections.length > MAX_VISIBLE_DETECTIONS;
+  const visibleDetections = useMemo(() => {
+    if (!hasOverflow || isExpanded) {
+      return detections;
+    }
+
+    const collapsed = detections.slice(0, MAX_VISIBLE_DETECTIONS);
+    const selectedInOverflow = detections
+      .slice(MAX_VISIBLE_DETECTIONS)
+      .find(({ detection_id: detectionId }) => detectionId === selectedDetectionId);
+
+    // Keep the open detection's card visible, otherwise collapsing leaves its child
+    // flyout up with nothing on screen pointing at it. It takes the last visible slot so
+    // the collapsed list stays exactly MAX_VISIBLE_DETECTIONS long.
+    return selectedInOverflow
+      ? [...collapsed.slice(0, MAX_VISIBLE_DETECTIONS - 1), selectedInOverflow]
+      : collapsed;
+  }, [detections, hasOverflow, isExpanded, selectedDetectionId]);
+  const hiddenCount = detections.length - visibleDetections.length;
 
   const { services } = useImpactedServices(event);
   const impactedServiceLabels = useMemo(() => services.map(({ name }) => name), [services]);
@@ -426,7 +500,7 @@ export function DetectionsList({
 
       {!showDetectionSkeletons && !isError && detections.length > 0 && (
         <DetectionListPanel
-          items={detections.map((detection) => (
+          items={visibleDetections.map((detection) => (
             <DetectionCard
               key={detection.detection_id}
               detection={detection}
@@ -440,6 +514,15 @@ export function DetectionsList({
               onClick={onDetectionClick}
             />
           ))}
+          footer={
+            hasOverflow ? (
+              <DetectionsOverflowToggle
+                hiddenCount={hiddenCount}
+                isExpanded={isExpanded}
+                onToggle={() => setIsExpanded((expanded) => !expanded)}
+              />
+            ) : undefined
+          }
         />
       )}
     </>

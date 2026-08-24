@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHeaderBadges } from './service_header_badges';
@@ -23,18 +23,26 @@ jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
 }));
 
+// Production `getRedirectUrl` builds `/app/r?...`. The mock must return that path so
+// tests fail if the badge uses it instead of `getUrl` (in-app `/app/apm/...`).
+const SHARE_REDIRECT_URL = '/app/r?l=APM_LOCATOR&lz=compressed-payload';
+
+const mockGetRedirectUrl = jest.fn().mockReturnValue(SHARE_REDIRECT_URL);
+
+const mockGetUrl = jest.fn().mockImplementation(async ({ serviceName, query }: any) => {
+  const params = new URLSearchParams();
+  Object.entries(query ?? {}).forEach(([k, v]) => {
+    if (v !== undefined) params.set(k, String(v));
+  });
+  return `/app/apm/services/${serviceName}/overview?${params.toString()}`;
+});
+
 const mockShare = {
   url: {
     locators: {
       get: jest.fn().mockReturnValue({
-        getRedirectUrl: jest
-          .fn()
-          .mockImplementation(
-            ({ serviceName, query }: any) =>
-              `/services/${serviceName}/overview?comparisonEnabled=${
-                query?.comparisonEnabled ?? true
-              }`
-          ),
+        getUrl: mockGetUrl,
+        getRedirectUrl: mockGetRedirectUrl,
       }),
     },
   },
@@ -304,7 +312,7 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });
 
-  it('shows anomalies badge when ML jobs can be read and a score is returned', () => {
+  it('shows anomalies badge when ML jobs can be read and a score is returned', async () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -316,9 +324,12 @@ describe('ServiceHeaderBadges', () => {
 
     expect(screen.getByTestId('serviceHeaderAnomaliesBadge')).toBeInTheDocument();
     expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+    });
   });
 
-  it('links the anomalies badge to the service overview tab', () => {
+  it('links the anomalies badge to the service overview tab', async () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -328,8 +339,15 @@ describe('ServiceHeaderBadges', () => {
     });
     renderBadges();
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-    expect(href).toContain('/services/test-service/overview');
+    await waitFor(() => {
+      expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+    });
+    const href = screen.getByTestId('apmAnomaliesBadge').getAttribute('href');
+    expect(href).toContain('/app/apm/services/test-service/overview');
+    expect(href).not.toMatch(/\/app\/r(\?|$)/);
+    expect(href).toContain('offset=expected_bounds');
+    expect(href).toContain('comparisonEnabled=true');
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
   });
 
   it('renders the anomalies badge as non-interactive when the agent name is not yet resolved', () => {
@@ -383,12 +401,22 @@ describe('ServiceHeaderBadges', () => {
       sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
     };
 
-    function getAnomalyBadgeSearchParams(): Record<string, string> {
-      const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
-      return Object.fromEntries(new URLSearchParams(href!.split('?')[1]));
+    async function getAnomalyBadgeHref(): Promise<string> {
+      await waitFor(() => {
+        expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+      });
+      return screen.getByTestId('apmAnomaliesBadge').getAttribute('href')!;
     }
 
-    it('always targets expected bounds ON when not on the overview tab', () => {
+    async function getAnomalyBadgeSearchParams(): Promise<Record<string, string>> {
+      const href = await getAnomalyBadgeHref();
+      expect(href).not.toMatch(/\/app\/r(\?|$)/);
+      expect(href).toContain('/app/apm/services/');
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+      return Object.fromEntries(new URLSearchParams(href.split('?')[1]));
+    }
+
+    it('always targets expected bounds ON when not on the overview tab', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/transactions',
@@ -397,10 +425,13 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({
+        comparisonEnabled: 'true',
+        offset: 'expected_bounds',
+      });
     });
 
-    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', () => {
+    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/overview',
@@ -409,10 +440,13 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'false' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({
+        comparisonEnabled: 'false',
+        offset: 'expected_bounds',
+      });
     });
 
-    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', () => {
+    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/overview',
@@ -421,7 +455,35 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({
+        comparisonEnabled: 'true',
+        offset: 'expected_bounds',
+      });
+    });
+
+    it('does not use getRedirectUrl (/app/r), which full-reloads APM and drops expected-bounds comparison', async () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/overview',
+        comparisonEnabled: true,
+        offset: '1d',
+      });
+      renderBadges();
+
+      const href = await getAnomalyBadgeHref();
+
+      expect(href).not.toBe(SHARE_REDIRECT_URL);
+      expect(href).not.toMatch(/\/app\/r(\?|$)/);
+      expect(href).toContain('/app/apm/services/test-service/overview');
+      expect(href).toContain('offset=expected_bounds');
+      expect(href).toContain('comparisonEnabled=true');
+      expect(mockGetUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ offset: 'expected_bounds' }),
+        }),
+        undefined
+      );
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     });
   });
 });

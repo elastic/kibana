@@ -23,11 +23,10 @@ export const titleFromLocatorFactory = (services: LocatorServicesDeps) => {
    *
    * @public
    */
-  const titleFromLocator = async (params: DiscoverAppLocatorParams): Promise<string> => {
-    const { savedSearchId, title: paramsTitle } = params as {
-      savedSearchId?: string;
-      title?: string;
-    };
+  const titleFromLocator = async (
+    params: DiscoverAppLocatorParams & { title?: string }
+  ): Promise<string> => {
+    const { savedSearchId, title: paramsTitle } = params;
 
     if (paramsTitle) {
       return paramsTitle;
