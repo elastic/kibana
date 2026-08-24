@@ -34,6 +34,7 @@ import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -141,6 +142,38 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
     return { ...output, allow_edit: merged };
   });
 }
+
+/**
+ * Builds a predicate matching outputs that route through HOTel's managed `_bulk` gateway,
+ * comparing on hostname only so host normalization (explicit ports, trailing slashes) can't
+ * cause a miss. Interim until ingest-dev#8489 replaces this with Streams-scoped ingest API keys.
+ */
+export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
+  const managedBulkHostnames = new Set(
+    (config ? getPreconfiguredOutputFromConfig(config) : [])
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
+      .flatMap(({ hosts }) => hosts ?? [])
+      .flatMap((host) => {
+        try {
+          return [new URL(host).hostname];
+        } catch {
+          // cloud.managed_otlp.url is only schema.string(); never throw on the full-policy path
+          return [];
+        }
+      })
+  );
+
+  return ({ type, hosts }: Pick<Output, 'type' | 'hosts'>) =>
+    type === outputType.Elasticsearch &&
+    (hosts?.some((host) => {
+      try {
+        return managedBulkHostnames.has(new URL(host).hostname);
+      } catch {
+        return false;
+      }
+    }) ??
+      false);
+};
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,

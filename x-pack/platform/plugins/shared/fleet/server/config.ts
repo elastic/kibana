@@ -274,7 +274,7 @@ export const config: PluginConfigDescriptor = {
           // writing directly to Elasticsearch.
           managedBulk: schema.maybe(
             schema.object({
-              enabled: schema.boolean({ defaultValue: false }),
+              enabled: schema.boolean({ defaultValue: true }),
             })
           ),
         })

@@ -36,10 +36,7 @@ export const logLegacyAgentlessWriteDeprecation = (operation: string) => {
 };
 
 export const isManagedBulkEnabled = () => {
-  return (
-    Boolean(appContextService.getCloud()?.managedOtlp?.url) &&
-    Boolean(appContextService.getConfig()?.agentless?.managedBulk?.enabled)
-  );
+  return Boolean(appContextService.getCloud()?.managedOtlp?.url);
 };
 
 export const getManagedBulkEndpoint = () => {
