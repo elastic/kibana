@@ -130,7 +130,7 @@ export function validateWorkflowYaml(
       severity: 'error',
       message: liquidError.message,
       source: 'liquid',
-      ruleId: 'liquidTemplateDiagnostic',
+      ruleId: 'liquidSyntaxError',
     });
   }
 

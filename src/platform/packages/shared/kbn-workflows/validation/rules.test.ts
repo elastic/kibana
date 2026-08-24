@@ -37,7 +37,6 @@ describe('workflow validation rules registry', () => {
         "invalidVariableReference",
         "invalidWorkflowOutput",
         "liquidSyntaxError",
-        "liquidTemplateDiagnostic",
         "liquidUnexpectedError",
         "missingRequiredInput",
         "parallelFanOutExceedsLimit",

@@ -174,7 +174,11 @@ steps:
       const result = validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
-      expect(result.diagnostics.some((d) => d.source === 'liquid')).toBe(true);
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ source: 'liquid', ruleId: 'liquidSyntaxError' }),
+        ])
+      );
     });
 
     it('should not flag valid liquid templates', () => {

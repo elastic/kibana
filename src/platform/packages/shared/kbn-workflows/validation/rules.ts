@@ -112,12 +112,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { reason: string };
   };
-  /** A diagnostic raised by the Liquid template checker. */
-  liquidTemplateDiagnostic: {
-    owner: 'liquid-template-validation';
-    defaultSeverity: 'error';
-    values: { reason: string };
-  };
   /** The Liquid checker itself threw. */
   liquidUnexpectedError: {
     owner: 'liquid-template-validation';
@@ -293,7 +287,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   validationRunFailed: { owner: 'variable-validation', defaultSeverity: 'error' },
 
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
-  liquidTemplateDiagnostic: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
   liquidUnexpectedError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
 
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
