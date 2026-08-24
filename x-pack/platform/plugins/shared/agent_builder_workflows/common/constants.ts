@@ -19,5 +19,6 @@ export const workflowTools = {
   validateWorkflow: workflowTool('validate_workflow'),
   getExamples: workflowTool('get_examples'),
   getConnectors: workflowTool('get_connectors'),
+  getWorkflow: workflowTool('get_workflow'),
   executeStep: workflowTool('workflow_execute_step'),
 } as const;

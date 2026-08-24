@@ -39,6 +39,7 @@ describe('generateWorkflowTool', () => {
   const buildContext = (
     overrides: Partial<{
       get: jest.Mock;
+      getActive: jest.Mock;
       add: jest.Mock;
       update: jest.Mock;
       sendUiEvent: jest.Mock;
@@ -52,6 +53,7 @@ describe('generateWorkflowTool', () => {
       spaceId: 'default',
       attachments: {
         get: overrides.get ?? jest.fn(),
+        getActive: overrides.getActive ?? jest.fn().mockReturnValue([]),
         add:
           overrides.add ??
           jest
@@ -233,6 +235,12 @@ describe('generateWorkflowTool', () => {
     expect(
       (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
     ).toMatch(/not found/i);
+    expect(
+      (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
+    ).toContain('platform.workflows.get_workflow');
+    expect(
+      (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
+    ).toContain('attach: true');
   });
 
   it('returns an errorResult when the source attachment is the wrong type', async () => {

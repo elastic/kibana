@@ -10,7 +10,6 @@ import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { PndPageSection } from '../layout/pnd_page_section';
-import { PndPageHeader } from '../pnd_page_header';
 import * as i18n from './translations';
 
 interface PlaceholderPageProps {
@@ -29,7 +28,6 @@ export const PlaceholderPage: React.FC<PlaceholderPageProps> = ({
 
   return (
     <PndPageSection>
-      <PndPageHeader title={title} />
       <EuiEmptyPrompt
         iconType="aggregate"
         body={
