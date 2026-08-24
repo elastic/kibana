@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { getFlyoutManagerStore } from '@elastic/eui';
 import { usePaginatedFlyout } from './use_paginated_flyout';
 import {
   FLYOUT_ORIGIN,
@@ -25,6 +26,13 @@ jest.mock('../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn().mockReturnValue({}),
 }));
 
+// Only the flyout-manager store is faked; `useGeneratedHtmlId` must stay real so the hook
+// still mints the id it registers the overlay under.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  getFlyoutManagerStore: jest.fn(),
+}));
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -41,6 +49,23 @@ const makeOptions = (overrides?: Partial<HookOptions>): HookOptions => ({
   ...overrides,
 });
 
+interface FakeSession {
+  mainFlyoutId: string;
+  childFlyoutId: string | null;
+  historyKey: symbol;
+}
+
+/** Fakes what the EUI flyout manager currently has open. */
+const mockFlyoutManagerSessions = (sessions: FakeSession[]): void => {
+  jest.mocked(getFlyoutManagerStore).mockReturnValue({
+    getState: () => ({ sessions }),
+  } as unknown as ReturnType<typeof getFlyoutManagerStore>);
+};
+
+/** The EUI id the hook registered its overlay under, read back from the open call. */
+const openedFlyoutId = (openFlyoutMock: jest.Mock): string =>
+  openFlyoutMock.mock.calls[openFlyoutMock.mock.calls.length - 1][1].id;
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -52,6 +77,7 @@ describe('usePaginatedFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useOpenFlyout).mockReturnValue(openFlyout);
+    mockFlyoutManagerSessions([]);
   });
 
   it('openDocumentFlyout is stable across re-renders', () => {
@@ -199,6 +225,29 @@ describe('usePaginatedFlyout', () => {
       });
     });
 
+    // The id is what lets the hook recognise its own flyout in the EUI flyout manager, so it
+    // has to reach the overlay and stay put across opens. (Uniqueness between hook instances
+    // comes from `useGeneratedHtmlId` and cannot be asserted here: Kibana's jest setup stubs
+    // `htmlIdGenerator` with a deterministic value.)
+    it('registers the overlay under an id that is stable across opens', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      act(() => {
+        result.current.openDocumentFlyout(0);
+      });
+      const firstId = openedFlyoutId(openFlyout);
+
+      act(() => {
+        result.current.closePaginatedFlyout();
+      });
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(firstId).toEqual(expect.any(String));
+      expect(openedFlyoutId(openFlyout)).toBe(firstId);
+    });
+
     it('closePaginatedFlyout closes the V2 overlay', () => {
       const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
 
@@ -211,6 +260,114 @@ describe('usePaginatedFlyout', () => {
       });
 
       expect(close).toHaveBeenCalled();
+    });
+  });
+
+  describe('openDocumentFlyout (source-driven opens)', () => {
+    // Opens the flyout and tells the fake flyout manager what is currently stacked over it.
+    const openThenStack = (
+      result: { current: ReturnType<typeof usePaginatedFlyout> },
+      stack: (flyoutId: string) => FakeSession[]
+    ) => {
+      act(() => {
+        result.current.openDocumentFlyout(0);
+      });
+      mockFlyoutManagerSessions(stack(openedFlyoutId(openFlyout)));
+    };
+
+    it('swaps the document in place while the flyout still owns the screen', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: flyoutId, childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(openFlyout).toHaveBeenCalledTimes(1);
+      expect(close).not.toHaveBeenCalled();
+      expect(result.current.slice.flyoutDocumentIndex).toBe(1);
+    });
+
+    it('restarts the session when a document is open as a child of the flyout', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: flyoutId, childFlyoutId: 'child-flyout', historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(openFlyout).toHaveBeenCalledTimes(2);
+      expect(result.current.slice.flyoutDocumentIndex).toBe(1);
+    });
+
+    it('restarts the session when a tool flyout stacked a new session on top', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: flyoutId, childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+        { mainFlyoutId: 'tool-flyout', childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(openFlyout).toHaveBeenCalledTimes(2);
+    });
+
+    it('restarts the session when an earlier session shares the history group', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: 'rule-flyout', childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+        { mainFlyoutId: flyoutId, childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(openFlyout).toHaveBeenCalledTimes(2);
+    });
+
+    it('ignores sessions belonging to another history group', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: 'unrelated-flyout', childFlyoutId: null, historyKey: Symbol('other-key') },
+        { mainFlyoutId: flyoutId, childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openDocumentFlyout(1);
+      });
+
+      expect(close).not.toHaveBeenCalled();
+      expect(openFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not restart the session for in-flyout pagination', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      openThenStack(result, (flyoutId) => [
+        { mainFlyoutId: flyoutId, childFlyoutId: 'child-flyout', historyKey: TEST_HISTORY_KEY },
+      ]);
+
+      act(() => {
+        result.current.openPaginatedFlyout(1);
+      });
+
+      expect(close).not.toHaveBeenCalled();
+      expect(openFlyout).toHaveBeenCalledTimes(1);
     });
   });
 });

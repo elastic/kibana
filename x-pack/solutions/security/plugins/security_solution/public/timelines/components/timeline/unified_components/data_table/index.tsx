@@ -232,7 +232,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const {
       slice: { flyoutDocumentIndex },
-      openPaginatedFlyout,
+      openDocumentFlyout,
       closePaginatedFlyout,
     } = usePaginatedFlyout({
       resolveDocument,
@@ -285,7 +285,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
           const newIndex = tableRows.findIndex((r) => r.id === eventData.id);
           const eventIndex = newIndex >= 0 ? newIndex : 0;
-          openPaginatedFlyout(eventIndex);
+          openDocumentFlyout(eventIndex);
           return;
         }
 
@@ -321,7 +321,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         openAttackFlyout,
         refetch,
         tableRows,
-        openPaginatedFlyout,
+        openDocumentFlyout,
         openFlyout,
         timelineId,
         telemetry,
