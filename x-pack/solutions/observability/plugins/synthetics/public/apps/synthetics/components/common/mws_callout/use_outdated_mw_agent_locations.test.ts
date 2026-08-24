@@ -7,6 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import { apiService } from '../../../../../utils/api_service/api_service';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
@@ -18,7 +21,17 @@ jest.mock('../../../contexts', () => ({
   useSyntheticsRefreshContext: () => ({ lastRefresh: 1 }),
 }));
 
+jest.mock('../../../hooks/use_url_space_id', () => ({
+  useUrlSpaceId: jest.fn(),
+}));
+
+jest.mock('../../../../../utils/api_service/api_service', () => ({
+  apiService: { get: jest.fn() },
+}));
+
 const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
+const mockUseUrlSpaceId = useUrlSpaceId as jest.MockedFunction<typeof useUrlSpaceId>;
+const mockApiGet = apiService.get as jest.MockedFunction<typeof apiService.get>;
 
 const setData = (outdatedLocationIds: string[] | undefined) => {
   mockUseFetcher.mockReturnValue({
@@ -30,6 +43,10 @@ const setData = (outdatedLocationIds: string[] | undefined) => {
 };
 
 describe('useOutdatedMwAgentLocationIds', () => {
+  beforeEach(() => {
+    mockUseUrlSpaceId.mockReturnValue(undefined);
+  });
+
   afterEach(() => jest.clearAllMocks());
 
   it('returns an empty set while the request has not resolved', () => {
@@ -47,5 +64,21 @@ describe('useOutdatedMwAgentLocationIds', () => {
 
     expect(result.current.outdatedLocationIds.has('loc-outdated')).toBe(true);
     expect(result.current.outdatedLocationIds.has('loc-ok')).toBe(false);
+  });
+
+  it('fetches in the viewed monitor space and refetches when that space changes', async () => {
+    mockUseUrlSpaceId.mockReturnValue('team-a');
+    setData([]);
+    mockApiGet.mockResolvedValue({ outdatedLocationIds: [] });
+
+    renderHook(() => useOutdatedMwAgentLocationIds());
+
+    const [fetch, deps] = mockUseFetcher.mock.calls[0];
+    expect(deps).toEqual([1, 'team-a']);
+    await fetch();
+    expect(mockApiGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,
+      { spaceId: 'team-a' }
+    );
   });
 });
