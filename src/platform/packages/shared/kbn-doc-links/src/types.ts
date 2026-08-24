@@ -620,6 +620,7 @@ export interface DocLinks {
     elasticAgentLogFileRetention: string;
     elasticAgentDownloads: string;
     integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
