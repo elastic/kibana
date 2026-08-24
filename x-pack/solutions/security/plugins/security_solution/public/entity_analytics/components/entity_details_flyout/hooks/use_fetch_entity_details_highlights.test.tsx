@@ -463,7 +463,7 @@ describe('useFetchEntityDetailsHighlights', () => {
         {
           initialProps: {
             ...mockProps,
-            storedSummary: mockStoredSummary,
+            storedSummary: mockStoredSummary as PersistedEntityAiSummary | null,
           },
         }
       );
