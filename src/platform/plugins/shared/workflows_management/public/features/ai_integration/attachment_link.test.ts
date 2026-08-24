@@ -9,7 +9,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { findLinkedWorkflowAttachment } from './attachment_link';
+import { findLinkedWorkflowAttachment, WORKFLOW_EDITOR_ATTACHMENT_ID } from './attachment_link';
 
 const workflowAttachment = (
   id: string,
@@ -70,6 +70,16 @@ describe('findLinkedWorkflowAttachment', () => {
       findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid', { origin: 'workflow-b' })],
         attachmentId: 'workflow-a',
+        workflowId: 'workflow-a',
+      })
+    ).toBeUndefined();
+  });
+
+  it('ignores the fixed-id attachment when it is linked to a different workflow', () => {
+    expect(
+      findLinkedWorkflowAttachment({
+        attachments: [workflowAttachment(WORKFLOW_EDITOR_ATTACHMENT_ID, { origin: 'workflow-b' })],
+        attachmentId: WORKFLOW_EDITOR_ATTACHMENT_ID,
         workflowId: 'workflow-a',
       })
     ).toBeUndefined();

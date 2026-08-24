@@ -28,9 +28,9 @@ export interface FindLinkedWorkflowAttachmentParams {
 
 /**
  * Returns the workflow attachment this session must keep writing into, or
- * `undefined` when the conversation holds none. The editor's own id changes
- * when a new workflow is saved, so resolving from the conversation is what
- * keeps one attachment instead of two.
+ * `undefined` when the conversation holds none. Once set, the origin identifies
+ * the owning workflow; before the first save, the fixed editor id identifies
+ * the unowned draft attachment.
  */
 export const findLinkedWorkflowAttachment = ({
   attachments,
@@ -42,9 +42,9 @@ export const findLinkedWorkflowAttachment = ({
       attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE && isAttachmentActive(attachment)
   );
 
-  return (
-    candidates.find((attachment) => attachment.id === attachmentId) ??
-    // Attachments predating the fixed id are only identifiable by origin.
-    (workflowId ? candidates.find((attachment) => attachment.origin === workflowId) : undefined)
+  return candidates.find((attachment) =>
+    attachment.origin !== undefined
+      ? attachment.origin === workflowId
+      : attachment.id === attachmentId
   );
 };
