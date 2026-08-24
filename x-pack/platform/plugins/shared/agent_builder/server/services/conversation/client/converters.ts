@@ -28,7 +28,11 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { ConversationPermissions } from '../../../../common/http_api/conversations';
+import type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 import {
   hasConversationDeleteAccess,
   hasConversationRenameAccess,
@@ -44,6 +48,8 @@ import type {
 } from './types';
 import type { ConversationProperties } from './storage';
 import { isReadBy } from './read_by';
+import type { ConversationTemplateResolver } from '../templates/serialize';
+import { withDeserializedMetadata } from '../templates/serialize';
 import {
   createAttachmentRefs,
   migrateRoundAttachments,
@@ -51,6 +57,7 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
   Required<
@@ -273,7 +280,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   });
 };
 
-export const withPermissions = <T extends ConversationWithoutRounds>({
+const withPermissions = <T extends ConversationWithoutRounds>({
   conversation,
   user,
 }: {
@@ -294,15 +301,83 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
 };
 
 /**
- * Converts the server-internal conversation shape to the public `Conversation` contract.
+ * Read-path round-trip verification. When on, a conversation's rounds are replaced by
+ * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
+ * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
+ * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
+ * persist the real rounds.
  *
- * Internal fields that support persistence or migrations, such as `read_by`, are stripped before
- * the object crosses the public API boundary.
+ * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
+ * via `CI=true`. Always OFF in production: a deployed Kibana never sets
+ * `CI`, so real reads return the stored rounds untouched.
  */
-export const toPublicConversation = (conversation: NormalizedConversation): Conversation => {
-  const { read_by: _readBy, ...conversationWithoutReadBy } = conversation;
+const shouldVerifyRoundTrip = process.env.CI === 'true';
 
-  return conversationWithoutReadBy;
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  shouldVerifyRoundTrip
+    ? {
+        ...conversation,
+        rounds: eventsToRounds(roundsToEvents(conversation)),
+      }
+    : conversation;
+
+const stripInternalFields = (conversation: NormalizedConversation): Conversation => {
+  const { read_by: _readBy, ...conversationWithoutInternalFields } = conversation;
+
+  return conversationWithoutInternalFields;
+};
+
+export const toConversationResponse = ({
+  conversation,
+  resolveTemplate,
+}: {
+  conversation: NormalizedConversation;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation => withDeserializedMetadata(stripInternalFields(conversation), resolveTemplate);
+
+export const toConversationResponseFromDocument = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation =>
+  withDeserializedMetadata(
+    verifyRoundTrip(stripInternalFields(fromEs(document, user))),
+    resolveTemplate
+  );
+
+export const toResponseConversation = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithPermissions => {
+  const conversation = toConversationResponseFromDocument({ document, user, resolveTemplate });
+
+  return withPermissions({ conversation, user });
+};
+
+export const toResponseConversationWithoutRounds = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithoutRoundsWithPermissions => {
+  const conversation = withDeserializedMetadata(
+    fromEsWithoutRounds(document, user),
+    resolveTemplate
+  );
+
+  return withPermissions({ conversation, user });
 };
 
 export const toEs = (

@@ -23,6 +23,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import {
   fromEs,
   toEs,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
   type Document as ConversationDocument,
 } from './converters';
@@ -597,40 +599,122 @@ describe('conversation model converters', () => {
     });
   });
 
-  describe('toEs', () => {
-    const conversationBase = (): Conversation => {
-      return {
-        id: 'conv_id',
-        agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
-        title: 'conv_title',
-        created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [
-          {
-            id: 'round-1',
-            status: ConversationRoundStatus.completed,
-            input: {
-              message: 'some message',
-            },
-            steps: [],
-            response: {
-              message: 'some response',
-            },
-            started_at: roundCreationDate,
-            time_to_first_token: 42,
-            time_to_last_token: 100,
-            model_usage: {
-              connector_id: 'unknown',
-              llm_calls: 1,
-              input_tokens: 12,
-              output_tokens: 42,
-            },
+  const conversationBase = (): Conversation => {
+    return {
+      id: 'conv_id',
+      agent_id: 'agent_id',
+      user: { id: 'user_id', username: 'user_name' },
+      title: 'conv_title',
+      created_at: creationDate,
+      updated_at: updateDate,
+      rounds: [
+        {
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          input: {
+            message: 'some message',
           },
-        ],
-      };
+          steps: [],
+          response: {
+            message: 'some response',
+          },
+          started_at: roundCreationDate,
+          time_to_first_token: 42,
+          time_to_last_token: 100,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
+        },
+      ],
     };
+  };
 
+  describe('toConversationResponse', () => {
+    it('strips internal fields from normalized conversations', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          events: [],
+        },
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response.read).toBe(true);
+    });
+
+    it('deserializes template metadata through the injected resolver', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: false,
+          read_by: [],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          template_id: 'test-template',
+          metadata: { is_urgent: 'true' },
+          events: [],
+        },
+        resolveTemplate: () => ({
+          id: 'test-template',
+          name: 'Test template',
+          version: 1,
+          fields: {
+            is_urgent: { input_type: 'TOGGLE' },
+          },
+        }),
+      });
+
+      expect(response.metadata).toEqual({ is_urgent: true });
+    });
+
+    it('strips internal fields from document responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: {
+          _id: 'conv_id',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            ...toEs(
+              {
+                ...conversationBase(),
+                read: true,
+                read_by: [{ userId: 'user_id' }],
+                access_control: {
+                  access_mode: ConversationAccessControlMode.Private,
+                  entries: [],
+                },
+                read_only: false,
+                events: [],
+              },
+              'space'
+            ),
+            read_by: [{ userId: 'user_id' }],
+          },
+        },
+        user: requestingUser,
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response.read).toBe(true);
+    });
+  });
+
+  describe('toEs', () => {
     it('serializes the conversation using new conversation_rounds field', () => {
       const conversation = conversationBase();
       const serialized = toEs(conversation, 'another-space');

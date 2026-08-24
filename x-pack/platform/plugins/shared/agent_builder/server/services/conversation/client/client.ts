@@ -61,11 +61,7 @@ import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
-import {
-  serializeMetadataValue,
-  buildMetadataFromTemplate,
-  withDeserializedMetadata,
-} from '../templates/serialize';
+import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
@@ -73,36 +69,15 @@ import {
   fromEs,
   fromEsWithoutRounds,
   toEs,
-  toPublicConversation,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
   isConversationDocument,
+  toResponseConversation,
+  toResponseConversationWithoutRounds,
   updateConversation,
-  withPermissions,
   type Document,
 } from './converters';
-import { roundsToEvents } from './rounds_to_events';
-import { eventsToRounds } from './events_to_rounds';
-
-/**
- * Read-path round-trip verification. When on, a conversation's rounds are replaced by
- * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
- * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
- * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
- * persist the real rounds.
- *
- * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
- * via `CI=true`. Always OFF in production: a deployed Kibana never sets
- * `CI`, so real reads return the stored rounds untouched.
- */
-const shouldVerifyRoundTrip = process.env.CI === 'true';
-
-const verifyRoundTrip = (conversation: Conversation): Conversation =>
-  shouldVerifyRoundTrip
-    ? {
-        ...conversation,
-        rounds: eventsToRounds(roundsToEvents(conversation)),
-      }
-    : conversation;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -243,14 +218,22 @@ class ConversationClientImpl implements ConversationClient {
         throw createInternalError('Conversation list search returned an incomplete hit');
       }
 
-      return this.toResponseConversationWithoutRounds(hit);
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
     });
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.toResponseConversation(document);
+    return toResponseConversation({
+      document,
+      user: this.user,
+      resolveTemplate: getTemplate,
+    });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -286,10 +269,11 @@ class ConversationClientImpl implements ConversationClient {
         access: 'converse',
       });
 
-      return withDeserializedMetadata(
-        verifyRoundTrip(toPublicConversation(fromEs(document, this.user))),
-        getTemplate
-      );
+      return toConversationResponseFromDocument({
+        document,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -609,26 +593,6 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    const conversation = withDeserializedMetadata(
-      verifyRoundTrip(toPublicConversation(fromEs(document, this.user))),
-      getTemplate
-    );
-
-    return withPermissions({ conversation, user: this.user });
-  }
-
-  private toResponseConversationWithoutRounds(
-    document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    const conversation = withDeserializedMetadata(
-      fromEsWithoutRounds(document, this.user),
-      getTemplate
-    );
-
-    return withPermissions({ conversation, user: this.user });
-  }
-
   private async getDocument(conversationId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -786,7 +750,7 @@ class ConversationClientImpl implements ConversationClient {
           }),
       });
 
-      return toPublicConversation(document);
+      return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
