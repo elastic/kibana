@@ -27,7 +27,7 @@ describe('attackAssigneesChanged trigger', () => {
         attackIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
-        spaceId: 'default',
+        truncated: false,
       })
     ).not.toThrow();
   });

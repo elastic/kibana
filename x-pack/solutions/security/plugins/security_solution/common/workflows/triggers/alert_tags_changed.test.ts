@@ -24,7 +24,7 @@ describe('alertTagsChanged trigger', () => {
         alertIds: ['a'],
         tagsToAdd: ['t1'],
         tagsToRemove: [],
-        spaceId: 'default',
+        truncated: false,
       })
     ).not.toThrow();
   });

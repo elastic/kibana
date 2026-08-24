@@ -27,7 +27,7 @@ describe('alertAssigneesChanged trigger', () => {
         alertIds: ['a'],
         assigneesToAdd: ['uid1'],
         assigneesToRemove: [],
-        spaceId: 'default',
+        truncated: false,
       })
     ).not.toThrow();
   });

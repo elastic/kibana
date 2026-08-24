@@ -24,7 +24,7 @@ describe('attackTagsChanged trigger', () => {
         attackIds: ['a'],
         tagsToAdd: ['t'],
         tagsToRemove: [],
-        spaceId: 'default',
+        truncated: false,
       })
     ).not.toThrow();
   });
