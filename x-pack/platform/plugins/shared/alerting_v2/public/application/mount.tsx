@@ -173,9 +173,7 @@ export const mountEpisodesApp = async ({
     element
   );
 
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+  return () => ReactDOM.unmountComponentAtNode(element);
 };
 
 export const mountActionPoliciesApp = async ({
