@@ -1875,17 +1875,7 @@
     "@elastic/esql-types" "^4.21.1"
     tslib "2.8.1"
 
-"@elastic/esql-definitions@^4.14.0":
-  version "4.21.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.21.0.tgz#44fb965db3cf11569945c937cf5a50d27d7fb3b4"
-  integrity sha512-OWPE1N4FRkvQjfcFtPs4eYZ1GjqfzWBguT4px4t/9ptEA2953QzqCLdLmVamdYkfTaUoemZ4W8/JkDP/EK2JoA==
-
-"@elastic/esql-definitions@^4.20.0":
-  version "4.20.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.20.0.tgz#d33b848ae78c8694c87bad1356f4a92a61d50129"
-  integrity sha512-wqp9fDJ2RGVrwMBhXQ6YN5ouV9YTKSAz62oTDbGlFMEz9QnqdyL/D0wLQgg7eSrj08w6m6qMywl5nZUC7iAJsg==
-
-"@elastic/esql-definitions@^4.21.1":
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.20.0", "@elastic/esql-definitions@^4.21.1":
   version "4.21.1"
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.21.1.tgz#ee6d63a7a997a4150b42b2b225d7f10183c2f153"
   integrity sha512-jlrR1mLO5NfJlNxeuf7/H1ragNC7yZhTBUcWPp+sjf3UgD6rvVn6AD8N4lnrLnor6RJp4v7XZB2t8XtImE1bcQ==
