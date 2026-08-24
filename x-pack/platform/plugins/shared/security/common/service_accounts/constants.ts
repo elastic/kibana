@@ -29,3 +29,8 @@ export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 16384;
  * room for that field plus JSON overhead; revisit it if the body grows.
  */
 export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 1024;
+
+/**
+ * Cap on a single page of listed service accounts.
+ */
+export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;

@@ -24,6 +24,16 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     throw Boom.notImplemented('Creating Elasticsearch service accounts is not yet implemented');
   }
 
+  async list(): Promise<never> {
+    throw Boom.notImplemented('Listing Elasticsearch service accounts is not yet implemented');
+  }
+
+  async get(): Promise<never> {
+    throw Boom.notImplemented(
+      'Getting Elasticsearch service accounts by id is not yet implemented'
+    );
+  }
+
   // See https://github.com/elastic/kibana/issues/284466.
   async createFakeRequest(): Promise<KibanaRequest> {
     throw Boom.notImplemented(
