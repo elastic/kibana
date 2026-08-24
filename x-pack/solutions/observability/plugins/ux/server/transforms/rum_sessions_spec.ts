@@ -145,6 +145,7 @@ const LAST_SEEN_FIELDS = [
   RUM_CANONICAL_BROWSER_NAME_FIELD,
   'attributes.os.name',
   'attributes.client.geo.country_iso_code',
+  'resource.attributes.client.geo.country_iso_code',
   'attributes.browser.breakpoint',
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   'attributes.network.connection.type',
@@ -516,7 +517,10 @@ export const rumSessionsDestPipeline = {
           ctx.browser.breakpoint = fieldOf(last, 'attributes.browser.breakpoint');
           if (ctx.os == null) { ctx.os = new HashMap(); }
           ctx.os.name = fieldOf(last, 'attributes.os.name');
-          ctx.country_iso = fieldOf(last, 'attributes.client.geo.country_iso_code');
+          def iso = fieldOf(last, 'attributes.client.geo.country_iso_code');
+          if (iso == '') { iso = fieldOf(last, 'resource.attributes.client.geo.country_iso_code'); }
+          if (iso == '') { iso = fieldOf(last, 'client.geo.country_iso_code'); }
+          ctx.country_iso = iso;
           ctx.connection = fieldOf(last, 'attributes.network.connection.type');
           ctx.device = fieldOf(last, 'attributes.device.memory');
           def service = fieldOf(last, 'resource.attributes.service.name');

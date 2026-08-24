@@ -15,6 +15,7 @@ import {
   emptyVitalAttribution,
   mergeRumPageRows,
   ranksFromPercentileRanks,
+  mergeRumCountries,
   type RumCountryRow,
   type RumOverviewResponse,
   type RumPageRow,
@@ -123,17 +124,7 @@ const overlaySessionIndex = async (
     },
     browsers: facets.browsers.length > 0 ? facets.browsers : result.browsers,
     os: facets.os.length > 0 ? facets.os : result.os,
-    countries:
-      facets.countries.length > 0
-        ? facets.countries.map((row) => ({
-            isoCode: row.key,
-            name: row.key,
-            pageViews: 0,
-            sessions: row.count,
-            errorCount: 0,
-            p75Lcp: null,
-          }))
-        : result.countries,
+    countries: mergeRumCountries(result.countries, facets.countries),
   };
 };
 
@@ -208,6 +199,14 @@ export const getRumOverviewRoute = createUxServerRoute({
         ...result,
         topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
       };
+      const sessionParams = sessionIndexParamsFromQuery(params.query, status.watermark);
+      const destCountries = status.installed
+        ? (await querySessionIndexFilters({ client, ...sessionParams })).countries
+        : [];
+      const withDestCountries = {
+        ...withPages,
+        countries: mergeRumCountries(withPages.countries, destCountries),
+      };
       if (
         !canUseSessionIndex({
           installed: status.installed,
@@ -217,15 +216,15 @@ export const getRumOverviewRoute = createUxServerRoute({
           lookbackDays: status.sourceLookbackDays,
         })
       ) {
-        return withPages;
+        return withDestCountries;
       }
       return {
-        ...withPages,
+        ...withDestCountries,
         trends: await overlaySessionTrendSessions({
           client,
-          trends: withPages.trends,
+          trends: withDestCountries.trends,
           align: '1d',
-          ...sessionIndexParamsFromQuery(params.query, status.watermark),
+          ...sessionParams,
         }),
       };
     }
@@ -538,6 +537,11 @@ export const getRumOverviewRoute = createUxServerRoute({
       errorClicks += errClicks;
     }
 
+    const sessionParams = sessionIndexParamsFromQuery(params.query, status.watermark);
+    const destCountries = status.installed
+      ? (await querySessionIndexFilters({ client, ...sessionParams })).countries
+      : [];
+
     return overlaySessionIndex(
       {
         kpis: {
@@ -578,7 +582,7 @@ export const getRumOverviewRoute = createUxServerRoute({
         topPages,
         browsers: facetFromScriptTerms(aggs.browsers),
         os: facetFromScriptTerms(aggs.os),
-        countries,
+        countries: mergeRumCountries(countries, destCountries),
       },
       client,
       params.query,

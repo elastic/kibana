@@ -39,7 +39,13 @@ describe('rumSessionsTransformBody', () => {
     expect(aggregations.click_first.aggs.token.top_metrics.metrics.field).toBe(
       'attributes.browser.css_selector'
     );
-    expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(8);
+    expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(9);
+    expect(aggregations.last_seen.top_metrics.metrics).toEqual(
+      expect.arrayContaining([
+        { field: 'attributes.client.geo.country_iso_code' },
+        { field: 'resource.attributes.client.geo.country_iso_code' },
+      ])
+    );
     expect(aggregations.user_seen.filter.bool.should).toEqual(
       expect.arrayContaining([
         { exists: { field: 'attributes.user.email' } },
@@ -54,7 +60,7 @@ describe('rumSessionsTransformBody', () => {
         { field: 'resource.attributes.user.email' },
       ])
     );
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 4 }));
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 5 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -112,6 +118,7 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('firstIdentity');
     expect(source).toContain('ctx.user_seen');
     expect(source).toContain('ctx.user.key');
+    expect(source).toContain('resource.attributes.client.geo.country_iso_code');
     expect(source).toContain('ctx.page_first');
     expect(source).not.toContain('ctx.sequences');
   });

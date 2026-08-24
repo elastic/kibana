@@ -18,6 +18,7 @@ import {
   isNewInRange,
   makeErrorGroupKey,
   mergePreferOtelByName,
+  mergeRumCountries,
   mergeRumPageRows,
   pagePassesCwv,
   pagePathFromKey,
@@ -409,6 +410,46 @@ describe('stackErrorTrends', () => {
     );
     expect(series[0].points.map((point) => point.count)).toEqual([2, 0]);
     expect(series[1].points.map((point) => point.count)).toEqual([0, 1]);
+  });
+});
+
+describe('mergeRumCountries', () => {
+  it('keeps raw views and LCP and adds dest-only countries', () => {
+    expect(
+      mergeRumCountries(
+        [
+          {
+            isoCode: 'de',
+            name: 'Germany',
+            pageViews: 5,
+            sessions: 1,
+            errorCount: 0,
+            p75Lcp: 2790,
+          },
+        ],
+        [
+          { key: 'de', count: 1 },
+          { key: 'us', count: 13 },
+        ]
+      )
+    ).toEqual([
+      {
+        isoCode: 'DE',
+        name: 'Germany',
+        pageViews: 5,
+        sessions: 1,
+        errorCount: 0,
+        p75Lcp: 2790,
+      },
+      {
+        isoCode: 'US',
+        name: 'US',
+        pageViews: 0,
+        sessions: 13,
+        errorCount: 0,
+        p75Lcp: null,
+      },
+    ]);
   });
 });
 

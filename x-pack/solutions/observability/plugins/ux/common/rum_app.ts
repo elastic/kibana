@@ -321,6 +321,45 @@ export interface RumCountryRow {
   p75Lcp: number | null;
 }
 
+/** Raw client.geo keeps views/LCP; session-dest country_iso fills countries with no ingest geo. */
+export const mergeRumCountries = (
+  raw: RumCountryRow[],
+  dest: Array<{ key: string; count: number }>
+): RumCountryRow[] => {
+  const byIso = new Map<string, RumCountryRow>();
+  for (const row of raw) {
+    const isoCode = row.isoCode.toUpperCase();
+    if (!isoCode) {
+      continue;
+    }
+    byIso.set(isoCode, { ...row, isoCode });
+  }
+  for (const facet of dest) {
+    const isoCode = String(facet.key).toUpperCase();
+    if (!isoCode) {
+      continue;
+    }
+    const existing = byIso.get(isoCode);
+    if (existing) {
+      if (existing.sessions === 0) {
+        existing.sessions = facet.count;
+      }
+      continue;
+    }
+    byIso.set(isoCode, {
+      isoCode,
+      name: isoCode,
+      pageViews: 0,
+      sessions: facet.count,
+      errorCount: 0,
+      p75Lcp: null,
+    });
+  }
+  return [...byIso.values()].sort(
+    (a, b) => b.pageViews - a.pageViews || b.sessions - a.sessions
+  );
+};
+
 export interface RumOverviewResponse {
   kpis: RumOverviewKpis;
   vitals: {
