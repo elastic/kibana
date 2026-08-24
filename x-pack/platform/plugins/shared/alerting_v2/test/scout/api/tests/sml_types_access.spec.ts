@@ -10,9 +10,8 @@ import { apiTest, tags } from '@kbn/scout';
 import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { ACTION_POLICY_SML_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyResponse, CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
@@ -54,7 +53,7 @@ const LIMITED_ALERTING_V2_CHAT_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        [AGENTBUILDER_FEATURE_ID]: ['read'],
+        agentBuilder: ['read'],
         [ALERTING_V2_FEATURES.rules.id]: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         [ALERTING_V2_FEATURES.actionPolicies.id]: [ALERTING_V2_UI_CAPABILITIES.actionPolicies.read],
       },
@@ -101,12 +100,6 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
  * Agent Builder chat discovers alerting v2 rules/policies via the builtin
  * `platform.core.sml_search` tool. `POST /api/agent_builder/tools/_execute`
  * runs that same handler without a conversation, LLM, or connector.
- *
- * Lives under `test/scout/` so `agentBuilder:experimentalFeatures` and
- * `alerting:v2:enabled` can be flipped at runtime. The crawler skips when
- * experimental features are off, and `list()`/`getSmlEntry()` no-op when
- * alerting v2 is disabled. `runSoon` triggers the 1m crawler immediately
- * after the objects exist.
  */
 apiTest.describe(
   'Agent Builder — alerting V2 SML type access',
@@ -172,7 +165,7 @@ apiTest.describe(
         body: createRuleData,
       });
       ruleId = createdRule.data.id;
-      ruleAttachmentId = `${RULE_SML_TYPE}://${ruleId}`;
+      ruleAttachmentId = `${RULE_KI_TYPE}://${ruleId}`;
 
       const createdPolicy = await kbnClient.request<ActionPolicyResponse>({
         method: 'POST',
@@ -185,11 +178,11 @@ apiTest.describe(
         },
       });
       policyId = createdPolicy.data.id;
-      policyAttachmentId = `${ACTION_POLICY_SML_TYPE}://${policyId}`;
+      policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
       await Promise.all([
-        runSmlCrawlerSoon(kbnClient, RULE_SML_TYPE),
-        runSmlCrawlerSoon(kbnClient, ACTION_POLICY_SML_TYPE),
+        runSmlCrawlerSoon(kbnClient, RULE_KI_TYPE),
+        runSmlCrawlerSoon(kbnClient, ACTION_POLICY_KI_TYPE),
       ]);
 
       limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
@@ -242,11 +235,11 @@ apiTest.describe(
         const hits = getSearchHits(await executeSmlSearch(apiClient, { query: searchToken }));
 
         expect(hits.find((hit) => hit.attachment_id === ruleAttachmentId)).toMatchObject({
-          type: RULE_SML_TYPE,
+          type: RULE_KI_TYPE,
           title: ruleTitle,
         });
         expect(hits.find((hit) => hit.attachment_id === policyAttachmentId)).toMatchObject({
-          type: ACTION_POLICY_SML_TYPE,
+          type: ACTION_POLICY_KI_TYPE,
           title: policyTitle,
         });
       }
@@ -258,7 +251,7 @@ apiTest.describe(
         const hits = getSearchHits(
           await executeSmlSearch(apiClient, {
             query: searchToken,
-            types: [RULE_SML_TYPE],
+            types: [RULE_KI_TYPE],
           })
         );
         const attachmentIds = hits.map((hit) => hit.attachment_id);
@@ -273,7 +266,7 @@ apiTest.describe(
         const hits = getSearchHits(
           await executeSmlSearch(apiClient, {
             query: searchToken,
-            types: [ACTION_POLICY_SML_TYPE],
+            types: [ACTION_POLICY_KI_TYPE],
           })
         );
         const attachmentIds = hits.map((hit) => hit.attachment_id);
