@@ -18,7 +18,7 @@ import type {
 import { inOperators } from '../../commands/definitions/all_operators';
 import { expandEvals } from '../shared/expand_evals';
 
-const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where']);
+const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval']);
 
 /**
  * Returns a list of subqueries to validate
@@ -91,7 +91,7 @@ function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
  *   [FROM index3, (FROM index4) | KEEP a]
  * ]
  *
- * WHERE IN subqueries use the same expansion.
+ * WHERE / EVAL / STATS / INLINE STATS IN subqueries use the same expansion.
  */
 function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLCommand[][] {
   return subquery.commands.flatMap((currentCommand, k) => {
